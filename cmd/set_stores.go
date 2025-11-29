@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -18,22 +19,22 @@ func CreateStoreUrls(args []string) {
 		// 获取当前工作目录
 		wd, err := os.Getwd()
 		if err != nil {
-			logger.Infof("Failed to get working directory:%s", err)
+			logger.Infof(locale.GetString("log_failed_to_get_working_directory"), err)
 		}
-		logger.Infof("Working directory:%s", wd)
+		logger.Infof(locale.GetString("log_working_directory"), wd)
 		err = config.GetCfg().AddStoreUrl(wd)
 		if err != nil {
-			logger.Infof("Failed to add working directory to store urls:%s", err)
+			logger.Infof(locale.GetString("log_failed_to_add_working_directory_to_store_urls"), err)
 		}
 	}
 	// 指定了书库路径，就都扫描一遍
 	for key, arg := range args {
 		if config.GetCfg().Debug {
-			logger.Infof("args[%d]: %s\n", key, arg)
+			logger.Infof(locale.GetString("log_args_index")+"\n", key, arg)
 		}
 		err := config.GetCfg().AddStoreUrl(arg)
 		if err != nil {
-			logger.Infof("Failed to add store url from args:%s", err)
+			logger.Infof(locale.GetString("log_failed_to_add_store_url_from_args"), err)
 		}
 	}
 	// 如果用户启用上传，且用户指定的上传路径不为空，就把程序预先设定的【默认上传路径】当作书库
@@ -42,7 +43,7 @@ func CreateStoreUrls(args []string) {
 			// 尝试把上传路径添加为书库里
 			err := config.GetCfg().AddStoreUrl(config.GetCfg().UploadPath)
 			if err != nil {
-				logger.Infof("Failed to add upload path to store urls:%s", err)
+				logger.Infof(locale.GetString("log_failed_to_add_upload_path_to_store_urls"), err)
 			}
 		}
 		// 如果用户启用上传，但没有指定上传路径
@@ -66,6 +67,6 @@ func CreateStoreUrls(args []string) {
 func ScanStore() {
 	err := scan.InitAllStore(config.GetCfg())
 	if err != nil {
-		logger.Infof("Failed to scan store path: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 	}
 }

@@ -72,7 +72,7 @@ func GetFileFromCache(id, filename, queryString string, isCover bool, cachePath 
 		if debug {
 			logger.Infof("ContentType not found in cache for key: %+v", key)
 		}
-		return nil, "", errors.New("contentType not found in cache")
+		return nil, "", errors.New(locale.GetString("err_content_type_not_found"))
 	}
 	contentType, _ := value.(string)
 

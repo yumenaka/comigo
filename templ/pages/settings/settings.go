@@ -66,9 +66,9 @@ func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	// 记录需要执行的操作
 	actionString, err := json.Marshal(action)
 	if err != nil {
-		logger.Infof("Server action: %v,", action)
+		logger.Infof(locale.GetString("log_server_action")+",", action)
 	} else {
-		logger.Infof("Server action: %s", string(actionString))
+		logger.Infof(locale.GetString("log_server_action_string"), string(actionString))
 	}
 	// 重启网页服务器等，此处不能导入routers，因为会循环引用
 	if action.ReStartWebServer {
@@ -91,7 +91,7 @@ func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	}
 	// 提示没有变化
 	if newConfig.Debug && !action.ReScanStores && !action.ReStartWebServer {
-		logger.Info("No changes in cfg, skipped rescan dir\n")
+		logger.Info(locale.GetString("log_no_changes_skipped_rescan"))
 	}
 }
 
@@ -173,7 +173,7 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (act
 		if action.ReStartTailscale == true {
 			action.StartTailscale = false
 			action.StopTailscale = false
-			logger.Info("Tailscale config changed, will restart Tailscale server")
+			logger.Info(locale.GetString("log_tailscale_config_changed_restart"))
 		}
 	}
 	// 什么情况下需要启动或停止Tailscale服务器
@@ -181,13 +181,13 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (act
 		action.StartTailscale = true
 		action.StopTailscale = false
 		action.ReStartTailscale = false
-		logger.Info("Tailscale enabled, will start Tailscale server")
+		logger.Info(locale.GetString("log_tailscale_enabled_start"))
 	}
 	if oldConfig.EnableTailscale != newConfig.EnableTailscale && newConfig.EnableTailscale == false {
 		action.StartTailscale = false
 		action.StopTailscale = true
 		action.ReStartTailscale = false
-		logger.Info("Tailscale disabled, will stop Tailscale server")
+		logger.Info(locale.GetString("log_tailscale_disabled_stop"))
 	}
 
 	return action

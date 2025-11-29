@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gofrs/flock"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -43,7 +44,7 @@ func NewSingleInstance(onNewArgs func(args []string) error) (*SingleInstance, er
 		configDir = filepath.Join(home, ".config", "comigo")
 		// 确保目录存在
 		if err := os.MkdirAll(configDir, os.ModePerm); err != nil {
-			logger.Infof("Failed to create config dir, using temp dir: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_create_config_dir"), err)
 			configDir = os.TempDir()
 		}
 	}
@@ -111,11 +112,11 @@ func (si *SingleInstance) StartServer() error {
 		}
 		// 设置 socket 文件权限
 		if err := os.Chmod(si.socketPath, 0600); err != nil {
-			logger.Infof("Warning: failed to set socket permissions: %v", err)
+			logger.Infof(locale.GetString("log_warning_failed_to_set_socket_permissions"), err)
 		}
 	}
 
-	logger.Infof("Single instance server started on: %s", si.socketPath)
+	logger.Infof(locale.GetString("log_single_instance_server_started"), si.socketPath)
 
 	// 在 goroutine 中处理连接
 	go func() {
@@ -128,7 +129,7 @@ func (si *SingleInstance) StartServer() error {
 						return
 					}
 				}
-				logger.Infof("Failed to accept connection: %v", err)
+				logger.Infof(locale.GetString("log_failed_to_accept_connection"), err)
 				continue
 			}
 			go si.handleConnection(conn)
@@ -149,14 +150,14 @@ func (si *SingleInstance) handleConnection(conn net.Conn) {
 	var msg Message
 	decoder := json.NewDecoder(conn)
 	if err := decoder.Decode(&msg); err != nil {
-		logger.Infof("Failed to decode message: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_decode_message"), err)
 		return
 	}
 
 	// 处理新参数
 	if si.onNewArgs != nil && len(msg.Args) > 0 {
 		if err := si.onNewArgs(msg.Args); err != nil {
-			logger.Infof("Failed to handle new args: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_handle_new_args"), err)
 			// 发送错误响应
 			encoder := json.NewEncoder(conn)
 			encoder.Encode(map[string]string{"error": err.Error()})
@@ -165,7 +166,7 @@ func (si *SingleInstance) handleConnection(conn net.Conn) {
 		// 发送成功响应
 		encoder := json.NewEncoder(conn)
 		encoder.Encode(map[string]string{"status": "ok"})
-		logger.Infof("Received and processed new args: %v", msg.Args)
+		logger.Infof(locale.GetString("log_received_and_processed_new_args"), msg.Args)
 	}
 }
 
@@ -205,7 +206,7 @@ func (si *SingleInstance) SendArgs(args []string) error {
 	decoder := json.NewDecoder(conn)
 	if err := decoder.Decode(&response); err != nil {
 		// 即使读取响应失败，消息可能已经发送成功
-		logger.Infof("Failed to read response, but message may have been sent: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_read_response"), err)
 		return nil
 	}
 
@@ -213,7 +214,7 @@ func (si *SingleInstance) SendArgs(args []string) error {
 		return fmt.Errorf("instance returned error: %s", errMsg)
 	}
 
-	logger.Infof("Successfully sent args to existing instance: %v", args)
+	logger.Infof(locale.GetString("log_successfully_sent_args"), args)
 	return nil
 }
 
@@ -221,7 +222,7 @@ func (si *SingleInstance) SendArgs(args []string) error {
 func (si *SingleInstance) Stop() error {
 	if si.listener != nil {
 		if err := si.listener.Close(); err != nil {
-			logger.Infof("Error closing listener: %v", err)
+			logger.Infof(locale.GetString("log_error_closing_listener"), err)
 		}
 		si.listener = nil
 	}
@@ -253,7 +254,7 @@ func EnsureSingleInstance(args []string, onNewArgs func(args []string) error) (b
 
 	if !locked {
 		// 已有实例运行，发送参数
-		logger.Infof("Another instance is already running, sending args to it...")
+		logger.Info(locale.GetString("log_another_instance_running"))
 		if err := si.SendArgs(args); err != nil {
 			return false, fmt.Errorf("failed to send args to existing instance: %w", err)
 		}

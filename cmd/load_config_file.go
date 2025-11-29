@@ -24,17 +24,17 @@ func LoadConfigFile() {
 		configDir := path.Join(home, ".config/comigo")
 		runtimeViper.AddConfigPath(configDir)
 	} else {
-		logger.Infof("Failed to get HomeDirectory:%s", err)
+		logger.Infof(locale.GetString("log_failed_to_get_homedirectory"), err)
 	}
 	// 候选目录2：二进制程序所在文件夹
 	// 可执行文件返回启动当前进程的可执行文件的路径名。无法保证路径仍然指向正确的可执行文件。如果使用符号链接来启动进程，则结果可能是符号链接或其指向的路径，具体取决于操作系统。
 	// 如果需要稳定的结果，[pathfilepath.EvalSymlinks] 可能会有所帮助。除非发生错误，否则可执行文件将返回绝对路径。主要用例是查找与可执行文件相关的资源
 	ProgramDirectory, err := os.Executable()
 	if err == nil {
-		logger.Infof("ProgramDirectory:%s", ProgramDirectory)
+		logger.Infof(locale.GetString("log_program_directory"), ProgramDirectory)
 		runtimeViper.AddConfigPath(ProgramDirectory)
 	} else {
-		logger.Infof("Failed to get ProgramDirectory:", err)
+		logger.Infof(locale.GetString("log_failed_to_get_program_directory"), err)
 	}
 
 	// 候选目录3：当前执行目录
@@ -42,7 +42,7 @@ func LoadConfigFile() {
 	if err == nil {
 		runtimeViper.AddConfigPath(WorkingDirectory)
 	} else {
-		logger.Infof("Failed to get WorkingDirectory:%s", err)
+		logger.Infof(locale.GetString("log_failed_to_get_working_directory"), err)
 	}
 
 	runtimeViper.SetConfigType("toml")

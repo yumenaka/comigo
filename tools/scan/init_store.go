@@ -21,7 +21,7 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 	}
 	storePathAbs, err := filepath.Abs(storePath)
 	if err != nil {
-		logger.Infof("Failed to get absolute path: %s", err)
+		logger.Infof(locale.GetString("log_failed_to_get_absolute_path_scan"), err)
 		storePathAbs = storePath
 	}
 	logger.Infof(locale.GetString("scan_start_hint")+" %s", storePathAbs)
@@ -48,7 +48,7 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 	if rootDirectoryNode.Files != nil {
 		book, err := scanDirGetBook(storePathAbs, storePathAbs, 0)
 		if err != nil {
-			logger.Infof("Failed to scan root directory: %s, error: %v", storePathAbs, err)
+			logger.Infof(locale.GetString("log_skip_to_scan_root_directory"), storePathAbs, err)
 		} else {
 			newBookList = append(newBookList, book)
 		}
@@ -58,14 +58,14 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 	for _, dir := range foundDirs {
 		absDir, err := filepath.Abs(dir)
 		if err != nil {
-			logger.Infof("Failed to get absolute path: %s", err)
+			logger.Infof(locale.GetString("log_failed_to_get_absolute_path_scan"), err)
 			absDir = storePath
 		}
 
 		// 计算路径深度
 		relPath, err := filepath.Rel(storePathAbs, absDir)
 		if err != nil {
-			logger.Infof("Failed to get relative path: %s", err)
+			logger.Infof(locale.GetString("log_failed_to_get_relative_path"), err)
 			continue
 		}
 		depth := strings.Count(relPath, string(os.PathSeparator))
@@ -85,7 +85,7 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 		// 扫描目录
 		book, err := scanDirGetBook(absDir, storePathAbs, depth)
 		if err != nil {
-			logger.Infof("Failed to scan directory: %s, error: %v", absDir, err)
+			logger.Infof(locale.GetString("log_skip_to_scan_directory"), absDir, err)
 			continue
 		}
 		newBookList = append(newBookList, book)
@@ -103,7 +103,7 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 		// 计算路径深度
 		relPath, err := filepath.Rel(storePathAbs, file.Path)
 		if err != nil {
-			logger.Infof("Failed to get relative path: %s", err)
+			logger.Infof(locale.GetString("log_failed_to_get_relative_path"), err)
 			continue
 		}
 		depth := strings.Count(relPath, string(os.PathSeparator))

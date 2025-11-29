@@ -31,7 +31,7 @@ func UploadFile(c echo.Context) error {
 	}
 	// 默认的上传路径是否已设置
 	if config.GetCfg().UploadPath == "" {
-		logger.Infof("%s", "UPLOAD_PATH_NOT_SET")
+		logger.Infof("%s", locale.GetString("log_upload_path_not_set"))
 	}
 	// 创建上传目录（如果不存在）
 	if !tools.IsExist(config.GetCfg().UploadPath) {
@@ -39,13 +39,13 @@ func UploadFile(c echo.Context) error {
 		err := os.MkdirAll(config.GetCfg().UploadPath, os.ModePerm)
 		if err != nil {
 			// 无法创建上传目录: %s
-			logger.Infof("mkdir failed![%s]\n", err)
+			logger.Infof(locale.GetString("log_mkdir_failed"), err)
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"error": fmt.Sprintf("无法创建上传目录: %s", config.GetCfg().UploadPath),
 			})
 		}
 		// 创建上传目录成功: %s
-		logger.Infof("mkdir upload folder success!\n %s\n", config.GetCfg().UploadPath)
+		logger.Infof(locale.GetString("log_mkdir_upload_folder_success"), config.GetCfg().UploadPath)
 	}
 
 	// 获取表单文件
@@ -64,7 +64,7 @@ func UploadFile(c echo.Context) error {
 	}
 
 	var uploadedFiles []string
-	logger.Info("上传文件数量:", len(files))
+	logger.Infof(locale.GetString("log_upload_file_count"), len(files))
 	// 遍历所有上传的文件
 	for _, file := range files {
 		// 验证文件大小（例如，不超过 5000 MB）
@@ -131,7 +131,7 @@ func UploadFile(c echo.Context) error {
 				"error": fmt.Sprintf("无法保存文件 %s", filename),
 			})
 		}
-		logger.Infof("文件上传成功: %s", filename)
+		logger.Infof(locale.GetString("log_file_upload_success"), filename)
 		uploadedFiles = append(uploadedFiles, filename)
 	}
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/templ/common"
@@ -38,23 +39,23 @@ func ShelfHandler(c echo.Context) error {
 	if bookID == "" {
 		storeBookInfos, err = store.TopOfShelfInfo(sortBy)
 		if err != nil {
-			logger.Errorf("GetBookShelf Error: %v", err)
+			logger.Errorf(locale.GetString("err_getbookshelf_error"), err)
 		}
 	}
 	var childBookInfos model.BookInfos
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
 		model.ClearBookNotExist()
-		logger.Infof("Get child books for bookID %s", bookID)
+		logger.Infof(locale.GetString("log_get_child_books_for_bookid"), bookID)
 		childBooks, err := store.GetChildBooksInfo(bookID)
 		if err == nil {
-			logger.Infof("Get %d child books for bookID %s", len(*childBooks), bookID)
+			logger.Infof(locale.GetString("log_get_child_books_count"), len(*childBooks), bookID)
 			childBookInfos = *childBooks
 		}
 		childBookInfos.SortBooks(sortBy)
 		// 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
-			logger.Infof("GetBookShelf Error: %v", err)
+			logger.Infof(locale.GetString("log_get_bookshelf_error"), err)
 			// 渲染 404 页面
 			indexHtml := common.Html(
 				c,

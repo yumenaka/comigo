@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -65,7 +66,7 @@ func (db *StoreDatabase) StoreBookMark(mark *model.BookMark) error {
 	// 获取书籍
 	b, err := db.GetBook(mark.BookID)
 	if err != nil {
-		return errors.New("StoreBookMark：cannot find book, id=" + mark.BookID)
+		return fmt.Errorf(locale.GetString("err_storebookmark_cannot_find"), mark.BookID)
 	}
 	switch mark.Type {
 	case model.UserMark:
@@ -96,7 +97,7 @@ func (db *StoreDatabase) StoreBookMark(mark *model.BookMark) error {
 		}
 	default:
 		// 目前没有其他类型书签
-		return errors.New("StoreBookMark：unknown bookmark type")
+		return errors.New(locale.GetString("err_storebookmark_unknown_type"))
 	}
 	err = db.StoreBook(b)
 	if err != nil {
@@ -109,7 +110,7 @@ func (db *StoreDatabase) GetBookMarks(bookID string) (*model.BookMarks, error) {
 	// 获取书籍
 	b, err := db.GetBook(bookID)
 	if err != nil {
-		return nil, errors.New("GetBookMark：cannot find book, id=" + bookID)
+		return nil, fmt.Errorf(locale.GetString("err_getbookmark_cannot_find"), bookID)
 	}
 	return &b.BookMarks, nil
 }

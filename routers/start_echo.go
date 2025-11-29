@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/sse_hub"
@@ -26,7 +27,7 @@ func StartEcho(e *echo.Echo) {
 		webHost = "localhost:"
 	}
 	// 记录日志并启动服务器
-	logger.Infof("Starting Server...", "on port", config.GetCfg().Port, "...")
+	logger.Infof(locale.GetString("log_starting_server_on_port"), config.GetCfg().Port)
 	// 初始化 HTTP 服务器
 	config.Server = &http.Server{
 		Addr:    webHost + strconv.Itoa(config.GetCfg().Port),
@@ -48,7 +49,7 @@ func StartEcho(e *echo.Echo) {
 			HostPolicy: autocert.HostWhitelist(config.GetCfg().Host),
 		}
 		// 更新服务器配置以使用自动 TLS
-		logger.Infof("Auto TLS enabled for domain:", config.GetCfg().Host)
+		logger.Infof(locale.GetString("log_auto_tls_enabled_for_domain"), config.GetCfg().Host)
 		config.Server = &http.Server{
 			Addr:    ":443",
 			Handler: e, // set Echo as handler
@@ -64,7 +65,7 @@ func StartEcho(e *echo.Echo) {
 	go func() {
 		// 监听并启动服务(自定义TLS证书)
 		if config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != "" {
-			logger.Infof("Custom TLS Cert", "CertFile:", config.GetCfg().CertFile, "KeyFile:", config.GetCfg().KeyFile)
+			logger.Infof(locale.GetString("log_custom_tls_cert"), config.GetCfg().CertFile, config.GetCfg().KeyFile)
 			if err := config.Server.ListenAndServeTLS(config.GetCfg().CertFile, config.GetCfg().KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				time.Sleep(3 * time.Second)
 				logger.Fatalf("listen: %s\n", err)
@@ -99,7 +100,7 @@ func StopWebServer() error {
 	// 停止 Tailscale HTTP 服务器（如启用）
 	err := tailscale_plugin.StopTailscale()
 	if err != nil {
-		logger.Errorf("Error stopping Tailscale server: %v", err)
+		logger.Errorf(locale.GetString("err_error_stopping_tailscale_server"), err)
 	}
 	// 关闭服务器（deadline 5秒）
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -121,7 +122,7 @@ func RestartWebServer() {
 	if err := StopWebServer(); err != nil {
 		logger.Fatalf("Server Shutdown Failed:%+v", err)
 	}
-	logger.Infof("Server Shutdown Successfully", "Starting Server...", "on port", config.GetCfg().Port, "...")
+	logger.Infof(locale.GetString("log_server_shutdown_successfully"), config.GetCfg().Port)
 	// 重新初始化web服务器
 	InitEcho()
 	// 重新启动web服务器

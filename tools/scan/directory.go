@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -58,7 +59,7 @@ func HandleDirectory(currentPath string, depth int) (DirNode, []string, []model.
 			subNode, subDirs, subFiles, subErr := HandleDirectory(fullPath, depth+1)
 			if subErr != nil {
 				// 忽略单个子目录出错，继续扫描其他目录
-				logger.Info("扫描子目录出错:", subErr)
+				logger.Infof(locale.GetString("log_scan_subdirectory_error"), subErr)
 				continue
 			}
 			node.SubDirs = append(node.SubDirs, subNode)
@@ -75,7 +76,7 @@ func HandleDirectory(currentPath string, depth int) (DirNode, []string, []model.
 			// 获取文件信息
 			info, err := entry.Info()
 			if err != nil {
-				logger.Info("获取文件信息失败:", err)
+				logger.Infof(locale.GetString("log_get_file_info_failed"), err)
 				continue
 			}
 			size := info.Size()

@@ -6,6 +6,7 @@ import (
 	"path"
 	"runtime"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -27,7 +28,7 @@ func (c *Status) SetConfigStatus() error {
 	if runtime.GOOS == "js" {
 		return nil
 	}
-	logger.Info("Checking cfg ShareName")
+	logger.Info(locale.GetString("log_checking_cfg_sharename"))
 	// 初始化
 	c.In = "None"
 	c.Path.WorkingDirectory = ""
@@ -44,14 +45,14 @@ func (c *Status) SetConfigStatus() error {
 	// 获取可执行文件所在目录
 	executablePath, err := os.Executable()
 	if err != nil {
-		return errors.New("error: failed to find executable path")
+		return errors.New(locale.GetString("err_failed_to_find_executable_path"))
 	}
 	programDir := path.Dir(executablePath)
 
 	// 获取用户主目录
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return errors.New("error: failed to find home directory")
+		return errors.New(locale.GetString("err_failed_to_find_home_directory"))
 	}
 
 	// 添加搜索路径

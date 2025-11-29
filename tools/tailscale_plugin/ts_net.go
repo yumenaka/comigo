@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 	"tailscale.com/client/local"
 	"tailscale.com/tsnet"
@@ -71,15 +72,15 @@ func RunTailscale(e *echo.Echo, c TailscaleConfig) error {
 		Handler: withTailscaleContext(e), // echo.Echo (多包一层)
 	}
 	// 使用Tailscale网络监听器启动服务器
-	logger.Infof("Starting Tailscale HTTP server on %s:%d", c.Hostname, c.Port)
+	logger.Infof(locale.GetString("log_starting_tailscale_http_server"), c.Hostname, c.Port)
 	go func() {
 		if netListener == nil {
-			logger.Errorf("Tailscale netListener is nil; server will not start")
+			logger.Errorf(locale.GetString("err_tailscale_netlistener_nil"))
 			return
 		}
 		if err := tsHttpServer.Serve(netListener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			if !strings.Contains(err.Error(), "use of closed network connection") {
-				logger.Errorf("Tailscale HTTP server error: %v", err)
+				logger.Errorf(locale.GetString("err_tailscale_http_server_error"), err)
 			}
 		}
 	}()
@@ -91,11 +92,11 @@ func StopTailscale() error {
 	if tsServer == nil && tsHttpServer == nil && netListener == nil && localClient == nil {
 		return nil
 	}
-	logger.Infof("Tailscale server stopped successfully.")
+	logger.Info(locale.GetString("log_tailscale_server_stopped_successfully"))
 	// 关闭网络监听器
 	if netListener != nil {
 		if err := netListener.Close(); err != nil {
-			logger.Errorf("Error closing network listener: %v", err)
+			logger.Errorf(locale.GetString("err_error_closing_network_listener"), err)
 			return err
 		}
 		netListener = nil
@@ -106,7 +107,7 @@ func StopTailscale() error {
 	// 关闭 Tailscale 服务器
 	if tsServer != nil {
 		if err := tsServer.Close(); err != nil {
-			logger.Errorf("Error closing Tailscale server: %v", err)
+			logger.Errorf(locale.GetString("err_error_closing_tailscale_server"), err)
 			return err
 		}
 		tsServer = nil

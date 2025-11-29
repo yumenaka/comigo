@@ -3,12 +3,13 @@ package tools
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/jpeg"
-	"strconv"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 
 	"github.com/bbrks/go-blurhash"
@@ -130,11 +131,11 @@ func ImageResizeByMaxWidth(loadedImage []byte, maxWidth int) ([]byte, error) {
 	decode, err := imaging.Decode(buf)
 	if err != nil {
 		logger.Infof("%s", err)
-		return nil, errors.New("imaging.Decode() Error")
+		return nil, errors.New(locale.GetString("err_imaging_decode_error"))
 	}
 	sourceWidth := decode.Bounds().Dx()
 	if maxWidth > sourceWidth {
-		return nil, errors.New("ImageResizeByMaxWidth Error maxWidth(" + strconv.Itoa(maxWidth) + ")> sourceWidth(" + strconv.Itoa(sourceWidth) + ")")
+		return nil, fmt.Errorf(locale.GetString("err_imageresize_maxwidth_error"), maxWidth, sourceWidth)
 	}
 	scalingRatio := float64(maxWidth) / float64(sourceWidth)
 	height := int(float64(decode.Bounds().Dy()) * scalingRatio)
@@ -144,7 +145,7 @@ func ImageResizeByMaxWidth(loadedImage []byte, maxWidth int) ([]byte, error) {
 	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
-		return nil, errors.New("imaging.Encode() Error")
+		return nil, errors.New(locale.GetString("err_imaging_encode_error"))
 	}
 	return buf2.Bytes(), nil
 }
@@ -155,11 +156,11 @@ func ImageResizeByMaxHeight(loadedImage []byte, maxHeight int) ([]byte, error) {
 	decode, err := imaging.Decode(buf)
 	if err != nil {
 		logger.Infof("%s", err)
-		return nil, errors.New("imaging.Decode() Error")
+		return nil, errors.New(locale.GetString("err_imaging_decode_error"))
 	}
 	sourceHeight := decode.Bounds().Dy()
 	if maxHeight > sourceHeight {
-		return nil, errors.New("ImageResizeByMaxHeight Error maxWidth(" + strconv.Itoa(maxHeight) + ")> sourceWidth(" + strconv.Itoa(sourceHeight) + ")")
+		return nil, fmt.Errorf(locale.GetString("err_imageresize_maxheight_error"), maxHeight, sourceHeight)
 	}
 	scalingRatio := float64(maxHeight) / float64(sourceHeight)
 	width := int(float64(decode.Bounds().Dx()) * scalingRatio)
@@ -168,7 +169,7 @@ func ImageResizeByMaxHeight(loadedImage []byte, maxHeight int) ([]byte, error) {
 	// 将图片编码成jpeg
 	err = imaging.Encode(buf2, decode, imaging.JPEG)
 	if err != nil {
-		return nil, errors.New("imaging.Encode() Error")
+		return nil, errors.New(locale.GetString("err_imaging_encode_error"))
 	}
 	return buf2.Bytes(), nil
 }

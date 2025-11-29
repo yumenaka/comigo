@@ -3,6 +3,7 @@ package file
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"image/jpeg"
 	"io"
 	"log"
@@ -13,6 +14,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -31,7 +33,7 @@ func CountPagesOfPDF(pdfFileName string) (int, error) {
 	// use default configuration for pdfcpu ("nil")
 	err := api.ValidateFile(pdfFileName, nil)
 	if err != nil {
-		return -1, errors.New("CountPagesOfPDF: invalid PDF: " + pdfFileName + " " + err.Error())
+		return -1, fmt.Errorf(locale.GetString("err_countpages_pdf_invalid"), pdfFileName, err.Error())
 	}
 	return api.PageCountFile(pdfFileName)
 }
@@ -70,11 +72,11 @@ func digestImage(buff *bytes.Buffer) func(model.Image, bool, int) error {
 	return func(img model.Image, singleImgPerPage bool, maxPageDigits int) error {
 		imageOut, err := imaging.Decode(img)
 		if err != nil {
-			return errors.New("imaging.Decode() Error")
+			return errors.New(locale.GetString("err_imaging_decode_error"))
 		}
 		err = jpeg.Encode(buff, imageOut, &jpeg.Options{Quality: 75})
 		if err != nil {
-			return errors.New("digestImage jpeg.Encode( Error")
+			return errors.New(locale.GetString("err_jpeg_encode_error"))
 		}
 		return nil
 	}

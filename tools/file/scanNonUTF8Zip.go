@@ -7,6 +7,7 @@ import (
 
 	"github.com/klauspost/compress/zip"
 	"github.com/yumenaka/archives"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/encoding"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -44,5 +45,5 @@ func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, e
 		}
 		return reader, err
 	}
-	return nil, errors.New("扫描文件错误")
+	return nil, errors.New(locale.GetString("err_scan_file_error"))
 }

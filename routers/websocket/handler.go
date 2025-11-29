@@ -45,7 +45,7 @@ var upGrader = websocket.Upgrader{
 		// }
 		// 验证路径
 		if r.URL.Path != "/api/ws" {
-			logger.Info("path error\n")
+			logger.Info(locale.GetString("log_path_error") + "\n")
 			return false
 		}
 		return true
@@ -97,7 +97,7 @@ func WsHandler(c echo.Context) error {
 			break
 		} else {
 			if *WsDebug {
-				logger.Infof("websocket服务器收到: %v\n", msg)
+				logger.Infof(locale.GetString("log_websocket_server_received")+"\n", msg)
 			}
 			msgWithClientID := MessageWithClientID{Msg: msg, ClientID: clientID}
 			// Send the newly received message to the broadcast channel

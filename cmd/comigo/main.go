@@ -39,7 +39,7 @@ func main() {
 		if len(args) == 0 {
 			return nil
 		}
-		logger.Infof("Received new args from another instance: %v", args)
+		logger.Infof(locale.GetString("log_received_new_args_from_instance"), args)
 		// 添加新的扫描路径
 		cmd.CreateStoreUrls(args)
 		// 扫描新添加的书库
@@ -52,11 +52,11 @@ func main() {
 	// 确保单实例模式运行
 	isFirstInstance, err := tools.EnsureSingleInstance(cmd.Args, handleNewArgs)
 	if err != nil {
-		logger.Infof("Single instance check failed: %v", err)
+		logger.Infof(locale.GetString("log_single_instance_check_failed"), err)
 		// 如果单实例检查失败，仍然继续运行（向后兼容）
 	} else if !isFirstInstance {
 		// 已有实例运行，参数已发送，直接退出
-		logger.Infof("Args sent to existing instance, exiting...")
+		logger.Infof(locale.GetString("log_args_sent_to_existing_instance"))
 		return
 	}
 
@@ -154,9 +154,9 @@ func shutdownServer() {
 			cachePath := path.Join(config.GetCfg().CacheDir, book.BookID)
 			err := os.RemoveAll(cachePath)
 			if err != nil {
-				logger.Infof("Error clearing temp files: %s", cachePath)
+				logger.Infof(locale.GetString("log_error_clearing_temp_files"), cachePath)
 			} else if config.GetCfg().Debug {
-				logger.Infof("Cleared temp files: %s", cachePath)
+				logger.Infof(locale.GetString("log_cleared_temp_files"), cachePath)
 			}
 		}
 		logger.Infof("%s", locale.GetString("clear_temp_file_completed"))
