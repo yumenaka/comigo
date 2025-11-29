@@ -483,5 +483,13 @@
   "systray_quit_tooltip": "Comigoを終了",
   "context_menu_open_with_comigo": "Comigoで開く",
   "register_context_menu": "右クリックメニューを登録（Comigoで開く）",
-  "unregister_context_menu": "右クリックメニューを削除（Comigoで開く）"
+  "unregister_context_menu": "右クリックメニューを削除（Comigoで開く）",
+  "systray_extra": "その他",
+  "systray_extra_tooltip": "その他の連携機能",
+  "systray_project": "Comigo プロジェクトページ",
+  "systray_project_tooltip": "Comigo の GitHub リポジトリを開く",
+  "register_folder_context_menu": "フォルダー右クリックメニューを登録（Comigoで開く）",
+  "unregister_folder_context_menu": "フォルダー右クリックメニューを削除（Comigoで開く）",
+  "register_file_association": "圧縮ファイルの関連付けを登録（候補として追加）",
+  "unregister_file_association": "圧縮ファイルの関連付けを解除"
 }

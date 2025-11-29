@@ -32,18 +32,21 @@ var (
 	getTailscaleEnabledFunc func() bool
 	// 菜单项引用，用于语言切换时更新
 	menuItems struct {
-		mOpenBrowser  *systray.MenuItem
-		mCopyURL      *systray.MenuItem
-		mTailscale    *systray.MenuItem
-		mContextMenu  *systray.MenuItem
-		mLanguage     *systray.MenuItem
-		mLangZh       *systray.MenuItem
-		mLangEn       *systray.MenuItem
-		mLangJa       *systray.MenuItem
-		mOpenDir      *systray.MenuItem
-		mConfigDir    *systray.MenuItem
-		mStoreFolders []*systray.MenuItem
-		mQuit         *systray.MenuItem
+		mOpenBrowser      *systray.MenuItem
+		mCopyURL          *systray.MenuItem
+		mTailscale        *systray.MenuItem
+		mExtra            *systray.MenuItem
+		mProject          *systray.MenuItem
+		mContextFolder    *systray.MenuItem
+		mContextFileAssoc *systray.MenuItem
+		mLanguage         *systray.MenuItem
+		mLangZh           *systray.MenuItem
+		mLangEn           *systray.MenuItem
+		mLangJa           *systray.MenuItem
+		mOpenDir          *systray.MenuItem
+		mConfigDir        *systray.MenuItem
+		mStoreFolders     []*systray.MenuItem
+		mQuit             *systray.MenuItem
 	}
 )
 
@@ -163,40 +166,6 @@ func initMenuItems() {
 		})
 	}
 
-	// Windows 右键菜单注册/清理（仅在 Windows 下显示）
-	if runtime.GOOS == "windows" {
-		title := locale.GetString("register_context_menu")
-		if windows_registry.HasComigoFolderContextMenu() {
-			title = locale.GetString("unregister_context_menu")
-		}
-		menuItems.mContextMenu = systray.AddMenuItem(title, locale.GetString("register_context_menu"))
-		menuItems.mContextMenu.Click(func() {
-			// 再次检测当前状态，决定是注册还是清理
-			if windows_registry.HasComigoFolderContextMenu() {
-				// 清理文件夹右键菜单
-				if err := windows_registry.RemoveComigoFromFolderContextMenu(); err != nil {
-					logger.Infof("Failed to clear Windows folder context menu: %v", err)
-				}
-				// 清理文件类型关联（使用默认扩展名列表）
-				if err := windows_registry.UnregisterComigoAsDefaultArchiveHandler(nil); err != nil {
-					logger.Infof("Failed to unregister archive handler: %v", err)
-				}
-				logger.Infof("%s", locale.GetString("unregister_context_menu"))
-			} else {
-				// 注册文件夹右键菜单
-				if err := windows_registry.AddComigoToFolderContextMenu(); err != nil {
-					logger.Infof("Failed to register Windows folder context menu: %v", err)
-				}
-				// 注册文件类型关联（使用默认扩展名列表）
-				if err := windows_registry.RegisterComigoAsDefaultArchiveHandler(nil); err != nil {
-					logger.Infof("Failed to register archive handler: %v", err)
-				}
-				logger.Infof("%s", locale.GetString("register_context_menu"))
-			}
-			// 标题更新依赖下次点击托盘图标时重新构建菜单
-		})
-	}
-
 	// 语言切换子菜单
 	menuItems.mLanguage = systray.AddMenuItem(locale.GetString("systray_language"), locale.GetString("systray_language_tooltip"))
 	menuItems.mLangZh = menuItems.mLanguage.AddSubMenuItem(locale.GetString("systray_language_zh"), locale.GetString("systray_language_zh_tooltip"))
@@ -274,6 +243,63 @@ func initMenuItems() {
 			}(storeUrl)
 		}
 	}
+
+	// 顶层“其他/Extra/その他”菜单（所有平台都显示）
+	menuItems.mExtra = systray.AddMenuItem(locale.GetString("systray_extra"), locale.GetString("systray_extra_tooltip"))
+	// Windows 右键菜单注册/清理（仅在 Windows 下显示）
+	if runtime.GOOS == "windows" {
+		// 子菜单：文件夹右键菜单注册/清理
+		folderTitle := locale.GetString("register_folder_context_menu")
+		if windows_registry.HasComigoFolderContextMenu() {
+			folderTitle = locale.GetString("unregister_folder_context_menu")
+		}
+		menuItems.mContextFolder = menuItems.mExtra.AddSubMenuItem(folderTitle, folderTitle)
+		menuItems.mContextFolder.Click(func() {
+			if windows_registry.HasComigoFolderContextMenu() {
+				if err := windows_registry.RemoveComigoFromFolderContextMenu(); err != nil {
+					logger.Infof("Failed to clear Windows folder context menu: %v", err)
+				} else {
+					logger.Infof("%s", locale.GetString("unregister_folder_context_menu"))
+				}
+			} else {
+				if err := windows_registry.AddComigoToFolderContextMenu(); err != nil {
+					logger.Infof("Failed to register Windows folder context menu: %v", err)
+				} else {
+					logger.Infof("%s", locale.GetString("register_folder_context_menu"))
+				}
+			}
+			// 文本更新依赖下次点击托盘图标时重新构建菜单
+		})
+
+		// 子菜单：文件类型关联注册/清理（候选打开方式）
+		fileAssocTitle := locale.GetString("register_file_association")
+		if windows_registry.HasComigoArchiveAssociation(nil) {
+			fileAssocTitle = locale.GetString("unregister_file_association")
+		}
+		menuItems.mContextFileAssoc = menuItems.mExtra.AddSubMenuItem(fileAssocTitle, fileAssocTitle)
+		menuItems.mContextFileAssoc.Click(func() {
+			if windows_registry.HasComigoArchiveAssociation(nil) {
+				if err := windows_registry.UnregisterComigoAsDefaultArchiveHandler(nil); err != nil {
+					logger.Infof("Failed to unregister archive handler: %v", err)
+				} else {
+					logger.Infof("%s", locale.GetString("unregister_file_association"))
+				}
+			} else {
+				if err := windows_registry.RegisterComigoAsDefaultArchiveHandler(nil); err != nil {
+					logger.Infof("Failed to register archive handler: %v", err)
+				} else {
+					logger.Infof("%s", locale.GetString("register_file_association"))
+				}
+			}
+			// 文本更新依赖下次点击托盘图标时重新构建菜单
+		})
+	}
+	// Comigo 项目地址子菜单（所有平台都显示）
+	menuItems.mProject = menuItems.mExtra.AddSubMenuItem(locale.GetString("systray_project"), locale.GetString("systray_project_tooltip"))
+	menuItems.mProject.Click(func() {
+		go tools.OpenBrowser("https://github.com/yumenaka/comigo")
+		logger.Infof("Opening Comigo project page: https://github.com/yumenaka/comigo")
+	})
 
 	// 退出
 	menuItems.mQuit = systray.AddMenuItem(locale.GetString("systray_quit"), locale.GetString("systray_quit_tooltip"))

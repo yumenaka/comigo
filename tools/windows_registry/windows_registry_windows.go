@@ -17,9 +17,12 @@ const (
 	classesRootCurrentUser = `Software\\Classes`
 )
 
-// RegisterComigoAsDefaultArchiveHandler 将当前可执行程序注册为指定扩展名的默认打开方式。
+// 默认作为候选打开方式支持的压缩扩展名
+var defaultArchiveExts = []string{".zip", ".rar"}
+
+// RegisterComigoAsDefaultArchiveHandler 将当前可执行程序注册为指定扩展名的“候选打开方式”（OpenWithProgids），并提供 Comigo.Archive ProgID。
 // exts 为空时，会使用默认扩展名 [.zip, .rar]。
-// 该操作仅在当前用户 (HKCU) 范围内生效，不需要管理员权限。
+// 该操作仅在当前用户 (HKCU) 范围内生效，不会尝试修改 UserChoice。
 func RegisterComigoAsDefaultArchiveHandler(exts []string) error {
 	exePath, err := currentExecutablePath()
 	if err != nil {
@@ -33,12 +36,20 @@ func RegisterComigoAsDefaultArchiveHandler(exts []string) error {
 		return err
 	}
 
-	// 2. 将特定扩展名关联到 Comigo.Archive
+	// 2. 为 Applications\\<exe> 注册 open 命令，便于系统在“选择其他应用”中展示
+	if err := registerComigoApplication(command); err != nil {
+		return err
+	}
+
+	// 3. 将特定扩展名关联到 Comigo.Archive，并写入 OpenWithProgids
 	if len(exts) == 0 {
-		exts = []string{".zip", ".rar"}
+		exts = defaultArchiveExts
 	}
 	for _, ext := range exts {
 		if err := associateExtensionWithProgID(ext, comigoArchiveProgID); err != nil {
+			return err
+		}
+		if err := registerOpenWithProgID(ext, comigoArchiveProgID); err != nil {
 			return err
 		}
 	}
@@ -46,21 +57,26 @@ func RegisterComigoAsDefaultArchiveHandler(exts []string) error {
 	return nil
 }
 
-// UnregisterComigoAsDefaultArchiveHandler 取消指定扩展名对 Comigo 的默认关联。
+// UnregisterComigoAsDefaultArchiveHandler 取消指定扩展名对 Comigo 的候选打开方式及 ProgID 关联。
 // 仅在当前用户 (HKCU) 范围内生效。
 func UnregisterComigoAsDefaultArchiveHandler(exts []string) error {
 	if len(exts) == 0 {
-		exts = []string{".zip", ".rar"}
+		exts = defaultArchiveExts
 	}
 
 	for _, ext := range exts {
 		if err := dissociateExtensionFromProgID(ext, comigoArchiveProgID); err != nil {
 			return err
 		}
+		if err := unregisterOpenWithProgID(ext, comigoArchiveProgID); err != nil {
+			return err
+		}
 	}
 
 	// 尝试删除 Comigo.Archive ProgID 相关键（如果仍被其他扩展使用则可能保留）
 	_ = deleteComigoArchiveProgID()
+	// 尝试删除 Applications\\<exe> 相关键
+	_ = unregisterComigoApplication()
 
 	return nil
 }
@@ -124,6 +140,20 @@ func HasComigoFolderContextMenu() bool {
 	return true
 }
 
+// HasComigoArchiveAssociation 检查是否已为指定扩展名（或默认扩展名）注册了 Comigo 作为候选打开方式。
+// 如果 exts 为空，则使用 defaultArchiveExts。只要任意一个扩展名存在 OpenWithProgids 中的 Comigo.Archive，即视为已注册。
+func HasComigoArchiveAssociation(exts []string) bool {
+	if len(exts) == 0 {
+		exts = defaultArchiveExts
+	}
+	for _, ext := range exts {
+		if hasOpenWithProgID(ext, comigoArchiveProgID) {
+			return true
+		}
+	}
+	return false
+}
+
 // currentExecutablePath 返回当前可执行文件的绝对路径，并解析符号链接。
 func currentExecutablePath() (string, error) {
 	p, err := os.Executable()
@@ -178,6 +208,96 @@ func deleteComigoArchiveProgID() error {
 		}
 	}
 
+	return nil
+}
+
+// registerOpenWithProgID 在 HKCU\\Software\\Classes\\.ext\\OpenWithProgids 下登记 Comigo 的 ProgID 作为候选打开方式。
+func registerOpenWithProgID(ext, progID string) error {
+	if ext == "" {
+		return nil
+	}
+	if ext[0] != '.' {
+		ext = "." + ext
+	}
+	keyPath := filepath.Join(classesRootCurrentUser, ext, "OpenWithProgids")
+	// 值内容通常为空字符串即可
+	return setStringValue(registry.CURRENT_USER, keyPath, progID, "")
+}
+
+// unregisterOpenWithProgID 从 HKCU\\Software\\Classes\\.ext\\OpenWithProgids 中移除 Comigo 的 ProgID。
+func unregisterOpenWithProgID(ext, progID string) error {
+	if ext == "" {
+		return nil
+	}
+	if ext[0] != '.' {
+		ext = "." + ext
+	}
+	keyPath := filepath.Join(classesRootCurrentUser, ext, "OpenWithProgids")
+	key, err := registry.OpenKey(registry.CURRENT_USER, keyPath, registry.SET_VALUE)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil
+		}
+		return fmt.Errorf("open registry key %s: %w", keyPath, err)
+	}
+	defer key.Close()
+
+	if err := key.DeleteValue(progID); err != nil && !isNotFoundError(err) {
+		return fmt.Errorf("delete OpenWithProgids value %s in %s: %w", progID, keyPath, err)
+	}
+	return nil
+}
+
+// hasOpenWithProgID 判断 HKCU\\Software\\Classes\\.ext\\OpenWithProgids 下是否存在指定 ProgID。
+func hasOpenWithProgID(ext, progID string) bool {
+	if ext == "" {
+		return false
+	}
+	if ext[0] != '.' {
+		ext = "." + ext
+	}
+	keyPath := filepath.Join(classesRootCurrentUser, ext, "OpenWithProgids")
+	key, err := registry.OpenKey(registry.CURRENT_USER, keyPath, registry.QUERY_VALUE)
+	if err != nil {
+		return false
+	}
+	defer key.Close()
+	_, _, err = key.GetStringValue(progID)
+	return err == nil
+}
+
+// registerComigoApplication 在 HKCU\\Software\\Classes\\Applications\\<exe>\\shell\\open\\command 下登记 Comigo 的应用信息。
+func registerComigoApplication(command string) error {
+	exePath, err := currentExecutablePath()
+	if err != nil {
+		return err
+	}
+	exeName := filepath.Base(exePath)
+	appCommandPath := filepath.Join(classesRootCurrentUser, `Applications\\`+exeName+`\\shell\\open\\command`)
+	return setStringValue(registry.CURRENT_USER, appCommandPath, "", command)
+}
+
+// unregisterComigoApplication 尝试清理 Applications\\<exe> 相关注册表键。
+func unregisterComigoApplication() error {
+	exePath, err := currentExecutablePath()
+	if err != nil {
+		return err
+	}
+	exeName := filepath.Base(exePath)
+
+	paths := []string{
+		filepath.Join(classesRootCurrentUser, `Applications\\`+exeName+`\\shell\\open\\command`),
+		filepath.Join(classesRootCurrentUser, `Applications\\`+exeName+`\\shell\\open`),
+		filepath.Join(classesRootCurrentUser, `Applications\\`+exeName+`\\shell`),
+		filepath.Join(classesRootCurrentUser, `Applications\\`+exeName),
+	}
+	for _, p := range paths {
+		if err := deleteRegistryKey(registry.CURRENT_USER, p); err != nil {
+			if !isNotFoundError(err) {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
