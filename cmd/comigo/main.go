@@ -65,7 +65,16 @@ func main() {
 	defer tools.CleanupSingleInstance()
 
 	// 设置系统托盘并启动服务器
-	system_tray.SetupSystray(startServer, shutdownServer, getServerURL)
+	system_tray.SetupSystray(
+		startServer,
+		shutdownServer,
+		getServerURL,
+		getConfigDir,
+		getStoreUrls,
+		toggleTailscale,
+		setLanguage,
+		getTailscaleEnabled,
+	)
 }
 
 // startServer 启动服务器
@@ -89,6 +98,41 @@ func startServer() {
 // getServerURL 获取服务器URL
 func getServerURL() string {
 	return config.GetQrcodeURL()
+}
+
+// getConfigDir 获取配置目录
+func getConfigDir() (string, error) {
+	return config.GetConfigDir()
+}
+
+// getStoreUrls 获取书库URL列表
+func getStoreUrls() []string {
+	return config.GetCfg().StoreUrls
+}
+
+// toggleTailscale 切换Tailscale状态
+func toggleTailscale() error {
+	cfg := config.GetCfg()
+	cfg.EnableTailscale = !cfg.EnableTailscale
+
+	if cfg.EnableTailscale {
+		routers.StartTailscale()
+	} else {
+		routers.StopTailscale()
+	}
+
+	// 保存配置
+	return config.SaveConfig(config.DefaultConfigLocation())
+}
+
+// setLanguage 设置语言
+func setLanguage(lang string) error {
+	return locale.SetLanguage(lang)
+}
+
+// getTailscaleEnabled 获取Tailscale是否启用
+func getTailscaleEnabled() bool {
+	return config.GetCfg().EnableTailscale
 }
 
 // shutdownServer 清理服务器资源

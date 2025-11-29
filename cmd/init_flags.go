@@ -108,6 +108,11 @@ func InitFlags() {
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableSingleInstance, "single-instance", true, locale.GetString("enable_single_instance"))
 	// Language 语言设置
 	RootCmd.PersistentFlags().StringVar(&cfg.Language, "lang", "auto", locale.GetString("lang"))
+	// Windows 右键菜单注册/卸载，仅在 Windows 下生效
+	if runtime.GOOS == "windows" {
+		RootCmd.PersistentFlags().BoolVar(&cfg.RegisterContextMenu, "register-context-menu", false, locale.GetString("register_context_menu"))
+		RootCmd.PersistentFlags().BoolVar(&cfg.UnregisterContextMenu, "unregister-context-menu", false, locale.GetString("unregister_context_menu"))
+	}
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 }

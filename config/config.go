@@ -62,6 +62,8 @@ type Config struct {
 	ZipFileTextEncoding    string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
 	EnableSingleInstance   bool            `json:"EnableSingleInstance" comment:"启用单实例模式，确保同一时间只有一个程序实例运行"`
 	Language               string          `json:"Language" comment:"界面语言设置，可选值：auto（自动检测）、zh（中文）、en（英文）、ja（日文），默认为auto"`
+	RegisterContextMenu    bool            `json:"RegisterContextMenu" comment:"在 Windows 上注册资源管理器文件夹右键菜单：使用Comigo打开"`
+	UnregisterContextMenu  bool            `json:"UnregisterContextMenu" comment:"在 Windows 上卸载资源管理器文件夹右键菜单：使用Comigo打开"`
 }
 
 func (c *Config) GetHost() string {
