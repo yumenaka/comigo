@@ -1,6 +1,6 @@
 //go:build windows
 
-package tools
+package windows_registry
 
 import (
 	"fmt"
