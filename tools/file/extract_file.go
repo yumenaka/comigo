@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/yumenaka/archives"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -16,7 +17,7 @@ func extractFileHandler(ctx context.Context, f archives.FileInfo) error {
 	// 从上下文中获取解压路径
 	extractPath, ok := ctx.Value("extractPath").(string)
 	if !ok {
-		return errors.New("extractPath not found in context")
+		return errors.New(locale.GetString("err_extract_path_not_found"))
 	}
 
 	// 打开压缩文件中的当前文件

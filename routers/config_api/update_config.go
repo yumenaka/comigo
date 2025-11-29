@@ -23,7 +23,7 @@ func UpdateConfig(c echo.Context) error {
 	}
 	// 将JSON数据转换为字符串并打印
 	jsonString := string(body)
-	logger.Infof("Received JSON data: %s \n", jsonString)
+	logger.Infof(locale.GetString("log_received_json_data"), jsonString)
 	// 如果配置被锁定，返回错误
 	if config.GetCfg().ReadOnlyMode {
 		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Config is locked, cannot be modified"})
@@ -34,7 +34,7 @@ func UpdateConfig(c echo.Context) error {
 	err = config.UpdateConfigByJson(jsonString)
 	if err != nil {
 		logger.Infof("%s", err.Error())
-		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Failed to parse JSON data"})
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": locale.GetString("log_failed_to_parse_json")})
 	}
 	// 如果 Language 配置发生变化，重新初始化语言设置
 	if oldConfig.Language != config.GetCfg().Language {
@@ -42,7 +42,7 @@ func UpdateConfig(c echo.Context) error {
 	}
 	err = config.UpdateConfigFile()
 	if err != nil {
-		logger.Infof("Failed to update local config: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), err)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描书库等
 	BeforeConfigUpdate(&oldConfig, config.GetCfg())
@@ -58,7 +58,7 @@ func BeforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 		StartReScan()
 	} else {
 		if newConfig.Debug {
-			logger.Info("No changes in cfg, skipped scan store path\n")
+			logger.Info(locale.GetString("log_no_changes_skipped_scan"))
 		}
 	}
 }
@@ -103,11 +103,11 @@ func checkNeedReScan(oldConfig *config.Config, newConfig *config.Config) (reScan
 func StartReScan() {
 	config.GetCfg().InitStoreUrls()
 	if err := scan.InitAllStore(config.GetCfg()); err != nil {
-		logger.Infof("Failed to scan store path: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 	}
 	if config.GetCfg().EnableDatabase {
 		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
-			logger.Infof("Failed to save results to database: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
 		}
 	}
 }

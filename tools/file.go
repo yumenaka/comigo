@@ -1,12 +1,13 @@
 package tools
 
 import (
-	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -68,7 +69,7 @@ func DeleteFileIfExist(filePath string) error {
 			return err
 		}
 	} else if os.IsNotExist(err) {
-		return errors.New("File does not exist:" + filePath)
+		return fmt.Errorf(locale.GetString("err_file_does_not_exist"), filePath)
 	} else {
 		return err
 	}

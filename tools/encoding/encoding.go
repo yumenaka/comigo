@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
@@ -131,7 +132,7 @@ func Decode(in []byte, charset string) ([]byte, error) {
 	if enc, ok := GetEncoding(charset); ok {
 		return enc.NewDecoder().Bytes(in)
 	}
-	return nil, errors.New("charset not found")
+	return nil, errors.New(locale.GetString("err_charset_not_found"))
 }
 
 func DecodeFileName(headerName string, ZipFilenameEncoding string) string {

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 	"tailscale.com/tsnet"
 )
@@ -41,19 +42,19 @@ func InitTailscale(c TailscaleConfig) error {
 	if c.FunnelMode {
 		// Funnel only supports TCP on ports 443, 8443, and 10000
 		if c.Port != 443 && c.Port != 8443 && c.Port != 10000 {
-			logger.Errorf("Funnel mode only supports ports 443, 8443, and 10000. Given port: %d", c.Port)
-			return errors.New("funnel mode only supports ports 443, 8443, and 10000")
+			logger.Errorf(locale.GetString("err_funnel_mode_ports_only"))
+			return errors.New(locale.GetString("err_funnel_mode_ports_only"))
 		}
 		netListener, err = tsServer.ListenFunnel("tcp", listenAddr)
 		if err != nil {
-			logger.Errorf("Failed to create Tailscale funnel listener on %s: %v", listenAddr, err)
+			logger.Errorf(locale.GetString("err_failed_to_create_tailscale_funnel_listener"), listenAddr, err)
 			return err
 		}
 	}
 	if !c.FunnelMode {
 		netListener, err = tsServer.Listen("tcp", listenAddr)
 		if err != nil {
-			logger.Errorf("Failed to create Tailscale listener on %s: %v", listenAddr, err)
+			logger.Errorf(locale.GetString("err_failed_to_create_tailscale_listener"), listenAddr, err)
 			return err
 		}
 	}
@@ -63,7 +64,7 @@ func InitTailscale(c TailscaleConfig) error {
 	// 它不会返回错误。
 	localClient, err = tsServer.LocalClient()
 	if err != nil {
-		logger.Errorf("Failed to create Tailscale local client: %v", err)
+		logger.Errorf(locale.GetString("err_failed_to_create_tailscale_local_client"), err)
 		if netListener != nil {
 			_ = netListener.Close()
 		}
@@ -75,6 +76,6 @@ func InitTailscale(c TailscaleConfig) error {
 			GetCertificate: localClient.GetCertificate,
 		})
 	}
-	logger.Infof("Tailscale server initialized successfully on %s:%d", c.Hostname, c.Port)
+	logger.Infof(locale.GetString("log_tailscale_server_initialized"), c.Hostname, c.Port)
 	return nil
 }

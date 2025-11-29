@@ -87,7 +87,7 @@ func onReady() {
 	// 从嵌入的文件系统中读取图标
 	iconBytes, err := iconData.ReadFile("icon.ico")
 	if err != nil {
-		logger.Infof("Failed to read icon file: %v, using default icon", err)
+		logger.Infof(locale.GetString("log_failed_to_read_icon_file"), err)
 		// 如果读取失败，使用默认图标
 		systray.SetIcon(nil)
 	} else {
@@ -132,7 +132,7 @@ func initMenuItems() {
 		if getURLFunc != nil {
 			url := getURLFunc()
 			go tools.OpenBrowser(url)
-			logger.Infof("Opening browser: %s", url)
+			logger.Infof(locale.GetString("log_opening_browser"), url)
 		}
 	})
 
@@ -142,9 +142,9 @@ func initMenuItems() {
 		if getURLFunc != nil {
 			url := getURLFunc()
 			if err := clipboard.WriteAll(url); err != nil {
-				logger.Infof("Failed to copy URL to clipboard: %v", err)
+				logger.Infof(locale.GetString("log_failed_to_copy_url"), err)
 			} else {
-				logger.Infof("Copied URL to clipboard: %s", url)
+				logger.Infof(locale.GetString("log_copied_url_to_clipboard"), url)
 			}
 		}
 	})
@@ -160,7 +160,7 @@ func initMenuItems() {
 		menuItems.mTailscale.Click(func() {
 			if toggleTailscaleFunc != nil {
 				if err := toggleTailscaleFunc(); err != nil {
-					logger.Infof("Failed to toggle Tailscale: %v", err)
+					logger.Infof(locale.GetString("log_failed_to_toggle_tailscale"), err)
 				}
 				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
 			}
@@ -176,9 +176,9 @@ func initMenuItems() {
 	menuItems.mLangZh.Click(func() {
 		if setLanguageFunc != nil {
 			if err := setLanguageFunc("zh-CN"); err != nil {
-				logger.Infof("Failed to set language: %v", err)
+				logger.Infof(locale.GetString("log_failed_to_set_language"), err)
 			} else {
-				logger.Info("Language changed to Chinese")
+				logger.Info(locale.GetString("log_language_changed_to_chinese"))
 				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
 			}
 		}
@@ -186,9 +186,9 @@ func initMenuItems() {
 	menuItems.mLangEn.Click(func() {
 		if setLanguageFunc != nil {
 			if err := setLanguageFunc("en-US"); err != nil {
-				logger.Infof("Failed to set language: %v", err)
+				logger.Infof(locale.GetString("log_failed_to_set_language"), err)
 			} else {
-				logger.Info("Language changed to English")
+				logger.Info(locale.GetString("log_language_changed_to_english"))
 				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
 			}
 		}
@@ -196,9 +196,9 @@ func initMenuItems() {
 	menuItems.mLangJa.Click(func() {
 		if setLanguageFunc != nil {
 			if err := setLanguageFunc("ja-JP"); err != nil {
-				logger.Infof("Failed to set language: %v", err)
+				logger.Infof(locale.GetString("log_failed_to_set_language"), err)
 			} else {
-				logger.Info("Language changed to Japanese")
+				logger.Info(locale.GetString("log_language_changed_to_japanese"))
 				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
 			}
 		}
@@ -216,7 +216,7 @@ func initMenuItems() {
 				if getConfigDirFunc != nil {
 					configDir, err := getConfigDirFunc()
 					if err != nil {
-						logger.Infof("Failed to get config dir: %v", err)
+						logger.Infof(locale.GetString("log_failed_to_get_config_dir"), err)
 						return
 					}
 					openDirectory(configDir)
@@ -258,13 +258,13 @@ func initMenuItems() {
 		menuItems.mContextFolder.Click(func() {
 			if windows_registry.HasComigoFolderContextMenu() {
 				if err := windows_registry.RemoveComigoFromFolderContextMenu(); err != nil {
-					logger.Infof("Failed to clear Windows folder context menu: %v", err)
+					logger.Infof(locale.GetString("log_failed_to_clear_folder_context_menu"), err)
 				} else {
 					logger.Infof("%s", locale.GetString("unregister_folder_context_menu"))
 				}
 			} else {
 				if err := windows_registry.AddComigoToFolderContextMenu(); err != nil {
-					logger.Infof("Failed to register Windows folder context menu: %v", err)
+					logger.Infof(locale.GetString("log_failed_to_register_folder_context_menu"), err)
 				} else {
 					logger.Infof("%s", locale.GetString("register_folder_context_menu"))
 				}
@@ -276,7 +276,7 @@ func initMenuItems() {
 		menuItems.mCreateDesktopShortcut = menuItems.mExtra.AddSubMenuItem(locale.GetString("create_desktop_shortcut"), locale.GetString("create_desktop_shortcut"))
 		menuItems.mCreateDesktopShortcut.Click(func() {
 			if err := windows_registry.CreateDesktopShortcut(); err != nil {
-				logger.Infof("Failed to create desktop shortcut: %v", err)
+				logger.Infof(locale.GetString("log_failed_to_create_desktop_shortcut"), err)
 			} else {
 				logger.Infof("%s", locale.GetString("create_desktop_shortcut"))
 			}
@@ -291,13 +291,13 @@ func initMenuItems() {
 		menuItems.mContextFileAssoc.Click(func() {
 			if windows_registry.HasComigoArchiveAssociation(nil) {
 				if err := windows_registry.UnregisterComigoAsDefaultArchiveHandler(nil); err != nil {
-					logger.Infof("Failed to unregister archive handler: %v", err)
+					logger.Infof(locale.GetString("log_failed_to_unregister_archive_handler"), err)
 				} else {
 					logger.Infof("%s", locale.GetString("unregister_file_association"))
 				}
 			} else {
 				if err := windows_registry.RegisterComigoAsDefaultArchiveHandler(nil); err != nil {
-					logger.Infof("Failed to register archive handler: %v", err)
+					logger.Infof(locale.GetString("log_failed_to_register_archive_handler"), err)
 				} else {
 					logger.Infof("%s", locale.GetString("register_file_association"))
 				}
@@ -309,13 +309,13 @@ func initMenuItems() {
 	menuItems.mProject = menuItems.mExtra.AddSubMenuItem(locale.GetString("systray_project"), locale.GetString("systray_project_tooltip"))
 	menuItems.mProject.Click(func() {
 		go tools.OpenBrowser("https://github.com/yumenaka/comigo")
-		logger.Infof("Opening Comigo project page: https://github.com/yumenaka/comigo")
+		logger.Infof(locale.GetString("log_opening_comigo_project_page"))
 	})
 
 	// 退出
 	menuItems.mQuit = systray.AddMenuItem(locale.GetString("systray_quit"), locale.GetString("systray_quit_tooltip"))
 	menuItems.mQuit.Click(func() {
-		logger.Info("Requesting quit from system tray")
+		logger.Info(locale.GetString("log_requesting_quit_from_systray"))
 		systray.Quit()
 	})
 }
@@ -340,6 +340,6 @@ func openDirectory(path string) {
 		cmd = exec.Command("xdg-open", path)
 	}
 	if err := cmd.Start(); err != nil {
-		logger.Infof("Failed to open directory: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_open_directory"), err)
 	}
 }

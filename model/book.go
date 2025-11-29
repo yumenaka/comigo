@@ -131,7 +131,7 @@ func GetAllBooksNumber() int {
 	// 遍历 map 并递增计数器
 	allBooks, err := IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, b := range allBooks {
 		if b.Type == TypeBooksGroup {
@@ -144,12 +144,12 @@ func GetAllBooksNumber() int {
 
 // ClearBookNotExist  检查内存中的书的源文件是否存在，不存在就删掉
 func ClearBookNotExist() {
-	logger.Infof("Checking book files exist...")
+	logger.Info(locale.GetString("log_checking_book_files_exist"))
 	var deletedBooks []string
 	// 遍历所有书籍
 	allBooks, err := IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, book := range allBooks {
 		// 如果父文件夹存在，但书籍文件不存在，也说明这本书被删除了
@@ -157,14 +157,14 @@ func ClearBookNotExist() {
 			deletedBooks = append(deletedBooks, book.BookPath)
 			err := IStore.DeleteBook(book.BookID)
 			if err != nil {
-				logger.Infof("Error deleting book %s: %s", book.BookID, err)
+				logger.Infof(locale.GetString("log_error_deleting_book"), book.BookID, err)
 			}
 		}
 	}
 	// 重新生成书组
 	if len(deletedBooks) > 0 {
 		if err := IStore.GenerateBookGroup(); err != nil {
-			logger.Infof("Error initializing main folder: %s", err)
+			logger.Infof(locale.GetString("log_error_initializing_main_folder"), err)
 		}
 	}
 }

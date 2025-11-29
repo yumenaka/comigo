@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/pelletier/go-toml/v2"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -86,7 +87,7 @@ func DefaultConfigLocation() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		// 获取Home失败就先记录一下，但不直接return，继续往后查
-		logger.Info("Warning: failed to get HomeDir:", err)
+		logger.Infof(locale.GetString("log_warning_failed_to_get_homedir"), err)
 	} else {
 		homePath := path.Join(home, ".config", "comigo", "config.toml")
 		if fileExists(homePath) {
@@ -103,7 +104,7 @@ func DefaultConfigLocation() string {
 	executable, errExe := os.Executable()
 	if errExe != nil {
 		// 获取可执行文件路径出错，这种情况也比较少见，先打印日志
-		logger.Info("Warning: failed to get Executable path:", errExe)
+		logger.Infof(locale.GetString("log_warning_failed_to_get_executable_path"), errExe)
 	} else {
 		progPath := path.Join(path.Dir(executable), "config.toml")
 		if fileExists(progPath) {
@@ -140,7 +141,7 @@ func SaveConfig(to string) error {
 	if errMarshal != nil {
 		return errMarshal
 	}
-	logger.Infof("cfg Save To %s", to)
+	logger.Infof(locale.GetString("log_cfg_save_to"), to)
 	switch to {
 	case HomeDirectory:
 		home, err := os.UserHomeDir()
@@ -234,7 +235,7 @@ func DeleteConfigIn(in string) error {
 	if runtime.GOOS == "js" {
 		return nil
 	}
-	logger.Infof("Try delete cfg in %s", in)
+	logger.Infof(locale.GetString("log_try_delete_cfg_in"), in)
 	var configFile string
 	switch in {
 	case HomeDirectory:

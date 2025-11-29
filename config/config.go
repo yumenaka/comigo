@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -132,7 +133,7 @@ func (c *Config) StoreUrlIsExits(url string) bool {
 	for _, storeUrl := range c.StoreUrls {
 		if storeUrl == url {
 			if c.Debug {
-				logger.Infof("Store Url already exists: %s", storeUrl)
+				logger.Infof(locale.GetString("log_store_url_already_exists"), storeUrl)
 			}
 			return true
 		}
@@ -143,7 +144,7 @@ func (c *Config) StoreUrlIsExits(url string) bool {
 // AddStoreUrl 添加本地书库(单个路径)
 func (c *Config) AddStoreUrl(storeURL string) error {
 	if c.StoreUrlIsExits(storeURL) {
-		return fmt.Errorf("store Url already exists: %s", storeURL)
+		return fmt.Errorf(locale.GetString("err_store_url_already_exists_error"), storeURL)
 	}
 	cfg.StoreUrls = append(cfg.StoreUrls, storeURL)
 	return nil
@@ -153,12 +154,12 @@ func (c *Config) AddStoreUrl(storeURL string) error {
 func (c *Config) InitStoreUrls() {
 	for _, storeUrl := range c.StoreUrls {
 		if c.StoreUrlIsExits(storeUrl) {
-			logger.Infof("Store Url already exists in config: %s", storeUrl)
+			logger.Infof(locale.GetString("log_store_url_already_exists_in_config"), storeUrl)
 			continue
 		}
 		err := c.AddStoreUrl(storeUrl)
 		if err != nil {
-			logger.Infof("Failed to add store url from config:%s", err)
+			logger.Infof(locale.GetString("log_failed_to_add_store_url"), err)
 		}
 	}
 }
@@ -187,10 +188,10 @@ func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
 	// 根据 fieldName 获取对应字段的 reflect.Value
 	f := v.FieldByName(fieldName)
 	if !f.IsValid() {
-		return fmt.Errorf("不存在名为 '%s' 的字段", fieldName)
+		return fmt.Errorf(locale.GetString("err_field_not_exists"), fieldName)
 	}
 	if !f.CanSet() {
-		return fmt.Errorf("无法对字段 '%s' 进行设置", fieldName)
+		return fmt.Errorf(locale.GetString("err_field_cannot_set"), fieldName)
 	}
 
 	// 根据字段的类型，进行解析并赋值
@@ -199,7 +200,7 @@ func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
 		// ParseBool 返回字符串表示的布尔值。它接受 1、t、T、TRUE、true、True、0、f、F、FALSE、false、False。任何其他值都会返回错误。
 		boolVal, err := strconv.ParseBool(fieldValue)
 		if err != nil {
-			return fmt.Errorf("无法将 '%s' 解析为 bool: %v", fieldValue, err)
+			return fmt.Errorf(locale.GetString("err_failed_to_parse_bool"), fieldValue, err)
 		}
 		f.SetBool(boolVal)
 
@@ -207,7 +208,7 @@ func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
 		// ParseInt 以给定基数（0、2 到 36）和位大小（0 到 64）解释字符串 s 并返回相应的值 i。该字符串可以以前导符号开头：“+”或“-”。
 		intVal, err := strconv.ParseInt(fieldValue, 10, 64)
 		if err != nil {
-			return fmt.Errorf("无法将 '%s' 解析为 int: %v", fieldValue, err)
+			return fmt.Errorf(locale.GetString("err_failed_to_parse_int"), fieldValue, err)
 		}
 		// 这里为了简单，直接设定 int64。如果结构体字段是 int（非 int64），
 		// Go 会自动做一次范围检查和转换；若超范围将报错。
@@ -223,11 +224,11 @@ func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
 			sliceVal := strings.Split(fieldValue, ",")
 			f.Set(reflect.ValueOf(sliceVal))
 		} else {
-			return errors.New("暂不支持此 slice 的设置(仅支持 []string)")
+			return errors.New(locale.GetString("err_slice_not_supported"))
 		}
 
 	default:
-		return fmt.Errorf("暂不支持设置字段 '%s' 的类型: %s", fieldName, f.Type().String())
+		return fmt.Errorf(locale.GetString("err_field_type_not_supported"), fieldName, f.Type().String())
 	}
 
 	return nil
@@ -238,7 +239,7 @@ func getStringSliceField(c *Config, fieldName string) (reflect.Value, []string, 
 	// 取得 *Config 的 Value
 	v := reflect.ValueOf(c)
 	if v.Kind() != reflect.Pointer || v.IsNil() {
-		return reflect.Value{}, nil, errors.New("必须是一个非空的 *Config 指针")
+		return reflect.Value{}, nil, errors.New(locale.GetString("err_must_be_nonempty_config_pointer"))
 	}
 	// 取得实际元素
 	v = v.Elem()
@@ -246,18 +247,18 @@ func getStringSliceField(c *Config, fieldName string) (reflect.Value, []string, 
 	// 根据 fieldName 获取对应字段
 	f := v.FieldByName(fieldName)
 	if !f.IsValid() {
-		return reflect.Value{}, nil, fmt.Errorf("不存在名为 '%s' 的字段", fieldName)
+		return reflect.Value{}, nil, fmt.Errorf(locale.GetString("err_field_not_exists"), fieldName)
 	}
 	if !f.CanSet() {
-		return reflect.Value{}, nil, fmt.Errorf("无法对字段 '%s' 进行设置", fieldName)
+		return reflect.Value{}, nil, fmt.Errorf(locale.GetString("err_field_cannot_set"), fieldName)
 	}
 	// 检查字段是否是切片类型
 	if f.Kind() != reflect.Slice {
-		return reflect.Value{}, nil, fmt.Errorf("字段 '%s' 不是切片类型", fieldName)
+		return reflect.Value{}, nil, fmt.Errorf(locale.GetString("err_field_not_slice_type"), fieldName)
 	}
 	// 检查切片元素类型是否是string
 	if f.Type().Elem().Kind() != reflect.String {
-		return reflect.Value{}, nil, fmt.Errorf("字段 '%s' 的元素类型不是 string", fieldName)
+		return reflect.Value{}, nil, fmt.Errorf(locale.GetString("err_field_element_not_string"), fieldName)
 	}
 	// 转换为 []string
 	oldSlice := f.Interface().([]string)
@@ -274,7 +275,7 @@ func (c *Config) AddStringArrayConfig(fieldName, addValue string) ([]string, err
 	// 检查新元素是否已存在
 	for _, v := range oldSlice {
 		if v == addValue {
-			logger.Infof("AddStringArrayConfig: 字符串 '%s' 已存在", addValue)
+			logger.Infof(locale.GetString("log_string_already_exists"), addValue)
 			return oldSlice, nil // 已存在则直接返回
 		}
 	}
@@ -317,7 +318,7 @@ func (c *Config) DeleteStringArrayConfig(fieldName, deleteValue string) ([]strin
 func UpdateConfigByJson(jsonString string) error {
 	var updates map[string]interface{}
 	if err := json.Unmarshal([]byte(jsonString), &updates); err != nil {
-		logger.Infof("Failed to unmarshal JSON: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_unmarshal_json"), err)
 		return err
 	}
 	for key, value := range updates {
@@ -462,7 +463,7 @@ func UpdateConfigByJson(jsonString string) error {
 				// 实际的语言初始化会在下次使用 locale 包时自动完成
 			}
 		default:
-			logger.Infof("Unknown config key: %s", key)
+			logger.Infof(locale.GetString("log_unknown_config_key"), key)
 		}
 	}
 	return nil
@@ -478,13 +479,13 @@ func SetByExecutableFilename() {
 	// 获取可执行文件所在目录
 	executablePath, err := os.Executable()
 	if err != nil {
-		logger.Infof("Error getting executable path: %s", err)
+		logger.Infof(locale.GetString("log_error_getting_executable_path"), err)
 		return
 	}
 	executableDir := filepath.Dir(executablePath)
 
 	if cfg.Debug {
-		logger.Infof("Executable Name: %s", filenameWithoutSuffix)
-		logger.Infof("Executable Path: %s", executableDir)
+		logger.Infof(locale.GetString("log_executable_name"), filenameWithoutSuffix)
+		logger.Infof(locale.GetString("log_executable_path"), executableDir)
 	}
 }

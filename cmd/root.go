@@ -37,14 +37,14 @@ var RootCmd = &cobra.Command{
 			// 先处理卸载，再处理注册，避免同时传入两个参数时出现冲突
 			if cfg.UnregisterContextMenu {
 				if err := windows_registry.RemoveComigoFromFolderContextMenu(); err != nil {
-					logger.Infof("Failed to unregister Windows context menu: %v", err)
+					logger.Infof(locale.GetString("log_failed_to_unregister_windows_context_menu"), err)
 				} else {
 					logger.Infof("%s", locale.GetString("unregister_context_menu"))
 				}
 			}
 			if cfg.RegisterContextMenu {
 				if err := windows_registry.AddComigoToFolderContextMenu(); err != nil {
-					logger.Infof("Failed to register Windows context menu: %v", err)
+					logger.Infof(locale.GetString("log_failed_to_register_windows_context_menu"), err)
 				} else {
 					logger.Infof("%s", locale.GetString("register_context_menu"))
 				}

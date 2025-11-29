@@ -5,6 +5,7 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
@@ -14,7 +15,7 @@ import (
 // FlipModeHandler 阅读界面（翻页模式）
 func FlipModeHandler(c echo.Context) error {
 	bookID := c.Param("id")
-	logger.Info("Flip Mode Book ID:" + bookID)
+	logger.Infof(locale.GetString("log_flip_mode_book_id"), bookID)
 	// 图片排序方式
 	sortBy := "default"
 	// c.Cookie("key") 没找到，那么就会取到空值（nil），没判断nil就直接访问 .Value 属性，会导致空指针引用错误。
@@ -25,7 +26,7 @@ func FlipModeHandler(c echo.Context) error {
 	// 读取url参数，获取书籍ID
 	book, err := model.IStore.GetBook(bookID)
 	if err != nil {
-		logger.Infof("GetBook: %v", err)
+		logger.Infof(locale.GetString("log_get_book_error"), err)
 		// 没有找到书，显示 HTTP 404 错误
 		indexHtml := common.Html(
 			c,

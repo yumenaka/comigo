@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -24,7 +25,7 @@ func DeleteConfig(c echo.Context) error {
 	validDirs := []string{WorkingDirectory, HomeDirectory, ProgramDirectory}
 
 	if !contains(validDirs, in) {
-		logger.Infof("error: Failed to delete config in %s directory", in)
+		logger.Infof(locale.GetString("log_error_failed_to_delete_config"), in)
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Failed to delete config in " + in + " directory",
 		})

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/yumenaka/archives"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/encoding"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -20,7 +21,7 @@ var mapBookFS sync.Map
 // GetSingleFile 获取单个文件
 func GetSingleFile(filePath, nameInArchive, textEncoding string) ([]byte, error) {
 	if nameInArchive == "" {
-		return nil, errors.New("nameInArchive is empty")
+		return nil, errors.New(locale.GetString("err_name_in_archive_empty"))
 	}
 
 	// 创建一个30秒超时的Context
@@ -30,7 +31,7 @@ func GetSingleFile(filePath, nameInArchive, textEncoding string) ([]byte, error)
 	// 打开文件
 	file, err := os.Open(filePath)
 	if err != nil {
-		logger.Infof("无法打开文件 %s: %v", filePath, err)
+		logger.Infof(locale.GetString("log_failed_to_open_file_get_single"), filePath, err)
 		return nil, err
 	}
 	defer file.Close()
@@ -40,9 +41,9 @@ func GetSingleFile(filePath, nameInArchive, textEncoding string) ([]byte, error)
 	if err != nil {
 		// 检查是否是超时错误
 		if errors.Is(err, context.DeadlineExceeded) {
-			logger.Infof("操作超时：识别压缩格式花费了超过30秒")
+			logger.Info(locale.GetString("log_timeout_identify_archive_format"))
 		} else {
-			logger.Infof("识别压缩格式失败: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_identify_archive_format"), err)
 		}
 		return nil, err
 	}
@@ -63,9 +64,9 @@ func GetSingleFile(filePath, nameInArchive, textEncoding string) ([]byte, error)
 		fileSystem, err = archives.FileSystem(ctx, filePath, nil)
 		if err != nil {
 			if errors.Is(err, context.DeadlineExceeded) {
-				logger.Infof("操作超时：创建文件系统花费了超过30秒")
+				logger.Info(locale.GetString("log_timeout_create_filesystem"))
 			} else {
-				logger.Infof("创建文件系统失败: %v", err)
+				logger.Infof(locale.GetString("log_failed_to_create_filesystem"), err)
 			}
 			return nil, err
 		}
@@ -79,9 +80,9 @@ func GetSingleFile(filePath, nameInArchive, textEncoding string) ([]byte, error)
 		data, err := io.ReadAll(fileInArchive)
 		if err != nil {
 			if errors.Is(err, context.DeadlineExceeded) {
-				logger.Infof("操作超时：读取文件内容花费了超过30秒")
+				logger.Info(locale.GetString("log_timeout_read_file_content"))
 			} else {
-				logger.Infof("读取文件内容失败: %v", err)
+				logger.Infof(locale.GetString("log_failed_to_read_file_content"), err)
 			}
 			return nil, err
 		}
@@ -98,7 +99,7 @@ func GetSingleFile(filePath, nameInArchive, textEncoding string) ([]byte, error)
 		return extractFileFromArchive(ctx, extractor, sourceArchiveReader, nameInArchive)
 	}
 
-	return nil, errors.New("不支持的压缩格式或在压缩包中未找到文件")
+	return nil, errors.New(locale.GetString("err_unsupported_archive_format"))
 }
 
 func extractFileFromArchive(ctx context.Context, extractor archives.Extractor, sourceArchive io.Reader, nameInArchive string) ([]byte, error) {
@@ -110,9 +111,9 @@ func extractFileFromArchive(ctx context.Context, extractor archives.Extractor, s
 		readCloser, err := f.Open()
 		if err != nil {
 			if errors.Is(err, context.DeadlineExceeded) {
-				logger.Infof("操作超时：打开压缩包内文件花费了超过30秒")
+				logger.Info(locale.GetString("log_timeout_open_file_in_archive"))
 			} else {
-				logger.Infof("打开压缩包内文件失败: %v", err)
+				logger.Infof(locale.GetString("log_failed_to_open_file_in_archive"), err)
 			}
 			return err
 		}
@@ -120,23 +121,23 @@ func extractFileFromArchive(ctx context.Context, extractor archives.Extractor, s
 		data, err = io.ReadAll(readCloser)
 		if err != nil {
 			if errors.Is(err, context.DeadlineExceeded) {
-				logger.Infof("操作超时：读取文件内容花费了超过30秒")
+				logger.Info(locale.GetString("log_timeout_read_file_content"))
 			} else {
-				logger.Infof("读取文件内容失败: %v", err)
+				logger.Infof(locale.GetString("log_failed_to_read_file_content"), err)
 			}
 		}
 		return err
 	})
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
-			logger.Infof("操作超时：提取文件花费了超过30秒")
+			logger.Info(locale.GetString("log_timeout_extract_file"))
 		} else {
-			logger.Infof("提取文件失败: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_extract_file"), err)
 		}
 		return nil, err
 	}
 	if data != nil {
 		return data, nil
 	}
-	return nil, errors.New("在压缩包中未找到文件")
+	return nil, errors.New(locale.GetString("err_file_not_found_in_archive"))
 }

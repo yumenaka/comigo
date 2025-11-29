@@ -8,6 +8,7 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -35,14 +36,14 @@ import (
 // parseSingleHTMXFormPair 提取并返回表单中的"第一对" key/value
 func parseSingleHTMXFormPair(c echo.Context) (string, string, error) {
 	if !htmx.IsHTMX(c.Request()) {
-		return "", "", errors.New("non-htmx request")
+		return "", "", errors.New(locale.GetString("err_non_htmx_request"))
 	}
 	formData, err := c.FormParams()
 	if err != nil {
 		return "", "", fmt.Errorf("parseForm error: %v", err)
 	}
 	if len(formData) == 0 {
-		return "", "", errors.New("no form data")
+		return "", "", errors.New(locale.GetString("err_no_form_data"))
 	}
 	var name, newValue string
 	for key, values := range formData {
@@ -62,20 +63,20 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 		return "", "", err
 	}
 
-	logger.Infof("Update config: %s = %s", name, newValue)
+	logger.Infof(locale.GetString("log_update_config"), name, newValue)
 
 	// 旧配置做个备份（有需要对比）
 	oldConfig := config.CopyCfg()
 
 	// 更新配置
 	if setErr := config.GetCfg().SetConfigValue(name, newValue); setErr != nil {
-		logger.Errorf("Failed to set config value: %v", setErr)
+		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
 		return "", "", setErr
 	}
 
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof("Failed to update local config: %v", writeErr)
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
@@ -123,7 +124,7 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 
 	boolVal, parseErr := strconv.ParseBool(newValue)
 	if parseErr != nil {
-		logger.Errorf("无法将 '%s' 解析为 bool: %v", newValue, parseErr)
+		logger.Errorf(locale.GetString("err_failed_to_parse_bool"), newValue, parseErr)
 		return echo.NewHTTPError(http.StatusBadRequest, "parse bool error")
 	}
 	saveSuccessHint := false
@@ -151,7 +152,7 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 	// 将字符串解析为 int
 	intVal, parseErr := strconv.ParseInt(newValue, 10, 64)
 	if parseErr != nil {
-		logger.Errorf("无法将 '%s' 解析为 int: %v", newValue, parseErr)
+		logger.Errorf(locale.GetString("err_failed_to_parse_int"), newValue, parseErr)
 		return echo.NewHTTPError(http.StatusBadRequest, "parse int error")
 	}
 	saveSuccessHint := false
@@ -182,10 +183,10 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 	reEnterPassword := c.FormValue("ReEnterPassword")
 	// 除非是调试模式, 密码不明文记录到日志，
 	if config.GetCfg().Debug {
-		logger.Infof("Update user info: Username=%s", username)
-		logger.Infof("Update user info: CurrentPassword=%s", currentPassword)
-		logger.Infof("Update user info: Password=%s", password)
-		logger.Infof("Update user info: ReEnterPassword=%s", reEnterPassword) // ReEnterPassword
+		logger.Infof(locale.GetString("log_update_user_info_username"), username)
+		logger.Infof(locale.GetString("log_update_user_info_current_password"), currentPassword)
+		logger.Infof(locale.GetString("log_update_user_info_password"), password)
+		logger.Infof(locale.GetString("log_update_user_info_reenter_password"), reEnterPassword) // ReEnterPassword
 	}
 
 	// 两次输入的密码不一致
@@ -211,7 +212,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 
 	// 更新用户名
 	if err := config.GetCfg().SetConfigValue("Username", username); err != nil {
-		logger.Errorf("Failed to set Username: %v", err)
+		logger.Errorf(locale.GetString("err_failed_to_set_username"), err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update username")
 	}
 	// 更新密码
@@ -222,7 +223,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof("Failed to update local config: %v", writeErr)
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 		// 这里可能需要回滚配置更改或返回错误
 		// return echo.NewHTTPError(http.StatusInternalServerError, "Failed to write config file")
 	}
@@ -234,7 +235,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 	// 渲染 UserInfoConfig 模板并返回
 	updatedHTML := UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password) // 如果UserInfoConfig期望的是加密后的密码，这里需要调整
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		logger.Errorf("Failed to render UserInfoConfig template: %v", renderErr)
+		logger.Errorf(locale.GetString("err_failed_to_render_userinfo_config_template"), renderErr)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return nil
@@ -288,7 +289,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	config.GetCfg().FunnelLoginCheck = request.FunnelLoginCheck
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof("Failed to update local config: %v", writeErr)
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 
 	// 根据配置的变化，做相应操作
@@ -315,7 +316,7 @@ func AddArrayConfigHandler(c echo.Context) error {
 	configName := c.FormValue("configName")
 	addValue := c.FormValue("addValue")
 
-	logger.Infof("AddArrayConfigHandler: %s = %s\n", configName, addValue)
+	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", configName, addValue)
 
 	values, err := doAdd(configName, addValue)
 	if err != nil {
@@ -339,12 +340,12 @@ func doAdd(configName, addValue string) ([]string, error) {
 	// 更新配置
 	values, err := config.GetCfg().AddStringArrayConfig(configName, addValue)
 	if err != nil {
-		logger.Errorf("Failed to add config value: %v", err)
+		logger.Errorf(locale.GetString("err_failed_to_add_config_value"), err)
 		return nil, err
 	}
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof("Failed to update local config: %v", writeErr)
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
 	beforeConfigUpdate(&oldConfig, config.GetCfg())
@@ -364,7 +365,7 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 	configName := c.FormValue("configName")
 	deleteValue := c.FormValue("deleteValue")
 
-	logger.Infof("DeleteArrayConfigHandler: %s = %s\n", configName, deleteValue)
+	logger.Infof(locale.GetString("log_delete_array_config_handler")+"\n", configName, deleteValue)
 
 	values, err := doDelete(configName, deleteValue)
 	if err != nil {
@@ -390,7 +391,7 @@ func doDelete(configName string, deleteValue string) ([]string, error) {
 
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof("Failed to update local config: %v", writeErr)
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
 	beforeConfigUpdate(&oldConfig, config.GetCfg())

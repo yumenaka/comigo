@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/yumenaka/archives"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 	"golang.org/x/net/html"
 )
@@ -21,7 +22,7 @@ import (
 func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) {
 	// 必须传值
 	if needFile == "" {
-		return nil, errors.New("needFile is empty")
+		return nil, errors.New(locale.GetString("err_needfile_empty"))
 	}
 	// 打开文件，只读模式
 	file, err := os.OpenFile(epubPath, os.O_RDONLY, 0o400) // Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
@@ -74,7 +75,7 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 		}
 		return data, nil
 	}
-	return nil, errors.New("getDataFromEpub Error. epubPath:" + epubPath + "  needFile:" + needFile)
+	return nil, fmt.Errorf(locale.GetString("err_getdata_from_epub_error"), epubPath, needFile)
 }
 
 // Container was generated 2025-04-15 23:51:38 by https://xml-to-go.github.io/ in Ukraine.
@@ -160,7 +161,7 @@ func getOPFPath(epubPath string) (opfPath string, err error) {
 		return "", fmt.Errorf("getOPFPath Error: %w", err)
 	}
 	if len(data) == 0 {
-		return "", errors.New("container.xml内容为空")
+		return "", errors.New(locale.GetString("err_container_xml_empty"))
 	}
 	con := new(Container)
 	err = xml.Unmarshal(data, con)
@@ -170,7 +171,7 @@ func getOPFPath(epubPath string) (opfPath string, err error) {
 	}
 	opfPath = con.Rootfiles.Rootfile.FullPath
 	if opfPath == "" {
-		return "", errors.New("container.xml中未找到有效的OPF路径")
+		return "", errors.New(locale.GetString("err_no_valid_opf_path"))
 	}
 	return
 }

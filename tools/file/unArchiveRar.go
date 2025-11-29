@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/yumenaka/archives"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -47,7 +48,7 @@ func UnArchiveRar(filePath string, extractPath string) error {
 		logger.Infof("RAR 文件解压完成：%s 解压到：%s", tools.GetAbsPath(filePath), extractPath)
 	} else {
 		logger.Infof("File is not a RAR archive: %s", filePath)
-		return errors.New("file is not a RAR archive")
+		return errors.New(locale.GetString("err_file_not_rar_archive"))
 	}
 
 	return nil

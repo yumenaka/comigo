@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/yumenaka/archives"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/encoding"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -51,7 +52,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 		logger.Infof("ZIP 文件解压完成：%s 解压到：%s", tools.GetAbsPath(filePath), extractPath)
 	} else {
 		logger.Infof("File is not a ZIP archive: %s", filePath)
-		return errors.New("file is not a ZIP archive")
+		return errors.New(locale.GetString("err_file_not_zip_archive"))
 	}
 
 	return nil

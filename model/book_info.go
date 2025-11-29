@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jxskiss/base62"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -64,16 +64,16 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 	//查看书库中是否已经有了这本书，有了就跳过
 	allBooks, err := IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, exitBook := range allBooks {
 		path, err := filepath.Abs(bookPath)
 		if err != nil {
-			logger.Infof("Error getting absolute path: %v", err)
+			logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
 			continue
 		}
 		if exitBook.BookPath == path && (exitBook.Type == b.Type) {
-			return nil, errors.New(fmt.Sprintf("Book already exists: %s  %s ", exitBook.BookID, bookPath))
+			return nil, fmt.Errorf(locale.GetString("err_book_data_already_exists"), exitBook.BookID, bookPath)
 		}
 	}
 	// 生成 BookID 的字符串
@@ -89,7 +89,7 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 	fullID := b62
 	minLength := 7
 	if len(fullID) <= minLength {
-		logger.Infof("Cannot shorten ID: %s", fullID)
+		logger.Infof(locale.GetString("log_cannot_shorten_id"), fullID)
 		b.BookID = fullID
 	}
 	shortID := fullID[:minLength]
@@ -98,7 +98,7 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 		conflict := false
 		allBooks, err := IStore.ListBooks()
 		if err != nil {
-			logger.Infof("Error listing books: %s", err)
+			logger.Infof(locale.GetString("log_error_listing_books"), err)
 		}
 		for _, b := range allBooks {
 			if b.BookID == shortID {
@@ -254,7 +254,7 @@ func (b *BookInfo) GetCover() PageInfo {
 	case TypeBooksGroup:
 		bookGroup, err := IStore.GetBook(b.BookID)
 		if err != nil {
-			logger.Infof("Error getting book group: %s", err)
+			logger.Infof(locale.GetString("log_error_getting_book_group"), err)
 			return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
 		for _, childID := range bookGroup.ChildBooksID {

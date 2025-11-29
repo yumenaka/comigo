@@ -21,7 +21,7 @@ import (
 // 使用时只需要写一行：defer TrackTIme(time.Now())
 func TrackTIme(pre time.Time) time.Duration {
 	elapsed := time.Since(pre)
-	logger.Info("耗时：", elapsed, "\n")
+	logger.Infof(locale.GetString("log_time_elapsed")+"\n", elapsed)
 	return elapsed
 }
 
@@ -143,7 +143,7 @@ func OpenBrowser(uri string) {
 	)
 
 	// Wait for the API to be available and responding correctly
-	logger.Info("Waiting for API health endpoint...")
+	logger.Info(locale.GetString("log_waiting_for_api_health"))
 
 	err := waiter.WaitContext(
 		ctx,
@@ -155,7 +155,7 @@ func OpenBrowser(uri string) {
 	if err != nil {
 		log.Fatalf("API health check failed: %v", err)
 	}
-	logger.Info("Comigo API is healthy and ready!")
+	logger.Info(locale.GetString("log_api_healthy_ready"))
 
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {

@@ -30,7 +30,7 @@ func AddBooksToStore(books []*model.Book) {
 		}
 		book.PageCount = len(book.PageInfos)
 		if err := model.IStore.StoreBook(book); err != nil {
-			logger.Infof("AddBook_error"+" bookID:%s %s", book.BookID, err)
+			logger.Infof(locale.GetString("log_add_book_error"), book.BookID, err)
 		}
 	}
 }

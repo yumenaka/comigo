@@ -3,6 +3,7 @@ package scan
 import (
 	"os"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -11,13 +12,13 @@ import (
 func scanFileGetBook(filePath string, storePath string, depth int) (*model.Book, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		logger.Infof("Failed to open file: %s, error: %v", filePath, err)
+		logger.Infof(locale.GetString("log_failed_to_open_file"), filePath, err)
 		return nil, err
 	}
 	defer file.Close()
 	fileInfo, err := file.Stat()
 	if err != nil {
-		logger.Infof("Failed to get file info: %s, error: %v", filePath, err)
+		logger.Infof(locale.GetString("log_failed_to_get_file_info"), filePath, err)
 		return nil, err
 	}
 	// 创建新书籍
