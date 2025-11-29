@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -67,7 +68,7 @@ func (store *Store) GenerateBookGroup() error {
 			tempBook, err := model.NewBook(filepath.Dir(sameParentBookList[0].BookPath), modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
 			if err != nil {
 				if config.GetCfg().Debug {
-					logger.Infof("Error creating new book group: %s", err)
+					logger.Infof(locale.GetString("log_error_creating_new_book_group"), err)
 				}
 				continue
 			}
@@ -90,7 +91,7 @@ func (store *Store) GenerateBookGroup() error {
 			Added := false
 			allBooks, err := RamStore.ListBooks()
 			if err != nil {
-				logger.Infof("Error listing books: %s", err)
+				logger.Infof(locale.GetString("log_error_listing_books"), err)
 			}
 			for _, bookGroup := range allBooks {
 				if bookGroup.Type != model.TypeBooksGroup {

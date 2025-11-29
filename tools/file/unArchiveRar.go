@@ -17,14 +17,14 @@ func UnArchiveRar(filePath string, extractPath string) error {
 	// 如果解压路径不存在，创建路径
 	err := os.MkdirAll(extractPath, os.ModePerm)
 	if err != nil {
-		logger.Infof("Failed to create extract path: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_create_extract_path"), err)
 		return err
 	}
 
 	// 打开文件，读模式
 	file, err := os.Open(filePath)
 	if err != nil {
-		logger.Infof("Failed to open file: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_open_file_unarchive"), err)
 		return err
 	}
 	defer file.Close()
@@ -32,7 +32,7 @@ func UnArchiveRar(filePath string, extractPath string) error {
 	// 确认文件格式
 	format, _, err := archives.Identify(context.Background(), filePath, file)
 	if err != nil {
-		logger.Infof("Failed to identify file format: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_identify_file_format"), err)
 		return err
 	}
 
@@ -42,12 +42,12 @@ func UnArchiveRar(filePath string, extractPath string) error {
 
 		err := rarFormat.Extract(ctx, file, extractFileHandler)
 		if err != nil {
-			logger.Infof("Failed to extract RAR file: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_extract_rar_file"), err)
 			return err
 		}
-		logger.Infof("RAR 文件解压完成：%s 解压到：%s", tools.GetAbsPath(filePath), extractPath)
+		logger.Infof(locale.GetString("log_rar_file_extracted"), tools.GetAbsPath(filePath), extractPath)
 	} else {
-		logger.Infof("File is not a RAR archive: %s", filePath)
+		logger.Infof(locale.GetString("err_file_not_rar_archive"), filePath)
 		return errors.New(locale.GetString("err_file_not_rar_archive"))
 	}
 

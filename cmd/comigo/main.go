@@ -147,7 +147,7 @@ func shutdownServer() {
 		logger.Infof("\r"+locale.GetString("start_clear_file")+" CacheDir:%s ", config.GetCfg().CacheDir)
 		allBooks, err := model.IStore.ListBooks()
 		if err != nil {
-			logger.Infof("Error listing books: %s", err)
+			logger.Infof(locale.GetString("log_error_listing_books"), err)
 		}
 		for _, book := range allBooks {
 			// 清理某一本书的缓存

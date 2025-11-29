@@ -152,7 +152,6 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	logger.Infof(locale.GetString("log_configured_store_urls"), config.GetCfg().StoreUrls)
 	// 遍历所有 storeUrl 对应的目录
 	for _, storeUrl := range config.GetCfg().StoreUrls {
-		//logger.Infof("Loading books for storeUrl: %s", storeUrl)
 		// 计算 storeUrl 的绝对路径
 		storePathAbs, err := filepath.Abs(storeUrl)
 		if err != nil {
@@ -399,21 +398,6 @@ func (ramStore *StoreInRam) DeleteBook(id string) error {
 	return fmt.Errorf(locale.GetString("err_deletebook_cannot_find"), id)
 }
 
-//func (ramStore *StoreInRam) UpdateBook(book *model.Book) error {
-//	for _, value := range ramStore.ChildStores.Range {
-//		childStore := value.(*Store)
-//		if _, ok := childStore.BookMap.Load(book.BookID); ok {
-//			childStore.BookMap.Store(book.BookID, book)
-//			err := SaveBookJson(book)
-//			if err != nil {
-//				logger.Infof("Error saving book %s to JSON: %s", book.BookID, err)
-//			}
-//			return nil
-//		}
-//	}
-//	return errors.New("UpdateBook：cannot find book, id=" + book.BookID)
-//}
-
 // TopOfShelfInfo 获取顶层书架信息
 func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 	model.ClearBookNotExist()
@@ -421,7 +405,7 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 	var topBookList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, b := range allBooks {
 		if b.Depth == 0 {
@@ -488,7 +472,7 @@ func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfos, error
 	var infoList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, b := range allBooks {
 		if b.ParentFolder == parentFolder {

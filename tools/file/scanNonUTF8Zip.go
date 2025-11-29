@@ -22,7 +22,7 @@ func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, e
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			logger.Infof("file.Close() Error:%s", err)
+			logger.Infof(locale.GetString("log_file_close_error"), err)
 		}
 	}(file)
 	// 是否是压缩包

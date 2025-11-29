@@ -61,7 +61,7 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 			return nil, "", err
 		}
 		if imgData == nil {
-			logger.Infof("GetImageFromPDF: imgData is nil")
+			logger.Info(locale.GetString("log_getimagefrompdf_imgdata_nil"))
 			imgData, err = tools.GenerateImage("Page " + tools.RemoveExtension(pictureName) + ": " + locale.GetString("unable_to_extract_images_from_pdf"))
 			if err != nil {
 				return nil, "", err

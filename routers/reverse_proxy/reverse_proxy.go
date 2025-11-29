@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -30,7 +31,7 @@ func ReverseProxyHandle(path string, option ReverseProxyOptions) echo.Middleware
 
 				req, err := http.NewRequest(c.Request().Method, url, c.Request().Body)
 				if err != nil {
-					logger.Infof("http.NewRequest Error: %s", err)
+					logger.Infof(locale.GetString("log_http_newrequest_error"), err)
 					return err
 				}
 
@@ -40,19 +41,19 @@ func ReverseProxyHandle(path string, option ReverseProxyOptions) echo.Middleware
 				// 发送请求
 				resp, err := client.Do(req)
 				if err != nil {
-					logger.Infof("client.Do Error: %s", err)
+					logger.Infof(locale.GetString("log_client_do_error"), err)
 					return err
 				}
 				defer func() {
 					if closeErr := resp.Body.Close(); closeErr != nil {
-						logger.Infof("Body.Close() Error: %s", closeErr)
+						logger.Infof(locale.GetString("log_body_close_error"), closeErr)
 					}
 				}()
 
 				// 读取响应体
 				body, err := io.ReadAll(resp.Body)
 				if err != nil {
-					logger.Infof("io.ReadAll Error: %s", err)
+					logger.Infof(locale.GetString("log_io_readall_error"), err)
 					return err
 				}
 
@@ -72,7 +73,7 @@ func ReverseProxyHandle(path string, option ReverseProxyOptions) echo.Middleware
 
 				// 写出响应内容
 				if _, err = c.Response().Writer.Write(body); err != nil {
-					logger.Infof("Response.Write Error: %s", err)
+					logger.Infof(locale.GetString("log_response_write_error"), err)
 					return err
 				}
 

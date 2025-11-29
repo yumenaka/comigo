@@ -26,7 +26,7 @@ func CountPagesOfPDF(pdfFileName string) (int, error) {
 	// recover 函数旨在捕获恐慌，但必须在延迟函数中调用它才能正常工作。https://victoriametrics.com/blog/defer-in-go/
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Infof("CountPagesOfPDF: invalid PDF: %v Error:%v", pdfFileName, r)
+			logger.Infof(locale.GetString("log_countpages_pdf_invalid_error"), pdfFileName, r)
 			// 这里可以根据需要进行错误处理，比如返回特定的错误值给调用者
 		}
 	}()
@@ -61,7 +61,7 @@ func GetImageFromPDF(pdfFileName string, pageNum int, Debug bool) ([]byte, error
 	// 虽然可以引用mupdf。但这会导致导入C代码，破坏跨平台兼容性。
 	// 或许可以cli调用imagemagick，曲线救国？
 	if Debug {
-		logger.Infof("GetImageFromPDF: %v", time.Now().Sub(start))
+		logger.Infof(locale.GetString("log_getimagefrompdf_time"), time.Now().Sub(start))
 	}
 
 	return buffer.Bytes(), nil

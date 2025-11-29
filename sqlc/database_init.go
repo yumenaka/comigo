@@ -53,26 +53,26 @@ func OpenDatabase(configDir string) error {
 	var err error
 	client, err = sql.Open("sqlite", dataSourceName)
 	if err != nil {
-		logger.Infof("Failed to open database: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_open_database"), err)
 		return err
 	}
 
 	// Test database connection
 	if err = client.PingContext(ctx); err != nil {
-		logger.Infof("Failed to ping database: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_ping_database"), err)
 		return err
 	}
 
 	// create tables - 现在使用 IF NOT EXISTS，所以即使表已存在也不会报错
 	if _, err := client.ExecContext(ctx, ddl); err != nil {
-		logger.Infof("Failed to create tables: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_create_tables"), err)
 		// 即使创建表失败，我们也要尝试创建 DBQueries，因为表可能已经存在
 		// 只要数据库连接正常，就应该能正常工作
 	}
 
 	// 创建 StoreDatabase 实例
 	DbStore = NewDBStore(client)
-	logger.Infof("Database initialized successfully")
+	logger.Info(locale.GetString("log_database_initialized_successfully"))
 	return nil
 }
 

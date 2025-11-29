@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -15,7 +16,7 @@ func WaitUntilServerReady(host string, port uint16, timeout time.Duration) {
 	addr := host + ":" + strconv.Itoa(int(port))
 	for {
 		if time.Now().After(deadline) {
-			logger.Infof("Server not ready within %v, continue anyway", timeout)
+			logger.Infof(locale.GetString("log_server_not_ready_within_timeout"), timeout)
 			return
 		}
 		conn, err := net.DialTimeout("tcp", addr, 1*time.Second)

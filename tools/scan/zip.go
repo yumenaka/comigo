@@ -29,7 +29,7 @@ func handleZipAndEpubFiles(filePath string, newBook *model.Book) error {
 		var pathError *fs.PathError
 		if errors.As(err, &pathError) {
 			if cfg.GetDebug() {
-				logger.Infof("NonUTF-8 ZIP: %s, Error: %s", filePath, err.Error())
+				logger.Infof(locale.GetString("log_nonutf8_zip_error"), filePath, err.Error())
 			}
 			err = scanNonUTF8ZipFile(filePath, newBook)
 		} else {
@@ -42,7 +42,7 @@ func handleZipAndEpubFiles(filePath string, newBook *model.Book) error {
 		if err == nil {
 			newBook.SortPagesByImageList(imageList)
 		} else {
-			logger.Infof("Failed to get image list from EPUB: %s, error: %v", newBook.BookPath, err)
+			logger.Infof(locale.GetString("log_failed_to_get_image_list_from_epub"), newBook.BookPath, err)
 		}
 
 		metaData, err := file.GetEpubMetadata(newBook.BookPath)
@@ -50,7 +50,7 @@ func handleZipAndEpubFiles(filePath string, newBook *model.Book) error {
 			newBook.Author = metaData.Creator
 			newBook.Press = metaData.Publisher
 		} else {
-			logger.Infof("Failed to get metadata from EPUB: %s, error: %v", newBook.BookPath, err)
+			logger.Infof(locale.GetString("log_failed_to_get_metadata_from_epub"), newBook.BookPath, err)
 		}
 	}
 	return nil
@@ -68,18 +68,18 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book) error {
 	pageNum := 1
 	err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			logger.Infof("Failed to access path %s in archive: %v", path, err)
+			logger.Infof(locale.GetString("log_failed_to_access_path_in_archive"), path, err)
 			return err
 		}
 
 		if IsSkipDir(path) {
-			logger.Infof("Skip Scan: %s", path)
+			logger.Infof(locale.GetString("log_skip_scan_path"), path)
 			return fs.SkipDir
 		}
 
 		f, err := d.Info()
 		if err != nil {
-			logger.Infof("Failed to get file info in archive: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_get_file_info_in_archive"), err)
 			return fs.SkipDir
 		}
 
