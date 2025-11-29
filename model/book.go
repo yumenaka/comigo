@@ -2,7 +2,7 @@ package model
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -25,7 +25,7 @@ func (b *Book) GuestCover() (cover PageInfo) {
 		// 先转换为小写
 		filenameLower := strings.ToLower(b.PageInfos[i].Name)
 		// 再去掉后缀名
-		filenameWithoutExt := strings.TrimSuffix(filenameLower, path.Ext(filenameLower))
+		filenameWithoutExt := strings.TrimSuffix(filenameLower, filepath.Ext(filenameLower))
 		// 再去掉前置的0 ，例如00001 -> 1, 0 -> ""
 		filenameTrimmed := strings.TrimLeft(filenameWithoutExt, "0")
 		// 对原始不带前导0的文件名包含 "cover" 的检查

@@ -175,7 +175,8 @@ func (c *Config) GetTopStoreName() string {
 	}
 	storeUrls := make([]string, len(c.StoreUrls))
 	for i, url := range c.StoreUrls {
-		storeUrls[i] = path.Base(url)
+		// 只取路径的最后一部分作为书库名称, path.Base只处理 UNIX 风格路径,filepath.Base 才会根据系统（Windows/Unix）自动处理分隔符
+		storeUrls[i] = filepath.Base(url)
 	}
 	return strings.Join(storeUrls, ", ")
 }
@@ -472,7 +473,7 @@ func UpdateConfigByJson(jsonString string) error {
 // SetByExecutableFilename 通过执行文件名设置默认网页模板参数
 func SetByExecutableFilename() {
 	// 获取可执行文件的名称
-	filenameWithSuffix := path.Base(os.Args[0])
+	filenameWithSuffix := filepath.Base(os.Args[0])
 	fileSuffix := path.Ext(filenameWithSuffix)
 	filenameWithoutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
 
