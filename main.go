@@ -6,7 +6,7 @@ import (
 	"context"
 	"log"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -153,7 +153,7 @@ func shutdownServer() {
 		}
 		for _, book := range allBooks {
 			// 清理某一本书的缓存
-			cachePath := path.Join(config.GetCfg().CacheDir, book.BookID)
+			cachePath := filepath.Join(config.GetCfg().CacheDir, book.BookID)
 			err := os.RemoveAll(cachePath)
 			if err != nil {
 				logger.Infof(locale.GetString("log_error_clearing_temp_files"), cachePath)
