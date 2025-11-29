@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strconv"
 
@@ -18,6 +19,8 @@ import (
 	"github.com/yumenaka/comigo/templ/pages/settings"
 )
 
+// MainArea 书架页面主体部分
+// 为了避免特殊编码，showBook的persist key使用了Base64编码
 func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -56,7 +59,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("book-shelf-" + strconv.Itoa(i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 23, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 26, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -67,9 +70,9 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
-				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ showBook: $persist(true).as('showBook_%s') }", storeBooks.StoreUrl))
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("{ showBook: $persist(true).as('showBook_%s') }", base64.StdEncoding.EncodeToString([]byte(storeBooks.StoreUrl))))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 24, Col: 96}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 27, Col: 139}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -82,7 +85,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(storeBooks.StoreUrl)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 30, Col: 55}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 33, Col: 55}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -95,7 +98,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(storeBooks.ChildBookNum)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 30, Col: 91}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 33, Col: 91}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {

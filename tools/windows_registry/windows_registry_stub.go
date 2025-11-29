@@ -1,6 +1,6 @@
 //go:build !windows
 
-package tools
+package windows_registry
 
 // RegisterComigoAsDefaultArchiveHandler 是 Windows 专用功能的空实现。
 // 在非 Windows 平台上调用该函数不会执行任何操作，仅用于保持 API 一致性。

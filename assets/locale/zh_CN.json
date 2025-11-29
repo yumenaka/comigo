@@ -482,6 +482,6 @@
   "systray_quit": "退出",
   "systray_quit_tooltip": "退出 Comigo",
   "context_menu_open_with_comigo": "使用Comigo打开",
-  "register_context_menu": "注册 Windows 文件夹右键菜单（“使用Comigo打开”）",
-  "unregister_context_menu": "卸载 Windows 文件夹右键菜单（“使用Comigo打开”）"
+  "register_context_menu": "注册右键菜单（“使用Comigo打开”）",
+  "unregister_context_menu": "清理右键菜单（“使用Comigo打开”）"
 }

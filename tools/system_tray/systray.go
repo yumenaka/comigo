@@ -13,6 +13,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/windows_registry"
 )
 
 // Sample：https://github.com/energye/systray/blob/main/example/main.go
@@ -91,8 +92,7 @@ func onReady() {
 	// 设置托盘图标旁边的文字（占用空间太大，注释掉，以后或许可以显示用户数什么的）
 	// systray.SetTitle(“Comigo”)
 
-	// 设置单击托盘图标时的回调
-	systray.SetOnClick(func(menu systray.IMenu) {
+	OnClickTray := func(menu systray.IMenu) {
 		// 清理所有菜单项
 		systray.ResetMenu()
 		// 重新创建所有菜单项（使用最新的语言和书库链接）
@@ -101,8 +101,11 @@ func onReady() {
 		if menu != nil { // menu for linux nil
 			menu.ShowMenu()
 		}
-	})
-
+	}
+	// 设置单击托盘图标时的回调
+	systray.SetOnClick(OnClickTray)
+	// 设置右击托盘图标时的回调
+	systray.SetOnRClick(OnClickTray)
 	// 初始化菜单项
 	initMenuItems()
 
@@ -163,24 +166,32 @@ func initMenuItems() {
 	// Windows 右键菜单注册/清理（仅在 Windows 下显示）
 	if runtime.GOOS == "windows" {
 		title := locale.GetString("register_context_menu")
-		if tools.HasComigoFolderContextMenu() {
+		if windows_registry.HasComigoFolderContextMenu() {
 			title = locale.GetString("unregister_context_menu")
 		}
 		menuItems.mContextMenu = systray.AddMenuItem(title, locale.GetString("register_context_menu"))
 		menuItems.mContextMenu.Click(func() {
 			// 再次检测当前状态，决定是注册还是清理
-			if tools.HasComigoFolderContextMenu() {
-				if err := tools.RemoveComigoFromFolderContextMenu(); err != nil {
-					logger.Infof("Failed to clear Windows context menu: %v", err)
-				} else {
-					logger.Infof("%s", locale.GetString("unregister_context_menu"))
+			if windows_registry.HasComigoFolderContextMenu() {
+				// 清理文件夹右键菜单
+				if err := windows_registry.RemoveComigoFromFolderContextMenu(); err != nil {
+					logger.Infof("Failed to clear Windows folder context menu: %v", err)
 				}
+				// 清理文件类型关联（使用默认扩展名列表）
+				if err := windows_registry.UnregisterComigoAsDefaultArchiveHandler(nil); err != nil {
+					logger.Infof("Failed to unregister archive handler: %v", err)
+				}
+				logger.Infof("%s", locale.GetString("unregister_context_menu"))
 			} else {
-				if err := tools.AddComigoToFolderContextMenu(); err != nil {
-					logger.Infof("Failed to register Windows context menu: %v", err)
-				} else {
-					logger.Infof("%s", locale.GetString("register_context_menu"))
+				// 注册文件夹右键菜单
+				if err := windows_registry.AddComigoToFolderContextMenu(); err != nil {
+					logger.Infof("Failed to register Windows folder context menu: %v", err)
 				}
+				// 注册文件类型关联（使用默认扩展名列表）
+				if err := windows_registry.RegisterComigoAsDefaultArchiveHandler(nil); err != nil {
+					logger.Infof("Failed to register archive handler: %v", err)
+				}
+				logger.Infof("%s", locale.GetString("register_context_menu"))
 			}
 			// 标题更新依赖下次点击托盘图标时重新构建菜单
 		})

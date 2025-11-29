@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/windows_registry"
 )
 
 var Args []string
@@ -36,14 +36,14 @@ var RootCmd = &cobra.Command{
 			cfg := config.GetCfg()
 			// 先处理卸载，再处理注册，避免同时传入两个参数时出现冲突
 			if cfg.UnregisterContextMenu {
-				if err := tools.RemoveComigoFromFolderContextMenu(); err != nil {
+				if err := windows_registry.RemoveComigoFromFolderContextMenu(); err != nil {
 					logger.Infof("Failed to unregister Windows context menu: %v", err)
 				} else {
 					logger.Infof("%s", locale.GetString("unregister_context_menu"))
 				}
 			}
 			if cfg.RegisterContextMenu {
-				if err := tools.AddComigoToFolderContextMenu(); err != nil {
+				if err := windows_registry.AddComigoToFolderContextMenu(); err != nil {
 					logger.Infof("Failed to register Windows context menu: %v", err)
 				} else {
 					logger.Infof("%s", locale.GetString("register_context_menu"))

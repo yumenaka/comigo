@@ -482,6 +482,6 @@
   "systray_quit": "Quit",
   "systray_quit_tooltip": "Quit Comigo",
   "context_menu_open_with_comigo": "Open with Comigo",
-  "register_context_menu": "Register Windows Explorer folder context menu: Open with Comigo",
-  "unregister_context_menu": "Unregister Windows Explorer folder context menu: Open with Comigo"
+  "register_context_menu": "Register context menu: Open with Comigo",
+  "unregister_context_menu": "Unregister context menu: Open with Comigo"
 }
