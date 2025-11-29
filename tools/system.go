@@ -37,7 +37,6 @@ func CheckPort(port uint16) bool {
 		logger.Infof(locale.GetString("check_port_error"), port)
 		return false
 	}
-	// logger.Infof("TCP Port %q is available", port)
 	return true
 }
 

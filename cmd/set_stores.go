@@ -54,7 +54,7 @@ func CreateStoreUrls(args []string) {
 					config.SetUploadPath(storeUrl)
 					err := config.GetCfg().AddStoreUrl(config.GetCfg().UploadPath)
 					if err != nil {
-						logger.Infof("Failed to add upload path to store urls:%s", err)
+						logger.Infof(locale.GetString("log_failed_to_add_upload_path_to_store_urls"), err)
 					}
 					break
 				}

@@ -42,7 +42,7 @@ func SaveFileToCache(id, filename string, data []byte, queryString, contentType 
 	filePath := filepath.Join(cacheDir, escapedFilename)
 	err = os.WriteFile(filePath, data, 0o644)
 	if err != nil {
-		logger.Infof("Failed to write file to cache: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_write_file_to_cache"), err)
 		return err
 	}
 
@@ -70,7 +70,7 @@ func GetFileFromCache(id, filename, queryString string, isCover bool, cachePath 
 	value, ok := contentTypeMap.Load(key)
 	if !ok {
 		if debug {
-			logger.Infof("ContentType not found in cache for key: %+v", key)
+			logger.Infof(locale.GetString("log_content_type_not_found_in_cache"), key)
 		}
 		return nil, "", errors.New(locale.GetString("err_content_type_not_found"))
 	}
@@ -87,7 +87,7 @@ func GetFileFromCache(id, filename, queryString string, isCover bool, cachePath 
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		if debug {
-			logger.Infof("Failed to read file from cache: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_read_file_from_cache"), err)
 		}
 		return nil, contentType, err
 	}

@@ -17,7 +17,7 @@ func ShowQRCode() {
 	etcStr := ""
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	if len(allBooks) == 1 {
 		etcStr = fmt.Sprintf("/#/%s/%s", config.GetCfg().DefaultMode, allBooks[0].BookID)

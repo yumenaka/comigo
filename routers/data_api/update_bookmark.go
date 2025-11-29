@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -39,14 +40,14 @@ func StoreBookmark(c echo.Context) error {
 	bookMark := model.NewBookMark(markType, book.BookID, book.GetStoreID(), request.PageIndex, request.Description)
 	err = model.IStore.StoreBookMark(bookMark)
 	if err != nil {
-		logger.Infof("Failed to store bookmark: %s", err)
+		logger.Infof(locale.GetString("log_failed_to_store_bookmark"), err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to store bookmark")
 	}
 	// 输出调试信息
 	jsonByte, err := json.MarshalIndent(book.BookMarks, "", "  ")
 	if err == nil {
 		if config.GetCfg().Debug {
-			logger.Infof("Updated bookmarks for book ID %s: %s", book.BookID, string(jsonByte))
+			logger.Infof(locale.GetString("log_updated_bookmarks_for_book_id"), book.BookID, string(jsonByte))
 		}
 	}
 	// 返回成功响应

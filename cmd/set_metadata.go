@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/sqlc"
@@ -19,7 +20,7 @@ func LoadMetadata() {
 			configDir = ""
 		}
 		if err := sqlc.OpenDatabase(configDir); err != nil {
-			logger.Infof("OpenDatabase Error: %s", err)
+			logger.Infof(locale.GetString("log_open_database_error"), err)
 			model.IStore = store.RamStore
 		} else {
 			model.IStore = sqlc.DbStore
@@ -29,7 +30,7 @@ func LoadMetadata() {
 	if !config.GetCfg().EnableDatabase {
 		err := store.RamStore.LoadBooks()
 		if err != nil {
-			logger.Infof("LoadBooks_error %s", err)
+			logger.Infof(locale.GetString("log_loadbooks_error"), err)
 		}
 		model.ClearBookNotExist()
 		// 生成虚拟书籍组
@@ -45,14 +46,14 @@ func SaveMetadata() {
 	if !config.GetCfg().EnableDatabase {
 		err := store.RamStore.SaveBooksToJson()
 		if err != nil {
-			logger.Infof("SaveBooks_error %s", err)
+			logger.Infof(locale.GetString("log_savebooks_error"), err)
 		}
 	}
 	// 启用数据库的时候，同步书籍元数据到RamStore
 	if config.GetCfg().EnableDatabase {
 		allBooks, err := sqlc.DbStore.ListBooks()
 		if err != nil {
-			logger.Infof("Error listing books from database: %s", err)
+			logger.Infof(locale.GetString("log_error_listing_books_from_database"), err)
 		} else {
 			// 兜底：万一数据库无效，至把书加回RamStore
 			err = store.RamStore.AddBooks(allBooks)
@@ -65,7 +66,7 @@ func SaveMetadata() {
 	if config.GetCfg().EnableDatabase {
 		err := scan.SaveBooksToDatabase(config.GetCfg())
 		if err != nil {
-			logger.Infof("Failed SaveBooksToDatabase: %v", err)
+			logger.Infof(locale.GetString("log_failed_savebookstodatabase"), err)
 			return
 		}
 	}
