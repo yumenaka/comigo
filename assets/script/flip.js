@@ -1232,39 +1232,41 @@ const wheelThrottleDelay = 250 // 节流延迟时间（毫秒）
 
 // 滚轮事件处理函数
 function onWheel(e) {
-    // 如果正在滑动，则不处理滚轮事件
+    // 如果正在滑动翻页，则不处理滚轮事件
     if (isSwiping || Math.abs(currentTranslate) > 10) {
         return
     }
-    
+    // 检测滚轮方向
+    const deltaY = e.deltaY
+    // 如果滚轮有有效移动，阻止默认滚动行为
+    if (deltaY !== 0) {
+        e.preventDefault()
+    }
     // 节流处理：如果上次触发还在节流时间内，则忽略本次事件
     if (wheelThrottleTimer !== null) {
         return
     }
-    
     // 设置节流定时器
     wheelThrottleTimer = setTimeout(() => {
         wheelThrottleTimer = null
     }, wheelThrottleDelay)
     
-    // 检测滚轮方向
-    const deltaY = e.deltaY
-    
-    // 向上滚动（deltaY < 0）→ 向前翻页（页数加）→ 调用 toNextPage()
-    if (deltaY < 0) {
+    // 向下滚动（deltaY > 0）→ 下一页 → 调用 toNextPage()
+    if (deltaY > 0) {
         toNextPage()
     }
-    // 向下滚动（deltaY > 0）→ 向后翻页（页数减）→ 调用 toPreviousPage()
-    else if (deltaY > 0) {
+    // 向上滚动（deltaY < 0）→ 上一页 → 调用 toPreviousPage()
+    else if (deltaY < 0) {
         toPreviousPage()
     }
 }
 
 // 在 mouseMoveArea 上绑定滚轮事件
 // 确保在 DOM 加载完成后再绑定
+// 使用 {passive: false} 以允许阻止默认滚动行为
 document.addEventListener('DOMContentLoaded', function () {
     const mouseMoveArea = document.getElementById('mouseMoveArea')
     if (mouseMoveArea) {
-        mouseMoveArea.addEventListener('wheel', onWheel)
+        mouseMoveArea.addEventListener('wheel', onWheel, {passive: false})
     }
 })
