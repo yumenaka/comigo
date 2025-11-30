@@ -1232,6 +1232,8 @@ const wheelThrottleDelay = 250 // 节流延迟时间（毫秒）
 
 // 滚轮事件处理函数
 function onWheel(e) {
+    if (!Alpine.store('flip').wheelFlip)
+        return
     // 如果正在滑动翻页，则不处理滚轮事件
     if (isSwiping || Math.abs(currentTranslate) > 10) {
         return

@@ -781,5 +781,6 @@
   "log_failed_to_create_tables": "テーブルの作成に失敗しました: %v",
   "log_database_initialized_successfully": "データベースが正常に初期化されました",
   "err_failed_to_read_embedded_image": "埋め込み画像の読み込みに失敗しました: %v",
-  "err_failed_to_read_embedded_data": "埋め込みデータの読み込みに失敗しました: %v"
+  "err_failed_to_read_embedded_data": "埋め込みデータの読み込みに失敗しました: %v",
+  "scroll_wheel_flip": "ホイールページめくり"
 }
