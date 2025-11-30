@@ -329,7 +329,7 @@
   "width_use_percent": "横屏宽度: 百分比%",
   "portrait_width_percent": "竖屏宽度(百分比)",
   "auto_align": "自动对齐画面",
-  "swipe_turn": "滑动翻页",
+  "swipe_turn": "触摸滑动翻页",
   "login_title": "登录Comigo",
   "login_subtitle": "请输入您的账号和密码",
   "login_failed": "登录失败，请检查用户名和密码",
@@ -781,5 +781,6 @@
   "log_failed_to_create_tables": "创建表失败: %v",
   "log_database_initialized_successfully": "数据库初始化成功",
   "err_failed_to_read_embedded_image": "读取嵌入图片失败: %v",
-  "err_failed_to_read_embedded_data": "读取嵌入数据失败: %v"
+  "err_failed_to_read_embedded_data": "读取嵌入数据失败: %v",
+  "scroll_wheel_flip": "鼠标滚轮翻页"
 }

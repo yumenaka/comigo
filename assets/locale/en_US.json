@@ -781,5 +781,6 @@
   "log_failed_to_create_tables": "Failed to create tables: %v",
   "log_database_initialized_successfully": "Database initialized successfully",
   "err_failed_to_read_embedded_image": "Failed to read embedded image: %v",
-  "err_failed_to_read_embedded_data": "Failed to read embedded data: %v"
+  "err_failed_to_read_embedded_data": "Failed to read embedded data: %v",
+  "scroll_wheel_flip": "Scroll Wheel Flip"
 }
