@@ -24,7 +24,7 @@ func main() {
 	// 启动或停止 Tailscale 服务（如启用）
 	routers.StartTailscale()
 	// 分析命令行参数，生成书库URL
-	cmd.CreateStoreUrls(cmd.Args)
+	cmd.AddStoreUrls(cmd.Args)
 	// 加载书籍元数据（包括书签）
 	cmd.LoadMetadata()
 	// 扫描书库

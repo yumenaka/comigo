@@ -41,8 +41,10 @@ func main() {
 				return nil
 			}
 			logger.Infof(locale.GetString("log_received_new_args_from_instance"), args)
-			// 添加新的扫描路径
-			cmd.CreateStoreUrls(args)
+			// 添加新扫描路径
+			cmd.AddStoreUrls(args)
+			// 设置上传路径
+			cmd.SetUploadPath(args)
 			// 扫描新添加的书库
 			cmd.ScanStore()
 			// 保存书籍元数据
@@ -86,7 +88,7 @@ func startServer() {
 	// 启动或停止 Tailscale 服务（如启用）
 	routers.StartTailscale()
 	// 分析命令行参数，生成书库URL
-	cmd.CreateStoreUrls(cmd.Args)
+	cmd.AddStoreUrls(cmd.Args)
 	// 加载书籍元数据（包括书签）
 	cmd.LoadMetadata()
 	// 扫描书库

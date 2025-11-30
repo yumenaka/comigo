@@ -779,5 +779,7 @@
   "log_failed_to_open_database": "打开数据库失败: %v",
   "log_failed_to_ping_database": "Ping数据库失败: %v",
   "log_failed_to_create_tables": "创建表失败: %v",
-  "log_database_initialized_successfully": "数据库初始化成功"
+  "log_database_initialized_successfully": "数据库初始化成功",
+  "err_failed_to_read_embedded_image": "读取嵌入图片失败: %v",
+  "err_failed_to_read_embedded_data": "读取嵌入数据失败: %v"
 }
