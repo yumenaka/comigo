@@ -101,7 +101,6 @@ func checkNeedReScan(oldConfig *config.Config, newConfig *config.Config) (reScan
 
 // StartReScan 扫描并相应地更新数据库
 func StartReScan() {
-	config.GetCfg().InitStoreUrls()
 	if err := scan.InitAllStore(config.GetCfg()); err != nil {
 		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 	}

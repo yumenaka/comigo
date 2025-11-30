@@ -42,7 +42,6 @@ func PageHandler(c echo.Context) error {
 	// 渲染页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 		// 渲染失败，返回 HTTP 500 错误。
-		//fmt.Printf("Error rendering settings page: %v\n", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	return nil

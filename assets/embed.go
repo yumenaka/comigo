@@ -8,6 +8,9 @@ import (
 	"mime"
 	"path/filepath"
 	"strings"
+
+	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 //go:embed script/*
@@ -25,7 +28,6 @@ func GetCSS(oneFileMode bool) (cssString string) {
 	} else {
 		cssString = "<link rel=\"stylesheet\" href=\"/script/styles.css\">\n"
 	}
-	// fmt.Println("cssString:", cssString)
 	return cssString
 }
 
@@ -69,7 +71,7 @@ func GetImageSrc(filePath string) string {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
 	data, err := Script.ReadFile(filePath)
 	if err != nil {
-		fmt.Println("Error:", err)
+		logger.Errorf(locale.GetString("err_failed_to_read_embedded_image"), err)
 		return "Not Found Image:" + filePath
 	}
 
@@ -95,7 +97,7 @@ func GetData(filePath string) []byte {
 	data, err := Script.ReadFile(filePath)
 	if err != nil {
 		// 如果有错误发生，返回空的字节切片，并输出错误信息
-		fmt.Println("Error:", err)
+		logger.Errorf(locale.GetString("err_failed_to_read_embedded_data"), err)
 		return []byte{}
 	}
 	// 返回文件内容作为字节切片

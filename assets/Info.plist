@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- 显示名称 -->
+    <key>CFBundleName</key>
+    <string>Comigo</string>
+
+    <key>CFBundleDisplayName</key>
+    <string>Comigo</string>
+
+    <!-- 反向域名形式，这里 comigo.xyz 来 -->
+    <key>CFBundleIdentifier</key>
+    <string>xyz.comigo</string>
+
+    <!-- 内部版本号（可自行调整） -->
+    <key>CFBundleVersion</key>
+    <string>1.1.5</string>
+
+    <!-- 对用户可见的版本号 -->
+    <key>CFBundleShortVersionString</key>
+    <string>1.1.5</string>
+
+    <!-- 可执行文件名（生成的二进制名字也会叫这个） -->
+    <key>CFBundleExecutable</key>
+    <string>Comigo</string>
+
+    <!-- App 类型：APPL 固定 -->
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <!-- 支持的最低系统版本，可以视情况调高 -->
+    <key>LSMinimumSystemVersion</key>
+    <string>10.13.0</string>
+
+    <!-- 图标文件名（不带 .icns 后缀），后面可以放一个 AppIcon.icns 到 Resources -->
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+
+    <!-- 只在菜单栏显示，不在 Dock 显示图标 -->
+    <key>LSUIElement</key>
+    <true/>
+
+    <!-- 网络访问权限：允许应用进行网络连接 -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+
+    <!-- 允许应用访问用户文件 -->
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>Comigo 需要访问您的文档文件夹以读取和管理漫画文件。</string>
+
+    <!-- 允许应用访问下载文件夹 -->
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>Comigo 需要访问您的下载文件夹以读取漫画文件。</string>
+
+    <!-- 允许应用访问可移动卷 -->
+    <key>NSRemovableVolumesUsageDescription</key>
+    <string>Comigo 需要访问可移动存储设备以读取漫画文件。</string>
+
+    <!-- 应用类别：实用工具 -->
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
+
+    <!-- 应用网站 -->
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2024 comigo.xyz. All rights reserved.</string>
+</dict>
+</plist>

@@ -150,8 +150,8 @@ func (c *Config) AddStoreUrl(storeURL string) error {
 	return nil
 }
 
-// InitStoreUrls 初始化配置文件中的书库
-func (c *Config) InitStoreUrls() {
+// InitConfigStoreUrls TODO: 初始化配置文件中的书库,后续支持网络书库的时候需要修改
+func (c *Config) InitConfigStoreUrls() {
 	for _, storeUrl := range c.StoreUrls {
 		if c.StoreUrlIsExits(storeUrl) {
 			logger.Infof(locale.GetString("log_store_url_already_exists_in_config"), storeUrl)

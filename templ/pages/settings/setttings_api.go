@@ -225,13 +225,9 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 		// 这里可能需要回滚配置更改或返回错误
-		// return echo.NewHTTPError(http.StatusInternalServerError, "Failed to write config file")
 	}
-
 	// 根据配置的变化，做相应操作。
 	beforeConfigUpdate(&oldConfig, config.GetCfg())
-	// fmt.Printf("New config: %+v\n", config.GetCfg())
-
 	// 渲染 UserInfoConfig 模板并返回
 	updatedHTML := UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password) // 如果UserInfoConfig期望的是加密后的密码，这里需要调整
 	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
@@ -260,7 +256,6 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
 	}
 	fmt.Printf("Received Tailscale config update: %+v\n", request)
-	//return echo.NewHTTPError(http.StatusBadRequest, "Debug Stop")
 
 	// 验证输入
 	if request.EnableTailscale {
@@ -315,9 +310,7 @@ func AddArrayConfigHandler(c echo.Context) error {
 	}
 	configName := c.FormValue("configName")
 	addValue := c.FormValue("addValue")
-
 	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", configName, addValue)
-
 	values, err := doAdd(configName, addValue)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "add error")
