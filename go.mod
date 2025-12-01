@@ -1,6 +1,6 @@
 module github.com/yumenaka/comigo
 
-go 1.25.3
+go 1.25.5
 
 tool (
 	entgo.io/ent/cmd/ent
@@ -20,7 +20,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/jxskiss/base62 v1.1.0
-	github.com/klauspost/compress v1.18.1
+	github.com/klauspost/compress v1.18.2
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/mandykoh/autocrop v0.4.7
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
@@ -30,7 +30,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/sirupsen/logrus v1.9.3
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/xxjwxc/gowp v0.0.0-20240929033016-5be68d222389
 	golang.org/x/net v0.47.0
@@ -56,7 +56,7 @@ require (
 	golang.org/x/crypto v0.45.0
 	golang.org/x/image v0.33.0
 	golang.org/x/mod v0.30.0
-	tailscale.com v1.92.0
+	tailscale.com v1.92.1
 	wait4x.dev/v3 v3.6.0
 )
 
@@ -95,7 +95,7 @@ require (
 	github.com/charmbracelet/x/cellbuf v0.0.14 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/cli/browser v1.3.0 // indirect
-	github.com/clipperhouse/displaywidth v0.6.0 // indirect
+	github.com/clipperhouse/displaywidth v0.6.1 // indirect
 	github.com/clipperhouse/stringish v0.1.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
 	github.com/coder/websocket v1.8.14 // indirect
@@ -165,7 +165,7 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
-	github.com/nwaples/rardecode/v2 v2.2.1 // indirect
+	github.com/nwaples/rardecode/v2 v2.2.2 // indirect
 	github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6 // indirect
 	github.com/olekukonko/errors v1.1.0 // indirect
 	github.com/olekukonko/ll v0.1.2 // indirect
@@ -219,7 +219,7 @@ require (
 	github.com/wasilibs/wazero-helpers v0.0.0-20250123031827-cd30c44769bb // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	github.com/xxjwxc/public v0.0.0-20251119140912-6880e7be0d1c // indirect
+	github.com/xxjwxc/public v0.0.0-20251128100948-6fc6cdaef5d7 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zclconf/go-cty v1.17.0 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect

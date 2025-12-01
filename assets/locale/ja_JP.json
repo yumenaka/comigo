@@ -91,6 +91,7 @@
   "sketch_count_seconds": "スケッチモードのカウントダウン秒数",
   "sketch_template": "デフォルト：スケッチモード",
   "skip_path": "スキップパス：",
+  "settings_page": "設定ページ",
   "sort": "画像の並べ替えルール（none、name、time）",
   "sort_by_name": "画像をファイル名で並べ替え",
   "sort_by_time": "画像を最終更新時間で並べ替え",
