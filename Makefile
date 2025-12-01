@@ -10,15 +10,9 @@
 ## 2. 跨平台编译（assets/makefiles/cross-compile.mk）
 ##
 ## 常用命令：
-##
-## 【macOS App 打包】
-##   make app              - 构建 macOS .app 文件（支持 Intel 和 Apple Silicon）
-##   make macos-app        - 同上，别名
-##   make icon             - 仅生成 App 图标
-##   make clean-app        - 清理 macOS App 构建文件
+##   make all              - 编译所有平台（CGO 版本）+App 并生成 MD5 校验
 ##
 ## 【跨平台编译】
-##   make all              - 编译所有平台（CGO 版本）并生成 MD5 校验
 ##   make compileAll_CGO   - 编译所有平台的 CGO 版本
 ##   make compileAll       - 编译所有平台的非 CGO 版本
 ##   make Windows_x86_64   - 编译 Windows 64 位版本
@@ -26,19 +20,17 @@
 ##   make MacOS_x86_64     - 编译 macOS Intel 版本
 ##   make MacOS_arm64      - 编译 macOS Apple Silicon 版本
 ##
-## 【指定版本号】
-##   所有命令都可以通过 VERSION 参数指定版本号：
-##   make app VERSION=v1.2.3
-##   make Windows_x86_64 VERSION=v1.2.3
+## 【macOS App 打包】
+##   make app              - 构建 macOS .app 文件（支持 Intel 和 Apple Silicon）
+##   make macos-app        - 同上，别名
+##   make icon             - 仅生成 App 图标
+##   make clean-app        - 清理 macOS App 构建文件
 ##
 ## 【其他】
 ##   make -n <target>      - 打印编译命令而不实际执行（用于调试）
 ##   make clean             - 清理所有构建文件
 ##
 ## ============================================================================
-
-##Release:
-# make all VERSION=v1.1.5
 
 ## Windows Release(Need MSYS2 or mingw32 + find.exe make.exe zip.exe upx.exe):
 # mingw32-make all VERSION=v0.9.9

@@ -2,6 +2,7 @@
 # go tool dist list
 
 NAME=comi
+FULL_NAME=comigo
 
 OS := $(shell uname)
 BINDIR := ./bin
@@ -22,7 +23,7 @@ else
 endif
 
 # 跨平台编译的默认目标
-all: compileAll_CGO md5SumThemAll
+all: app Windows_x86_64_full Windows_i386_full Windows_arm64_full compileAll_CGO md5SumThemAll
 
 ## windows 可能不需要CGO就能支持Tailscale？
 
@@ -44,6 +45,14 @@ gomobile:
 md5SumThemAll:
 	rm -f $(MD5_TEXTFILE)
 	find $(BINDIR) -type f -name "$(NAME)_*" -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
+	find $(BINDIR) -type f -name "$(FULL_NAME)_*" -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
+	# 如果存在 Comigo.app 目录，则先打包为 zip 再计算 md5
+	if [ -d "$(BINDIR)/Comigo.app" ]; then \
+		echo "==> 打包 Comigo.app 为 Comigo.app.zip 用于计算 md5"; \
+		rm -f "$(BINDIR)/Comigo.app.zip"; \
+		cd "$(BINDIR)" && zip -r "Comigo.app.zip" "Comigo.app" > /dev/null; \
+		cd .. && $(MD5_UTIL) "$(BINDIR)/Comigo.app.zip" >> $(MD5_TEXTFILE); \
+	fi
 	# 删除 $(MD5_TEXTFILE)里面的 ./bin/ 字符串
 	sed -i '' 's|./bin/||g' $(MD5_TEXTFILE)
 	cat $(MD5_TEXTFILE)
@@ -267,7 +276,8 @@ linux_i386_cgo_docker:
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
 
 ## No CGO build:
-#64位Windows	$(NAME)_$(VERSION)_$@   
+
+# 64位Windows	$(NAME)_$(VERSION)_$@
 Windows_x86_64:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
@@ -276,22 +286,46 @@ Windows_x86_64:
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rm  resource.syso 
 
-#32位Windows	
+# 64位Windows + system_tray	$(NAME)_$(VERSION)_$@
+Windows_x86_64_full:
+	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
+	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
+	GOARCH=amd64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe main.go
+	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
+	rmdir $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
+	rm  resource.syso
+
+# 32位Windows
 Windows_i386:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=386 GOOS=windows go generate
 	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
-	rm   resource.syso	
+	rm   resource.syso
 
-#windows arm64 no upx
+# 32位Windows + system_tray
+Windows_i386_full:
+	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
+	GOARCH=386 GOOS=windows go generate
+	GOARCH=386 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui  -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe main.go
+	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
+	rmdir $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
+	rm   resource.syso
+
+#windows arm64
 Windows_arm64:
 	GOARCH=arm64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
+# windows arm64 + system_tray
+Windows_arm64_full:
+	GOARCH=arm64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe main.go
+	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
+	rmdir $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
+	rm -rf $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@:
 
 #Linux_armv6 RaspberryPi1,2,zero,GOARM=6：仅使用 VFPv1；交叉编译时默认；通常是 ARM11 或更好的内核（也支持 VFPv2 或更好的内核）
 Linux_armv6:

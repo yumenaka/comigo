@@ -91,6 +91,7 @@
   "sketch_count_seconds": "Countdown seconds in sketch mode",
   "sketch_template": "Default template: sketch",
   "skip_path": "Skip the path:",
+  "settings_page": "Settings Page",
   "sort": "Image sorting rules (none, name, time)",
   "sort_by_name": "Sort images by file name",
   "sort_by_time": "Sort images by modification time",

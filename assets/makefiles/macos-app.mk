@@ -17,13 +17,13 @@ ICON_PNG    := $(ASSETS_DIR)/icon.png
 ICON_ICNSET := $(BUILD_DIR)/AppIcon.iconset
 APP_ICON    := $(ASSETS_DIR)/AppIcon.icns
 
-# 从 config/version.go 提取版本号（去掉 v 前缀）
+# 从 config/version.go 提取版本号（不去掉 v 前缀）
 # 注意：如果主 Makefile 已经定义了 VERSION，这里不会覆盖
 VERSION_GO := config/version.go
 ifndef VERSION
-  VERSION := $(shell grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' $(VERSION_GO) | head -1 | sed 's/^v//')
+  VERSION := $(shell grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' $(VERSION_GO) | head -1)
   ifeq ($(VERSION),)
-    VERSION := 1.0.0
+    VERSION := 1.1.5
   endif
 endif
 
