@@ -134,3 +134,5 @@ frontend/dist
 
 # deamon
 *.pid
+assets/AppIcon.icns
+assets/icon.png
