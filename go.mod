@@ -10,6 +10,10 @@ tool (
 	github.com/sqlc-dev/sqlc/cmd/sqlc
 )
 
+// linux平台需要 appindicator 支持，sudo pacman -Syu libappindicator libayatana-appindicator
+// debian/ubuntu: sudo apt install libayatana-appindicator
+// gnome 需要 https://extensions.gnome.org/extension/615/appindicator-support/
+
 require (
 	entgo.io/ent v0.14.5 // indirect
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f
@@ -233,7 +237,7 @@ require (
 	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39 // indirect
 	golang.org/x/oauth2 v0.33.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/term v0.37.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/tools v0.39.0 // indirect

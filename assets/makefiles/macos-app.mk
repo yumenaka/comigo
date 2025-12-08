@@ -16,6 +16,10 @@ INFO_PLIST_TMP := $(BUILD_DIR)/Info.plist
 ICON_PNG    := $(ASSETS_DIR)/icon.png
 ICON_ICNSET := $(BUILD_DIR)/AppIcon.iconset
 APP_ICON    := $(ASSETS_DIR)/AppIcon.icns
+# 网站和 Windows 图标
+FAVICON_ICO := $(ASSETS_DIR)/images/favicon.ico
+FAVICON_PNG := $(ASSETS_DIR)/images/favicon.png
+WINDOWS_ICO := icon.ico
 
 # 从 config/version.go 提取版本号（不去掉 v 前缀）
 # 注意：如果主 Makefile 已经定义了 VERSION，这里不会覆盖
@@ -27,14 +31,16 @@ ifndef VERSION
   endif
 endif
 
-.PHONY: macos-app clean-app app universal icon version
+.PHONY: macos-app clean-app app universal icon version favicon windows-icon all-icons FORCE
+FORCE:
 
 # macOS app 打包的默认目标
 macos-app: app
 
-# 从 icon.png 生成 AppIcon.icns
-$(APP_ICON): $(ICON_PNG)
-	@echo "==> 从 $(ICON_PNG) 生成 $(APP_ICON)"
+# 从 icon.png 生成 AppIcon.icns，同时确保网站和 Windows 图标也已生成（强制重新生成）
+$(APP_ICON): FORCE $(ICON_PNG) $(FAVICON_ICO) $(FAVICON_PNG) $(WINDOWS_ICO)
+	@echo "==> 从 $(ICON_PNG) 生成 AppIcon.icns..."
+	@rm -f $(APP_ICON)
 	@rm -rf $(ICON_ICNSET)
 	@mkdir -p $(ICON_ICNSET)
 	@echo "==> 生成不同尺寸的图标..."
@@ -70,6 +76,38 @@ $(APP_ICON): $(ICON_PNG)
 	@echo "==> 已生成 $(APP_ICON)"
 
 icon: $(APP_ICON)
+
+# 生成网站 favicon.png（强制重新生成）
+$(FAVICON_PNG): FORCE $(ICON_PNG)
+	@echo "==> 生成网站 favicon.png (128x128)..."
+	@rm -f $(FAVICON_PNG)
+	@mkdir -p $(ASSETS_DIR)/images
+	@sips -z 128 128 $(ICON_PNG) --out $(FAVICON_PNG) > /dev/null 2>&1
+	@echo "==> 已生成 $(FAVICON_PNG)"
+
+# 生成网站 favicon.ico（强制重新生成）
+$(FAVICON_ICO): FORCE $(ICON_PNG)
+	@echo "==> 生成网站 favicon.ico (64x64)..."
+	@rm -f $(FAVICON_ICO)
+	@mkdir -p $(ASSETS_DIR)/images
+	@sips -s format ico -z 64 64 $(ICON_PNG) --out $(FAVICON_ICO) > /dev/null 2>&1
+	@echo "==> 已生成 $(FAVICON_ICO)"
+
+# 生成 Windows 图标 icon.ico（强制重新生成）
+$(WINDOWS_ICO): FORCE $(ICON_PNG)
+	@echo "==> 生成 Windows 图标 icon.ico (256x256)..."
+	@rm -f $(WINDOWS_ICO)
+	@sips -s format ico -z 256 256 $(ICON_PNG) --out $(WINDOWS_ICO) > /dev/null 2>&1
+	@echo "==> 已生成 $(WINDOWS_ICO)"
+
+# 生成所有图标（包括网站和 Windows 图标）
+all-icons: $(APP_ICON) $(FAVICON_ICO) $(FAVICON_PNG) $(WINDOWS_ICO)
+
+# 仅生成网站 favicon
+favicon: $(FAVICON_ICO) $(FAVICON_PNG)
+
+# 仅生成 Windows 图标
+windows-icon: $(WINDOWS_ICO)
 
 # 从 config/version.go 提取版本号并更新 Info.plist
 $(INFO_PLIST_TMP): $(INFO_PLIST) $(VERSION_GO)
