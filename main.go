@@ -67,7 +67,7 @@ func main() {
 		// 注册退出时清理单实例资源
 		defer tools.CleanupSingleInstance()
 	}
-	//config.OpenBrowserIfNeeded()
+	config.OpenBrowserIfNeeded()
 	// 设置系统托盘并启动服务器
 	system_tray.SetupSystray(
 		startServer,
