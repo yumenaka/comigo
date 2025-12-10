@@ -578,7 +578,7 @@
   "log_failed_to_get_file_info": "获取文件信息失败: %s, 错误: %v",
   "log_add_book_error": "添加书籍错误 书籍ID:%s %s",
   "log_get_child_books_for_bookid": "获取书籍ID %s 的子书籍",
-  "log_get_child_books_count": "获取书籍ID %s 的 %d 本子书籍",
+  "log_get_child_books_count": "获取书籍ID %v 的 %v 本子书籍",
   "log_get_bookshelf_error": "获取书架错误: %v",
   "log_error_getting_absolute_path": "获取绝对路径错误: %v",
   "log_cannot_shorten_id": "无法缩短ID: %s",
@@ -783,5 +783,6 @@
   "log_database_initialized_successfully": "数据库初始化成功",
   "err_failed_to_read_embedded_image": "读取嵌入图片失败: %v",
   "err_failed_to_read_embedded_data": "读取嵌入数据失败: %v",
-  "scroll_wheel_flip": "鼠标滚轮翻页"
+  "scroll_wheel_flip": "鼠标滚轮翻页",
+  "open_in_new_tab": "新标签页打开"
 }

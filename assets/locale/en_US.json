@@ -578,7 +578,7 @@
   "log_failed_to_get_file_info": "Failed to get file info: %s, error: %v",
   "log_add_book_error": "AddBook_error bookID: %s %s",
   "log_get_child_books_for_bookid": "Get child books for bookID %s",
-  "log_get_child_books_count": "Get %d child books for bookID %s",
+  "log_get_child_books_count": "bookID %v, Get %v child books",
   "log_get_bookshelf_error": "GetBookShelf Error: %v",
   "log_error_getting_absolute_path": "Error getting absolute path: %v",
   "log_cannot_shorten_id": "Cannot shorten ID: %s",
@@ -783,5 +783,6 @@
   "log_database_initialized_successfully": "Database initialized successfully",
   "err_failed_to_read_embedded_image": "Failed to read embedded image: %v",
   "err_failed_to_read_embedded_data": "Failed to read embedded data: %v",
-  "scroll_wheel_flip": "Scroll Wheel Flip"
+  "scroll_wheel_flip": "Scroll Wheel Flip",
+  "open_in_new_tab": "Open in New Tab"
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
-	"strconv"
 	"time"
 
 	"github.com/angelofallars/htmx-go"
@@ -96,11 +95,7 @@ func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 
 func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 	if !oldConfig.OpenBrowser && newConfig.OpenBrowser {
-		protocol := "http://"
-		if newConfig.EnableTLS {
-			protocol = "https://"
-		}
-		go tools.OpenBrowser(protocol + "localhost:" + strconv.Itoa(int(newConfig.Port)))
+		go tools.OpenBrowser(newConfig.EnableTLS, "127.0.0.1", newConfig.Port)
 	}
 }
 

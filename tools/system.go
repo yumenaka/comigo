@@ -116,18 +116,19 @@ func GetOutboundIP() net.IP {
 	return localAddr.IP
 }
 
-// OpenBrowser 打开浏览器，为了防止阻塞，需要使用go关键字调用
-func OpenBrowser(uri string) {
+func OpenBrowser(isHTTPS bool, host string, port int) {
+	if isHTTPS {
+		OpenBrowserByURL("https://" + host + ":" + strconv.Itoa(port))
+	} else {
+		OpenBrowserByURL("http://" + host + ":" + strconv.Itoa(port))
+	}
+}
+
+// OpenBrowserByURL 打开浏览器，为了防止阻塞，需要使用go关键字调用
+func OpenBrowserByURL(uri string) {
 	// Create a context with cancellation
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	// headers := http.Header{}
-	// headers.Add("Authorization", "Bearer my-token")
-	// headers.Add("Content-Type", "application/json")
-
-	// // Prepare a request body
-	// requestBody := strings.NewReader(`{"query": "status"}`)
-
 	// Create an HTTP checker with multiple validations
 	checker := httpChecker.New(
 		uri,

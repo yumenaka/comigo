@@ -43,3 +43,21 @@ func HasComigoArchiveAssociation(exts []string) bool {
 func CreateDesktopShortcut() error {
 	return nil
 }
+
+// AddComigoHereToFolderBackgroundMenu 是 Windows 专用功能的空实现。
+// 在非 Windows 平台上调用该函数不会执行任何操作，仅用于保持 API 一致性。
+func AddComigoHereToFolderBackgroundMenu() error {
+	return nil
+}
+
+// RemoveComigoHereFromFolderBackgroundMenu 是 Windows 专用功能的空实现。
+// 在非 Windows 平台上调用该函数不会执行任何操作，仅用于保持 API 一致性。
+func RemoveComigoHereFromFolderBackgroundMenu() error {
+	return nil
+}
+
+// HasComigoHereFolderBackgroundMenu 是 Windows 专用功能的空实现。
+// 在非 Windows 平台上始终返回 false。
+func HasComigoHereFolderBackgroundMenu() bool {
+	return false
+}

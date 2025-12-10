@@ -269,3 +269,9 @@ func GetQrcodeURL() string {
 	}
 	return protocol + cfg.Host + ":" + strconv.Itoa(int(cfg.Port))
 }
+
+func OpenBrowserIfNeeded() {
+	if cfg.OpenBrowser == true {
+		go tools.OpenBrowser(cfg.EnableTLS, "127.0.0.1", cfg.Port)
+	}
+}

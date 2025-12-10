@@ -134,7 +134,73 @@ func HasComigoFolderContextMenu() bool {
 		if isNotFoundError(err) {
 			return false
 		}
-		// 其他错误视为“未知”，这里保守返回 false，避免误判为存在
+		// 其他错误视为"未知"，这里保守返回 false，避免误判为存在
+		return false
+	}
+	_ = key.Close()
+	return true
+}
+
+// AddComigoHereToFolderBackgroundMenu 在文件夹空白处右键菜单中添加"ComiGo Here"菜单项。
+// 该操作仅在当前用户 (HKCU) 范围内生效，多次调用会覆盖原有设置。
+// 兼容 Win11 新右键菜单和经典右键菜单。
+func AddComigoHereToFolderBackgroundMenu() error {
+	exePath, err := currentExecutablePath()
+	if err != nil {
+		return fmt.Errorf("get executable path: %w", err)
+	}
+
+	command := fmt.Sprintf("\"%s\" \"%%V\"", exePath)
+	menuText := "ComiGo Here"
+	iconValue := fmt.Sprintf("%s,0", exePath)
+
+	// HKCU\Software\Classes\Directory\Background\shell\ComiGo
+	keyPath := filepath.Join(classesRootCurrentUser, `Directory\\Background\\shell\\ComiGo`)
+	if err := setStringValue(registry.CURRENT_USER, keyPath, "", menuText); err != nil {
+		return err
+	}
+
+	// 设置图标
+	if err := setStringValue(registry.CURRENT_USER, keyPath, "Icon", iconValue); err != nil {
+		return err
+	}
+
+	// HKCU\Software\Classes\Directory\Background\shell\ComiGo\command
+	commandKeyPath := filepath.Join(keyPath, "command")
+	if err := setStringValue(registry.CURRENT_USER, commandKeyPath, "", command); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// RemoveComigoHereFromFolderBackgroundMenu 移除文件夹空白处右键菜单中的"ComiGo Here"菜单项。
+// 仅在当前用户 (HKCU) 范围内生效。
+func RemoveComigoHereFromFolderBackgroundMenu() error {
+	// 先删除 command 子键
+	commandKeyPath := filepath.Join(classesRootCurrentUser, `Directory\\Background\\shell\\ComiGo\\command`)
+	if err := deleteRegistryKey(registry.CURRENT_USER, commandKeyPath); err != nil {
+		return err
+	}
+
+	// 再删除 ComiGo 主键
+	menuKeyPath := filepath.Join(classesRootCurrentUser, `Directory\\Background\\shell\\ComiGo`)
+	if err := deleteRegistryKey(registry.CURRENT_USER, menuKeyPath); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// HasComigoHereFolderBackgroundMenu 检查当前用户下是否已存在 Comigo 文件夹空白处右键菜单。
+func HasComigoHereFolderBackgroundMenu() bool {
+	menuKeyPath := filepath.Join(classesRootCurrentUser, `Directory\\Background\\shell\\ComiGo`)
+	key, err := registry.OpenKey(registry.CURRENT_USER, menuKeyPath, registry.QUERY_VALUE)
+	if err != nil {
+		if isNotFoundError(err) {
+			return false
+		}
+		// 其他错误视为"未知"，这里保守返回 false，避免误判为存在
 		return false
 	}
 	_ = key.Close()

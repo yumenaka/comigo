@@ -4,7 +4,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
@@ -52,7 +51,7 @@ func UpdateConfig(c echo.Context) error {
 
 // BeforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func BeforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
-	openBrowserIfNeeded(oldConfig, newConfig)
+	OpenBrowserIfNeeded(oldConfig, newConfig)
 	needReScan := checkNeedReScan(oldConfig, newConfig)
 	if needReScan {
 		StartReScan()
@@ -63,13 +62,9 @@ func BeforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	}
 }
 
-func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
+func OpenBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 	if (oldConfig.OpenBrowser == false) && (newConfig.OpenBrowser == true) {
-		protocol := "http://"
-		if newConfig.EnableTLS {
-			protocol = "https://"
-		}
-		go tools.OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(int(newConfig.Port)))
+		go tools.OpenBrowser(newConfig.EnableTLS, "127.0.0.1", newConfig.Port)
 	}
 }
 

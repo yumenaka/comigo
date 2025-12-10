@@ -39,6 +39,12 @@ templ ShelfDrawerSlot() {
 			x-text="$store.shelf.readingProgressPercent?i18next.t('reading_progress_percent'):i18next.t('reading_progress_page')"
 		></span>
 	</label>
+	<!-- 切换【新标签页打开】-->
+	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
+		<input type="checkbox" :value="$store.shelf.openInNewTab" x-on:click="$store.shelf.openInNewTab =!$store.shelf.openInNewTab" class="sr-only peer"/>
+		<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+		<span class="font-medium ms-3" x-text="i18next.t('open_in_new_tab')"></span>
+	</label>
 	<!-- 切换【无限卷轴/分页卷轴/翻页阅读】的select-->
 	@common.ReadModeSelect(true)
 }

@@ -131,7 +131,7 @@ func initMenuItems() {
 	menuItems.mOpenBrowser.Click(func() {
 		if getURLFunc != nil {
 			url := getURLFunc()
-			go tools.OpenBrowser(url)
+			go tools.OpenBrowserByURL(url)
 			logger.Infof(locale.GetString("log_opening_browser"), url)
 		}
 	})
@@ -308,7 +308,7 @@ func initMenuItems() {
 	// Comigo 项目地址子菜单（所有平台都显示）
 	menuItems.mProject = menuItems.mExtra.AddSubMenuItem(locale.GetString("systray_project"), locale.GetString("systray_project_tooltip"))
 	menuItems.mProject.Click(func() {
-		go tools.OpenBrowser("https://github.com/yumenaka/comigo")
+		go tools.OpenBrowserByURL("https://github.com/yumenaka/comigo")
 		logger.Infof(locale.GetString("log_opening_comigo_project_page"))
 	})
 
