@@ -49,7 +49,7 @@ func ShelfHandler(c echo.Context) error {
 		logger.Infof(locale.GetString("log_get_child_books_for_bookid"), bookID)
 		childBooks, err := store.GetChildBooksInfo(bookID)
 		if err == nil {
-			logger.Infof(locale.GetString("log_get_child_books_count"), len(*childBooks), bookID)
+			logger.Infof(locale.GetString("log_get_child_books_count"), bookID, len(*childBooks))
 			childBookInfos = *childBooks
 		}
 		childBookInfos.SortBooks(sortBy)
@@ -96,9 +96,16 @@ func generateReadURL(book model.BookInfo, lastReadPage int) string {
 	return fmt.Sprintf("$store.global.getReadURL(\"%s\",%d)", book.BookID, lastReadPage)
 }
 
-func getTarget(book model.BookInfo) string {
+// getBookCardTarget 根据书籍类型，返回书籍卡片的 target 属性值。似乎有点问题，暂时未使用。
+func getBookCardTarget(book model.BookInfo) string {
+	// 新页面打开
 	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
-		return "_blank"
+		return `_blank`
 	}
-	return "_self"
+	// 按照用户设置决定
+	if book.Type == model.TypeZip || book.Type == model.TypeCbz || book.Type == model.TypeEpub || book.Type == model.TypeRar || book.Type == model.TypeCbr || book.Type == model.TypeTar {
+		return `$store.shelf.openInNewTab ? '_blank' : '_self'`
+	}
+	// 当前页面打开
+	return `_self`
 }

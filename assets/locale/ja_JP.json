@@ -578,7 +578,7 @@
   "log_failed_to_get_file_info": "ファイル情報の取得に失敗しました: %s, エラー: %v",
   "log_add_book_error": "AddBook_error 書籍ID: %s %s",
   "log_get_child_books_for_bookid": "書籍ID %s の子書籍を取得",
-  "log_get_child_books_count": "書籍ID %s の %d 冊の子書籍を取得",
+  "log_get_child_books_count": "書籍ID %v の %v 冊の子書籍を取得",
   "log_get_bookshelf_error": "本棚の取得エラー: %v",
   "log_error_getting_absolute_path": "絶対パスの取得エラー: %v",
   "log_cannot_shorten_id": "IDを短縮できません: %s",
@@ -783,5 +783,6 @@
   "log_database_initialized_successfully": "データベースが正常に初期化されました",
   "err_failed_to_read_embedded_image": "埋め込み画像の読み込みに失敗しました: %v",
   "err_failed_to_read_embedded_data": "埋め込みデータの読み込みに失敗しました: %v",
-  "scroll_wheel_flip": "ホイールページめくり"
+  "scroll_wheel_flip": "ホイールページめくり",
+  "open_in_new_tab": "新しいタブで開く"
 }
