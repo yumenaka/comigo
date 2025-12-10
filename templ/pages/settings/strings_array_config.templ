@@ -2,9 +2,24 @@ package settings
 
 import "strconv"
 import "fmt"
+import "encoding/json"
 import "github.com/yumenaka/comigo/templ/common/svg"
 
 var StringArrayOnceHandle = templ.NewOnceHandle()
+
+// hxValsJSON 生成用于 hx-vals 属性的 JSON 字符串，正确处理特殊字符转义
+func hxValsJSON(configName string, value string) string {
+	data := map[string]string{
+		"configName":  configName,
+		"deleteValue": value,
+	}
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		// 如果序列化失败，回退到安全的空对象
+		return "{}"
+	}
+	return string(jsonBytes)
+}
 
 // 出于安全考虑。onclick不能直接拼接函数，需要使用 templ.JSFuncCall()
 // https://templ.guide/syntax-and-usage/script-templates/
@@ -105,7 +120,7 @@ templ StringArrayConfig(name string, values []string, description string, saveSu
 						hx-post="/api/delete-array-config"
 						hx-target={ "#" + name + "-string-array-config" }
 						hx-swap="outerHTML"
-						hx-vals={ fmt.Sprintf(`{"configName":"%s","deleteValue":"%s"}`, name, value) }
+						hx-vals={ hxValsJSON(name, value) }
 						onsubmit={ templ.JSFuncCall("deleteStringConfigValue", templ.JSExpression("this")) }
 						class="flex justify-center items-center w-6 h-6 ml-1 mr-0.5 rounded hover:ring"
 					>
