@@ -31,7 +31,12 @@ templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
 		:href={ generateReadURL(book, bookMarks.GetLastReadPage()) }
 		x-data={ fmt.Sprintf("{ BookID: %s }", "'"+book.BookID+"'") }
 		x-show="showBook"
-		:target="$store.shelf.openInNewTab ? '_blank' : '_self'"
+		if book.Type == model.TypeZip || book.Type == model.TypeCbz || book.Type == model.TypeEpub || book.Type == model.TypeRar || book.Type == model.TypeDir || book.Type == model.TypeCbr || book.Type == model.TypeTar || book.Type == model.TypeHTML {
+			:target="$store.shelf.openInNewTab ? '_blank' : '_self'"
+		}
+		if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
+			target="_blank"
+		}
 		:rel="openInNewTab ? 'noopener noreferrer' : null"
 		class={ backgroundImage(book.GetCover().Url) , "relative w-32 transition-transform duration-200 hover:scale-105 m-2 md:m-3 bg-top bg-cover h-44 rounded drop-shadow-lg ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden" }
 	>

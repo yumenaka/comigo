@@ -92,7 +92,23 @@ func BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) te
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" x-show=\"showBook\" :target=\"$store.shelf.openInNewTab ? '_blank' : '_self'\" :rel=\"openInNewTab ? 'noopener noreferrer' : null\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" x-show=\"showBook\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if book.Type == model.TypeZip || book.Type == model.TypeCbz || book.Type == model.TypeEpub || book.Type == model.TypeRar || book.Type == model.TypeDir || book.Type == model.TypeCbr || book.Type == model.TypeTar || book.Type == model.TypeHTML {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " :target=\"$store.shelf.openInNewTab ? '_blank' : '_self'\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " target=\"_blank\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " :rel=\"openInNewTab ? 'noopener noreferrer' : null\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -105,126 +121,126 @@ func BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) te
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><!-- 根据书籍类型，选择显示的图标 --><!-- 虽然此处理论上用 switch 语句更简洁，但是vscode目前无法格式化 templ 的switch语句，所以暂时不用 --><!-- Zip，Cbz压缩文件 使用 transform 和 scale 实现“元素放大且不影响原有布局”的效果。核心思路是通过 CSS Transform 做放大动画，而不改变其占据的文档流空间。transition-transform duration-200 hover:scale-105 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"><!-- 根据书籍类型，选择显示的图标 --><!-- 虽然此处理论上用 switch 语句更简洁，但是vscode目前无法格式化 templ 的switch语句，所以暂时不用 --><!-- Zip，Cbz压缩文件 使用 transform 和 scale 实现“元素放大且不影响原有布局”的效果。核心思路是通过 CSS Transform 做放大动画，而不改变其占据的文档流空间。transition-transform duration-200 hover:scale-105 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if book.Type == model.TypeZip || book.Type == model.TypeCbz {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute top-0 z-0 w-8 h-8 text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path stroke=\"black\" stroke-width=\"0.5\" d=\"M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-4 10h2v-2h-2v-2h2v-2h-2V8h4v10h-4v-2zm0 0h-2v2H4V6h5.17l2 2H14v2h2v2h-2v2h2v2z\" fill=\"currentColor\"></path> <g id=\"Layer_Name\"><title>Layer Name</title><text stroke=\"black\" stroke-width=\"0.5\" font-weight=\"bold\" xml:space=\"preserve\" text-anchor=\"start\" font-family=\"Arial\" font-size=\"10\" id=\"svg_1\" y=\"16\" x=\"5\" fill=\"currentColor\">Z</text></g></svg>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute top-0 z-0 w-8 h-8 text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path stroke=\"black\" stroke-width=\"0.5\" d=\"M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-4 10h2v-2h-2v-2h2v-2h-2V8h4v10h-4v-2zm0 0h-2v2H4V6h5.17l2 2H14v2h2v2h-2v2h2v2z\" fill=\"currentColor\"></path> <g id=\"Layer_Name\"><title>Layer Name</title><text stroke=\"black\" stroke-width=\"0.5\" font-weight=\"bold\" xml:space=\"preserve\" text-anchor=\"start\" font-family=\"Arial\" font-size=\"10\" id=\"svg_1\" y=\"16\" x=\"5\" fill=\"currentColor\">Z</text></g></svg>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<!-- Rar，Cbr压缩文件 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<!-- Rar，Cbr压缩文件 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if book.Type == model.TypeRar || book.Type == model.TypeCbr {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute top-0 z-0 w-8 h-8 text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path stroke=\"black\" stroke-width=\"0.5\" d=\"M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-4 10h2v-2h-2v-2h2v-2h-2V8h4v10h-4v-2zm0 0h-2v2H4V6h5.17l2 2H14v2h2v2h-2v2h2v2z\" fill=\"currentColor\"></path> <g id=\"Layer_Name\"><title>Layer Name</title><text stroke=\"black\" stroke-width=\"0.5\" font-weight=\"bold\" xml:space=\"preserve\" text-anchor=\"start\" font-family=\"Arial\" font-size=\"10\" id=\"svg_1\" y=\"16\" x=\"5\" fill=\"currentColor\">R</text></g></svg>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute top-0 z-0 w-8 h-8 text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path stroke=\"black\" stroke-width=\"0.5\" d=\"M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-4 10h2v-2h-2v-2h2v-2h-2V8h4v10h-4v-2zm0 0h-2v2H4V6h5.17l2 2H14v2h2v2h-2v2h2v2z\" fill=\"currentColor\"></path> <g id=\"Layer_Name\"><title>Layer Name</title><text stroke=\"black\" stroke-width=\"0.5\" font-weight=\"bold\" xml:space=\"preserve\" text-anchor=\"start\" font-family=\"Arial\" font-size=\"10\" id=\"svg_1\" y=\"16\" x=\"5\" fill=\"currentColor\">R</text></g></svg>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<!-- Tar压缩文件 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<!-- Tar压缩文件 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if book.Type == model.TypeTar {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute top-0 z-0 w-8 h-8 text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path stroke=\"black\" stroke-width=\"0.5\" d=\"M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-4 10h2v-2h-2v-2h2v-2h-2V8h4v10h-4v-2zm0 0h-2v2H4V6h5.17l2 2H14v2h2v2h-2v2h2v2z\" fill=\"currentColor\"></path> <g id=\"Layer_Name\"><title>Layer Name</title><text stroke=\"black\" stroke-width=\"0.5\" font-weight=\"bold\" xml:space=\"preserve\" text-anchor=\"start\" font-family=\"Arial\" font-size=\"10\" id=\"svg_1\" y=\"16\" x=\"5\" fill=\"currentColor\">T</text></g></svg>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute top-0 z-0 w-8 h-8 text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path stroke=\"black\" stroke-width=\"0.5\" d=\"M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-4 10h2v-2h-2v-2h2v-2h-2V8h4v10h-4v-2zm0 0h-2v2H4V6h5.17l2 2H14v2h2v2h-2v2h2v2z\" fill=\"currentColor\"></path> <g id=\"Layer_Name\"><title>Layer Name</title><text stroke=\"black\" stroke-width=\"0.5\" font-weight=\"bold\" xml:space=\"preserve\" text-anchor=\"start\" font-family=\"Arial\" font-size=\"10\" id=\"svg_1\" y=\"16\" x=\"5\" fill=\"currentColor\">T</text></g></svg>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<!-- epub文件图标 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<!-- epub文件图标 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if book.Type == model.TypeEpub {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute top-0 z-10 w-8 h-8 text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" style=\"stroke: black; stroke-width: 0.5px;\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 20 20\"><g fill=\"none\"><path d=\"M18 4.75v5.507a5.495 5.495 0 0 0-1.5-.882V4.75a.25.25 0 0 0-.25-.25H12c-.69 0-1.25.56-1.25 1.25v4.727a5.502 5.502 0 0 0-1.5 2.379V5.75c0-.69-.56-1.25-1.25-1.25H3.75a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25H8c.421 0 .794-.208 1.02-.527c.049.574.186 1.123.398 1.634c-.414.25-.9.393-1.418.393H3.75A1.75 1.75 0 0 1 2 15.25V4.75C2 3.784 2.784 3 3.75 3H8c.788 0 1.499.331 2 .863A2.742 2.742 0 0 1 12 3h4.25c.966 0 1.75.784 1.75 1.75z\" fill=\"currentColor\"></path><path d=\"M13.01 14c.047-1.128.25-2.123.54-2.85c.167-.417.353-.722.535-.914c.18-.19.32-.236.415-.236c.094 0 .235.046.415.236c.182.192.368.497.535.914c.29.727.493 1.722.54 2.85h-2.98z\" fill=\"currentColor\"></path><path d=\"M12.621 10.779c.064-.16.134-.314.208-.459A4.504 4.504 0 0 0 10.027 14h1.982c.048-1.234.268-2.36.612-3.221z\" fill=\"currentColor\"></path><path d=\"M16.378 10.779a5.346 5.346 0 0 0-.207-.459A4.504 4.504 0 0 1 18.973 14H16.99c-.048-1.234-.268-2.36-.613-3.221z\" fill=\"currentColor\"></path><path d=\"M16.99 15h1.983a4.504 4.504 0 0 1-2.802 3.68c.074-.145.143-.299.207-.459c.345-.862.565-1.987.613-3.221z\" fill=\"currentColor\"></path><path d=\"M14.915 18.764c-.18.19-.32.236-.415.236c-.094 0-.235-.046-.415-.236c-.182-.192-.368-.497-.535-.914c-.29-.727-.493-1.722-.54-2.85h2.98c-.047 1.128-.25 2.123-.54 2.85c-.167.417-.353.722-.535.913z\" fill=\"currentColor\"></path><path d=\"M10.027 15a4.504 4.504 0 0 0 2.803 3.68a5.346 5.346 0 0 1-.209-.459c-.344-.862-.564-1.987-.612-3.221h-1.982z\" fill=\"currentColor\"></path></g></svg>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute top-0 z-10 w-8 h-8 text-yellow-400 rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" style=\"stroke: black; stroke-width: 0.5px;\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 20 20\"><g fill=\"none\"><path d=\"M18 4.75v5.507a5.495 5.495 0 0 0-1.5-.882V4.75a.25.25 0 0 0-.25-.25H12c-.69 0-1.25.56-1.25 1.25v4.727a5.502 5.502 0 0 0-1.5 2.379V5.75c0-.69-.56-1.25-1.25-1.25H3.75a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25H8c.421 0 .794-.208 1.02-.527c.049.574.186 1.123.398 1.634c-.414.25-.9.393-1.418.393H3.75A1.75 1.75 0 0 1 2 15.25V4.75C2 3.784 2.784 3 3.75 3H8c.788 0 1.499.331 2 .863A2.742 2.742 0 0 1 12 3h4.25c.966 0 1.75.784 1.75 1.75z\" fill=\"currentColor\"></path><path d=\"M13.01 14c.047-1.128.25-2.123.54-2.85c.167-.417.353-.722.535-.914c.18-.19.32-.236.415-.236c.094 0 .235.046.415.236c.182.192.368.497.535.914c.29.727.493 1.722.54 2.85h-2.98z\" fill=\"currentColor\"></path><path d=\"M12.621 10.779c.064-.16.134-.314.208-.459A4.504 4.504 0 0 0 10.027 14h1.982c.048-1.234.268-2.36.612-3.221z\" fill=\"currentColor\"></path><path d=\"M16.378 10.779a5.346 5.346 0 0 0-.207-.459A4.504 4.504 0 0 1 18.973 14H16.99c-.048-1.234-.268-2.36-.613-3.221z\" fill=\"currentColor\"></path><path d=\"M16.99 15h1.983a4.504 4.504 0 0 1-2.802 3.68c.074-.145.143-.299.207-.459c.345-.862.565-1.987.613-3.221z\" fill=\"currentColor\"></path><path d=\"M14.915 18.764c-.18.19-.32.236-.415.236c-.094 0-.235-.046-.415-.236c-.182-.192-.368-.497-.535-.914c-.29-.727-.493-1.722-.54-2.85h2.98c-.047 1.128-.25 2.123-.54 2.85c-.167.417-.353.722-.535.913z\" fill=\"currentColor\"></path><path d=\"M10.027 15a4.504 4.504 0 0 0 2.803 3.68a5.346 5.346 0 0 1-.209-.459c-.344-.862-.564-1.987-.612-3.221h-1.982z\" fill=\"currentColor\"></path></g></svg>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<!-- 书籍组图标x书籍数量 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<!-- 书籍组图标x书籍数量 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if book.Type == model.TypeBooksGroup {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div x-show=\"$store.shelf.showFileIcon\" class=\"absolute top-0 z-10 text-black rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600\"><div class=\"flex text-xl font-black text-yellow-400\" style=\"text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;\"><svg class=\"w-8 h-8\" style=\"stroke: black; stroke-width: 0.5px;\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><g fill=\"none\"><path d=\"M6.5 2A2.5 2.5 0 0 0 4 4.5v15A2.5 2.5 0 0 0 6.5 22h13.25a.75.75 0 0 0 0-1.5H6.5a1 1 0 0 1-1-1h14.25a.75.75 0 0 0 .75-.75V4.5A2.5 2.5 0 0 0 18 2H6.5zM8 5h8a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z\" fill=\"currentColor\"></path></g></svg> <span class=\"h-8 font-black text-yellow-400 align-text-bottom text-shadow\">x")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div x-show=\"$store.shelf.showFileIcon\" class=\"absolute top-0 z-10 text-black rounded left-1 hover:bg-gray-200 dark:hover:bg-gray-600\"><div class=\"flex text-xl font-black text-yellow-400\" style=\"text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;\"><svg class=\"w-8 h-8\" style=\"stroke: black; stroke-width: 0.5px;\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><g fill=\"none\"><path d=\"M6.5 2A2.5 2.5 0 0 0 4 4.5v15A2.5 2.5 0 0 0 6.5 22h13.25a.75.75 0 0 0 0-1.5H6.5a1 1 0 0 1-1-1h14.25a.75.75 0 0 0 .75-.75V4.5A2.5 2.5 0 0 0 18 2H6.5zM8 5h8a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z\" fill=\"currentColor\"></path></g></svg> <span class=\"h-8 font-black text-yellow-400 align-text-bottom text-shadow\">x")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(book.GetAllChildBooksNum()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 79, Col: 123}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 84, Col: 123}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</span></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<!-- 文件夹图标 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<!-- 文件夹图标 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if book.Type == model.TypeDir {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" style=\"text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M432 112V96a48.14 48.14 0 0 0-48-48H64a48.14 48.14 0 0 0-48 48v256a48.14 48.14 0 0 0 48 48h16\" fill=\"rgb(234 179 8)\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"32\"></path> <rect x=\"96\" y=\"128\" width=\"400\" height=\"336\" rx=\"45.99\" ry=\"45.99\" fill=\"rgb(234 179 8)\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"32\"></rect> <ellipse cx=\"372.92\" cy=\"219.64\" rx=\"30.77\" ry=\"30.55\" fill=\"none\" stroke=\"currentColor\" stroke-miterlimit=\"10\" stroke-width=\"32\"></ellipse> <path d=\"M342.15 372.17L255 285.78a30.93 30.93 0 0 0-42.18-1.21L96 387.64\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></path> <path d=\"M265.23 464l118.59-117.73a31 31 0 0 1 41.46-1.87L496 402.91\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></path></svg>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" style=\"text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\"><path d=\"M432 112V96a48.14 48.14 0 0 0-48-48H64a48.14 48.14 0 0 0-48 48v256a48.14 48.14 0 0 0 48 48h16\" fill=\"rgb(234 179 8)\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"32\"></path> <rect x=\"96\" y=\"128\" width=\"400\" height=\"336\" rx=\"45.99\" ry=\"45.99\" fill=\"rgb(234 179 8)\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"32\"></rect> <ellipse cx=\"372.92\" cy=\"219.64\" rx=\"30.77\" ry=\"30.55\" fill=\"none\" stroke=\"currentColor\" stroke-miterlimit=\"10\" stroke-width=\"32\"></ellipse> <path d=\"M342.15 372.17L255 285.78a30.93 30.93 0 0 0-42.18-1.21L96 387.64\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></path> <path d=\"M265.23 464l118.59-117.73a31 31 0 0 1 41.46-1.87L496 402.91\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"></path></svg>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<!-- 视频文件图标  -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<!-- 视频文件图标  -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if book.Type == model.TypeVideo {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"rgb(234 179 8)\" viewBox=\"0 0 24 24\" stroke-width=\"1.0\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z\"></path></svg>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"rgb(234 179 8)\" viewBox=\"0 0 24 24\" stroke-width=\"1.0\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z\"></path></svg>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<!-- 音乐文件图标  -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<!-- 音乐文件图标  -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if book.Type == model.TypeAudio {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"rgb(234 179 8)\" stroke-width=\"1.0\" stroke=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M19.952 1.651a.75.75 0 0 1 .298.599V16.303a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.403-4.909l2.311-.66a1.5 1.5 0 0 0 1.088-1.442V6.994l-9 2.572v9.737a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.402-4.909l2.31-.66a1.5 1.5 0 0 0 1.088-1.442V5.25a.75.75 0 0 1 .544-.721l10.5-3a.75.75 0 0 1 .658.122Z\" clip-rule=\"evenodd\"></path></svg>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"rgb(234 179 8)\" stroke-width=\"1.0\" stroke=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M19.952 1.651a.75.75 0 0 1 .298.599V16.303a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.403-4.909l2.311-.66a1.5 1.5 0 0 0 1.088-1.442V6.994l-9 2.572v9.737a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.402-4.909l2.31-.66a1.5 1.5 0 0 0 1.088-1.442V5.25a.75.75 0 0 1 .544-.721l10.5-3a.75.75 0 0 1 .658.122Z\" clip-rule=\"evenodd\"></path></svg>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<!-- PDF文件图标  -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<!-- PDF文件图标  -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if book.Type == model.TypePDF {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 16 16\"><g fill=\"currentColor\"><path d=\"M4.5 9.003a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-.166h.333a1.167 1.167 0 0 0 0-2.334H4.5zm.833 1.334H5v-.334h.333a.167.167 0 0 1 0 .334zm4.668-.835a.5.5 0 0 1 .5-.499h.998a.5.5 0 0 1 0 1h-.5v.335h.5a.5.5 0 1 1 0 1H11v.164a.5.5 0 0 1-1 .002L10 10.837L10 9.502zm-2.503-.499a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5H8a1.5 1.5 0 0 0 0-3h-.502zm.5 2v-1H8a.5.5 0 0 1 0 1h-.002zM9 2.002H4.5a1.5 1.5 0 0 0-1.5 1.5v3.582A1.5 1.5 0 0 0 2 8.5v4.003a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5V8.499a1.5 1.5 0 0 0-1-1.415V6h-2.5A1.5 1.5 0 0 1 9 4.5V2.002zM3.5 7.999h9a.5.5 0 0 1 .5.5v4.003a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V8.499a.5.5 0 0 1 .5-.5zm9.206-3H10.5a.5.5 0 0 1-.5-.5V2.298L12.706 5z\" fill=\"rgb(234 179 8)\" stroke-width=\"0.5\" stroke=\"currentColor\"></path></g></svg>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-black rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 16 16\"><g fill=\"currentColor\"><path d=\"M4.5 9.003a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-.166h.333a1.167 1.167 0 0 0 0-2.334H4.5zm.833 1.334H5v-.334h.333a.167.167 0 0 1 0 .334zm4.668-.835a.5.5 0 0 1 .5-.499h.998a.5.5 0 0 1 0 1h-.5v.335h.5a.5.5 0 1 1 0 1H11v.164a.5.5 0 0 1-1 .002L10 10.837L10 9.502zm-2.503-.499a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5H8a1.5 1.5 0 0 0 0-3h-.502zm.5 2v-1H8a.5.5 0 0 1 0 1h-.002zM9 2.002H4.5a1.5 1.5 0 0 0-1.5 1.5v3.582A1.5 1.5 0 0 0 2 8.5v4.003a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5V8.499a1.5 1.5 0 0 0-1-1.415V6h-2.5A1.5 1.5 0 0 1 9 4.5V2.002zM3.5 7.999h9a.5.5 0 0 1 .5.5v4.003a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V8.499a.5.5 0 0 1 .5-.5zm9.206-3H10.5a.5.5 0 0 1-.5-.5V2.298L12.706 5z\" fill=\"rgb(234 179 8)\" stroke-width=\"0.5\" stroke=\"currentColor\"></path></g></svg>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<!-- HTML图标  -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<!-- HTML图标  -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if book.Type == model.TypeHTML {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-yellow-400 rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" style=\"vertical-align: middle;fill: currentColor;overflow: hidden;\" viewBox=\"0 0 1024 1024\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M535.42 74.41H593v91.38c108.53 0.61 217.17-1.12 325.6 0.51 23.35-2.23 41.63 15.94 39.29 39.29 1.73 189.66-0.41 379.42 1 569.19-1 20.5 2 43.25-9.75 61.42-14.82 10.76-34.11 9.34-51.47 10.15-101.53-0.51-203.06-0.35-304.67-0.35v101.57h-63.18c-154.73-28.23-309.77-54-464.6-81.22q-0.15-355.31 0-710.51c156.67-27.12 313.33-54.73 470.2-81.43z\" fill=\"#64A247\"></path><path d=\"M112.32 550.12V426h23.19v48.84h45.44V426h23.2v124.1h-23.2v-54.25h-45.44v54.27zM254 550.12V447h-34.11v-21h91.29v21h-34v103.12zM325.84 550.12V426h34.71l20.84 84.65L402 426h34.79v124.1h-21.55v-97.67l-22.8 97.68h-22.33l-22.73-97.68v97.68zM460.44 550.12V427h23.2v102.2h57.67v20.91zM589.6 196.24v619.34h335.05V196.24z m75.43 361l-48.73-39a7.37 7.37 0 0 1-2.44-5.69 9.22 9.22 0 0 1 2.44-6.5l48.73-39a8 8 0 1 1 11.37 11.37l-42.24 34.18 42.24 34.12c3.25 3.25 3.25 8.12 0 10.56a7.85 7.85 0 0 1-11.4-0.01z m17.87 57.67c-4.87-0.81-5.69-6.5-3.25-10.56l101.53-195.72c2.44-4.06 7.31-5.69 11.37-3.25a8.74 8.74 0 0 1 2.45 11.37L694.27 611.69c-2.44 4.06-6.5 4.88-11.37 3.25z m172.2-95.85l-48.74 39A8 8 0 0 1 795 546.71l42.24-34.12L795 478.48a8 8 0 0 1 11.37-11.37l48.74 39q2.44 2.44 2.44 7.31a8.78 8.78 0 0 1-2.46 5.68z\" fill=\"#FFFFFF\"></path></svg> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-yellow-400 rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" style=\"vertical-align: middle;fill: currentColor;overflow: hidden;\" viewBox=\"0 0 1024 1024\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M535.42 74.41H593v91.38c108.53 0.61 217.17-1.12 325.6 0.51 23.35-2.23 41.63 15.94 39.29 39.29 1.73 189.66-0.41 379.42 1 569.19-1 20.5 2 43.25-9.75 61.42-14.82 10.76-34.11 9.34-51.47 10.15-101.53-0.51-203.06-0.35-304.67-0.35v101.57h-63.18c-154.73-28.23-309.77-54-464.6-81.22q-0.15-355.31 0-710.51c156.67-27.12 313.33-54.73 470.2-81.43z\" fill=\"#64A247\"></path><path d=\"M112.32 550.12V426h23.19v48.84h45.44V426h23.2v124.1h-23.2v-54.25h-45.44v54.27zM254 550.12V447h-34.11v-21h91.29v21h-34v103.12zM325.84 550.12V426h34.71l20.84 84.65L402 426h34.79v124.1h-21.55v-97.67l-22.8 97.68h-22.33l-22.73-97.68v97.68zM460.44 550.12V427h23.2v102.2h57.67v20.91zM589.6 196.24v619.34h335.05V196.24z m75.43 361l-48.73-39a7.37 7.37 0 0 1-2.44-5.69 9.22 9.22 0 0 1 2.44-6.5l48.73-39a8 8 0 1 1 11.37 11.37l-42.24 34.18 42.24 34.12c3.25 3.25 3.25 8.12 0 10.56a7.85 7.85 0 0 1-11.4-0.01z m17.87 57.67c-4.87-0.81-5.69-6.5-3.25-10.56l101.53-195.72c2.44-4.06 7.31-5.69 11.37-3.25a8.74 8.74 0 0 1 2.45 11.37L694.27 611.69c-2.44 4.06-6.5 4.88-11.37 3.25z m172.2-95.85l-48.74 39A8 8 0 0 1 795 546.71l42.24-34.12L795 478.48a8 8 0 0 1 11.37-11.37l48.74 39q2.44 2.44 2.44 7.31a8.78 8.78 0 0 1-2.46 5.68z\" fill=\"#FFFFFF\"></path></svg> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if book.Type == model.TypeUnknownFile {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-yellow-400 rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 32 32\"><circle cx=\"9\" cy=\"28.5\" r=\"1.5\" fill=\"currentColor\"></circle><path d=\"M10 25H8v-4h2a2 2 0 0 0 0-4H8a2.002 2.002 0 0 0-2 2v.5H4V19a4.005 4.005 0 0 1 4-4h2a4 4 0 0 1 0 8z\" fill=\"currentColor\"></path><path d=\"M27.7 9.3l-7-7A.908.908 0 0 0 20 2H10a2.006 2.006 0 0 0-2 2v8h2V4h8v6a2.006 2.006 0 0 0 2 2h6v16H14v2h12a2.006 2.006 0 0 0 2-2V10a.91.91 0 0 0-.3-.7zM20 10V4.4l5.6 5.6z\" fill=\"currentColor\"></path></svg>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<svg x-show=\"$store.shelf.showFileIcon\" class=\"absolute z-10 w-8 h-8 m-0 text-yellow-400 rounded shadow-2xl top-1 left-1 hover:bg-gray-200 dark:hover:bg-gray-600\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 32 32\"><circle cx=\"9\" cy=\"28.5\" r=\"1.5\" fill=\"currentColor\"></circle><path d=\"M10 25H8v-4h2a2 2 0 0 0 0-4H8a2.002 2.002 0 0 0-2 2v.5H4V19a4.005 4.005 0 0 1 4-4h2a4 4 0 0 1 0 8z\" fill=\"currentColor\"></path><path d=\"M27.7 9.3l-7-7A.908.908 0 0 0 20 2H10a2.006 2.006 0 0 0-2 2v8h2V4h8v6a2.006 2.006 0 0 0 2 2h6v16H14v2h12a2.006 2.006 0 0 0 2-2V10a.91.91 0 0 0-.3-.7zM20 10V4.4l5.6 5.6z\" fill=\"currentColor\"></path></svg>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<!-- 阅读进度 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<!-- 阅读进度 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -232,20 +248,20 @@ func BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) te
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<!-- 书名显示栏 --><div x-show=\"$store.shelf.showFilename\" class=\"absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100/80 border-blue-800 rounded-b h-1/4\"><span class=\"absolute inset-x-0 top-0 p-1 align-middle\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<!-- 书名显示栏 --><div x-show=\"$store.shelf.showFilename\" class=\"absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100/80 border-blue-800 rounded-b h-1/4\"><span class=\"absolute inset-x-0 top-0 p-1 align-middle\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs("$store.shelf.simplifyTitle === true?'" + book.ShortName() + "':'" + book.Title + "'")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 209, Col: 153}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 214, Col: 153}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\"></span></div></a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\"></span></div></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -275,52 +291,52 @@ func ReadingProgress(book model.BookInfo, bookMarks model.BookMarks) templ.Compo
 		}
 		ctx = templ.ClearChildren(ctx)
 		if bookMarks != nil && bookMarks.GetLastReadPage() != 0 && bookMarks.GetLastReadPage() < book.PageCount {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<span x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<span x-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(getReadPercentage(book, bookMarks))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 216, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 221, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\" class=\"absolute top-1 right-1 h-8 font-black text-yellow-400 align-text-bottom text-shadow\" style=\"text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" class=\"absolute top-1 right-1 h-8 font-black text-yellow-400 align-text-bottom text-shadow\" style=\"text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(bookMarks.GetLastReadPage())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 216, Col: 250}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 221, Col: 250}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "/")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "/")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(book.PageCount)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 216, Col: 269}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_book_card.templ`, Line: 221, Col: 269}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</span> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</span> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if bookMarks != nil && bookMarks.GetLastReadPage() != 0 && bookMarks.GetLastReadPage() == book.PageCount {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<span x-text=\"i18next.t('read')\" class=\"absolute top-1 right-1 h-8 font-black text-yellow-400 align-text-bottom text-shadow\" style=\"text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;\">已读</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<span x-text=\"i18next.t('read')\" class=\"absolute top-1 right-1 h-8 font-black text-yellow-400 align-text-bottom text-shadow\" style=\"text-shadow: 0 1px black, 1px 0 black, -1px 0 black, 0 -1px black;\">已读</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
