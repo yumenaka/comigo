@@ -32,6 +32,7 @@ func LoadMetadata() {
 		if err != nil {
 			logger.Infof(locale.GetString("log_loadbooks_error"), err)
 		}
+		model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
 		model.ClearBookNotExist()
 		// 生成虚拟书籍组
 		if err := model.IStore.GenerateBookGroup(); err != nil {

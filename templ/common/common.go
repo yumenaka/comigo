@@ -2,9 +2,9 @@ package common
 
 import (
 	"encoding/base64"
+	"fmt"
 	"mime"
 	"path/filepath"
-	"strconv"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
@@ -17,7 +17,7 @@ import (
 // GetPageTitle 获取页面标题
 func GetPageTitle(bookID string, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) string {
 	if bookID == "" {
-		return config.GetCfg().GetTopStoreName() + " (x" + strconv.Itoa(nowBookNum) + ")"
+		return fmt.Sprintf("%v(x%v) ", config.GetCfg().GetTopStoreName(), nowBookNum)
 	}
 	groupBook, err := model.IStore.GetBook(bookID)
 	if err != nil {

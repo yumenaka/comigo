@@ -678,6 +678,7 @@
   "log_starting_tailscale_http_server": "正在启动Tailscale HTTP服务器 %s:%d",
   "log_tailscale_server_stopped_successfully": "Tailscale服务器已成功停止",
   "log_checking_book_files_exist": "正在检查书籍文件是否存在...",
+  "log_checking_store_urls_exist": "正在检查书库URL是否存在...",
   "log_error_deleting_book": "删除书籍 %s 错误: %s",
   "log_error_initializing_main_folder": "初始化主文件夹错误: %s",
   "log_failed_to_get_absolute_path_scan": "获取绝对路径失败: %s",

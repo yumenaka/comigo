@@ -678,6 +678,7 @@
   "log_starting_tailscale_http_server": "Tailscale HTTPサーバーを起動中 %s:%d",
   "log_tailscale_server_stopped_successfully": "Tailscaleサーバーが正常に停止しました",
   "log_checking_book_files_exist": "書籍ファイルの存在を確認中...",
+  "log_checking_store_urls_exist": "書庫URLの存在を確認中...",
   "log_error_deleting_book": "書籍 %s の削除エラー: %s",
   "log_error_initializing_main_folder": "メインフォルダーの初期化エラー: %s",
   "log_failed_to_get_absolute_path_scan": "絶対パスの取得に失敗しました: %s",

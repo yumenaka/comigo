@@ -678,6 +678,7 @@
   "log_starting_tailscale_http_server": "Starting Tailscale HTTP server on %s:%d",
   "log_tailscale_server_stopped_successfully": "Tailscale server stopped successfully.",
   "log_checking_book_files_exist": "Checking book files exist...",
+  "log_checking_store_urls_exist": "Checking store URLs exist...",
   "log_error_deleting_book": "Error deleting book %s: %s",
   "log_error_initializing_main_folder": "Error initializing main folder: %s",
   "log_failed_to_get_absolute_path_scan": "Failed to get absolute path: %s",

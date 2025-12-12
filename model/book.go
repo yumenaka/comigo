@@ -145,19 +145,75 @@ func GetAllBooksNumber() int {
 // ClearBookNotExist  检查内存中的书的源文件是否存在，不存在就删掉
 func ClearBookNotExist() {
 	logger.Info(locale.GetString("log_checking_book_files_exist"))
-	var deletedBooks []string
 	// 遍历所有书籍
+	var deletedBooks []string
 	allBooks, err := IStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, book := range allBooks {
-		// 如果父文件夹存在，但书籍文件不存在，也说明这本书被删除了
+		// 如果父文件夹存在，但书籍文件不存在，说明这本书被删除了
 		if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
 			deletedBooks = append(deletedBooks, book.BookPath)
 			err := IStore.DeleteBook(book.BookID)
 			if err != nil {
 				logger.Infof(locale.GetString("log_error_deleting_book"), book.BookID, err)
+			}
+		}
+	}
+	// 重新生成书组
+	if len(deletedBooks) > 0 {
+		if err := IStore.GenerateBookGroup(); err != nil {
+			logger.Infof(locale.GetString("log_error_initializing_main_folder"), err)
+		}
+	}
+}
+
+// ClearBookWhenStoreUrlNotExist 清理书库中不存在的书籍源对应的书籍，传入的是当前存在的书籍源
+func ClearBookWhenStoreUrlNotExist(nowStoreUrls []string) {
+	logger.Info(locale.GetString("log_checking_store_urls_exist"))
+	// 遍历所有书籍
+	var deletedBooks []string
+	allBooks, err := IStore.ListBooks()
+	if err != nil {
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
+		return
+	}
+	// 如果传入的书库URL列表为空，清空所有书籍
+	if len(nowStoreUrls) == 0 {
+		for _, book := range allBooks {
+			deletedBooks = append(deletedBooks, book.BookPath)
+			err := IStore.DeleteBook(book.BookID)
+			if err != nil {
+				logger.Infof(locale.GetString("log_error_deleting_book"), book.BookID, err)
+			}
+		}
+	} else {
+		// 将传入的书库URL转换为绝对路径，用于后续比较
+		normalizedStoreUrls := make(map[string]bool, len(nowStoreUrls))
+		for _, storeUrl := range nowStoreUrls {
+			storePathAbs, err := filepath.Abs(storeUrl)
+			if err != nil {
+				logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
+				storePathAbs = storeUrl
+			}
+			normalizedStoreUrls[storePathAbs] = true
+		}
+		// 遍历所有书籍，删除不在当前书库列表中的书籍
+		for _, book := range allBooks {
+			// 将书籍的书库URL转换为绝对路径
+			bookStoreUrlAbs, err := filepath.Abs(book.StoreUrl)
+			if err != nil {
+				logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
+				bookStoreUrlAbs = book.StoreUrl
+			}
+			// 如果书籍的书库URL不在当前存在的书库列表中，删除该书籍
+			if !normalizedStoreUrls[bookStoreUrlAbs] {
+				deletedBooks = append(deletedBooks, book.BookPath)
+				err := IStore.DeleteBook(book.BookID)
+				if err != nil {
+					logger.Infof(locale.GetString("log_error_deleting_book"), book.BookID, err)
+				}
 			}
 		}
 	}
