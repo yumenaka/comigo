@@ -17,7 +17,7 @@ func main() {
 			return
 		}
 	}
-	// 初始化命令行flag与args，环境变量与配置文件
+	// 初始化命令行flag与args: 读取环境变量 -> 根据可执行文件名设置部分默认参数 -> 读取配置文件
 	cmd.Execute()
 	// 启动网页服务器（不阻塞）
 	routers.StartWebServer()

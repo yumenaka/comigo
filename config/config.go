@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
-	"path"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -17,7 +15,7 @@ import (
 
 // Config Comigo全局配置
 type Config struct {
-	AutoRescan             bool            `json:"AutoRescan" comment:"刷新页面时，是否自动重新扫描书籍是否存在"`
+	AutoRescan             bool            `json:"AutoRescan" comment:"是否定时重新扫描书籍是否存在"`
 	CacheDir               string          `json:"CacheDir" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	ClearCacheExit         bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	ClearDatabaseWhenExit  bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
@@ -468,25 +466,4 @@ func UpdateConfigByJson(jsonString string) error {
 		}
 	}
 	return nil
-}
-
-// SetByExecutableFilename 通过执行文件名设置默认网页模板参数
-func SetByExecutableFilename() {
-	// 获取可执行文件的名称
-	filenameWithSuffix := filepath.Base(os.Args[0])
-	fileSuffix := path.Ext(filenameWithSuffix)
-	filenameWithoutSuffix := strings.TrimSuffix(filenameWithSuffix, fileSuffix)
-
-	// 获取可执行文件所在目录
-	executablePath, err := os.Executable()
-	if err != nil {
-		logger.Infof(locale.GetString("log_error_getting_executable_path"), err)
-		return
-	}
-	executableDir := filepath.Dir(executablePath)
-
-	if cfg.Debug {
-		logger.Infof(locale.GetString("log_executable_name"), filenameWithoutSuffix)
-		logger.Infof(locale.GetString("log_executable_path"), executableDir)
-	}
 }
