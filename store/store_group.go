@@ -400,6 +400,7 @@ func (ramStore *StoreInRam) DeleteBook(id string) error {
 
 // TopOfShelfInfo 获取顶层书架信息
 func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
+	model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
 	model.ClearBookNotExist()
 	// 显示顶层书库的书籍
 	var topBookList model.BookInfos
@@ -448,6 +449,8 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 
 // GetChildBooksInfo 根据 ID 获取书籍列表
 func GetChildBooksInfo(BookID string) (*model.BookInfos, error) {
+	model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
+	model.ClearBookNotExist()
 	var infoList model.BookInfos
 	parentBook, err := model.IStore.GetBook(BookID)
 	if err != nil {
