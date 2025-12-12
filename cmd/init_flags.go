@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -11,6 +12,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // cobra & viper sample:
@@ -31,11 +33,6 @@ func InitFlags() {
 	cfg := config.GetCfg()
 	cobra.MousetrapHelpText = ""       // 屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 // "这是命令行程序"的提醒表示时间
-	// // 后台运行相关
-	// if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-	// 	RootCmd.PersistentFlags().BoolVar(&DemonFlag, "start", false, locale.GetString("start_in_background"))
-	// 	RootCmd.PersistentFlags().BoolVar(&StopDaemonFlag, "stop", false, locale.GetString("stop_background"))
-	// }
 	// 指定配置文件
 	RootCmd.PersistentFlags().StringVarP(&cfg.ConfigFile, "config", "c", "", locale.GetString("config"))
 	// 启用登陆保护，需要设定用户名
@@ -67,9 +64,6 @@ func InitFlags() {
 	}
 	// 打开浏览器
 	RootCmd.PersistentFlags().BoolVarP(&cfg.OpenBrowser, "open-browser", "o", false, locale.GetString("open_browser"))
-	if runtime.GOOS == "windows" {
-		cfg.OpenBrowser = true
-	}
 	// 不对局域网开放
 	RootCmd.PersistentFlags().BoolVar(&cfg.DisableLAN, "local", false, locale.GetString("disable_lan"))
 	// 文件搜索深度
@@ -87,7 +81,7 @@ func InitFlags() {
 	// 图片缓存路径
 	RootCmd.PersistentFlags().StringVar(&cfg.CacheDir, "cache-dir", "", locale.GetString("cache_file_dir"))
 	// 退出时清除缓存
-	RootCmd.PersistentFlags().BoolVar(&cfg.ClearCacheExit, "cache-clean", true, locale.GetString("cache_file_clean"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.ClearCacheExit, "cache-clean", false, locale.GetString("cache_file_clean"))
 	// 手动指定zip文件编码 gbk、shiftjis……
 	RootCmd.PersistentFlags().StringVar(&cfg.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("zip_encode"))
 	// 启用Tailscale服务
@@ -105,7 +99,7 @@ func InitFlags() {
 	// ReadOnlyMode 只读模式，禁止网页端修改配置或上传文件
 	RootCmd.PersistentFlags().BoolVar(&cfg.ReadOnlyMode, "read-only", false, locale.GetString("read_only_mode"))
 	// EnableSingleInstance 启用单实例模式
-	RootCmd.PersistentFlags().BoolVar(&cfg.EnableSingleInstance, "single-instance", true, locale.GetString("enable_single_instance"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnableSingleInstance, "single-instance", false, locale.GetString("enable_single_instance"))
 	// Language 语言设置
 	RootCmd.PersistentFlags().StringVar(&cfg.Language, "lang", "auto", locale.GetString("lang"))
 	// Windows 右键菜单注册/卸载，仅在 Windows 下生效
@@ -115,4 +109,142 @@ func InitFlags() {
 	}
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
+}
+
+// SetByExecutableFilename 根据可执行文件名或软链接名自动设置部分配置项的默认值。
+// 该函数会检查可执行文件的名称（在类Unix系统中，如果通过软链接调用，会获取软链接名），
+// 并根据文件名中包含的关键词自动设置相应的配置项。
+//
+// 支持的配置项及对应的文件名关键词：
+//
+//   - 阅读模式：
+//
+//   - "flip" → 设置为翻页模式
+//
+//   - "scroll" → 设置为滚动模式
+//
+//   - 布尔值配置项（文件名包含关键词时启用）：
+//
+//   - "rescan" → 启用自动扫描 (AutoRescan)
+//
+//   - "database" → 启用数据库 (EnableDatabase)
+//
+//   - "enable-upload" 或 "upload" → 启用文件上传 (EnableUpload)
+//
+//   - "local" → 仅本地访问，不对局域网开放 (DisableLAN)
+//
+//   - "generate-metadata" 或 "metadata" → 生成元数据 (GenerateMetaData)
+//
+//   - "log-file" 或 "logfile" → 输出日志文件 (LogToFile)
+//
+//   - "use-cache" 或 "cache" → 启用缓存 (UseCache)
+//
+//   - "cache-clean" 或 "cleancache" → 退出时清除缓存 (ClearCacheExit)
+//
+//   - "read-only" 或 "readonly" → 启用只读模式 (ReadOnlyMode)
+//
+//   - "single-instance" 或 "singleinstance" → 启用单实例模式 (EnableSingleInstance)
+//
+//   - "open-browser" → 打开浏览器 (OpenBrowser)
+//
+//   - "debug" → 启用调试模式 (Debug)
+//
+//   - 语言设置：
+//
+//   - "zh" 或 "chinese" → 设置为中文 (Language = "zh")
+//
+//   - "en" 或 "english" → 设置为英文 (Language = "en")
+//
+//   - "ja" 或 "japanese" → 设置为日文 (Language = "ja")
+//
+// 特殊行为：
+//   - 在 Windows 系统上，默认会启用 OpenBrowser（打开浏览器）
+//   - 在 Windows 系统上，文件名会移除 .exe 或 .EXE 后缀（保持原始大小写）
+//   - 关键词匹配是大小写不敏感的
+//
+// 使用示例：
+//   - 可执行文件名为 "comigo-rescan" → 启用自动扫描
+//   - 可执行文件名为 "comigo-open-browser-zh" → 打开浏览器并设置语言为中文
+//   - 可执行文件名为 "comigo-readonly" → 启用只读模式
+//   - 软链接名为 "comigo-flip" → 设置默认阅读模式为翻页模式
+func SetByExecutableFilename() {
+	// 获取可执行文件的名称,如果在类Unix系统里通过软链接调用,会拿到"软链接名"（也就是别名）
+	filename := filepath.Base(os.Args[0])
+	// 在 Windows 系统上，移除 .exe 或 .EXE 后缀（保持原始大小写）
+	if runtime.GOOS == "windows" {
+		filename = strings.TrimSuffix(filename, ".exe")
+		filename = strings.TrimSuffix(filename, ".EXE")
+	}
+	// 转换为小写用于大小写不敏感的匹配
+	filenameLower := strings.ToLower(filename)
+	cfg := config.GetCfg()
+	// 默认阅读模式设置
+	if strings.Contains(filenameLower, "flip") {
+		cfg.DefaultMode = "flip"
+	} else if strings.Contains(filenameLower, "scroll") {
+		cfg.DefaultMode = "scroll"
+	}
+	// Windows 默认打开浏览器
+	if runtime.GOOS == "windows" {
+		cfg.OpenBrowser = true
+	}
+	// 打开浏览器
+	if strings.Contains(filenameLower, "open-browser") {
+		cfg.OpenBrowser = true
+	}
+	// Debug 模式
+	if strings.Contains(filenameLower, "debug") {
+		cfg.Debug = true
+	}
+	// 自动扫描
+	if strings.Contains(filenameLower, "rescan") {
+		cfg.AutoRescan = true
+	}
+	// 启用数据库
+	if strings.Contains(filenameLower, "database") {
+		cfg.EnableDatabase = true
+	}
+	// 启用文件上传
+	if strings.Contains(filenameLower, "enable-upload") || strings.Contains(filenameLower, "upload") {
+		cfg.EnableUpload = true
+	}
+	// 仅本地访问
+	if strings.Contains(filenameLower, "local") {
+		cfg.DisableLAN = true
+	}
+	// 生成元数据
+	if strings.Contains(filenameLower, "generate-metadata") || strings.Contains(filenameLower, "metadata") {
+		cfg.GenerateMetaData = true
+	}
+	// 输出日志文件
+	if strings.Contains(filenameLower, "log-file") || strings.Contains(filenameLower, "logfile") {
+		cfg.LogToFile = true
+	}
+	// 启用缓存
+	if strings.Contains(filenameLower, "use-cache") || strings.Contains(filenameLower, "cache") {
+		cfg.UseCache = true
+	}
+	// 退出时清除缓存
+	if strings.Contains(filenameLower, "cache-clean") || strings.Contains(filenameLower, "cleancache") {
+		cfg.ClearCacheExit = true
+	}
+	// 只读模式
+	if strings.Contains(filenameLower, "read-only") || strings.Contains(filenameLower, "readonly") {
+		cfg.ReadOnlyMode = true
+	}
+	// 单实例模式
+	if strings.Contains(filenameLower, "single-instance") || strings.Contains(filenameLower, "singleinstance") {
+		cfg.EnableSingleInstance = true
+	}
+	// 语言设置
+	if strings.Contains(filenameLower, "zh") || strings.Contains(filenameLower, "chinese") {
+		cfg.Language = "zh"
+	} else if strings.Contains(filenameLower, "en") || strings.Contains(filenameLower, "english") {
+		cfg.Language = "en"
+	} else if strings.Contains(filenameLower, "ja") || strings.Contains(filenameLower, "japanese") {
+		cfg.Language = "ja"
+	}
+	if cfg.Debug {
+		logger.Infof(locale.GetString("log_executable_name"), filename)
+	}
 }
