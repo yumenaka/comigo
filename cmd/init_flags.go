@@ -39,8 +39,8 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVar(&cfg.Username, "username", "", locale.GetString("username"))
 	RootCmd.PersistentFlags().StringVar(&cfg.Password, "password", "", locale.GetString("password"))
 	RootCmd.PersistentFlags().IntVar(&cfg.Timeout, "timeout", 60*24*30, locale.GetString("timeout"))
-	// 启用自动扫描
-	RootCmd.PersistentFlags().BoolVar(&cfg.AutoRescan, "rescan", true, locale.GetString("rescan"))
+	// 启用自动扫描，间隔时间，单位分钟，0为不启用
+	RootCmd.PersistentFlags().IntVar(&cfg.AutoRescanIntervalMinutes, "auto-rescan-min", 0, locale.GetString("auto_rescan_interval_minutes"))
 	// 启用数据库，保存扫描数据
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableDatabase, "database", false, locale.GetString("enable_database"))
 	// 服务端口
@@ -166,7 +166,6 @@ func InitFlags() {
 //   - 可执行文件名为 "comigo-rescan" → 启用自动扫描
 //   - 可执行文件名为 "comigo-open-browser-zh" → 打开浏览器并设置语言为中文
 //   - 可执行文件名为 "comigo-readonly" → 启用只读模式
-//   - 软链接名为 "comigo-flip" → 设置默认阅读模式为翻页模式
 func SetByExecutableFilename() {
 	// 获取可执行文件的名称,如果在类Unix系统里通过软链接调用,会拿到"软链接名"（也就是别名）
 	filename := filepath.Base(os.Args[0])
@@ -178,12 +177,6 @@ func SetByExecutableFilename() {
 	// 转换为小写用于大小写不敏感的匹配
 	filenameLower := strings.ToLower(filename)
 	cfg := config.GetCfg()
-	// 默认阅读模式设置
-	if strings.Contains(filenameLower, "flip") {
-		cfg.DefaultMode = "flip"
-	} else if strings.Contains(filenameLower, "scroll") {
-		cfg.DefaultMode = "scroll"
-	}
 	// Windows 默认打开浏览器
 	if runtime.GOOS == "windows" {
 		cfg.OpenBrowser = true
@@ -196,9 +189,11 @@ func SetByExecutableFilename() {
 	if strings.Contains(filenameLower, "debug") {
 		cfg.Debug = true
 	}
-	// 自动扫描
-	if strings.Contains(filenameLower, "rescan") {
-		cfg.AutoRescan = true
+	// 自动扫描间隔
+	if strings.Contains(filenameLower, "autorescan") {
+		if cfg.AutoRescanIntervalMinutes == 0 {
+			cfg.AutoRescanIntervalMinutes = 60 // 默认60分钟
+		}
 	}
 	// 启用数据库
 	if strings.Contains(filenameLower, "database") {
@@ -233,7 +228,7 @@ func SetByExecutableFilename() {
 		cfg.ReadOnlyMode = true
 	}
 	// 单实例模式
-	if strings.Contains(filenameLower, "single-instance") || strings.Contains(filenameLower, "singleinstance") {
+	if strings.Contains(filenameLower, "comigo") || strings.Contains(filenameLower, "single-instance") || strings.Contains(filenameLower, "singleinstance") {
 		cfg.EnableSingleInstance = true
 	}
 	// 语言设置

@@ -281,9 +281,11 @@ linux_i386_cgo_docker:
 Windows_x86_64:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
+	cp resource.syso cmd/comi/resource.syso
 	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
+	rm  cmd/comi/resource.syso
 	rm  resource.syso 
 
 # 64位Windows + system_tray	$(NAME)_$(VERSION)_$@
@@ -299,9 +301,11 @@ Windows_x86_64_full:
 Windows_i386:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=386 GOOS=windows go generate
+	cp resource.syso cmd/comi/resource.syso
 	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
+	rm  cmd/comi/resource.syso
 	rm   resource.syso
 
 # 32位Windows + system_tray
