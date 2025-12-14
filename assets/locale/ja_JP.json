@@ -785,5 +785,17 @@
   "err_failed_to_read_embedded_image": "埋め込み画像の読み込みに失敗しました: %v",
   "err_failed_to_read_embedded_data": "埋め込みデータの読み込みに失敗しました: %v",
   "scroll_wheel_flip": "ホイールページめくり",
-  "open_in_new_tab": "新しいタブで開く"
+  "open_in_new_tab": "新しいタブで開く",
+  "auto_rescan_interval_minutes": "自動再スキャン間隔",
+  "auto_rescan_interval_minutes_desc": "分単位。0を指定すると自動スキャンを無効にします",
+  "log_scheduler_task_still_running_skip": "前のスキャンタスクがまだ実行中です。このスキャンをスキップします",
+  "log_scheduler_task_execution_failed": "スケジュールされたスキャンタスクの実行に失敗しました: %v",
+  "log_scheduler_task_execution_completed": "スケジュールされたスキャンタスクの実行が完了しました",
+  "log_scheduler_interval_zero_no_scheduled_scan": "スキャン間隔が0のため、スケジュールされたスキャンは実行しません",
+  "log_scheduler_stop_task_failed": "スケジュールされたタスクの停止に失敗しました: %v",
+  "log_scheduler_stop_old_task_failed": "古いスケジュールされたタスクの停止に失敗しました: %v",
+  "log_scheduler_create_scheduler_failed": "スケジューラーの作成に失敗しました: %v",
+  "log_scheduler_create_task_failed": "スケジュールされたタスクの作成に失敗しました: %v",
+  "log_scheduler_task_started": "スケジュールされたスキャンタスクが開始されました。間隔: %d 分",
+  "log_scheduler_task_stopped": "スケジュールされたスキャンタスクが停止しました"
 }

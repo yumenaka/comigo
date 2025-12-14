@@ -785,5 +785,17 @@
   "err_failed_to_read_embedded_image": "Failed to read embedded image: %v",
   "err_failed_to_read_embedded_data": "Failed to read embedded data: %v",
   "scroll_wheel_flip": "Scroll Wheel Flip",
-  "open_in_new_tab": "Open in New Tab"
+  "open_in_new_tab": "Open in New Tab",
+  "auto_rescan_interval_minutes": "Automatic rescan interval",
+  "auto_rescan_interval_minutes_desc": "In minutes. Set to 0 to disable automatic scanning",
+  "log_scheduler_task_still_running_skip": "Previous scan task is still running, skipping this scan",
+  "log_scheduler_task_execution_failed": "Scheduled scan task execution failed: %v",
+  "log_scheduler_task_execution_completed": "Scheduled scan task execution completed",
+  "log_scheduler_interval_zero_no_scheduled_scan": "Scan interval is 0, no scheduled scanning",
+  "log_scheduler_stop_task_failed": "Failed to stop scheduled task: %v",
+  "log_scheduler_stop_old_task_failed": "Failed to stop old scheduled task: %v",
+  "log_scheduler_create_scheduler_failed": "Failed to create scheduler: %v",
+  "log_scheduler_create_task_failed": "Failed to create scheduled task: %v",
+  "log_scheduler_task_started": "Scheduled scan task started, interval: %d minutes",
+  "log_scheduler_task_stopped": "Scheduled scan task stopped"
 }
