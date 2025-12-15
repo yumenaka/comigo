@@ -27,7 +27,7 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		Args = args
 		// 通过“可执行文件名”设置部分默认参数,目前不生效
-		config.SetByExecutableFilename()
+		SetByExecutableFilename()
 		// 设置临时文件夹
 		config.AutoSetCacheDir()
 

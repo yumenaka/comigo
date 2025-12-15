@@ -20,7 +20,7 @@ func ShowQRCode() {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	if len(allBooks) == 1 {
-		etcStr = fmt.Sprintf("/#/%s/%s", config.GetCfg().DefaultMode, allBooks[0].BookID)
+		etcStr = fmt.Sprintf("/#/%s/%s", "scroll", allBooks[0].BookID)
 	}
 
 	// 判断是否启用 TLS
