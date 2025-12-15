@@ -127,7 +127,7 @@ package scan
 // 		})
 // 	// 所有可用书籍，包括压缩包与文件夹
 // 	if len(newBookList) > 0 {
-// 		logger.Infof(locale.GetString("found_in_path"), scanOption.Cfg.GetStores()[0].Smb.ShareName, len(newBookList))
+// 		logger.Infof(locale.GetString("library_new_books_found"), scanOption.Cfg.GetStores()[0].Smb.ShareName, len(newBookList))
 // 		return newBookList, err
 // 	}
 // 	return nil, errors.New("NO_BOOKS_FOUND in SMB:" + scanOption.Cfg.GetStores()[0].Smb.ShareName)

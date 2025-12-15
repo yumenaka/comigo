@@ -28,7 +28,6 @@ var cfg = Config{
 	ClearCacheExit:        true,
 	ClearDatabaseWhenExit: true,
 	DisableLAN:            false,
-	DefaultMode:           "scroll",
 	EnableUpload:          true,
 	EnableDatabase:        false,
 	EnableTLS:             false,

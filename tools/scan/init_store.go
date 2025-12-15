@@ -2,6 +2,7 @@ package scan
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,6 +28,10 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 
 	// 如果书库URL对应一个文件，返回一本书
 	if tools.IsFile(storePathAbs) && IsSupportFile(storePathAbs) {
+		// 如果书库里已经有这本书，跳过
+		if checkBookInStore(storePathAbs, storePathAbs) {
+			return nil
+		}
 		book, err := scanFileGetBook(storePathAbs, storePathAbs, 0)
 		if err != nil {
 			return err
@@ -112,7 +117,10 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 			logger.Infof(locale.GetString("exceeds_maximum_depth")+" %d, base: %s, scan: %s", cfg.GetMaxScanDepth(), storePathAbs, file.Path)
 			continue
 		}
-
+		// 如果书库里已经有这本书，跳过
+		if checkBookInStore(storePathAbs, file.Path) {
+			continue
+		}
 		// 扫描文件
 		book, err := scanFileGetBook(file.Path, storePathAbs, depth)
 		if err != nil {
@@ -123,8 +131,31 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 	}
 
 	if len(newBookList) > 0 {
-		logger.Infof(locale.GetString("found_in_path"), storePathAbs, len(newBookList))
+		logger.Infof(locale.GetString("library_new_books_found"), storePathAbs, len(newBookList))
 	}
 	AddBooksToStore(newBookList)
 	return nil
+}
+
+func checkBookInStore(storePathAbs string, filePathAbs string) bool {
+	bookInStore, err := getBookByPath(storePathAbs, filePathAbs)
+	if err != nil || bookInStore == nil {
+		return false
+	}
+	logger.Infof(locale.GetString("log_book_data_already_exists"), bookInStore.BookID, filePathAbs)
+	return true
+}
+
+// getBookByPath 获取指定路径的书籍
+func getBookByPath(storePath string, filePath string) (*model.Book, error) {
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
+	}
+	for _, b := range allBooks {
+		if b.StoreUrl == storePath && b.BookPath == filePath {
+			return b, nil
+		}
+	}
+	return nil, fmt.Errorf("err_getbook_cannot_find_by_path")
 }

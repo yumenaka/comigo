@@ -151,7 +151,7 @@ package scan
 // 	// })
 // 	// // 所有可用书籍，包括压缩包与文件夹
 // 	// if len(newBookList) > 0 {
-// 	//	logger.Infof(locale.GetString("found_in_path"), storePathAbs, len(newBookList))
+// 	//	logger.Infof(locale.GetString("library_new_books_found"), storePathAbs, len(newBookList))
 // 	// }
 // 	// return newBookList, err
 // 	return newBookList, err

@@ -171,7 +171,7 @@ func ClearBookNotExist() {
 
 // ClearBookWhenStoreUrlNotExist 清理书库中不存在的书籍源对应的书籍，传入的是当前存在的书籍源
 func ClearBookWhenStoreUrlNotExist(nowStoreUrls []string) {
-	logger.Info(locale.GetString("log_checking_store_urls_exist"))
+	logger.Info(locale.GetString("log_checking_store_exist"))
 	// 遍历所有书籍
 	var deletedBooks []string
 	allBooks, err := IStore.ListBooks()

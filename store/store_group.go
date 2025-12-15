@@ -219,6 +219,9 @@ func (ramStore *StoreInRam) LoadBooks() error {
 				continue // 跳过这本书，继续处理其他书籍
 			}
 			loadedCount++
+			if loadedCount%50 == 0 {
+				logger.Infof(locale.GetString("log_loaded_books_so_far"), loadedCount, cacheDir)
+			}
 		}
 		logger.Infof(locale.GetString("log_successfully_loaded_books"), loadedCount, cacheDir)
 	}
@@ -318,7 +321,7 @@ func (ramStore *StoreInRam) GetArchiveBooks() []*model.Book {
 // GetBook 根据 BookID 获取书籍
 // GetBookByID 根据 BookID 获取书籍
 func (ramStore *StoreInRam) GetBook(id string) (*model.Book, error) {
-	// 遍历 ChildStores ，删除指定 ID 的书籍
+	// 遍历 ChildStores ，获取指定 ID 的书籍
 	for _, value := range ramStore.ChildStores.Range {
 		childStore := value.(*Store)
 		if value, ok := childStore.BookMap.Load(id); ok {
@@ -434,7 +437,7 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 		for _, b := range allBooks {
 			if b.StoreUrl == storePathAbs && b.Type != model.TypeBooksGroup {
 				childBookNum++
-				//logger.Infof("[%v]Counting book %s in store %s, BookID=%s", childBookNum, b.Title, storePathAbs, b.BookID)
+				// logger.Infof("[%v]Counting book %s in store %s, BookID=%s", childBookNum, b.Title, storePathAbs, b.BookID)
 			}
 		}
 		newStoreBookInfo.ChildBookNum = childBookNum

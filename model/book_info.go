@@ -73,7 +73,7 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 			continue
 		}
 		if exitBook.BookPath == path && (exitBook.Type == b.Type) {
-			return nil, fmt.Errorf(locale.GetString("err_book_data_already_exists"), exitBook.BookID, bookPath)
+			return nil, fmt.Errorf(locale.GetString("log_book_data_already_exists"), exitBook.BookID, bookPath)
 		}
 	}
 	// 生成 BookID 的字符串
