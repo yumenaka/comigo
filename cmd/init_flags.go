@@ -39,7 +39,7 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVar(&cfg.Username, "username", "", locale.GetString("username"))
 	RootCmd.PersistentFlags().StringVar(&cfg.Password, "password", "", locale.GetString("password"))
 	RootCmd.PersistentFlags().IntVar(&cfg.Timeout, "timeout", 60*24*30, locale.GetString("timeout"))
-	// 启用自动扫描，间隔时间，单位分钟，0为不启用
+	// 启用自动扫描间隔，单位分钟，0为禁用自动扫描
 	RootCmd.PersistentFlags().IntVar(&cfg.AutoRescanIntervalMinutes, "auto-rescan-min", 0, locale.GetString("auto_rescan_interval_minutes"))
 	// 启用数据库，保存扫描数据
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableDatabase, "database", false, locale.GetString("enable_database"))

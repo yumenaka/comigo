@@ -15,8 +15,7 @@ import (
 
 // Config Comigo全局配置
 type Config struct {
-	AutoRescan                bool            `json:"AutoRescan" comment:"是否定时重新扫描书籍是否存在"`
-	AutoRescanIntervalMinutes int             `json:"AutoRescanIntervalMinutes" comment:"定时重新扫描书籍的时间。单位为分钟。默认设为 0 ，表示禁用定期自动扫描。"`
+	AutoRescanIntervalMinutes int             `json:"AutoRescanIntervalMinutes" comment:"定期扫描书库间隔。单位为分钟。默认为 0，表示禁用自动定期扫描。"`
 	CacheDir                  string          `json:"CacheDir" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	ClearCacheExit            bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	ClearDatabaseWhenExit     bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
@@ -376,10 +375,10 @@ func UpdateConfigByJson(jsonString string) error {
 			if v, ok := value.(bool); ok {
 				cfg.DisableLAN = v
 			}
-		//case "DefaultMode":
-		//	if v, ok := value.(string); ok {
-		//		cfg.DefaultMode = v
-		//	}
+		case "AutoRescanIntervalMinutes":
+			if v, ok := value.(float64); ok {
+				cfg.AutoRescanIntervalMinutes = int(v)
+			}
 		case "LogToFile":
 			if v, ok := value.(bool); ok {
 				cfg.LogToFile = v
