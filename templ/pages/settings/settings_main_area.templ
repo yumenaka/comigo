@@ -45,10 +45,6 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 					</div>
 				</div>
 			}
-			<!-- 管理账号密码 -->
-			@UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password)
-			<!-- 远程连接 -->
-			@RemoteAccessConfig(tsStatus)
 			<!-- 书库设置 -->
 			<div
 				id="settings_stores"
@@ -57,15 +53,11 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<div x-text={ getTranslations("settings_stores") } class="w-full text-center"></div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 				@StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", false)
-				@NumberConfig("MaxScanDepth", config.GetCfg().MaxScanDepth, "MaxScanDepth_Description", 0, 65535, false)
-				@NumberConfig("MinImageNum", config.GetCfg().MinImageNum, "MinImageNum_Description", 0, 65535, false)
-				@BoolConfig("OpenBrowser", config.GetCfg().OpenBrowser, "OpenBrowser_Description", false)
-				@BoolConfig("EnableUpload", config.GetCfg().EnableUpload, "EnableUpload_Description", false)
-				@StringConfig("UploadPath", config.GetCfg().UploadPath, "UploadPath_Description", false)
-				@StringArrayConfig("ExcludePath", config.GetCfg().ExcludePath, "ExcludePath_Description", false)
-				@StringArrayConfig("SupportMediaType", config.GetCfg().SupportMediaType, "SupportMediaType_Description", false)
-				@StringArrayConfig("SupportFileType", config.GetCfg().SupportFileType, "SupportFileType_Description", false)
 			</div>
+			<!-- 管理账号密码 -->
+			@UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password)
+			<!-- 远程连接 -->
+			@RemoteAccessConfig(tsStatus)
 			<!-- 网络设置 -->
 			<div
 				id="settings_network"
@@ -78,7 +70,22 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				@BoolConfig("DisableLAN", config.GetCfg().DisableLAN, "DisableLAN_Description", false)
 				@NumberConfig("Timeout", config.GetCfg().Timeout, "Timeout_Description", 0, 65535, false)
 			</div>
-			<!-- 保存toml设置文件 -->
+			<!-- 其他设置 -->
+			<div
+				id="settings_stores"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			>
+				<div x-text={ getTranslations("other_settings") } class="w-full text-center"></div>
+				@NumberConfig("MaxScanDepth", config.GetCfg().MaxScanDepth, "MaxScanDepth_Description", 0, 65535, false)
+				@NumberConfig("MinImageNum", config.GetCfg().MinImageNum, "MinImageNum_Description", 0, 65535, false)
+				@BoolConfig("OpenBrowser", config.GetCfg().OpenBrowser, "OpenBrowser_Description", false)
+				@BoolConfig("EnableUpload", config.GetCfg().EnableUpload, "EnableUpload_Description", false)
+				@StringConfig("UploadPath", config.GetCfg().UploadPath, "UploadPath_Description", false)
+				@StringArrayConfig("ExcludePath", config.GetCfg().ExcludePath, "ExcludePath_Description", false)
+				@StringArrayConfig("SupportMediaType", config.GetCfg().SupportMediaType, "SupportMediaType_Description", false)
+				@StringArrayConfig("SupportFileType", config.GetCfg().SupportFileType, "SupportFileType_Description", false)
+			</div>
+			<!-- 配置文件管理 -->
 			@ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(),
 				config.GetHomeDirectoryConfig(),
 				config.GetProgramDirectoryConfig())

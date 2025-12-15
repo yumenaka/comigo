@@ -103,6 +103,7 @@ templ HeaderTitle(prop HeaderProps) {
 		if (prop.QuickJumpBarBooks != nil) {
 			<button
 				id="quickJumpBarDropdownButton"
+				title={ prop.Title }
 				x-show="$store.global.onlineBook"
 				data-dropdown-toggle="QuickJumpDropdown"
 				data-dropdown-trigger="click"
@@ -136,6 +137,7 @@ templ HeaderTitle(prop HeaderProps) {
 		} else {
 			if (prop.DownLoadLink != "") {
 				<span
+					title={ prop.Title }
 					class="text-lg font-semibold text-blue-700/90 hover:underline"
 					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 					x-init="$nextTick(() => {document.title = $el.innerText + version});"
@@ -144,6 +146,7 @@ templ HeaderTitle(prop HeaderProps) {
 				</span>
 			} else {
 				<span
+					title={ prop.Title }
 					class="text-lg font-semibold"
 					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 					x-init="$nextTick(() => {document.title = $el.innerText + version});"

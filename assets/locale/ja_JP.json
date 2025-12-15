@@ -798,5 +798,6 @@
   "log_scheduler_create_scheduler_failed": "スケジューラーの作成に失敗しました: %v",
   "log_scheduler_create_task_failed": "スケジュールされたタスクの作成に失敗しました: %v",
   "log_scheduler_task_started": "スケジュールされたスキャンタスクが開始されました。間隔: %d 分",
-  "log_scheduler_task_stopped": "スケジュールされたスキャンタスクが停止しました"
+  "log_scheduler_task_stopped": "スケジュールされたスキャンタスクが停止しました",
+  "other_settings": "その他の設定"
 }
