@@ -798,5 +798,6 @@
   "log_scheduler_create_scheduler_failed": "Failed to create scheduler: %v",
   "log_scheduler_create_task_failed": "Failed to create scheduled task: %v",
   "log_scheduler_task_started": "Scheduled scan task started, interval: %d minutes",
-  "log_scheduler_task_stopped": "Scheduled scan task stopped"
+  "log_scheduler_task_stopped": "Scheduled scan task stopped",
+  "other_settings": "Other Settings"
 }

@@ -798,5 +798,6 @@
   "log_scheduler_create_scheduler_failed": "创建调度器失败: %v",
   "log_scheduler_create_task_failed": "创建定时任务失败: %v",
   "log_scheduler_task_started": "定时扫描任务已启动，间隔: %d 分钟",
-  "log_scheduler_task_stopped": "定时扫描任务已停止"
+  "log_scheduler_task_stopped": "定时扫描任务已停止",
+  "other_settings": "其他设置"
 }
