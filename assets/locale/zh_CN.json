@@ -788,6 +788,7 @@
   "scroll_wheel_flip": "鼠标滚轮翻页",
   "open_in_new_tab": "新标签页打开",
   "auto_rescan_interval_minutes": "自动重新扫描间隔",
+  "AutoRescanIntervalMinutes":  "自动重新扫描间隔",
   "auto_rescan_interval_minutes_desc": "定期扫描书库间隔。单位为分钟。默认为 0，表示禁用自动定期扫描",
   "log_scheduler_task_still_running_skip": "上一个扫描任务仍在执行中，跳过本次扫描",
   "log_scheduler_task_execution_failed": "定时扫描任务执行失败: %v",

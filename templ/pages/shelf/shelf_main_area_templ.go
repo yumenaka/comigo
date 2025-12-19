@@ -153,11 +153,11 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = settings.StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = settings.StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><script>\n\t\t\t// htmx出错时报错（Toast）\n\t\t\tdocument.addEventListener(\"htmx:responseError\", (event) => {\n\t\t\t\tshowToast(\n\t\t\t\t\tevent.detail.xhr.statusText + \": \" + event.detail.xhr.responseURL,\n\t\t\t\t\t\"error\",\n\t\t\t\t);\n\t\t\t});\n\t\t\t// 删除字符串数组配置中的元素。此处仅用作打印调试信息。删除操作是由 htmx 完成的。\n\t\t\tfunction deleteStringConfigValue(e) {\n\t\t\t\tconst configName = e.getAttribute(\"data-config-name\");\n\t\t\t\tconst arrawIndex = e.getAttribute(\"data-arraw-index\");\n\t\t\t\tconst deleteValue = e.getAttribute(\"data-delete-value\");\n\t\t\t\tconsole.log(configName, arrawIndex, deleteValue);\n\t\t\t}\n\t\t\t// 添加字符串数组配置中的元素\n\t\t\t// 此函数的作用，是修改 hx-vals 的值。实际的提交操作是由 htmx 完成的\n\t\t\tfunction addStringConfigValue(e) {\n\t\t\t\tconst buttonID = e.getAttribute(\"id\");\n\t\t\t\tconst configName = buttonID.replace(\"StringArrayAddButton\", \"\");\n\t\t\t\tconst addValue = document.getElementById(configName + \"AddInput\").value;\n\t\t\t\tconsole.log(configName, addValue);\n\t\t\t\te.setAttribute(\n\t\t\t\t\t\"hx-vals\",\n\t\t\t\t\tJSON.stringify({ configName: configName, addValue: addValue }),\n\t\t\t\t);\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><script>\n\t\t\t// 全局错误处理：捕获 fetch 错误并显示 Toast\n\t\t\twindow.addEventListener(\"unhandledrejection\", (event) => {\n\t\t\t\tif (event.reason && event.reason.message) {\n\t\t\t\t\tshowToast(event.reason.message, \"error\");\n\t\t\t\t}\n\t\t\t});\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

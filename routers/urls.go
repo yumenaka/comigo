@@ -130,7 +130,6 @@ func bindProtectedAPI(group *echo.Group) {
 	websocket.WsDebug = &config.GetCfg().Debug
 	group.GET("/ws", websocket.WsHandler)
 
-	// 新加的 HTMX 相关路由
 	// 字符串、布尔值、数字配置的更改
 	group.POST("/update-string-config", settings.UpdateStringConfigHandler)
 	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)

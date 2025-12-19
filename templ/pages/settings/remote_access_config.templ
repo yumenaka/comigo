@@ -427,8 +427,53 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 	<div
 		id="tailscale_status_panel"
-		x-init="UpdateTailscaleStatus()"
-		hx-trigger="load[document.visibilityState === 'visible',enable_tailscale] delay:1s"
+		x-init="
+			// 初始化时立即更新一次状态
+			UpdateTailscaleStatus();
+			// 设置自动刷新定时器，当页面可见且启用 Tailscale 时，每 1.5 秒刷新一次
+			let refreshInterval = null;
+			const getEnableTailscale = () => {
+				const checkbox = document.getElementById('EnableTailscale');
+				return checkbox ? checkbox.checked : false;
+			};
+			const startAutoRefresh = () => {
+				if (refreshInterval) return;
+				refreshInterval = setInterval(() => {
+					if (document.visibilityState === 'visible' && getEnableTailscale()) {
+						UpdateTailscaleStatus();
+					}
+				}, 1500);
+			};
+			const stopAutoRefresh = () => {
+				if (refreshInterval) {
+					clearInterval(refreshInterval);
+					refreshInterval = null;
+				}
+			};
+			// 监听页面可见性变化
+			document.addEventListener('visibilitychange', () => {
+				if (document.visibilityState === 'visible' && getEnableTailscale()) {
+					startAutoRefresh();
+				} else {
+					stopAutoRefresh();
+				}
+			});
+			// 监听 EnableTailscale checkbox 变化
+			const enableCheckbox = document.getElementById('EnableTailscale');
+			if (enableCheckbox) {
+				enableCheckbox.addEventListener('change', () => {
+					if (enableCheckbox.checked && document.visibilityState === 'visible') {
+						startAutoRefresh();
+					} else {
+						stopAutoRefresh();
+					}
+				});
+			}
+			// 初始启动（如果条件满足）
+			if (getEnableTailscale() && document.visibilityState === 'visible') {
+				setTimeout(() => startAutoRefresh(), 1000);
+			}
+		"
 		class="flex flex-col justify-start w-full mx-0 my-2 px-4 pt-2 pb-4 font-normal text-base border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<div class="flex flex-row w-full mb-2 justify-center items-center" @click="UpdateTailscaleStatus">

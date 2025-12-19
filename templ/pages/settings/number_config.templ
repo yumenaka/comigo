@@ -2,15 +2,11 @@ package settings
 
 import "strconv"
 
-templ NumberConfig(name string, value int, description string, min int, max int, saveSuccessHint bool) {
-	if saveSuccessHint {
-		<div
-			class="hidden"
-			x-init="showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {
-            window.location.reload();
-        }, 2000)"
-		></div>
-	}
+// numberConfigScriptHandle 用于防止 JS 代码重复渲染
+var numberConfigScriptHandle = templ.NewOnceHandle()
+
+// NumberConfig 数字类型的配置
+templ NumberConfig(name string, value int, description string, min int, max int) {
 	<div
 		id={ "numberConfig_" + name }
 		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
@@ -25,13 +21,83 @@ templ NumberConfig(name string, value int, description string, min int, max int,
 			value={ strconv.Itoa(value) }
 			max={ strconv.Itoa(max) }
 			min={ strconv.Itoa(min) }
-			hx-post="/api/update-number-config"
-			hx-trigger="change"
-			hx-target={ "#numberConfig_" + name }
-			hx-swap="outerHTML"
-			hx-params="*"
+			data-original-value={ strconv.Itoa(value) }
+			x-on:change={ "updateNumberConfig('" + name + "', $event.target.value, " + strconv.Itoa(min) + ", " + strconv.Itoa(max) + ")" }
 		/>
 		<div class="w-full py-1 text-left text-xs text-gray-500" x-text={ getTranslations(description) }></div>
 		<div class="bg-red-600"></div>
 	</div>
+	@numberConfigScriptHandle.Once() {
+		<script>
+			// 更新数字配置的函数
+			async function updateNumberConfig(name, value, min, max) {
+				// 验证数值范围
+				const numValue = parseInt(value);
+				if (isNaN(numValue)) {
+					showToast("请输入有效的数字", "error");
+					return;
+				}
+				if (numValue < min || numValue > max) {
+					showToast(`数值必须在 ${min} 到 ${max} 之间`, "error");
+					// 恢复输入框的值
+					const input = document.getElementById(name);
+					if (input) {
+						input.value = input.getAttribute("data-original-value") || value;
+					}
+					return;
+				}
+
+				try {
+					const response = await fetch("/api/update-number-config", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							name: name,
+							value: numValue,
+						}),
+					});
+
+					const data = await response.json();
+
+					if (!response.ok || !data.success) {
+						const errorMsg = data.message || "更新配置失败";
+						showToast(errorMsg, "error");
+						// 恢复输入框的值
+						const input = document.getElementById(name);
+						if (input) {
+							input.value = input.getAttribute("data-original-value") || value;
+						}
+						return;
+					}
+
+					// 更新原始值标记
+					const input = document.getElementById(name);
+					if (input) {
+						input.setAttribute("data-original-value", numValue);
+					}
+
+					// 显示成功提示
+					if (data.saveSuccessHint) {
+						showToast(i18next.t("saveSuccessHint"), "info");
+						// 2秒后刷新页面
+						setTimeout(() => {
+							window.location.reload();
+						}, 2000);
+					} else {
+						showToast(i18next.t("saveSuccessHint"), "success");
+					}
+				} catch (error) {
+					console.error("更新配置失败:", error);
+					showToast("网络错误，请重试", "error");
+					// 恢复输入框的值
+					const input = document.getElementById(name);
+					if (input) {
+						input.value = input.getAttribute("data-original-value") || value;
+					}
+				}
+			}
+		</script>
+	}
 }

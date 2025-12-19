@@ -1,33 +1,20 @@
 package settings
 
 import (
+	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/a-h/templ"
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
-
-// -------------------------
-// 使用templ模板响应htmx请求
-// -------------------------
-
-//func AllSetting(c echo.Context) error {
-//	tsStatus, err := tailscale_plugin.GetTailscaleStatus(c.Request().Context())
-//	if err != nil {
-//		return err
-//	}
-//	template := settings_all(tsStatus)
-//	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, template); renderErr != nil {
-//		return echo.NewHTTPError(http.StatusInternalServerError)
-//	}
-//	return nil
-//}
 
 // -------------------------
 // 抽取更新配置的公共逻辑
@@ -89,152 +76,296 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 // 各类配置的更新 PageHandler
 // -------------------------
 
-// UpdateStringConfigHandler 处理 String 类型
+// updateStringConfigFromJSON 从 JSON 请求中更新字符串配置的通用逻辑
+func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
+	// 解析 JSON 请求体
+	var request struct {
+		Name  string `json:"name"`
+		Value string `json:"value"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return "", "", fmt.Errorf("invalid JSON request: %v", err)
+	}
+
+	if request.Name == "" {
+		return "", "", errors.New("name is required")
+	}
+
+	logger.Infof(locale.GetString("log_update_config"), request.Name, request.Value)
+
+	// 旧配置做个备份（有需要对比）
+	oldConfig := config.CopyCfg()
+
+	// 更新配置
+	if setErr := config.GetCfg().SetConfigValue(request.Name, request.Value); setErr != nil {
+		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
+		return "", "", setErr
+	}
+
+	// 写入配置文件
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+	}
+
+	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
+	beforeConfigUpdate(&oldConfig, config.GetCfg())
+
+	return request.Name, request.Value, nil
+}
+
+// UpdateStringConfigHandler 处理 String 类型的 JSON API
 func UpdateStringConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Config is locked, cannot be modified",
+		})
 	}
-	name, newValue, err := updateConfigGeneric(c)
+	// 调用通用逻辑更新配置
+	name, newValue, err := updateStringConfigFromJSON(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": err.Error(),
+		})
 	}
+
+	// 判断是否需要显示保存成功提示并刷新页面
 	saveSuccessHint := false
 	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
 		saveSuccessHint = true
 	}
-	updatedHTML := StringConfig(name, newValue, name+"_Description", saveSuccessHint)
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
 
-	return nil
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success":         true,
+		"message":         "Configuration updated successfully",
+		"value":           newValue,
+		"saveSuccessHint": saveSuccessHint,
+	})
 }
 
-// UpdateBoolConfigHandler 处理 Bool 类型
+// updateBoolConfigFromJSON 从 JSON 请求中更新布尔配置的通用逻辑
+func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
+	// 解析 JSON 请求体
+	var request struct {
+		Name  string `json:"name"`
+		Value bool   `json:"value"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return "", false, fmt.Errorf("invalid JSON request: %v", err)
+	}
+
+	if request.Name == "" {
+		return "", false, errors.New("name is required")
+	}
+
+	// 将 bool 转换为 string
+	newValue := strconv.FormatBool(request.Value)
+
+	logger.Infof(locale.GetString("log_update_config"), request.Name, newValue)
+
+	// 旧配置做个备份（有需要对比）
+	oldConfig := config.CopyCfg()
+
+	// 更新配置
+	if setErr := config.GetCfg().SetConfigValue(request.Name, newValue); setErr != nil {
+		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
+		return "", false, setErr
+	}
+
+	// 写入配置文件
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+	}
+
+	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
+	beforeConfigUpdate(&oldConfig, config.GetCfg())
+
+	return request.Name, request.Value, nil
+}
+
+// UpdateBoolConfigHandler 处理 Bool 类型的 JSON API
 func UpdateBoolConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
-	}
-	name, newValue, err := updateConfigGeneric(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Config is locked, cannot be modified",
+		})
 	}
 
-	boolVal, parseErr := strconv.ParseBool(newValue)
-	if parseErr != nil {
-		logger.Errorf(locale.GetString("err_failed_to_parse_bool"), newValue, parseErr)
-		return echo.NewHTTPError(http.StatusBadRequest, "parse bool error")
+	name, boolVal, err := updateBoolConfigFromJSON(c)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": err.Error(),
+		})
 	}
+
+	// 判断是否需要显示保存成功提示并刷新页面
 	saveSuccessHint := false
 	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" || name == "Debug" {
 		saveSuccessHint = true
 	}
-	updatedHTML := BoolConfig(name, boolVal, name+"_Description", saveSuccessHint)
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	return nil
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success":         true,
+		"message":         "Configuration updated successfully",
+		"value":           boolVal,
+		"saveSuccessHint": saveSuccessHint,
+	})
 }
 
-// UpdateNumberConfigHandler 处理 Number 类型
+// updateNumberConfigFromJSON 从 JSON 请求中更新数字配置的通用逻辑
+func updateNumberConfigFromJSON(c echo.Context) (string, int, error) {
+	// 解析 JSON 请求体
+	var request struct {
+		Name  string `json:"name"`
+		Value int    `json:"value"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return "", 0, fmt.Errorf("invalid JSON request: %v", err)
+	}
+
+	if request.Name == "" {
+		return "", 0, errors.New("name is required")
+	}
+
+	// 将 int 转换为 string
+	newValue := strconv.Itoa(request.Value)
+
+	logger.Infof(locale.GetString("log_update_config"), request.Name, newValue)
+
+	// 旧配置做个备份（有需要对比）
+	oldConfig := config.CopyCfg()
+
+	// 更新配置
+	if setErr := config.GetCfg().SetConfigValue(request.Name, newValue); setErr != nil {
+		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
+		return "", 0, setErr
+	}
+
+	// 写入配置文件
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+	}
+	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
+	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	return request.Name, request.Value, nil
+}
+
+// UpdateNumberConfigHandler 处理 Number 类型的配置
 func UpdateNumberConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Config is locked, cannot be modified",
+		})
 	}
-	name, newValue, err := updateConfigGeneric(c)
+	// 调用通用逻辑更新配置
+	name, intVal, err := updateNumberConfigFromJSON(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": err.Error(),
+		})
 	}
 
-	// 将字符串解析为 int
-	intVal, parseErr := strconv.ParseInt(newValue, 10, 64)
-	if parseErr != nil {
-		logger.Errorf(locale.GetString("err_failed_to_parse_int"), newValue, parseErr)
-		return echo.NewHTTPError(http.StatusBadRequest, "parse int error")
-	}
+	// 判断是否需要显示保存成功提示并刷新页面
 	saveSuccessHint := false
 	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
 		saveSuccessHint = true
 	}
-	// 渲染对应的模板
-	updatedHTML := NumberConfig(name, int(intVal), name+"_Description", 0, 65535, saveSuccessHint)
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-
-	return nil
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success":         true,
+		"message":         "Configuration updated successfully",
+		"value":           intVal,
+		"saveSuccessHint": saveSuccessHint,
+	})
 }
 
-// UpdateLoginSettingsHandler 登录相关设置
-func UpdateLoginSettingsHandler(c echo.Context) error {
-	if !htmx.IsHTMX(c.Request()) {
-		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
+// updateLoginSettingsFromJSON 从 JSON 请求中更新登录设置的通用逻辑
+func updateLoginSettingsFromJSON(c echo.Context) error {
+	// 解析 JSON 请求体
+	var request struct {
+		Username        string `json:"username"`
+		CurrentPassword string `json:"currentPassword"`
+		Password        string `json:"password"`
+		ReEnterPassword string `json:"reEnterPassword"`
 	}
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+	if err := c.Bind(&request); err != nil {
+		return fmt.Errorf("invalid JSON request: %v", err)
 	}
-	username := c.FormValue("Username")
-	currentPassword := c.FormValue("CurrentPassword")
-	password := c.FormValue("Password") // 新密码(初次设定) 或 原始密码（已有密码时）
-	reEnterPassword := c.FormValue("ReEnterPassword")
-	// 除非是调试模式, 密码不明文记录到日志，
+
+	// 除非是调试模式, 密码不明文记录到日志
 	if config.GetCfg().Debug {
-		logger.Infof(locale.GetString("log_update_user_info_username"), username)
-		logger.Infof(locale.GetString("log_update_user_info_current_password"), currentPassword)
-		logger.Infof(locale.GetString("log_update_user_info_password"), password)
-		logger.Infof(locale.GetString("log_update_user_info_reenter_password"), reEnterPassword) // ReEnterPassword
+		logger.Infof(locale.GetString("log_update_user_info_username"), request.Username)
+		logger.Infof(locale.GetString("log_update_user_info_current_password"), request.CurrentPassword)
+		logger.Infof(locale.GetString("log_update_user_info_password"), request.Password)
+		logger.Infof(locale.GetString("log_update_user_info_reenter_password"), request.ReEnterPassword)
 	}
 
 	// 两次输入的密码不一致
-	if password != reEnterPassword {
-		return echo.NewHTTPError(http.StatusBadRequest, "Password do not match")
+	if request.Password != request.ReEnterPassword {
+		return errors.New("Password do not match")
 	}
 	// 用户名或密码为空
-	if username == "" || password == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Username and Password cannot be empty")
+	if request.Username == "" || request.Password == "" {
+		return errors.New("Username and Password cannot be empty")
 	}
-	//// 密码过短
-	//if len(password) < 6 {
-	//	return echo.NewHTTPError(http.StatusBadRequest, "Password must be at least 6 characters long")
-	//}
 
-	// 当前密码不正确
-	if config.GetCfg().Password != currentPassword {
-		return echo.NewHTTPError(http.StatusBadRequest, "Current Password is incorrect")
+	// 当前密码不正确（如果已有密码）
+	if config.GetCfg().Password != "" && config.GetCfg().Password != request.CurrentPassword {
+		return errors.New("Current Password is incorrect")
 	}
 
 	// 旧配置做个备份（后面需要对比）
 	oldConfig := config.CopyCfg()
 
 	// 更新用户名
-	if err := config.GetCfg().SetConfigValue("Username", username); err != nil {
+	if err := config.GetCfg().SetConfigValue("Username", request.Username); err != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_username"), err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update username")
+		return fmt.Errorf("failed to update username: %v", err)
 	}
 	// 更新密码
-	if err := config.GetCfg().SetConfigValue("Password", password); err != nil {
-		// logger.Errorf("Failed to set Password: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update password")
+	if err := config.GetCfg().SetConfigValue("Password", request.Password); err != nil {
+		return fmt.Errorf("failed to update password: %v", err)
 	}
 
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
-		// 这里可能需要回滚配置更改或返回错误
 	}
-	// 根据配置的变化，做相应操作。
+
+	// 根据配置的变化，做相应操作
 	beforeConfigUpdate(&oldConfig, config.GetCfg())
-	// 渲染 UserInfoConfig 模板并返回
-	updatedHTML := UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password) // 如果UserInfoConfig期望的是加密后的密码，这里需要调整
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		logger.Errorf(locale.GetString("err_failed_to_render_userinfo_config_template"), renderErr)
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
+
 	return nil
+}
+
+// UpdateLoginSettingsHandler 处理登录设置的 JSON API
+func UpdateLoginSettingsHandler(c echo.Context) error {
+	// 如果配置被锁定
+	if config.GetCfg().ReadOnlyMode {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Config is locked, cannot be modified",
+		})
+	}
+
+	if err := updateLoginSettingsFromJSON(c); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "Login settings updated successfully",
+	})
 }
 
 // UpdateTailscaleConfigHandler 处理Tailscale配置更新的JSON API
@@ -297,33 +428,66 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	})
 }
 
+// AddArrayConfigHandler 处理添加数组元素的 JSON API
 func AddArrayConfigHandler(c echo.Context) error {
-	// 解析htmx的form数据
-	// 原始数据类似：configName=SupportMediaType&addValue=.test
-	// 解析后的数据类似：ConfigName=SupportMediaType, AddValue=.test
-	if !htmx.IsHTMX(c.Request()) {
-		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
-	}
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Config is locked, cannot be modified",
+		})
 	}
-	configName := c.FormValue("configName")
-	addValue := c.FormValue("addValue")
-	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", configName, addValue)
-	values, err := doAdd(configName, addValue)
+
+	// 解析 JSON 请求体
+	var request struct {
+		ConfigName string `json:"configName"`
+		AddValue   string `json:"addValue"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Invalid JSON request",
+		})
+	}
+
+	if request.ConfigName == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "configName is required",
+		})
+	}
+
+	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", request.ConfigName, request.AddValue)
+
+	values, err := doAdd(request.ConfigName, request.AddValue)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "add error")
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to add config value",
+		})
 	}
+
 	saveSuccessHint := false
-	if configName == "StoreUrls" {
+	if request.ConfigName == "StoreUrls" {
 		saveSuccessHint = true
 	}
-	updatedHTML := StringArrayConfig(configName, values, configName+"_Description", saveSuccessHint)
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
+
+	// 渲染更新后的 HTML
+	updatedHTML := StringArrayConfig(request.ConfigName, values, request.ConfigName+"_Description")
+	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
+	if renderErr != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to render template",
+		})
 	}
-	return nil
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success":         true,
+		"message":         "Configuration value added successfully",
+		"saveSuccessHint": saveSuccessHint,
+		"html":            htmlString,
+	})
 }
 
 func doAdd(configName, addValue string) ([]string, error) {
@@ -345,31 +509,67 @@ func doAdd(configName, addValue string) ([]string, error) {
 	return values, nil
 }
 
-// DeleteArrayConfigHandler 处理删除数组元素
+// DeleteArrayConfigHandler 处理删除数组元素的 JSON API
 func DeleteArrayConfigHandler(c echo.Context) error {
-	if !htmx.IsHTMX(c.Request()) {
-		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
-	}
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Config is locked, cannot be modified",
+		})
 	}
 
-	configName := c.FormValue("configName")
-	deleteValue := c.FormValue("deleteValue")
+	// 解析 JSON 请求体
+	var request struct {
+		ConfigName  string `json:"configName"`
+		DeleteValue string `json:"deleteValue"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Invalid JSON request",
+		})
+	}
 
-	logger.Infof(locale.GetString("log_delete_array_config_handler")+"\n", configName, deleteValue)
+	if request.ConfigName == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "configName is required",
+		})
+	}
 
-	values, err := doDelete(configName, deleteValue)
+	if request.DeleteValue == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "deleteValue is required",
+		})
+	}
+
+	logger.Infof(locale.GetString("log_delete_array_config_handler")+"\n", request.ConfigName, request.DeleteValue)
+
+	values, err := doDelete(request.ConfigName, request.DeleteValue)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, configName+" delete Failed")
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to delete config value",
+		})
 	}
 
-	updatedHTML := StringArrayConfig(configName, values, configName+"_Description", false)
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
+	// 渲染更新后的 HTML
+	updatedHTML := StringArrayConfig(request.ConfigName, values, request.ConfigName+"_Description")
+	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
+	if renderErr != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to render template",
+		})
 	}
-	return nil
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "Configuration value deleted successfully",
+		"html":    htmlString,
+	})
 }
 
 func doDelete(configName string, deleteValue string) ([]string, error) {
@@ -391,60 +591,131 @@ func doDelete(configName string, deleteValue string) ([]string, error) {
 	return values, nil
 }
 
-// HandleConfigSave 处理 /api/config-save 的 POST 请求
-func HandleConfigSave(c echo.Context) error {
-	if !htmx.IsHTMX(c.Request()) {
-		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
+// renderTemplToString 将 templ 组件渲染为 HTML 字符串
+func renderTemplToString(ctx context.Context, component templ.Component) (string, error) {
+	var buf bytes.Buffer
+	if err := component.Render(ctx, &buf); err != nil {
+		return "", err
 	}
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
-	}
-	// 保存到什么文件夹
-	selectedDir := c.FormValue("selectedDir")
-	if selectedDir == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "No directory selected")
-	}
-	if selectedDir != config.WorkingDirectory && selectedDir != config.HomeDirectory && selectedDir != config.ProgramDirectory {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid directory selected")
-	}
-	// 保存失败时
-	if err := config.SaveConfig(selectedDir); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save config")
-	}
-	// 更新后的HTML片段
-	updatedHTML := ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	return nil
+	return buf.String(), nil
 }
 
-// HandleConfigDelete 处理 /api/config-delete 的 POST 请求
-func HandleConfigDelete(c echo.Context) error {
-	if !htmx.IsHTMX(c.Request()) {
-		return echo.NewHTTPError(http.StatusBadRequest, "non-htmx request")
-	}
+// HandleConfigSave 处理 /api/config-save 的 JSON API
+func HandleConfigSave(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
-	}
-	// 保存到什么文件夹
-	selectedDir := c.FormValue("selectedDir")
-	if selectedDir == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "No directory selected")
-	}
-	if selectedDir != config.WorkingDirectory && selectedDir != config.HomeDirectory && selectedDir != config.ProgramDirectory {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid directory selected")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Config is locked, cannot be modified",
+		})
 	}
 
-	if err := config.DeleteConfigIn(selectedDir); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete config")
+	// 解析 JSON 请求体
+	var request struct {
+		SelectedDir string `json:"selectedDir"`
 	}
-	// 更新后的HTML片段
+	if err := c.Bind(&request); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Invalid JSON request",
+		})
+	}
+
+	if request.SelectedDir == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "No directory selected",
+		})
+	}
+
+	if request.SelectedDir != config.WorkingDirectory && request.SelectedDir != config.HomeDirectory && request.SelectedDir != config.ProgramDirectory {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Invalid directory selected",
+		})
+	}
+
+	// 保存配置
+	if err := config.SaveConfig(request.SelectedDir); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to save config",
+		})
+	}
+
+	// 渲染更新后的 HTML
 	updatedHTML := ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
-	if renderErr := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, updatedHTML); renderErr != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
+	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
+	if renderErr != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to render template",
+		})
 	}
-	return nil
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "Configuration saved successfully",
+		"html":    htmlString,
+	})
+}
+
+// HandleConfigDelete 处理 /api/config-delete 的 JSON API
+func HandleConfigDelete(c echo.Context) error {
+	// 如果配置被锁定
+	if config.GetCfg().ReadOnlyMode {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Config is locked, cannot be modified",
+		})
+	}
+
+	// 解析 JSON 请求体
+	var request struct {
+		SelectedDir string `json:"selectedDir"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Invalid JSON request",
+		})
+	}
+
+	if request.SelectedDir == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "No directory selected",
+		})
+	}
+
+	if request.SelectedDir != config.WorkingDirectory && request.SelectedDir != config.HomeDirectory && request.SelectedDir != config.ProgramDirectory {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"message": "Invalid directory selected",
+		})
+	}
+
+	// 删除配置
+	if err := config.DeleteConfigIn(request.SelectedDir); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to delete config",
+		})
+	}
+
+	// 渲染更新后的 HTML
+	updatedHTML := ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
+	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
+	if renderErr != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"message": "Failed to render template",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "Configuration deleted successfully",
+		"html":    htmlString,
+	})
 }

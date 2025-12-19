@@ -788,6 +788,7 @@
   "scroll_wheel_flip": "ホイールページめくり",
   "open_in_new_tab": "新しいタブで開く",
   "auto_rescan_interval_minutes": "自動再スキャン間隔",
+  "AutoRescanIntervalMinutes":  "自動再スキャン間隔",
   "auto_rescan_interval_minutes_desc": "分単位。0を指定すると自動スキャンを無効にします",
   "log_scheduler_task_still_running_skip": "前のスキャンタスクがまだ実行中です。このスキャンをスキップします",
   "log_scheduler_task_execution_failed": "スケジュールされたスキャンタスクの実行に失敗しました: %v",
