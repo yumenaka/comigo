@@ -121,7 +121,7 @@ func BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) te
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " :rel=\"openInNewTab ? 'noopener noreferrer' : null\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " :rel=\"$store.shelf.openInNewTab ? 'noopener noreferrer' : null\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

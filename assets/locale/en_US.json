@@ -788,6 +788,7 @@
   "scroll_wheel_flip": "Scroll Wheel Flip",
   "open_in_new_tab": "Open in New Tab",
   "auto_rescan_interval_minutes": "Automatic rescan interval",
+  "AutoRescanIntervalMinutes":  "Automatic rescan interval",
   "auto_rescan_interval_minutes_desc": "In minutes. Set to 0 to disable automatic scanning",
   "log_scheduler_task_still_running_skip": "Previous scan task is still running, skipping this scan",
   "log_scheduler_task_execution_failed": "Scheduled scan task execution failed: %v",

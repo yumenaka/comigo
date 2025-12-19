@@ -5,14 +5,26 @@ templ QRCode() {
 	<div x-data="{ serverHost: 'localhost' }" id="qrcode-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
 		<!-- QRCode Modal Content -->
 		<!-- <div class="relative w-64 h-64 p-1 m-1" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString().replace(window.location.hostname,serverHost))">  -->
-		<div class="relative w-64 h-64 p-1 m-1" x-data="{ qrcodeSrc: '' }" x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString())">
+		<div
+			class="relative w-64 h-64 p-1 m-1"
+			x-data="{ qrcodeSrc: '', qrcodeImageSrc: '' }"
+			x-init="
+			qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
+			// 使用 fetch 加载二维码
+			fetch(qrcodeSrc)
+				.then(response => response.text())
+				.then(data => {
+					qrcodeImageSrc = data;
+				})
+				.catch(error => {
+					console.error('加载二维码失败:', error);
+				});
+		"
+		>
 			<img
 				id="qrcode-img"
 				draggable="false"
-				:hx-get="qrcodeSrc"
-				hx-trigger="load"
-				hx-swap="none"
-				hx-on-htmx-after-request="this.src = event.detail.xhr.responseText;"
+				:src="qrcodeImageSrc"
 				class="w-64 h-64 rounded shadow-lg border border-gray-300"
 				alt="QR Code"
 			/>

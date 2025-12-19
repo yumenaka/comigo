@@ -28,8 +28,7 @@ var PAGED_SIZE = 32
 // ScrollMainArea 定义 BodyHTML
 // 需要更复杂的屏幕状态判断的时候，可以参考：https://developer.mozilla.org/zh-CN/docs/Web/API/Screen/orientation
 // orientation: (screen.orientation || {}).type ||  screen.mozOrientation || screen.msOrientation
-// tips：hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素
-// https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
+// tips：使用 alpine.js 的 x-init 和 fetch API 来加载 HTML 内容
 // tips： Alpine.js 动态CSS，只支持内联写法
 // min-h-16 是为了图片未加载时，图片高度为0，导致页面不美观。极端设置下会导致图片变形。  text-center：居中 alert文字，因为需要等待css加载，所以现在没设置alt文字。
 templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int, startIndex int) {
@@ -94,7 +93,12 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 					:style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"
 				>
 					if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
-						<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
+						<div
+							x-data="{ htmlContent: '' }"
+							x-init={ "fetch('" + image.Url + "').then(response => response.text()).then(html => { htmlContent = html; }).catch(error => { console.error('加载HTML内容失败:', error); });" }
+							x-html="htmlContent"
+							class="w-full m-0"
+						></div>
 					}
 					if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
 						if c != nil && c.QueryParam("static") == "" {

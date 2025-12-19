@@ -16,7 +16,6 @@
     "@alpinejs/persist": "latest",
     "alpinejs": "latest",
     "flowbite": "latest",
-    "htmx.org": "latest",
     "i18next": "latest",
     "i18next-browser-languagedetector": "latest",
     "screenfull": "latest",

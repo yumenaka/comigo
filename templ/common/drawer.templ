@@ -66,18 +66,26 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 			<div
 				x-show="$store.global.onlineBook"
 				class="w-32 h-32 p-0 mt-2 mb-2"
-				x-data="{ qrcodeSrc: '' }"
-				x-init="qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString())"
+				x-data="{ qrcodeSrc: '', qrcodeImageSrc: '' }"
+				x-init="
+					qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
+					// 使用 fetch 加载二维码
+					fetch(qrcodeSrc)
+						.then(response => response.text())
+						.then(data => {
+							qrcodeImageSrc = data;
+						})
+						.catch(error => {
+							console.error('加载二维码失败:', error);
+						});
+				"
 			>
 				<img
 					id="QrcodeImage"
 					draggable="false"
 					data-modal-target="qrcode-modal"
 					data-modal-toggle="qrcode-modal"
-					:hx-get="qrcodeSrc"
-					hx-trigger="load"
-					hx-swap="none"
-					hx-on-htmx-after-request="this.src = event.detail.xhr.responseText;"
+					:src="qrcodeImageSrc"
 					class="w-32 h-32 rounded border border-gray-500 dark:border-gray-200"
 				/>
 			</div>

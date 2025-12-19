@@ -39,7 +39,7 @@ require (
 	github.com/xxjwxc/gowp v0.0.0-20240929033016-5be68d222389
 	golang.org/x/net v0.48.0
 	golang.org/x/text v0.32.0
-	modernc.org/sqlite v1.40.1
+	modernc.org/sqlite v1.41.0
 )
 
 require (
@@ -62,7 +62,7 @@ require (
 	golang.org/x/image v0.34.0
 	golang.org/x/mod v0.31.0
 	golang.org/x/sys v0.39.0
-	tailscale.com v1.92.2
+	tailscale.com v1.92.4
 	wait4x.dev/v3 v3.6.0
 )
 
@@ -179,7 +179,7 @@ require (
 	github.com/olekukonko/tablewriter v1.1.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pganalyze/pg_query_go/v6 v6.1.0 // indirect
-	github.com/pierrec/lz4/v4 v4.1.22 // indirect
+	github.com/pierrec/lz4/v4 v4.1.23 // indirect
 	github.com/pingcap/errors v0.11.5-0.20250523034308-74f78ae071ee // indirect
 	github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86 // indirect
 	github.com/pingcap/log v1.1.0 // indirect

@@ -53,7 +53,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content bg-base-300\" :class=\"(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative\"><script>\n\t\t\t\t// htmx出错时报错（Toast）\n\t\t\t\tdocument.addEventListener(\"htmx:responseError\", (event) => {\n\t\t\t\t\tjson = JSON.parse(event.detail.xhr.responseText);\n\t\t\t\t\tif (typeof json.message !== \"undefined\") {\n\t\t\t\t\t\tshowToast(json.message, \"error\");\n\t\t\t\t\t\tconsole.error(\"Error:\", json.message);\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(\n\t\t\t\t\t\t\tevent.detail.xhr.statusText + \": \" + event.detail.xhr.responseURL,\n\t\t\t\t\t\t\t\"error\",\n\t\t\t\t\t\t);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content bg-base-300\" :class=\"(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -70,7 +70,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("settings_stores"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 53, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 38, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -80,11 +80,11 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535, false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -108,19 +108,19 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("Port", int(config.GetCfg().Port), "Port_Description", 0, 65535, false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("Port", int(config.GetCfg().Port), "Port_Description", 0, 65535).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringConfig("Host", config.GetCfg().Host, "Host_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringConfig("Host", config.GetCfg().Host, "Host_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("DisableLAN", config.GetCfg().DisableLAN, "DisableLAN_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BoolConfig("DisableLAN", config.GetCfg().DisableLAN, "DisableLAN_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("Timeout", config.GetCfg().Timeout, "Timeout_Description", 0, 65535, false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("Timeout", config.GetCfg().Timeout, "Timeout_Description", 0, 65535).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -131,7 +131,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("other_settings"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 79, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 64, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -141,35 +141,35 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("MaxScanDepth", config.GetCfg().MaxScanDepth, "MaxScanDepth_Description", 0, 65535, false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("MaxScanDepth", config.GetCfg().MaxScanDepth, "MaxScanDepth_Description", 0, 65535).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NumberConfig("MinImageNum", config.GetCfg().MinImageNum, "MinImageNum_Description", 0, 65535, false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = NumberConfig("MinImageNum", config.GetCfg().MinImageNum, "MinImageNum_Description", 0, 65535).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("OpenBrowser", config.GetCfg().OpenBrowser, "OpenBrowser_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BoolConfig("OpenBrowser", config.GetCfg().OpenBrowser, "OpenBrowser_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("EnableUpload", config.GetCfg().EnableUpload, "EnableUpload_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BoolConfig("EnableUpload", config.GetCfg().EnableUpload, "EnableUpload_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringConfig("UploadPath", config.GetCfg().UploadPath, "UploadPath_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringConfig("UploadPath", config.GetCfg().UploadPath, "UploadPath_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrayConfig("ExcludePath", config.GetCfg().ExcludePath, "ExcludePath_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrayConfig("ExcludePath", config.GetCfg().ExcludePath, "ExcludePath_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrayConfig("SupportMediaType", config.GetCfg().SupportMediaType, "SupportMediaType_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrayConfig("SupportMediaType", config.GetCfg().SupportMediaType, "SupportMediaType_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StringArrayConfig("SupportFileType", config.GetCfg().SupportFileType, "SupportFileType_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StringArrayConfig("SupportFileType", config.GetCfg().SupportFileType, "SupportFileType_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -190,7 +190,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("settings_extra"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 98, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 83, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -200,12 +200,12 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BoolConfig("Debug", config.GetCfg().Debug, "Debug_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BoolConfig("Debug", config.GetCfg().Debug, "Debug_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if config.GetCfg().Debug {
-			templ_7745c5c3_Err = BoolConfig("LogToFile", config.GetCfg().LogToFile, "LogToFile_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = BoolConfig("LogToFile", config.GetCfg().LogToFile, "LogToFile_Description").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -213,7 +213,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = BoolConfig("GenerateMetaData", config.GetCfg().GenerateMetaData, "GenerateMetaData_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = BoolConfig("GenerateMetaData", config.GetCfg().GenerateMetaData, "GenerateMetaData_Description").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -221,7 +221,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = BoolConfig("EnableDatabase", config.GetCfg().EnableDatabase, "EnableDatabase_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = BoolConfig("EnableDatabase", config.GetCfg().EnableDatabase, "EnableDatabase_Description").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -229,7 +229,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = BoolConfig("ClearCacheExit", config.GetCfg().ClearCacheExit, "ClearCacheExit_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = BoolConfig("ClearCacheExit", config.GetCfg().ClearCacheExit, "ClearCacheExit_Description").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -237,7 +237,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -245,7 +245,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = StringConfig("ZipFileTextEncoding", config.GetCfg().ZipFileTextEncoding, "ZipFileTextEncoding_Description", false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = StringConfig("ZipFileTextEncoding", config.GetCfg().ZipFileTextEncoding, "ZipFileTextEncoding_Description").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

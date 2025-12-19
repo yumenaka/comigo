@@ -8,6 +8,9 @@ package settings
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+// configManagerScriptHandle 用于防止 JS 代码重复渲染
+var configManagerScriptHandle = templ.NewOnceHandle()
+
 func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirectoryConfig string, ProgramDirectoryConfig string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -29,247 +32,295 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"config-container\" class=\"flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-data=\"")
+		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\t// 保存配置的函数\n\t\t\tasync function saveConfig(selectedDir) {\n\t\t\t\t// 验证逻辑：检查其他位置是否已有配置\n\t\t\t\tlet canSave = false;\n\t\t\t\tif (selectedDir === \"WorkingDirectory\") {\n\t\t\t\t\tif (\n\t\t\t\t\t\tdocument.getElementById(\"ProgramDirectoryConfigDiv\") === null &&\n\t\t\t\t\t\tdocument.getElementById(\"HomeDirectoryConfigDiv\") === null\n\t\t\t\t\t) {\n\t\t\t\t\t\tcanSave = true;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif (selectedDir === \"HomeDirectory\") {\n\t\t\t\t\tif (\n\t\t\t\t\t\tdocument.getElementById(\"ProgramDirectoryConfigDiv\") === null &&\n\t\t\t\t\t\tdocument.getElementById(\"WorkingDirectoryConfigDiv\") === null\n\t\t\t\t\t) {\n\t\t\t\t\t\tcanSave = true;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif (selectedDir === \"ProgramDirectory\") {\n\t\t\t\t\tif (\n\t\t\t\t\t\tdocument.getElementById(\"HomeDirectoryConfigDiv\") === null &&\n\t\t\t\t\t\tdocument.getElementById(\"WorkingDirectoryConfigDiv\") === null\n\t\t\t\t\t) {\n\t\t\t\t\t\tcanSave = true;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// 如果其他地方已经有配置了，则阻止请求并执行本地逻辑\n\t\t\t\tif (!canSave) {\n\t\t\t\t\tshowToast(i18next.t(\"please_delete_other_config_first\"), \"warning\");\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\"/api/config-save\", {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tselectedDir: selectedDir,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\tif (!response.ok || !data.success) {\n\t\t\t\t\t\tconst errorMsg = data.message || \"保存配置失败\";\n\t\t\t\t\t\tshowToast(errorMsg, \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tshowToast(i18next.t(\"save_config_success\"), \"success\");\n\n\t\t\t\t\t// 更新 UI：替换整个容器\n\t\t\t\t\tif (data.html) {\n\t\t\t\t\t\tconst container = document.getElementById(\"config-container\");\n\t\t\t\t\t\tif (container && container.parentNode) {\n\t\t\t\t\t\t\t// 创建临时元素来解析 HTML\n\t\t\t\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t\t\t\ttemp.innerHTML = data.html;\n\t\t\t\t\t\t\tconst newContainer = temp.querySelector(\"#config-container\");\n\t\t\t\t\t\t\tif (newContainer) {\n\t\t\t\t\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\t\t\t\t\t// 重新初始化 Alpine.js\n\t\t\t\t\t\t\t\tif (window.Alpine) {\n\t\t\t\t\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"保存配置失败:\", error);\n\t\t\t\t\tshowToast(\"网络错误，请重试\", \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 删除配置的函数\n\t\t\tasync function deleteConfig(selectedDir) {\n\t\t\t\t// 验证逻辑：检查当前位置是否有配置\n\t\t\t\tlet canDelete = true;\n\t\t\t\tif (selectedDir === \"WorkingDirectory\") {\n\t\t\t\t\tif (document.getElementById(\"WorkingDirectoryConfigDiv\") === null) {\n\t\t\t\t\t\tcanDelete = false;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif (selectedDir === \"HomeDirectory\") {\n\t\t\t\t\tif (document.getElementById(\"HomeDirectoryConfigDiv\") === null) {\n\t\t\t\t\t\tcanDelete = false;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif (selectedDir === \"ProgramDirectory\") {\n\t\t\t\t\tif (document.getElementById(\"ProgramDirectoryConfigDiv\") === null) {\n\t\t\t\t\t\tcanDelete = false;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// 如果不满足条件，则阻止请求并执行本地逻辑\n\t\t\t\tif (!canDelete) {\n\t\t\t\t\tshowToast(i18next.t(\"no_config_file_to_delete_in_path\"), \"warning\");\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\"/api/config-delete\", {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tselectedDir: selectedDir,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\tif (!response.ok || !data.success) {\n\t\t\t\t\t\tconst errorMsg = data.message || \"删除配置失败\";\n\t\t\t\t\t\tshowToast(errorMsg, \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tshowToast(i18next.t(\"delete_config_success\"), \"success\");\n\n\t\t\t\t\t// 更新 UI：替换整个容器\n\t\t\t\t\tif (data.html) {\n\t\t\t\t\t\tconst container = document.getElementById(\"config-container\");\n\t\t\t\t\t\tif (container && container.parentNode) {\n\t\t\t\t\t\t\t// 创建临时元素来解析 HTML\n\t\t\t\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t\t\t\ttemp.innerHTML = data.html;\n\t\t\t\t\t\t\tconst newContainer = temp.querySelector(\"#config-container\");\n\t\t\t\t\t\t\tif (newContainer) {\n\t\t\t\t\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\t\t\t\t\t// 重新初始化 Alpine.js\n\t\t\t\t\t\t\t\tif (window.Alpine) {\n\t\t\t\t\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"删除配置失败:\", error);\n\t\t\t\t\tshowToast(\"网络错误，请重试\", \"error\");\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = configManagerScriptHandle.Once().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("{ selectedDir: '" + initSaveTo + "',initinitSaveTo:'" + initSaveTo + "'}")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 7, Col: 85}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><!-- 标题 --><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div id=\"config-container\" class=\"flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-data=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigManager"))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("{ selectedDir: '" + initSaveTo + "',initinitSaveTo:'" + initSaveTo + "'}")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 10, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 162, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"w-full text-center\"></label><hr class=\"my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200\"><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><!-- 标题 --><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigStorageLocationPrompt"))
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigManager"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 12, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 165, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-full\"></label><!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 --><div class=\"flex flex-col w-full mx-0\"><div class=\"flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer WorkingDirectory min-h-15\" data-save_to=\"WorkingDirectory\" :class=\"selectedDir === 'WorkingDirectory'?'bg-cyan-200':''\" @click=\"selectedDir = 'WorkingDirectory'\"><div class=\"w-1/3 flex flex-col items-center justify-center p-1 m-1 bg-blue-300 rounded min-h-15\"><img class=\"h-7 w-7\" src=\"/images/working_directory.png\"><div class=\"mt-1\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-full text-center\"></label><hr class=\"my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200\"><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("WorkingDirectory"))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigStorageLocationPrompt"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 23, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 167, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\">当前工作目录</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"w-full\"></label><!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 --><div class=\"flex flex-col w-full mx-0\"><div class=\"flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer WorkingDirectory min-h-15\" data-save_to=\"WorkingDirectory\" :class=\"selectedDir === 'WorkingDirectory'?'bg-cyan-200':''\" @click=\"selectedDir = 'WorkingDirectory'\"><div class=\"w-1/3 flex flex-col items-center justify-center p-1 m-1 bg-blue-300 rounded min-h-15\"><img class=\"h-7 w-7\" src=\"/images/working_directory.png\"><div class=\"mt-1\" x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("WorkingDirectory"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 178, Col: 67}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\">当前工作目录</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if WorkingDirectoryConfig != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div id=\"WorkingDirectoryConfigDiv\" class=\"w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(WorkingDirectoryConfig)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 30, Col: 30}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"WorkingDirectoryConfigDivHint\" x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div id=\"WorkingDirectoryConfigDiv\" class=\"w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("current_dir_scope"))
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(WorkingDirectoryConfig)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 35, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 185, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"w-2/3 flex items-center justify-center w-1/3 p-1 m-1 text-sm bg-blue-300 rounded min-h-15\">在当前目录运行时（局部有效）</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div><div class=\"flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer min-h-15\" data-save_to=\"HomeDirectory\" :class=\"selectedDir === 'HomeDirectory'?'bg-cyan-200':''\" @click=\"selectedDir = 'HomeDirectory'\"><div class=\"w-1/3 flex flex-col items-center justify-center p-1 m-1 bg-blue-300 rounded min-h-15\"><img class=\"h-7 w-7\" src=\"/images/home_directory.png\"><div class=\"mt-1\" x-text=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("HomeDirectory"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 48, Col: 64}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\">用户主目录</div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if HomeDirectoryConfig != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div id=\"HomeDirectoryConfigDiv\" class=\"w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(HomeDirectoryConfig)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 55, Col: 27}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div id=\"HomeDirectoryConfigDivHint\" x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div id=\"WorkingDirectoryConfigDivHint\" x-text=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("current_dir_scope"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 190, Col: 51}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"w-2/3 flex items-center justify-center w-1/3 p-1 m-1 text-sm bg-blue-300 rounded min-h-15\">在当前目录运行时（局部有效）</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><div class=\"flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer min-h-15\" data-save_to=\"HomeDirectory\" :class=\"selectedDir === 'HomeDirectory'?'bg-cyan-200':''\" @click=\"selectedDir = 'HomeDirectory'\"><div class=\"w-1/3 flex flex-col items-center justify-center p-1 m-1 bg-blue-300 rounded min-h-15\"><img class=\"h-7 w-7\" src=\"/images/home_directory.png\"><div class=\"mt-1\" x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("HomeDirectory"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 203, Col: 64}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\">用户主目录</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if HomeDirectoryConfig != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div id=\"HomeDirectoryConfigDiv\" class=\"w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("current_user_scope"))
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(HomeDirectoryConfig)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 60, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 210, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"w-2/3 flex items-center justify-center p-1 m-1 text-sm bg-blue-300 rounded min-h-15\">当前登录用户有效（全局有效）</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><div class=\"flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer min-h-15\" data-save_to=\"ProgramDirectory\" :class=\"selectedDir === 'ProgramDirectory'?'bg-cyan-200':''\" @click=\"selectedDir = 'ProgramDirectory'\"><div class=\"w-1/3 flex flex-col items-center justify-center  p-1 m-1 bg-blue-300 rounded min-h-15\"><img class=\"h-7 w-7\" src=\"/images/program_directory.png\"><div class=\"mt-1\" x-text=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ProgramDirectory"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 73, Col: 67}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\">程序所在目录</div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if ProgramDirectoryConfig != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div id=\"ProgramDirectoryConfigDiv\" class=\"w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(ProgramDirectoryConfig)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 80, Col: 30}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div id=\"ProgramDirectoryConfigDivHint\" x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div id=\"HomeDirectoryConfigDivHint\" x-text=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("current_user_scope"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 215, Col: 52}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"w-2/3 flex items-center justify-center p-1 m-1 text-sm bg-blue-300 rounded min-h-15\">当前登录用户有效（全局有效）</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div><div class=\"flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer min-h-15\" data-save_to=\"ProgramDirectory\" :class=\"selectedDir === 'ProgramDirectory'?'bg-cyan-200':''\" @click=\"selectedDir = 'ProgramDirectory'\"><div class=\"w-1/3 flex flex-col items-center justify-center  p-1 m-1 bg-blue-300 rounded min-h-15\"><img class=\"h-7 w-7\" src=\"/images/program_directory.png\"><div class=\"mt-1\" x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ProgramDirectory"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 228, Col: 67}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\">程序所在目录</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if ProgramDirectoryConfig != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div id=\"ProgramDirectoryConfigDiv\" class=\"w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("portable_binary_scope"))
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(ProgramDirectoryConfig)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 85, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 235, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" class=\"w-2/3 flex justify-center items-center justify-center p-1 m-1 text-sm bg-blue-300 rounded min-h-15\">此二进制文件有效（便携模式）</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div id=\"ProgramDirectoryConfigDivHint\" x-text=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var14 string
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("portable_binary_scope"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 240, Col: 55}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"w-2/3 flex justify-center items-center justify-center p-1 m-1 text-sm bg-blue-300 rounded min-h-15\">此二进制文件有效（便携模式）</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div></div><!-- 用来记录用户当前选择的隐藏字段（和Alpine双向绑定） --><input id=\"selectedDir\" name=\"selectedDir\" type=\"hidden\" x-model=\"selectedDir\"><!-- SAVE 按钮：发起 HTMX 请求到 /api/new_config-save --><div class=\"flex flex-row justify-center w-full\"><!-- hx-include 将 #selectedDir 表单值一并提交 --><!-- hx-target 将返回结果替换到本容器内 --><button id=\"saveConfigButton\" class=\"w-24 h-10 mx-2 my-1 text-center transition bg-sky-300 active:bg-sky-500 border border-gray-500 rounded\" hx-post=\"/api/config-save\" hx-include=\"#selectedDir\" hx-target=\"#config-container\" hx-swap=\"outerHTML\" x-text=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("save"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 109, Col: 36}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\">SAVE</button> <button id=\"deleteConfigButton\" class=\"w-24 h-10 mx-2 my-1 text-center transition bg-red-300 active:bg-red-500 border border-gray-500 rounded\" hx-post=\"/api/config-delete\" hx-include=\"#selectedDir\" hx-target=\"#config-container\" hx-swap=\"outerHTML\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div></div><!-- 用来记录用户当前选择的隐藏字段（和Alpine双向绑定） --><input id=\"selectedDir\" name=\"selectedDir\" type=\"hidden\" x-model=\"selectedDir\"><!-- SAVE 和 DELETE 按钮 --><div class=\"flex flex-row justify-center w-full\"><button id=\"saveConfigButton\" type=\"button\" class=\"w-24 h-10 mx-2 my-1 text-center transition bg-sky-300 active:bg-sky-500 border border-gray-500 rounded\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("delete"))
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("save"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 120, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 259, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\">DELETE</button></div><!-- 设置管理功能的说明 --><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" x-on:click=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigManagerDescription"))
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs("saveConfig(selectedDir)")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 126, Col: 101}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 260, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\">点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。</div><script>\n\t\t\t// 为保存按钮添加事件监听，拦截保存设置的 htmx 请求\n\t\t\tdocument\n\t\t\t\t.getElementById(\"saveConfigButton\")\n\t\t\t\t.addEventListener(\"htmx:beforeRequest\", function (event) {\n\t\t\t\t\t// 检查是否可以保存设置\n\t\t\t\t\tlet selectedDir = document.getElementById(\"selectedDir\").value;\n\t\t\t\t\tlet canSave = false;\n\t\t\t\t\tif (selectedDir === \"WorkingDirectory\") {\n\t\t\t\t\t\tif (\n\t\t\t\t\t\t\tdocument.getElementById(\"ProgramDirectoryConfigDiv\") === null &&\n\t\t\t\t\t\t\tdocument.getElementById(\"HomeDirectoryConfigDiv\") === null\n\t\t\t\t\t\t) {\n\t\t\t\t\t\t\tconsole.log(\"WorkingDirectoryConfigDiv is null\");\n\t\t\t\t\t\t\tcanSave = true;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (selectedDir === \"HomeDirectory\") {\n\t\t\t\t\t\tif (\n\t\t\t\t\t\t\tdocument.getElementById(\"ProgramDirectoryConfigDiv\") === null &&\n\t\t\t\t\t\t\tdocument.getElementById(\"WorkingDirectoryConfigDiv\") === null\n\t\t\t\t\t\t) {\n\t\t\t\t\t\t\tconsole.log(\"HomeDirectoryConfigDiv is null\");\n\t\t\t\t\t\t\tcanSave = true;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (selectedDir === \"ProgramDirectory\") {\n\t\t\t\t\t\tif (\n\t\t\t\t\t\t\tdocument.getElementById(\"HomeDirectoryConfigDiv\") === null &&\n\t\t\t\t\t\t\tdocument.getElementById(\"WorkingDirectoryConfigDiv\") === null\n\t\t\t\t\t\t) {\n\t\t\t\t\t\t\tconsole.log(\"ProgramDirectoryConfigDiv is null\");\n\t\t\t\t\t\t\tcanSave = true;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\t// 如果其他地方已经有配置了，则阻止请求并执行本地逻辑\n\t\t\t\t\tif (!canSave) {\n\t\t\t\t\t\tevent.preventDefault();\n\t\t\t\t\t\t// 请先删除其他位置的配置文件\n\t\t\t\t\t\tshowToast(i18next.t(\"please_delete_other_config_first\"), \"warning\");\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\tdocument\n\t\t\t\t.getElementById(\"saveConfigButton\")\n\t\t\t\t.addEventListener(\"htmx:afterRequest\", function (event) {\n\t\t\t\t\t// 只对ID为myButton的请求进行监听\n\t\t\t\t\tif (event.detail.successful) {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_config_success\"), \"info\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_config_failed\"), \"error\");\n\t\t\t\t\t}\n\t\t\t\t});\n\n\t\t\t// 为删除按钮添加事件监听，\n\t\t\tdocument\n\t\t\t\t.getElementById(\"deleteConfigButton\")\n\t\t\t\t.addEventListener(\"htmx:beforeRequest\", function (event) {\n\t\t\t\t\t// 检查是否可以删除配置\n\t\t\t\t\tlet selectedDir = document.getElementById(\"selectedDir\").value;\n\t\t\t\t\tcanSelete = true;\n\t\t\t\t\tif (selectedDir === \"WorkingDirectory\") {\n\t\t\t\t\t\tif (document.getElementById(\"WorkingDirectoryConfigDiv\") === null) {\n\t\t\t\t\t\t\tcanSelete = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (selectedDir === \"HomeDirectory\") {\n\t\t\t\t\t\tif (document.getElementById(\"HomeDirectoryConfigDiv\") === null) {\n\t\t\t\t\t\t\tcanSelete = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (selectedDir === \"ProgramDirectory\") {\n\t\t\t\t\t\tif (document.getElementById(\"ProgramDirectoryConfigDiv\") === null) {\n\t\t\t\t\t\t\tcanSelete = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\t// 如果不满足条件，则阻止请求并执行本地逻辑\n\t\t\t\t\tif (!canSelete) {\n\t\t\t\t\t\tevent.preventDefault();\n\t\t\t\t\t\tshowToast(i18next.t(\"no_config_file_to_delete_in_path\"), \"warning\");\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\tdocument\n\t\t\t\t.getElementById(\"deleteConfigButton\")\n\t\t\t\t.addEventListener(\"htmx:afterRequest\", function (event) {\n\t\t\t\t\t// 只对ID为myButton的请求进行监听\n\t\t\t\t\tif (event.detail.successful) {\n\t\t\t\t\t\tshowToast(i18next.t(\"delete_config_success\"), \"info\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"delete_config_failed\"), \"error\");\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t</script></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\">SAVE</button> <button id=\"deleteConfigButton\" type=\"button\" class=\"w-24 h-10 mx-2 my-1 text-center transition bg-red-300 active:bg-red-500 border border-gray-500 rounded\" x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var17 string
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("delete"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 268, Col: 38}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" x-on:click=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var18 string
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs("deleteConfig(selectedDir)")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 269, Col: 44}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\">DELETE</button></div><!-- 设置管理功能的说明 --><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var19 string
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigManagerDescription"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 275, Col: 101}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\">点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
