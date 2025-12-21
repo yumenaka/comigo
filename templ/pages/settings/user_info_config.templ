@@ -206,15 +206,13 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 							reEnterPassword: reEnterPassword,
 						}),
 					});
-
+					// 解析响应
 					const data = await response.json();
-
 					if (!response.ok || !data.success) {
 						const errorMsg = data.message || "更新登录设置失败";
 						showToast(errorMsg, "error");
 						return;
 					}
-
 					// 显示成功提示
 					showToast(i18next.t("MsgLoginSettingsUpdated"), "success");
 					// 3秒后刷新页面（跳转到登录页面）

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/angelofallars/htmx-go"
@@ -17,7 +18,7 @@ import (
 )
 
 // -------------------------
-// 抽取更新配置的公共逻辑
+// 更新配置的公共逻辑
 // -------------------------
 
 // parseSingleHTMXFormPair 提取并返回表单中的"第一对" key/value
@@ -218,18 +219,18 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 }
 
 // updateNumberConfigFromJSON 从 JSON 请求中更新数字配置的通用逻辑
-func updateNumberConfigFromJSON(c echo.Context) (string, int, error) {
+func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, error) {
 	// 解析 JSON 请求体
 	var request struct {
 		Name  string `json:"name"`
 		Value int    `json:"value"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return "", 0, fmt.Errorf("invalid JSON request: %v", err)
+		return "", 0, nil, fmt.Errorf("invalid JSON request: %v", err)
 	}
 
 	if request.Name == "" {
-		return "", 0, errors.New("name is required")
+		return "", 0, nil, errors.New("name is required")
 	}
 
 	// 将 int 转换为 string
@@ -243,16 +244,14 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, error) {
 	// 更新配置
 	if setErr := config.GetCfg().SetConfigValue(request.Name, newValue); setErr != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
-		return "", 0, setErr
+		return "", 0, nil, setErr
 	}
 
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
-	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
-	return request.Name, request.Value, nil
+	return request.Name, request.Value, &oldConfig, nil
 }
 
 // UpdateNumberConfigHandler 处理 Number 类型的配置
@@ -265,12 +264,22 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 		})
 	}
 	// 调用通用逻辑更新配置
-	name, intVal, err := updateNumberConfigFromJSON(c)
+	name, intVal, oldConfig, err := updateNumberConfigFromJSON(c)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"success": false,
 			"message": err.Error(),
 		})
+	}
+	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
+	if name == "Port" {
+		go func() {
+			// 延迟1秒执行
+			time.Sleep(1 * time.Second)
+			beforeConfigUpdate(oldConfig, config.GetCfg())
+		}()
+	} else {
+		beforeConfigUpdate(oldConfig, config.GetCfg())
 	}
 
 	// 判断是否需要显示保存成功提示并刷新页面

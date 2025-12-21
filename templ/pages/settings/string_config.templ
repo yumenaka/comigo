@@ -5,6 +5,7 @@ var stringConfigScriptHandle = templ.NewOnceHandle()
 
 // StringConfig 字符串类型的配置
 templ StringConfig(name string, value string, description string) {
+	@StringConfigJavascript()
 	<div
 		id={ "stringConfig_" + name }
 		class="flex flex-col justify-start w-full p-2 m-1 font-semibold
@@ -28,6 +29,9 @@ templ StringConfig(name string, value string, description string) {
 		></div>
 		<div class="bg-red-600"></div>
 	</div>
+}
+
+templ StringConfigJavascript() {
 	@stringConfigScriptHandle.Once() {
 		<script>
 			// 更新字符串配置的函数
@@ -43,9 +47,8 @@ templ StringConfig(name string, value string, description string) {
 							value: value,
 						}),
 					});
-
+					// 解析响应
 					const data = await response.json();
-
 					if (!response.ok || !data.success) {
 						const errorMsg = data.message || "更新配置失败";
 						showToast(errorMsg, "error");
@@ -62,7 +65,6 @@ templ StringConfig(name string, value string, description string) {
 					if (input) {
 						input.setAttribute("data-original-value", value);
 					}
-
 					// 显示成功提示
 					if (data.saveSuccessHint) {
 						showToast(i18next.t("saveSuccessHint"), "info");
