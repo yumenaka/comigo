@@ -352,6 +352,7 @@
   "current_user_scope": "Effective for logged-in user (global scope)",
   "portable_binary_scope": "Effective for this binary only (portable mode)",
   "saveSuccessHint": "Settings saved successfully. The page will refresh automatically in 2 seconds.",
+  "port_change_hint": "Port has been changed. Redirecting to the new port in 2 seconds.",
   "no_books_library_path_notice": "No readable books were found. Please configure a library path. The page will automatically refresh once the configuration is complete.",
   "download_raw_archive": "Download original archive file",
   "download_portable_web_file": "Download as a portable HTML file",

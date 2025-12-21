@@ -3,11 +3,9 @@ package settings
 import "strconv"
 import "github.com/yumenaka/comigo/templ/common/svg"
 
-// stringArrayConfigScriptHandle 用于防止 JS 代码重复渲染
-var stringArrayConfigScriptHandle = templ.NewOnceHandle()
-
 // StringArrayConfig 字符串数组类型的配置
 templ StringArrayConfig(name string, values []string, description string) {
+	@StringArrayConfigJavaScript()
 	<div
 		id={ name + "-string-array-config" }
 		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
@@ -54,6 +52,13 @@ templ StringArrayConfig(name string, values []string, description string) {
 		<div x-text={ getTranslations(description) } class="w-full py-1 text-left ml-2 text-xs text-gray-500"></div>
 		<div class="bg-red-600"></div>
 	</div>
+}
+
+// stringArrayConfigScriptHandle 用于防止 JS 代码重复渲染
+var stringArrayConfigScriptHandle = templ.NewOnceHandle()
+
+// StringArrayConfigJavaScript 字符串数组配置相关的 JavaScript 代码
+templ StringArrayConfigJavaScript() {
 	@stringArrayConfigScriptHandle.Once() {
 		<script>
 			// 添加字符串数组配置中的元素

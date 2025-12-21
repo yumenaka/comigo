@@ -2,11 +2,9 @@ package settings
 
 import "strconv"
 
-// numberConfigScriptHandle 用于防止 JS 代码重复渲染
-var numberConfigScriptHandle = templ.NewOnceHandle()
-
 // NumberConfig 数字类型的配置
 templ NumberConfig(name string, value int, description string, min int, max int) {
+	@NumberConfigJavaScript()
 	<div
 		id={ "numberConfig_" + name }
 		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
@@ -27,6 +25,13 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 		<div class="w-full py-1 text-left text-xs text-gray-500" x-text={ getTranslations(description) }></div>
 		<div class="bg-red-600"></div>
 	</div>
+}
+
+// numberConfigScriptHandle 用于防止 JS 代码重复渲染
+var numberConfigScriptHandle = templ.NewOnceHandle()
+
+// NumberConfigJavaScript 数字配置相关的 JavaScript 代码
+templ NumberConfigJavaScript() {
 	@numberConfigScriptHandle.Once() {
 		<script>
 			// 更新数字配置的函数
@@ -46,7 +51,6 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 					}
 					return;
 				}
-
 				try {
 					const response = await fetch("/api/update-number-config", {
 						method: "POST",
@@ -58,9 +62,7 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 							value: numValue,
 						}),
 					});
-
 					const data = await response.json();
-
 					if (!response.ok || !data.success) {
 						const errorMsg = data.message || "更新配置失败";
 						showToast(errorMsg, "error");
@@ -80,6 +82,17 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 
 					// 显示成功提示
 					if (data.saveSuccessHint) {
+						if (name === "Port") {
+							// 如果更新的是端口号，提示用户需要跳转新端口
+							showToast(i18next.t("port_change_hint"), "info");
+							// 2秒后跳转到新端口
+							setTimeout(() => {
+								const newUrl = new URL(window.location.href);
+								newUrl.port = numValue;
+								window.location.href = newUrl.href;
+							}, 2000);
+							return;
+						}
 						showToast(i18next.t("saveSuccessHint"), "info");
 						// 2秒后刷新页面
 						setTimeout(() => {

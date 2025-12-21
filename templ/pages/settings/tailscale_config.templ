@@ -7,8 +7,8 @@ import (
 	"strconv"
 )
 
-// RemoteAccessConfig 远程连接配置项
-templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
+// TailscaleConfig Tailscale远程连接配置项
+templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 	if tsStatus != nil {
 		@templ.JSONScript("tsStatus", tsStatus)
 	}
@@ -388,7 +388,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 										),
 										buttons: "confirm",
 										onConfirm: function () {
-											// 提交后，定时刷新Tailscale状态面板，最多刷新15次
+											// 提交后，定时刷新Tailscale状态面板，最多刷新10次
 											if (typeof UpdateTailscaleStatus === "function") {
 												let __tsRefreshCount = 0;
 												const __tsRefreshTimer = setInterval(() => {
@@ -396,7 +396,7 @@ templ RemoteAccessConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 														UpdateTailscaleStatus();
 													} catch (_) {}
 													__tsRefreshCount++;
-													if (__tsRefreshCount >= 15) {
+													if (__tsRefreshCount >= 10) {
 														clearInterval(__tsRefreshTimer);
 													}
 												}, 1500);
@@ -436,12 +436,20 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 				const checkbox = document.getElementById('EnableTailscale');
 				return checkbox ? checkbox.checked : false;
 			};
+			let count = 0;
 			const startAutoRefresh = () => {
 				if (refreshInterval) return;
 				refreshInterval = setInterval(() => {
 					if (document.visibilityState === 'visible' && getEnableTailscale()) {
 						UpdateTailscaleStatus();
+						count++;
 					}
+					if (count >= 10) {
+                        // 自动刷新10次后停止
+                        clearInterval(refreshInterval);
+                        refreshInterval = null;
+                        count = 0;
+                    }
 				}, 1500);
 			};
 			const stopAutoRefresh = () => {
