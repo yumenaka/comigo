@@ -24,21 +24,15 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 				this.current_password = this.$el.querySelector('#CurrentPassword') ? this.$el.querySelector('#CurrentPassword').value : '';
 				this.password = this.$el.querySelector('#Password').value;
                 this.ReEnterPassword = this.$el.querySelector('#ReEnterPassword').value;
-
 				this.$watch('username', value => {
 					this.isFormChanged = true; // 用户名有变化，表单被修改过
-					//console.log('Username changed. isFormChanged:', this.isFormChanged, 'New username:', value);
 				});
-				
 				this.$watch('password', value => {
 					this.isFormChanged = true; // 密码框变化，表单被修改过
 					this.passwordOK = this.password !== '' && this.ReEnterPassword !== '' && this.password === this.ReEnterPassword;
-					//console.log('Password changed. isFormChanged:', this.isFormChanged, 'New password:', value, 'Current username:', this.username);
 				});
-				
 				this.$watch('ReEnterPassword', value => {
 					this.passwordOK = this.password !== '' && this.ReEnterPassword !== '' && this.password === this.ReEnterPassword;
-					//console.log('Password changed. isFormChanged:', this.isFormChanged, 'New ReEnterPassword:', value, 'Current username:', this.username);
 				});
 			},
 			
@@ -192,7 +186,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 					showToast(i18next.t("PromptSetPassword"), "error");
 					return;
 				}
-
+				// 发送更新请求到后端 API
 				try {
 					const response = await fetch("/api/update-login-settings", {
 						method: "POST",
@@ -206,11 +200,9 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 							reEnterPassword: reEnterPassword,
 						}),
 					});
-					// 解析响应
-					const data = await response.json();
-					if (!response.ok || !data.success) {
-						const errorMsg = data.message || "更新登录设置失败";
-						showToast(errorMsg, "error");
+					// 如果响应不成功，显示错误提示
+					if (!response.ok) {
+						showToast(i18next.t("err_update_login_settings_failed"), "error");
 						return;
 					}
 					// 显示成功提示
@@ -221,7 +213,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 					}, 3000);
 				} catch (error) {
 					console.error("更新登录设置失败:", error);
-					showToast("网络错误，请重试", "error");
+					showToast(i18next.t("err_network_error"), "error");
 				}
 			}
 		</script>

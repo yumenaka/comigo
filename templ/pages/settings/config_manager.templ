@@ -128,6 +128,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 // configManagerScriptHandle 用于防止 JS 代码重复渲染
 var configManagerScriptHandle = templ.NewOnceHandle()
 
+// ConfigManagerJavaScript 配置管理相关的 JavaScript 代码
 templ ConfigManagerJavaScript() {
 	@configManagerScriptHandle.Once() {
 		<script>
@@ -164,7 +165,7 @@ templ ConfigManagerJavaScript() {
 					showToast(i18next.t("please_delete_other_config_first"), "warning");
 					return;
 				}
-
+				// 发送保存请求
 				try {
 					const response = await fetch("/api/config-save", {
 						method: "POST",
@@ -175,18 +176,15 @@ templ ConfigManagerJavaScript() {
 							selectedDir: selectedDir,
 						}),
 					});
-
-					const data = await response.json();
-
-					if (!response.ok || !data.success) {
-						const errorMsg = data.message || "保存配置失败";
-						showToast(errorMsg, "error");
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_save_config_failed"), "error");
 						return;
 					}
-
+					// 解析响应数据
+					const data = await response.json();
 					// 显示成功提示
 					showToast(i18next.t("save_config_success"), "success");
-
 					// 更新 UI：替换整个容器
 					if (data.html) {
 						const container = document.getElementById("config-container");
@@ -206,10 +204,9 @@ templ ConfigManagerJavaScript() {
 					}
 				} catch (error) {
 					console.error("保存配置失败:", error);
-					showToast("网络错误，请重试", "error");
+					showToast(i18next.t("err_network_error"), "error");
 				}
 			}
-
 			// 删除配置的函数
 			async function deleteConfig(selectedDir) {
 				// 验证逻辑：检查当前位置是否有配置
@@ -234,7 +231,7 @@ templ ConfigManagerJavaScript() {
 					showToast(i18next.t("no_config_file_to_delete_in_path"), "warning");
 					return;
 				}
-
+				// 发送删除请求
 				try {
 					const response = await fetch("/api/config-delete", {
 						method: "POST",
@@ -245,18 +242,16 @@ templ ConfigManagerJavaScript() {
 							selectedDir: selectedDir,
 						}),
 					});
-
-					const data = await response.json();
-
-					if (!response.ok || !data.success) {
-						const errorMsg = data.message || "删除配置失败";
-						showToast(errorMsg, "error");
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_delete_config_failed"), "error");
 						return;
 					}
 
+					// 解析响应数据
+					const data = await response.json();
 					// 显示成功提示
 					showToast(i18next.t("delete_config_success"), "success");
-
 					// 更新 UI：替换整个容器
 					if (data.html) {
 						const container = document.getElementById("config-container");
@@ -276,7 +271,7 @@ templ ConfigManagerJavaScript() {
 					}
 				} catch (error) {
 					console.error("删除配置失败:", error);
-					showToast("网络错误，请重试", "error");
+					showToast(i18next.t("err_network_error"), "error");
 				}
 			}
 		</script>

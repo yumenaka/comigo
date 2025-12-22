@@ -118,18 +118,12 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 func UpdateStringConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Config is locked, cannot be modified",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
 	}
 	// 调用通用逻辑更新配置
 	name, newValue, err := updateStringConfigFromJSON(c)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	// 判断是否需要显示保存成功提示并刷新页面
@@ -139,8 +133,6 @@ func UpdateStringConfigHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success":         true,
-		"message":         "Configuration updated successfully",
 		"value":           newValue,
 		"saveSuccessHint": saveSuccessHint,
 	})
@@ -190,18 +182,12 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 func UpdateBoolConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Config is locked, cannot be modified",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
 	}
 
 	name, boolVal, err := updateBoolConfigFromJSON(c)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	// 判断是否需要显示保存成功提示并刷新页面
@@ -211,8 +197,6 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success":         true,
-		"message":         "Configuration updated successfully",
 		"value":           boolVal,
 		"saveSuccessHint": saveSuccessHint,
 	})
@@ -258,18 +242,12 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, er
 func UpdateNumberConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Config is locked, cannot be modified",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
 	}
 	// 调用通用逻辑更新配置
 	name, intVal, oldConfig, err := updateNumberConfigFromJSON(c)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
 	if name == "Port" {
@@ -288,8 +266,6 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 		saveSuccessHint = true
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success":         true,
-		"message":         "Configuration updated successfully",
 		"value":           intVal,
 		"saveSuccessHint": saveSuccessHint,
 	})
@@ -358,30 +334,21 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 func UpdateLoginSettingsHandler(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Config is locked, cannot be modified",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
 	}
 
 	if err := updateLoginSettingsFromJSON(c); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Login settings updated successfully",
-	})
+	return c.NoContent(http.StatusOK)
 }
 
 // UpdateTailscaleConfigHandler 处理Tailscale配置更新的JSON API
 func UpdateTailscaleConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, "Config is locked, cannot be modified")
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
 	}
 	// 解析请求体（JSON格式）
 	var request struct {
@@ -431,20 +398,14 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	beforeConfigUpdate(&oldConfig, config.GetCfg())
 
 	// 返回成功响应
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Tailscale configuration updated successfully",
-	})
+	return c.NoContent(http.StatusOK)
 }
 
 // AddArrayConfigHandler 处理添加数组元素的 JSON API
 func AddArrayConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Config is locked, cannot be modified",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
 	}
 
 	// 解析 JSON 请求体
@@ -453,27 +414,18 @@ func AddArrayConfigHandler(c echo.Context) error {
 		AddValue   string `json:"addValue"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Invalid JSON request",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
 	}
 
 	if request.ConfigName == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "configName is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "configName is required")
 	}
 
 	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", request.ConfigName, request.AddValue)
 
 	values, err := doAdd(request.ConfigName, request.AddValue)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"message": "Failed to add config value",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_add_config_failed"))
 	}
 
 	saveSuccessHint := false
@@ -485,15 +437,10 @@ func AddArrayConfigHandler(c echo.Context) error {
 	updatedHTML := StringArrayConfig(request.ConfigName, values, request.ConfigName+"_Description")
 	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
 	if renderErr != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"message": "Failed to render template",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success":         true,
-		"message":         "Configuration value added successfully",
 		"saveSuccessHint": saveSuccessHint,
 		"html":            htmlString,
 	})
@@ -522,10 +469,7 @@ func doAdd(configName, addValue string) ([]string, error) {
 func DeleteArrayConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Config is locked, cannot be modified",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
 	}
 
 	// 解析 JSON 请求体
@@ -534,50 +478,33 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 		DeleteValue string `json:"deleteValue"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Invalid JSON request",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
 	}
 
 	if request.ConfigName == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "configName is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "configName is required")
 	}
 
 	if request.DeleteValue == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "deleteValue is required",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "deleteValue is required")
 	}
 
 	logger.Infof(locale.GetString("log_delete_array_config_handler")+"\n", request.ConfigName, request.DeleteValue)
 
 	values, err := doDelete(request.ConfigName, request.DeleteValue)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"message": "Failed to delete config value",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_config_failed"))
 	}
 
 	// 渲染更新后的 HTML
 	updatedHTML := StringArrayConfig(request.ConfigName, values, request.ConfigName+"_Description")
 	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
 	if renderErr != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"message": "Failed to render template",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Configuration value deleted successfully",
-		"html":    htmlString,
+		"html": htmlString,
 	})
 }
 
@@ -613,10 +540,7 @@ func renderTemplToString(ctx context.Context, component templ.Component) (string
 func HandleConfigSave(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Config is locked, cannot be modified",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
 	}
 
 	// 解析 JSON 请求体
@@ -624,48 +548,31 @@ func HandleConfigSave(c echo.Context) error {
 		SelectedDir string `json:"selectedDir"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Invalid JSON request",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
 	}
 
 	if request.SelectedDir == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "No directory selected",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "No directory selected")
 	}
 
 	if request.SelectedDir != config.WorkingDirectory && request.SelectedDir != config.HomeDirectory && request.SelectedDir != config.ProgramDirectory {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Invalid directory selected",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid directory selected")
 	}
 
 	// 保存配置
 	if err := config.SaveConfig(request.SelectedDir); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"message": "Failed to save config",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_save_config_failed"))
 	}
 
 	// 渲染更新后的 HTML
 	updatedHTML := ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
 	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
 	if renderErr != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"message": "Failed to render template",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Configuration saved successfully",
-		"html":    htmlString,
+		"html": htmlString,
 	})
 }
 
@@ -673,10 +580,7 @@ func HandleConfigSave(c echo.Context) error {
 func HandleConfigDelete(c echo.Context) error {
 	// 如果配置被锁定
 	if config.GetCfg().ReadOnlyMode {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Config is locked, cannot be modified",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
 	}
 
 	// 解析 JSON 请求体
@@ -684,47 +588,30 @@ func HandleConfigDelete(c echo.Context) error {
 		SelectedDir string `json:"selectedDir"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Invalid JSON request",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
 	}
 
 	if request.SelectedDir == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "No directory selected",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "No directory selected")
 	}
 
 	if request.SelectedDir != config.WorkingDirectory && request.SelectedDir != config.HomeDirectory && request.SelectedDir != config.ProgramDirectory {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"success": false,
-			"message": "Invalid directory selected",
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid directory selected")
 	}
 
 	// 删除配置
 	if err := config.DeleteConfigIn(request.SelectedDir); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"message": "Failed to delete config",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_config_failed"))
 	}
 
 	// 渲染更新后的 HTML
 	updatedHTML := ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(), config.GetHomeDirectoryConfig(), config.GetProgramDirectoryConfig())
 	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
 	if renderErr != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"message": "Failed to render template",
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Configuration deleted successfully",
-		"html":    htmlString,
+		"html": htmlString,
 	})
 }

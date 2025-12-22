@@ -39,11 +39,17 @@ templ NumberConfigJavaScript() {
 				// 验证数值范围
 				const numValue = parseInt(value);
 				if (isNaN(numValue)) {
-					showToast("请输入有效的数字", "error");
+					showToast(i18next.t("err_invalid_number"), "error");
 					return;
 				}
 				if (numValue < min || numValue > max) {
-					showToast(`数值必须在 ${min} 到 ${max} 之间`, "error");
+					showToast(
+						i18next
+							.t("err_number_range")
+							.replace("{0}", min)
+							.replace("{1}", max),
+						"error",
+					);
 					// 恢复输入框的值
 					const input = document.getElementById(name);
 					if (input) {
@@ -62,10 +68,9 @@ templ NumberConfigJavaScript() {
 							value: numValue,
 						}),
 					});
-					const data = await response.json();
-					if (!response.ok || !data.success) {
-						const errorMsg = data.message || "更新配置失败";
-						showToast(errorMsg, "error");
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_update_config_failed"), "error");
 						// 恢复输入框的值
 						const input = document.getElementById(name);
 						if (input) {
@@ -73,13 +78,13 @@ templ NumberConfigJavaScript() {
 						}
 						return;
 					}
-
+					// 解析响应数据
+					const data = await response.json();
 					// 更新原始值标记
 					const input = document.getElementById(name);
 					if (input) {
 						input.setAttribute("data-original-value", numValue);
 					}
-
 					// 显示成功提示
 					if (data.saveSuccessHint) {
 						if (name === "Port") {
@@ -103,7 +108,7 @@ templ NumberConfigJavaScript() {
 					}
 				} catch (error) {
 					console.error("更新配置失败:", error);
-					showToast("网络错误，请重试", "error");
+					showToast(i18next.t("err_network_error"), "error");
 					// 恢复输入框的值
 					const input = document.getElementById(name);
 					if (input) {

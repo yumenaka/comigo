@@ -65,7 +65,6 @@ templ StringArrayConfigJavaScript() {
 			async function addStringConfigValue(configName) {
 				const addInput = document.getElementById(configName + "AddInput");
 				if (!addInput) return;
-
 				const addValue = addInput.value.trim();
 				// 验证：如果为空，显示错误提示
 				if (addValue === "") {
@@ -75,7 +74,6 @@ templ StringArrayConfigJavaScript() {
 					});
 					return;
 				}
-
 				// 验证：如果已经有这个值了，显示错误提示
 				const container = document.getElementById(
 					configName + "-string-array-config",
@@ -97,7 +95,7 @@ templ StringArrayConfigJavaScript() {
 						}
 					}
 				}
-
+				// 发送添加请求到服务器
 				try {
 					const response = await fetch("/api/add-array-config", {
 						method: "POST",
@@ -109,15 +107,13 @@ templ StringArrayConfigJavaScript() {
 							addValue: addValue,
 						}),
 					});
-
-					const data = await response.json();
-
-					if (!response.ok || !data.success) {
-						const errorMsg = data.message || "添加配置失败";
-						showToast(errorMsg, "error");
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_add_config_failed"), "error");
 						return;
 					}
-
+					// 解析响应数据
+					const data = await response.json();
 					// 显示成功提示
 					if (data.saveSuccessHint) {
 						showToast(i18next.t("saveSuccessHint"), "info");
@@ -159,7 +155,7 @@ templ StringArrayConfigJavaScript() {
 					}
 				} catch (error) {
 					console.error("添加配置失败:", error);
-					showToast("网络错误，请重试", "error");
+					showToast(i18next.t("err_network_error"), "error");
 				}
 			}
 
@@ -176,18 +172,15 @@ templ StringArrayConfigJavaScript() {
 							deleteValue: deleteValue,
 						}),
 					});
-
-					const data = await response.json();
-
-					if (!response.ok || !data.success) {
-						const errorMsg = data.message || "删除配置失败";
-						showToast(errorMsg, "error");
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_delete_config_failed"), "error");
 						return;
 					}
-
+					// 解析响应数据
+					const data = await response.json();
 					// 显示成功提示
 					showToast(i18next.t("saveSuccessHint"), "success");
-
 					// 更新 UI：替换整个容器
 					if (data.html) {
 						const container = document.getElementById(
@@ -211,7 +204,7 @@ templ StringArrayConfigJavaScript() {
 					}
 				} catch (error) {
 					console.error("删除配置失败:", error);
-					showToast("网络错误，请重试", "error");
+					showToast(i18next.t("err_network_error"), "error");
 				}
 			}
 		</script>

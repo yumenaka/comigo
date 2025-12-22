@@ -31,6 +31,7 @@ templ StringConfig(name string, value string, description string) {
 	</div>
 }
 
+// StringConfigJavascript 字符串配置相关的 JavaScript 代码
 templ StringConfigJavascript() {
 	@stringConfigScriptHandle.Once() {
 		<script>
@@ -47,11 +48,8 @@ templ StringConfigJavascript() {
 							value: value,
 						}),
 					});
-					// 解析响应
-					const data = await response.json();
-					if (!response.ok || !data.success) {
-						const errorMsg = data.message || "更新配置失败";
-						showToast(errorMsg, "error");
+					if (!response.ok) {
+						showToast(i18next.t("err_update_config_failed"), "error");
 						// 恢复输入框的值
 						const input = document.getElementById(name);
 						if (input) {
@@ -59,7 +57,8 @@ templ StringConfigJavascript() {
 						}
 						return;
 					}
-
+					// 解析响应
+					const data = await response.json();
 					// 更新原始值标记
 					const input = document.getElementById(name);
 					if (input) {
@@ -77,7 +76,7 @@ templ StringConfigJavascript() {
 					}
 				} catch (error) {
 					console.error("更新配置失败:", error);
-					showToast("网络错误，请重试", "error");
+					showToast(i18next.t("err_network_error"), "error");
 					// 恢复输入框的值
 					const input = document.getElementById(name);
 					if (input) {
