@@ -2292,6 +2292,10 @@
     margin-inline-start: calc(var(--spacing) * 3);
   }
 
+  .ms-auto {
+    margin-inline-start: auto;
+  }
+
   .mt-0 {
     margin-top: calc(var(--spacing) * 0);
   }
@@ -2677,6 +2681,10 @@
     height: calc(var(--spacing) * 12);
   }
 
+  .h-20 {
+    height: calc(var(--spacing) * 20);
+  }
+
   .h-32 {
     height: calc(var(--spacing) * 32);
   }
@@ -2715,6 +2723,10 @@
 
   .h-screen {
     height: 100vh;
+  }
+
+  .max-h-96 {
+    max-height: calc(var(--spacing) * 96);
   }
 
   .max-h-fit {
@@ -2977,6 +2989,10 @@
     border-color: var(--color-brand);
   }
 
+  .min-w-0 {
+    min-width: calc(var(--spacing) * 0);
+  }
+
   .min-w-24 {
     min-width: calc(var(--spacing) * 24);
   }
@@ -3029,7 +3045,15 @@
     flex: none;
   }
 
-  .flex-shrink, .shrink {
+  .flex-shrink {
+    flex-shrink: 1;
+  }
+
+  .flex-shrink-0 {
+    flex-shrink: 0;
+  }
+
+  .shrink {
     flex-shrink: 1;
   }
 
@@ -3536,6 +3560,10 @@
 
   .gap-2 {
     gap: calc(var(--spacing) * 2);
+  }
+
+  .gap-3 {
+    gap: calc(var(--spacing) * 3);
   }
 
   :where(.-space-y-px > :not(:last-child)) {
@@ -4889,6 +4917,10 @@
 
   .py-3 {
     padding-block: calc(var(--spacing) * 3);
+  }
+
+  .py-4 {
+    padding-block: calc(var(--spacing) * 4);
   }
 
   .py-12 {

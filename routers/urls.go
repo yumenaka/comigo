@@ -30,7 +30,7 @@ func BindURLs() {
 	bindPublicView(publicViewGroup)
 	bindPublicAPI(publicAPI)
 
-	// 可能需要登录的页面
+	// 可以设置登录保护的页面与api
 	privateViewGroup := publicViewGroup.Group("")
 	privateAPI := publicAPI.Group("")
 
@@ -71,7 +71,6 @@ func bindPublicView(group *echo.Group) {
 func bindPublicAPI(group *echo.Group) {
 	// 生成QRCode
 	group.GET("/qrcode.png", data_api.GetQrcode)
-
 	group.POST("/login", login.Login)
 	group.POST("/logout", login.Logout)
 }
@@ -106,6 +105,8 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/top_shelf", data_api.GetTopOfShelfInfo)
 	// 查询书籍信息
 	group.GET("/get_book", data_api.GetBook)
+	// 获取所有书签的API
+	group.GET("/all_bookmarks", data_api.GetAllBookmarks)
 	// 更新书签信息
 	group.POST("/store_bookmark", data_api.StoreBookmark)
 	// 查询父书籍信息
@@ -129,7 +130,6 @@ func bindProtectedAPI(group *echo.Group) {
 	// TODO: 测试需要登录时的表现
 	websocket.WsDebug = &config.GetCfg().Debug
 	group.GET("/ws", websocket.WsHandler)
-
 	// 字符串、布尔值、数字配置的更改
 	group.POST("/update-string-config", settings.UpdateStringConfigHandler)
 	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)
@@ -138,7 +138,6 @@ func bindProtectedAPI(group *echo.Group) {
 	group.POST("/update-login-settings", settings.UpdateLoginSettingsHandler)
 	// Tailscale配置更新JSON API
 	group.POST("/submit-tailscale-config", settings.UpdateTailscaleConfigHandler)
-
 	// 字符串数组配置的增删改
 	group.POST("/delete-array-config", settings.DeleteArrayConfigHandler)
 	group.POST("/add-array-config", settings.AddArrayConfigHandler)
