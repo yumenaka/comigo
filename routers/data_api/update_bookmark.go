@@ -53,3 +53,25 @@ func StoreBookmark(c echo.Context) error {
 	// 返回成功响应
 	return c.JSON(http.StatusOK, map[string]string{"message": "bookmark updated successfully"})
 }
+
+// GetAllBookmarks 获取所有书签的 API 处理函数
+func GetAllBookmarks(c echo.Context) error {
+	// 获取所有书籍
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
+	}
+	// 收集所有书签
+	allMarks := []model.BookinfoWithBookMark{}
+	for _, book := range allBooks {
+		for _, mark := range book.BookMarks {
+			book.BookInfo.Cover = book.GetCover()
+			bookinfoWithMark := model.BookinfoWithBookMark{
+				BookInfo: book.BookInfo,
+				BookMark: mark,
+			}
+			allMarks = append(allMarks, bookinfoWithMark)
+		}
+	}
+	return c.JSON(http.StatusOK, allMarks)
+}
