@@ -87,8 +87,12 @@ func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	if action.ReScanStores {
 		config_api.StartReScan()
 	}
+	// 处理自动扫描间隔的变化
+	if action.UpdateAutoRescan {
+		config.StartAutoRescan()
+	}
 	// 提示没有变化
-	if newConfig.Debug && !action.ReScanStores && !action.ReStartWebServer {
+	if newConfig.Debug && !action.ReScanStores && !action.ReStartWebServer && !action.UpdateAutoRescan {
 		logger.Info(locale.GetString("log_no_changes_skipped_rescan"))
 	}
 }
@@ -105,6 +109,7 @@ type ConfigChangeAction struct {
 	StartTailscale   bool
 	StopTailscale    bool
 	ReStartTailscale bool
+	UpdateAutoRescan bool
 }
 
 // checkServerActions 检查旧的和新的配置是否需要更新，并返回需要重启网页服务器、重新扫描整个书库、重新扫描所有文件的布尔值
@@ -182,6 +187,10 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (act
 		action.StopTailscale = true
 		action.ReStartTailscale = false
 		logger.Info(locale.GetString("log_tailscale_disabled_stop"))
+	}
+	// 自动扫描间隔变化时，需要更新定时扫描
+	if oldConfig.AutoRescanIntervalMinutes != newConfig.AutoRescanIntervalMinutes {
+		action.UpdateAutoRescan = true
 	}
 
 	return action

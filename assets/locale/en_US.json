@@ -814,5 +814,11 @@
   "log_scheduler_create_task_failed": "Failed to create scheduled task: %v",
   "log_scheduler_task_started": "Scheduled scan task started, interval: %d minutes",
   "log_scheduler_task_stopped": "Scheduled scan task stopped",
+  "auto_rescan_started": "Automatic rescan started, interval: %d minutes",
+  "auto_rescan_stopped": "Automatic rescan stopped",
+  "auto_rescan_updated": "Automatic rescan interval updated to: %d minutes",
+  "auto_rescan_status_running": "Running",
+  "auto_rescan_status_stopped": "Stopped",
+  "auto_rescan_current_interval": "Current scan interval: %d minutes",
   "other_settings": "Other Settings"
 }

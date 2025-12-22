@@ -10,6 +10,23 @@ import (
 	"github.com/yumenaka/comigo/tools/scan"
 )
 
+func init() {
+	// 设置扫描任务函数，用于自动扫描
+	config.SetScanTaskFunc(func() error {
+		if err := scan.InitAllStore(config.GetCfg()); err != nil {
+			logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
+			return err
+		}
+		if config.GetCfg().EnableDatabase {
+			if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
+				logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 // SetCwdAsScanPath  当没有指定扫描路径时，把当前工作目录作为扫描路径
 func SetCwdAsScanPathIfNeed() {
 	if len(config.GetCfg().StoreUrls) == 0 {
