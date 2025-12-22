@@ -265,10 +265,40 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
 		saveSuccessHint = true
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
+
+	// 构建响应
+	response := map[string]interface{}{
 		"value":           intVal,
 		"saveSuccessHint": saveSuccessHint,
-	})
+	}
+
+	// 如果是 AutoRescanIntervalMinutes，返回扫描状态信息
+	if name == "AutoRescanIntervalMinutes" {
+		config.InitLibraryScanner()
+		isRunning := config.GlobalLibraryScanner.IsRunning()
+		currentInterval := config.GlobalLibraryScanner.GetInterval()
+
+		response["autoRescanStatus"] = map[string]interface{}{
+			"isRunning":       isRunning,
+			"currentInterval": currentInterval,
+		}
+
+		// 根据状态添加提示信息
+		if intVal > 0 {
+			if currentInterval > 0 && currentInterval != intVal {
+				// 间隔已更新
+				response["autoRescanMessage"] = fmt.Sprintf(locale.GetString("auto_rescan_updated"), intVal)
+			} else {
+				// 新启动
+				response["autoRescanMessage"] = fmt.Sprintf(locale.GetString("auto_rescan_started"), intVal)
+			}
+		} else {
+			// 已停止
+			response["autoRescanMessage"] = locale.GetString("auto_rescan_stopped")
+		}
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 // updateLoginSettingsFromJSON 从 JSON 请求中更新登录设置的通用逻辑

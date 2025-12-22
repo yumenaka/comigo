@@ -814,5 +814,11 @@
   "log_scheduler_create_task_failed": "スケジュールされたタスクの作成に失敗しました: %v",
   "log_scheduler_task_started": "スケジュールされたスキャンタスクが開始されました。間隔: %d 分",
   "log_scheduler_task_stopped": "スケジュールされたスキャンタスクが停止しました",
+  "auto_rescan_started": "自動再スキャンが開始されました。間隔: %d 分",
+  "auto_rescan_stopped": "自動再スキャンが停止しました",
+  "auto_rescan_updated": "自動再スキャン間隔が更新されました: %d 分",
+  "auto_rescan_status_running": "実行中",
+  "auto_rescan_status_stopped": "停止",
+  "auto_rescan_current_interval": "現在のスキャン間隔: %d 分",
   "other_settings": "その他の設定"
 }

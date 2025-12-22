@@ -814,5 +814,11 @@
   "log_scheduler_create_task_failed": "创建定时任务失败: %v",
   "log_scheduler_task_started": "定时扫描任务已启动，间隔: %d 分钟",
   "log_scheduler_task_stopped": "定时扫描任务已停止",
+  "auto_rescan_started": "自动扫描已启动，间隔: %d 分钟",
+  "auto_rescan_stopped": "自动扫描已停止",
+  "auto_rescan_updated": "自动扫描间隔已更新为: %d 分钟",
+  "auto_rescan_status_running": "运行中",
+  "auto_rescan_status_stopped": "已停止",
+  "auto_rescan_current_interval": "当前扫描间隔: %d 分钟",
   "other_settings": "其他设置"
 }
