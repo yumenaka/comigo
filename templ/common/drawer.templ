@@ -57,6 +57,9 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component) {
 			</button>
 		</div>
 		<div class="flex flex-col items-center justify-end flex-grow px-1 pt-1 my-0 rounded drawer_slot text-accent-content dark:text-white">
+			<!-- 阅读历史记录 -->
+			@ReadingHistory()
+			<!-- drawer插槽 -->
 			if slot != nil {
 				@slot
 			}

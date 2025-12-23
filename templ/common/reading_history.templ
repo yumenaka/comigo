@@ -1,0 +1,92 @@
+package common
+
+// ReadingHistory 阅读历史记录列表组件
+templ ReadingHistory() {
+	<div
+		x-data="{ collapsed: $persist(true).as('shelf_collapsed'), bookmarks: [], loading: false }"
+		x-init="
+			(async () => {
+				loading = true;
+				try {
+					const response = await fetch('/api/all_bookmarks');
+					if (response.ok) {
+						const data = await response.json();
+						// 过滤掉没有阅读记录的书签（PageIndex > 0），并按更新时间降序排序
+						bookmarks = data.filter(item => item.book_mark.page_index > 0)
+							.sort((a, b) => new Date(b.book_mark.updated_at) - new Date(a.book_mark.updated_at));
+					}
+				} catch (error) {
+					console.error('Failed to load bookmarks:', error);
+				} finally {
+					loading = false;
+				}
+			})();
+		"
+		class="flex flex-col w-full my-2.5 h-full max-h-128"
+	>
+		<!-- 折叠/展开按钮 -->
+		<button
+			@click="collapsed = !collapsed"
+			class="inline-flex mb-1 items-center w-full cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		>
+			<span class="font-medium ms-3" x-text="i18next.t('reading_history')"></span>
+			<span class="ms-auto text-sm text-gray-500" x-show="bookmarks.length > 0" x-text="'(' + bookmarks.length + ')'"></span>
+			<svg
+				class="w-5 h-5 transition-transform"
+				:class="{ 'rotate-90': !collapsed }"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 10 6"
+			>
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+			</svg>
+		</button>
+		<!-- 阅读历史列表 -->
+		<div
+			x-show="!collapsed"
+			x-transition
+			class="mt-2 p-1 space-y-2 overflow-y-auto drop-shadow-lg rounded"
+		>
+			<!-- 加载中 -->
+			<div x-show="loading" class="text-center text-gray-500 py-4">
+				<span x-text="i18next.t('loading')"></span>
+			</div>
+			<!-- 空列表提示 -->
+			<div x-show="!loading && bookmarks.length === 0" class="text-center text-gray-500 py-4">
+				<span x-text="i18next.t('no_reading_history')"></span>
+			</div>
+			<!-- 书签列表 -->
+			<template x-for="item in bookmarks" :key="item.book_info.id + '_' + item.book_mark.page_index">
+				<a
+					:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)"
+					class="flex flex-col gap-2 p-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 outline-double outline-2 hover:outline-3 transition-colors cursor-pointer"
+				>
+					<div class="flex items-center gap-3">
+						<!-- 封面 -->
+						<div
+							class="w-16 h-20 bg-cover bg-center rounded shrink-0  border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+							:style="'background-image: url(' + (item.book_info.cover.url.includes('api/get_file?') ? item.book_info.cover.url + '&resize_height=128' : item.book_info.cover.url) + ')'"
+						></div>
+						<!-- 信息 -->
+						<div class="flex-1 min-w-0">
+							<div class="font-medium text-sm truncate" x-text="item.book_info.title || i18next.t('unknown')"></div>
+							<div class="text-xs text-gray-500 mt-1">
+								<span x-text="item.book_mark.page_index + '/' + item.book_info.page_count"></span>
+								<span x-show="$store.shelf.readingProgressPercent" class="ml-2">
+									<span x-text="Math.round((item.book_mark.page_index / item.book_info.page_count) * 100) + '%'"></span>
+								</span>
+							</div>
+						</div>
+					</div>
+					<!-- 阅读进度条 -->
+					<div class="w-full h-1.5 bg-white dark:bg-gray-700 rounded-full overflow-hidden">
+						<div
+							class="h-full bg-blue-500 transition-all duration-300"
+							:style="'width: ' + Math.round((item.book_mark.page_index / item.book_info.page_count) * 100) + '%'"
+						></div>
+					</div>
+				</a>
+			</template>
+		</div>
+	</div>
+}
