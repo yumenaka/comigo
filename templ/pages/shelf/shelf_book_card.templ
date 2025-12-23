@@ -207,13 +207,32 @@ templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
 		}
 		<!-- 阅读进度 -->
 		@ReadingProgress(book, bookMarks)
-		<!-- 书名显示栏 -->
-		<div
-			x-show="$store.shelf.showFilename"
-			class="absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100/80 border-blue-800 rounded-b h-1/4"
-		>
-			<span class="absolute inset-x-0 top-0 p-1 align-middle" x-text={ fmt.Sprintf("$store.shelf.simplifyTitle === true?'%v':'%v'", book.ShortName(), book.Title) }></span>
-		</div>
+		<!-- 书名栏 -->
+		if bookMarks != nil && bookMarks.GetLastReadPage() > 0 {
+			<div
+				x-show="$store.shelf.showFilename"
+				class="absolute inset-x-0 bottom-1.5 text-sm font-semibold text-center text-black bg-gray-100/80 border-blue-800 rounded-b h-1/4"
+			>
+				<span class="absolute inset-x-0 top-0 p-1 align-middle" x-text={ fmt.Sprintf("$store.shelf.simplifyTitle === true?'%v':'%v'", book.ShortName(), book.Title) }></span>
+			</div>
+		}
+		if bookMarks == nil || bookMarks.GetLastReadPage() == 0 {
+			<div
+				x-show="$store.shelf.showFilename"
+				class="absolute inset-x-0 bottom-0 text-sm font-semibold text-center text-black bg-gray-100/80 border-blue-800 rounded-b h-1/4"
+			>
+				<span class="absolute inset-x-0 top-0 p-1 align-middle" x-text={ fmt.Sprintf("$store.shelf.simplifyTitle === true?'%v':'%v'", book.ShortName(), book.Title) }></span>
+			</div>
+		}
+		<!-- 阅读进度条 -->
+		if bookMarks != nil && bookMarks.GetLastReadPage() > 0 {
+			<div class="absolute inset-x-0 bottom-0 h-1.5 bg-white dark:bg-gray-700 rounded-b overflow-hidden z-10">
+				<div
+					class="h-full bg-blue-500 transition-all duration-300"
+					style={ fmt.Sprintf("width: %.0f%%", (float64(bookMarks.GetLastReadPage())/float64(book.PageCount))*100) }
+				></div>
+			</div>
+		}
 	</a>
 }
 
