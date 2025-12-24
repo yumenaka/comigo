@@ -21,7 +21,7 @@ templ NotFound404(c echo.Context) {
 		<div class="text-4xl font-bold text-gray-500">404</div>
 		<div class="text-2xl font-bold text-gray-500">Not Found</div>
 	</div>
-	@common.Drawer(c, nil, nil)
+	@common.Drawer(c, nil, nil, true, "/")
 	@common.QRCode()
 	@common.Footer(config.GetVersion())
 }

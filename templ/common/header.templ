@@ -8,9 +8,12 @@ import (
 )
 
 type HeaderProps struct {
+	// 标题
 	Title string
 	// 是否显示返回图标
 	ShowReturnIcon bool
+	// 返回链接
+	ReturnUrl string
 	// 是否显示设置图标
 	ShowServerSetting bool
 	//是否显示上传图标
@@ -19,8 +22,6 @@ type HeaderProps struct {
 	ShowReSortIcon bool
 	// 下载链接
 	DownLoadLink string
-	// 返回链接
-	ReturnUrl string
 	// 快速跳转，设置之后标题变为快速跳转栏
 	QuickJumpBarBooks *model.BookInfos
 }

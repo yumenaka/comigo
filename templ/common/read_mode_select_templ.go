@@ -40,7 +40,7 @@ func ReadModeSelect(inShelf bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " x-show=\"$store.global.onlineBook\" class=\"w-full h-10 py-0 mt-2 mb-2 font-semibold border rounded bg-base-100 text-accent-content focus:outline-none\"><option value=\"infinite_scroll\" x-text=\"i18next.t('infinite_scroll')\">卷轴(无限)</option> <option value=\"paged_scroll\" x-text=\"i18next.t('paged_scroll')\">卷轴(分页)</option> <option value=\"page_flip\" x-text=\"i18next.t('page_flip')\">翻页(左右)</option></select>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " x-show=\"$store.global.onlineBook\" class=\"w-full h-10 py-0 mt-2 mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none\"><option value=\"infinite_scroll\" x-text=\"i18next.t('infinite_scroll')\">卷轴(无限)</option> <option value=\"paged_scroll\" x-text=\"i18next.t('paged_scroll')\">卷轴(分页)</option> <option value=\"page_flip\" x-text=\"i18next.t('page_flip')\">翻页(左右)</option></select>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
