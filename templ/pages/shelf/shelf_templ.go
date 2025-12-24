@@ -60,7 +60,7 @@ func ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(c, nil, ShelfDrawerSlot()).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(c, nil, ShelfDrawerSlot(), c.Param("id") != "", common.GetReturnUrl(c.Param("id"))).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -30,7 +30,11 @@ templ ScrollPage(c echo.Context, book *model.Book, readMode string, pagedIndex i
 		@MainArea(c, book, readMode, pagedIndex, startIndex)
 	}
 	@common.Footer(config.GetVersion())
-	@common.Drawer(c, book, DrawerSlot(c, book))
+	if book != nil {
+		@common.Drawer(c, book, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
+	} else {
+		@common.Drawer(c, book, DrawerSlot(c, book), true, "/")
+	}
 	@common.QRCode()
 }
 

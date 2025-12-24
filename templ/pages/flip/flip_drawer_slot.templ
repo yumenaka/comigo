@@ -39,7 +39,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
 	<label
 		x-show="$store.global.onlineBook"
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -53,7 +53,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<span class="font-medium ms-3" x-text="i18next.t('sync_page')"></span>
 	</label>
 	<!-- 是否【滑动翻页】 -->
-	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
+	<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input
 			type="checkbox"
 			x-model="$store.flip.swipeTurn"
@@ -62,12 +62,12 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 			checked
 		/>
 		<div
-			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span class="font-medium ms-3" x-text="i18next.t('swipe_turn')"></span>
 	</label>
 	<!-- 是否【鼠标滚轮翻页】 -->
-	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
+	<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input
 			type="checkbox"
 			x-model="$store.flip.wheelFlip"
@@ -76,13 +76,13 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 			checked
 		/>
 		<div
-			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span class="font-medium ms-3" x-text="i18next.t('scroll_wheel_flip')"></span>
 	</label>
 	<!-- 日漫模式（右开本）  -->
 	<label
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -101,7 +101,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	</label>
 	<!-- 单页模式  -->
 	<label
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -120,7 +120,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	</label>
 	<!-- 显示页数  -->
 	<label
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -136,7 +136,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	<!-- 【压缩图片】 -->
 	<label
 		x-show="$store.global.onlineBook"
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -151,7 +151,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<span class="font-medium ms-3" x-text="i18next.t('compress_image')"></span>
 	</label>
 	<!-- 【压缩图片:宽度】 -->
-	<div x-show="$store.global.autoResize && $store.global.onlineBook" x-transition class="relative w-full my-2 rounded-sm outline-offset-4 outline-double outline-2 hover:outline-3 ">
+	<div x-show="$store.global.autoResize && $store.global.onlineBook" x-transition class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label
 			for="autoResizeWidth"
 			class="block w-full mb-0 font-medium"
@@ -171,7 +171,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	<!-- 【自动切边】 -->
 	<label
 		x-show="$store.global.onlineBook"
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -186,7 +186,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<span class="font-medium ms-3" x-text="i18next.t('auto_crop')"></span>
 	</label>
 	<!-- 【切边阈值】 -->
-	<div x-show="$store.global.autoCrop && $store.global.onlineBook" x-transition class="relative w-full my-2 rounded-sm outline-offset-4 outline-double outline-2 hover:outline-3">
+	<div x-show="$store.global.autoCrop && $store.global.onlineBook" x-transition class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label
 			for="autoCropNum"
 			class="block w-full mb-0 font-medium"
@@ -206,7 +206,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	</div>
 	<!-- 自动隐藏工具栏  -->
 	<label
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -222,7 +222,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	<!-- 自动对齐  -->
 	<label
 		x-show="!$store.flip.autoHideToolbar"
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"

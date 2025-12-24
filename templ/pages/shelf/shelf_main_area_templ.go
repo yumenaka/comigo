@@ -78,7 +78,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"w-full h-full mt-2 mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8\"><!-- 书架标题栏 --><button title=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"w-full h-full mt-2 mb-6 border-2 border-gray-500 dark:border-gray-200 rounded flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8\"><!-- 书架标题栏 --><button title=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -91,7 +91,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" @click=\"showBook = !showBook\" class=\"child_store max-w-4/6 flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2\"><span class=\"flex flex-row size-fit min-w-64 max-w-3/4 mt-0 p-2 bg-base-100 border-4 border-slate-400 text-base-content rounded-xl text-center text-sm font-semibold\"><span class=\"flex-10 mx-2 truncate\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" @click=\"showBook = !showBook\" class=\"child_store max-w-4/6 flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2\"><span class=\"flex flex-row size-fit min-w-64 max-w-3/4 mt-0 p-2 bg-base-100 border-2 border-gray-500 dark:border-gray-200 text-base-content rounded text-center text-sm font-semibold\"><span class=\"flex-10 mx-2 truncate\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

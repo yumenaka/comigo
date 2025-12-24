@@ -18,6 +18,6 @@ templ UploadPage(c echo.Context) {
 	@common.UploadArea()
 	,
 	@common.Footer(config.GetVersion())
-	@common.Drawer(c, nil, nil)
+	@common.Drawer(c, nil, nil, true, "/")
 	@common.QRCode()
 }

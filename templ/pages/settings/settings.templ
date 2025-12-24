@@ -19,7 +19,7 @@ templ SettingsPage(c echo.Context, tsStatus *tailscale_plugin.TailscaleStatus) {
 		})
 	@common.Toast()
 	@MainArea(tsStatus)
-	@common.Drawer(c, nil, nil)
+	@common.Drawer(c, nil, nil, true, "/")
 	@common.Footer(config.GetVersion())
 	@common.QRCode()
 }

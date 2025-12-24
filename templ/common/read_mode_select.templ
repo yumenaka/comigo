@@ -11,7 +11,7 @@ templ ReadModeSelect(inShelf bool) {
 			x-on:change="$store.global.onChangeReadMode();"
 		}
 		x-show="$store.global.onlineBook"
-		class="w-full h-10 py-0 mt-2 mb-2 font-semibold border rounded bg-base-100 text-accent-content focus:outline-none"
+		class="w-full h-10 py-0 mt-2 mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
 	>
 		<option value="infinite_scroll" x-text="i18next.t('infinite_scroll')">卷轴(无限)</option>
 		<option value="paged_scroll" x-text="i18next.t('paged_scroll')">卷轴(分页)</option>
