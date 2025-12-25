@@ -2292,10 +2292,6 @@
     margin-inline-start: calc(var(--spacing) * 3);
   }
 
-  .ms-auto {
-    margin-inline-start: auto;
-  }
-
   .mt-0 {
     margin-top: calc(var(--spacing) * 0);
   }
@@ -3165,6 +3161,10 @@
     scale: none;
   }
 
+  .-rotate-90 {
+    rotate: -90deg;
+  }
+
   .rotate-90 {
     rotate: 90deg;
   }
@@ -3950,6 +3950,11 @@
   .border-t {
     border-top-style: var(--tw-border-style);
     border-top-width: 1px;
+  }
+
+  .border-t-2 {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 2px;
   }
 
   .border-r {
@@ -6502,6 +6507,10 @@ body {
 
 .scroll-hidden::-webkit-scrollbar {
   display: none;
+}
+
+.bg-dark-backdrop\/70 {
+  background-color: #0000004d;
 }
 
 input[type="range"]::-moz-range-progress {

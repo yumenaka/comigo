@@ -60,7 +60,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"mouseMoveArea\" x-data=\"{\n            imageWidth: '', //图片的宽度\n            counter: 0,//计数器\n            maxReadPageNum: 0 //读取的最大页码\n        }\" x-init=\"let stoper= setInterval(() => {\n            counter++;\n            console.log('Wait.. Attempt: ' + counter);\n            if (counter > 2) {\n                clearInterval(stoper);\n            }\n        }, 1000);\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"mouseMoveArea\" x-data=\"{\n            imageWidth: '', //图片的宽度\n            counter: 0,//计数器\n            maxReadPageNum: 0 //读取的最大页码\n        }\" x-init=\"let stoper= setInterval(() => {\n            counter++;\n            console.log('Wait.. Attempt: ' + counter);\n            if (counter > 1) {\n                clearInterval(stoper);\n            }\n        }, 1000);\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

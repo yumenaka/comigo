@@ -91,14 +91,14 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" @click=\"showBook = !showBook\" class=\"child_store max-w-4/6 flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2\"><span class=\"flex flex-row size-fit min-w-64 max-w-3/4 mt-0 p-2 bg-base-100 border-2 border-gray-500 dark:border-gray-200 text-base-content rounded text-center text-sm font-semibold\"><span class=\"flex-10 mx-2 truncate\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" @click=\"showBook = !showBook\" class=\"child_store max-w-4/6 flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2\"><span class=\"flex flex-row size-fit min-w-64 max-w-3/4 mt-0 p-2 bg-base-100 border-2 border-gray-500 dark:border-gray-200 text-base-content rounded text-center text-sm font-semibold\"><svg class=\"flex-1 w-3 h-6 transition-transform\" :class=\"{ '-rotate-90': !showBook }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg> <span class=\"flex-10 mx-2 truncate\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v(x%v) ", storeBooks.StoreUrl, storeBooks.ChildBookNum))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 34, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/shelf/shelf_main_area.templ`, Line: 37, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
