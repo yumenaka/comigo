@@ -608,7 +608,7 @@
   "log_error_closing_listener": "关闭监听器错误: %v",
   "log_another_instance_running": "另一个实例正在运行，正在向其发送参数...",
   "log_get_book_error": "获取书籍错误: %v",
-  "log_saving_books_to": "正在保存书籍到 %s",
+  "log_saving_books_meta_data_to": "正在保存书籍Metadata到 %s",
   "log_error_saving_book": "保存书籍 %s 错误: %s",
   "log_successfully_saved_books": "成功保存 %d 本书籍到 %s",
   "log_cfg_save_to": "配置保存到 %s",

@@ -608,7 +608,7 @@
   "log_error_closing_listener": "Error closing listener: %v",
   "log_another_instance_running": "Another instance is already running, sending args to it...",
   "log_get_book_error": "GetBook: %v",
-  "log_saving_books_to": "Saving books to %s",
+  "log_saving_books_meta_data_to": "Saving books metadata to %s",
   "log_error_saving_book": "Error saving book %s: %s",
   "log_successfully_saved_books": "Successfully saved %d books to %s",
   "log_cfg_save_to": "cfg Save To %s",
