@@ -19,7 +19,7 @@ templ ReadModeSwitchButton() {
 		>
 			<button
 				type="button"
-				class="flex-1 h-10 px-3 mb-2 text-sm font-semibold border rounded text-white bg-blue-500 shadow-lg hover:bg-blue-600 transition-colors focus:outline-none focus:ring"
+				class="flex-1 h-10 px-3 mb-1 text-sm border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
 				x-on:click="$store.global.readMode = mode; $store.global.onChangeReadMode();"
 				x-text="i18next.t(mode+'_button')"
 				x-bind:aria-label="i18next.t(mode+'_button')"

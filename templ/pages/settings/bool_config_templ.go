@@ -47,7 +47,7 @@ func BoolConfig(name string, value bool, description string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl justify-left items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl justify-left items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

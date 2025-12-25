@@ -5,6 +5,7 @@ templ ReadingHistory() {
 	<!-- ReadingHistory 阅读历史记录列表组件 -->
 	<div
 		x-data="{ collapsed: $persist(true).as('reading_history_collapsed'), bookmarks: [], loading: false }"
+		x-show="!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')"
 		x-init="
 			(async () => {
 				loading = true;
