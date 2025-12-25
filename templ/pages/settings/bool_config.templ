@@ -3,7 +3,7 @@ package settings
 // BoolConfig 布尔类型的配置
 templ BoolConfig(name string, value bool, description string) {
 	@BoolConfigJavaScript()
-	<div id={ "boolConfig_" + name } class="flex flex-col w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl justify-left items-left bg-base-100 text-base-content border-slate-400">
+	<div id={ "boolConfig_" + name } class="flex flex-col w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl justify-left items-left bg-base-100 text-base-content border-slate-400">
 		<div x-text={ getTranslations(name) } class="w-full py-0 text-left"></div>
 		<label for={ name } class="relative h-8 cursor-pointer w-14">
 			<input

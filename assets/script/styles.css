@@ -339,7 +339,6 @@
     --radius-md: .375rem;
     --radius-lg: .5rem;
     --radius-xl: .75rem;
-    --radius-2xl: 1rem;
     --drop-shadow-lg: 0 4px 4px #00000026;
     --ease-in: cubic-bezier(.4, 0, 1, 1);
     --ease-out: cubic-bezier(0, 0, .2, 1);
@@ -2677,6 +2676,10 @@
     height: calc(var(--spacing) * 10);
   }
 
+  .h-10\.5 {
+    height: calc(var(--spacing) * 10.5);
+  }
+
   .h-12 {
     height: calc(var(--spacing) * 12);
   }
@@ -3783,10 +3786,6 @@
     border-radius: .25rem;
   }
 
-  .rounded-2xl {
-    border-radius: var(--radius-2xl);
-  }
-
   .rounded-full {
     border-radius: 3.40282e38px;
   }
@@ -4148,6 +4147,10 @@
     }
   }
 
+  .bg-blue-200 {
+    background-color: var(--color-blue-200);
+  }
+
   .bg-blue-300 {
     background-color: var(--color-blue-300);
   }
@@ -4256,8 +4259,8 @@
     background-color: var(--color-red-100);
   }
 
-  .bg-red-300 {
-    background-color: var(--color-red-300);
+  .bg-red-200 {
+    background-color: var(--color-red-200);
   }
 
   .bg-red-400 {
@@ -4954,10 +4957,6 @@
 
   .py-24 {
     padding-block: calc(var(--spacing) * 24);
-  }
-
-  .pe-10 {
-    padding-inline-end: calc(var(--spacing) * 10);
   }
 
   .pt-0 {
@@ -5848,6 +5847,10 @@
     transition-behavior: normal;
   }
 
+  .delay-150 {
+    transition-delay: .15s;
+  }
+
   .duration-200 {
     --tw-duration: .2s;
     transition-duration: .2s;
@@ -6133,6 +6136,13 @@
       scale: var(--tw-scale-x) var(--tw-scale-y);
     }
 
+    .hover\:scale-110:hover {
+      --tw-scale-x: 110%;
+      --tw-scale-y: 110%;
+      --tw-scale-z: 110%;
+      scale: var(--tw-scale-x) var(--tw-scale-y);
+    }
+
     .hover\:border-blue-500:hover {
       border-color: var(--color-blue-500);
     }
@@ -6171,12 +6181,30 @@
       background-color: var(--color-gray-400);
     }
 
+    .hover\:bg-indigo-300:hover {
+      background-color: var(--color-indigo-300);
+    }
+
     .hover\:bg-indigo-700:hover {
       background-color: var(--color-indigo-700);
     }
 
+    .hover\:bg-red-400:hover {
+      background-color: var(--color-red-400);
+    }
+
     .hover\:bg-white:hover {
       background-color: var(--color-white);
+    }
+
+    .hover\:bg-white\/30:hover {
+      background-color: #ffffff4d;
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-white\/30:hover {
+        background-color: color-mix(in oklab, var(--color-white) 30%, transparent);
+      }
     }
 
     .hover\:text-black:hover {

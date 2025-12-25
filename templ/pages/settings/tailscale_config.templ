@@ -16,7 +16,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		id="tailscale_config_form"
 		action="/api/submit-tailscale-config"
 		method="post"
-		class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		x-data="{
 			    	enable_tailscale: true,
 			    	tailscale_auth_key: '',
@@ -55,7 +55,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<div x-text={ getTranslations("remote_access") } class="w-full text-center"></div>
 		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<!-- 启用Tailscale -->
-		<div id={ "boolConfig_EnableTailscale" } class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
+		<div id={ "boolConfig_EnableTailscale" } class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
 			<div x-text={ getTranslations("EnableTailscale") }></div>
 			<!--  如果一个复选框在其表单被提交时没有被选中，就不会有任何代表其未被选中的状态（例如 value=unchecked）的值被提交给服务器——该值根本就没有被提交给服务器！-->
 			<!-- 如果你想在复选框未被选中时提交一个默认值，你可以在表单中加入一个具有相同的 name 和 value 的 <input type="hidden"> 字段，它可以由 JavaScript 生成。 -->
@@ -94,7 +94,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<div
 			id={ "stringConfig_TailscaleHostname" }
 			x-show="enable_tailscale"
-			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		>
 			<label x-text={ getTranslations("TailscaleHostname") } for={ "TailscaleHostname" }></label>
 			<input
@@ -103,7 +103,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				type="text"
 				:placeholder={ getTranslations("TailscaleHostname") }
 				value={ config.GetCfg().TailscaleHostname }
-				class="px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
 			/>
 			<div
 				class="w-full py-1 text-xs text-gray-500"
@@ -114,12 +114,12 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<!-- Tailscale服务端口号-->
 		<div
 			id={ "numberConfig_TailscalePort" }
-			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			x-show="enable_tailscale"
 		>
 			<label for={ "TailscalePort" } x-text={ getTranslations("TailscalePort") }></label>
 			<input
-				class="px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
 				id={ "TailscalePort" }
 				name={ "TailscalePort" }
 				type="number"
@@ -135,7 +135,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<div
 			id={ "stringConfig_TailscaleAuthKey" }
 			x-show="enable_tailscale"
-			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		>
 			<label x-text={ getTranslations("TailscaleAuthKey") } for={ "TailscaleAuthKey" }></label>
 			<input
@@ -144,7 +144,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				type="text"
 				:placeholder={ getTranslations("TailscaleAuthKey") }
 				value={ config.GetCfg().TailscaleAuthKey }
-				class="px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
 			/>
 			<div
 				class="w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline"
@@ -154,13 +154,13 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<!-- Funnel密码保护检查 -->
 		<div
 			id={ "boolConfig_FunnelLoginCheck" }
-			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
+			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
 			x-show="enable_tailscale"
 		>
 			<!-- Funnel ACL 权限未设置时的遮罩层 -->
 			<div
 				id="funnel_password_protection_overlay"
-				class="absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm"
+				class="absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded bg-black/20 text-white text-sm"
 				if tsStatus != nil {
 					if tsStatus.FunnelCapability == "false" {
 						style=""
@@ -198,13 +198,13 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<!-- Funnel模式（公网访问） -->
 		<div
 			id={ "boolConfig_FunnelTunnel" }
-			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
+			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
 			x-show="enable_tailscale"
 		>
 			<!-- Funnel ACL 权限未设置时的遮罩层 -->
 			<div
 				id="funnel-acl-overlay"
-				class="absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm"
+				class="absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded bg-black/20 text-white text-sm"
 				if tsStatus != nil {
 					if tsStatus.FunnelCapability == "false" {
 						style=""
@@ -241,7 +241,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<div
 			id="funnel-acl-hint"
 			x-show="enable_tailscale"
-			class="flex flex-col justify-start w-full mx-0 mt-0 mb-2 px-4 py-2 font-semibold items-left bg-base-100 text-base-content text-xs/4 md:text-sm/6 border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			class="flex flex-col justify-start w-full mx-0 mt-0 mb-2 px-4 py-2 font-semibold items-left bg-base-100 text-base-content text-xs/4 md:text-sm/6 border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			if tsStatus != nil {
 				if tsStatus.FunnelCapability == "false" {
 					style=""
@@ -475,7 +475,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 				setTimeout(() => startAutoRefresh(), 1000);
 			}
 		"
-		class="flex flex-col justify-start w-full mx-0 my-2 px-4 pt-2 pb-4 font-normal text-base border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full mx-0 my-2 px-4 pt-2 pb-4 font-normal text-base border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<div class="flex flex-row w-full mb-2 justify-center items-center" @click="UpdateTailscaleStatus">
 			<div id="refresh-text" x-text={ getTranslations("tailscale_status") } class="text-center font-semibold"></div>

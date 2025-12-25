@@ -5,7 +5,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 	@ConfigManagerJavaScript()
 	<div
 		id="config-container"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		x-data={ "{ selectedDir: '" + initSaveTo + "',initinitSaveTo:'" + initSaveTo + "'}" }
 	>
 		<!-- 标题 -->
@@ -102,7 +102,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 			<button
 				id="saveConfigButton"
 				type="button"
-				class="w-24 h-10 mx-2 my-1 text-center transition bg-sky-300 active:bg-sky-500 border border-gray-500 rounded"
+				class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
 				x-text={ getTranslations("save") }
 				x-on:click={ "saveConfig(selectedDir)" }
 			>
@@ -111,7 +111,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 			<button
 				id="deleteConfigButton"
 				type="button"
-				class="w-24 h-10 mx-2 my-1 text-center transition bg-red-300 active:bg-red-500 border border-gray-500 rounded"
+				class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-red-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-red-400"
 				x-text={ getTranslations("delete") }
 				x-on:click={ "deleteConfig(selectedDir)" }
 			>

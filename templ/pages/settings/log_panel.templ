@@ -4,12 +4,12 @@ package settings
 templ LogPanel() {
 	<div
 		id="log_panel"
-		class="w-full h-[400px] p-4 mx-2 mt-1.5 bg-gray-900 text-sm text-white rounded-md overflow-auto whitespace-pre-line break-all"
+		class="w-full h-[400px] p-4 mx-2 mt-1.5 bg-gray-900 text-sm text-white rounded overflow-auto whitespace-pre-line break-all"
 	>
 		<!-- 日志内容将通过 JavaScript 动态插入 -->
 	</div>
 	<div class="row flex items-center justify-center w-5/6 p-2 my-2">
-		<input id="msg" placeholder="输入全局广播消息" class="ml-4 px-2 py-1 h-10 rounded-md"/>
+		<input id="msg" placeholder="输入全局广播消息" class="ml-4 px-2 py-1 h-10 rounded"/>
 		<button id="send" class="ml-2 p-1 h-10 w-24 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900">POST</button>
 	</div>
 	<script>

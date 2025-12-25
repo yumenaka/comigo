@@ -43,7 +43,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form id=\"tailscale_config_form\" action=\"/api/submit-tailscale-config\" method=\"post\" class=\"flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{\n\t\t\t    \tenable_tailscale: true,\n\t\t\t    \ttailscale_auth_key: '',\n                \ttailscale_hostname: '',\n                \ttailscale_port: '',\n                \ttailscale_enable_funnel: '',\n                \tfunnel_password_protection: false,\n        \t\t\tnowTailscaleStatus: {\n        \t\t\t    AuthURL: '', BackendState: '', Clients: null, OS: 'unknown', Online: true, FQDN: '', TailscaleIPs: [], Version: ''\n        \t\t\t},\n        \t\t\tisFormChanged:false,\n        \t\t\tinit() {\n        \t\t\t    // 初始化数据\n                        this.enable_tailscale = this.$el.querySelector('#EnableTailscale').value === 'true';\n\n                        this.tailscale_auth_key = this.$el.querySelector('#TailscaleAuthKey').value? this.$el.querySelector('#TailscaleAuthKey').value: '';\n\n                        this.tailscale_hostname = this.$el.querySelector('#TailscaleHostname') .value? this.$el.querySelector('#TailscaleHostname') .value: 'comigo';\n\n                        this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';\n\n                        this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').value === 'true';\n\n                        this.funnel_password_protection = this.$el.querySelector('#FunnelLoginCheck').value === 'true';\n\n                        this.nowTailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)\n\n        \t\t\t\tthis.$watch('enable_tailscale', value => {\n        \t\t\t\t    this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n        \t\t\t\t});\n        \t\t\t\tthis.$watch('tailscale_enable_funnel', value => {\n                            this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n                       });\n        \t\t\t}}\"><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form id=\"tailscale_config_form\" action=\"/api/submit-tailscale-config\" method=\"post\" class=\"flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{\n\t\t\t    \tenable_tailscale: true,\n\t\t\t    \ttailscale_auth_key: '',\n                \ttailscale_hostname: '',\n                \ttailscale_port: '',\n                \ttailscale_enable_funnel: '',\n                \tfunnel_password_protection: false,\n        \t\t\tnowTailscaleStatus: {\n        \t\t\t    AuthURL: '', BackendState: '', Clients: null, OS: 'unknown', Online: true, FQDN: '', TailscaleIPs: [], Version: ''\n        \t\t\t},\n        \t\t\tisFormChanged:false,\n        \t\t\tinit() {\n        \t\t\t    // 初始化数据\n                        this.enable_tailscale = this.$el.querySelector('#EnableTailscale').value === 'true';\n\n                        this.tailscale_auth_key = this.$el.querySelector('#TailscaleAuthKey').value? this.$el.querySelector('#TailscaleAuthKey').value: '';\n\n                        this.tailscale_hostname = this.$el.querySelector('#TailscaleHostname') .value? this.$el.querySelector('#TailscaleHostname') .value: 'comigo';\n\n                        this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';\n\n                        this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').value === 'true';\n\n                        this.funnel_password_protection = this.$el.querySelector('#FunnelLoginCheck').value === 'true';\n\n                        this.nowTailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)\n\n        \t\t\t\tthis.$watch('enable_tailscale', value => {\n        \t\t\t\t    this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n        \t\t\t\t});\n        \t\t\t\tthis.$watch('tailscale_enable_funnel', value => {\n                            this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n                       });\n        \t\t\t}}\"><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,7 +69,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -190,7 +190,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -268,7 +268,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm\"><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -294,7 +294,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-show=\"enable_tailscale\"><label for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-show=\"enable_tailscale\"><label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -320,7 +320,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"></label> <input class=\"px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"></label> <input class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -424,7 +424,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -502,7 +502,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm\"><div class=\"w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline\"><a href=\"https://login.tailscale.com/admin/settings/keys\" target=\"_blank\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm\"><div class=\"w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline\"><a href=\"https://login.tailscale.com/admin/settings/keys\" target=\"_blank\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -528,7 +528,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative\" x-show=\"enable_tailscale\"><!-- Funnel ACL 权限未设置时的遮罩层 --><div id=\"funnel_password_protection_overlay\" class=\"absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative\" x-show=\"enable_tailscale\"><!-- Funnel ACL 权限未设置时的遮罩层 --><div id=\"funnel_password_protection_overlay\" class=\"absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded bg-black/20 text-white text-sm\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -670,7 +670,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative\" x-show=\"enable_tailscale\"><!-- Funnel ACL 权限未设置时的遮罩层 --><div id=\"funnel-acl-overlay\" class=\"absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded-md bg-black/20 text-white text-sm\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative\" x-show=\"enable_tailscale\"><!-- Funnel ACL 权限未设置时的遮罩层 --><div id=\"funnel-acl-overlay\" class=\"absolute inset-0 z-10 w-full h-full flex items-center justify-center rounded bg-black/20 text-white text-sm\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -786,7 +786,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "\" class=\"w-full py-1 text-xs text-gray-500\"></div></div><!-- 帮助面板：如何设置Funnel ACL 权限 --><div id=\"funnel-acl-hint\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 mt-0 mb-2 px-4 py-2 font-semibold items-left bg-base-100 text-base-content text-xs/4 md:text-sm/6 border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "\" class=\"w-full py-1 text-xs text-gray-500\"></div></div><!-- 帮助面板：如何设置Funnel ACL 权限 --><div id=\"funnel-acl-hint\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 mt-0 mb-2 px-4 py-2 font-semibold items-left bg-base-100 text-base-content text-xs/4 md:text-sm/6 border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -951,7 +951,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 			templ_7745c5c3_Var59 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "<div id=\"tailscale_status_panel\" x-init=\"\n\t\t\t// 初始化时立即更新一次状态\n\t\t\tUpdateTailscaleStatus();\n\t\t\t// 设置自动刷新定时器，当页面可见且启用 Tailscale 时，每 1.5 秒刷新一次\n\t\t\tlet refreshInterval = null;\n\t\t\tconst getEnableTailscale = () => {\n\t\t\t\tconst checkbox = document.getElementById('EnableTailscale');\n\t\t\t\treturn checkbox ? checkbox.checked : false;\n\t\t\t};\n\t\t\t// 开始自动刷新\n\t\t\tlet count = 0;\n\t\t\tconst startAutoRefresh = () => {\n\t\t\t\tif (refreshInterval) return;\n\t\t\t\trefreshInterval = setInterval(() => {\n\t\t\t\t\tif (document.visibilityState === 'visible' && getEnableTailscale()) {\n\t\t\t\t\t\tUpdateTailscaleStatus();\n\t\t\t\t\t\tcount++;\n\t\t\t\t\t}\n\t\t\t\t\tif (count >= 10) {\n                        // 自动刷新10次后停止\n                        clearInterval(refreshInterval);\n                        refreshInterval = null;\n                        count = 0;\n                    }\n\t\t\t\t}, 1500);\n\t\t\t};\n\t\t\t// 停止自动刷新\n\t\t\tconst stopAutoRefresh = () => {\n\t\t\t\tif (refreshInterval) {\n\t\t\t\t\tclearInterval(refreshInterval);\n\t\t\t\t\trefreshInterval = null;\n\t\t\t\t}\n\t\t\t};\n\t\t\t// 监听页面可见性变化\n\t\t\tdocument.addEventListener('visibilitychange', () => {\n\t\t\t\tif (document.visibilityState === 'visible' && getEnableTailscale()) {\n\t\t\t\t\tstartAutoRefresh();\n\t\t\t\t} else {\n\t\t\t\t\tstopAutoRefresh();\n\t\t\t\t}\n\t\t\t});\n\t\t\t// 监听 EnableTailscale checkbox 变化\n\t\t\tconst enableCheckbox = document.getElementById('EnableTailscale');\n\t\t\tif (enableCheckbox) {\n\t\t\t\tenableCheckbox.addEventListener('change', () => {\n\t\t\t\t\tif (enableCheckbox.checked && document.visibilityState === 'visible') {\n\t\t\t\t\t\tstartAutoRefresh();\n\t\t\t\t\t} else {\n\t\t\t\t\t\tstopAutoRefresh();\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}\n\t\t\t// 初始启动（如果条件满足）\n\t\t\tif (getEnableTailscale() && document.visibilityState === 'visible') {\n\t\t\t\tsetTimeout(() => startAutoRefresh(), 1000);\n\t\t\t}\n\t\t\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 pt-2 pb-4 font-normal text-base border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div class=\"flex flex-row w-full mb-2 justify-center items-center\" @click=\"UpdateTailscaleStatus\"><div id=\"refresh-text\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 84, "<div id=\"tailscale_status_panel\" x-init=\"\n\t\t\t// 初始化时立即更新一次状态\n\t\t\tUpdateTailscaleStatus();\n\t\t\t// 设置自动刷新定时器，当页面可见且启用 Tailscale 时，每 1.5 秒刷新一次\n\t\t\tlet refreshInterval = null;\n\t\t\tconst getEnableTailscale = () => {\n\t\t\t\tconst checkbox = document.getElementById('EnableTailscale');\n\t\t\t\treturn checkbox ? checkbox.checked : false;\n\t\t\t};\n\t\t\t// 开始自动刷新\n\t\t\tlet count = 0;\n\t\t\tconst startAutoRefresh = () => {\n\t\t\t\tif (refreshInterval) return;\n\t\t\t\trefreshInterval = setInterval(() => {\n\t\t\t\t\tif (document.visibilityState === 'visible' && getEnableTailscale()) {\n\t\t\t\t\t\tUpdateTailscaleStatus();\n\t\t\t\t\t\tcount++;\n\t\t\t\t\t}\n\t\t\t\t\tif (count >= 10) {\n                        // 自动刷新10次后停止\n                        clearInterval(refreshInterval);\n                        refreshInterval = null;\n                        count = 0;\n                    }\n\t\t\t\t}, 1500);\n\t\t\t};\n\t\t\t// 停止自动刷新\n\t\t\tconst stopAutoRefresh = () => {\n\t\t\t\tif (refreshInterval) {\n\t\t\t\t\tclearInterval(refreshInterval);\n\t\t\t\t\trefreshInterval = null;\n\t\t\t\t}\n\t\t\t};\n\t\t\t// 监听页面可见性变化\n\t\t\tdocument.addEventListener('visibilitychange', () => {\n\t\t\t\tif (document.visibilityState === 'visible' && getEnableTailscale()) {\n\t\t\t\t\tstartAutoRefresh();\n\t\t\t\t} else {\n\t\t\t\t\tstopAutoRefresh();\n\t\t\t\t}\n\t\t\t});\n\t\t\t// 监听 EnableTailscale checkbox 变化\n\t\t\tconst enableCheckbox = document.getElementById('EnableTailscale');\n\t\t\tif (enableCheckbox) {\n\t\t\t\tenableCheckbox.addEventListener('change', () => {\n\t\t\t\t\tif (enableCheckbox.checked && document.visibilityState === 'visible') {\n\t\t\t\t\t\tstartAutoRefresh();\n\t\t\t\t\t} else {\n\t\t\t\t\t\tstopAutoRefresh();\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}\n\t\t\t// 初始启动（如果条件满足）\n\t\t\tif (getEnableTailscale() && document.visibilityState === 'visible') {\n\t\t\t\tsetTimeout(() => startAutoRefresh(), 1000);\n\t\t\t}\n\t\t\" class=\"flex flex-col justify-start w-full mx-0 my-2 px-4 pt-2 pb-4 font-normal text-base border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div class=\"flex flex-row w-full mb-2 justify-center items-center\" @click=\"UpdateTailscaleStatus\"><div id=\"refresh-text\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
