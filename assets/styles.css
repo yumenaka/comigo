@@ -52,7 +52,10 @@ body {
 .scroll-hidden::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
-
+/* 抽屉（Drawer）的半透明黑色背景 */
+.bg-dark-backdrop\/70 {
+    background-color: rgba(0, 0, 0, 0.3);
+}
 
 /* @tailwindcss/forms注释掉以后需要这些代码来保证滑动条正常 */
 input[type="range"]::-moz-range-progress {
