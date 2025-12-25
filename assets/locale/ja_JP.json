@@ -608,7 +608,7 @@
   "log_error_closing_listener": "リスナーのクローズエラー: %v",
   "log_another_instance_running": "別のインスタンスが既に実行中です。引数を送信しています...",
   "log_get_book_error": "書籍の取得: %v",
-  "log_saving_books_to": "書籍を %s に保存中",
+  "log_saving_books_meta_data_to": "書籍Metadataを %s に保存中",
   "log_error_saving_book": "書籍 %s の保存エラー: %s",
   "log_successfully_saved_books": "%d 冊の書籍を %s に正常に保存しました",
   "log_cfg_save_to": "設定を %s に保存",

@@ -72,7 +72,7 @@ func (ramStore *StoreInRam) SaveBooksToJson() error {
 		return err
 	}
 	savePath := filepath.Join(configDir, "books")
-	logger.Infof(locale.GetString("log_saving_books_to"), savePath)
+	logger.Infof(locale.GetString("log_saving_books_meta_data_to"), savePath)
 	allBooks, err := ramStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
