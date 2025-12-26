@@ -64,7 +64,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 				:placeholder={ getTranslations("Username") }
 				value={ nowUsername }
 				x-model="username"
-				class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
+				class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 			/>
 			<!-- 当前密码 -->
 			<div class="relative" hidden?={ nowPassword == "" } x-data="{ open: false }">
@@ -76,7 +76,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 						:type="showPassword ? 'text' : 'password'"
 						:placeholder={ getTranslations("CurrentPassword") }
 						x-model="current_password"
-						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
+						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 					/>
 					<button
 						type="button"
@@ -103,7 +103,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 						:type="showPassword ? 'text' : 'password'"
 						:placeholder={ getTranslations("Password") }
 						x-model="password"
-						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
+						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 					/>
 					<button
 						type="button"
@@ -130,7 +130,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 						:type="showPassword ? 'text' : 'password'"
 						:placeholder={ getTranslations("ReEnterPassword") }
 						x-model="ReEnterPassword"
-						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
+						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 						:class="{ 'border-red-500': passwordOK }"
 					/>
 					<button

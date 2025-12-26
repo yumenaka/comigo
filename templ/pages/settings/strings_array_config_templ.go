@@ -211,7 +211,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"w-full h-10.5 rounded border-gray-400 py-2.5 mx-1 shadow-sm sm:text-sm\" x-on:keydown=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"w-full h-10.5 rounded border-gray-400 py-2.5 mx-1 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50\" x-on:keydown=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

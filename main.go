@@ -96,7 +96,7 @@ func startServer() {
 	// 保存书籍元数据（包括书签）
 	cmd.SaveMetadata()
 	// 启动自动扫描（如果配置了间隔）
-	config.StartAutoRescan()
+	config.StartOrStopAutoRescan()
 	// 在命令行显示QRCode
 	cmd.ShowQRCode()
 }

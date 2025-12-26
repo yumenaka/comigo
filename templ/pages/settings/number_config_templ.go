@@ -127,72 +127,88 @@ func NumberConfig(name string, value int, description string, min int, max int) 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" max=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if name == "AutoRescanIntervalMinutes" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " step=\"10\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if name == "Timeout" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " step=\"10\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " max=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(max))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 20, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 26, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" min=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" min=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(min))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 21, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 27, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" data-original-value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" data-original-value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(value))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 22, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 28, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" x-on:change=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" x-on:change=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("updateNumberConfig('" + name + "', $event.target.value, " + strconv.Itoa(min) + ", " + strconv.Itoa(max) + ")")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 23, Col: 128}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 29, Col: 128}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"><div class=\"w-full py-1 text-left text-xs text-gray-500\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"><div class=\"w-full py-1 text-left text-xs text-gray-500\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(description))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 25, Col: 96}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/number_config.templ`, Line: 31, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"></div><div class=\"bg-red-600\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"></div><div class=\"bg-red-600\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -237,7 +253,7 @@ func NumberConfigJavaScript() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<script>\n\t\t\t// 更新数字配置的函数\n\t\t\tasync function updateNumberConfig(name, value, min, max) {\n\t\t\t\t// 验证数值范围\n\t\t\t\tconst numValue = parseInt(value);\n\t\t\t\tif (isNaN(numValue)) {\n\t\t\t\t\tshowToast(i18next.t(\"err_invalid_number\"), \"error\");\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tif (numValue < min || numValue > max) {\n\t\t\t\t\tshowToast(\n\t\t\t\t\t\ti18next\n\t\t\t\t\t\t\t.t(\"err_number_range\")\n\t\t\t\t\t\t\t.replace(\"{0}\", min)\n\t\t\t\t\t\t\t.replace(\"{1}\", max),\n\t\t\t\t\t\t\"error\",\n\t\t\t\t\t);\n\t\t\t\t\t// 恢复输入框的值\n\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\tif (input) {\n\t\t\t\t\t\tinput.value = input.getAttribute(\"data-original-value\") || value;\n\t\t\t\t\t}\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\"/api/update-number-config\", {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tname: name,\n\t\t\t\t\t\t\tvalue: numValue,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_update_config_failed\"), \"error\");\n\t\t\t\t\t\t// 恢复输入框的值\n\t\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\t\tif (input) {\n\t\t\t\t\t\t\tinput.value = input.getAttribute(\"data-original-value\") || value;\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\t// 更新原始值标记\n\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\tif (input) {\n\t\t\t\t\t\tinput.setAttribute(\"data-original-value\", numValue);\n\t\t\t\t\t}\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tif (data.saveSuccessHint) {\n\t\t\t\t\t\tif (name === \"Port\") {\n\t\t\t\t\t\t\t// 如果更新的是端口号，提示用户需要跳转新端口\n\t\t\t\t\t\t\tshowToast(i18next.t(\"port_change_hint\"), \"info\");\n\t\t\t\t\t\t\t// 2秒后跳转到新端口\n\t\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\t\tconst newUrl = new URL(window.location.href);\n\t\t\t\t\t\t\t\tnewUrl.port = numValue;\n\t\t\t\t\t\t\t\twindow.location.href = newUrl.href;\n\t\t\t\t\t\t\t}, 2000);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tshowToast(i18next.t(\"saveSuccessHint\"), \"info\");\n\t\t\t\t\t\t// 2秒后刷新页面\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t\t}, 2000);\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"saveSuccessHint\"), \"success\");\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"更新配置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t\t// 恢复输入框的值\n\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\tif (input) {\n\t\t\t\t\t\tinput.value = input.getAttribute(\"data-original-value\") || value;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<script>\n\t\t\t// 更新数字配置的函数\n\t\t\tasync function updateNumberConfig(name, value, min, max) {\n\t\t\t\t// 验证数值范围\n\t\t\t\tconst numValue = parseInt(value);\n\t\t\t\tif (isNaN(numValue)) {\n\t\t\t\t\tshowToast(i18next.t(\"err_invalid_number\"), \"error\");\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tif (numValue < min || numValue > max) {\n\t\t\t\t\tshowToast(\n\t\t\t\t\t\ti18next\n\t\t\t\t\t\t\t.t(\"err_number_range\")\n\t\t\t\t\t\t\t.replace(\"{0}\", min)\n\t\t\t\t\t\t\t.replace(\"{1}\", max),\n\t\t\t\t\t\t\"error\",\n\t\t\t\t\t);\n\t\t\t\t\t// 恢复输入框的值\n\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\tif (input) {\n\t\t\t\t\t\tinput.value = input.getAttribute(\"data-original-value\") || value;\n\t\t\t\t\t}\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\"/api/update-number-config\", {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tname: name,\n\t\t\t\t\t\t\tvalue: numValue,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_update_config_failed\"), \"error\");\n\t\t\t\t\t\t// 恢复输入框的值\n\t\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\t\tif (input) {\n\t\t\t\t\t\t\tinput.value = input.getAttribute(\"data-original-value\") || value;\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\t// 更新原始值标记\n\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\tif (input) {\n\t\t\t\t\t\tinput.setAttribute(\"data-original-value\", numValue);\n\t\t\t\t\t}\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tif (data.saveSuccessHint) {\n\t\t\t\t\t\tif (name === \"Port\") {\n\t\t\t\t\t\t\t// 如果更新的是端口号，提示用户需要跳转新端口\n\t\t\t\t\t\t\tshowToast(i18next.t(\"port_change_hint\"), \"info\");\n\t\t\t\t\t\t\t// 2秒后跳转到新端口\n\t\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\t\tconst newUrl = new URL(window.location.href);\n\t\t\t\t\t\t\t\tnewUrl.port = numValue;\n\t\t\t\t\t\t\t\twindow.location.href = newUrl.href;\n\t\t\t\t\t\t\t}, 2000);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\t//如果更新的是自动重扫间隔\n\t\t\t\t\t\tif (name === \"AutoRescanIntervalMinutes\") {\n\t\t\t\t\t\t\t// 如果numValue > 0，提示用户自动重扫已启用\n\t\t\t\t\t\t\tif (numValue > 0) {\n\t\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\t\tmessage: i18next.t(\"auto_rescan_enabled_hint\"),\n\t\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t\t\tonConfirm: function () {\n\t\t\t\t\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t// 如果numValue === 0，提示用户自动重扫已禁用\n\t\t\t\t\t\t\tif (numValue === 0) {\n\t\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\t\tmessage: i18next.t(\"auto_rescan_disabled_hint\"),\n\t\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t\t\tonConfirm: function () {\n\t\t\t\t\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tshowToast(i18next.t(\"saveSuccessHint\"), \"info\");\n\t\t\t\t\t\t// 2秒后刷新页面\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t\t}, 2000);\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"saveSuccessHint\"), \"success\");\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"更新配置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t\t// 恢复输入框的值\n\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\tif (input) {\n\t\t\t\t\t\tinput.value = input.getAttribute(\"data-original-value\") || value;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -268,7 +268,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm\"><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50\"><div class=\"w-full py-1 text-xs text-gray-500\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -320,7 +320,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"></label> <input class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"></label> <input class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm  placeholder-gray-500 placeholder-opacity-50\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -502,7 +502,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm\"><div class=\"w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline\"><a href=\"https://login.tailscale.com/admin/settings/keys\" target=\"_blank\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50\"><div class=\"w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline\"><a href=\"https://login.tailscale.com/admin/settings/keys\" target=\"_blank\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

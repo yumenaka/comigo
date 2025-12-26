@@ -820,5 +820,7 @@
   "auto_rescan_status_running": "Running",
   "auto_rescan_status_stopped": "Stopped",
   "auto_rescan_current_interval": "Current scan interval: %d minutes",
+  "auto_rescan_enabled_hint": "Automatic rescan has been enabled. The system will periodically scan the library",
+  "auto_rescan_disabled_hint": "Automatic rescan has been disabled",
   "other_settings": "Other Settings"
 }

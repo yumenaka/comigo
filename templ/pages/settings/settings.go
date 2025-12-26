@@ -89,7 +89,7 @@ func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	}
 	// 处理自动扫描间隔的变化
 	if action.UpdateAutoRescan {
-		config.StartAutoRescan()
+		config.StartOrStopAutoRescan()
 	}
 	// 提示没有变化
 	if newConfig.Debug && !action.ReScanStores && !action.ReStartWebServer && !action.UpdateAutoRescan {

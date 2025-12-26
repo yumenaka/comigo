@@ -24,8 +24,8 @@ func SetScanTaskFunc(fn func() error) {
 	scanTaskFunc = fn
 }
 
-// StartAutoRescan 根据配置启动或停止自动扫描
-func StartAutoRescan() {
+// StartOrStopAutoRescan 根据配置启动或停止自动扫描
+func StartOrStopAutoRescan() {
 	InitLibraryScanner()
 	interval := GetCfg().AutoRescanIntervalMinutes
 	if interval > 0 {

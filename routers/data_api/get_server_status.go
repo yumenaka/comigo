@@ -15,10 +15,12 @@ import (
 func GetServerInfoHandler(c echo.Context) error {
 	serverStatus := tools.GetServerInfo(
 		tools.ServerInfoParams{
-			Cfg:            config.GetCfg(),
-			Version:        config.GetVersion(),
-			AllBooksNumber: model.GetAllBooksNumber(),
-			ClientIP:       c.RealIP(),
+			Cfg:                   config.GetCfg(),
+			Version:               config.GetVersion(),
+			AllBooksNumber:        model.GetAllBooksNumber(),
+			ClientIP:              c.RealIP(),
+			ReScanServiceEnable:   config.GlobalLibraryScanner.IsRunning(),
+			ReScanServiceInterval: config.GlobalLibraryScanner.GetInterval(),
 		})
 	tailscaleStatus, err := tailscale_plugin.GetTailscaleStatus(c.Request().Context())
 	if err == nil {
