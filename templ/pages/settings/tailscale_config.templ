@@ -103,7 +103,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				type="text"
 				:placeholder={ getTranslations("TailscaleHostname") }
 				value={ config.GetCfg().TailscaleHostname }
-				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
+				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 			/>
 			<div
 				class="w-full py-1 text-xs text-gray-500"
@@ -119,7 +119,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		>
 			<label for={ "TailscalePort" } x-text={ getTranslations("TailscalePort") }></label>
 			<input
-				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
+				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm  placeholder-gray-500 placeholder-opacity-50"
 				id={ "TailscalePort" }
 				name={ "TailscalePort" }
 				type="number"
@@ -144,7 +144,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				type="text"
 				:placeholder={ getTranslations("TailscaleAuthKey") }
 				value={ config.GetCfg().TailscaleAuthKey }
-				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
+				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 			/>
 			<div
 				class="w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline"

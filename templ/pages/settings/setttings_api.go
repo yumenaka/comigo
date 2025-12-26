@@ -262,7 +262,7 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 
 	// 判断是否需要显示保存成功提示并刷新页面
 	saveSuccessHint := false
-	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
+	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" || name == "AutoRescanIntervalMinutes" {
 		saveSuccessHint = true
 	}
 
@@ -271,33 +271,6 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 		"value":           intVal,
 		"saveSuccessHint": saveSuccessHint,
 	}
-
-	// 如果是 AutoRescanIntervalMinutes，返回扫描状态信息
-	if name == "AutoRescanIntervalMinutes" {
-		config.InitLibraryScanner()
-		isRunning := config.GlobalLibraryScanner.IsRunning()
-		currentInterval := config.GlobalLibraryScanner.GetInterval()
-
-		response["autoRescanStatus"] = map[string]interface{}{
-			"isRunning":       isRunning,
-			"currentInterval": currentInterval,
-		}
-
-		// 根据状态添加提示信息
-		if intVal > 0 {
-			if currentInterval > 0 && currentInterval != intVal {
-				// 间隔已更新
-				response["autoRescanMessage"] = fmt.Sprintf(locale.GetString("auto_rescan_updated"), intVal)
-			} else {
-				// 新启动
-				response["autoRescanMessage"] = fmt.Sprintf(locale.GetString("auto_rescan_started"), intVal)
-			}
-		} else {
-			// 已停止
-			response["autoRescanMessage"] = locale.GetString("auto_rescan_stopped")
-		}
-	}
-
 	return c.JSON(http.StatusOK, response)
 }
 

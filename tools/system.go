@@ -271,15 +271,17 @@ func GetSystemStatus() SystemStatus {
 
 // ServerStatus 服务器当前状况
 type ServerStatus struct {
-	ServerName        string       // 服务器描述
-	ServerHost        string       // ServerHost 服务器主机或 IP 地址。
-	ServerPort        uint16       // ServerPort 服务运行的端口号。
-	TailscaleAuthURL  string       // Tailscale身份验证URL（如果适用）
-	TailscaleUrl      string       // Tailscale阅读地址（如果有）
-	NumberOfBooks     int          // 当前拥有的书籍总数
-	SupportUploadFile bool         // 是否支持上传文件
-	ClientIP          string       // 客户端IP
-	OSInfo            SystemStatus // 系统信息
+	ServerName            string       // 服务器描述
+	ServerHost            string       // ServerHost 服务器主机或 IP 地址。
+	ServerPort            uint16       // ServerPort 服务运行的端口号。
+	TailscaleAuthURL      string       // Tailscale身份验证URL（如果适用）
+	TailscaleUrl          string       // Tailscale阅读地址（如果有）
+	NumberOfBooks         int          // 当前拥有的书籍总数
+	SupportUploadFile     bool         // 是否支持上传文件
+	ClientIP              string       // 客户端IP
+	OSInfo                SystemStatus // 系统信息
+	ReScanServiceEnable   bool         // 是否启用自动扫描服务
+	ReScanServiceInterval int          // 自动扫描服务间隔（分钟）
 }
 
 type ConfigInterface interface {
@@ -289,10 +291,12 @@ type ConfigInterface interface {
 }
 
 type ServerInfoParams struct {
-	Cfg            ConfigInterface
-	Version        string
-	AllBooksNumber int
-	ClientIP       string
+	Cfg                   ConfigInterface
+	Version               string
+	AllBooksNumber        int
+	ClientIP              string
+	ReScanServiceEnable   bool
+	ReScanServiceInterval int
 }
 
 func GetServerInfo(params ServerInfoParams) *ServerStatus {
@@ -308,13 +312,15 @@ func GetServerInfo(params ServerInfoParams) *ServerStatus {
 		host = configHost
 	}
 	serverStatus := ServerStatus{
-		ServerName:        serverName,
-		ServerHost:        host,
-		ServerPort:        uint16(port),
-		SupportUploadFile: enableUpload,
-		NumberOfBooks:     params.AllBooksNumber,
-		ClientIP:          params.ClientIP,
-		OSInfo:            GetSystemStatus(),
+		ServerName:            serverName,
+		ServerHost:            host,
+		ServerPort:            uint16(port),
+		SupportUploadFile:     enableUpload,
+		NumberOfBooks:         params.AllBooksNumber,
+		ClientIP:              params.ClientIP,
+		ReScanServiceEnable:   params.ReScanServiceEnable,
+		ReScanServiceInterval: params.ReScanServiceInterval,
+		OSInfo:                GetSystemStatus(),
 	}
 	return &serverStatus
 }

@@ -1,9 +1,7 @@
 /*此文件需要编译，相关指令请参考 package.json*/
-
 @import 'tailwindcss' source('../templ');
-/*@plugin '@tailwindcss/forms';*/  /* 重置表格样式的插件，会导致parcel编译报错，注释掉*/
+@plugin '@tailwindcss/forms'; /* 重置表格样式的插件*/
 @plugin '@tailwindcss/typography';
-
 @plugin 'flowbite/plugin';
 @source '../node_modules/flowbite';
 
@@ -85,12 +83,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 
-
-
-
-
 /* Alpine.js styles */
-
 [x-cloak] {
   display: none !important;
 }
@@ -120,8 +113,6 @@ input[type="range"]::-moz-range-thumb {
     background-position: 0 0, 0 10px, 10px -10px, -10px 0;
     background-size: 20px 20px;
 }
-
-
 
 /* ------------------------------------------------ */
 /* css 主题设置 from: https://github.com/saadeghi/daisyui/blob/master/src/theming/themes.js */

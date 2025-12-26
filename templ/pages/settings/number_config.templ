@@ -17,6 +17,12 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 			type="number"
 			placeholder={ getTranslations(name) }
 			value={ strconv.Itoa(value) }
+			if name == "AutoRescanIntervalMinutes" {
+				step="10"
+			}
+			if name == "Timeout" {
+				step="10"
+			}
 			max={ strconv.Itoa(max) }
 			min={ strconv.Itoa(min) }
 			data-original-value={ strconv.Itoa(value) }
@@ -96,6 +102,30 @@ templ NumberConfigJavaScript() {
 								newUrl.port = numValue;
 								window.location.href = newUrl.href;
 							}, 2000);
+							return;
+						}
+						//如果更新的是自动重扫间隔
+						if (name === "AutoRescanIntervalMinutes") {
+							// 如果numValue > 0，提示用户自动重扫已启用
+							if (numValue > 0) {
+								showMessage({
+									message: i18next.t("auto_rescan_enabled_hint"),
+									buttons: "confirm",
+									onConfirm: function () {
+										window.location.reload();
+									},
+								});
+							}
+							// 如果numValue === 0，提示用户自动重扫已禁用
+							if (numValue === 0) {
+								showMessage({
+									message: i18next.t("auto_rescan_disabled_hint"),
+									buttons: "confirm",
+									onConfirm: function () {
+										window.location.reload();
+									},
+								});
+							}
 							return;
 						}
 						showToast(i18next.t("saveSuccessHint"), "info");
