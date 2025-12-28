@@ -28,8 +28,8 @@ func init() {
 func InitFlags() {
 	// 加载环境变量，改写对应值
 	runtimeViper.AutomaticEnv()
-	// 设置环境变量的前缀，将 PORT变为 COMI_PORT
-	runtimeViper.SetEnvPrefix("COMI")
+	// 设置环境变量的前缀，将 PORT变为 COMIGO_PORT
+	runtimeViper.SetEnvPrefix("COMIGO")
 	cfg := config.GetCfg()
 	cobra.MousetrapHelpText = ""       // 屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 // "这是命令行程序"的提醒表示时间

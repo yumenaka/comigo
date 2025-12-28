@@ -3,9 +3,12 @@ package main
 import (
 	"os"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 func main() {
@@ -20,6 +23,44 @@ func main() {
 	}
 	// 初始化命令行flag与args: 读取环境变量 -> 根据可执行文件名设置部分默认参数 -> 读取配置文件
 	cmd.Execute()
+	// 初始化命令行flag与args，环境变量与配置文件
+	// 需要在单实例检查之前执行，以便获取 cmd.Args
+	cmd.Execute()
+	// 如果启用了单实例模式，进行单实例检查
+	if config.GetCfg().EnableSingleInstance {
+		// 处理新参数的回调函数（当已有实例运行时，新实例会调用此函数）
+		handleNewArgs := func(args []string) error {
+			if len(args) == 0 {
+				return nil
+			}
+			logger.Infof(locale.GetString("log_received_new_args_from_instance"), args)
+			// 添加新扫描路径
+			cmd.AddStoreUrls(args)
+			// 设置上传路径
+			cmd.SetUploadPath(args)
+			// 扫描新添加的书库
+			cmd.ScanStore()
+			// 保存书籍元数据
+			cmd.SaveMetadata()
+			return nil
+		}
+
+		// 确保单实例模式运行
+		isFirstInstance, err := tools.EnsureSingleInstance(cmd.Args, handleNewArgs)
+		if err != nil {
+			logger.Infof(locale.GetString("log_single_instance_check_failed"), err)
+			// 如果单实例检查失败，仍然继续运行（向后兼容）
+		} else if !isFirstInstance {
+			// 已有实例运行，参数已发送，直接退出
+			logger.Infof(locale.GetString("log_args_sent_to_existing_instance"))
+			return
+		}
+
+		// 第一个实例，正常启动
+		// 注册退出时清理单实例资源
+		defer tools.CleanupSingleInstance()
+	}
+	config.OpenBrowserIfNeeded()
 	// 启动网页服务器（不阻塞）
 	routers.StartWebServer()
 	// 启动或停止 Tailscale 服务（如启用）

@@ -39,7 +39,7 @@ require (
 	github.com/xxjwxc/gowp v0.0.0-20240929033016-5be68d222389
 	golang.org/x/net v0.48.0
 	golang.org/x/text v0.32.0
-	modernc.org/sqlite v1.41.0
+	modernc.org/sqlite v1.42.1
 )
 
 require (
@@ -255,7 +255,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gvisor.dev/gvisor v0.0.0-20250205023644-9414b50a5633 // indirect
-	modernc.org/libc v1.67.1 // indirect
+	modernc.org/libc v1.67.2 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )
