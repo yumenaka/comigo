@@ -92,9 +92,9 @@ endif
 
 windows_x86_64_cgo_docker:
 	cp resource.syso.windows_amd64 resource.syso
-	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'" -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME).exe
-	rm -rf  $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
+	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'" -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE).tar.gz $(NAME).exe
+	rm -rf  $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)
 	rm   resource.syso
 
 #make Windows_i386_cgo VERSION=v1.0.5
@@ -116,9 +116,9 @@ endif
 
 windows_i386_cgo_docker:
 	cp resource.syso.windows_386 resource.syso
-	CGO_ENABLED=1 GOOS=windows GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME).exe
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
+	CGO_ENABLED=1 GOOS=windows GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE).tar.gz $(NAME).exe
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)
 	rm   resource.syso
 
 #make Windows_arm64_cgo VERSION=v1.0.5
@@ -139,9 +139,9 @@ ifdef DOCKER
 endif
 
 windows_arm64_cgo_docker:
-	CGO_ENABLED=1 GOOS=windows GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME).exe
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
+	CGO_ENABLED=1 GOOS=windows GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE).tar.gz $(NAME).exe
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)
 
 #  make Linux_armv7_cgo VERSION=v1.0.5
 Linux_armv7_cgo:
@@ -161,9 +161,9 @@ ifdef DOCKER
 endif
 
 linux_armv7_cgo_docker:
-	CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
+	CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)
 
 #  make MacOS_x86_64_cgo VERSION=v1.0.5
 MacOS_x86_64_cgo:
@@ -183,9 +183,9 @@ ifdef DOCKER
 endif
 
 darwin_x86_64_cgo_docker:
-	CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
+	CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)
 
 #  make MacOS_arm64_cgo VERSION=v1.0.5
 MacOS_arm64_cgo:
@@ -205,9 +205,9 @@ ifdef DOCKER
 endif
 
 darwin_arm64_cgo_docker:
-	CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
+	CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)
 
 #  make Linux_arm64_cgo VERSION=v1.0.4
 Linux_arm64_cgo:
@@ -227,9 +227,9 @@ ifdef DOCKER
 endif
 
 linux_arm64_cgo_docker:
-	CGO_ENABLED=1 GOOS=linux GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
+	CGO_ENABLED=1 GOOS=linux GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)
 
 #  make Linux_x86_64_cgo VERSION=v1.0.4
 Linux_x86_64_cgo:
@@ -249,9 +249,9 @@ ifdef DOCKER
 endif
 
 linux_x86_64_cgo_docker:
-	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)
 
 # Add Linux_i386_cgo mirroring the pattern
 Linux_i386_cgo:
@@ -271,30 +271,30 @@ ifdef DOCKER
 endif
 
 linux_i386_cgo_docker:
-	CGO_ENABLED=1 GOOS=linux GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
+	CGO_ENABLED=1 GOOS=linux GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)
 
 ## No CGO build:
 
-# 64位Windows	$(NAME)_$(VERSION)_$@
+# 64位Windows	$(NAME)_v$(VERSION)_$@
 Windows_x86_64:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
 	cp resource.syso cmd/comi/resource.syso
-	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
-	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
-	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
+	zip -m -r -j -9 $(BINDIR)/$(NAME)_v$(VERSION)_$@.zip $(BINDIR)/$(NAME)_v$(VERSION)_$@
+	rmdir $(BINDIR)/$(NAME)_v$(VERSION)_$@
 	rm  cmd/comi/resource.syso
 	rm  resource.syso 
 
-# 64位Windows + system_tray	$(NAME)_$(VERSION)_$@
+# 64位Windows + system_tray	$(NAME)_v$(VERSION)_$@
 Windows_x86_64_full:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
-	GOARCH=amd64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe main.go
-	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
-	rmdir $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
+	GOARCH=amd64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@/$(FULL_NAME).exe cmd/comigo/main.go
+	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
+	rmdir $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
 	rm  resource.syso
 
 # 32位Windows
@@ -302,9 +302,9 @@ Windows_i386:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=386 GOOS=windows go generate
 	cp resource.syso cmd/comi/resource.syso
-	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
-	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
-	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
+	zip -m -r -j -9 $(BINDIR)/$(NAME)_v$(VERSION)_$@.zip $(BINDIR)/$(NAME)_v$(VERSION)_$@
+	rmdir $(BINDIR)/$(NAME)_v$(VERSION)_$@
 	rm  cmd/comi/resource.syso
 	rm   resource.syso
 
@@ -312,75 +312,75 @@ Windows_i386:
 Windows_i386_full:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=386 GOOS=windows go generate
-	GOARCH=386 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui  -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe main.go
-	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
-	rmdir $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
+	GOARCH=386 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui  -o $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@/$(FULL_NAME).exe cmd/comigo/main.go
+	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
+	rmdir $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
 	rm   resource.syso
 
 #windows arm64
 Windows_arm64:
-	GOARCH=arm64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
-	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
-	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=arm64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
+	zip -m -r -j -9 $(BINDIR)/$(NAME)_v$(VERSION)_$@.zip $(BINDIR)/$(NAME)_v$(VERSION)_$@
+	rmdir $(BINDIR)/$(NAME)_v$(VERSION)_$@
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@
 
 # windows arm64 + system_tray
 Windows_arm64_full:
-	GOARCH=arm64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe main.go
-	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
-	rmdir $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
-	rm -rf $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@:
+	GOARCH=arm64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@/$(FULL_NAME).exe cmd/comigo/main.go
+	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
+	rmdir $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
+	rm -rf $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@:
 
 #Linux_armv6 RaspberryPi1,2,zero,GOARM=6：仅使用 VFPv1；交叉编译时默认；通常是 ARM11 或更好的内核（也支持 VFPv2 或更好的内核）
 Linux_armv6:
-	GOARCH=arm GOOS=linux GOARM=6 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=arm GOOS=linux GOARM=6 $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$@.tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@
 
 #Linux_armv7，RaspberryPi3 官方32位armv7l系统。GOARM=7：使用 VFPv3；通常是 Cortex-A 内核. 2012年发布的架构。
 Linux_armv7:
-	GOARCH=arm GOOS=linux GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=arm GOOS=linux GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$@.tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@
 
 #linux，64位arm。2012年发布的架构。
 Linux_arm64:
-	GOARCH=arm64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=arm64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$@.tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@
 
 #Linux，x86_64
 Linux_x86_64:
-	GOARCH=amd64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=amd64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$@.tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@
 
 #Linux，i386
 Linux_i386:
-	GOARCH=386 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=386 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$@.tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@
 
 #MACOS x86_64
 MacOS_x86_64:
-	GOARCH=amd64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=amd64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$@.tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@
 	
 #MACOS arm64 no upx
 MacOS_arm64:
-	GOARCH=arm64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=arm64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME) cmd/comi/main.go
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$@.tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@
 	
 #Android，32位arm，Termux	
 Linux_arm_android:
-	GOARCH=arm GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go 
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=arm GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME) cmd/comi/main.go 
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$@.tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@
 
 #Android，64位arm，Termux
 Linux_arm64-android:
-	GOARCH=arm64 GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go 
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	GOARCH=arm64 GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME) cmd/comi/main.go 
+	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$@.tar.gz $(NAME)
+	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@

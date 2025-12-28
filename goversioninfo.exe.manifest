@@ -3,7 +3,7 @@
   <assemblyIdentity
     type="win32"
     name="comigo.xyz"
-    version="0.10.0.0"
+    version="1.17.0.0"
     processorArchitecture="*"/>
  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
    <security>
