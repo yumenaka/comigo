@@ -11,15 +11,22 @@ templ ReadModeSwitchButton() {
 			}
 		}"
 		x-show="$store.global.onlineBook"
-		class="flex gap-2 mt-2"
+		class="flex flex-row justify-center items-center w-full mt-2 mb-2 pb-1 gap-2 border-2 border-gray-500 dark:border-gray-200 rounded relative"
 	>
+		<!-- 切换 -->
+		<span
+			class="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content"
+			x-text="i18next.t('switch')"
+		>
+			切换
+		</span>
 		<template
 			x-for="mode in readModeSwitchOptions[$store.global.readMode] ?? []"
 			:key="mode"
 		>
 			<button
 				type="button"
-				class="flex-1 h-10 px-3 mb-1 text-sm border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
+				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
 				x-on:click="$store.global.readMode = mode; $store.global.onChangeReadMode();"
 				x-text="i18next.t(mode+'_button')"
 				x-bind:aria-label="i18next.t(mode+'_button')"
