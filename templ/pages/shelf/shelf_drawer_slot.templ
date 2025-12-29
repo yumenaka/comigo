@@ -4,7 +4,7 @@ import "github.com/yumenaka/comigo/templ/common"
 
 templ ShelfDrawerSlot() {
 	<!-- 切换【无限卷轴/分页卷轴/翻页阅读】的select-->
-	@common.ReadModeSelect(true)
+	@common.ReadModeSelect()
 	<!-- 切换【显示文件名】-->
 	<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input type="checkbox" :value="$store.shelf.showFilename" x-on:click="$store.shelf.showFilename =!$store.shelf.showFilename" class="sr-only peer"/>

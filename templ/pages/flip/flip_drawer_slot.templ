@@ -22,19 +22,8 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 			用浏览器打开PDF
 		</a>
 	}
-	<!-- 【下载为便携网页文件】按钮，便携模式不可见 -->
-	<div class="flex justify-center w-full my-1 font-semibold" x-show="$store.global.onlineBook">
-		<a
-			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
-			download={ book.BookInfo.Title + ".html" }
-			class="inline-flex items-center px-2.5 py-2 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
-			:title="i18next.t('download_portable_web_file')"
-			x-text="i18next.t('download_portable_web_file')"
-		>
-			下载为便携网页文件
-		</a>
-	</div>
 	@common.ReadModeSwitchButton()
+	@common.DownloadButton(c, book)
 	<!-- 远程同步翻页 -->
 	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
 	<label

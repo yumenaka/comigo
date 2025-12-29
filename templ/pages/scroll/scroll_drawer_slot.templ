@@ -23,22 +23,8 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 			用浏览器打开PDF
 		</a>
 	}
-	<!-- 【下载为便携网页文件】按钮，便携模式不可见 -->
-	<div class="flex justify-center w-full my-1 font-semibold" x-show="$store.global.onlineBook">
-		<a
-			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
-			download={ book.BookInfo.Title + ".html" }
-			class="inline-flex items-center px-2.5 py-2 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
-			:title="i18next.t('download_portable_web_file')"
-			x-text="i18next.t('download_portable_web_file')"
-		>
-			<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-			</svg>
-			下载为便携网页文件
-		</a>
-	</div>
 	@common.ReadModeSwitchButton()
+	@common.DownloadButton(c, book)
 	<!-- 【显示页数】 -->
 	<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>

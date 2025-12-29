@@ -9,7 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 // 切换【无限卷轴/分页卷轴/翻页阅读】的select
-func ReadModeSelect(inShelf bool) templ.Component {
+func ReadModeSelect() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -30,17 +30,7 @@ func ReadModeSelect(inShelf bool) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- https://alpinejs.dev/directives/model#select-inputs --><!-- https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLElement/change_event --><select id=\"read_mode_select\" x-model=\"$store.global.readMode\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if !inShelf {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " x-on:change=\"$store.global.onChangeReadMode();\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " x-show=\"$store.global.onlineBook\" class=\"w-full h-10 py-0 mt-2 mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none\"><option value=\"infinite_scroll\" x-text=\"i18next.t('infinite_scroll')\">卷轴(无限)</option> <option value=\"paged_scroll\" x-text=\"i18next.t('paged_scroll')\">卷轴(分页)</option> <option value=\"page_flip\" x-text=\"i18next.t('page_flip')\">翻页(左右)</option></select>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- https://alpinejs.dev/directives/model#select-inputs --><!-- https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLElement/change_event --><select id=\"read_mode_select\" x-model=\"$store.global.readMode\" x-on:change=\"$store.global.onChangeReadMode();\" x-show=\"$store.global.onlineBook\" class=\"w-full h-10 py-0 mt-2 mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none\"><option value=\"infinite_scroll\" x-text=\"i18next.t('infinite_scroll')\">卷轴(无限)</option> <option value=\"paged_scroll\" x-text=\"i18next.t('paged_scroll')\">卷轴(分页)</option> <option value=\"page_flip\" x-text=\"i18next.t('page_flip')\">翻页(左右)</option></select>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
