@@ -32,10 +32,13 @@
 
 ```bash
 # Using curl:
-bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
+bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 
 # Using wget:
-bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
+bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
+
+# For users in Mainland China (using proxy):
+bash <(curl -s https://comigo.xyz/get.sh) --proxy
 
 # If you have Golang  (go 1.23 or higher):
 go install github.com/yumenaka/comigo/cmd/comi@latest

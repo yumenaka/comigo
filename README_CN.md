@@ -31,13 +31,16 @@
 ### 一键安装（推荐）
 
 ```bash
-# 使用 curl：
-bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
+# 中国大陆用户推荐使用中转脚本：
+bash <(curl -s https://comigo.xyz/get.sh) --proxy
 
-# 使用 wget：
-bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
+# 使用 curl 从 GitHub下载：
+bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 
-# 如果您已设置 Golang 环境（go 1.23 或更高版本）：
+# 使用 wget 从 GitHub下载：
+bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
+
+# 如果您已设置 Golang 环境：
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
 

@@ -4,14 +4,14 @@
 # Comigo 一键安装脚本
 # ============================================================================
 # 使用 curl：
-#   bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
+#   bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 # 使用 wget：
-#   bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
+#   bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 #
 # 使用代理模式（通过 comigo.xyz 代理 GitHub）：
-#   bash <(curl -s https://comigo.xyz/yumenaka/comigo/master/get_comigo.sh) --proxy
+#   bash <(curl -s https://comigo.xyz/get.sh) --proxy
 #   或指定代理域名：
-#   bash <(curl -s https://comigo.xyz/yumenaka/comigo/master/get_comigo.sh) --proxy-base https://comigo.xyz
+#   bash <(curl -s https://comigo.xyz/get.sh) --proxy-base https://comigo.xyz
 # ============================================================================
 
 # 遇到错误时立即退出
@@ -62,6 +62,11 @@ convert_github_url() {
     # 处理 raw.githubusercontent.com
     if [[ "$original_url" =~ ^https://raw\.githubusercontent\.com/(.*)$ ]]; then
         local path="${BASH_REMATCH[1]}"
+        # 特殊处理：get.sh 使用简化路径
+        if [[ "$path" == "yumenaka/comigo/master/get.sh" ]]; then
+            echo "${PROXY_BASE}/get.sh"
+            return
+        fi
         echo "${PROXY_BASE}/yumenaka/raw.githubusercontent.com/${path}"
         return
     fi
@@ -76,6 +81,10 @@ convert_github_url() {
     # 处理 github.com（releases 下载等）
     if [[ "$original_url" =~ ^https://github\.com/(.*)$ ]]; then
         local path="${BASH_REMATCH[1]}"
+        # 如果路径以 yumenaka/ 开头，去掉它，因为反向代理会自动添加
+        if [[ "$path" =~ ^yumenaka/(.*)$ ]]; then
+            path="${BASH_REMATCH[1]}"
+        fi
         echo "${PROXY_BASE}/yumenaka/${path}"
         return
     fi

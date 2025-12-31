@@ -293,6 +293,23 @@ func decodeURL(s string) (string, error) {
 	return string(b), nil
 }
 
+// GetComigoScriptHandler 处理 /get.sh 的简化路径
+func GetComigoScriptHandler(c echo.Context) error {
+	cfg := config.GetCfg()
+	// 安全检查：仅在调试模式下启用此功能
+	if !cfg.Debug {
+		return echo.NewHTTPError(http.StatusNotFound, "not found")
+	}
+
+	// 直接映射到 get.sh 脚本
+	target := "https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh"
+	if c.Request().URL.RawQuery != "" {
+		target += "?" + c.Request().URL.RawQuery
+	}
+
+	return fetchAndStream(c, target)
+}
+
 // getPublicBase 获取公共基础 URL（用于重定向）
 func getPublicBase(c echo.Context) string {
 	cfg := config.GetCfg()
