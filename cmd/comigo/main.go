@@ -71,7 +71,7 @@ func main() {
 		startServer,
 		shutdownServer,
 		getServerURL,
-		getConfigDir,
+		config.GetConfigDir,
 		getStoreUrls,
 		toggleTailscale,
 		setLanguage,
@@ -102,11 +102,6 @@ func startServer() {
 // getServerURL 获取服务器URL
 func getServerURL() string {
 	return config.GetQrcodeURL()
-}
-
-// getConfigDir 获取配置目录
-func getConfigDir() (string, error) {
-	return config.GetConfigDir()
 }
 
 // getStoreUrls 获取书库URL列表

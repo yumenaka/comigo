@@ -23,7 +23,6 @@ type GetPictureDataOption struct {
 	ResizeHeight     int
 	ResizeMaxWidth   int
 	ResizeMaxHeight  int
-	ThumbnailMode    bool
 	AutoCrop         int
 	Gray             bool
 	BlurHash         int
@@ -90,11 +89,7 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 	// 处理图像文件
 	// 图片Resize, 按照固定的width height缩放
 	if option.ResizeWidth > 0 && option.ResizeHeight > 0 {
-		if option.ThumbnailMode {
-			imgData = tools.ImageThumbnail(imgData, option.ResizeWidth, option.ResizeHeight)
-		} else {
-			imgData = tools.ImageResize(imgData, option.ResizeWidth, option.ResizeHeight)
-		}
+		imgData = tools.ImageResize(imgData, option.ResizeWidth, option.ResizeHeight)
 		contentType = tools.GetContentTypeByFileName(".jpg")
 	}
 	// 图片Resize, 按照 width 等比例缩放

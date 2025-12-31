@@ -71,8 +71,8 @@ func (ramStore *StoreInRam) SaveBooksToJson() error {
 	if err != nil {
 		return err
 	}
-	savePath := filepath.Join(configDir, "books")
-	logger.Infof(locale.GetString("log_saving_books_meta_data_to"), savePath)
+	metaPath := filepath.Join(configDir, "metadata")
+	logger.Infof(locale.GetString("log_saving_books_meta_data_to"), metaPath)
 	allBooks, err := ramStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
@@ -85,24 +85,25 @@ func (ramStore *StoreInRam) SaveBooksToJson() error {
 			logger.Infof(locale.GetString("log_error_saving_book"), book.BookID, err)
 		}
 	}
-	logger.Infof(locale.GetString("log_successfully_saved_books"), len(allBooks), savePath)
+	logger.Infof(locale.GetString("log_successfully_saved_books"), len(allBooks), metaPath)
 	return nil
 }
 
 // SaveBookJson 将单本书籍信息保存为 JSON 文件
 func SaveBookJson(book *model.Book) error {
 	configDir, err := config.GetConfigDir()
-	savePath := filepath.Join(configDir, "books")
 	if err != nil {
 		return err
 	}
+	// 构造保存路径
+	metaPath := filepath.Join(configDir, "metadata")
 	// 序列化书籍为 JSON 格式
 	jsonData, err := json.MarshalIndent(book, "", "  ")
 	if err != nil {
 		return err
 	}
 	// StoreID是书库URL路径的 base62 编码
-	cacheDir := filepath.Join(savePath, book.GetStoreID())
+	cacheDir := filepath.Join(metaPath, book.GetStoreID())
 	// 创建保存目录
 	err = os.MkdirAll(cacheDir, os.ModePerm)
 	if err != nil {
@@ -120,12 +121,12 @@ func SaveBookJson(book *model.Book) error {
 
 func DeleteBookJson(book *model.Book) error {
 	configDir, err := config.GetConfigDir()
-	savePath := filepath.Join(configDir, "books")
 	if err != nil {
 		return err
 	}
+	metaPath := filepath.Join(configDir, "metadata")
 	// StoreID是书库URL路径的 base62 编码
-	cacheDir := filepath.Join(savePath, book.GetStoreID())
+	cacheDir := filepath.Join(metaPath, book.GetStoreID())
 	// 创建保存目录
 	err = os.MkdirAll(cacheDir, os.ModePerm)
 	if err != nil {
@@ -147,8 +148,8 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	if err != nil {
 		return err
 	}
-	savePath := filepath.Join(configDir, "books")
-	logger.Infof(locale.GetString("log_loading_books_from"), savePath)
+	metaPath := filepath.Join(configDir, "metadata")
+	logger.Infof(locale.GetString("log_loading_books_from"), metaPath)
 	logger.Infof(locale.GetString("log_configured_store_urls"), config.GetCfg().StoreUrls)
 	// 遍历所有 storeUrl 对应的目录
 	for _, storeUrl := range config.GetCfg().StoreUrls {
@@ -159,7 +160,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 			storePathAbs = storeUrl
 		}
 		// 计算缓存目录路径
-		cacheDir := filepath.Join(savePath, base62.EncodeToString([]byte(storePathAbs)))
+		cacheDir := filepath.Join(metaPath, base62.EncodeToString([]byte(storePathAbs)))
 		// 检查目录是否存在
 		_, err = os.Stat(cacheDir)
 		// 目录不存在是正常的（首次运行），不返回错误
@@ -190,7 +191,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 			// 只处理 .json 文件
 			fileName := entry.Name()
 			if !strings.HasSuffix(fileName, ".json") {
-				logger.Infof(locale.GetString("log_skipping_non_json_file"), fileName)
+				//logger.Infof(locale.GetString("log_skipping_non_json_file"), fileName)
 				continue
 			}
 			// 读取文件内容

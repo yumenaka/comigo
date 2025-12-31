@@ -19,18 +19,18 @@ func ImageXData(Url string) string {
 
 templ MainArea(book *model.Book) {
 	<div
-		id="mouseMoveArea"
+		id="FlipMainArea"
 		class="flex flex-col items-start justify-start m-0 p-0 w-full h-full"
 	>
 		<!-- 漫画显示区域 + sliderContainer -->
-		<div id="manga_area" class="manga_area w-full h-full flex justify-center item-start overflow-hidden flex-row m-0 p-0">
+		<div id="slider_container" class="slider_container w-full h-full flex justify-center item-start overflow-hidden flex-row m-0 p-0">
 			<div id="slider" class="flex transition-transform duration-300 ease-out w-full h-full justify-center item-start">
 				<!-- 屏幕左边的图片 -->
 				<div id="left-slide" draggable="false" class="slide w-full h-full flex justify-center item-start absolute">
-					<!-- 内容将在JS中动态设置 -->
+					<!-- 内容将在 javascript 中动态设置 -->
 				</div>
 				<div id="middle-slide" class="slide w-full h-full flex justify-center item-start">
-					<!-- 课题：给图片设置 max-h-fit 可以使其顶部对齐，但是safari不兼容此用法，原因未知 -->
+					<!-- 课题：给图片设置 max-h-fit 可以使其顶部对齐，但是 safari 不兼容此用法，原因未知 -->
 					<img
 						id="Single-NowImage"
 						x-show="!$store.flip.doublePageMode"
@@ -38,7 +38,7 @@ templ MainArea(book *model.Book) {
 						:class="$store.global.isPortrait? 'object-contain w-auto  max-w-full h-screen':'object-contain h-screen w-auto max-w-full'"
 					/>
 					<!-- 双页模式+日漫模式-->
-					<div x-show="$store.flip.doublePageMode" class="manga_area flex flex-row w-full h-screen m-0 p-0 justify-center-safe item-start">
+					<div x-show="$store.flip.doublePageMode" class="slider_container flex flex-row w-full h-screen m-0 p-0 justify-center-safe item-start">
 						<!-- 双页模式-当前屏幕-左页 -->
 						<img
 							id="Double-NowImage-Left"
@@ -56,7 +56,7 @@ templ MainArea(book *model.Book) {
 				</div>
 				<!-- 屏幕右边的图片-->
 				<div id="right-slide" draggable="false" class="slide w-full h-full flex justify-center item-start absolute">
-					<!-- 内容将在JS中动态设置 -->
+					<!-- 内容将在 javascript 中动态设置 -->
 				</div>
 			</div>
 		</div>
@@ -64,7 +64,7 @@ templ MainArea(book *model.Book) {
 	@templ.Raw("<style>" + assets.GetFileStr("script/flip.css") + "</style>")
 	<style>
 		/* 滑动切换相关样式 */
-		#manga_area {
+		#slider_container {
 			will-change: transform; /* 优化动画性能 */
 			touch-action: pan-y; /* 允许垂直滚动，但水平滑动会被捕获 */
 		}

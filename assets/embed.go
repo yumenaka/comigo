@@ -103,3 +103,17 @@ func GetData(filePath string) []byte {
 	// 返回文件内容作为字节切片
 	return data
 }
+
+// GetImageData 从Images embed.FS获取图片字节数据
+func GetImageData(imageName string) []byte {
+	filePath := "images/" + imageName
+	// 使用ReadFile从嵌入文件系统中读取图片内容
+	data, err := Images.ReadFile(filePath)
+	if err != nil {
+		// 如果有错误发生，返回空的字节切片，并输出错误信息
+		logger.Errorf(locale.GetString("err_failed_to_read_embedded_image"), err)
+		return []byte{}
+	}
+	// 返回图片内容作为字节切片
+	return data
+}

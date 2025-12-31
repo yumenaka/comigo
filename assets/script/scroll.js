@@ -119,14 +119,14 @@ function onMouseMove(e) {
         e.currentTarget.style.cursor = ''
     }
 }
-//获取ID为 mouseMoveArea 的元素
-let mouseMoveArea = document.getElementById('mouseMoveArea')
+//获取ID为 ScrollMainArea 的元素
+let ScrollMainArea = document.getElementById('ScrollMainArea')
 // 鼠标移动的时候触发移动事件
-mouseMoveArea.addEventListener('mousemove', onMouseMove)
+ScrollMainArea.addEventListener('mousemove', onMouseMove)
 // 点击的时候触发点击事件
-mouseMoveArea.addEventListener('click', onMouseClick)
+ScrollMainArea.addEventListener('click', onMouseClick)
 // 触摸的时候也触发点击事件
-mouseMoveArea.addEventListener('touchstart', onMouseClick)
+ScrollMainArea.addEventListener('touchstart', onMouseClick)
 
 // 键盘快捷键
 /* 记录方向键当前的按压状态 */

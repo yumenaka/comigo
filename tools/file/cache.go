@@ -2,9 +2,9 @@ package file
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"sync"
 
@@ -22,7 +22,7 @@ type cacheKey struct {
 var contentTypeMap sync.Map
 
 // SaveFileToCache 保存文件到缓存，加快读取速度
-func SaveFileToCache(id, filename string, data []byte, queryString, contentType string, isCover bool, cachePath string, debug bool) error {
+func SaveFileToCache(id, filename string, data []byte, queryString, contentType string, cachePath string, debug bool) error {
 	// 创建缓存目录
 	cacheDir := filepath.Join(cachePath, id)
 	err := os.MkdirAll(cacheDir, os.ModePerm)
@@ -30,14 +30,8 @@ func SaveFileToCache(id, filename string, data []byte, queryString, contentType 
 		logger.Infof(locale.GetString("saveFileToCache_error")+": %v", err)
 		return err
 	}
-
 	// 特殊字符转义，避免文件名不合法
 	escapedFilename := url.PathEscape(filename)
-	// 如果是封面，另存为固定文件名
-	if isCover {
-		escapedFilename = "comigo_cover" + path.Ext(filename)
-	}
-
 	// 写入文件
 	filePath := filepath.Join(cacheDir, escapedFilename)
 	err = os.WriteFile(filePath, data, 0o644)
@@ -45,11 +39,47 @@ func SaveFileToCache(id, filename string, data []byte, queryString, contentType 
 		logger.Infof(locale.GetString("log_failed_to_write_file_to_cache"), err)
 		return err
 	}
-
 	// 将 ContentType 存入并发安全的映射
 	key := cacheKey{bookID: id, queryString: queryString}
 	contentTypeMap.Store(key, contentType)
 	return nil
+}
+
+// SaveCoverToLocal 保存封面文件到本地文件夹，加快读取速度
+func SaveCoverToLocal(metaDataDir string, bookID string, data []byte) error {
+	// 创建封面meta data目录
+	err := os.MkdirAll(metaDataDir, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf(locale.GetString("log_failed_to_write_file_to_cache")+": %v", err)
+	}
+	// 写入文件
+	filename := bookID + ".jpg"
+	filePath := filepath.Join(metaDataDir, filename)
+	err = os.WriteFile(filePath, data, 0o644)
+	if err != nil {
+		return fmt.Errorf(locale.GetString("log_failed_to_write_file_to_cache"), err)
+	}
+	return nil
+}
+
+// CoverFileCacheExists 检查封面文件是否存在
+func CoverFileCacheExists(metaDataDir string, bookID string) bool {
+	// 构建封面文件路径
+	filename := bookID + ".jpg"
+	filePath := filepath.Join(metaDataDir, filename)
+	// 检查文件是否存在
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+// GetCoverFromLocal 从本地文件夹读取封面文件
+func GetCoverFromLocal(metaDataDir string, bookID string) ([]byte, error) {
+	filename := bookID + ".jpg"
+	filePath := filepath.Join(metaDataDir, filename)
+	// 读取文件
+	return os.ReadFile(filePath)
 }
 
 // GetQueryString 根据查询参数生成一个排序后的键字符串
@@ -64,7 +94,7 @@ func GetQueryString(query url.Values) string {
 }
 
 // GetFileFromCache 从缓存读取文件，加快第二次访问的速度
-func GetFileFromCache(id, filename, queryString string, isCover bool, cachePath string, debug bool) ([]byte, string, error) {
+func GetFileFromCache(id, filename, queryString string, cachePath string, debug bool) ([]byte, string, error) {
 	// 从映射中读取 ContentType
 	key := cacheKey{bookID: id, queryString: queryString}
 	value, ok := contentTypeMap.Load(key)
@@ -78,9 +108,6 @@ func GetFileFromCache(id, filename, queryString string, isCover bool, cachePath 
 
 	// 特殊字符转义，构建文件路径
 	escapedFilename := url.PathEscape(filename)
-	if isCover {
-		escapedFilename = "comigo_cover" + path.Ext(filename)
-	}
 	filePath := filepath.Join(cachePath, id, escapedFilename)
 
 	// 读取文件

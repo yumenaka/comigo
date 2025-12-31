@@ -237,7 +237,6 @@ func (b *BookInfo) ShortName() string {
 		// 如果原标题也是空的，返回空字符串
 		return ""
 	}
-
 	// [简化标题] 如果简化后长度 <= 15，直接返回
 	if len(runes) <= 15 {
 		return shortTitle
@@ -278,7 +277,7 @@ func (b *BookInfo) GetCover() PageInfo {
 	case TypeAudio:
 		return PageInfo{Name: "audio.png", Url: "/images/audio.png"}
 	case TypeHTML:
-		return PageInfo{Name: "audio.png", Url: "/images/html.png"}
+		return PageInfo{Name: "html.png", Url: "/images/html.png"}
 	case TypeUnknownFile:
 		return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 	}

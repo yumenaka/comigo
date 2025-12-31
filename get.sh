@@ -9,7 +9,7 @@
 #   bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 #
 # 使用代理模式（通过 comigo.xyz 代理 GitHub）：
-#   bash <(curl -s https://comigo.xyz/get.sh) --proxy
+#   bash <(curl -s https://comigo.xyz/get.sh) --cn
 #   或指定代理域名：
 #   bash <(curl -s https://comigo.xyz/get.sh) --proxy-base https://comigo.xyz
 # ============================================================================
@@ -20,7 +20,9 @@ set -e
 # ============================================================================
 # 初始化：获取系统语言
 # ============================================================================
-system_language=$(locale | grep -E '^LANG=' | cut -d= -f2 | cut -d. -f1)
+# 获取系统语言设置，如果 locale 命令不存在或无法获取语言信息，则使用默认值 en_US
+# 使用 2>/dev/null 抑制错误输出，避免 locale 命令不存在时报错
+system_language=$(locale 2>/dev/null | grep -E '^LANG=' | cut -d= -f2 | cut -d. -f1 || echo "en_US")
 
 # ============================================================================
 # 参数解析
@@ -31,7 +33,7 @@ PROXY_BASE="https://comigo.xyz"
 # 解析命令行参数
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --proxy|--use-proxy)
+        --cn|--proxy|--use-proxy)
             USE_PROXY=true
             shift
             ;;

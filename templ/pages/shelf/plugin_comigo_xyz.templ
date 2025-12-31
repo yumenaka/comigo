@@ -1,0 +1,14 @@
+package shelf
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+)
+
+templ PluginComigoXYZ(c echo.Context) {
+	if config.GetCfg().Plugin {
+		<script>
+			console.log("Load Plugin: Comigo.xyz");
+		</script>
+	}
+}

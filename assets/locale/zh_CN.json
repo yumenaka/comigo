@@ -104,7 +104,7 @@
   "target_path": "目标目录",
   "temp_folder_create_error": "创建临时文件夹失败。",
   "temp_folder_error": "临时文件夹设置失败。",
-  "temp_folder_path": "临时文件夹路径：:",
+  "temp_folder_path": "临时文件夹路径：",
   "template": "默认页面模板（scroll、flip、sketch）",
   "timeout": "超时时间（分钟）",
   "tls_crt": "TLS/SSL证书文件路径",
@@ -206,6 +206,7 @@
   "UploadPath": "上传位置",
   "UploadPath_Description": "自定义上传文件存储位置，默认在当前执行目录或第一个书库目录。",
   "UseCache": "本地图片缓存",
+  "UseCache_Description": "启用本地图片解压缓存，默认禁用。",
   "Username": "用户名",
   "Username_Description": "登录用的用户名。",
   "WorkingDirectory": "当前工作目录",
@@ -756,6 +757,7 @@
   "log_failed_to_write_file_to_cache": "写入文件到缓存失败: %v",
   "log_content_type_not_found_in_cache": "缓存中未找到ContentType，键: %+v",
   "log_failed_to_read_file_from_cache": "从缓存读取文件失败: %v",
+  "log_cover_file_not_found": "封面文件未找到",
   "log_created_new_book": "创建新书籍: %s",
   "log_updated_existing_book": "更新现有书籍: %s %s",
   "log_saved_media_files_for_book": "为书籍 %s 保存了 %d 个媒体文件",
@@ -824,5 +826,6 @@
   "auto_rescan_current_interval": "当前扫描间隔: %d 分钟",
   "auto_rescan_enabled_hint": "自动重扫已启用，系统将定期扫描书库",
   "auto_rescan_disabled_hint": "自动重扫已禁用",
-  "other_settings": "其他设置"
+  "other_settings": "其他设置",
+  "plugin_enable": "启用插件"
 }

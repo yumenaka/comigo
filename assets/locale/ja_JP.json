@@ -206,6 +206,7 @@
   "UploadPath": "アップロード場所",
   "UploadPath_Description": "アップロードされたファイルの保存場所をカスタマイズします。デフォルトでは、アップロードフォルダは現在の実行ディレクトリまたは最初のブックストアディレクトリの下。",
   "UseCache": "ローカル画像キャッシュ",
+  "UseCache_Description": "ローカル画像解凍キャッシュを有効にします。デフォルトでは無効です。",
   "Username": "ユーザー名",
   "Username_Description": "ログイン インターフェイスに必要なユーザー名。",
   "WorkingDirectory": "作業ディレクトリ",
@@ -756,6 +757,7 @@
   "log_failed_to_write_file_to_cache": "ファイルをキャッシュに書き込み失敗: %v",
   "log_content_type_not_found_in_cache": "キャッシュ内でContentTypeが見つかりません、キー: %+v",
   "log_failed_to_read_file_from_cache": "キャッシュからファイルを読み込み失敗: %v",
+  "log_cover_file_not_found": "カバーファイルが見つかりません",
   "log_created_new_book": "新しい書籍を作成しました: %s",
   "log_updated_existing_book": "既存の書籍を更新しました: %s %s",
   "log_saved_media_files_for_book": "書籍 %s に %d 個のメディアファイルを保存しました",
@@ -824,5 +826,6 @@
   "auto_rescan_current_interval": "現在のスキャン間隔: %d 分",
   "auto_rescan_enabled_hint": "自動再スキャンが有効になりました。システムは定期的に書庫をスキャンします",
   "auto_rescan_disabled_hint": "自動再スキャンが無効になりました",
-  "other_settings": "その他の設定"
+  "other_settings": "その他の設定",
+  "plugin_enable": "プラグインを有効にする"
 }

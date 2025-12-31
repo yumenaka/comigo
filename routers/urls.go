@@ -106,6 +106,8 @@ func bindProtectedAPI(group *echo.Group) {
 	group.POST("/upload", upload_api.UploadFile)
 	// 获取特定文件
 	group.GET("/get_file", data_api.GetFile)
+	// 获取书籍封面
+	group.GET("/get_cover", data_api.GetCover)
 	// 直接下载原始文件
 	group.GET("/raw/:book_id/:file_name", data_api.GetRawFile)
 	// 获取书架信息
