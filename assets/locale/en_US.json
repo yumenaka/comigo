@@ -206,6 +206,7 @@
   "UploadPath": "Upload location",
   "UploadPath_Description": "Customize the storage location of the uploaded files, by default, the upload folder is created under the current execution directory or the first bookstore directory.",
   "UseCache": "Local image cache",
+  "UseCache_Description": "Enable local image extraction cache, disabled by default.",
   "Username": "Username",
   "Username_Description": "The username required for the login interface.",
   "WorkingDirectory": "current working directory",
@@ -756,6 +757,7 @@
   "log_failed_to_write_file_to_cache": "Failed to write file to cache: %v",
   "log_content_type_not_found_in_cache": "ContentType not found in cache for key: %+v",
   "log_failed_to_read_file_from_cache": "Failed to read file from cache: %v",
+  "log_cover_file_not_found": "Cover file not found",
   "log_created_new_book": "Created new book: %s",
   "log_updated_existing_book": "Updated existing book: %s %s",
   "log_saved_media_files_for_book": "Saved %d media files for book %s",
@@ -824,5 +826,6 @@
   "auto_rescan_current_interval": "Current scan interval: %d minutes",
   "auto_rescan_enabled_hint": "Automatic rescan has been enabled. The system will periodically scan the library",
   "auto_rescan_disabled_hint": "Automatic rescan has been disabled",
-  "other_settings": "Other Settings"
+  "other_settings": "Other Settings",
+  "plugin_enable": "Enable Plugin"
 }

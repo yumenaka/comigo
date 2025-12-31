@@ -23,7 +23,6 @@ func GetSingleFile(filePath, nameInArchive, textEncoding string) ([]byte, error)
 	if nameInArchive == "" {
 		return nil, errors.New(locale.GetString("err_name_in_archive_empty"))
 	}
-
 	// 创建一个30秒超时的Context
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()

@@ -22,4 +22,5 @@ templ ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBook
 	@common.Footer(config.GetVersion())
 	@common.Drawer(c, nil, ShelfDrawerSlot(), c.Param("id") != "", common.GetReturnUrl(c.Param("id")))
 	@common.QRCode()
+	@PluginComigoXYZ(c)
 }

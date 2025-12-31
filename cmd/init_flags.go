@@ -77,7 +77,7 @@ func InitFlags() {
 	// 输出log文件
 	RootCmd.PersistentFlags().BoolVar(&cfg.LogToFile, "log-file", false, locale.GetString("log_to_file"))
 	// web图片缓存
-	RootCmd.PersistentFlags().BoolVar(&cfg.UseCache, "use-cache", false, locale.GetString("cache_file_enable"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.UseCache, "use-cache", true, locale.GetString("cache_file_enable"))
 	// 图片缓存路径
 	RootCmd.PersistentFlags().StringVar(&cfg.CacheDir, "cache-dir", "", locale.GetString("cache_file_dir"))
 	// 退出时清除缓存
@@ -107,6 +107,8 @@ func InitFlags() {
 		RootCmd.PersistentFlags().BoolVar(&cfg.RegisterContextMenu, "register-context-menu", false, locale.GetString("register_context_menu"))
 		RootCmd.PersistentFlags().BoolVar(&cfg.UnregisterContextMenu, "unregister-context-menu", false, locale.GetString("unregister_context_menu"))
 	}
+	// Plugin
+	RootCmd.PersistentFlags().BoolVar(&cfg.Plugin, "plugin", true, locale.GetString("plugin_enable"))
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 }
@@ -188,6 +190,10 @@ func SetByExecutableFilename() {
 	// Debug 模式
 	if strings.Contains(filenameLower, "debug") {
 		cfg.Debug = true
+	}
+	// 启用 Plugin
+	if strings.Contains(filenameLower, "plugin") {
+		cfg.Plugin = true
 	}
 	// 自动扫描间隔
 	if strings.Contains(filenameLower, "autorescan") {

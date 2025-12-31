@@ -46,8 +46,8 @@ func SetShutdownHandler() {
 		}
 		logger.Infof("%s", locale.GetString("clear_temp_file_completed"))
 	}
-	// 上下文用于通知服务器它有 5 秒的时间来完成它当前正在处理的请求
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// 上下文用于通知服务器它有 10 秒的时间来完成它当前正在处理的请求
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	// 只能通过http.Server.Shutdown()/http.Server.Close()等http包里的方法去实现,没办法自己实现.
 	// 因为这样的设计即使你给自定义Server接口的实现类设计了Shutdown()方法,也调用不到.

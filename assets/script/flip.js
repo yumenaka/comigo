@@ -77,10 +77,9 @@ let isSwiping = false
 let currentTranslate = 0
 let startTime = 0
 let animationID = 0
-const sliderContainer = document.getElementById('manga_area')
+const sliderContainer = document.getElementById('slider_container')
 const slider = document.getElementById('slider')
 const leftSlide = document.getElementById('left-slide')
-//const middleSlide = document.getElementById('middle-slide')
 const rightSlide = document.getElementById('right-slide')
 const threshold = 100 // 滑动阈值，超过这个值才会触发翻页
 const swipeTimeout = 300 // 滑动超时时间（毫秒）
@@ -665,8 +664,8 @@ function getInSetArea(e) {
 // 翻页模式功能：显示工具栏时，点击设置区域，自动漫画区域居中。
 function scrollToMangaMain() {
     if (!Alpine.store('flip').autoHideToolbar) {
-        // 将 manga_area 顶部对齐到浏览器可见区域顶部
-        const mangaMain = document.getElementById('manga_area')
+        // 将 slider_container 顶部对齐到浏览器可见区域顶部
+        const mangaMain = document.getElementById('slider_container')
         mangaMain.scrollIntoView({
             behavior: 'smooth', // 平滑滚动
             block: 'start', // 与可视区顶部对齐
@@ -904,16 +903,16 @@ function onMouseLeave(e) {
     e.currentTarget.style.cursor = ''
 }
 
-//获取ID为 mouseMoveArea 的元素
-let mouseMoveArea = document.getElementById('mouseMoveArea')
+//获取ID为 FlipMainArea 的元素
+let FlipMainArea = document.getElementById('FlipMainArea')
 // 鼠标移动时触发移动事件
-mouseMoveArea.addEventListener('mousemove', onMouseMove)
+FlipMainArea.addEventListener('mousemove', onMouseMove)
 //点击的时候触发点击事件
-mouseMoveArea.addEventListener('click', onMouseClick)
+FlipMainArea.addEventListener('click', onMouseClick)
 // 触摸开始时触发点击事件
-mouseMoveArea.addEventListener('touchstart', onMouseClick)
+FlipMainArea.addEventListener('touchstart', onMouseClick)
 //离开的时候触发离开事件
-mouseMoveArea.addEventListener('mouseleave', onMouseLeave)
+FlipMainArea.addEventListener('mouseleave', onMouseLeave)
 
 // Websocket 连接和消息处理
 // https://www.ruanyifeng.com/blog/2017/05/websocket.html
@@ -1263,12 +1262,12 @@ function onWheel(e) {
     }
 }
 
-// 在 mouseMoveArea 上绑定滚轮事件
+// 在 FlipMainArea 上绑定滚轮事件
 // 确保在 DOM 加载完成后再绑定
 // 使用 {passive: false} 以允许阻止默认滚动行为
 document.addEventListener('DOMContentLoaded', function () {
-    const mouseMoveArea = document.getElementById('mouseMoveArea')
-    if (mouseMoveArea) {
-        mouseMoveArea.addEventListener('wheel', onWheel, {passive: false})
+    const FlipMainArea = document.getElementById('FlipMainArea')
+    if (FlipMainArea) {
+        FlipMainArea.addEventListener('wheel', onWheel, {passive: false})
     }
 })

@@ -33,7 +33,7 @@ var PAGED_SIZE = 32
 // min-h-16 是为了图片未加载时，图片高度为0，导致页面不美观。极端设置下会导致图片变形。  text-center：居中 alert文字，因为需要等待css加载，所以现在没设置alt文字。
 templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int, startIndex int) {
 	<div
-		id="mouseMoveArea"
+		id="ScrollMainArea"
 		x-data="{
             imageWidth: '', //图片的宽度
             counter: 0,//计数器

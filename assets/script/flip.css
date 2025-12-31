@@ -11,7 +11,7 @@
 }
 
 /* 漫画div */
-.manga_area {
+.slider_container {
     /* 不可以被选中 */
     user-select: none;
     /* 火狐 */
@@ -21,7 +21,7 @@
 }
 
 /* 最后的一或两张图片*/
-.manga_area img {
+.slider_container img {
     /* 不可以被选中 */
     user-select: none;
     /* 火狐 */
