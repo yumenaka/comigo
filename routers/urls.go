@@ -10,6 +10,7 @@ import (
 	"github.com/yumenaka/comigo/routers/config_api"
 	"github.com/yumenaka/comigo/routers/data_api"
 	"github.com/yumenaka/comigo/routers/login"
+	"github.com/yumenaka/comigo/routers/reverse_proxy"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/routers/websocket"
 	"github.com/yumenaka/comigo/templ/pages/flip"
@@ -65,6 +66,9 @@ func BindURLs() {
 // bindPublicView 注册公共页面
 func bindPublicView(group *echo.Group) {
 	group.GET("/login", login_page.Handler)
+	// GitHub 反向代理：/yumenaka/* -> https://github.com/yumenaka/*
+	group.GET("/yumenaka/*", reverse_proxy.ProxyHandler)
+	group.HEAD("/yumenaka/*", reverse_proxy.ProxyHandler)
 }
 
 // bindPublicAPI 注册公共路由
