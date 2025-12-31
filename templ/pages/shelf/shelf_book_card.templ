@@ -9,10 +9,10 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
-// 如果链接包含字符串“api/get_file?” 则在背景图片链接中添加参数“&resize_height=512”
+// 如果链接包含字符串“api/get_file?” 则在背景图片链接中添加参数“&resize_height=360”
 func getResizedImageUrl(imageUrl string) string {
 	if strings.Contains(imageUrl, "api/get_file?") {
-		imageUrl = imageUrl + "&resize_height=512"
+		imageUrl = imageUrl + "&resize_height=360"
 	}
 	return imageUrl
 }

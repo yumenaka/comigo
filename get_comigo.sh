@@ -7,6 +7,11 @@
 #   bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
 # 使用 wget：
 #   bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get_comigo.sh)
+#
+# 使用代理模式（通过 comigo.xyz 代理 GitHub）：
+#   bash <(curl -s https://comigo.xyz/yumenaka/comigo/master/get_comigo.sh) --proxy
+#   或指定代理域名：
+#   bash <(curl -s https://comigo.xyz/yumenaka/comigo/master/get_comigo.sh) --proxy-base https://comigo.xyz
 # ============================================================================
 
 # 遇到错误时立即退出
@@ -16,6 +21,68 @@ set -e
 # 初始化：获取系统语言
 # ============================================================================
 system_language=$(locale | grep -E '^LANG=' | cut -d= -f2 | cut -d. -f1)
+
+# ============================================================================
+# 参数解析
+# ============================================================================
+USE_PROXY=false
+PROXY_BASE="https://comigo.xyz"
+
+# 解析命令行参数
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --proxy|--use-proxy)
+            USE_PROXY=true
+            shift
+            ;;
+        --proxy-base)
+            PROXY_BASE="$2"
+            USE_PROXY=true
+            shift 2
+            ;;
+        *)
+            # 未知参数，忽略
+            shift
+            ;;
+    esac
+done
+
+# ============================================================================
+# URL 转换函数
+# ============================================================================
+# 将 GitHub URL 转换为代理 URL（如果启用代理）
+convert_github_url() {
+    local original_url="$1"
+    
+    if [ "$USE_PROXY" = false ]; then
+        echo "$original_url"
+        return
+    fi
+    
+    # 处理 raw.githubusercontent.com
+    if [[ "$original_url" =~ ^https://raw\.githubusercontent\.com/(.*)$ ]]; then
+        local path="${BASH_REMATCH[1]}"
+        echo "${PROXY_BASE}/yumenaka/raw.githubusercontent.com/${path}"
+        return
+    fi
+    
+    # 处理 api.github.com
+    if [[ "$original_url" =~ ^https://api\.github\.com/(.*)$ ]]; then
+        local path="${BASH_REMATCH[1]}"
+        echo "${PROXY_BASE}/yumenaka/api.github.com/${path}"
+        return
+    fi
+    
+    # 处理 github.com（releases 下载等）
+    if [[ "$original_url" =~ ^https://github\.com/(.*)$ ]]; then
+        local path="${BASH_REMATCH[1]}"
+        echo "${PROXY_BASE}/yumenaka/${path}"
+        return
+    fi
+    
+    # 如果不是 GitHub URL，直接返回原 URL
+    echo "$original_url"
+}
 
 # ============================================================================
 # 国际化消息输出函数
@@ -469,10 +536,11 @@ done
 # 版本信息获取
 # ============================================================================
 # 从 GitHub API 获取最新版本标签
+api_url=$(convert_github_url "https://api.github.com/repos/yumenaka/comigo/releases/latest")
 if [ "$download_tool" = "curl" ]; then
-    latest_release=$(curl --silent "https://api.github.com/repos/yumenaka/comigo/releases/latest")
+    latest_release=$(curl --silent "$api_url")
 else
-    latest_release=$(wget -qO- "https://api.github.com/repos/yumenaka/comigo/releases/latest")
+    latest_release=$(wget -qO- "$api_url")
 fi
 
 # 使用 sed 提取最新标签（MacOS 不支持 grep -P）
@@ -539,7 +607,8 @@ esac
 # ============================================================================
 # 构造下载文件名
 file_name="comi_v${Version}_${OS_NAME}_${ARCH_NAME}.tar.gz"
-url="https://github.com/yumenaka/comigo/releases/download/${latest_tag}/${file_name}"
+original_url="https://github.com/yumenaka/comigo/releases/download/${latest_tag}/${file_name}"
+url=$(convert_github_url "$original_url")
 
 print_message "downloading" "$file_name"
 
