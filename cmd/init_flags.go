@@ -108,7 +108,7 @@ func InitFlags() {
 		RootCmd.PersistentFlags().BoolVar(&cfg.UnregisterContextMenu, "unregister-context-menu", false, locale.GetString("unregister_context_menu"))
 	}
 	// Plugin
-	RootCmd.PersistentFlags().BoolVar(&cfg.Plugin, "plugin", true, locale.GetString("plugin_enable"))
+	//RootCmd.PersistentFlags().BoolVar(&cfg.Plugin, "plugin", true, locale.GetString("plugin_enable"))
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 }

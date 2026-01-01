@@ -1,4 +1,4 @@
-package shelf
+package plugins
 
 import (
 	"github.com/labstack/echo/v4"
@@ -8,7 +8,7 @@ import (
 templ PluginComigoXYZ(c echo.Context) {
 	if config.GetCfg().Plugin {
 		<script>
-			console.log("Load Plugin: Comigo.xyz");
+			console.log("Test Plugin: Comigo.xyz");
 		</script>
 	}
 }
