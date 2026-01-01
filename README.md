@@ -28,17 +28,14 @@
 
 ## Installation Guide
 
-### Installation Script (Recommended)
+### Installation Script
 
 ```bash
-# Using curl:
+#  Recommended:
 bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 
-# Using wget:
-bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
-
 # For users in Mainland China:
-bash <(curl -s https://comigo.xyz/get.sh) ----cn
+bash <(curl -s https://comigo.xyz/get.sh) --cn
 
 # If you have Golang  (go 1.23 or higher):
 go install github.com/yumenaka/comigo/cmd/comi@latest

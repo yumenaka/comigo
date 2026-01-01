@@ -27,11 +27,11 @@
 ### ワンクリックインストール（推奨）
 
 ```bash
-# curlを使用：
+# 推奨：
 bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 
-# wgetを使用：
-bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
+# China本土のユーザー向け：
+bash <(curl -s https://comigo.xyz/get.sh) --cn
 
 # Golang環境（go 1.23以上）が設定済みの場合：
 go install github.com/yumenaka/comigo/cmd/comi@latest
