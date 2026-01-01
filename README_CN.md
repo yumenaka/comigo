@@ -34,11 +34,8 @@
 # 中国大陆用户推荐使用中转脚本：
 bash <(curl -s https://comigo.xyz/get.sh) --cn
 
-# 使用 curl 从 GitHub下载：
+# 从 GitHub下载：
 bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
-
-# 使用 wget 从 GitHub下载：
-bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 
 # 如果您已设置 Golang 环境：
 go install github.com/yumenaka/comigo/cmd/comi@latest
