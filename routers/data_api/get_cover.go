@@ -18,13 +18,17 @@ import (
 // GetCover 获取书籍封面
 // 相关参数：
 // id：书籍的ID，必须参数 &id=2B17a
+// resize_height：可选参数，指定封面高度，默认值为352 &resize_height=500
 // 示例 URL： http://127.0.0.1:1234/api/get_cover?id=2b17a13
+// 示例 URL（自定义高度）： http://127.0.0.1:1234/api/get_cover?id=2b17a13&resize_height=500
 func GetCover(c echo.Context) error {
 	// 获取书籍ID
 	id := c.QueryParam("id")
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
+	// 获取 resize_height 参数，默认值为 352
+	resizeHeight := getIntQueryParam(c, "resize_height", 352)
 	// 获取书籍信息
 	book, err := model.IStore.GetBook(id)
 	if err != nil {
@@ -82,10 +86,8 @@ func GetCover(c echo.Context) error {
 		}
 		// 确定MIME类型
 		contentType := tools.GetContentTypeByFileName(cover.Name)
-		// 获取封面时，固定高度为352，需要缩放图片
-		const coverHeight = 352
 		// 缩放图片到指定高度
-		imgData = tools.ImageResizeByHeight(imgData, coverHeight)
+		imgData = tools.ImageResizeByHeight(imgData, resizeHeight)
 		// 缩放后的图片转换为JPEG格式
 		contentType = tools.GetContentTypeByFileName(".jpg")
 		// 内嵌图片也缓存封面到本地（方便以后做手动指定封面功能）
@@ -96,7 +98,7 @@ func GetCover(c echo.Context) error {
 		// 返回图片数据
 		return c.Blob(http.StatusOK, contentType, imgData)
 	}
-	// 获取图片数据的选项，固定高度为352
+	// 获取图片数据的选项
 	option := fileutil.GetPictureDataOption{
 		PictureName:      needFile,
 		BookPath:         actualBook.BookPath,
@@ -104,7 +106,7 @@ func GetCover(c echo.Context) error {
 		BookIsDir:        actualBook.Type == model.TypeDir,
 		BookIsNonUTF8Zip: actualBook.NonUTF8Zip,
 		Debug:            config.GetCfg().Debug,
-		ResizeHeight:     352,
+		ResizeHeight:     resizeHeight,
 	}
 	// 获取图片数据
 	imgData, contentType, err := fileutil.GetPictureData(option)

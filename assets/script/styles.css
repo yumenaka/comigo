@@ -2271,8 +2271,8 @@
     top: calc(var(--spacing) * 5);
   }
 
-  .top-\[0px\] {
-    top: 0;
+  .-right-20 {
+    right: calc(var(--spacing) * -20);
   }
 
   .right-0 {
@@ -2289,10 +2289,6 @@
 
   .right-4 {
     right: calc(var(--spacing) * 4);
-  }
-
-  .right-\[-80px\] {
-    right: -80px;
   }
 
   .bottom-0 {

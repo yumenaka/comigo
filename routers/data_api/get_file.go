@@ -35,7 +35,7 @@ func GetFile(c echo.Context) error {
 	}
 
 	// 读取查询参数
-	noCache := getBoolQueryParam(c, "no-cache", false)
+	disableCache := getBoolQueryParam(c, "no-cache", false)
 
 	// 读取图片处理参数
 	resizeWidth := getIntQueryParam(c, "resize_width", 0)
@@ -47,11 +47,18 @@ func GetFile(c echo.Context) error {
 	blurhashImage := getIntQueryParam(c, "blurhash_image", 0)
 	gray := getBoolQueryParam(c, "gray", false)
 
+	// 当有任何图片处理参数生效时，禁用缓存，避免后续返回错误的缓存结果
+	if resizeWidth > 0 || resizeHeight > 0 || autoCrop > 0 ||
+		resizeMaxWidth > 0 || resizeMaxHeight > 0 ||
+		blurhash > 0 || blurhashImage > 0 || gray {
+		disableCache = true
+	}
+
 	// 如果启用了本地缓存
-	if config.GetCfg().UseCache && !noCache {
+	if config.GetCfg().UseCache && !disableCache {
 		// 获取所有的参数键值对
 		query := c.Request().URL.Query()
-		// 如果有缓存，直接读取本地获取缓存文件并返回
+		// 如果有缓存，读取本地获取缓存文件并返回
 		cacheData, ct, err := fileutil.GetFileFromCache(
 			id,
 			needFile,
@@ -97,7 +104,7 @@ func GetFile(c echo.Context) error {
 	}
 
 	// 缓存文件到本地，避免重复解压。如果书中的图片，来自本地目录，就不需要缓存。
-	if config.GetCfg().UseCache && !noCache && book.Type != model.TypeDir {
+	if config.GetCfg().UseCache && !disableCache && book.Type != model.TypeDir {
 		// 获取所有的参数键值对
 		query := c.Request().URL.Query()
 		errSave := fileutil.SaveFileToCache(

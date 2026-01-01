@@ -36,7 +36,7 @@ templ StringArrayConfig(name string, values []string, description string) {
 					class="w-full h-10.5 rounded border-gray-400 py-2.5 mx-1 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 					x-on:keydown={ "if ($event.key === 'Enter') { addStringConfigValue('" + name + "'); }" }
 				/>
-				<span class="absolute top-[0px] right-[-80px] place-content-center">
+				<span class="absolute top-0 -right-20 place-content-center text-black">
 					<button
 						x-text={ getTranslations("submit") }
 						type="button"
