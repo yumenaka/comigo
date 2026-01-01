@@ -150,11 +150,11 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 				<!-- 密码不匹配错误提示 -->
 				<div x-show="password !== ReEnterPassword" class="text-red-500 text-xs mt-1" x-text="i18next.t('passwords_not_match')">两次输入的密码不一致</div>
 			</div>
-			<!-- SAVE按钮 -->
+			<!-- 设置账号密码 按钮 -->
 			<div class="flex justify-center items-center w-full my-2">
 				<button
 					type="button"
-					class="min-w-28 px-2 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
+					class="min-w-28 px-2 h-10 mx-2 my-0 text-center text-black transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
 					:class="{ 'opacity-50 cursor-not-allowed': isFormChanged === false || passwordOK === false }"
 					:disabled="isFormChanged === false || passwordOK === false"
 					x-on:click={ "if (checkFormData()) { updateLoginSettings(username, current_password, password, ReEnterPassword); }" }

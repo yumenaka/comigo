@@ -13,7 +13,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<label x-text={ getTranslations("ConfigStorageLocationPrompt") } class="w-full"></label>
 		<!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 -->
-		<div class="flex flex-col w-full mx-0">
+		<div class="flex flex-col w-full mx-0 text-black">
 			<div
 				class="flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer WorkingDirectory min-h-15"
 				data-save_to="WorkingDirectory"
@@ -98,7 +98,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 			x-model="selectedDir"
 		/>
 		<!-- SAVE 和 DELETE 按钮 -->
-		<div class="flex flex-row justify-center w-full">
+		<div class="flex flex-row justify-center w-full text-black">
 			<button
 				id="saveConfigButton"
 				type="button"

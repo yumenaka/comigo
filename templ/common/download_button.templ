@@ -24,7 +24,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 		<a
 			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
 			download={ book.BookInfo.Title + ".html" }
-			class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
+			class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
 			x-show="$store.global.onlineBook"
 			:title="i18next.t('download_portable_web_file')"
 			x-text="i18next.t('download_portable_web_file')"
@@ -35,7 +35,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 		<a
 			href={ templ.SafeURL(fmt.Sprintf("/api/raw/%v/%v", book.BookID, book.BookInfo.Title)) }
 			download={ book.BookInfo.Title }
-			class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
+			class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
 			x-show="$store.global.onlineBook"
 			:title="i18next.t('download_raw_archive')"
 			x-text="i18next.t('download_raw_archive')"

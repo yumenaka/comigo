@@ -62,7 +62,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" x-show=\"$store.global.onlineBook\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\">下载便携网页</a><!-- 【下载原始文件】按钮，便携模式不可见 --><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" x-show=\"$store.global.onlineBook\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\">下载便携网页</a><!-- 【下载原始文件】按钮，便携模式不可见 --><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -88,7 +88,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" x-show=\"$store.global.onlineBook\" :title=\"i18next.t('download_raw_archive')\" x-text=\"i18next.t('download_raw_archive')\">下载原始文件</a></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" x-show=\"$store.global.onlineBook\" :title=\"i18next.t('download_raw_archive')\" x-text=\"i18next.t('download_raw_archive')\">下载原始文件</a></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
