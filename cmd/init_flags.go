@@ -77,7 +77,7 @@ func InitFlags() {
 	// 输出log文件
 	RootCmd.PersistentFlags().BoolVar(&cfg.LogToFile, "log-file", false, locale.GetString("log_to_file"))
 	// web图片缓存
-	RootCmd.PersistentFlags().BoolVar(&cfg.UseCache, "use-cache", true, locale.GetString("cache_file_enable"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.UseCache, "use-cache", false, locale.GetString("cache_file_enable"))
 	// 图片缓存路径
 	RootCmd.PersistentFlags().StringVar(&cfg.CacheDir, "cache-dir", "", locale.GetString("cache_file_dir"))
 	// 退出时清除缓存

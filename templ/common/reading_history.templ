@@ -80,7 +80,7 @@ templ ReadingHistory() {
 						<!-- 封面 -->
 						<div
 							class="w-16 h-20 bg-cover bg-center rounded shrink-0 border-2 border-gray-500 dark:border-gray-200"
-							:style="'background-image: url(' + (item.book_info.cover.url.includes('api/get_file?') ? item.book_info.cover.url + '&resize_height=128' : item.book_info.cover.url) + ')'"
+							:style="'background-image: url(' + (item.book_info.cover.url.includes('api/get_file?') ? item.book_info.cover.url + '&resize_height=128&no-cache=true' : item.book_info.cover.url) + ')'"
 						></div>
 						<!-- 信息 -->
 						<div class="flex-1 min-w-0">
