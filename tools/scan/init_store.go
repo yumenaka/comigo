@@ -97,13 +97,15 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 
 	// 处理文件
 	for _, file := range foundFiles {
-		////如果是以 . 开头的隐藏文件，跳过
+		// 如果是以 . 开头的隐藏文件，跳过
 		if strings.HasPrefix(filepath.Base(file.Name), ".") {
 			continue
 		}
 		if !IsSupportFile(file.Name) {
+			logger.Infof(locale.GetString("log_skip_unsupported_file_type")+" (路径: %s)", file.Name, file.Path)
 			continue
 		}
+		//logger.Infof(locale.GetString("log_processing_file"), file.Name, file.Path)
 		// 计算路径深度
 		relPath, err := filepath.Rel(storePathAbs, file.Path)
 		if err != nil {
