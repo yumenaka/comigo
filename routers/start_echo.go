@@ -40,7 +40,8 @@ func StartEcho(e *echo.Echo) {
 	if config.GetCfg().AutoTLSCertificate {
 		configDir, err := config.GetConfigDir()
 		if err != nil {
-			configDir = ""
+			logger.Errorf(locale.GetString("err_failed_to_get_config_dir"), err)
+			return
 		}
 		autoTLSManager := autocert.Manager{
 			Prompt: autocert.AcceptTOS,

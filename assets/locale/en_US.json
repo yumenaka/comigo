@@ -161,6 +161,19 @@
   "EnableTLS_Description": "Whether to enable HTTPS protocol. \nThe certificate needs to be set in the key file.",
   "EnableUpload": "Enable upload functionality",
   "EnableUpload_Description": "Enable upload functionality.",
+  "EnablePlugin": "Enable plugin system",
+  "EnablePlugin_Description": "Enable the plugin system to allow inserting custom HTML, CSS, and JavaScript code into pages.",
+  "plugins_config": "Plugin System",
+  "buildin_plugins": "Built-in Plugins",
+  "enabled_plugins": "Enabled Plugins",
+  "auto_flip_drag": "Drag",
+  "auto_flip_drag_panel": "Drag Panel",
+  "auto_flip_start_flip": "Start Auto Flip",
+  "auto_flip_start_scroll": "Start Auto Scroll",
+  "auto_flip_pause_flip": "Pause Auto Flip",
+  "auto_flip_pause_scroll": "Pause Auto Scroll",
+  "auto_flip_interval": "Interval:",
+  "auto_flip_seconds": "seconds",
   "ExcludePath": "Exclude path",
   "ExcludePath_Description": "When scanning books, the names of files or folders that need to be excluded",
   "FrpClientConfig": "FrpClient settings",
@@ -830,5 +843,6 @@
   "auto_rescan_enabled_hint": "Automatic rescan has been enabled. The system will periodically scan the library",
   "auto_rescan_disabled_hint": "Automatic rescan has been disabled",
   "other_settings": "Other Settings",
-  "plugin_enable": "Enable Plugin"
+  "plugin_enable": "Enable Plugin",
+  "err_failed_to_get_config_dir": "Failed to get config directory: %v"
 }

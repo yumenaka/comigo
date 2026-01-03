@@ -13,7 +13,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-func PluginComigoXYZ(c echo.Context) templ.Component {
+func SamplePlugin(c echo.Context) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -34,10 +34,12 @@ func PluginComigoXYZ(c echo.Context) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if config.GetCfg().Plugin {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\tconsole.log(\"Test Plugin: Comigo.xyz\");\n\t\t</script>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+		if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("sample") && c.Request().Host == "comigo.xyz" {
+			if config.GetCfg().Debug {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\t\tconsole.log(\"示例插件已启用\");\n\t\t\t</script>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 		}
 		return nil

@@ -1,0 +1,189 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"strings"
+)
+
+// AutoScrollPlugin 自动滚动插件（仅支持滚动模式）
+templ AutoScrollPlugin(c echo.Context) {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_scroll") && strings.HasPrefix(c.Request().URL.Path, "/scroll/") {
+		if config.GetCfg().Debug {
+			<script>
+				console.log("自动滚动插件已启用");
+			</script>
+		}
+		<div
+			x-data="{ 
+				autoScrollEnabled: false, 
+				autoScrollInterval: null,
+				intervalSeconds: $persist(3).as('autoScrollIntervalSeconds'),
+				showIntervalInput: false,
+				isDragging: false,
+				startX: 0,
+				startY: 0,
+				offsetX: 0,
+				offsetY: 0,
+				left: $persist('auto').as('autoScrollPluginLeft'),
+				top: $persist('auto').as('autoScrollPluginTop'),
+				startAutoScroll() {
+					const self = this;
+					// 清除旧定时器
+					if (self.autoScrollInterval) {
+						clearInterval(self.autoScrollInterval);
+						self.autoScrollInterval = null;
+					}
+					// 确保使用最新的 intervalSeconds 值
+					const currentInterval = parseInt(self.intervalSeconds) || 3;
+					// 滚动模式：自动向下滚动
+					const scrollStep = window.innerHeight * 2 / 3; // 每次滚动2/3个屏幕高度
+					self.autoScrollInterval = setInterval(() => {
+						// 检查是否到达页面底部
+						const scrollHeight = document.documentElement.scrollHeight;
+						const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+						const clientHeight = window.innerHeight;
+						
+						if (scrollTop + clientHeight >= scrollHeight - 10) {
+							// 到达底部，自动停止
+							clearInterval(self.autoScrollInterval);
+							self.autoScrollEnabled = false;
+							self.autoScrollInterval = null;
+						} else {
+							// 继续向下滚动
+							window.scrollBy({
+								top: scrollStep,
+								behavior: 'smooth'
+							});
+						}
+					}, currentInterval * 1000);
+				}
+			}"
+			x-init="(() => {
+				// 确保 intervalSeconds 是数字类型
+				if (typeof intervalSeconds !== 'number') {
+					intervalSeconds = parseInt(intervalSeconds) || 3;
+				}
+				
+				// 初始化位置：如果未设置过，默认在右上角
+				if (left === 'auto' || top === 'auto') {
+					// 延迟设置，确保页面已加载
+					setTimeout(() => {
+						const rect = $el.getBoundingClientRect();
+						left = (window.innerWidth - rect.width - 16) + 'px';
+						top = 16 + 'px';
+					}, 100);
+				}
+				
+				// 页面卸载时清理定时器
+				window.addEventListener('beforeunload', () => {
+					if (autoScrollInterval) {
+						clearInterval(autoScrollInterval);
+					}
+				});
+			})()"
+			@mouseenter="showIntervalInput = true"
+			@mouseleave="
+				if (!isDragging) {
+					showIntervalInput = false;
+				}
+			"
+			@mousemove="
+				if (isDragging) {
+					const newLeft = $event.clientX - offsetX;
+					const newTop = $event.clientY - offsetY;
+					
+					// 限制在视口内
+					const maxLeft = window.innerWidth - $el.offsetWidth;
+					const maxTop = window.innerHeight - $el.offsetHeight;
+					
+					left = Math.max(0, Math.min(newLeft, maxLeft)) + 'px';
+					top = Math.max(0, Math.min(newTop, maxTop)) + 'px';
+				}
+			"
+			@mouseup="isDragging = false"
+			:style="{ left: left, top: top, bottom: left === 'auto' ? 'auto' : 'unset', right: left === 'auto' ? 'auto' : 'unset' }"
+			class="comigo_plugin fixed z-50 flex flex-col gap-2"
+		>
+			<!-- 拖动按钮 -->
+			<button
+				@mousedown.stop="
+					isDragging = true;
+					startX = $event.clientX;
+					startY = $event.clientY;
+					const rect = $el.closest('[x-data]').getBoundingClientRect();
+					offsetX = startX - rect.left;
+					offsetY = startY - rect.top;
+				"
+				class="flex items-center justify-center w-full px-2 py-2 text-xs text-base-content bg-base-300 bg-opacity-80 rounded-t cursor-move hover:bg-opacity-100 select-none"
+				:x-title="i18next.t('auto_flip_drag_panel')"
+			>
+				<span class="mr-1">⋮⋮</span>
+				<span class="text-xs" x-text="i18next.t('auto_flip_drag')">拖动</span>
+			</button>
+			<!-- 自动滚动控制按钮 -->
+			<button
+				x-show="!autoScrollEnabled"
+				@click="
+					showIntervalInput = true;
+					autoScrollEnabled = true;
+					startAutoScroll();
+				"
+				class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 shadow-lg"
+			>
+				<span x-text="i18next.t('auto_flip_start_scroll')"></span>
+			</button>
+			<button
+				x-show="autoScrollEnabled"
+				@click="
+					showIntervalInput = true;
+					if (autoScrollInterval) {
+						clearInterval(autoScrollInterval);
+						autoScrollInterval = null;
+					}
+					autoScrollEnabled = false;
+				"
+				class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 shadow-lg"
+			>
+				<span x-text="i18next.t('auto_flip_pause_scroll')"></span>
+			</button>
+			<!-- 间隔时间设置（默认隐藏，hover或点击时显示） -->
+			<div
+				x-show="showIntervalInput"
+				x-transition
+				class="flex flex-row items-center gap-2 px-3 py-2 text-xs bg-base-200 bg-opacity-80 rounded shadow"
+			>
+				<label class="text-base-content" x-text="i18next.t('auto_flip_interval')">间隔:</label>
+				<input
+					type="number"
+					min="1"
+					max="60"
+					x-model.number="intervalSeconds"
+					@input="
+						intervalSeconds = parseInt($event.target.value) || 3;
+						// 如果正在运行，重新启动定时器以应用新的间隔时间
+						if (autoScrollEnabled) {
+							startAutoScroll();
+						}
+					"
+					class="w-16 px-2 py-1 text-center border border-gray-400 rounded bg-base-100 text-base-content"
+				/>
+				<span class="text-base-content" x-text="i18next.t('auto_flip_seconds')">秒</span>
+			</div>
+		</div>
+		<style>
+			/* 确保按钮和输入框可以正常交互 */
+			.fixed button:not(:first-child),
+			.fixed input {
+				pointer-events: auto;
+				cursor: pointer;
+			}
+			.fixed input {
+				cursor: text;
+			}
+			.fixed button:first-child {
+				cursor: move;
+			}
+		</style>
+	}
+}

@@ -17,7 +17,9 @@ func LoadMetadata() {
 		// 从数据库中读取书籍信息并持久化
 		configDir, err := config.GetConfigDir()
 		if err != nil {
-			configDir = ""
+			logger.Infof(locale.GetString("err_failed_to_get_config_dir"), err)
+			model.IStore = store.RamStore
+			return
 		}
 		if err := sqlc.OpenDatabase(configDir); err != nil {
 			logger.Infof(locale.GetString("log_open_database_error"), err)

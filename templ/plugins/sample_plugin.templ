@@ -1,0 +1,16 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+)
+
+templ SamplePlugin(c echo.Context) {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("sample") && c.Request().Host == "comigo.xyz" {
+		if config.GetCfg().Debug {
+			<script>
+				console.log("示例插件已启用");
+			</script>
+		}
+	}
+}

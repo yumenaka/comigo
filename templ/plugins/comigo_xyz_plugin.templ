@@ -1,0 +1,105 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"strings"
+)
+
+// ComigoXYZPlugin 当域名为 comigo.xyz 时，改造顶层书架为软件项目首页
+templ ComigoXYZPlugin(c echo.Context) {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("comigo_xyz") && (c.Request().Host == "comigo.xyz" || strings.HasSuffix(c.Request().Host, ".comigo.xyz")) && (c.Request().URL.Path == "/" || c.Request().URL.Path == "/shelf" || c.Request().URL.Path == "/index.html") && c.Param("id") == "" {
+		if config.GetCfg().Debug {
+			<script>
+				console.log("Comigo.xyz插件已启用");
+			</script>
+		}
+		<script>
+			// 等待页面加载完成后替换书架内容
+			document.addEventListener("DOMContentLoaded", function () {
+				const shelfMainArea = document.getElementById("ShelfMainArea");
+				if (shelfMainArea) {
+					// 创建项目首页内容
+					const homePageContent = `
+						<div class="comigo_plugin flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gradient-to-br from-base-200 to-base-300">
+							<div class="max-w-4xl w-full space-y-8">
+								<!-- 标题区域 -->
+								<div class="text-center space-y-4">
+									<h1 class="text-5xl font-bold text-base-content">Comigo</h1>
+									<p class="text-xl text-base-content/80">Simple Manga Reader Online</p>
+									<p class="text-base text-base-content/60">在线漫画阅读器 - 支持 Linux、Windows、Mac OS</p>
+								</div>
+								
+								<!-- 功能特性 -->
+								<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
+										<h3 class="text-xl font-semibold mb-2">📚 多格式支持</h3>
+										<p class="text-base-content/70">支持 ZIP、RAR、CBZ、EPUB、PDF 等多种漫画格式</p>
+									</div>
+									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
+										<h3 class="text-xl font-semibold mb-2">🌐 跨平台</h3>
+										<p class="text-base-content/70">支持 Linux、Windows、Mac OS 三大操作系统</p>
+									</div>
+									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
+										<h3 class="text-xl font-semibold mb-2">📱 响应式设计</h3>
+										<p class="text-base-content/70">完美适配桌面端和移动端设备</p>
+									</div>
+									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
+										<h3 class="text-xl font-semibold mb-2">🔄 多种阅读模式</h3>
+										<p class="text-base-content/70">支持翻页模式和卷轴模式，满足不同阅读习惯</p>
+									</div>
+									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
+										<h3 class="text-xl font-semibold mb-2">🔒 安全可靠</h3>
+										<p class="text-base-content/70">支持 HTTPS 和用户认证，保护您的隐私</p>
+									</div>
+									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
+										<h3 class="text-xl font-semibold mb-2">⚡ 高性能</h3>
+										<p class="text-base-content/70">快速扫描和加载，流畅的阅读体验</p>
+									</div>
+								</div>
+								
+								<!-- 链接区域 -->
+								<div class="flex flex-col md:flex-row justify-center items-center gap-4 mt-12">
+									<a 
+										href="https://github.com/yumenaka/comigo" 
+										target="_blank"
+										class="px-6 py-3 bg-base-content text-base-100 rounded-lg hover:bg-base-content/90 transition-colors font-semibold"
+									>
+										📦 GitHub 仓库
+									</a>
+									<a 
+										href="https://github.com/yumenaka/comigo/releases" 
+										target="_blank"
+										class="px-6 py-3 bg-primary text-primary-content rounded-lg hover:bg-primary/90 transition-colors font-semibold"
+									>
+										⬇️ 下载最新版本
+									</a>
+								</div>
+								
+								<!-- 使用说明 -->
+								<div class="mt-12 bg-base-100 p-6 rounded-lg shadow-lg">
+									<h2 class="text-2xl font-semibold mb-4">快速开始</h2>
+									<ol class="list-decimal list-inside space-y-2 text-base-content/80">
+										<li>下载并运行 Comigo 程序</li>
+										<li>在设置中配置您的书库路径</li>
+										<li>开始享受阅读体验！</li>
+									</ol>
+								</div>
+							</div>
+						</div>
+					`;
+
+					// 替换书架内容
+					shelfMainArea.innerHTML = homePageContent;
+					shelfMainArea.className = "w-full h-full";
+				}
+			});
+		</script>
+		<style>
+			/* 确保首页样式正确显示 */
+			#ShelfMainArea {
+				overflow: visible !important;
+			}
+		</style>
+	}
+}

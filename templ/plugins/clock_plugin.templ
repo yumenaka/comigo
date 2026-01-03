@@ -1,0 +1,71 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+)
+
+// ClockPlugin 在右下角显示当前时间的插件（支持拖动）
+templ ClockPlugin(c echo.Context) {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("clock") {
+		if config.GetCfg().Debug {
+			<script>
+				console.log("时钟插件已启用");
+			</script>
+		}
+		<div
+			x-data="{ 
+				currentTime: new Date().toLocaleTimeString(),
+				isDragging: false,
+				startX: 0,
+				startY: 0,
+				offsetX: 0,
+				offsetY: 0,
+				left: $persist('auto').as('clockPluginLeft'),
+				top: $persist('auto').as('clockPluginTop')
+			}"
+			x-init="
+				// 更新时间
+				setInterval(() => { currentTime = new Date().toLocaleTimeString(); }, 1000);
+				
+				// 初始化位置：如果未设置过，默认在右下角
+				if (left === 'auto' || top === 'auto') {
+					// 延迟设置，确保页面已加载
+					setTimeout(() => {
+						const rect = $el.getBoundingClientRect();
+						left = (window.innerWidth - rect.width - 16) + 'px';
+						top = (window.innerHeight - rect.height - 16) + 'px';
+					}, 100);
+				}
+			"
+			@mousedown="
+				isDragging = true;
+				startX = $event.clientX;
+				startY = $event.clientY;
+				const rect = $el.getBoundingClientRect();
+				offsetX = startX - rect.left;
+				offsetY = startY - rect.top;
+			"
+			@mousemove="
+				if (isDragging) {
+					const newLeft = $event.clientX - offsetX;
+					const newTop = $event.clientY - offsetY;
+					
+					// 限制在视口内
+					const maxLeft = window.innerWidth - $el.offsetWidth;
+					const maxTop = window.innerHeight - $el.offsetHeight;
+					
+					left = Math.max(0, Math.min(newLeft, maxLeft)) + 'px';
+					top = Math.max(0, Math.min(newTop, maxTop)) + 'px';
+				}
+			"
+			@mouseup="isDragging = false"
+			@mouseleave="isDragging = false"
+			:style="{ left: left, top: top, bottom: left === 'auto' ? 'auto' : 'unset', right: left === 'auto' ? 'auto' : 'unset' }"
+			class="comigo_plugin fixed px-3 py-2 text-sm font-mono text-base-content bg-base-200 bg-opacity-80 rounded-lg shadow-lg z-50 cursor-move select-none"
+			:class="{ 'opacity-70': isDragging }"
+		>
+			<span x-text="currentTime"></span>
+		</div>
+	}
+}

@@ -161,6 +161,19 @@
   "EnableTLS_Description": "是否启用HTTPS协议。需要设置证书于key文件。",
   "EnableUpload": "启用上传功能",
   "EnableUpload_Description": "启用上传功能。",
+  "EnablePlugin": "启用插件系统",
+  "EnablePlugin_Description": "启用插件系统，允许在页面中插入自定义的HTML、CSS和JavaScript代码。",
+  "plugins_config": "插件系统",
+  "buildin_plugins": "内置插件",
+  "enabled_plugins": "已启用插件",
+  "auto_flip_drag": "拖动",
+  "auto_flip_drag_panel": "拖动面板",
+  "auto_flip_start_flip": "开始自动翻页",
+  "auto_flip_start_scroll": "开始自动滚动",
+  "auto_flip_pause_flip": "暂停自动翻页",
+  "auto_flip_pause_scroll": "暂停自动滚动",
+  "auto_flip_interval": "间隔:",
+  "auto_flip_seconds": "秒",
   "ExcludePath": "排除路径",
   "ExcludePath_Description": "扫描书籍的时候，需要排除的文件或文件夹的名字",
   "FrpClientConfig": "FrpClient设置",
@@ -830,5 +843,6 @@
   "auto_rescan_enabled_hint": "自动重扫已启用，系统将定期扫描书库",
   "auto_rescan_disabled_hint": "自动重扫已禁用",
   "other_settings": "其他设置",
-  "plugin_enable": "启用插件"
+  "plugin_enable": "启用插件",
+  "err_failed_to_get_config_dir": "获取配置目录失败: %v"
 }

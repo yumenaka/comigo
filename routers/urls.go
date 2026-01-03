@@ -150,6 +150,9 @@ func bindProtectedAPI(group *echo.Group) {
 	// 字符串数组配置的增删改
 	group.POST("/delete-array-config", settings.DeleteArrayConfigHandler)
 	group.POST("/add-array-config", settings.AddArrayConfigHandler)
+	// 插件管理
+	group.POST("/enable-plugin", settings.EnablePluginHandler)
+	group.POST("/disable-plugin", settings.DisablePluginHandler)
 	// 保存和删除配置
 	group.POST("/config-save", settings.HandleConfigSave)
 	group.POST("/config-delete", settings.HandleConfigDelete)

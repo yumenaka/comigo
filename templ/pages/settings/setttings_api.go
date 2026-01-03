@@ -468,6 +468,82 @@ func doAdd(configName, addValue string) ([]string, error) {
 	return values, nil
 }
 
+// EnablePluginHandler 处理启用插件的 JSON API
+func EnablePluginHandler(c echo.Context) error {
+	// 如果配置被锁定
+	if config.GetCfg().ReadOnlyMode {
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	}
+
+	// 解析 JSON 请求体
+	var request struct {
+		PluginName string `json:"pluginName"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+	}
+
+	if request.PluginName == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "pluginName is required")
+	}
+
+	logger.Infof("启用插件: %s\n", request.PluginName)
+
+	// 启用插件
+	err := config.GetCfg().AddPlugin(request.PluginName)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_update_config_failed"))
+	}
+
+	// 写入配置文件
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "插件已启用",
+	})
+}
+
+// DisablePluginHandler 处理禁用插件的 JSON API
+func DisablePluginHandler(c echo.Context) error {
+	// 如果配置被锁定
+	if config.GetCfg().ReadOnlyMode {
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	}
+
+	// 解析 JSON 请求体
+	var request struct {
+		PluginName string `json:"pluginName"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+	}
+
+	if request.PluginName == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "pluginName is required")
+	}
+
+	logger.Infof("禁用插件: %s\n", request.PluginName)
+
+	// 禁用插件
+	err := config.GetCfg().DisablePlugin(request.PluginName)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_update_config_failed"))
+	}
+
+	// 写入配置文件
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "插件已禁用",
+	})
+}
+
 // DeleteArrayConfigHandler 处理删除数组元素的 JSON API
 func DeleteArrayConfigHandler(c echo.Context) error {
 	// 如果配置被锁定
