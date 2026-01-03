@@ -31,6 +31,7 @@ var cfg = Config{
 	EnableUpload:          true,
 	EnableDatabase:        false,
 	EnableTLS:             false,
+	EnablePlugin:          false,
 	ExcludePath:           []string{"$RECYCLE.BIN", "System Volume Information", "node_modules"},
 	Host:                  "",
 	LogToFile:             false,
@@ -48,4 +49,9 @@ var cfg = Config{
 	ZipFileTextEncoding:   "",
 	EnableSingleInstance:  false,
 	Language:              "auto",
+	// 初始化内置插件列表
+	BuildInPluginList: []string{"clock", "auto_flip", "auto_scroll", "comigo_xyz", "sample"},
+	UserPluginList:    []string{},
+	//EnabledPluginList: []string{"clock", "auto_flip", "comigo_xyz", "sample"}, // 默认启用所有内置插件
+	EnabledPluginList: []string{}, // 默认不启用任何插件
 }

@@ -161,6 +161,19 @@
   "EnableTLS_Description": "HTTPS プロトコルを有効にするかどうか。証明書はキーファイルに設定する必要があります。",
   "EnableUpload": "アップロード機能を有効にする",
   "EnableUpload_Description": "アップロード機能を有効にします。",
+  "EnablePlugin": "プラグインシステムを有効にする",
+  "EnablePlugin_Description": "プラグインシステムを有効にし、ページにカスタムのHTML、CSS、JavaScriptコードを挿入できるようにします。",
+  "plugins_config": "プラグインシステム",
+  "buildin_plugins": "組み込みプラグイン",
+  "enabled_plugins": "有効なプラグイン",
+  "auto_flip_drag": "ドラッグ",
+  "auto_flip_drag_panel": "パネルをドラッグ",
+  "auto_flip_start_flip": "自動めくりを開始",
+  "auto_flip_start_scroll": "自動スクロールを開始",
+  "auto_flip_pause_flip": "自動めくりを一時停止",
+  "auto_flip_pause_scroll": "自動スクロールを一時停止",
+  "auto_flip_interval": "間隔:",
+  "auto_flip_seconds": "秒",
   "ExcludePath": "パスを除外する",
   "ExcludePath_Description": "本をスキャンするときに、除外する必要があるファイルまたはフォルダーの名前",
   "FrpClientConfig": "FrpClient設定",
@@ -830,5 +843,6 @@
   "auto_rescan_enabled_hint": "自動再スキャンが有効になりました。システムは定期的に書庫をスキャンします",
   "auto_rescan_disabled_hint": "自動再スキャンが無効になりました",
   "other_settings": "その他の設定",
-  "plugin_enable": "プラグインを有効にする"
+  "plugin_enable": "プラグインを有効にする",
+  "err_failed_to_get_config_dir": "設定ディレクトリの取得に失敗しました: %v"
 }

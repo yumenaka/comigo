@@ -21,7 +21,8 @@ func StartTailscale() {
 	// 启动或重启 Tailscale 服务
 	configDir, err := config.GetConfigDir()
 	if err != nil {
-		configDir = ""
+		logger.Errorf(locale.GetString("err_failed_to_get_config_dir"), err)
+		return
 	}
 	if tsError := tailscale_plugin.RunTailscale(
 		engine,

@@ -22,7 +22,11 @@ type Config struct {
 	ConfigFile                string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
 	ReadOnlyMode              bool            `json:"ReadOnlyMode" comment:"只读模式。禁止网页端更改配置或上传文件。"`
 	Debug                     bool            `json:"Debug" comment:"开启Debug模式"`
-	Plugin                    bool            `json:"Plugin" comment:"启用插件支持"`
+	EnablePlugin              bool            `json:"EnablePlugin" comment:"启用插件系统"`
+	PluginDirectory           string          `json:"-" toml:"-"  comment:"插件存放目录"`
+	BuildInPluginList         []string        `json:"-" toml:"-"  comment:"内置插件列表"`
+	UserPluginList            []string        `json:"-" toml:"-"  comment:"用户自定义插件列表"`
+	EnabledPluginList         []string        `json:"-" toml:"-"  comment:"已启用插件列表"`
 	DisableLAN                bool            `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
 	EnableDatabase            bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
 	EnableTLS                 bool            `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
@@ -313,6 +317,34 @@ func (c *Config) DeleteStringArrayConfig(fieldName, deleteValue string) ([]strin
 	return newSlice, nil
 }
 
+// IsPluginEnabled 检查指定插件是否已启用
+func (c *Config) IsPluginEnabled(pluginName string) bool {
+	for _, enabledPlugin := range c.EnabledPluginList {
+		if enabledPlugin == pluginName {
+			return true
+		}
+	}
+	return false
+}
+
+// AddPlugin 启用指定插件（添加到 EnabledPluginList）
+func (c *Config) AddPlugin(pluginName string) error {
+	// 检查插件是否已经在启用列表中
+	if c.IsPluginEnabled(pluginName) {
+		return nil // 已经启用，直接返回
+	}
+	// 添加到启用列表
+	c.EnabledPluginList = append(c.EnabledPluginList, pluginName)
+	return nil
+}
+
+// DisablePlugin 禁用指定插件（从 EnabledPluginList 移除）
+func (c *Config) DisablePlugin(pluginName string) error {
+	// 使用 DeleteStringArrayConfig 来删除
+	_, err := c.DeleteStringArrayConfig("EnabledPluginList", pluginName)
+	return err
+}
+
 // UpdateConfigByJson 使用 JSON 字符串反序列化将更新的配置解析为映射，遍历映射并更新配置，减少重复的代码。
 func UpdateConfigByJson(jsonString string) error {
 	var updates map[string]interface{}
@@ -438,9 +470,9 @@ func UpdateConfigByJson(jsonString string) error {
 			if v, ok := value.(bool); ok {
 				cfg.Debug = v
 			}
-		case "Plugin":
+		case "EnablePlugin":
 			if v, ok := value.(bool); ok {
-				cfg.Plugin = v
+				cfg.EnablePlugin = v
 			}
 		case "Username":
 			if v, ok := value.(string); ok {

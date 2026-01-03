@@ -1,0 +1,29 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+)
+
+// RenderAllPlugins 渲染所有启用的插件
+templ RenderAllPlugins(c echo.Context) {
+	if config.GetCfg().EnablePlugin {
+		for _, pluginName := range config.GetCfg().EnabledPluginList {
+			if pluginName == "clock" {
+				@ClockPlugin(c)
+			}
+			if pluginName == "auto_flip" {
+				@AutoFlipPlugin(c)
+			}
+			if pluginName == "auto_scroll" {
+				@AutoScrollPlugin(c)
+			}
+			if pluginName == "comigo_xyz" {
+				@ComigoXYZPlugin(c)
+			}
+			if pluginName == "sample" {
+				@SamplePlugin(c)
+			}
+		}
+	}
+}

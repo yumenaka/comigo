@@ -2529,6 +2529,10 @@
     margin-top: calc(var(--spacing) * 8);
   }
 
+  .mt-12 {
+    margin-top: calc(var(--spacing) * 12);
+  }
+
   .mt-32 {
     margin-top: calc(var(--spacing) * 32);
   }
@@ -2598,6 +2602,10 @@
 
   .mr-0\.5 {
     margin-right: calc(var(--spacing) * .5);
+  }
+
+  .mr-1 {
+    margin-right: calc(var(--spacing) * 1);
   }
 
   .mr-2 {
@@ -3143,6 +3151,10 @@
     max-width: 66.6667%;
   }
 
+  .max-w-4xl {
+    max-width: var(--container-4xl);
+  }
+
   .max-w-64 {
     max-width: calc(var(--spacing) * 64);
   }
@@ -3410,6 +3422,10 @@
     cursor: default;
   }
 
+  .cursor-move {
+    cursor: move;
+  }
+
   .cursor-not-allowed {
     cursor: not-allowed;
   }
@@ -3517,6 +3533,10 @@
 
   .grid-flow-row-dense {
     grid-auto-flow: dense;
+  }
+
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
 
   .grid-cols-4 {
@@ -3779,6 +3799,14 @@
     gap: calc(var(--spacing) * 3);
   }
 
+  .gap-4 {
+    gap: calc(var(--spacing) * 4);
+  }
+
+  .gap-6 {
+    gap: calc(var(--spacing) * 6);
+  }
+
   :where(.-space-y-px > :not(:last-child)) {
     --tw-space-y-reverse: 0;
     margin-block-start: calc(-1px * var(--tw-space-y-reverse));
@@ -3795,6 +3823,12 @@
     --tw-space-y-reverse: 0;
     margin-block-start: calc(calc(var(--spacing) * 2) * var(--tw-space-y-reverse));
     margin-block-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-y-reverse)));
+  }
+
+  :where(.space-y-4 > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--spacing) * 4) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-y-reverse)));
   }
 
   :where(.space-y-6 > :not(:last-child)) {
@@ -4279,6 +4313,10 @@
     border-color: var(--color-red-600);
   }
 
+  .border-slate-300 {
+    border-color: var(--color-slate-300);
+  }
+
   .border-slate-400 {
     border-color: var(--color-slate-400);
   }
@@ -4552,6 +4590,11 @@
   .-bg-conic, .bg-conic {
     --tw-gradient-position: in oklab;
     background-image: conic-gradient(var(--tw-gradient-stops));
+  }
+
+  .bg-gradient-to-br {
+    --tw-gradient-position: to bottom right in oklab;
+    background-image: linear-gradient(var(--tw-gradient-stops));
   }
 
   .bg-radial {
@@ -5296,6 +5339,10 @@
     vertical-align: top;
   }
 
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
   .font-sans {
     font-family: var(--font-sans);
   }
@@ -5313,6 +5360,11 @@
   .text-4xl {
     font-size: var(--text-4xl);
     line-height: var(--tw-leading, var(--text-4xl--line-height));
+  }
+
+  .text-5xl {
+    font-size: var(--text-5xl);
+    line-height: var(--tw-leading, var(--text-5xl--line-height));
   }
 
   .text-base {
@@ -5854,6 +5906,10 @@
     opacity: .5;
   }
 
+  .opacity-70 {
+    opacity: .7;
+  }
+
   .opacity-75 {
     opacity: .75;
   }
@@ -6247,6 +6303,10 @@
     }
   }
 
+  .peer-checked\:start-5:is(:where(.peer):checked ~ *) {
+    inset-inline-start: calc(var(--spacing) * 5);
+  }
+
   .peer-checked\:start-6:is(:where(.peer):checked ~ *) {
     inset-inline-start: calc(var(--spacing) * 6);
   }
@@ -6395,6 +6455,10 @@
       background-color: var(--color-gray-400);
     }
 
+    .hover\:bg-green-700:hover {
+      background-color: var(--color-green-700);
+    }
+
     .hover\:bg-indigo-300:hover {
       background-color: var(--color-indigo-300);
     }
@@ -6405,6 +6469,10 @@
 
     .hover\:bg-red-400:hover {
       background-color: var(--color-red-400);
+    }
+
+    .hover\:bg-red-700:hover {
+      background-color: var(--color-red-700);
     }
 
     .hover\:bg-white:hover {
@@ -6497,8 +6565,16 @@
     --tw-ring-color: var(--color-blue-300);
   }
 
+  .focus\:ring-green-300:focus {
+    --tw-ring-color: var(--color-green-300);
+  }
+
   .focus\:ring-indigo-500:focus {
     --tw-ring-color: var(--color-indigo-500);
+  }
+
+  .focus\:ring-red-300:focus {
+    --tw-ring-color: var(--color-red-300);
   }
 
   .focus\:ring-offset-2:focus {
@@ -6571,6 +6647,14 @@
       max-width: var(--container-2xl);
     }
 
+    .md\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .md\:flex-row {
+      flex-direction: row;
+    }
+
     .md\:truncate {
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -6588,6 +6672,10 @@
   }
 
   @media (width >= 64rem) {
+    .lg\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .lg\:px-8 {
       padding-inline: calc(var(--spacing) * 8);
     }

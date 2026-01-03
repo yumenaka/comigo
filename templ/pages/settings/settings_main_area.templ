@@ -42,7 +42,9 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			</div>
 			<!-- 管理账号密码 -->
 			@UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password)
-			<!-- Tailscale远程连接 -->
+			<!-- 插件系统设置 -->
+			@PluginsConfig()
+			<!-- Tailscale 远程连接 -->
 			@TailscaleConfig(tsStatus)
 			<!-- 网络设置 -->
 			<div

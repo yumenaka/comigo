@@ -107,8 +107,8 @@ func InitFlags() {
 		RootCmd.PersistentFlags().BoolVar(&cfg.RegisterContextMenu, "register-context-menu", false, locale.GetString("register_context_menu"))
 		RootCmd.PersistentFlags().BoolVar(&cfg.UnregisterContextMenu, "unregister-context-menu", false, locale.GetString("unregister_context_menu"))
 	}
-	// Plugin
-	//RootCmd.PersistentFlags().BoolVar(&cfg.Plugin, "plugin", true, locale.GetString("plugin_enable"))
+	// EnablePlugin
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnablePlugin, "plugin", true, locale.GetString("plugin_enable"))
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 }
@@ -191,9 +191,9 @@ func SetByExecutableFilename() {
 	if strings.Contains(filenameLower, "debug") {
 		cfg.Debug = true
 	}
-	// 启用 Plugin
+	// 启用 EnablePlugin
 	if strings.Contains(filenameLower, "plugin") {
-		cfg.Plugin = true
+		cfg.EnablePlugin = true
 	}
 	// 自动扫描间隔
 	if strings.Contains(filenameLower, "autorescan") {
