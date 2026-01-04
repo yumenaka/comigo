@@ -27,6 +27,23 @@ templ AutoFlipPlugin(c echo.Context) {
 				offsetY: 0,
 				left: $persist('auto').as('autoFlipPluginLeft'),
 				top: $persist('auto').as('autoFlipPluginTop'),
+				isHovered: false,
+				lastInteractionTime: Date.now(),
+				opacityTimer: null,
+				updateOpacity() {
+					const now = Date.now();
+					const timeSinceInteraction = now - this.lastInteractionTime;
+					// 如果鼠标悬停或距离最后交互时间小于3秒，则不透明；否则50%透明度
+					if (this.isHovered || timeSinceInteraction < 3000) {
+						$el.style.opacity = '1';
+					} else {
+						$el.style.opacity = '0.5';
+					}
+				},
+				resetInteraction() {
+					this.lastInteractionTime = Date.now();
+					this.updateOpacity();
+				},
 				startAutoFlip() {
 					const self = this;
 					// 清除旧定时器
@@ -69,20 +86,36 @@ templ AutoFlipPlugin(c echo.Context) {
 					}, 100);
 				}
 				
+				// 设置透明度定时器，每100ms检查一次
+				opacityTimer = setInterval(() => {
+					updateOpacity();
+				}, 100);
+				
 				// 页面卸载时清理定时器
 				window.addEventListener('beforeunload', () => {
 					if (autoFlipInterval) {
 						clearInterval(autoFlipInterval);
 					}
+					if (opacityTimer) {
+						clearInterval(opacityTimer);
+					}
 				});
 			})()"
-			@mouseenter="showIntervalInput = true"
+			@mouseenter="
+				isHovered = true;
+				showIntervalInput = true;
+				resetInteraction();
+			"
 			@mouseleave="
+				isHovered = false;
 				if (!isDragging) {
 					showIntervalInput = false;
 				}
+				resetInteraction();
 			"
+			@click="resetInteraction()"
 			@mousemove="
+				resetInteraction();
 				if (isDragging) {
 					const newLeft = $event.clientX - offsetX;
 					const newTop = $event.clientY - offsetY;
@@ -97,11 +130,12 @@ templ AutoFlipPlugin(c echo.Context) {
 			"
 			@mouseup="isDragging = false"
 			:style="{ left: left, top: top, bottom: left === 'auto' ? 'auto' : 'unset', right: left === 'auto' ? 'auto' : 'unset' }"
-			class="comigo_plugin fixed z-50 flex flex-col gap-2"
+			class="comigo_plugin fixed z-50 w-32 flex flex-col justify-center items-center gap-2"
 		>
 			<!-- 拖动按钮 -->
 			<button
 				@mousedown.stop="
+					resetInteraction();
 					isDragging = true;
 					startX = $event.clientX;
 					startY = $event.clientY;
@@ -109,27 +143,31 @@ templ AutoFlipPlugin(c echo.Context) {
 					offsetX = startX - rect.left;
 					offsetY = startY - rect.top;
 				"
-				class="flex items-center justify-center w-full px-2 py-2 text-xs text-base-content bg-base-300 bg-opacity-80 rounded-t cursor-move hover:bg-opacity-100 select-none"
+				class="flex items-center justify-center w-1/2 px-2 py-2 text-xs text-base-content bg-base-300 bg-opacity-80 rounded cursor-move hover:bg-opacity-100 select-none border"
 				:x-title="i18next.t('auto_flip_drag_panel')"
 			>
 				<span class="mr-1">⋮⋮</span>
 				<span class="text-xs" x-text="i18next.t('auto_flip_drag')">拖动</span>
 			</button>
-			<!-- 自动翻页/滚动控制按钮 -->
+			<!-- 自动翻页/滚动控制按钮（默认隐藏，hover或点击时显示） -->
 			<button
-				x-show="!autoFlipEnabled"
+				x-show="showIntervalInput && !autoFlipEnabled"
+				x-transition
 				@click="
+					resetInteraction();
 					showIntervalInput = true;
 					autoFlipEnabled = true;
 					startAutoFlip();
 				"
-				class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 shadow-lg"
+				class="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 shadow-lg border"
 			>
 				<span x-text="i18next.t('auto_flip_start_flip')"></span>
 			</button>
 			<button
-				x-show="autoFlipEnabled"
+				x-show="showIntervalInput && autoFlipEnabled"
+				x-transition
 				@click="
+					resetInteraction();
 					showIntervalInput = true;
 					if (autoFlipInterval) {
 						clearInterval(autoFlipInterval);
@@ -137,7 +175,7 @@ templ AutoFlipPlugin(c echo.Context) {
 					}
 					autoFlipEnabled = false;
 				"
-				class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 shadow-lg"
+				class="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 shadow-lg"
 			>
 				<span x-text="i18next.t('auto_flip_pause_flip')"></span>
 			</button>
@@ -145,7 +183,7 @@ templ AutoFlipPlugin(c echo.Context) {
 			<div
 				x-show="showIntervalInput"
 				x-transition
-				class="flex flex-row items-center gap-2 px-3 py-2 text-xs bg-base-200 bg-opacity-80 rounded shadow"
+				class="w-full flex flex-row items-center gap-2 px-3 py-2 text-xs bg-base-200 bg-opacity-80 rounded shadow border"
 			>
 				<label class="text-base-content" x-text="i18next.t('auto_flip_interval')">间隔:</label>
 				<input
@@ -154,6 +192,7 @@ templ AutoFlipPlugin(c echo.Context) {
 					max="60"
 					x-model.number="intervalSeconds"
 					@input="
+						resetInteraction();
 						intervalSeconds = parseInt($event.target.value) || 3;
 						// 如果正在运行，重新启动定时器以应用新的间隔时间
 						if (autoFlipEnabled) {

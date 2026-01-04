@@ -4277,6 +4277,16 @@
     stroke: var(--color-default) !important;
   }
 
+  .border-black\/50 {
+    border-color: #00000080;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .border-black\/50 {
+      border-color: color-mix(in oklab, var(--color-black) 50%, transparent);
+    }
+  }
+
   .border-blue-800 {
     border-color: var(--color-blue-800);
   }
@@ -5902,12 +5912,12 @@
     opacity: .25;
   }
 
-  .opacity-50 {
-    opacity: .5;
+  .opacity-40 {
+    opacity: .4;
   }
 
-  .opacity-70 {
-    opacity: .7;
+  .opacity-50 {
+    opacity: .5;
   }
 
   .opacity-75 {

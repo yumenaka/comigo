@@ -247,5 +247,6 @@ func SetByExecutableFilename() {
 	}
 	if cfg.Debug {
 		logger.Infof(locale.GetString("log_executable_name"), filename)
+		cfg.EnabledPluginList = []string{"clock", "auto_flip", "auto_scroll", "comigo_xyz", "sample"}
 	}
 }
