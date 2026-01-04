@@ -40,10 +40,10 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				@StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description")
 				@NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535)
 			</div>
+			<!-- 插件系统 -->
+			@PluginsConfig()
 			<!-- 管理账号密码 -->
 			@UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password)
-			<!-- 插件系统设置 -->
-			@PluginsConfig()
 			<!-- Tailscale 远程连接 -->
 			@TailscaleConfig(tsStatus)
 			<!-- 网络设置 -->

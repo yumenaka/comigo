@@ -62,8 +62,8 @@ templ ClockPlugin(c echo.Context) {
 			@mouseup="isDragging = false"
 			@mouseleave="isDragging = false"
 			:style="{ left: left, top: top, bottom: left === 'auto' ? 'auto' : 'unset', right: left === 'auto' ? 'auto' : 'unset' }"
-			class="comigo_plugin fixed px-3 py-2 text-sm font-mono text-base-content bg-base-200 bg-opacity-80 rounded-lg shadow-lg z-50 cursor-move select-none"
-			:class="{ 'opacity-70': isDragging }"
+			class="comigo_plugin fixed px-3 py-2 text-sm font-mono text-base-content bg-base-200/60 border border-black/50 rounded-lg shadow-lg z-50 cursor-move select-none"
+			:class="{ 'opacity-40': isDragging }"
 		>
 			<span x-text="currentTime"></span>
 		</div>

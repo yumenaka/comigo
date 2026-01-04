@@ -20,7 +20,7 @@ templ PluginsConfig() {
 				<div class="flex flex-col w-full">
 					for _, pluginName := range config.GetCfg().BuildInPluginList {
 						<div class="flex flex-row items-center justify-between w-full p-2 m-1 border rounded bg-base-100">
-							<span class="text-sm">{ pluginName }</span>
+							<span class="text-sm" x-text={ "i18next.t('plugin_name_" + pluginName + "')" }>{ pluginName }</span>
 							<label class="relative h-6 cursor-pointer w-12">
 								<input
 									type="checkbox"

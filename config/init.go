@@ -51,7 +51,8 @@ var cfg = Config{
 	Language:              "auto",
 	// 初始化内置插件列表
 	BuildInPluginList: []string{"clock", "auto_flip", "auto_scroll", "comigo_xyz", "sample"},
+	//EnabledPluginList: []string{"clock", "auto_flip", "comigo_xyz", "sample"}, // 默认启用的内置插件
+	// 用户自定义插件插（TODO）
 	UserPluginList:    []string{},
-	//EnabledPluginList: []string{"clock", "auto_flip", "comigo_xyz", "sample"}, // 默认启用所有内置插件
-	EnabledPluginList: []string{}, // 默认不启用任何插件
+	EnabledPluginList: []string{}, // 初始状态，不启用任何插件
 }

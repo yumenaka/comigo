@@ -9,7 +9,7 @@ tmp_dir = "test/temp"
 [build]
 ## 运行的时候，需要传给二进制文件的参数。
 #  args_bin = ["./test","--tailscale","--debug", "--config-locked"]
-args_bin = ["./test","--tailscale"]
+args_bin = ["./test","--tailscale","--debug"]
 #二进制文件
 bin = "./test/temp/comi"
 cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi ./cmd/comigo/main.go"
