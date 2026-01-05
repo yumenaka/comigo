@@ -3,101 +3,288 @@ package plugins
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
-	"strings"
 )
 
-// ComigoXYZPlugin 当域名为 comigo.xyz 时，改造顶层书架为软件项目首页
+// ComigoXYZPlugin 在书架顶部添加软件项目首页功能块。需要限定域名的时候：(c.Request().Host == "comigo.xyz" || strings.HasSuffix(c.Request().Host, ".comigo.xyz"))
 templ ComigoXYZPlugin(c echo.Context) {
-	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("comigo_xyz") && (c.Request().Host == "comigo.xyz" || strings.HasSuffix(c.Request().Host, ".comigo.xyz")) && (c.Request().URL.Path == "/" || c.Request().URL.Path == "/shelf" || c.Request().URL.Path == "/index.html") && c.Param("id") == "" {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("comigo_xyz") && c.Param("id") == "" {
 		if config.GetCfg().Debug {
 			<script>
 				console.log("Comigo.xyz插件已启用");
 			</script>
 		}
+		<!-- 版本号数据，通过 data 属性传递 -->
+		<div id="comigo-xyz-plugin-data" data-version={ config.GetVersion() } style="display: none;"></div>
 		<script>
-			// 等待页面加载完成后替换书架内容
-			document.addEventListener("DOMContentLoaded", function () {
+			// 等待页面加载完成后在书架顶部插入主页功能块
+			let retryCount = 0;
+			const maxRetries = 50; // 最多重试5秒（50 * 100ms）
+
+			function insertHomePageBlock() {
 				const shelfMainArea = document.getElementById("ShelfMainArea");
-				if (shelfMainArea) {
-					// 创建项目首页内容
-					const homePageContent = `
-						<div class="comigo_plugin flex flex-col items-center justify-center min-h-screen w-full p-8 bg-gradient-to-br from-base-200 to-base-300">
-							<div class="max-w-4xl w-full space-y-8">
-								<!-- 标题区域 -->
-								<div class="text-center space-y-4">
-									<h1 class="text-5xl font-bold text-base-content">Comigo</h1>
-									<p class="text-xl text-base-content/80">Simple Manga Reader Online</p>
-									<p class="text-base text-base-content/60">在线漫画阅读器 - 支持 Linux、Windows、Mac OS</p>
+				if (!shelfMainArea) {
+					// 如果 ShelfMainArea 还不存在，延迟重试
+					retryCount++;
+					if (retryCount < maxRetries) {
+						setTimeout(insertHomePageBlock, 100);
+					} else {
+						console.warn(
+							"Comigo.xyz插件: ShelfMainArea 未找到，可能当前页面没有书籍",
+						);
+					}
+					return;
+				}
+
+				// 检查是否已经插入过
+				if (shelfMainArea.querySelector(".comigo_plugin")) {
+					return;
+				}
+
+				// 从 data 属性获取版本号
+				const dataElement = document.getElementById("comigo-xyz-plugin-data");
+				const version = dataElement
+					? dataElement.getAttribute("data-version") || "v1.0.0"
+					: "v1.0.0";
+
+				// 固定代理域名
+				const proxyBase = "https://comigo.xyz";
+
+				// 检测操作系统（只判断 OS，架构根据 OS 默认设置）
+				function detectSystem() {
+					const userAgent = navigator.userAgent.toLowerCase();
+					const platform = navigator.platform.toLowerCase();
+
+					let os = "Linux";
+					let arch = "x86_64";
+
+					// 检测操作系统（优先检测 Windows）
+					if (userAgent.includes("win") || platform.includes("win")) {
+						os = "Windows";
+						arch = "x86_64"; // Windows 优先 x86_64
+					} else if (userAgent.includes("mac") || platform.includes("mac")) {
+						os = "MacOS";
+						arch = "arm64"; // MacOS 优先 arm64
+					} else if (
+						userAgent.includes("linux") ||
+						platform.includes("linux")
+					) {
+						os = "Linux";
+						arch = "x86_64"; // Linux 优先 x86_64
+					} else if (userAgent.includes("android")) {
+						os = "Linux"; // Android 基于 Linux
+						arch = "x86_64";
+					} else if (
+						userAgent.includes("iphone") ||
+						userAgent.includes("ipad")
+					) {
+						os = "MacOS"; // iOS 设备，下载 MacOS 版本
+						arch = "arm64";
+					}
+
+					return { os, arch };
+				}
+
+				// 平台选项（包含托盘版本和命令行版本）
+				const platforms = [
+					// MacOS 托盘版本（默认，兼容 arm64 和 x86_64）
+					{
+						os: "MacOS",
+						arch: "universal",
+						type: "tray",
+						label: "MacOS (托盘版)",
+					},
+					{
+						os: "MacOS",
+						arch: "arm64",
+						type: "cli",
+						label: "MacOS arm64 (命令行)",
+					},
+					{
+						os: "MacOS",
+						arch: "x86_64",
+						type: "cli",
+						label: "MacOS x86_64 (命令行)",
+					},
+					// Windows 托盘版本（默认）
+					{
+						os: "Windows",
+						arch: "x86_64",
+						type: "tray",
+						label: "Windows x86_64 (托盘版)",
+					},
+					{
+						os: "Windows",
+						arch: "x86_64",
+						type: "cli",
+						label: "Windows x86_64 (命令行)",
+					},
+					// Linux 只有命令行版本
+					{ os: "Linux", arch: "x86_64", type: "cli", label: "Linux x86_64" },
+					{ os: "Linux", arch: "arm64", type: "cli", label: "Linux arm64" },
+					{ os: "Linux", arch: "arm", type: "cli", label: "Linux arm" },
+				];
+
+				// 检测当前系统并选择默认平台
+				const currentSystem = detectSystem();
+				let defaultIndex = 0;
+
+				if (currentSystem.os === "Windows") {
+					// Windows 默认选择托盘版
+					defaultIndex = platforms.findIndex(
+						(p) =>
+							p.os === "Windows" &&
+							p.arch === currentSystem.arch &&
+							p.type === "tray",
+					);
+				} else if (currentSystem.os === "MacOS") {
+					// MacOS 默认选择托盘版（通用版本，不区分架构）
+					defaultIndex = platforms.findIndex(
+						(p) => p.os === "MacOS" && p.type === "tray",
+					);
+				} else {
+					// Linux 默认选择命令行版
+					defaultIndex = platforms.findIndex(
+						(p) =>
+							p.os === "Linux" &&
+							p.arch === currentSystem.arch &&
+							p.type === "cli",
+					);
+				}
+
+				// 如果找不到匹配的，使用第一个
+				const selectedIndex = defaultIndex >= 0 ? defaultIndex : 0;
+
+				// 创建主页功能块
+				const homePageBlock = document.createElement("div");
+				homePageBlock.className = "comigo_plugin w-full mb-6";
+				homePageBlock.setAttribute(
+					"x-data",
+					`{
+					selectedIndex: ${selectedIndex},
+					platforms: ${JSON.stringify(platforms)},
+					version: ${JSON.stringify(version)},
+					proxyBase: ${JSON.stringify(proxyBase)},
+					get selectedPlatform() {
+						return this.platforms[this.selectedIndex] || this.platforms[0];
+					},
+					getDownloadUrl() {
+						const platform = this.selectedPlatform;
+						let filename = "";
+						
+						if (platform.type === "tray") {
+							// 托盘版本
+							if (platform.os === "Windows") {
+								// Windows 托盘版：comigo_v{version}_Windows_x86_64_full.zip
+								filename = \`comigo_\${this.version}_Windows_x86_64_full.zip\`;
+							} else if (platform.os === "MacOS") {
+								// MacOS 托盘版：Comigo.app.zip
+								filename = \`Comigo.app.zip\`;
+							}
+						} else {
+							// 命令行版本：comi_v{version}_{OS}_{ARCH}.tar.gz
+							filename = \`comi_\${this.version}_\${platform.os}_\${platform.arch}.tar.gz\`;
+						}
+						return \`\${this.proxyBase}/yumenaka/comigo/releases/download/\${this.version}/\${filename}\`;
+					}
+				}`,
+				);
+
+				homePageBlock.innerHTML = `
+					<div class="flex mt-[-16px] flex-col items-center bg-base-200 border justify-center w-full p-8 rounded-lg">
+						<div class="max-w-4xl w-full space-y-8">
+							<!-- 标题区域 -->
+							<div class="text-center space-y-4">
+								<h1 class="text-5xl font-bold text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_title')">Comigo</h1>
+								<p class="text-xl text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_subtitle')">Simple Manga Reader Online</p>
+								<p class="text-base text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_description')">在线漫画阅读器 - 支持 Linux、Windows、Mac OS</p>
+							</div>
+
+							<!-- 功能特性 -->
+							<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_format')">📚 多格式支持</h3>
+									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_format_desc')">支持 ZIP、RAR、CBZ、EPUB、PDF 等多种漫画格式</p>
 								</div>
-								
-								<!-- 功能特性 -->
-								<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
-										<h3 class="text-xl font-semibold mb-2">📚 多格式支持</h3>
-										<p class="text-base-content/70">支持 ZIP、RAR、CBZ、EPUB、PDF 等多种漫画格式</p>
-									</div>
-									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
-										<h3 class="text-xl font-semibold mb-2">🌐 跨平台</h3>
-										<p class="text-base-content/70">支持 Linux、Windows、Mac OS 三大操作系统</p>
-									</div>
-									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
-										<h3 class="text-xl font-semibold mb-2">📱 响应式设计</h3>
-										<p class="text-base-content/70">完美适配桌面端和移动端设备</p>
-									</div>
-									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
-										<h3 class="text-xl font-semibold mb-2">🔄 多种阅读模式</h3>
-										<p class="text-base-content/70">支持翻页模式和卷轴模式，满足不同阅读习惯</p>
-									</div>
-									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
-										<h3 class="text-xl font-semibold mb-2">🔒 安全可靠</h3>
-										<p class="text-base-content/70">支持 HTTPS 和用户认证，保护您的隐私</p>
-									</div>
-									<div class="bg-base-100 p-6 rounded-lg shadow-lg">
-										<h3 class="text-xl font-semibold mb-2">⚡ 高性能</h3>
-										<p class="text-base-content/70">快速扫描和加载，流畅的阅读体验</p>
-									</div>
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_cross_platform')">🌐 跨平台</h3>
+									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_cross_platform_desc')">支持 Linux、Windows、Mac OS 三大操作系统</p>
 								</div>
-								
-								<!-- 链接区域 -->
-								<div class="flex flex-col md:flex-row justify-center items-center gap-4 mt-12">
-									<a 
-										href="https://github.com/yumenaka/comigo" 
-										target="_blank"
-										class="px-6 py-3 bg-base-content text-base-100 rounded-lg hover:bg-base-content/90 transition-colors font-semibold"
-									>
-										📦 GitHub 仓库
-									</a>
-									<a 
-										href="https://github.com/yumenaka/comigo/releases" 
-										target="_blank"
-										class="px-6 py-3 bg-primary text-primary-content rounded-lg hover:bg-primary/90 transition-colors font-semibold"
-									>
-										⬇️ 下载最新版本
-									</a>
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_responsive')">📱 响应式设计</h3>
+									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_responsive_desc')">适配桌面端和移动端设备</p>
 								</div>
-								
-								<!-- 使用说明 -->
-								<div class="mt-12 bg-base-100 p-6 rounded-lg shadow-lg">
-									<h2 class="text-2xl font-semibold mb-4">快速开始</h2>
-									<ol class="list-decimal list-inside space-y-2 text-base-content/80">
-										<li>下载并运行 Comigo 程序</li>
-										<li>在设置中配置您的书库路径</li>
-										<li>开始享受阅读体验！</li>
-									</ol>
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_reading_modes')">🔄 多种阅读模式</h3>
+									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_reading_modes_desc')">支持翻页模式和卷轴模式，满足不同阅读习惯</p>
+								</div>
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_security')">🔒 安全可靠</h3>
+									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_security_desc')">支持 HTTPS 和用户认证，保护您的隐私</p>
+								</div>
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_performance')">⚡ 高性能</h3>
+									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_performance_desc')">快速扫描和加载，流畅的阅读体验</p>
 								</div>
 							</div>
-						</div>
-					`;
 
-					// 替换书架内容
-					shelfMainArea.innerHTML = homePageContent;
-					shelfMainArea.className = "w-full h-full";
+							<!-- 下载区域 -->
+							<div class="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
+								<div class="flex flex-col md:flex-row items-center gap-2">
+									<select
+										x-model.number="selectedIndex"
+										class="px-4 py-3 border bg-base-100 border rounded-lg text-base-content focus:outline-none focus:ring-2 focus:ring-primary"
+									>
+										<template x-for="(platform, index) in platforms" :key="index">
+											<option :value="index" x-text="platform.label"></option>
+										</template>
+									</select>
+									<a
+										:href="getDownloadUrl()"
+										target="_blank"
+										class="px-6 py-3 border bg-green-500 text-white rounded-lg font-semibold"
+									>
+										<span x-text="i18next.t('comigo_xyz_download')">⬇️ 下载</span>
+									</a>
+								</div>
+							</div>
+							<!-- 使用说明 -->
+							<div class="mt-12 bg-base-100 p-6 rounded-lg shadow-lg">
+								<h2 class="text-2xl font-semibold mb-4 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_quick_start')">快速开始</h2>
+								<ol class="list-decimal list-inside space-y-2 text-base-content dark:text-white">
+									<li x-text="i18next.t('comigo_xyz_quick_start_step1')">下载并运行 Comigo 程序</li>
+									<li x-text="i18next.t('comigo_xyz_quick_start_step2')">配置您的书库路径</li>
+									<li x-text="i18next.t('comigo_xyz_quick_start_step3')">开始享受阅读！</li>
+								</ol>
+							</div>
+						</div>
+					</div>
+				`;
+
+				// 在书架顶部插入主页功能块
+				shelfMainArea.insertBefore(homePageBlock, shelfMainArea.firstChild);
+
+				// 初始化Alpine.js（如果还没有初始化）
+				if (typeof Alpine !== "undefined") {
+					Alpine.initTree(homePageBlock);
+				} else {
+					// 如果 Alpine 还没加载，等待加载完成
+					document.addEventListener("alpine:init", () => {
+						Alpine.initTree(homePageBlock);
+					});
 				}
-			});
+			}
+
+			// 页面加载完成后执行
+			if (document.readyState === "loading") {
+				document.addEventListener("DOMContentLoaded", insertHomePageBlock);
+			} else {
+				// DOM 已经加载完成，直接执行
+				insertHomePageBlock();
+			}
 		</script>
 		<style>
-			/* 确保首页样式正确显示 */
-			#ShelfMainArea {
+			/* 确保主页功能块样式正确显示 */
+			.comigo_plugin {
 				overflow: visible !important;
 			}
 		</style>
