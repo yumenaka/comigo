@@ -851,8 +851,8 @@
   "plugin_enable": "プラグインを有効にする",
   "err_failed_to_get_config_dir": "設定ディレクトリの取得に失敗しました: %v",
   "comigo_xyz_title": "Comigo",
-  "comigo_xyz_subtitle": "Simple Manga Reader Online",
-  "comigo_xyz_description": "オンラインコミックリーダー - Linux、Windows、Mac OS をサポート",
+  "comigo_xyz_subtitle": "シンプルなコミックブラウザ",
+  "comigo_xyz_description": "すべてのデバイスで漫画を読むのを目指します - ＰＣでもスマートフォンでも。",
   "comigo_xyz_feature_format": "📚 複数フォーマット対応",
   "comigo_xyz_feature_format_desc": "ZIP、RAR、CBZ、EPUB、PDF など、さまざまなコミックフォーマットをサポート",
   "comigo_xyz_feature_cross_platform": "🌐 クロスプラットフォーム",
@@ -862,7 +862,7 @@
   "comigo_xyz_feature_reading_modes": "🔄 複数の読書モード",
   "comigo_xyz_feature_reading_modes_desc": "ページめくりモードとスクロールモードをサポートし、さまざまな読書習慣に対応",
   "comigo_xyz_feature_security": "🔒 安全で信頼性が高い",
-  "comigo_xyz_feature_security_desc": "HTTPS とユーザー認証をサポートし、プライバシーを保護",
+  "comigo_xyz_feature_security_desc": "HTTPS とユーザー認証をサポートし、Tailscale リモートアクセスを内蔵",
   "comigo_xyz_feature_performance": "⚡ 高性能",
   "comigo_xyz_feature_performance_desc": "高速スキャンと読み込みで、スムーズな読書体験を実現",
   "comigo_xyz_github_repo": "📦 GitHub リポジトリ",
@@ -873,5 +873,10 @@
   "comigo_xyz_quick_start_step3": "読書体験をお楽しみください！",
   "comigo_xyz_download_for": "ダウンロード",
   "comigo_xyz_select_platform": "プラットフォームを選択",
-  "comigo_xyz_download": "⬇️ ダウンロード"
+  "comigo_xyz_download": "⬇️ ダウンロード",
+  "comigo_xyz_cli_install_title": "ワンクリック CLI インストール：",
+  "comigo_xyz_cli_install_desc": "以下のコマンドを使用して Comigo をすばやくインストール",
+  "comigo_xyz_cli_install_copy": "コピー",
+  "comigo_xyz_cli_install_copied": "コピーしました",
+  "comigo_xyz_cli_install_cn_desc": "中国大陸ユーザーにおすすめ："
 }

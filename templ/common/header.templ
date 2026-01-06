@@ -96,8 +96,8 @@ func BookURL(bookID string) string {
 	return fmt.Sprintf(`{BookURL: $store.global.readMode === 'page_flip' ? "/flip/%s" : "/scroll/%s"}`, bookID, bookID)
 }
 
+//	<!-- 标题-->
 templ HeaderTitle(prop HeaderProps) {
-	<!-- 标题-->
 	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
 		<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
 		<span x-show="!$store.global.onlineBook" class="text-lg font-semibold" x-text={ "'" + prop.Title + "'" }></span>
@@ -139,6 +139,7 @@ templ HeaderTitle(prop HeaderProps) {
 			if (prop.DownLoadLink != "") {
 				<span
 					title={ prop.Title }
+					id="headerTitle"
 					class="text-lg font-semibold text-blue-700/90 hover:underline"
 					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 					x-init="$nextTick(() => {document.title = $el.innerText + version});"
@@ -148,6 +149,7 @@ templ HeaderTitle(prop HeaderProps) {
 			} else {
 				<span
 					title={ prop.Title }
+					id="headerTitle"
 					class="text-lg font-semibold"
 					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 					x-init="$nextTick(() => {document.title = $el.innerText + version});"

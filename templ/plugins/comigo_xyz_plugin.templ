@@ -46,6 +46,15 @@ templ ComigoXYZPlugin(c echo.Context) {
 					? dataElement.getAttribute("data-version") || "v1.0.0"
 					: "v1.0.0";
 
+				// 设置页面标题
+				document.title = i18next.t("comigo_xyz_title") + " " + version;
+				document.metaDescription = i18next.t("comigo_xyz_description");
+				const HeaderTextElement = document.getElementById("headerTitle");
+				if (HeaderTextElement) {
+					HeaderTextElement.textContent =
+						i18next.t("comigo_xyz_title") + " " + version;
+				}
+
 				// 固定代理域名
 				const proxyBase = "https://comigo.xyz";
 
@@ -80,12 +89,18 @@ templ ComigoXYZPlugin(c echo.Context) {
 						os = "MacOS"; // iOS 设备，下载 MacOS 版本
 						arch = "arm64";
 					}
-
 					return { os, arch };
 				}
 
 				// 平台选项（包含托盘版本和命令行版本）
 				const platforms = [
+					// Windows 托盘版本（默认）
+					{
+						os: "Windows",
+						arch: "x86_64",
+						type: "tray",
+						label: "Windows x86_64 (托盘版)",
+					},
 					// MacOS 托盘版本（默认，兼容 arm64 和 x86_64）
 					{
 						os: "MacOS",
@@ -105,13 +120,6 @@ templ ComigoXYZPlugin(c echo.Context) {
 						type: "cli",
 						label: "MacOS x86_64 (命令行)",
 					},
-					// Windows 托盘版本（默认）
-					{
-						os: "Windows",
-						arch: "x86_64",
-						type: "tray",
-						label: "Windows x86_64 (托盘版)",
-					},
 					{
 						os: "Windows",
 						arch: "x86_64",
@@ -119,9 +127,24 @@ templ ComigoXYZPlugin(c echo.Context) {
 						label: "Windows x86_64 (命令行)",
 					},
 					// Linux 只有命令行版本
-					{ os: "Linux", arch: "x86_64", type: "cli", label: "Linux x86_64" },
-					{ os: "Linux", arch: "arm64", type: "cli", label: "Linux arm64" },
-					{ os: "Linux", arch: "arm", type: "cli", label: "Linux arm" },
+					{
+						os: "Linux",
+						arch: "x86_64",
+						type: "cli",
+						label: "Linux x86_64 (命令行)",
+					},
+					{
+						os: "Linux",
+						arch: "arm64",
+						type: "cli",
+						label: "Linux arm64 (命令行)",
+					},
+					{
+						os: "Linux",
+						arch: "arm",
+						type: "cli",
+						label: "Linux arm (命令行)",
+					},
 				];
 
 				// 检测当前系统并选择默认平台
@@ -164,6 +187,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 					platforms: ${JSON.stringify(platforms)},
 					version: ${JSON.stringify(version)},
 					proxyBase: ${JSON.stringify(proxyBase)},
+					copiedIndex: -1,
 					get selectedPlatform() {
 						return this.platforms[this.selectedIndex] || this.platforms[0];
 					},
@@ -185,6 +209,17 @@ templ ComigoXYZPlugin(c echo.Context) {
 							filename = \`comi_\${this.version}_\${platform.os}_\${platform.arch}.tar.gz\`;
 						}
 						return \`\${this.proxyBase}/yumenaka/comigo/releases/download/\${this.version}/\${filename}\`;
+					},
+					async copyToClipboard(text, index) {
+						try {
+							await navigator.clipboard.writeText(text);
+							this.copiedIndex = index;
+							setTimeout(() => {
+								this.copiedIndex = -1;
+							}, 2000);
+						} catch (err) {
+							console.error('复制失败:', err);
+						}
 					}
 				}`,
 				);
@@ -194,13 +229,70 @@ templ ComigoXYZPlugin(c echo.Context) {
 						<div class="max-w-4xl w-full space-y-8">
 							<!-- 标题区域 -->
 							<div class="text-center space-y-4">
-								<h1 class="text-5xl font-bold text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_title')">Comigo</h1>
-								<p class="text-xl text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_subtitle')">Simple Manga Reader Online</p>
-								<p class="text-base text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_description')">在线漫画阅读器 - 支持 Linux、Windows、Mac OS</p>
+								<p class="text-xl text-base-content dark:text-white font-bold" x-text="i18next.t('comigo_xyz_subtitle')">简单粗暴的漫画浏览器</p>
+								<p class="text-base text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_description')">在所有设备上看漫画。无论电脑还是手机，Windows还是Linux、MacOS</p>
 							</div>
-
+							<!-- 下载区域 -->
+							<div class="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
+								<div class="flex flex-col md:flex-row items-center gap-2">
+									<select
+										x-model.number="selectedIndex"
+										class="px-4 py-3 border bg-base-100 border rounded-lg text-base-content focus:outline-none focus:ring-2 focus:ring-primary"
+									>
+										<template x-for="(platform, index) in platforms" :key="index">
+											<option :value="index" x-text="platform.label"></option>
+										</template>
+									</select>
+									<a
+										:href="getDownloadUrl()"
+										target="_blank"
+										class="px-6 py-3 border bg-green-500 text-black dark:text-white rounded-lg font-semibold"
+									>
+										<span x-text="i18next.t('comigo_xyz_download')">⬇️ 下载</span>
+									</a>
+								</div>
+							</div>
+							<!-- 一键安装命令行版 -->
+							<div class="mt-8">
+								<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_title')">一键安装命令行版：</p>
+								<div class="space-y-3">
+									<!-- 第一个代码块 -->
+									<div class="bg-black relative border border-gray-300 dark:border-gray-600 rounded-lg p-4">
+										<pre class="text-sm text-white font-mono overflow-x-auto mb-2"><code>bash &lt;(curl -s https://comigo.xyz/get.sh)</code></pre>
+										<button
+											@click="copyToClipboard('bash <(curl -s https://comigo.xyz/get.sh)', 0)"
+											class="absolute top-2 right-2 p-2 text-base-content/70 dark:text-base-content/80 hover:text-base-content dark:hover:text-white transition-colors"
+											:title="copiedIndex === 0 ? i18next.t('comigo_xyz_cli_install_copied') : i18next.t('comigo_xyz_cli_install_copy')"
+										>
+											<svg x-show="copiedIndex !== 0" class="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+											</svg>
+											<svg x-show="copiedIndex === 0" class="w-5 h-5 text-green-500" fill="none" stroke="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+											</svg>
+										</button>
+									</div>
+									<!-- 第二个代码块 -->
+									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_cn_desc')">中国大陆用户推荐：</p>
+									<div class="bg-black relative border border-gray-300 dark:border-gray-600 rounded-lg p-4">
+										<pre class="text-sm text-white font-mono overflow-x-auto mb-2"><code>bash &lt;(curl -s https://comigo.xyz/get.sh) --cn</code></pre>
+										<button
+											@click="copyToClipboard('bash <(curl -s https://comigo.xyz/get.sh) --cn', 1)"
+											class="absolute top-2 right-2 p-2 text-base-content/70 dark:text-base-content/80 hover:text-base-content dark:hover:text-white transition-colors"
+											:title="copiedIndex === 1 ? i18next.t('comigo_xyz_cli_install_copied') : i18next.t('comigo_xyz_cli_install_copy')"
+										>
+											<svg x-show="copiedIndex !== 1" class="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+											</svg>
+											<svg x-show="copiedIndex === 1" class="w-5 h-5 text-green-500" fill="none" stroke="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+											</svg>
+										</button>
+									</div>
+								</div>
+							</div>
 							<!-- 功能特性 -->
-							<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+							<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
 								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
 									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_format')">📚 多格式支持</h3>
 									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_format_desc')">支持 ZIP、RAR、CBZ、EPUB、PDF 等多种漫画格式</p>
@@ -224,27 +316,6 @@ templ ComigoXYZPlugin(c echo.Context) {
 								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
 									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_performance')">⚡ 高性能</h3>
 									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_performance_desc')">快速扫描和加载，流畅的阅读体验</p>
-								</div>
-							</div>
-
-							<!-- 下载区域 -->
-							<div class="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
-								<div class="flex flex-col md:flex-row items-center gap-2">
-									<select
-										x-model.number="selectedIndex"
-										class="px-4 py-3 border bg-base-100 border rounded-lg text-base-content focus:outline-none focus:ring-2 focus:ring-primary"
-									>
-										<template x-for="(platform, index) in platforms" :key="index">
-											<option :value="index" x-text="platform.label"></option>
-										</template>
-									</select>
-									<a
-										:href="getDownloadUrl()"
-										target="_blank"
-										class="px-6 py-3 border bg-green-500 text-white rounded-lg font-semibold"
-									>
-										<span x-text="i18next.t('comigo_xyz_download')">⬇️ 下载</span>
-									</a>
 								</div>
 							</div>
 							<!-- 使用说明 -->
