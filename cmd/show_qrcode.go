@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sanity-io/litter"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -40,11 +39,10 @@ func ShowQRCode() {
 		config.GetCfg().AutoTLSCertificate,
 		etcStr,
 	)
-
-	// 打印配置，调试用
-	if config.GetCfg().Debug {
-		litter.Dump(config.GetCfg())
-	}
+	//// 打印配置，调试用
+	//if config.GetCfg().Debug {
+	//	litter.Dump(config.GetCfg())
+	//}
 	// ”如何快捷键退出“的文字提示
 	fmt.Println(locale.GetString("ctrl_c_hint"))
 	// 打印 Tailscale 访问地址的二维码

@@ -851,8 +851,8 @@
   "plugin_enable": "Enable Plugin",
   "err_failed_to_get_config_dir": "Failed to get config directory: %v",
   "comigo_xyz_title": "Comigo",
-  "comigo_xyz_subtitle": "Simple Manga Reader Online",
-  "comigo_xyz_description": "Online manga reader - Supports Linux, Windows, Mac OS",
+  "comigo_xyz_subtitle": "Simple and Direct Manga Browser",
+  "comigo_xyz_description": "Help you read manga on all devices - Whether computer or phone, Windows, Linux,　MacOS",
   "comigo_xyz_feature_format": "📚 Multi-format Support",
   "comigo_xyz_feature_format_desc": "Supports ZIP, RAR, CBZ, EPUB, PDF and other comic formats",
   "comigo_xyz_feature_cross_platform": "🌐 Cross-platform",
@@ -862,7 +862,7 @@
   "comigo_xyz_feature_reading_modes": "🔄 Multiple Reading Modes",
   "comigo_xyz_feature_reading_modes_desc": "Supports flip mode and scroll mode to meet different reading habits",
   "comigo_xyz_feature_security": "🔒 Secure and Reliable",
-  "comigo_xyz_feature_security_desc": "Supports HTTPS and user authentication to protect your privacy",
+  "comigo_xyz_feature_security_desc": "Supports HTTPS and user authentication, built-in Tailscale remote access",
   "comigo_xyz_feature_performance": "⚡ High Performance",
   "comigo_xyz_feature_performance_desc": "Fast scanning and loading for smooth reading experience",
   "comigo_xyz_github_repo": "📦 GitHub Repository",
@@ -873,5 +873,10 @@
   "comigo_xyz_quick_start_step3": "Start enjoying your reading experience!",
   "comigo_xyz_download_for": "Download for",
   "comigo_xyz_select_platform": "Select Platform",
-  "comigo_xyz_download": "⬇️ Download"
+  "comigo_xyz_download": "⬇️ Download",
+  "comigo_xyz_cli_install_title": "One-Click CLI Installation:",
+  "comigo_xyz_cli_install_desc": "Use the following commands to quickly install Comigo",
+  "comigo_xyz_cli_install_copy": "Copy",
+  "comigo_xyz_cli_install_copied": "Copied",
+  "comigo_xyz_cli_install_cn_desc": "Recommended for Mainland China users:"
 }
