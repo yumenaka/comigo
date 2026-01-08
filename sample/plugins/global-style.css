@@ -1,0 +1,12 @@
+/* 全局测试样式 */
+body::after {
+    content: '✓ Global Plugin CSS Loaded';
+    position: fixed;
+    bottom: 50px;
+    right: 10px;
+    background: rgba(0, 255, 0, 0.1);
+    padding: 5px;
+    font-size: 10px;
+    color: green;
+    z-index: 9999;
+}
