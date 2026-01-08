@@ -1,0 +1,82 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"strings"
+)
+
+// RenderCustomPlugin 渲染单个自定义插件
+templ RenderCustomPlugin(plugin config.CustomPlugin) {
+	if plugin.FileType == "js" {
+		@templ.Raw("<script>\n" + plugin.Content + "\n</script>")
+	}
+	if plugin.FileType == "css" {
+		@templ.Raw("<style>\n" + plugin.Content + "\n</style>")
+	}
+	if plugin.FileType == "html" {
+		@templ.Raw(plugin.Content)
+	}
+}
+
+// RenderCustomPlugins 根据当前页面渲染对应范围的自定义插件
+templ RenderCustomPlugins(c echo.Context) {
+	if config.GetCfg().EnablePlugin {
+		// 获取当前路径
+		if config.GetCfg().Debug {
+			<script>
+				console.log("开始加载自定义插件，当前路径:", window.location.pathname);
+			</script>
+		}
+		// 全局插件：在所有页面加载
+		for _, plugin := range config.GetCustomPluginsByScope("global") {
+			@RenderCustomPlugin(plugin)
+		}
+		// 根据路径加载特定范围的插件
+		if strings.HasPrefix(c.Request().URL.Path, "/shelf") || c.Request().URL.Path == "/" {
+			for _, plugin := range config.GetCustomPluginsByScope("shelf") {
+				@RenderCustomPlugin(plugin)
+			}
+		}
+		if strings.HasPrefix(c.Request().URL.Path, "/flip") {
+			// 加载 flip 范围的通用插件
+			for _, plugin := range config.GetCustomPluginsByScope("flip") {
+				@RenderCustomPlugin(plugin)
+			}
+			// 提取书籍 ID 并加载书籍特定插件
+			if bookID := extractBookID(c.Request().URL.Path); bookID != "" {
+				if bookPlugins, err := config.LoadBookPlugins(bookID, "flip"); err == nil {
+					for _, plugin := range bookPlugins {
+						@RenderCustomPlugin(plugin)
+					}
+				}
+			}
+		}
+		if strings.HasPrefix(c.Request().URL.Path, "/scroll") {
+			// 加载 scroll 范围的通用插件
+			for _, plugin := range config.GetCustomPluginsByScope("scroll") {
+				@RenderCustomPlugin(plugin)
+			}
+			// 提取书籍 ID 并加载书籍特定插件
+			if bookID := extractBookID(c.Request().URL.Path); bookID != "" {
+				if bookPlugins, err := config.LoadBookPlugins(bookID, "scroll"); err == nil {
+					for _, plugin := range bookPlugins {
+						@RenderCustomPlugin(plugin)
+					}
+				}
+			}
+		}
+	}
+}
+
+// extractBookID 从 URL 路径中提取书籍 ID
+// 例如: "/flip/aBcE4Fz" -> "aBcE4Fz"
+//
+//	"/scroll/abc123" -> "abc123"
+func extractBookID(path string) string {
+	parts := strings.Split(strings.Trim(path, "/"), "/")
+	if len(parts) >= 2 {
+		return parts[1]
+	}
+	return ""
+}

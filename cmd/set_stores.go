@@ -87,3 +87,13 @@ func ScanStore() {
 		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 	}
 }
+
+// LoadUserPlugins 加载用户自定义插件
+func LoadUserPlugins() {
+	if config.GetCfg().EnablePlugin {
+		err := config.ScanUserPlugins()
+		if err != nil {
+			logger.Infof("加载自定义插件失败: %v", err)
+		}
+	}
+}

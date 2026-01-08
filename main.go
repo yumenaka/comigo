@@ -26,6 +26,8 @@ func main() {
 	routers.StartWebServer()
 	// 启动或停止 Tailscale 服务（如启用）
 	routers.StartTailscale()
+	// 加载用户自定义插件
+	cmd.LoadUserPlugins()
 	// 分析命令行参数，生成书库URL
 	cmd.AddStoreUrls(cmd.Args)
 	// 如果没有指定扫描路径，就把当前工作目录作为扫描路径

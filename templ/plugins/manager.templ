@@ -8,6 +8,7 @@ import (
 // RenderAllPlugins 渲染所有启用的插件
 templ RenderAllPlugins(c echo.Context) {
 	if config.GetCfg().EnablePlugin {
+		// 渲染内置插件
 		for _, pluginName := range config.GetCfg().EnabledPluginList {
 			if pluginName == "clock" {
 				@ClockPlugin(c)
@@ -25,5 +26,7 @@ templ RenderAllPlugins(c echo.Context) {
 				@SamplePlugin(c)
 			}
 		}
+		// 渲染用户自定义插件
+		@RenderCustomPlugins(c)
 	}
 }

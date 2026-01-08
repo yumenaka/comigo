@@ -27,6 +27,7 @@ type Config struct {
 	BuildInPluginList         []string        `json:"-" toml:"-"  comment:"内置插件列表"`
 	UserPluginList            []string        `json:"-" toml:"-"  comment:"用户自定义插件列表"`
 	EnabledPluginList         []string        `json:"-" toml:"-"  comment:"已启用插件列表"`
+	CustomPlugins             []CustomPlugin  `json:"-" toml:"-"  comment:"用户自定义插件内容列表"`
 	DisableLAN                bool            `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
 	EnableDatabase            bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
 	EnableTLS                 bool            `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
