@@ -6,6 +6,7 @@ import (
 )
 
 // ComigoXYZPlugin 在书架顶部添加软件项目首页功能块。需要限定域名的时候：(c.Request().Host == "comigo.xyz" || strings.HasSuffix(c.Request().Host, ".comigo.xyz"))
+// x-init="$nextTick(() => { $el.value = selectedIndex; })" 确保：使用 $nextTick 等待 Alpine.js 完成所有 DOM 更新（包括 x-for 生成的选项）在下一个渲染周期中强制设置 select 元素的值  这样可以保证选项已经生成后再设置默认选中值
 templ ComigoXYZPlugin(c echo.Context) {
 	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("comigo_xyz") && c.Param("id") == "" {
 		if config.GetCfg().Debug {
@@ -60,33 +61,31 @@ templ ComigoXYZPlugin(c echo.Context) {
 
 				// 检测操作系统（只判断 OS，架构根据 OS 默认设置）
 				function detectSystem() {
-					const userAgent = navigator.userAgent.toLowerCase();
-					const platform = navigator.platform.toLowerCase();
-
+					const userAgent = navigator.userAgent;
 					let os = "Linux";
 					let arch = "x86_64";
 
-					// 检测操作系统（优先检测 Windows）
-					if (userAgent.includes("win") || platform.includes("win")) {
+					// 按优先级检测操作系统（参考 getUserOsInfo 逻辑）
+					if (userAgent.indexOf("Windows NT") !== -1) {
 						os = "Windows";
-						arch = "x86_64"; // Windows 优先 x86_64
-					} else if (userAgent.includes("mac") || platform.includes("mac")) {
+						arch = "x86_64";
+					} else if (userAgent.indexOf("Mac") !== -1) {
 						os = "MacOS";
-						arch = "arm64"; // MacOS 优先 arm64
-					} else if (
-						userAgent.includes("linux") ||
-						platform.includes("linux")
-					) {
+						arch = "arm64";
+					} else if (userAgent.indexOf("Linux") !== -1) {
 						os = "Linux";
-						arch = "x86_64"; // Linux 优先 x86_64
-					} else if (userAgent.includes("android")) {
-						os = "Linux"; // Android 基于 Linux
+						arch = "x86_64";
+					} else if (userAgent.indexOf("X11") !== -1) {
+						os = "Linux";
+						arch = "x86_64";
+					} else if (userAgent.indexOf("Android") !== -1) {
+						os = "Linux";
 						arch = "x86_64";
 					} else if (
-						userAgent.includes("iphone") ||
-						userAgent.includes("ipad")
+						userAgent.indexOf("iPhone") !== -1 ||
+						userAgent.indexOf("iPad") !== -1
 					) {
-						os = "MacOS"; // iOS 设备，下载 MacOS 版本
+						os = "MacOS";
 						arch = "arm64";
 					}
 					return { os, arch };
@@ -176,7 +175,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 
 				// 如果找不到匹配的，使用第一个
 				const selectedIndex = defaultIndex >= 0 ? defaultIndex : 0;
-
+				//console.log(`Comigo.xyz插件: 检测到系统 ${currentSystem.os} ${currentSystem.arch}，默认选择平台索引 ${selectedIndex}`,);
 				// 创建主页功能块
 				const homePageBlock = document.createElement("div");
 				homePageBlock.className = "comigo_plugin w-full mb-6";
@@ -194,7 +193,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 					getDownloadUrl() {
 						const platform = this.selectedPlatform;
 						let filename = "";
-						
+
 						if (platform.type === "tray") {
 							// 托盘版本
 							if (platform.os === "Windows") {
@@ -237,6 +236,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 								<div class="flex flex-col md:flex-row items-center gap-2">
 									<select
 										x-model.number="selectedIndex"
+										x-init="$nextTick(() => { $el.value = selectedIndex; })"
 										class="px-4 py-3 border bg-base-100 border rounded-lg text-base-content focus:outline-none focus:ring-2 focus:ring-primary"
 									>
 										<template x-for="(platform, index) in platforms" :key="index">
@@ -258,7 +258,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 								<div class="space-y-3">
 									<!-- 第一个代码块 -->
 									<div class="bg-black relative border border-gray-300 dark:border-gray-600 rounded-lg p-4">
-										<pre class="text-sm text-white font-mono overflow-x-auto mb-2"><code>bash &lt;(curl -s https://comigo.xyz/get.sh)</code></pre>
+										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code class="w-full h-full text-center">bash &lt;(curl -s https://comigo.xyz/get.sh)</code></pre>
 										<button
 											@click="copyToClipboard('bash <(curl -s https://comigo.xyz/get.sh)', 0)"
 											class="absolute top-2 right-2 p-2 text-base-content/70 dark:text-base-content/80 hover:text-base-content dark:hover:text-white transition-colors"
@@ -275,7 +275,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 									<!-- 第二个代码块 -->
 									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_cn_desc')">中国大陆用户推荐：</p>
 									<div class="bg-black relative border border-gray-300 dark:border-gray-600 rounded-lg p-4">
-										<pre class="text-sm text-white font-mono overflow-x-auto mb-2"><code>bash &lt;(curl -s https://comigo.xyz/get.sh) --cn</code></pre>
+										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code>bash &lt;(curl -s https://comigo.xyz/get.sh) --cn</code></pre>
 										<button
 											@click="copyToClipboard('bash <(curl -s https://comigo.xyz/get.sh) --cn', 1)"
 											class="absolute top-2 right-2 p-2 text-base-content/70 dark:text-base-content/80 hover:text-base-content dark:hover:text-white transition-colors"
