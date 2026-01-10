@@ -10,7 +10,7 @@ import (
 templ NotFound404(c echo.Context) {
 	@common.Header(
 		common.HeaderProps{
-			Title:          "",
+			TitleText:      "i18next.t('404notfound')",
 			ShowReturnIcon: true,
 			ReturnUrl:      "/",
 		})

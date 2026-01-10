@@ -92,6 +92,8 @@
   "sketch_template": "默认模板：草稿参考",
   "skip_path": "忽略路径：",
   "settings_page": "设置页面",
+  "upload_page": "上传页面",
+  "404notfound": "404 页面未找到",
   "sort": "图片排序规则（none、name、time）",
   "sort_by_name": "按文件名排序",
   "sort_by_time": "按修改时间排序",

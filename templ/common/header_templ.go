@@ -17,7 +17,7 @@ import (
 
 type HeaderProps struct {
 	// 标题
-	Title string
+	TitleText string
 	// 是否显示返回图标
 	ShowReturnIcon bool
 	// 返回链接
@@ -195,9 +195,9 @@ func HeaderTitle(prop HeaderProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs("'" + prop.Title + "'")
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(prop.TitleText)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 103, Col: 104}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 103, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -208,14 +208,14 @@ func HeaderTitle(prop HeaderProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if prop.QuickJumpBarBooks != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<button id=\"quickJumpBarDropdownButton\" title=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<button id=\"quickJumpBarDropdownButton\" x-bind:title=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(prop.TitleText)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 107, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 107, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -226,9 +226,9 @@ func HeaderTitle(prop HeaderProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(prop.TitleText)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 114, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 114, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -238,7 +238,7 @@ func HeaderTitle(prop HeaderProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</button><!-- Dropdown menu --> <div id=\"QuickJumpDropdown\" x-show=\"$store.global.onlineBook\" class=\"max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700\"><ul class=\"py-2 mt-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"quickJumpBarDropdownButton\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</button><!-- 下拉菜单，同一阶层的其他书籍 --> <div id=\"QuickJumpDropdown\" x-show=\"$store.global.onlineBook\" class=\"max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700\"><ul class=\"py-2 mt-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"quickJumpBarDropdownButton\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -318,14 +318,14 @@ func HeaderTitle(prop HeaderProps) templ.Component {
 			}
 		} else {
 			if prop.DownLoadLink != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<span title=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<span x-bind:title=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(prop.TitleText)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 141, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 141, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -357,32 +357,32 @@ func HeaderTitle(prop HeaderProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" x-text=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var14 string
-				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
+				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(prop.TitleText)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 147, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 147, Col: 69}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</a></span>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\"></a></span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<span title=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<span x-bind:title=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var15 string
-				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
+				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(prop.TitleText)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 151, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 151, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -401,20 +401,20 @@ func HeaderTitle(prop HeaderProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" x-init=\"$nextTick(() => {document.title = $el.innerText + version});\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" x-init=\"$nextTick(() => {document.title = $el.innerText + version});\" x-text=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var17 string
-				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(prop.Title)
+				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(prop.TitleText)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 156, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 156, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</span>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\"></span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

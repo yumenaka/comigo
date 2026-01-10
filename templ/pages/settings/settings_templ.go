@@ -10,7 +10,6 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
@@ -40,7 +39,7 @@ func SettingsPage(c echo.Context, tsStatus *tailscale_plugin.TailscaleStatus) te
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
-				Title:          locale.GetString("settings_page"),
+				TitleText:      "i18next.t('settings_page')",
 				ShowReturnIcon: true,
 				ShowUploadIcon: true,
 				ReturnUrl:      "/",

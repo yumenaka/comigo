@@ -12,7 +12,7 @@ templ ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBook
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
-			Title:             common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
+			TitleText:         common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
 			ShowReturnIcon:    c.Param("id") != "",
 			ShowReSortIcon:    true,
 			ShowServerSetting: true,

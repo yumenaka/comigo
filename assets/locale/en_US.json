@@ -92,6 +92,8 @@
   "sketch_template": "Default template: sketch",
   "skip_path": "Skip the path:",
   "settings_page": "Settings Page",
+  "upload_page": "Upload Page",
+  "404notfound": "404 Not Found",
   "sort": "Image sorting rules (none, name, time)",
   "sort_by_name": "Sort images by file name",
   "sort_by_time": "Sort images by modification time",
