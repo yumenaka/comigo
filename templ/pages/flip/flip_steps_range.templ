@@ -2,25 +2,19 @@ package flip
 
 templ StepsRangeArea() {
 	<!-- 底部的阅读进度条 -->
-	<!-- https://flowbite.com/docs/forms/range/ -->
-	<!-- 宽度：w-5/6 https://www.tailwindcss.cn/docs/width 使用 w-{fraction} 或 w-full 将元素设置为基于百分比的宽度。 -->
-	<!-- 定位：https://www.tailwindcss.cn/docs/position  -->
-	<!-- 使用 fixed 来定位一个元素相对于浏览器窗视口的位置。偏移量是相对于视口计算的，且该元素将作为绝对定位的子元素的位置参考。 -->
-	<!-- 控制 flex 和 grid 项目如何沿着容器的主轴定位:https://www.tailwindcss.cn/docs/justify-content -->
-	<!-- Tailwind 的容器不会自动居中，也没有任何内置的水平方向的内边距。要使一个容器居中，使用 mx-auto 功能类： -->
-	<!-- 自定义 slider -->
+	<!-- 自定义滑动条样式，支持普通模式和漫画模式 -->
 	<style>
-		/* 基础 滑动条样式 */
+		/* 基础滑动条样式 */
 		.slider-base {
 			-webkit-appearance: none;
 			appearance: none;
 			height: 16px;
 			outline: none;
 			border-radius: 2px;
-			background: transparent; /* 确保基础背景是透明的 */
+			background: transparent;
 		}
 
-		/* 普通模式 滑动条样式 */
+		/* 普通模式滑动条轨道样式 */
 		.slider-base::-webkit-slider-runnable-track {
 			background: linear-gradient(
 				to right,
@@ -45,7 +39,7 @@ templ StepsRangeArea() {
 			border-radius: 2px;
 		}
 
-		/* 漫画模式 滑动条样式 - 颜色反转 */
+		/* 漫画模式滑动条轨道样式（颜色反转） */
 		.manga-mode .slider-base::-webkit-slider-runnable-track {
 			background: linear-gradient(
 				to right,
@@ -70,27 +64,40 @@ templ StepsRangeArea() {
 			border-radius: 2px;
 		}
 
-		/* 特殊处理 Firefox提供了一个特殊的::-moz-range-progress选择器，可以单独控制已滑过部分的样式 */
-		/* 使用 @supports (-moz-appearance:none) 规则确保这些样式仅在 Firefox 中生效 */
+		/* Firefox特殊处理：使用::-moz-range-progress选择器 */
 		@supports (-moz-appearance: none) {
-			/* 将基础背景设为透明，避免背景叠加问题 */
-			.manga-mode .slider-base {
-				background: transparent;
+			/* 普通模式（美漫模式） */
+			.slider-base {
+				background: transparent !important;
 			}
-			/* 为Firefox提供专用的纯色背景而非渐变 */
+			.slider-base::-moz-range-progress {
+				background: #3b82f6 !important;
+				height: 16px;
+				border-radius: 2px;
+			}
+			.slider-base::-moz-range-track {
+				background: white !important;
+				height: 16px;
+				border-radius: 2px;
+			}
+
+			/* 漫画模式（日漫模式） */
+			.manga-mode .slider-base {
+				background: transparent !important;
+			}
 			.manga-mode .slider-base::-moz-range-progress {
-				background-color: white;
+				background: white !important;
 				height: 16px;
 				border-radius: 2px;
 			}
 			.manga-mode .slider-base::-moz-range-track {
-				background-color: #3b82f6;
+				background: #3b82f6 !important;
 				height: 16px;
 				border-radius: 2px;
 			}
 		}
 
-		/* 拖动按钮样式 */
+		/* 滑动按钮样式 */
 		.slider-base::-webkit-slider-thumb {
 			-webkit-appearance: none;
 			appearance: none;
@@ -100,9 +107,8 @@ templ StepsRangeArea() {
 			border: 1.5px solid #3b82f6;
 			border-radius: 10%;
 			cursor: pointer;
-			/* margin-top: 0px; */
 		}
-		/* 火狐：拖动按钮样式 */
+
 		.slider-base::-moz-range-thumb {
 			width: 18px;
 			height: 18px;
@@ -112,7 +118,7 @@ templ StepsRangeArea() {
 			cursor: pointer;
 		}
 	</style>
-	<!-- x-on:click.stop="" ：阻止事件冒泡，防止触发父组件上的翻页动作-->
+	<!-- 阻止事件冒泡，防止触发父组件上的翻页动作 -->
 	<div
 		id="StepsRangeArea"
 		x-on:click.stop=""
@@ -120,91 +126,72 @@ templ StepsRangeArea() {
 		:class="($store.flip.autoHideToolbar? 'fixed bottom-0':'flex flex-col justify-center bg-base-100/50')+($store.flip.mangaMode?' manga-mode': '')"
 	>
 		<div class="relative w-full self-center-safe" :class="$store.flip.autoHideToolbar? 'top-2.5':'mt-0'">
-			<!-- cursor-pointer:鼠标显示链接的符号（手） -->
-			<!-- appearance-none：删除浏览器默认样式-->
 			<input
 				id="steps-range"
 				class="slider-base w-full"
 				type="range"
 				min="1"
-				x-data="{initPageNum:$store.flip.mangaMode?($store.global.allPageNum -$store.global.nowPageNum + 1):$store.global.nowPageNum}"
+				x-data="{
+					initPageNum: $store.flip.mangaMode ? ($store.global.allPageNum - $store.global.nowPageNum + 1) : $store.global.nowPageNum,
+					updateProgress() {
+						const allPageNum = $store.global.allPageNum;
+						const nowPageNum = $store.global.nowPageNum;
+						this.initPageNum = $store.flip.mangaMode ? (allPageNum - nowPageNum + 1) : nowPageNum;
+						const percent = ((this.initPageNum - 1) / (allPageNum - 1)) * 100;
+						$el.style.setProperty('--value-percent', percent + '%');
+					}
+				}"
 				x-init="
-			            $watch('$store.global.nowPageNum', _ =>
-			             {
-			                if($store.flip.mangaMode) {
-			                    initPageNum = ($store.global.allPageNum - $store.global.nowPageNum + 1); }
-			                else{
-			                    initPageNum = $store.global.nowPageNum;
-			                }
-			                
-			                // 更新CSS变量
-			                const percent = ((initPageNum - 1) / ($store.global.allPageNum - 1)) * 100;
-			                $el.style.setProperty('--value-percent', percent + '%');
-			             }
-			            );
-                        $watch('$store.global.allPageNum', _ =>
-			             {
-			                if($store.flip.mangaMode) {
-			                    initPageNum = ($store.global.allPageNum - $store.global.nowPageNum + 1); }
-			                else{
-			                    initPageNum = $store.global.nowPageNum;
-			                }
-			                
-			                // 更新CSS变量
-			                const percent = ((initPageNum - 1) / ($store.global.allPageNum - 1)) * 100;
-			                $el.style.setProperty('--value-percent', percent + '%');
-			             }
-			            );
-			            
-			            // 初始设置CSS变量
-			            const initPercent = ((initPageNum - 1) / ($store.global.allPageNum - 1)) * 100;
-			            $el.style.setProperty('--value-percent', initPercent + '%');
-			    "
-				@change="initPageNum=$event.target.value;inputPageNum($event); const percent = ((initPageNum - 1) / ($store.global.allPageNum - 1)) * 100; $el.style.setProperty('--value-percent', percent + '%');"
-				@input="initPageNum=$event.target.value;inputPageNum($event); const percent = ((initPageNum - 1) / ($store.global.allPageNum - 1)) * 100; $el.style.setProperty('--value-percent', percent + '%');"
+					$watch('$store.global.nowPageNum', () => updateProgress());
+					$watch('$store.global.allPageNum', () => updateProgress());
+					$watch('$store.flip.mangaMode', () => updateProgress());
+					updateProgress();
+				"
+				@change="initPageNum = $event.target.value; inputPageNum($event); updateProgress();"
+				@input="initPageNum = $event.target.value; inputPageNum($event); updateProgress();"
 				:max="$store.global.allPageNum"
 				x-model="initPageNum"
 				step="1"
 			/>
-			<!-- ⚠️注意⚠️ alpinejs 的 x-for  从 1 开始，循环到 ALL_PAGE_NUM -->
+			<!-- 刻度标记容器 -->
 			<div class="absolute w-full h-2 pointer-events-none" style="bottom: 2px;">
 				<template x-for="i in $store.global.allPageNum" :key="i">
 					<div
 						class="absolute"
-						:style="!$store.flip.mangaMode?`left: ${(i-1)/($store.global.allPageNum)*100}%; transform: translateX(50%);`:`left: ${($store.global.allPageNum -i)/($store.global.allPageNum)*100}%; transform: translateX(50%);`"
+						x-data="{
+							getTickStyle(i, allPageNum, mangaMode) {
+								const position = mangaMode 
+									? (allPageNum - i) / (allPageNum - 1) * 100 
+									: (i - 1) / (allPageNum - 1) * 100;
+								return `left: ${position}%; transform: translateX(-50%);`;
+							},
+							getTickClass(i, allPageNum) {
+								if (i === 1 || i === allPageNum) {
+									return 'h-2.5 w-[1.5px] bg-gray-900 rounded-xs';
+								}
+								const interval = allPageNum < 50 ? 5 : 10;
+								if (i % interval === 0) {
+									return 'h-1 w-[1.5px] bg-gray-900 rounded-xs';
+								}
+								return 'h-1 w-[0.5px] bg-gray-600';
+							},
+							shouldShowLabel(i, allPageNum, mangaMode) {
+								if (i === 1 || i === allPageNum) return true;
+								const minMargin = allPageNum >= 100 ? 9 : allPageNum >= 50 ? 5 : 3;
+								if (i >= allPageNum - minMargin) return false;
+								const interval = allPageNum < 50 ? 5 : allPageNum < 100 ? 10 : 20;
+								return i % interval === 0;
+							}
+						}"
+						:style="getTickStyle(i, $store.global.allPageNum, $store.flip.mangaMode)"
 					>
-						<!-- 刻度:如果页数 < 50，则每 5 页刻度加粗；同时首页与末页也单独加粗显示 -->
+						<!-- 刻度线 -->
 						<div
 							:id="i"
-							:class="(i === 1 || i === $store.global.allPageNum)
-        								? 'h-2.5 w-[1.5px] bg-gray-900 rounded-xs'
-        								: (
-        									$store.global.allPageNum < 50
-        										? (
-        											i !== 1 && i % 5 === 0
-        												? 'h-1 w-[1.5px] bg-gray-900 rounded-xs'
-        												: 'h-1 w-[0.5px] bg-gray-600'
-        										)
-        										: (
-        											i !== 1 && i % 10 === 0
-        												? 'h-1 w-[1.5px] bg-gray-900 rounded-xs'
-        												: 'h-1 w-[0.5px] bg-gray-600'
-        										)
-        								)"
+							:class="getTickClass(i, $store.global.allPageNum)"
 						></div>
-						<!-- 页码: 根据页数来显示页码，如果小于 50 则每 5 页显示一次。50~100 页，每10页显示一次。 100以上每20页显示一次。-->
-						<template
-							x-if="(
-        						i === 1
-        						|| i === $store.global.allPageNum
-        						|| (!$store.flip.mangaMode && $store.global.allPageNum < 50 && i % 5 === 0 && i<($store.global.allPageNum-3))
-        						|| (!$store.flip.mangaMode && ($store.global.allPageNum >= 50 && $store.global.allPageNum < 100) && i % 10 === 0 && i<($store.global.allPageNum-5))
-        						|| (!$store.flip.mangaMode && ($store.global.allPageNum >= 100) && i % 20 === 0 && i<($store.global.allPageNum-9))
-        						|| ($store.flip.mangaMode && $store.global.allPageNum < 50 && i % 5 === 0 && i<($store.global.allPageNum-3))
-                                || ($store.flip.mangaMode && ($store.global.allPageNum >= 50 && $store.global.allPageNum < 100) && i % 10 === 0 && i<($store.global.allPageNum-5))
-                                || ($store.flip.mangaMode && $store.global.allPageNum >= 100 && i % 20 === 0 && i<($store.global.allPageNum-9))
-        					)"
-						>
+						<!-- 页码标签 -->
+						<template x-if="shouldShowLabel(i, $store.global.allPageNum, $store.flip.mangaMode)">
 							<div
 								class="text-xs text-center mb-0"
 								style="position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);"
