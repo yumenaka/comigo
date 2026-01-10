@@ -54,14 +54,6 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVar(&cfg.KeyFile, "tls-key", "", locale.GetString("tls_key"))
 	// 启用文件上传功能
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableUpload, "enable-upload", true, locale.GetString("enable_file_upload"))
-	// 上传文件的保存路径
-	RootCmd.PersistentFlags().StringVar(&cfg.UploadPath, "upload-path", "", locale.GetString("upload_path"))
-	if cfg.EnableUpload && cfg.UploadPath == "" {
-		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-		if err != nil {
-			config.SetUploadPath(dir)
-		}
-	}
 	// 打开浏览器
 	RootCmd.PersistentFlags().BoolVarP(&cfg.OpenBrowser, "open-browser", "o", false, locale.GetString("open_browser"))
 	// 不对局域网开放

@@ -66,14 +66,6 @@ func AutoSetCacheDir() {
 	}
 }
 
-func SetUploadPath(path string) {
-	if (!tools.IsDir(path)) || (!tools.PathExists(path)) {
-		logger.Info(locale.GetString("log_invalid_upload_path"))
-		return
-	}
-	cfg.UploadPath = path
-}
-
 // GetJwtSigningKey JWT令牌签名key，目前是用户名+密码(如果两者都设置了的话)
 func GetJwtSigningKey() string {
 	if cfg.Username == "" || cfg.Password == "" {

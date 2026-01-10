@@ -43,8 +43,6 @@ func main() {
 			logger.Infof(locale.GetString("log_received_new_args_from_instance"), args)
 			// 添加新扫描路径
 			cmd.AddStoreUrls(args)
-			// 设置上传路径
-			cmd.SetUploadPath(args)
 			// 扫描新添加的书库
 			cmd.ScanStore()
 			// 保存书籍元数据

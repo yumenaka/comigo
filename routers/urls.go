@@ -102,6 +102,8 @@ func bindProtectedView(group *echo.Group) {
 func bindProtectedAPI(group *echo.Group) {
 	// 服务器状态
 	group.GET("/server_info", data_api.GetServerInfoHandler)
+	// 获取书库列表
+	group.GET("/stores", data_api.GetStores)
 	// 文件上传
 	group.POST("/upload", upload_api.UploadFile)
 	// 获取特定文件

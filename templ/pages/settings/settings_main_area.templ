@@ -68,7 +68,6 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				@NumberConfig("MinImageNum", config.GetCfg().MinImageNum, "MinImageNum_Description", 0, 65535)
 				@BoolConfig("OpenBrowser", config.GetCfg().OpenBrowser, "OpenBrowser_Description")
 				@BoolConfig("EnableUpload", config.GetCfg().EnableUpload, "EnableUpload_Description")
-				@StringConfig("UploadPath", config.GetCfg().UploadPath, "UploadPath_Description")
 				@StringArrayConfig("ExcludePath", config.GetCfg().ExcludePath, "ExcludePath_Description")
 				@StringArrayConfig("SupportMediaType", config.GetCfg().SupportMediaType, "SupportMediaType_Description")
 				@StringArrayConfig("SupportFileType", config.GetCfg().SupportFileType, "SupportFileType_Description")

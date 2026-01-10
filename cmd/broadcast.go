@@ -67,19 +67,6 @@ func waitSystemMessages() {
 		msg := <-SystemBroadcast // 广播频道
 		// Send it out to every client that is currently connected
 		switch msg {
-		//// 重新扫描上传目录
-		//case "rescan_upload_path":
-		//	logger.Infof("Rescan the upload folder：%s", msg)
-		//	if config.GetEnableUpload() {
-		//		ReScanPath(config.GetUploadPath(), true)
-		//	}
-		//	// 保存扫描结果到数据库
-		//	if config.GetEnableDatabase() {
-		//		err := scan.SaveBooksToDatabase(viper.ConfigFileUsed(), config.GetClearDatabaseWhenExit())
-		//		if err != nil {
-		//			return
-		//		}
-		//	}
 		// 重启网页服务器
 		case "restart_web_server":
 			logger.Infof("Config changed, restarting web server...\n", msg)
