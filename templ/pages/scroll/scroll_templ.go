@@ -55,7 +55,7 @@ func ScrollPage(c echo.Context, book *model.Book, readMode string, pagedIndex in
 		if book != nil {
 			templ_7745c5c3_Err = common.Header(
 				common.HeaderProps{
-					Title:             common.GetBookTitle(book.BookInfo.BookID),
+					TitleText:         common.GetBookTitle(book.BookInfo.BookID),
 					ShowReturnIcon:    true,
 					ShowReSortIcon:    true,
 					ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),

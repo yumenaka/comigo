@@ -11,12 +11,11 @@ templ UploadPage(c echo.Context) {
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
-			Title:          "UploadPage",
+			TitleText:      "i18next.t('upload_page')",
 			ShowReturnIcon: true,
 			ReturnUrl:      "/",
 		})
-	@common.UploadArea()
-	,
+	@UploadArea()
 	@common.Footer(config.GetVersion())
 	@common.Drawer(c, nil, nil, true, "/")
 	@common.QRCode()

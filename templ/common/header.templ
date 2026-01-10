@@ -9,7 +9,7 @@ import (
 
 type HeaderProps struct {
 	// 标题
-	Title string
+	TitleText string
 	// 是否显示返回图标
 	ShowReturnIcon bool
 	// 返回链接
@@ -100,21 +100,21 @@ func BookURL(bookID string) string {
 templ HeaderTitle(prop HeaderProps) {
 	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
 		<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
-		<span x-show="!$store.global.onlineBook" class="text-lg font-semibold" x-text={ "'" + prop.Title + "'" }></span>
+		<span x-show="!$store.global.onlineBook" class="text-lg font-semibold" x-text={ prop.TitleText }></span>
 		if (prop.QuickJumpBarBooks != nil) {
 			<button
 				id="quickJumpBarDropdownButton"
-				title={ prop.Title }
+				x-bind:title={ prop.TitleText }
 				x-show="$store.global.onlineBook"
 				data-dropdown-toggle="QuickJumpDropdown"
 				data-dropdown-trigger="click"
 				class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
 				type="button"
 			>
-				{ prop.Title }
+				{ prop.TitleText }
 				@svg.ArrowDown()
 			</button>
-			<!-- Dropdown menu -->
+			<!-- 下拉菜单，同一阶层的其他书籍 -->
 			<div
 				id="QuickJumpDropdown"
 				x-show="$store.global.onlineBook"
@@ -138,22 +138,23 @@ templ HeaderTitle(prop HeaderProps) {
 		} else {
 			if (prop.DownLoadLink != "") {
 				<span
-					title={ prop.Title }
+					x-bind:title={ prop.TitleText }
 					id="headerTitle"
 					class="text-lg font-semibold text-blue-700/90 hover:underline"
 					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 					x-init="$nextTick(() => {document.title = $el.innerText + version});"
 				>
-					<a href={ templ.URL(prop.DownLoadLink) }>{ prop.Title }</a>
+					<a href={ templ.URL(prop.DownLoadLink) } x-text={ prop.TitleText }></a>
 				</span>
 			} else {
 				<span
-					title={ prop.Title }
+					x-bind:title={ prop.TitleText }
 					id="headerTitle"
 					class="text-lg font-semibold"
 					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 					x-init="$nextTick(() => {document.title = $el.innerText + version});"
-				>{ prop.Title }</span>
+					x-text={ prop.TitleText }
+				></span>
 			}
 		}
 	</div>

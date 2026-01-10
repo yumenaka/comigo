@@ -42,18 +42,14 @@ func UploadPage(c echo.Context) templ.Component {
 		}
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
-				Title:          "UploadPage",
+				TitleText:      "i18next.t('upload_page')",
 				ShowReturnIcon: true,
 				ReturnUrl:      "/",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.UploadArea().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, ",")
+		templ_7745c5c3_Err = UploadArea().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

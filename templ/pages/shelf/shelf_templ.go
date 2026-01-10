@@ -43,7 +43,7 @@ func ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 		}
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
-				Title:             common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
+				TitleText:         common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
 				ShowReturnIcon:    c.Param("id") != "",
 				ShowReSortIcon:    true,
 				ShowServerSetting: true,
