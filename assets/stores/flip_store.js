@@ -42,4 +42,24 @@ Alpine.store('flip', {
     sketchFlipSecond: 30,
     //计时用,从0开始
     sketchSecondCount: 0,
+    
+    // ============ 滑动动画配置（新增）============
+    // 滑动动画持续时间（毫秒）
+    swipeAnimationDuration: Alpine.$persist(300).as('flip.swipeAnimationDuration'),
+    // 回弹动画持续时间（毫秒）
+    resetAnimationDuration: Alpine.$persist(400).as('flip.resetAnimationDuration'),
+    // 滑动阈值（像素）- 超过这个值才会触发翻页
+    swipeThreshold: Alpine.$persist(100).as('flip.swipeThreshold'),
+    // 快速滑动超时时间（毫秒）
+    swipeTimeout: Alpine.$persist(300).as('flip.swipeTimeout'),
+    
+    // ============ 其他可配置参数（新增）============
+    // 预加载图片范围
+    preloadRange: Alpine.$persist(10).as('flip.preloadRange'),
+    // 滚轮节流延迟（毫秒）
+    wheelThrottleDelay: Alpine.$persist(250).as('flip.wheelThrottleDelay'),
+    // WebSocket 最大重连次数
+    websocketMaxReconnect: Alpine.$persist(200).as('flip.websocketMaxReconnect'),
+    // WebSocket 重连间隔（毫秒）
+    websocketReconnectInterval: Alpine.$persist(3000).as('flip.websocketReconnectInterval'),
 }) 
