@@ -15,59 +15,57 @@ import (
 
 // Config Comigo全局配置
 type Config struct {
-	AutoRescanIntervalMinutes int             `json:"AutoRescanIntervalMinutes" comment:"定期扫描书库间隔。单位为分钟。默认为 0，表示禁用自动定期扫描。"`
-	CacheDir                  string          `json:"CacheDir" comment:"本地图片缓存位置，默认系统临时文件夹"`
-	ClearCacheExit            bool            `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
-	ClearDatabaseWhenExit     bool            `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
-	ConfigFile                string          `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
-	ReadOnlyMode              bool            `json:"ReadOnlyMode" comment:"只读模式。禁止网页端更改配置或上传文件。"`
-	Debug                     bool            `json:"Debug" comment:"开启Debug模式"`
-	EnablePlugin              bool            `json:"EnablePlugin" comment:"启用插件系统"`
-	PluginDirectory           string          `json:"-" toml:"-"  comment:"插件存放目录"`
-	BuildInPluginList         []string        `json:"-" toml:"-"  comment:"内置插件列表"`
-	UserPluginList            []string        `json:"-" toml:"-"  comment:"用户自定义插件列表"`
-	EnabledPluginList         []string        `json:"-" toml:"-"  comment:"已启用插件列表"`
-	CustomPlugins             []CustomPlugin  `json:"-" toml:"-"  comment:"用户自定义插件内容列表"`
-	DisableLAN                bool            `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
-	EnableDatabase            bool            `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
-	EnableTLS                 bool            `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
-	AutoTLSCertificate        bool            `json:"AutoTLSCertificate" comment:"自动申请、签发 HTTPS 证书（Let's Encrypt）"`
-	Host                      string          `json:"Host" comment:"自定义二维码显示的主机名，如果为空，则使用自动检测到的局域网IP地址。自动申请HTTPS证书时，必须设置为公网可访问的域名"`
-	KeyFile                   string          `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: ~/.config/.comigo/key.key)"`
-	CertFile                  string          `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
-	EnableUpload              bool            `json:"EnableUpload" comment:"启用上传功能"`
-	ExcludePath               []string        `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
-	GenerateMetaData          bool            `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
-	StoreUrls                 []string        `json:"StoreUrls" comment:"本地书库路径列表，支持多个路径。可以是本地文件夹或网络书库地址。"` // 书库地址列表
-	LogFileName               string          `json:"LogFileName" comment:"Log文件名"`
-	LogFilePath               string          `json:"LogFilePath" comment:"Log文件的保存位置"`
-	LogToFile                 bool            `json:"LogToFile" comment:"是否保存程序Log到本地文件。默认不保存。"`
-	MaxScanDepth              int             `json:"MaxScanDepth" comment:"最大扫描深度"`
-	MinImageNum               int             `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
-	OpenBrowser               bool            `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
-	Password                  string          `json:"Password" comment:"登录界面需要的密码。"`
-	Port                      int             `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，启用auto TLS时强制使用443端口"`
-	PrintAllPossibleQRCode    bool            `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
-	SupportFileType           []string        `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
-	SupportMediaType          []string        `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
-	SupportTemplateFile       []string        `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
-	Timeout                   int             `json:"Timeout" comment:"cookie过期的时间。单位为分钟。默认60*24*30分钟后过期。"`
-	TimeoutLimitForScan       int             `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
-	UploadDirOption           UploadDirOption `json:"UploadDirOption" comment:"上传目录的位置选项：0-当前执行目录，1-第一个书库目录，2-指定上传路径"`
-	UploadPath                string          `json:"UploadPath" comment:"指定上传路径时，上传文件的存储位置"`
-	UseCache                  bool            `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
-	Username                  string          `json:"Username" comment:"登录界用的用户名。"`
-	EnableTailscale           bool            `json:"EnableTailscale" comment:"启用Tailscale网络支持"`
-	TailscaleHostname         string          `json:"TailscaleHostname" comment:"Tailscale网络的主机名，默认为comigo"`
-	FunnelTunnel              bool            `json:"FunnelTunnel" comment:"启用Tailscale的Funnel模式，允许通过Tailscale公开comigo服务到公网。"`
-	FunnelLoginCheck          bool            `json:"funnel_enforce_password" comment:"启用Funnel模式时，强制要求使用密码登录comigo服务。"`
-	TailscalePort             int             `json:"TailscalePort" comment:"Tailscale网络的端口，默认为443"`
-	TailscaleAuthKey          string          `json:"TailscaleAuthKey" comment:"Tailscale身份验证密钥。另外，也可以将本地环境变量 TS_AUTHKEY 设置为身份验证密钥"`
-	ZipFileTextEncoding       string          `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
-	EnableSingleInstance      bool            `json:"EnableSingleInstance" comment:"启用单实例模式，确保同一时间只有一个程序实例运行"`
-	Language                  string          `json:"Language" comment:"界面语言设置，可选值：auto（自动检测）、zh（中文）、en（英文）、ja（日文），默认为auto"`
-	RegisterContextMenu       bool            `json:"RegisterContextMenu" comment:"在 Windows 上注册资源管理器文件夹右键菜单：使用Comigo打开"`
-	UnregisterContextMenu     bool            `json:"UnregisterContextMenu" comment:"在 Windows 上卸载资源管理器文件夹右键菜单：使用Comigo打开"`
+	AutoRescanIntervalMinutes int            `json:"AutoRescanIntervalMinutes" comment:"定期扫描书库间隔。单位为分钟。默认为 0，表示禁用自动定期扫描。"`
+	CacheDir                  string         `json:"CacheDir" comment:"本地图片缓存位置，默认系统临时文件夹"`
+	ClearCacheExit            bool           `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
+	ClearDatabaseWhenExit     bool           `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
+	ConfigFile                string         `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
+	ReadOnlyMode              bool           `json:"ReadOnlyMode" comment:"只读模式。禁止网页端更改配置或上传文件。"`
+	Debug                     bool           `json:"Debug" comment:"开启Debug模式"`
+	EnablePlugin              bool           `json:"EnablePlugin" comment:"启用插件系统"`
+	PluginDirectory           string         `json:"-" toml:"-"  comment:"插件存放目录"`
+	BuildInPluginList         []string       `json:"-" toml:"-"  comment:"内置插件列表"`
+	UserPluginList            []string       `json:"-" toml:"-"  comment:"用户自定义插件列表"`
+	EnabledPluginList         []string       `json:"-" toml:"-"  comment:"已启用插件列表"`
+	CustomPlugins             []CustomPlugin `json:"-" toml:"-"  comment:"用户自定义插件内容列表"`
+	DisableLAN                bool           `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
+	EnableDatabase            bool           `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
+	EnableTLS                 bool           `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
+	AutoTLSCertificate        bool           `json:"AutoTLSCertificate" comment:"自动申请、签发 HTTPS 证书（Let's Encrypt）"`
+	Host                      string         `json:"Host" comment:"自定义二维码显示的主机名，如果为空，则使用自动检测到的局域网IP地址。自动申请HTTPS证书时，必须设置为公网可访问的域名"`
+	KeyFile                   string         `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: ~/.config/.comigo/key.key)"`
+	CertFile                  string         `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
+	EnableUpload              bool           `json:"EnableUpload" comment:"启用上传功能"`
+	ExcludePath               []string       `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
+	GenerateMetaData          bool           `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
+	StoreUrls                 []string       `json:"StoreUrls" comment:"本地书库路径列表，支持多个路径。可以是本地文件夹或网络书库地址。"` // 书库地址列表
+	LogFileName               string         `json:"LogFileName" comment:"Log文件名"`
+	LogFilePath               string         `json:"LogFilePath" comment:"Log文件的保存位置"`
+	LogToFile                 bool           `json:"LogToFile" comment:"是否保存程序Log到本地文件。默认不保存。"`
+	MaxScanDepth              int            `json:"MaxScanDepth" comment:"最大扫描深度"`
+	MinImageNum               int            `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
+	OpenBrowser               bool           `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
+	Password                  string         `json:"Password" comment:"登录界面需要的密码。"`
+	Port                      int            `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，启用auto TLS时强制使用443端口"`
+	PrintAllPossibleQRCode    bool           `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
+	SupportFileType           []string       `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
+	SupportMediaType          []string       `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
+	SupportTemplateFile       []string       `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
+	Timeout                   int            `json:"Timeout" comment:"cookie过期的时间。单位为分钟。默认60*24*30分钟后过期。"`
+	TimeoutLimitForScan       int            `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
+	UseCache                  bool           `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
+	Username                  string         `json:"Username" comment:"登录界用的用户名。"`
+	EnableTailscale           bool           `json:"EnableTailscale" comment:"启用Tailscale网络支持"`
+	TailscaleHostname         string         `json:"TailscaleHostname" comment:"Tailscale网络的主机名，默认为comigo"`
+	FunnelTunnel              bool           `json:"FunnelTunnel" comment:"启用Tailscale的Funnel模式，允许通过Tailscale公开comigo服务到公网。"`
+	FunnelLoginCheck          bool           `json:"funnel_enforce_password" comment:"启用Funnel模式时，强制要求使用密码登录comigo服务。"`
+	TailscalePort             int            `json:"TailscalePort" comment:"Tailscale网络的端口，默认为443"`
+	TailscaleAuthKey          string         `json:"TailscaleAuthKey" comment:"Tailscale身份验证密钥。另外，也可以将本地环境变量 TS_AUTHKEY 设置为身份验证密钥"`
+	ZipFileTextEncoding       string         `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
+	EnableSingleInstance      bool           `json:"EnableSingleInstance" comment:"启用单实例模式，确保同一时间只有一个程序实例运行"`
+	Language                  string         `json:"Language" comment:"界面语言设置，可选值：auto（自动检测）、zh（中文）、en（英文）、ja（日文），默认为auto"`
+	RegisterContextMenu       bool           `json:"RegisterContextMenu" comment:"在 Windows 上注册资源管理器文件夹右键菜单：使用Comigo打开"`
+	UnregisterContextMenu     bool           `json:"UnregisterContextMenu" comment:"在 Windows 上卸载资源管理器文件夹右键菜单：使用Comigo打开"`
 }
 
 func (c *Config) GetHost() string {
@@ -384,10 +382,6 @@ func UpdateConfigByJson(jsonString string) error {
 		case "ClearCacheExit":
 			if v, ok := value.(bool); ok {
 				cfg.ClearCacheExit = v
-			}
-		case "UploadPath":
-			if v, ok := value.(string); ok {
-				cfg.UploadPath = v
 			}
 		case "EnableUpload":
 			if v, ok := value.(bool); ok {

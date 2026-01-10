@@ -6560,6 +6560,10 @@
     z-index: 10;
   }
 
+  .focus\:border-blue-500:focus {
+    border-color: var(--color-blue-500);
+  }
+
   .focus\:border-indigo-500:focus {
     border-color: var(--color-indigo-500);
   }
@@ -6581,6 +6585,10 @@
 
   .focus\:ring-blue-300:focus {
     --tw-ring-color: var(--color-blue-300);
+  }
+
+  .focus\:ring-blue-500:focus {
+    --tw-ring-color: var(--color-blue-500);
   }
 
   .focus\:ring-green-300:focus {

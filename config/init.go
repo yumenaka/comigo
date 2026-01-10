@@ -44,7 +44,6 @@ var cfg = Config{
 	SupportMediaType:      []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
 	SupportTemplateFile:   []string{".html"},
 	UseCache:              true,
-	UploadPath:            "",
 	Username:              "comigo",
 	ZipFileTextEncoding:   "",
 	EnableSingleInstance:  false,

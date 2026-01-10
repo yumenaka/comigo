@@ -32,8 +32,6 @@ func main() {
 	cmd.AddStoreUrls(cmd.Args)
 	// 如果没有指定扫描路径，就把当前工作目录作为扫描路径
 	cmd.SetCwdAsScanPathIfNeed()
-	// 设置上传路径
-	cmd.SetUploadPath(cmd.Args)
 	// 加载书籍元数据（包括书签）
 	cmd.LoadMetadata()
 	// 扫描书库

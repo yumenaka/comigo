@@ -34,8 +34,6 @@ func main() {
 			logger.Infof(locale.GetString("log_received_new_args_from_instance"), args)
 			// 添加新扫描路径
 			cmd.AddStoreUrls(args)
-			// 设置上传路径
-			cmd.SetUploadPath(args)
 			// 扫描新添加的书库
 			cmd.ScanStore()
 			// 保存书籍元数据
@@ -67,8 +65,6 @@ func main() {
 	cmd.AddStoreUrls(cmd.Args)
 	// 如果没有指定扫描路径，就把当前工作目录作为扫描路径
 	cmd.SetCwdAsScanPathIfNeed()
-	// 设置上传路径
-	cmd.SetUploadPath(cmd.Args)
 	// 加载书籍元数据（包括书签）
 	cmd.LoadMetadata()
 	// 扫描书库

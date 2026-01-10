@@ -15,9 +15,7 @@ import (
 	"github.com/yumenaka/comigo/tools/scan"
 )
 
-var (
-	RescanBroadcast *chan string
-)
+var RescanBroadcast *chan string
 
 // UploadFile 上传文件
 // engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
@@ -29,23 +27,42 @@ func UploadFile(c echo.Context) error {
 			"error": locale.GetString("upload_disable_hint"),
 		})
 	}
-	// 默认的上传路径是否已设置
-	if config.GetCfg().UploadPath == "" {
-		logger.Infof("%s", locale.GetString("log_upload_path_not_set"))
+
+	// 获取用户选择的书库路径
+	storeUrl := c.QueryParam("store_url")
+	if storeUrl == "" {
+		logger.Infof("未选择上传目标书库")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": locale.GetString("store_validation_failed"),
+		})
 	}
-	// 创建上传目录（如果不存在）
-	if !tools.IsExist(config.GetCfg().UploadPath) {
-		// 创建文件夹
-		err := os.MkdirAll(config.GetCfg().UploadPath, os.ModePerm)
+
+	// 验证书库路径是否在配置的书库列表中
+	storeUrls := config.GetCfg().StoreUrls
+	isValidStore := false
+	for _, url := range storeUrls {
+		absUrl, err := filepath.Abs(url)
 		if err != nil {
-			// 无法创建上传目录: %s
-			logger.Infof(locale.GetString("log_mkdir_failed"), err)
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": fmt.Sprintf("无法创建上传目录: %s", config.GetCfg().UploadPath),
-			})
+			absUrl = url
 		}
-		// 创建上传目录成功: %s
-		logger.Infof(locale.GetString("log_mkdir_upload_folder_success"), config.GetCfg().UploadPath)
+		if absUrl == storeUrl {
+			isValidStore = true
+			break
+		}
+	}
+	if !isValidStore {
+		logger.Infof("无效的书库路径: %s", storeUrl)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": locale.GetString("store_validation_failed"),
+		})
+	}
+
+	// 检查书库路径是否存在
+	if !tools.IsExist(storeUrl) {
+		logger.Infof("书库路径不存在: %s", storeUrl)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": locale.GetString("store_not_exists"),
+		})
 	}
 
 	// 获取表单文件
@@ -96,7 +113,7 @@ func UploadFile(c echo.Context) error {
 		filename := filepath.Base(file.Filename)
 
 		// 确保文件名唯一（可选）
-		destPath := filepath.Join(config.GetCfg().UploadPath, filename)
+		destPath := filepath.Join(storeUrl, filename)
 		// 如果文件已存在，追加编号
 		counter := 1
 		ext := filepath.Ext(filename)
@@ -106,7 +123,7 @@ func UploadFile(c echo.Context) error {
 				break
 			}
 			filename = fmt.Sprintf("%s_%d%s", name, counter, ext)
-			destPath = filepath.Join(config.GetCfg().UploadPath, filename)
+			destPath = filepath.Join(storeUrl, filename)
 			counter++
 		}
 		// 保存文件
@@ -140,9 +157,9 @@ func UploadFile(c echo.Context) error {
 
 	// 同步执行扫描（等待完成）
 	// 扫描上传目录的文件
-	err = scan.InitStore(config.GetCfg().UploadPath, config.GetCfg())
+	err = scan.InitStore(storeUrl, config.GetCfg())
 	if err != nil {
-		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", config.GetCfg().UploadPath, err)
+		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", storeUrl, err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": fmt.Sprintf("扫描上传目录失败: %s", err),
 		})

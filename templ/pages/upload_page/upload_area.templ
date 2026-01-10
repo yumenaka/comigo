@@ -2,6 +2,14 @@ package upload_page
 
 templ UploadArea() {
 	<div class="relative w-full max-w-2xl p-8 bg-white rounded shadow-md">
+		<!-- 书库选择下拉框 -->
+		<div class="mb-6">
+			<label class="block mb-2 text-sm font-medium text-gray-700" x-text="i18next.t('select_upload_target_store')">选择上传目标书库</label>
+			<select id="store-select" class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+				<option value="" x-text="i18next.t('loading')">加载中...</option>
+			</select>
+			<p id="store-warning" class="mt-2 text-sm text-red-500 hidden"></p>
+		</div>
 		<!-- 文件选择与拖拽区域 -->
 		<div id="drop-area" class="px-6 py-24 text-center transition duration-300 border-4 border-gray-300 border-dashed rounded cursor-pointer hover:border-blue-500">
 			<p class="text-gray-500" x-text="i18next.t('drag_or_click_to_upload')">>将文件拖拽到此处或点击选择文件</p>
@@ -30,8 +38,75 @@ templ UploadArea() {
 		const uploadButton = document.getElementById("upload-button");
 		const resultDiv = document.getElementById("result");
 		const progressBar = document.getElementById("progress-bar");
+		const storeSelect = document.getElementById("store-select");
+		const storeWarning = document.getElementById("store-warning");
 		// 保存选中的文件
 		let filesToUpload = [];
+		// 保存可用的书库列表
+		let availableStores = [];
+
+		// 页面加载时获取书库列表
+		fetch("/api/stores")
+			.then((response) => response.json())
+			.then((data) => {
+				const stores = data.stores || [];
+				storeSelect.innerHTML = ""; // 清空加载提示
+
+				if (stores.length === 0) {
+					// 没有配置书库
+					const option = document.createElement("option");
+					option.value = "";
+					option.textContent = i18next.t("no_available_stores");
+					option.disabled = true;
+					storeSelect.appendChild(option);
+					storeWarning.textContent = i18next.t("no_available_stores");
+					storeWarning.classList.remove("hidden");
+					uploadButton.disabled = true;
+					return;
+				}
+
+				// 添加默认选项
+				const defaultOption = document.createElement("option");
+				defaultOption.value = "";
+				defaultOption.textContent = i18next.t("select_upload_target_store");
+				defaultOption.disabled = true;
+				defaultOption.selected = true;
+				storeSelect.appendChild(defaultOption);
+
+				// 填充书库选项
+				stores.forEach((store) => {
+					const option = document.createElement("option");
+					option.value = store.url;
+					if (store.exists) {
+						option.textContent = store.name;
+						availableStores.push(store.url);
+					} else {
+						option.textContent =
+							store.name + " (" + i18next.t("store_not_exists") + ")";
+						option.disabled = true;
+					}
+					storeSelect.appendChild(option);
+				});
+
+				// 检查是否有可用书库
+				if (availableStores.length === 0) {
+					storeWarning.textContent = i18next.t("no_available_stores");
+					storeWarning.classList.remove("hidden");
+					uploadButton.disabled = true;
+				}
+			})
+			.catch((error) => {
+				console.error("获取书库列表失败:", error);
+				storeSelect.innerHTML = "";
+				const option = document.createElement("option");
+				option.value = "";
+				option.textContent = i18next.t("upload_failed_network_error");
+				option.disabled = true;
+				storeSelect.appendChild(option);
+				storeWarning.textContent = i18next.t("upload_failed_network_error");
+				storeWarning.classList.remove("hidden");
+				uploadButton.disabled = true;
+			});
 		// 触发文件选择对话框
 		dropArea.addEventListener("click", () => {
 			fileInput.click();
@@ -142,12 +217,26 @@ templ UploadArea() {
 		}
 		// 更新上传按钮的状态
 		function updateUploadButtonState() {
-			uploadButton.disabled = filesToUpload.length === 0;
+			const storeSelected = storeSelect.value !== "";
+			const hasFiles = filesToUpload.length > 0;
+			uploadButton.disabled =
+				!storeSelected || !hasFiles || availableStores.length === 0;
 		}
+
+		// 监听书库选择变化
+		storeSelect.addEventListener("change", () => {
+			updateUploadButtonState();
+		});
 		// 处理文件上传
 		uploadButton.addEventListener("click", () => {
 			// 没有文件不上传
 			if (filesToUpload.length === 0) return;
+			// 检查是否选择了书库
+			const selectedStore = storeSelect.value;
+			if (!selectedStore) {
+				alert(i18next.t("select_upload_target_store"));
+				return;
+			}
 			// 初始化进度条
 			progressBar.style.width = "0%";
 			progressBar.style.opacity = "0.3";
@@ -160,7 +249,11 @@ templ UploadArea() {
 			// 创建 XMLHttpRequest
 			// 使用 XMLHttpRequest 来替代 fetch，因为 XMLHttpRequest 提供了上传进度事件，便于实现实时的上传进度显示。
 			const xhr = new XMLHttpRequest();
-			xhr.open("POST", "/api/upload", true);
+			xhr.open(
+				"POST",
+				"/api/upload?store_url=" + encodeURIComponent(selectedStore),
+				true,
+			);
 			// 监听上传进度
 			xhr.upload.addEventListener("progress", (e) => {
 				if (e.lengthComputable) {
