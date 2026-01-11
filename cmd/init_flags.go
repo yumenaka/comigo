@@ -237,9 +237,8 @@ func SetByExecutableFilename() {
 	} else if strings.Contains(filenameLower, "ja") || strings.Contains(filenameLower, "japanese") {
 		cfg.Language = "ja"
 	}
+	// 打印日志信息（仅在 Debug 模式下打印）
 	if cfg.Debug {
 		logger.Infof(locale.GetString("log_executable_name"), filename)
-		// 设置启用的内置插件列表
-		cfg.EnabledPluginList = []string{"clock", "auto_flip", "auto_scroll", "comigo_xyz", "sample"}
 	}
 }

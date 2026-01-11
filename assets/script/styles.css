@@ -2612,10 +2612,6 @@
     margin-right: calc(var(--spacing) * .5);
   }
 
-  .mr-1 {
-    margin-right: calc(var(--spacing) * 1);
-  }
-
   .mr-2 {
     margin-right: calc(var(--spacing) * 2);
   }
@@ -4525,6 +4521,10 @@
     .bg-gray-900\/50 {
       background-color: color-mix(in oklab, var(--color-gray-900) 50%, transparent);
     }
+  }
+
+  .bg-green-300 {
+    background-color: var(--color-green-300);
   }
 
   .bg-green-500 {
@@ -6485,8 +6485,8 @@
       background-color: var(--color-gray-400);
     }
 
-    .hover\:bg-green-700:hover {
-      background-color: var(--color-green-700);
+    .hover\:bg-green-400:hover {
+      background-color: var(--color-green-400);
     }
 
     .hover\:bg-indigo-300:hover {
@@ -6499,10 +6499,6 @@
 
     .hover\:bg-red-400:hover {
       background-color: var(--color-red-400);
-    }
-
-    .hover\:bg-red-700:hover {
-      background-color: var(--color-red-700);
     }
 
     .hover\:bg-white:hover {
@@ -6603,16 +6599,8 @@
     --tw-ring-color: var(--color-blue-500);
   }
 
-  .focus\:ring-green-300:focus {
-    --tw-ring-color: var(--color-green-300);
-  }
-
   .focus\:ring-indigo-500:focus {
     --tw-ring-color: var(--color-indigo-500);
-  }
-
-  .focus\:ring-red-300:focus {
-    --tw-ring-color: var(--color-red-300);
   }
 
   .focus\:ring-offset-2:focus {

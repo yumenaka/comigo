@@ -26,14 +26,17 @@ var RootCmd = &cobra.Command{
 	// 因为参数设置已完成，实际运行的命令习惯写在这里
 	Run: func(cmd *cobra.Command, args []string) {
 		Args = args
-		// 通过“可执行文件名”设置部分默认参数,目前不生效
+		// 通过“可执行文件名”设置部分默认参数
 		SetByExecutableFilename()
+		cfg := config.GetCfg()
+		// 默认启用几个内置插件
+		if cfg.EnablePlugin {
+			cfg.EnabledPluginList = []string{"auto_flip", "auto_scroll"}
+		}
 		// 设置临时文件夹
 		config.AutoSetCacheDir()
-
 		// 在 Windows 上，根据命令行参数注册/卸载资源管理器文件夹右键菜单
 		if runtime.GOOS == "windows" {
-			cfg := config.GetCfg()
 			// 先处理卸载，再处理注册，避免同时传入两个参数时出现冲突
 			if cfg.UnregisterContextMenu {
 				if err := windows_registry.RemoveComigoFromFolderContextMenu(); err != nil {

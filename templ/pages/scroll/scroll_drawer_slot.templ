@@ -7,10 +7,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/templ/plugins"
 )
 
 // 卷轴模式页面，放在侧栏里的【非共通设置】
 templ DrawerSlot(c echo.Context, book *model.Book) {
+	<!-- 自动滚动插件 -->
+	@plugins.AutoScrollPlugin(c)
 	if (book != nil && book.Type == model.TypePDF) {
 		<!-- 【用浏览器中打开PDF】 -->
 		<a
