@@ -58,6 +58,9 @@ templ MessageModal() {
 					"min-w-24 mx-4 px-4 py-2 bg-gray-500 hover:bg-gray-550 active:bg-gray-600 text-white rounded shadow-md";
 				cancelButton.onclick = function () {
 					hideModal();
+					if (typeof options.onCancel === "function") {
+						options.onCancel();
+					}
 				};
 				buttonsContainer.appendChild(confirmButton);
 				buttonsContainer.appendChild(cancelButton);

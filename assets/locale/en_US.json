@@ -336,6 +336,7 @@
   "starting_from_beginning_hint": "Load from the first page",
   "stop_sketch_mode": "Stop Sketch",
   "submit": "submit",
+  "add": "Add",
   "success_fullscreen": "Entered Fullscreen Mode",
   "successfully_loaded_reading_progress": "Successfully Loaded Reading Progress",
   "sync_page": "Remote Page Sync",
@@ -882,5 +883,14 @@
   "comigo_xyz_cli_install_desc": "Use the following commands to quickly install Comigo",
   "comigo_xyz_cli_install_copy": "Copy",
   "comigo_xyz_cli_install_copied": "Copied",
-  "comigo_xyz_cli_install_cn_desc": "Recommended for Mainland China users:"
+  "comigo_xyz_cli_install_cn_desc": "Recommended for Mainland China users:",
+  "rescan_store": "Rescan",
+  "delete_store": "Delete Store",
+  "select_store_to_operate": "Please select a store to operate",
+  "confirm_delete_store": "Confirm to delete the store? This will also delete all book data in this store",
+  "rescan_store_success": "Store scan completed, {0} new books added",
+  "delete_store_success": "Store deleted successfully",
+  "rescan_store_in_progress": "Scanning store, please wait...",
+  "err_rescan_store_failed": "Failed to rescan store",
+  "err_delete_store_failed": "Failed to delete store"
 }
