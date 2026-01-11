@@ -336,6 +336,7 @@
   "starting_from_beginning_hint": "从头开始加载",
   "stop_sketch_mode": "停止速写",
   "submit": "提交",
+  "add": "添加",
   "success_fullscreen": "已进入全屏模式",
   "successfully_loaded_reading_progress": "成功加载阅读进度",
   "sync_page": "远程同步翻页",
@@ -882,5 +883,14 @@
   "comigo_xyz_cli_install_desc": "使用以下命令快速安装 Comigo",
   "comigo_xyz_cli_install_copy": "复制",
   "comigo_xyz_cli_install_copied": "已复制",
-  "comigo_xyz_cli_install_cn_desc": "中国大陆用户推荐："
+  "comigo_xyz_cli_install_cn_desc": "中国大陆用户推荐：",
+  "rescan_store": "重新扫描",
+  "delete_store": "删除书库",
+  "select_store_to_operate": "请先选择要操作的书库",
+  "confirm_delete_store": "确认删除书库？这将同时删除该书库的所有书籍数据",
+  "rescan_store_success": "书库扫描完成，新增 {0} 本书",
+  "delete_store_success": "书库删除成功",
+  "rescan_store_in_progress": "正在扫描书库，请稍候...",
+  "err_rescan_store_failed": "扫描书库失败",
+  "err_delete_store_failed": "删除书库失败"
 }

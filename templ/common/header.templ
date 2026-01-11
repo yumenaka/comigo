@@ -44,6 +44,15 @@ templ Header(prop HeaderProps) {
 					</div>
 				</a>
 			}
+			<!-- 全屏按钮 offlineBook-->
+			<div
+				id="FullScreenIcon"
+				x-show="window.location.href.startsWith('file://') || window.location.href.startsWith('content://')"
+				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+			>
+				@svg.FullScreen()
+			</div>
 			if (prop.ShowServerSetting) {
 				<!-- 新服务器设置 -->
 				<a x-show="$store.global.onlineBook" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
@@ -73,9 +82,10 @@ templ Header(prop HeaderProps) {
 			>
 				@svg.QRCode()
 			</div>
-			<!-- 全屏按钮-->
+			<!-- 全屏按钮 onlineBook-->
 			<div
 				id="FullScreenIcon"
+				x-show="$store.global.onlineBook"
 				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
 				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 			>

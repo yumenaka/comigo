@@ -37,7 +37,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			>
 				<div x-text={ getTranslations("settings_stores") } class="w-full text-center"></div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-				@StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description")
+				@StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description")
 				@NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535)
 			</div>
 			<!-- 插件系统 -->

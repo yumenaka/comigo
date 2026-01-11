@@ -336,6 +336,7 @@
   "starting_from_beginning_hint": "最初のページから読み込みます",
   "stop_sketch_mode": "クロッキーモード終了",
   "submit": "送信",
+  "add": "追加",
   "success_fullscreen": "フルスクリーンに成功しました",
   "successfully_loaded_reading_progress": "読書進捗を読み込みました",
   "sync_page": "リモートページ同期",
@@ -882,5 +883,14 @@
   "comigo_xyz_cli_install_desc": "以下のコマンドを使用して Comigo をすばやくインストール",
   "comigo_xyz_cli_install_copy": "コピー",
   "comigo_xyz_cli_install_copied": "コピーしました",
-  "comigo_xyz_cli_install_cn_desc": "中国大陸ユーザーにおすすめ："
+  "comigo_xyz_cli_install_cn_desc": "中国大陸ユーザーにおすすめ：",
+  "rescan_store": "再スキャン",
+  "delete_store": "書庫を削除",
+  "select_store_to_operate": "操作する書庫を選択してください",
+  "confirm_delete_store": "書庫を削除しますか？これにより、この書庫のすべての書籍データも削除されます",
+  "rescan_store_success": "書庫のスキャンが完了しました。{0} 冊の新しい書籍が追加されました",
+  "delete_store_success": "書庫が正常に削除されました",
+  "rescan_store_in_progress": "書庫をスキャンしています。お待ちください...",
+  "err_rescan_store_failed": "書庫の再スキャンに失敗しました",
+  "err_delete_store_failed": "書庫の削除に失敗しました"
 }

@@ -77,7 +77,7 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 				>
 					没有可读书籍，请设置书库路径。设置完成后，网页会自动刷新。
 				</div>
-				@settings.StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description")
+				@settings.StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description")
 			</div>
 		</div>
 		<script>

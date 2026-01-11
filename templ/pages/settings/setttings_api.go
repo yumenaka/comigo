@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -14,7 +15,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/scan"
 )
 
 // -------------------------
@@ -692,5 +695,140 @@ func HandleConfigDelete(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"html": htmlString,
+	})
+}
+
+// RescanStoreHandler 处理重新扫描书库的 JSON API
+func RescanStoreHandler(c echo.Context) error {
+	// 如果配置被锁定
+	if config.GetCfg().ReadOnlyMode {
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	}
+
+	// 解析 JSON 请求体
+	var request struct {
+		StoreUrl string `json:"storeUrl"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+	}
+
+	if request.StoreUrl == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is required")
+	}
+
+	logger.Infof("重新扫描书库: %s\n", request.StoreUrl)
+
+	// 记录扫描前的书籍数量
+	beforeCount := model.GetAllBooksNumber()
+
+	// 调用扫描功能
+	err := scan.InitStore(request.StoreUrl, config.GetCfg())
+	if err != nil {
+		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
+	}
+
+	// 如果启用数据库，保存扫描结果
+	if config.GetCfg().EnableDatabase {
+		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
+			logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
+			return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
+		}
+	}
+
+	// 计算新增的书籍数量
+	afterCount := model.GetAllBooksNumber()
+	newBooksCount := afterCount - beforeCount
+	if newBooksCount < 0 {
+		newBooksCount = 0
+	}
+
+	logger.Infof("书库扫描完成，新增 %d 本书\n", newBooksCount)
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success":       true,
+		"newBooksCount": newBooksCount,
+		"message":       locale.GetString("rescan_store_success"),
+	})
+}
+
+// DeleteStoreHandler 处理删除书库的 JSON API
+func DeleteStoreHandler(c echo.Context) error {
+	// 如果配置被锁定
+	if config.GetCfg().ReadOnlyMode {
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	}
+
+	// 解析 JSON 请求体
+	var request struct {
+		StoreUrl string `json:"storeUrl"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+	}
+
+	if request.StoreUrl == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is required")
+	}
+
+	logger.Infof("删除书库: %s\n", request.StoreUrl)
+
+	// 先删除该书库的所有书籍数据
+	targetStoreAbs, err := filepath.Abs(request.StoreUrl)
+	if err != nil {
+		logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
+		targetStoreAbs = request.StoreUrl
+	}
+
+	// 遍历所有书籍，删除属于该书库的书籍
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_store_failed"))
+	}
+
+	deletedCount := 0
+	for _, book := range allBooks {
+		bookStoreAbs, err := filepath.Abs(book.StoreUrl)
+		if err != nil {
+			logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
+			bookStoreAbs = book.StoreUrl
+		}
+
+		if bookStoreAbs == targetStoreAbs {
+			err := model.IStore.DeleteBook(book.BookID)
+			if err != nil {
+				logger.Infof(locale.GetString("log_error_deleting_book"), book.BookID, err)
+			} else {
+				deletedCount++
+			}
+		}
+	}
+
+	logger.Infof("删除了 %d 本书籍\n", deletedCount)
+
+	// 从配置中移除该书库 URL
+	values, err := doDelete("StoreUrls", request.StoreUrl)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_store_failed"))
+	}
+
+	// 重新生成书组
+	if err := model.IStore.GenerateBookGroup(); err != nil {
+		logger.Infof(locale.GetString("log_error_initializing_main_folder"), err)
+	}
+
+	// 渲染更新后的 HTML
+	updatedHTML := StoreConfig("StoreUrls", values, "StoreUrls_Description")
+	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
+	if renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"html":    htmlString,
+		"message": locale.GetString("delete_store_success"),
 	})
 }
