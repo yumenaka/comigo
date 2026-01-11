@@ -136,4 +136,3 @@ frontend/dist
 *.pid
 assets/AppIcon.icns
 assets/icon.png
-/AGENTS.md

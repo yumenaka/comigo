@@ -7,9 +7,12 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/templ/plugins"
 )
 
 templ FlipDrawerSlot(c echo.Context, book *model.Book) {
+	<!-- 自动翻页插件 -->
+	@plugins.AutoFlipPlugin(c)
 	if (book != nil && book.Type == model.TypePDF) {
 		<!-- PDF【在浏览器中打开】 -->
 		<a

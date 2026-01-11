@@ -1,4 +1,7 @@
 <!-- 全局 HTML 测试插件 -->
-<div style="position: fixed; top: 10px; right: 10px; background: rgba(255, 0, 0, 0.1); padding: 10px; border: 1px solid red; z-index: 9999; font-size: 12px;">
+<div x-data="{ show: true }" 
+     x-init="setTimeout(() => show = false, 2000)"
+     x-show="show"
+     style="position: fixed; top: 100px; right: 100px; background: rgba(255, 0, 0, 0.1); padding: 10px; border: 1px solid red; z-index: 9999; font-size: 12px; pointer-events: none;">
     ✓ 自定义 HTML 插件已加载
 </div>
