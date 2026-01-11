@@ -5,6 +5,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common/svg"
+	"strings"
 )
 
 type HeaderProps struct {
@@ -110,11 +111,11 @@ func BookURL(bookID string) string {
 templ HeaderTitle(prop HeaderProps) {
 	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
 		<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
-		<span x-show="!$store.global.onlineBook" class="text-lg font-semibold" x-text={ prop.TitleText }></span>
+		<span x-show="!$store.global.onlineBook" class="text-lg font-semibold">{ prop.TitleText }</span>
 		if (prop.QuickJumpBarBooks != nil) {
 			<button
 				id="quickJumpBarDropdownButton"
-				x-bind:title={ prop.TitleText }
+				title={ prop.TitleText }
 				x-show="$store.global.onlineBook"
 				data-dropdown-toggle="QuickJumpDropdown"
 				data-dropdown-trigger="click"
@@ -148,23 +149,30 @@ templ HeaderTitle(prop HeaderProps) {
 		} else {
 			if (prop.DownLoadLink != "") {
 				<span
-					x-bind:title={ prop.TitleText }
+					title={ prop.TitleText }
 					id="headerTitle"
 					class="text-lg font-semibold text-blue-700/90 hover:underline"
 					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 					x-init="$nextTick(() => {document.title = $el.innerText + version});"
 				>
-					<a href={ templ.URL(prop.DownLoadLink) } x-text={ prop.TitleText }></a>
+					<a
+						href={ templ.URL(prop.DownLoadLink) }
+						if strings.HasPrefix(prop.TitleText,"i18next") {
+							x-text={ prop.TitleText }
+						}
+					>{ prop.TitleText }</a>
 				</span>
 			} else {
 				<span
-					x-bind:title={ prop.TitleText }
+					title={ prop.TitleText }
 					id="headerTitle"
 					class="text-lg font-semibold"
 					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 					x-init="$nextTick(() => {document.title = $el.innerText + version});"
-					x-text={ prop.TitleText }
-				></span>
+					if strings.HasPrefix(prop.TitleText,"i18next") {
+						x-text={ prop.TitleText }
+					}
+				>{ prop.TitleText }</span>
 			}
 		}
 	</div>
