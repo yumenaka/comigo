@@ -1,7 +1,12 @@
 package settings
 
+import (
+	"fmt"
+	"path/filepath"
+)
+
 // StoreConfig 书库配置组件
-templ StoreConfig(name string, values []string, description string) {
+templ StoreConfig(name string, values []string, description string, bookCounts map[string]int) {
 	@StoreConfigJavaScript()
 	<div
 		id={ name + "-store-config" }
@@ -18,7 +23,12 @@ templ StoreConfig(name string, values []string, description string) {
 						:class={ "selectedStore === '" + value + "' ? 'bg-blue-400 border-blue-600 text-white' : 'bg-blue-200 border-gray-500 dark:border-gray-200 text-black hover:bg-blue-300'" }
 						@click={ "selectedStore = selectedStore === '" + value + "' ? '' : '" + value + "'" }
 					>
-						<span class="flex-1">{ value }</span>
+						<span class="flex-1">
+							{ value }
+							if count, ok := bookCounts[filepath.Clean(value)]; ok && count > 0 {
+								<span class="ml-1 opacity-75">{ fmt.Sprintf("(x%d)", count) }</span>
+							}
+						</span>
 						<span class="ml-2" x-show={ "selectedStore === '" + value + "'" }>✓</span>
 					</div>
 				}

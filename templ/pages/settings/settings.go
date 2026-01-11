@@ -3,6 +3,7 @@ package settings
 import (
 	"encoding/json"
 	"net/http"
+	"path/filepath"
 	"reflect"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/config_api"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/tools"
@@ -24,6 +26,34 @@ func getTranslations(value string) string {
 // getTranslationsGO 返回 Go 语言的翻译字符串  not working
 func getTranslationsGO(value string, lang string) string {
 	return locale.GetStringByLocal(value, lang)
+}
+
+// GetStoreBookCounts 获取每个书库的书籍数量
+// 返回 map[storeUrl]bookCount
+func GetStoreBookCounts() map[string]int {
+	counts := make(map[string]int)
+
+	// 获取所有书籍
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
+		return counts
+	}
+
+	// 统计每个书库的书籍数量
+	for _, book := range allBooks {
+		// 只统计非书籍组的实际书籍
+		if book.Type != model.TypeBooksGroup {
+			// 将书库路径转换为绝对路径以便匹配
+			storePathAbs, err := filepath.Abs(book.StoreUrl)
+			if err != nil {
+				storePathAbs = book.StoreUrl
+			}
+			counts[storePathAbs]++
+		}
+	}
+
+	return counts
 }
 
 // PageHandler 设定页面

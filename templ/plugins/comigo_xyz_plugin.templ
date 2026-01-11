@@ -257,7 +257,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 								<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_title')">一键安装命令行版：</p>
 								<div class="space-y-3">
 									<!-- 第一个代码块 -->
-									<div class="bg-black relative border border-gray-300 dark:border-gray-600 rounded-lg p-4">
+									<div class="bg-black relative border border-gray-500 dark:border-gray-200  rounded-lg p-4">
 										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code class="w-full h-full text-center">bash &lt;(curl -s https://comigo.xyz/get.sh)</code></pre>
 										<button
 											@click="copyToClipboard('bash <(curl -s https://comigo.xyz/get.sh)', 0)"
@@ -274,7 +274,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 									</div>
 									<!-- 第二个代码块 -->
 									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_cn_desc')">中国大陆用户推荐：</p>
-									<div class="bg-black relative border border-gray-300 dark:border-gray-600 rounded-lg p-4">
+									<div class="bg-black relative border border-gray-500 dark:border-gray-200  rounded-lg p-4">
 										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code>bash &lt;(curl -s https://comigo.xyz/get.sh) --cn</code></pre>
 										<button
 											@click="copyToClipboard('bash <(curl -s https://comigo.xyz/get.sh) --cn', 1)"
@@ -293,33 +293,33 @@ templ ComigoXYZPlugin(c echo.Context) {
 							</div>
 							<!-- 功能特性 -->
 							<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 ">
 									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_format')">📚 多格式支持</h3>
 									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_format_desc')">支持 ZIP、RAR、CBZ、EPUB、PDF 等多种漫画格式</p>
 								</div>
-								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 ">
 									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_cross_platform')">🌐 跨平台</h3>
 									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_cross_platform_desc')">支持 Linux、Windows、Mac OS 三大操作系统</p>
 								</div>
-								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 ">
 									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_responsive')">📱 响应式设计</h3>
 									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_responsive_desc')">适配桌面端和移动端设备</p>
 								</div>
-								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 ">
 									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_reading_modes')">🔄 多种阅读模式</h3>
 									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_reading_modes_desc')">支持翻页模式和卷轴模式，满足不同阅读习惯</p>
 								</div>
-								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 ">
 									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_security')">🔒 安全可靠</h3>
 									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_security_desc')">支持 HTTPS 和用户认证，保护您的隐私</p>
 								</div>
-								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-300 dark:border-gray-600">
+								<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 ">
 									<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_performance')">⚡ 高性能</h3>
 									<p class="text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_feature_performance_desc')">快速扫描和加载，流畅的阅读体验</p>
 								</div>
 							</div>
 							<!-- 使用说明 -->
-							<div class="mt-12 bg-base-100 p-6 rounded-lg shadow-lg">
+							<div class="mt-12 bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200">
 								<h2 class="text-2xl font-semibold mb-4 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_quick_start')">快速开始</h2>
 								<ol class="list-decimal list-inside space-y-2 text-base-content dark:text-white">
 									<li x-text="i18next.t('comigo_xyz_quick_start_step1')">下载并运行 Comigo 程序</li>
