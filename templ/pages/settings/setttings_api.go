@@ -820,7 +820,7 @@ func DeleteStoreHandler(c echo.Context) error {
 	}
 
 	// 渲染更新后的 HTML
-	updatedHTML := StoreConfig("StoreUrls", values, "StoreUrls_Description")
+	updatedHTML := StoreConfig("StoreUrls", values, "StoreUrls_Description", GetStoreBookCounts())
 	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
 	if renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")

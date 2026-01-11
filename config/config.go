@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -128,7 +130,77 @@ func (c *Config) GetClearDatabaseWhenExit() bool {
 	return c.ClearDatabaseWhenExit
 }
 
-// StoreUrlIsExits 检查书库URL是否可添加
+// IsPathOverlapping 检查新路径是否与已有路径重合（完全相同、父子关系）
+// 返回值：
+// - overlapping: true 表示有重合
+// - conflictPath: 冲突的已有路径
+// - message: 错误消息
+func (c *Config) IsPathOverlapping(newPath string) (overlapping bool, conflictPath string, message string) {
+	// 将新路径转换为绝对路径并清理
+	newPathAbs, err := filepath.Abs(newPath)
+	if err != nil {
+		return true, "", fmt.Sprintf(locale.GetString("err_invalid_store_path"), newPath)
+	}
+	newPathAbs = filepath.Clean(newPathAbs)
+
+	// Windows 路径统一转换为小写进行比较（Windows 文件系统不区分大小写）
+	if runtime.GOOS == "windows" {
+		newPathAbs = strings.ToLower(newPathAbs)
+	}
+
+	// 检查是否与已有路径冲突
+	for _, existingUrl := range c.StoreUrls {
+		existingAbs, err := filepath.Abs(existingUrl)
+		if err != nil {
+			// 如果现有路径无法转换，跳过检查
+			continue
+		}
+		existingAbs = filepath.Clean(existingAbs)
+
+		// Windows 路径统一转换为小写
+		if runtime.GOOS == "windows" {
+			existingAbs = strings.ToLower(existingAbs)
+		}
+
+		// 1. 检查是否完全相同
+		if newPathAbs == existingAbs {
+			return true, existingUrl, fmt.Sprintf(locale.GetString("err_store_url_already_exists_error"), existingUrl)
+		}
+
+		// 2. 检查新路径是否是已有路径的子目录
+		if isSubPath(existingAbs, newPathAbs) {
+			return true, existingUrl, fmt.Sprintf(locale.GetString("err_store_path_is_subdir_of_existing"), newPath, existingUrl)
+		}
+
+		// 3. 检查新路径是否是已有路径的父目录
+		if isSubPath(newPathAbs, existingAbs) {
+			return true, existingUrl, fmt.Sprintf(locale.GetString("err_store_path_is_parent_of_existing"), newPath, existingUrl)
+		}
+	}
+
+	return false, "", ""
+}
+
+// isSubPath 检查 child 是否是 parent 的子路径
+// parent 和 child 应该都是已经清理过的绝对路径
+func isSubPath(parent, child string) bool {
+	// 使用 filepath.Rel 计算相对路径
+	rel, err := filepath.Rel(parent, child)
+	if err != nil {
+		return false
+	}
+
+	// 如果相对路径是 "."，说明两个路径相同（这种情况在调用前已经检查过）
+	if rel == "." {
+		return false
+	}
+
+	// 如果相对路径以 ".." 开头，说明 child 不在 parent 内
+	// 如果相对路径不以 ".." 开头，说明 child 在 parent 内
+	return !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && rel != ".."
+}
+
+// StoreUrlIsExits 检查书库URL是否可添加（已弃用，使用 IsPathOverlapping 代替）
 func (c *Config) StoreUrlIsExits(url string) bool {
 	// 检查书库URL是否已存在
 	for _, storeUrl := range c.StoreUrls {
@@ -143,23 +215,52 @@ func (c *Config) StoreUrlIsExits(url string) bool {
 }
 
 // AddStoreUrl 添加本地书库(单个路径)
+// 会将相对路径转换为绝对路径，并检查路径冲突
 func (c *Config) AddStoreUrl(storeURL string) error {
-	if c.StoreUrlIsExits(storeURL) {
-		return fmt.Errorf(locale.GetString("err_store_url_already_exists_error"), storeURL)
+	// 将路径转换为绝对路径
+	absPath, err := filepath.Abs(storeURL)
+	if err != nil {
+		return fmt.Errorf(locale.GetString("err_invalid_store_path"), storeURL)
 	}
-	cfg.StoreUrls = append(cfg.StoreUrls, storeURL)
+	absPath = filepath.Clean(absPath)
+
+	// 检查路径是否存在（可选，不强制要求路径必须存在）
+	if _, err := os.Stat(absPath); os.IsNotExist(err) {
+		// 路径不存在，记录警告但不阻止添加
+		if c.Debug {
+			logger.Infof(locale.GetString("path_not_exist")+": %s", absPath)
+		}
+	}
+
+	// 使用新的路径重合检测
+	overlapping, conflictPath, message := c.IsPathOverlapping(absPath)
+	if overlapping {
+		if c.Debug {
+			logger.Infof("%s: %s <-> %s", locale.GetString("err_store_path_conflict"), absPath, conflictPath)
+		}
+		return errors.New(message)
+	}
+
+	// 添加绝对路径到配置（使用接收者而不是全局变量）
+	c.StoreUrls = append(c.StoreUrls, absPath)
 	return nil
 }
 
-// InitConfigStoreUrls TODO: 初始化配置文件中的书库,后续支持网络书库的时候需要修改
+// InitConfigStoreUrls 初始化配置文件中的书库，将相对路径转换为绝对路径
+// TODO: 后续支持网络书库的时候需要修改
 func (c *Config) InitConfigStoreUrls() {
-	for _, storeUrl := range c.StoreUrls {
-		if c.StoreUrlIsExits(storeUrl) {
-			logger.Infof(locale.GetString("log_store_url_already_exists_in_config"), storeUrl)
-			continue
-		}
+	// 保存原始的 StoreUrls
+	originalUrls := make([]string, len(c.StoreUrls))
+	copy(originalUrls, c.StoreUrls)
+
+	// 清空 StoreUrls，然后重新添加（这样可以触发路径标准化）
+	c.StoreUrls = []string{}
+
+	for _, storeUrl := range originalUrls {
+		// 使用 AddStoreUrl 添加，会自动转换为绝对路径并验证
 		err := c.AddStoreUrl(storeUrl)
 		if err != nil {
+			// 如果添加失败，记录错误但继续处理其他路径
 			logger.Infof(locale.GetString("log_failed_to_add_store_url"), err)
 		}
 	}
@@ -269,7 +370,18 @@ func getStringSliceField(c *Config, fieldName string) (reflect.Value, []string, 
 }
 
 // AddStringArrayConfig 往指定的 []string 字段中添加一个新字符串
+// 对于 StoreUrls 字段，会进行路径验证和标准化
 func (c *Config) AddStringArrayConfig(fieldName, addValue string) ([]string, error) {
+	// 针对 StoreUrls 做特殊处理：使用 AddStoreUrl 进行路径验证和转换
+	if fieldName == "StoreUrls" {
+		err := c.AddStoreUrl(addValue)
+		if err != nil {
+			return c.StoreUrls, err
+		}
+		return c.StoreUrls, nil
+	}
+
+	// 其他字段使用通用逻辑
 	f, oldSlice, err := getStringSliceField(c, fieldName)
 	if err != nil {
 		return nil, err
@@ -289,7 +401,45 @@ func (c *Config) AddStringArrayConfig(fieldName, addValue string) ([]string, err
 }
 
 // DeleteStringArrayConfig 从指定的 []string 字段中删除某个字符串
+// 对于 StoreUrls 字段，删除时也需要使用绝对路径进行匹配
 func (c *Config) DeleteStringArrayConfig(fieldName, deleteValue string) ([]string, error) {
+	// 针对 StoreUrls 做特殊处理：使用绝对路径进行比较
+	if fieldName == "StoreUrls" {
+		// 将要删除的路径转换为绝对路径
+		deleteAbs, err := filepath.Abs(deleteValue)
+		if err == nil {
+			deleteAbs = filepath.Clean(deleteAbs)
+			// Windows 路径统一转换为小写
+			if runtime.GOOS == "windows" {
+				deleteAbs = strings.ToLower(deleteAbs)
+			}
+
+			// 过滤掉需要删除的路径
+			newSlice := make([]string, 0, len(c.StoreUrls))
+			found := false
+			for _, v := range c.StoreUrls {
+				vAbs, err := filepath.Abs(v)
+				if err == nil {
+					vAbs = filepath.Clean(vAbs)
+					if runtime.GOOS == "windows" {
+						vAbs = strings.ToLower(vAbs)
+					}
+					if vAbs == deleteAbs {
+						found = true
+						continue
+					}
+				}
+				newSlice = append(newSlice, v)
+			}
+
+			if found {
+				c.StoreUrls = newSlice
+			}
+			return c.StoreUrls, nil
+		}
+	}
+
+	// 其他字段使用通用逻辑
 	f, oldSlice, err := getStringSliceField(c, fieldName)
 	if err != nil {
 		return nil, err
