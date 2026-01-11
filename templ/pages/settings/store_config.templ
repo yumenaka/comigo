@@ -23,13 +23,13 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 						:class={ "selectedStore === '" + value + "' ? 'bg-blue-400 border-blue-600 text-white' : 'bg-blue-200 border-gray-500 dark:border-gray-200 text-black hover:bg-blue-300'" }
 						@click={ "selectedStore = selectedStore === '" + value + "' ? '' : '" + value + "'" }
 					>
-						<span class="flex-1">
+						<span class="flex-1 truncate min-w-0">
 							{ value }
-							if count, ok := bookCounts[filepath.Clean(value)]; ok && count > 0 {
-								<span class="ml-1 opacity-75">{ fmt.Sprintf("(x%d)", count) }</span>
-							}
 						</span>
-						<span class="ml-2" x-show={ "selectedStore === '" + value + "'" }>✓</span>
+						if count, ok := bookCounts[filepath.Clean(value)]; ok && count > 0 {
+							<span class="shrink-0 ml-1 opacity-75">{ fmt.Sprintf("(x%d)", count) }</span>
+						}
+						<span class="shrink-0 ml-2" x-show={ "selectedStore === '" + value + "'" }>✓</span>
 					</div>
 				}
 			</div>
@@ -40,7 +40,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					type="text"
 					id={ name + "AddInput" }
 					:placeholder={ getTranslations("type_or_paste_content") }
-					class="flex-1 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+					class="w-full h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 					x-on:keydown={ "if ($event.key === 'Enter') { addStore('" + name + "'); }" }
 				/>
 				<button
