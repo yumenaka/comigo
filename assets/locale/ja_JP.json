@@ -69,7 +69,7 @@
   "password": "パスワード",
   "path_not_exist": "指定されたパスは存在しません",
   "port": "サービスポート",
-  "port_busy": "ポートが占有されています。ランダムポートを試します：%v",
+  "port_busy": "%v ポートが占有されています。ランダムポートを試します",
   "print_all_ip": "すべてのローカルIPを表示",
   "print_config": "プロファイル出力",
   "re_enter_password": "パスワード再入力",

@@ -1,0 +1,298 @@
+# ============================================================================
+# Docker 相关的 Makefile - Comigo
+# ============================================================================
+# 使用方法（从项目根目录执行）：
+#   make -f sample/docker/Makefile.docker <target>
+# 
+# 常用命令：
+#   make -f sample/docker/Makefile.docker docker-build          - 构建本地镜像（当前平台）
+#   make -f sample/docker/Makefile.docker docker-buildx         - 构建并推送多平台镜像
+#   make -f sample/docker/Makefile.docker docker-push           - 推送镜像到仓库
+#   make -f sample/docker/Makefile.docker docker-test           - 本地测试运行
+#   make -f sample/docker/Makefile.docker docker-clean          - 清理镜像
+# ============================================================================
+
+# ============================================================================
+# 配置变量
+# ============================================================================
+
+# 从 config/version.go 提取版本号
+VERSION_FILE := config/version.go
+ifndef VERSION
+  VERSION := $(shell grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' $(VERSION_FILE) | head -1)
+  ifeq ($(VERSION),)
+    VERSION := v1.0.0
+  endif
+endif
+
+# Docker 镜像配置
+DOCKER_HUB_REPO ?= yumenaka/comigo
+GHCR_REPO ?= ghcr.io/yumenaka/comigo
+IMAGE_NAME ?= $(DOCKER_HUB_REPO)
+PLATFORMS := linux/amd64,linux/arm64,linux/arm/v7
+
+# Docker 构建相关
+DOCKERFILE := sample/docker/Dockerfile
+BUILD_CONTEXT := .
+BUILDX_BUILDER := comigo-builder
+
+# 颜色输出
+CYAN := \033[0;36m
+GREEN := \033[0;32m
+YELLOW := \033[1;33m
+NC := \033[0m
+
+# ============================================================================
+# 帮助信息
+# ============================================================================
+
+.PHONY: help
+help:
+	@echo "$(CYAN)Comigo Docker 构建命令$(NC)"
+	@echo ""
+	@echo "$(GREEN)构建相关:$(NC)"
+	@echo "  make docker-build              - 构建本地镜像（当前平台）"
+	@echo "  make docker-build-all          - 构建并推送多平台镜像"
+	@echo "  make docker-buildx             - 同 docker-build-all（别名）"
+	@echo "  make docker-build-no-cache     - 无缓存构建"
+	@echo ""
+	@echo "$(GREEN)推送相关:$(NC)"
+	@echo "  make docker-push               - 推送镜像到 Docker Hub"
+	@echo "  make docker-push-ghcr          - 推送镜像到 GitHub Container Registry"
+	@echo "  make docker-push-all           - 推送到所有仓库"
+	@echo ""
+	@echo "$(GREEN)测试相关:$(NC)"
+	@echo "  make docker-test               - 本地测试运行（前台）"
+	@echo "  make docker-test-bg            - 本地测试运行（后台）"
+	@echo "  make docker-stop               - 停止测试容器"
+	@echo "  make docker-logs               - 查看容器日志"
+	@echo ""
+	@echo "$(GREEN)Docker Compose:$(NC)"
+	@echo "  make docker-compose-up         - 启动服务（后台）"
+	@echo "  make docker-compose-down       - 停止服务"
+	@echo "  make docker-compose-restart    - 重启服务"
+	@echo "  make docker-compose-logs       - 查看日志"
+	@echo ""
+	@echo "$(GREEN)清理相关:$(NC)"
+	@echo "  make docker-clean              - 清理本地镜像"
+	@echo "  make docker-clean-all          - 清理所有相关资源"
+	@echo ""
+	@echo "$(GREEN)其他:$(NC)"
+	@echo "  make docker-info               - 显示构建信息"
+	@echo "  make docker-login              - 登录 Docker Hub"
+	@echo "  make docker-login-ghcr         - 登录 GitHub Container Registry"
+	@echo ""
+	@echo "$(YELLOW)环境变量:$(NC)"
+	@echo "  VERSION=$(VERSION)"
+	@echo "  IMAGE_NAME=$(IMAGE_NAME)"
+	@echo "  PLATFORMS=$(PLATFORMS)"
+
+# ============================================================================
+# 信息显示
+# ============================================================================
+
+.PHONY: docker-info
+docker-info:
+	@echo "$(CYAN)Docker 构建信息$(NC)"
+	@echo "  版本号:      $(VERSION)"
+	@echo "  镜像名称:    $(IMAGE_NAME)"
+	@echo "  支持平台:    $(PLATFORMS)"
+	@echo "  Dockerfile:  $(DOCKERFILE)"
+	@echo "  构建上下文:  $(BUILD_CONTEXT)"
+
+# ============================================================================
+# 构建相关
+# ============================================================================
+
+.PHONY: docker-build
+docker-build:
+	@echo "$(GREEN)==> 构建本地镜像（当前平台）$(NC)"
+	docker build \
+		--build-arg VERSION=$(VERSION) \
+		-t $(IMAGE_NAME):$(VERSION) \
+		-t $(IMAGE_NAME):latest \
+		-f $(DOCKERFILE) \
+		$(BUILD_CONTEXT)
+	@echo "$(GREEN)✅ 构建完成: $(IMAGE_NAME):$(VERSION)$(NC)"
+
+.PHONY: docker-build-no-cache
+docker-build-no-cache:
+	@echo "$(GREEN)==> 无缓存构建本地镜像$(NC)"
+	docker build \
+		--no-cache \
+		--build-arg VERSION=$(VERSION) \
+		-t $(IMAGE_NAME):$(VERSION) \
+		-t $(IMAGE_NAME):latest \
+		-f $(DOCKERFILE) \
+		$(BUILD_CONTEXT)
+	@echo "$(GREEN)✅ 构建完成: $(IMAGE_NAME):$(VERSION)$(NC)"
+
+# 设置 buildx builder
+.PHONY: docker-buildx-setup
+docker-buildx-setup:
+	@if ! docker buildx inspect $(BUILDX_BUILDER) > /dev/null 2>&1; then \
+		echo "$(YELLOW)创建 buildx builder: $(BUILDX_BUILDER)$(NC)"; \
+		docker buildx create --name $(BUILDX_BUILDER) --use --bootstrap; \
+	else \
+		echo "$(GREEN)使用现有 builder: $(BUILDX_BUILDER)$(NC)"; \
+		docker buildx use $(BUILDX_BUILDER); \
+	fi
+
+.PHONY: docker-build-all docker-buildx
+docker-build-all: docker-buildx-setup
+	@echo "$(GREEN)==> 构建并推送多平台镜像$(NC)"
+	@echo "$(YELLOW)平台: $(PLATFORMS)$(NC)"
+	@echo "$(YELLOW)注意: 多平台镜像将自动推送到 $(IMAGE_NAME)$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--build-arg VERSION=$(VERSION) \
+		-t $(IMAGE_NAME):$(VERSION) \
+		-t $(IMAGE_NAME):latest \
+		-f $(DOCKERFILE) \
+		--push \
+		$(BUILD_CONTEXT)
+	@echo "$(GREEN)✅ 多平台镜像构建并推送完成$(NC)"
+
+# docker-buildx 是 docker-build-all 的别名，保持与主 Makefile 命名一致
+docker-buildx: docker-build-all
+
+# ============================================================================
+# 推送相关
+# ============================================================================
+
+.PHONY: docker-push
+docker-push: docker-buildx-setup
+	@echo "$(GREEN)==> 推送镜像到 Docker Hub$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--build-arg VERSION=$(VERSION) \
+		-t $(DOCKER_HUB_REPO):$(VERSION) \
+		-t $(DOCKER_HUB_REPO):latest \
+		-f $(DOCKERFILE) \
+		--push \
+		$(BUILD_CONTEXT)
+	@echo "$(GREEN)✅ 推送完成: $(DOCKER_HUB_REPO):$(VERSION)$(NC)"
+
+.PHONY: docker-push-ghcr
+docker-push-ghcr: docker-buildx-setup
+	@echo "$(GREEN)==> 推送镜像到 GitHub Container Registry$(NC)"
+	docker buildx build \
+		--platform $(PLATFORMS) \
+		--build-arg VERSION=$(VERSION) \
+		-t $(GHCR_REPO):$(VERSION) \
+		-t $(GHCR_REPO):latest \
+		-f $(DOCKERFILE) \
+		--push \
+		$(BUILD_CONTEXT)
+	@echo "$(GREEN)✅ 推送完成: $(GHCR_REPO):$(VERSION)$(NC)"
+
+.PHONY: docker-push-all
+docker-push-all: docker-push docker-push-ghcr
+	@echo "$(GREEN)✅ 已推送到所有仓库$(NC)"
+
+# ============================================================================
+# 登录相关
+# ============================================================================
+
+.PHONY: docker-login
+docker-login:
+	@echo "$(YELLOW)登录 Docker Hub...$(NC)"
+	docker login
+
+.PHONY: docker-login-ghcr
+docker-login-ghcr:
+	@echo "$(YELLOW)登录 GitHub Container Registry...$(NC)"
+	@echo "$(YELLOW)请使用 GitHub Personal Access Token (需要 write:packages 权限)$(NC)"
+	docker login ghcr.io
+
+# ============================================================================
+# 测试相关
+# ============================================================================
+
+TEST_CONTAINER_NAME := comigo-test
+TEST_PORT := 1234
+TEST_DATA_DIR := $(shell pwd)/test
+
+.PHONY: docker-test
+docker-test:
+	@echo "$(GREEN)==> 启动测试容器（前台）$(NC)"
+	@mkdir -p $(TEST_DATA_DIR)
+	docker run --rm \
+		--name $(TEST_CONTAINER_NAME) \
+		-p $(TEST_PORT):1234 \
+		-v $(TEST_DATA_DIR):/data \
+		-e COMIGO_DEBUG=true \
+		$(IMAGE_NAME):$(VERSION)
+
+.PHONY: docker-test-bg
+docker-test-bg:
+	@echo "$(GREEN)==> 启动测试容器（后台）$(NC)"
+	@mkdir -p $(TEST_DATA_DIR)
+	docker run -d \
+		--name $(TEST_CONTAINER_NAME) \
+		-p $(TEST_PORT):1234 \
+		-v $(TEST_DATA_DIR):/data \
+		-e COMIGO_DEBUG=true \
+		$(IMAGE_NAME):$(VERSION)
+	@echo "$(GREEN)✅ 容器已启动，访问: http://localhost:$(TEST_PORT)$(NC)"
+	@echo "$(YELLOW)查看日志: make -f sample/docker/Makefile.docker docker-logs$(NC)"
+	@echo "$(YELLOW)停止容器: make -f sample/docker/Makefile.docker docker-stop$(NC)"
+
+.PHONY: docker-stop
+docker-stop:
+	@echo "$(YELLOW)停止测试容器...$(NC)"
+	docker stop $(TEST_CONTAINER_NAME) || true
+	docker rm $(TEST_CONTAINER_NAME) || true
+
+.PHONY: docker-logs
+docker-logs:
+	docker logs -f $(TEST_CONTAINER_NAME)
+
+# ============================================================================
+# Docker Compose 相关
+# ============================================================================
+
+COMPOSE_FILE := sample/docker/docker-compose.yml
+
+.PHONY: docker-compose-up
+docker-compose-up:
+	@echo "$(GREEN)==> 启动 Docker Compose 服务$(NC)"
+	cd sample/docker && docker-compose up -d
+	@echo "$(GREEN)✅ 服务已启动$(NC)"
+
+.PHONY: docker-compose-down
+docker-compose-down:
+	@echo "$(YELLOW)停止 Docker Compose 服务...$(NC)"
+	cd sample/docker && docker-compose down
+
+.PHONY: docker-compose-restart
+docker-compose-restart:
+	@echo "$(YELLOW)重启 Docker Compose 服务...$(NC)"
+	cd sample/docker && docker-compose restart
+
+.PHONY: docker-compose-logs
+docker-compose-logs:
+	cd sample/docker && docker-compose logs -f
+
+# ============================================================================
+# 清理相关
+# ============================================================================
+
+.PHONY: docker-clean
+docker-clean:
+	@echo "$(YELLOW)清理本地镜像...$(NC)"
+	docker rmi $(IMAGE_NAME):$(VERSION) || true
+	docker rmi $(IMAGE_NAME):latest || true
+	@echo "$(GREEN)✅ 清理完成$(NC)"
+
+.PHONY: docker-clean-all
+docker-clean-all: docker-stop docker-clean
+	@echo "$(YELLOW)清理所有相关资源...$(NC)"
+	docker buildx rm $(BUILDX_BUILDER) || true
+	@echo "$(GREEN)✅ 清理完成$(NC)"
+
+# ============================================================================
+# 默认目标
+# ============================================================================
+
+.DEFAULT_GOAL := help

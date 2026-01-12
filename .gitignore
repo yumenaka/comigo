@@ -98,6 +98,7 @@ _temp
 # IDE files.
 .idea/
 .vscode/
+.cursor
 
 # Go workflow files.
 go.work

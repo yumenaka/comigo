@@ -69,7 +69,7 @@
   "password": "密码",
   "path_not_exist": "路径不存在",
   "port": "服务端口",
-  "port_busy": "端口被占用，尝试使用随机端口：%v",
+  "port_busy": "%v 端口被占用，尝试使用随机端口",
   "print_all_ip": "打印所有可用网卡ip",
   "print_config": "打印配置：",
   "re_enter_password": "重新输入密码",
