@@ -26,9 +26,15 @@
 ##   make icon             - 仅生成 App 图标
 ##   make clean-app        - 清理 macOS App 构建文件
 ##
+## 【Docker 镜像】
+##   make docker-build     - 构建 Docker 镜像（本地单平台）
+##   make docker-buildx    - 构建并推送多平台 Docker 镜像（需要 docker login）
+##   make docker-test      - 本地测试 Docker 镜像
+##   make docker-clean     - 清理 Docker 镜像
+##
 ## 【其他】
 ##   make -n <target>      - 打印编译命令而不实际执行（用于调试）
-##   make clean             - 清理所有构建文件
+##   make clean            - 清理所有构建文件
 ##
 ## ============================================================================
 
@@ -79,11 +85,66 @@ include assets/makefiles/macos-app.mk
 include assets/makefiles/cross-compile.mk
 
 ## ============================================================================
+## Docker 镜像构建目标
+## ============================================================================
+
+.PHONY: docker-build docker-buildx docker-test docker-clean docker-help
+
+# Docker 镜像仓库配置（可通过命令行覆盖）
+DOCKER_REPO ?= yumenaka/comigo
+DOCKER_PLATFORMS := linux/amd64,linux/arm64,linux/arm/v7
+
+# 构建本地 Docker 镜像（当前平台）
+docker-build:
+	@$(MAKE) -f sample/docker/Makefile.docker docker-build IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION)
+
+# 构建并推送多平台 Docker 镜像
+# 注意：多平台镜像无法加载到本地，必须推送到远程仓库
+docker-buildx:
+	@echo "提示：多平台镜像将自动推送到 $(DOCKER_REPO)"
+	@echo "如果只想本地测试，请使用: make docker-build"
+	@$(MAKE) -f sample/docker/Makefile.docker docker-buildx IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION)
+
+# 本地测试 Docker 镜像
+docker-test:
+	@$(MAKE) -f sample/docker/Makefile.docker docker-test IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION)
+
+# 清理 Docker 镜像
+docker-clean:
+	@$(MAKE) -f sample/docker/Makefile.docker docker-clean IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION)
+
+# Docker 帮助信息
+docker-help:
+	@echo "Docker 镜像构建命令："
+	@echo ""
+	@echo "  make docker-build     - 构建本地镜像（当前平台，不推送）"
+	@echo "  make docker-buildx    - 构建并推送多平台镜像（自动推送）"
+	@echo "  make docker-test      - 本地测试镜像"
+	@echo "  make docker-clean     - 清理镜像"
+	@echo ""
+	@echo "环境变量："
+	@echo "  VERSION=$(VERSION)"
+	@echo "  DOCKER_REPO=$(DOCKER_REPO)"
+	@echo "  DOCKER_PLATFORMS=$(DOCKER_PLATFORMS)"
+	@echo ""
+	@echo "示例："
+	@echo "  make docker-build                              # 本地构建测试"
+	@echo "  make docker-buildx DOCKER_REPO=yumenaka/comigo     # 构建并推送多平台镜像"
+	@echo ""
+	@echo "注意："
+	@echo "  - docker-build: 只构建当前平台，保存到本地"
+	@echo "  - docker-buildx: 构建多平台镜像，必须推送到远程仓库"
+	@echo "                   (Docker 不支持同时加载多个架构的镜像到本地)"
+	@echo ""
+	@echo "更多 Docker 命令请查看："
+	@echo "  make -f sample/docker/Makefile.docker help"
+
+## ============================================================================
 ## 通用清理目标
 ## ============================================================================
 
 .PHONY: clean
 
-# 清理所有构建文件（包括 macOS App 和跨平台编译的产物）
-clean: clean-app
+# 清理所有构建文件（包括 macOS App、跨平台编译和 Docker 镜像）
+clean: clean-app docker-clean
 	@echo "==> 清理完成"

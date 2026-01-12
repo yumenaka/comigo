@@ -13,7 +13,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// RenderAllPlugins 渲染所有启用的插件
+// RenderAllPlugins 渲染位置无关的启用插件
 func RenderAllPlugins(c echo.Context) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context

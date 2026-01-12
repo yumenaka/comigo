@@ -69,7 +69,7 @@
   "password": "password",
   "path_not_exist": "Path does not exist",
   "port": "Service port",
-  "port_busy": "The port is occupied, trying a random port: %v",
+  "port_busy": " %v port is occupied, trying a random port",
   "print_all_ip": "Print all available network interface IP addresses",
   "print_config": "Print configuration",
   "re_enter_password": "Re-enter password",

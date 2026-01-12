@@ -5,7 +5,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// RenderAllPlugins 渲染所有启用的插件
+// RenderAllPlugins 渲染位置无关的启用插件
 templ RenderAllPlugins(c echo.Context) {
 	if config.GetCfg().EnablePlugin {
 		// 渲染内置插件
