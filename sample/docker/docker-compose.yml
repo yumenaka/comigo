@@ -36,6 +36,9 @@ services:
       # 服务端口（默认 1234）
       - COMIGO_PORT=1234
 
+      # 配置文件目录（用于容器化部署）
+      - COMIGO_CONFIG_DIR=/config
+
       # 用户认证（可选，启用后需要登录）
       # - COMIGO_USERNAME=admin
       # - COMIGO_PASSWORD=your_secure_password
@@ -76,8 +79,8 @@ services:
       
       # 配置文件目录（可选）
       # 如果需要持久化配置文件，可以挂载此目录
-      # 配置文件路径: /root/.config/comigo/config.toml
-      - ./config:/root/.config/comigo
+      # 配置文件路径: /config/config.toml
+      - ./config:/config
       
       # 自定义插件目录（可选）
       # 如果有自定义插件，可以挂载到项目的插件目录

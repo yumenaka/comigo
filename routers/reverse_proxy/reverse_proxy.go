@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -21,6 +22,14 @@ const allowedPrefix = "/yumenaka/"
 
 // GitHub 目标（固定）
 const githubBase = "https://github.com"
+
+// 预编译的正则表达式，用于替换 URL 中的 "latest" 为实际版本号
+var (
+	// 匹配 /releases/download/latest/ 路径
+	releasePathRegex = regexp.MustCompile(`/releases/download/latest/`)
+	// 匹配文件名中的 _latest_ 格式
+	fileNameRegex = regexp.MustCompile(`_latest_`)
+)
 
 // ProxyHandler 处理反向代理请求
 func ProxyHandler(c echo.Context) error {
@@ -66,6 +75,10 @@ func ProxyHandler(c echo.Context) error {
 		// /yumenaka/xxx -> https://github.com/yumenaka/xxx
 		target = githubBase + path
 	}
+
+	// 替换 URL 中的 "latest" 为当前版本号
+	// 支持 releases/download/latest/... 和文件名中的 _latest_ 格式
+	target = replaceLatestWithVersion(target)
 
 	if req.URL.RawQuery != "" {
 		target += "?" + req.URL.RawQuery
@@ -308,6 +321,28 @@ func GetComigoScriptHandler(c echo.Context) error {
 	}
 
 	return fetchAndStream(c, target)
+}
+
+// replaceLatestWithVersion 将 URL 中的 "latest" 替换为当前版本号
+// 支持两种模式：
+// 1. releases/download/latest/ -> releases/download/v1.2.4/
+// 2. 文件名中的 _latest_ -> _v1.2.4_ (如 comi_latest_linux_amd64.tar.gz -> comi_v1.2.4_linux_amd64.tar.gz)
+func replaceLatestWithVersion(target string) string {
+	version := config.GetVersion() // 从 version.go 获取版本号，如 "v1.2.4"
+
+	// 模式1：替换 releases/download/latest/ 路径中的 latest
+	// 匹配 /releases/download/latest/ 并替换为 /releases/download/{version}/
+	if releasePathRegex.MatchString(target) {
+		target = releasePathRegex.ReplaceAllString(target, "/releases/download/"+version+"/")
+	}
+
+	// 模式2：替换文件名中的 _latest_ 格式
+	// 例如：comi_latest_linux_amd64.tar.gz -> comi_v1.2.4_linux_amd64.tar.gz
+	if fileNameRegex.MatchString(target) {
+		target = fileNameRegex.ReplaceAllString(target, "_"+version+"_")
+	}
+
+	return target
 }
 
 // getPublicBase 获取公共基础 URL（用于重定向）

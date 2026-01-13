@@ -14,7 +14,7 @@ MAIN_FILE_DIR := ./
 # 覆盖版本号，只有 string 可以直接覆盖 包路径必须和 go list 输出的完全一致，需要带 module 路径
 # -trimpath 去掉源码绝对路径，比如构建机目录
 # -ldflags 指定编译参数。-s 去掉符号信息  -w去掉调试信息 减小二进制体积
-GOBUILD=CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'"
+GOBUILD=go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'"
 
 ifeq ($(OS), Darwin)
   MD5_UTIL = md5
@@ -23,7 +23,7 @@ else
 endif
 
 # 跨平台编译的默认目标
-all: app Windows_x86_64_full Windows_i386_full Windows_arm64_full compileAll_CGO md5SumThemAll
+all: app Windows_x86_64_full Windows_i386_full Windows_arm64_full compileAll_CGO deb-all md5SumThemAll
 
 ## windows 可能不需要CGO就能支持Tailscale？
 
@@ -384,3 +384,83 @@ Linux_arm64-android:
 	GOARCH=arm64 GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_v$(VERSION)_$@/$(NAME) cmd/comi/main.go 
 	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$@  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_v$(VERSION)_$@
+
+## ============================================================================
+## Debian Package (.deb) Build
+## ============================================================================
+## Usage:
+##   make deb-amd64          - Build amd64 .deb package
+##   make deb-arm64          - Build arm64 .deb package
+##   make deb-all            - Build all .deb packages
+## ============================================================================
+
+.PHONY: deb-amd64 deb-arm64 deb-all deb-clean
+
+DEB_NAME := comigo
+DEB_MAINTAINER := Comigo Project <www.bailin.tv@gmail.com>
+DEB_DESCRIPTION := Comic/Book reader server supporting ZIP, RAR, CBZ, EPUB, PDF formats
+
+# Build amd64 .deb package
+deb-amd64:
+	@echo "==> Building amd64 .deb package..."
+	$(eval DEB_ARCH := amd64)
+	$(eval DEB_DIR := $(BINDIR)/$(NAME)_v$(VERSION)_$(DEB_ARCH))
+	@mkdir -p $(DEB_DIR)/DEBIAN
+	@mkdir -p $(DEB_DIR)/usr/bin
+	@mkdir -p $(DEB_DIR)/lib/systemd/system
+	@# Build binary
+	GOARCH=amd64 GOOS=linux $(GOBUILD) -o $(DEB_DIR)/usr/bin/$(NAME) cmd/comi/main.go
+	@# Create control file
+	@echo "Package: $(DEB_NAME)" > $(DEB_DIR)/DEBIAN/control
+	@echo "Version: $(VERSION)" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Section: web" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Priority: optional" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Architecture: $(DEB_ARCH)" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Maintainer: $(DEB_MAINTAINER)" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Description: $(DEB_DESCRIPTION)" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Homepage: https://github.com/yumenaka/comigo" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Depends: libc6" >> $(DEB_DIR)/DEBIAN/control
+	@# Copy systemd service file
+	@cp sample/systemd/comigo.service $(DEB_DIR)/lib/systemd/system/
+	@# Build .deb package with root ownership
+	dpkg-deb --root-owner-group --build $(DEB_DIR)
+	@mv $(DEB_DIR).deb $(BINDIR)/$(NAME)_v$(VERSION)_$(DEB_ARCH).deb
+	@rm -rf $(DEB_DIR)
+	@echo "==> Created $(BINDIR)/$(NAME)_v$(VERSION)_$(DEB_ARCH).deb"
+
+# Build arm64 .deb package
+deb-arm64:
+	@echo "==> Building arm64 .deb package..."
+	$(eval DEB_ARCH := arm64)
+	$(eval DEB_DIR := $(BINDIR)/$(NAME)_v$(VERSION)_$(DEB_ARCH))
+	@mkdir -p $(DEB_DIR)/DEBIAN
+	@mkdir -p $(DEB_DIR)/usr/bin
+	@mkdir -p $(DEB_DIR)/lib/systemd/system
+	@# Build binary
+	GOARCH=arm64 GOOS=linux $(GOBUILD) -o $(DEB_DIR)/usr/bin/$(NAME) cmd/comi/main.go
+	@# Create control file
+	@echo "Package: $(DEB_NAME)" > $(DEB_DIR)/DEBIAN/control
+	@echo "Version: $(VERSION)" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Section: web" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Priority: optional" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Architecture: $(DEB_ARCH)" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Maintainer: $(DEB_MAINTAINER)" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Description: $(DEB_DESCRIPTION)" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Homepage: https://github.com/yumenaka/comigo" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Depends: libc6" >> $(DEB_DIR)/DEBIAN/control
+	@# Copy systemd service file
+	@cp sample/systemd/comigo.service $(DEB_DIR)/lib/systemd/system/
+	@# Build .deb package with root ownership
+	dpkg-deb --root-owner-group --build $(DEB_DIR)
+	@mv $(DEB_DIR).deb $(BINDIR)/$(NAME)_v$(VERSION)_$(DEB_ARCH).deb
+	@rm -rf $(DEB_DIR)
+	@echo "==> Created $(BINDIR)/$(NAME)_v$(VERSION)_$(DEB_ARCH).deb"
+
+# Build all .deb packages
+deb-all: deb-amd64 deb-arm64
+	@echo "==> All .deb packages built successfully"
+
+# Clean .deb build artifacts
+deb-clean:
+	@rm -f $(BINDIR)/*.deb
+	@echo "==> Cleaned .deb packages"

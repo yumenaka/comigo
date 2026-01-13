@@ -896,5 +896,7 @@
   "delete_store_success": "Store deleted successfully",
   "rescan_store_in_progress": "Scanning store, please wait...",
   "err_rescan_store_failed": "Failed to rescan store",
-  "err_delete_store_failed": "Failed to delete store"
+  "err_delete_store_failed": "Failed to delete store",
+  "log_book_file_not_exist_skip": "Book file does not exist, skipping load: %s",
+  "log_error_deleting_orphan_metadata": "Error deleting orphan metadata file %s: %s"
 }

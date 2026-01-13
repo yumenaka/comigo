@@ -10,7 +10,7 @@
 ## 2. 跨平台编译（assets/makefiles/cross-compile.mk）
 ##
 ## 常用命令：
-##   make all              - 编译所有平台（CGO 版本）+App 并生成 MD5 校验
+##   make all              - 编译所有平台（CGO 版本）+App 并生成校验
 ##
 ## 【跨平台编译】
 ##   make compileAll_CGO   - 编译所有平台的 CGO 版本
@@ -31,6 +31,12 @@
 ##   make docker-buildx    - 构建并推送多平台 Docker 镜像（需要 docker login）
 ##   make docker-test      - 本地测试 Docker 镜像
 ##   make docker-clean     - 清理 Docker 镜像
+##
+## 【Debian 包】macos 需要 brew install dpkg
+##   make deb-amd64        - 构建 amd64 架构的 .deb 包
+##   make deb-arm64        - 构建 arm64 架构的 .deb 包
+##   make deb-all          - 构建所有架构的 .deb 包
+##   make deb-clean        - 清理 .deb 包
 ##
 ## 【其他】
 ##   make -n <target>      - 打印编译命令而不实际执行（用于调试）
