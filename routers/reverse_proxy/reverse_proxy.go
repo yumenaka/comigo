@@ -34,11 +34,6 @@ var (
 // ProxyHandler 处理反向代理请求
 func ProxyHandler(c echo.Context) error {
 	req := c.Request()
-	cfg := config.GetCfg()
-	// 安全检查：仅在调试模式下启用此功能
-	if !cfg.Debug {
-		return echo.NewHTTPError(http.StatusNotFound, "not found")
-	}
 	// 安全检查：只允许 /yumenaka/*
 	if !strings.HasPrefix(req.URL.Path, allowedPrefix) {
 		return echo.NewHTTPError(http.StatusNotFound, "not found")
@@ -75,10 +70,13 @@ func ProxyHandler(c echo.Context) error {
 		// /yumenaka/xxx -> https://github.com/yumenaka/xxx
 		target = githubBase + path
 	}
-
 	// 替换 URL 中的 "latest" 为当前版本号
-	// 支持 releases/download/latest/... 和文件名中的 _latest_ 格式
-	target = replaceLatestWithVersion(target)
+	// yumenaka/comigo/releases/download/v1.2.4/comi_v1.2.4_MacOS_arm64.tar.gz
+	// ->
+	// yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz
+	if strings.Contains(target, "latest") {
+		target = replaceLatestWithVersion(target)
+	}
 
 	if req.URL.RawQuery != "" {
 		target += "?" + req.URL.RawQuery

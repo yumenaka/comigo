@@ -32,10 +32,10 @@ var RootCmd = &cobra.Command{
 		cfg := config.GetCfg()
 		// 默认启用几个内置插件
 		if cfg.EnablePlugin {
-			cfg.EnabledPluginList = []string{"auto_flip", "auto_scroll"}
+			cfg.EnabledPluginList = append(cfg.EnabledPluginList, "auto_flip", "auto_scroll")
 		}
 		if strings.Contains(cfg.Host, "comigo.xyz") {
-			cfg.EnabledPluginList = []string{"auto_flip", "auto_scroll", "comigo_xyz"}
+			cfg.EnabledPluginList = append(cfg.EnabledPluginList, "comigo_xyz")
 		}
 		// 设置临时文件夹
 		config.AutoSetCacheDir()
