@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -32,6 +33,9 @@ var RootCmd = &cobra.Command{
 		// 默认启用几个内置插件
 		if cfg.EnablePlugin {
 			cfg.EnabledPluginList = []string{"auto_flip", "auto_scroll"}
+		}
+		if strings.Contains(cfg.Host, "comigo.xyz") {
+			cfg.EnabledPluginList = []string{"auto_flip", "auto_scroll", "comigo_xyz"}
 		}
 		// 设置临时文件夹
 		config.AutoSetCacheDir()
