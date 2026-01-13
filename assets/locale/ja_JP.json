@@ -896,5 +896,7 @@
   "delete_store_success": "書庫が正常に削除されました",
   "rescan_store_in_progress": "書庫をスキャンしています。お待ちください...",
   "err_rescan_store_failed": "書庫の再スキャンに失敗しました",
-  "err_delete_store_failed": "書庫の削除に失敗しました"
+  "err_delete_store_failed": "書庫の削除に失敗しました",
+  "log_book_file_not_exist_skip": "書籍ファイルが存在しないため、読み込みをスキップしました: %s",
+  "log_error_deleting_orphan_metadata": "孤立したメタデータファイル %s の削除エラー: %s"
 }

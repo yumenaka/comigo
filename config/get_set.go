@@ -19,12 +19,25 @@ func CopyCfg() Config {
 }
 
 // GetConfigDir 获取配置文件所在目录
+// 优先级：1. 用户指定的配置文件路径 2. COMIGO_CONFIG_DIR 环境变量 3. 用户主目录 4. 临时目录
 func GetConfigDir() (dir string, err error) {
 	// 如果配置文件存在
 	if cfg.ConfigFile != "" && tools.PathExists(cfg.ConfigFile) {
 		return filepath.Dir(cfg.ConfigFile), nil
 	}
-	//获取用户主目录
+
+	// 检查 COMIGO_CONFIG_DIR 环境变量（适用于 Docker 等容器环境）
+	if envConfigDir := os.Getenv("COMIGO_CONFIG_DIR"); envConfigDir != "" {
+		// 创建目录（如果不存在）
+		err = os.MkdirAll(envConfigDir, os.ModePerm)
+		if err != nil {
+			logger.Infof(locale.GetString("log_failed_to_create_config_dir"), err)
+			return "", err
+		}
+		return envConfigDir, nil
+	}
+
+	// 获取用户主目录
 	home, err := os.UserHomeDir()
 	if err != nil {
 		// 如果获取Home失败，使用临时目录

@@ -213,6 +213,16 @@ func (ramStore *StoreInRam) LoadBooks() error {
 				}
 				continue // 继续处理其他文件
 			}
+			// 检查书籍文件或目录是否存在，如果不存在则跳过加载并删除元数据文件
+			if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
+				logger.Infof(locale.GetString("log_book_file_not_exist_skip"), book.BookPath)
+				// 删除不存在书籍的元数据文件
+				errDel := os.Remove(filePath)
+				if errDel != nil {
+					logger.Infof(locale.GetString("log_error_deleting_orphan_metadata"), fileName, errDel)
+				}
+				continue // 跳过不存在的书籍
+			}
 			// 添加书籍到内存书库
 			err = ramStore.StoreBook(&book)
 			if err != nil {

@@ -1,0 +1,17 @@
+[Unit]
+Description=Comigo - Comic/Book Reader Server
+Documentation=https://github.com/yumenaka/comigo
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/comi /path/to/your/books
+Environment="COMIGO_PORT=1234"
+Environment="COMIGO_LANGUAGE=auto"
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

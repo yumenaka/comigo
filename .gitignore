@@ -36,7 +36,8 @@ cache
 main
 *.DS_Store
 *comigo.yaml
-*comigo.ini
+*comigo
+*comigo.exe
 *comigo.db
 *.local
 *.lockb
