@@ -14,7 +14,7 @@ MAIN_FILE_DIR := ./
 # 覆盖版本号，只有 string 可以直接覆盖 包路径必须和 go list 输出的完全一致，需要带 module 路径
 # -trimpath 去掉源码绝对路径，比如构建机目录
 # -ldflags 指定编译参数。-s 去掉符号信息  -w去掉调试信息 减小二进制体积
-GOBUILD=go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'"
+GOBUILD=go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=v${VERSION}'"
 
 ifeq ($(OS), Darwin)
   MD5_UTIL = md5
@@ -92,7 +92,7 @@ endif
 
 windows_x86_64_cgo_docker:
 	cp resource.syso.windows_amd64 resource.syso
-	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'" -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
+	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=v${VERSION}'" -o $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
 	tar --directory=$(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE).tar.gz $(NAME).exe
 	rm -rf  $(BINDIR)/$(NAME)_v$(VERSION)_$(FILE_LABLE)
 	rm   resource.syso
