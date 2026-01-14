@@ -57,13 +57,12 @@ COPY --from=frontend-builder /build/assets/ ./assets/
 RUN go run github.com/a-h/templ/cmd/templ@latest generate
 
 # 编译 Go 程序
-# CGO_ENABLED=0: 禁用 CGO，生成静态链接的二进制文件
 # -trimpath: 去掉源码绝对路径
 # -ldflags: -s 去掉符号信息，-w 去掉调试信息，减小二进制体积
 RUN if [ -z "$VERSION" ]; then \
         VERSION=$(grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' config/version.go | head -1); \
     fi && \
-    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath \
     -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'" \
     -o /build/comigo \
