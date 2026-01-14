@@ -8,8 +8,6 @@
 #   重启服务: docker-compose restart
 # ============================================================================
 
-version: '3.8'
-
 services:
   comigo:
     # 使用预构建的镜像
@@ -36,9 +34,6 @@ services:
       # 服务端口（默认 1234）
       - COMIGO_PORT=1234
 
-      # 配置文件目录（用于容器化部署）
-      - COMIGO_CONFIG_DIR=/config
-
       # 用户认证（可选，启用后需要登录）
       # - COMIGO_USERNAME=admin
       # - COMIGO_PASSWORD=your_secure_password
@@ -58,16 +53,6 @@ services:
       # 最少图片数量（默认 1）
       # - COMIGO_MIN_IMAGE=1
       
-      
-      # 自动重新扫描间隔（分钟，0 为禁用）
-      # - COMIGO_AUTO_RESCAN_MIN=0
-      
-      # 只在本机提供服务，不对外共享
-      # - COMIGO_LOCAL=false
-      
-      # 启用插件系统
-      # - COMIGO_ENABLE_PLUGIN=true
-      
       # 时区设置
       - TZ=Asia/Shanghai
     
@@ -79,13 +64,8 @@ services:
       
       # 配置文件目录（可选）
       # 如果需要持久化配置文件，可以挂载此目录
-      # 配置文件路径: /config/config.toml
-      - ./config:/config
-      
-      # 自定义插件目录（可选）
-      # 如果有自定义插件，可以挂载到项目的插件目录
-      # 注意：需要在配置中启用插件并指定插件目录
-      # - ./plugins:/data/plugins
+      # 配置文件路径: /root/.config/comigo/config.toml
+      - ./config:/root/.config/comigo
     
     # 健康检查
     healthcheck:
@@ -94,28 +74,7 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
-    
-    # 资源限制（可选）
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '2'
-    #       memory: 1G
-    #     reservations:
-    #       cpus: '0.5'
-    #       memory: 256M
-    
+
     # 网络配置
     # networks:
     #   - comigo-network
-
-# 自定义网络（可选）
-# networks:
-#   comigo-network:
-#     driver: bridge
-
-# 命名卷（可选）
-# volumes:
-#   comigo-data:
-#   comigo-config:
-#   comigo-cache:

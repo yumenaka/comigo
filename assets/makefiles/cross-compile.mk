@@ -292,9 +292,11 @@ Windows_x86_64:
 Windows_x86_64_full:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
+	cp resource.syso cmd/comigo/resource.syso
 	GOARCH=amd64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@/$(FULL_NAME).exe cmd/comigo/main.go
 	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
 	rmdir $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
+	rm cmd/comigo/resource.syso
 	rm  resource.syso
 
 # 32位Windows
@@ -312,9 +314,11 @@ Windows_i386:
 Windows_i386_full:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
 	GOARCH=386 GOOS=windows go generate
+	cp resource.syso cmd/comigo/resource.syso
 	GOARCH=386 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui  -o $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@/$(FULL_NAME).exe cmd/comigo/main.go
 	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
 	rmdir $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
+	rm cmd/comigo/resource.syso
 	rm   resource.syso
 
 #windows arm64
@@ -326,10 +330,14 @@ Windows_arm64:
 
 # windows arm64 + system_tray
 Windows_arm64_full:
+	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
+	GOARCH=arm64 GOOS=windows go generate
+	cp resource.syso cmd/comigo/resource.syso
 	GOARCH=arm64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@/$(FULL_NAME).exe cmd/comigo/main.go
 	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
 	rmdir $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@
-	rm -rf $(BINDIR)/$(FULL_NAME)_v$(VERSION)_$@:
+	rm cmd/comigo/resource.syso
+	rm resource.syso
 
 #Linux_armv6 RaspberryPi1,2,zero,GOARM=6：仅使用 VFPv1；交叉编译时默认；通常是 ARM11 或更好的内核（也支持 VFPv2 或更好的内核）
 Linux_armv6:

@@ -9,7 +9,7 @@
 
 ![Windowsサンプル](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windowsサンプル")
 
-[English](https://github.com/yumenaka/comigo/blob/master/README.md) | [中文文档](https://github.com/yumenaka/comigo/blob/master/README_CN.md) |  [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
+[中文文档](https://github.com/yumenaka/comigo/blob/master/README.md) | [English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
 
 ## 主な機能
 
@@ -52,6 +52,48 @@ go install github.com/yumenaka/comigo/cmd/comi@latest
 | Linux 64bit     | Linux_x86_64.tar.gz |
 | Linux ARM 32bit | Linux_arm.tar.gz    |
 | Linux ARM 64bit | Linux_arm64.tar.gz  |
+
+## Docker デプロイ
+
+### クイックスタート
+
+```bash
+# 最新イメージをプルして実行
+docker run -d \
+  --name comigo \
+  -p 1234:1234 \
+  -v /path/to/your/books:/data \
+  yumenaka/comigo:latest
+```
+
+`http://localhost:1234` にアクセスして使用を開始します。
+
+### Docker Compose を使用
+
+1. [`docker-compose.yml`](sample/docker/docker-compose.yml) ファイルをダウンロード
+2. 必要に応じて設定を編集
+3. サービスを開始：
+
+```bash
+docker-compose up -d
+```
+
+### サポートされているプラットフォーム
+
+- `linux/amd64` - 標準的な x86_64 サーバー
+- `linux/arm64` - ARM64 サーバー（Raspberry Pi 4/5）
+- `linux/arm/v7` - ARMv7 デバイス（Raspberry Pi 2-4）
+
+### 環境変数
+
+| 変数名 | 説明 | デフォルト値 |
+|--------|------|-------------|
+| `COMIGO_PORT` | サービスポート | `1234` |
+| `COMIGO_USERNAME` | ログインユーザー名（オプション） | - |
+| `COMIGO_PASSWORD` | ログインパスワード（オプション） | - |
+| `COMIGO_ENABLE_UPLOAD` | ファイルアップロードを有効化 | `true` |
+
+詳細については、完全な [Docker ドキュメント](sample/docker/README.md) をご覧ください。
 
 ## 使用方法
 

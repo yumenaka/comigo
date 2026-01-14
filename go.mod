@@ -30,7 +30,6 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.6.1
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
-	github.com/sanity-io/litter v1.5.8
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/sirupsen/logrus v1.9.3
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
