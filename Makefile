@@ -1,6 +1,3 @@
-# Makefile for cross-compilation
-# Window icon Need：go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-
 ## ============================================================================
 ## 使用说明
 ## ============================================================================
@@ -26,7 +23,7 @@
 ##   make icon             - 仅生成 App 图标
 ##   make clean-app        - 清理 macOS App 构建文件
 ##
-## 【Docker 镜像】
+## 【Docker 镜像】https://hub.docker.com/r/yumenaka/comigo
 ##   make docker-build     - 构建 Docker 镜像（本地单平台）
 ##   make docker-buildx    - 构建并推送多平台 Docker 镜像（需要 docker login）
 ##   make docker-test      - 本地测试 Docker 镜像
@@ -40,7 +37,7 @@
 ##
 ## 【其他】
 ##   make -n <target>      - 打印编译命令而不实际执行（用于调试）
-##   make clean            - 清理所有构建文件
+##   make clean            - 清理构建文件（不含 Docker 镜像）
 ##
 ## ============================================================================
 
@@ -151,6 +148,7 @@ docker-help:
 
 .PHONY: clean
 
-# 清理所有构建文件（包括 macOS App、跨平台编译和 Docker 镜像）
-clean: clean-app docker-clean
+# 清理所有构建文件（包括 macOS App 和跨平台编译）
+# 注意：不包括 Docker 镜像，如需清理请使用 make docker-clean
+clean: clean-app
 	@echo "==> 清理完成"

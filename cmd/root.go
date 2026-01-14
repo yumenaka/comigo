@@ -33,10 +33,12 @@ var RootCmd = &cobra.Command{
 		// 默认启用几个内置插件
 		if cfg.EnablePlugin {
 			cfg.EnabledPluginList = append(cfg.EnabledPluginList, "auto_flip", "auto_scroll")
+			if cfg.Debug || strings.Contains(cfg.Host, "comigo.xyz") {
+				cfg.EnabledPluginList = append(cfg.EnabledPluginList, "comigo_xyz")
+			}
+			logger.Infof("cfg.Host: %v , cfg.EnabledPluginList: %v ", cfg.Host, cfg.EnabledPluginList)
 		}
-		if strings.Contains(cfg.Host, "comigo.xyz") {
-			cfg.EnabledPluginList = append(cfg.EnabledPluginList, "comigo_xyz")
-		}
+
 		// 设置临时文件夹
 		config.AutoSetCacheDir()
 		// 在 Windows 上，根据命令行参数注册/卸载资源管理器文件夹右键菜单

@@ -90,8 +90,8 @@ RUN apk add --no-cache ca-certificates tzdata wget && \
     rm -rf /var/cache/apk/*
 
 # 创建必要的目录
-# /config 用于存放配置文件，/data 用于存放书库数据
-RUN mkdir -p /data /config
+# 配置文件目录使用标准的 HomeDirectory 路径
+RUN mkdir -p /data /root/.config/comigo
 
 WORKDIR /app
 
@@ -106,14 +106,12 @@ RUN chmod +x /app/comigo
 EXPOSE 1234
 
 # 设置环境变量
-# COMIGO_CONFIG_DIR 指定配置文件目录，便于容器化部署时挂载配置
 ENV COMIGO_PORT=1234 \
     COMIGO_ENABLE_UPLOAD=true \
-    COMIGO_LANGUAGE=auto \
-    COMIGO_CONFIG_DIR=/config
+    COMIGO_LANGUAGE=auto
 
 # 数据卷
-VOLUME ["/data", "/config"]
+VOLUME ["/data", "/root/.config/comigo"]
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

@@ -46,7 +46,7 @@ func SetCwdAsScanPathIfNeed() {
 func AddStoreUrls(urls []string) {
 	for key, url := range urls {
 		if config.GetCfg().Debug {
-			logger.Infof(locale.GetString("log_args_index")+"\n", key, url)
+			logger.Infof(locale.GetString("log_args_index"), key, url)
 		}
 		err := config.GetCfg().AddStoreUrl(url)
 		if err != nil {
