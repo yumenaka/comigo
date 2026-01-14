@@ -24,34 +24,47 @@
 
 ## インストール方法
 
-### ワンクリックインストール（推奨）
+### GUI版（初心者におすすめ）
+
+| システム | ダウンロード |
+|----------|-------------|
+| Windows 64bit | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
+| macOS (Intel/Apple Silicon) | [Comigo.app.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo.app.zip) |
+
+> 💡 **説明**：GUI版はシステムトレイアイコンを提供し、バックグラウンドで実行できます。Windows: ダブルクリックで実行; macOS: Applicationsフォルダにドラッグ。
+
+### CLI版のワンクリックインストール
 
 ```bash
 # 推奨：
 bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 
-# China本土のユーザー向け：
+# 中国本土のユーザー向け：
 bash <(curl -s https://comigo.xyz/get.sh) --cn
 
 # Golang環境（go 1.23以上）が設定済みの場合：
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
 
+### CLI版
+
+| システム | ダウンロード |
+|---------|-------------|
+| Windows 64bit | [comi_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_x86_64.zip) |
+| Windows ARM | [comi_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_arm64.zip) |
+| macOS Intel | [comi_latest_MacOS_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_x86_64.tar.gz) |
+| macOS Apple Silicon | [comi_latest_MacOS_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz) |
+| Linux 64bit | [comi_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_x86_64.tar.gz) |
+| Linux ARM64 | [comi_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_arm64.tar.gz) |
+| Linux ARM32 | [comi_latest_Linux_armv7.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_armv7.tar.gz) |
+| Debian/Ubuntu 64bit | [comi_latest_amd64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_amd64.deb) |
+| Debian/Ubuntu ARM64 | [comi_latest_arm64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_arm64.deb) |
+
+> 💡 **説明**：CLI版はサーバーデプロイと上級ユーザーに適しています。ダウンロード後、手動でシステムPATHに追加する必要があります。
+
 ### 手動インストール
 
 [Releases ページ](https://github.com/yumenaka/comigo/releases) から最新バージョンをダウンロードし、実行ファイルをシステムの `PATH` 環境変数に追加してください。
-
-### バージョン選択ガイド
-
-| システム            | ダウンロードバージョン         |
-|-----------------|---------------------|
-| Windows 64bit   | Windows_x86_64.zip  |
-| Windows ARM版    | Windows_arm64.zip   |
-| MacOS Appleチップ  | MacOS_arm64.tar.gz  |
-| MacOS Intelチップ  | MacOS_x86_64.tar.gz |
-| Linux 64bit     | Linux_x86_64.tar.gz |
-| Linux ARM 32bit | Linux_arm.tar.gz    |
-| Linux ARM 64bit | Linux_arm64.tar.gz  |
 
 ## Docker デプロイ
 

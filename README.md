@@ -28,7 +28,16 @@
 
 ## 安装指南
 
-### 一键安装（推荐）
+### 托盘版（推荐）
+
+| 系统 | 下载链接 |
+|------|---------|
+| Windows 64位 | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
+| macOS (Intel/Apple芯片) | [Comigo.app.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo.app.zip) |
+
+> 💡 **说明**：托盘版提供系统托盘图标，可最小化到后台运行。Windows 用户双击运行，macOS 用户拖入 Applications 文件夹。
+
+### 一键安装(命令行版)
 
 ```bash
 # 中国大陆用户推荐使用中转脚本：
@@ -41,25 +50,28 @@ bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
 
-### 手动安装
+### 下载命令行版
 
-在 [Releases 页面](https://github.com/yumenaka/comigo/releases) 下载最新版本，并将可执行文件添加到系统的 `PATH` 环境变量中。
+| 系统类型 | 下载链接 |
+|---------|---------|
+| Windows 64位 | [comi_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_x86_64.zip) |
+| Windows ARM | [comi_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_arm64.zip) |
+| macOS Intel | [comi_latest_MacOS_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_x86_64.tar.gz) |
+| macOS Apple芯片 | [comi_latest_MacOS_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz) |
+| Linux 64位 | [comi_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_x86_64.tar.gz) |
+| Linux ARM64 | [comi_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_arm64.tar.gz) |
+| Linux ARM32 | [comi_latest_Linux_armv7.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_armv7.tar.gz) |
+| Debian/Ubuntu 64位 | [comi_latest_amd64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_amd64.deb) |
+| Debian/Ubuntu ARM64 | [comi_latest_arm64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_arm64.deb) |
 
-### 版本选择指南
+> 💡 **说明**：命令行版适合服务器部署和高级用户。下载后需手动添加到系统 PATH 环境变量。
 
-| 系统类型               | 下载版本                             |
-|--------------------|----------------------------------|
-| Windows 64位 托盘版    | *_Windows_x86_64_full.zip |
-| MacOS  M芯片/Intel芯片 托盘版 |  Comigo.app.zip  |
-| Windows 64位 命令行    | *_Windows_x86_64.zip             |
-| Windows ARM版  命令行  | *_Windows_arm64.zip              |
-| MacOS Apple芯片 命令行  | *_MacOS_arm64.tar.gz             |
-| MacOS Intel芯片 命令行  | *_MacOS_x86_64.tar.gz            |
-| Linux 64位 命令行      | *_Linux_x86_64.tar.gz            |
-| Linux ARM 32位  命令行 | *_Linux_arm.tar.gz               |
-| Linux ARM 64位 命令行  | *_Linux_arm64.tar.gz             |
+### 发布页
 
-## Docker 部署
+也可以在 [Releases 页面](https://github.com/yumenaka/comigo/releases) 下载最新版本，并将可执行文件添加到系统的 `PATH` 环境变量中。
+
+
+## 使用Docker 部署
 
 ### 快速开始
 
@@ -83,22 +95,6 @@ docker run -d \
 ```bash
 docker-compose up -d
 ```
-
-### 支持的平台
-
-- `linux/amd64` - 标准 x86_64 服务器
-- `linux/arm64` - ARM64 服务器（树莓派 4/5）
-- `linux/arm/v7` - ARMv7 设备（树莓派 2-4）
-
-### 环境变量配置
-
-| 变量名 | 说明 | 默认值 |
-|--------|------|--------|
-| `COMIGO_PORT` | 服务端口 | `1234` |
-| `COMIGO_USERNAME` | 登录用户名（可选） | - |
-| `COMIGO_PASSWORD` | 登录密码（可选） | - |
-| `COMIGO_ENABLE_UPLOAD` | 启用文件上传 | `true` |
-| `COMIGO_LANGUAGE` | 界面语言 (auto/zh/en/ja) | `auto` |
 
 更多详细说明请查看完整的 [Docker 使用文档](sample/docker/README.md)。
 
