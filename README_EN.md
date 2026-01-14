@@ -28,34 +28,47 @@
 
 ## Installation Guide
 
-### Installation Script
+### GUI Version (Recommended for Beginners)
+
+| System | Download |
+|--------|----------|
+| Windows 64-bit | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
+| macOS (Intel/Apple Silicon) | [Comigo.app.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo.app.zip) |
+
+> 💡 **Note**: GUI version provides system tray icon, can run minimized in background. Windows: Double-click to run; macOS: Drag to Applications folder.
+
+### Quick Install for CLI
 
 ```bash
-#  Recommended:
+# Recommended:
 bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 
 # For users in Mainland China:
 bash <(curl -s https://comigo.xyz/get.sh) --cn
 
-# If you have Golang  (go 1.23 or higher):
+# If you have Golang (go 1.23 or higher):
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
+
+### CLI Version
+
+| System | Download |
+|--------|----------|
+| Windows 64-bit | [comi_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_x86_64.zip) |
+| Windows ARM | [comi_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_arm64.zip) |
+| macOS Intel | [comi_latest_MacOS_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_x86_64.tar.gz) |
+| macOS Apple Silicon | [comi_latest_MacOS_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz) |
+| Linux 64-bit | [comi_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_x86_64.tar.gz) |
+| Linux ARM64 | [comi_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_arm64.tar.gz) |
+| Linux ARM32 | [comi_latest_Linux_armv7.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_armv7.tar.gz) |
+| Debian/Ubuntu 64-bit | [comi_latest_amd64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_amd64.deb) |
+| Debian/Ubuntu ARM64 | [comi_latest_arm64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_arm64.deb) |
+
+> 💡 **Note**: CLI version suitable for server deployment and advanced users. Manual PATH configuration required after download.
 
 ### Manual Installation
 
 Download the latest version from the [Releases page](https://github.com/yumenaka/comigo/releases) and add the executable to your system's `PATH` environment variable.
-
-### Version Selection Guide
-
-| System              | Download            |
-|---------------------|---------------------|
-| Windows 64-bit      | Windows_x86_64.zip  |
-| Windows ARM         | Windows_arm64.zip   |
-| MacOS Apple Silicon | MacOS_arm64.tar.gz  |
-| MacOS Intel         | MacOS_x86_64.tar.gz |
-| Linux 64-bit        | Linux_x86_64.tar.gz |
-| Linux ARM 32-bit    | Linux_arm.tar.gz    |
-| Linux ARM 64-bit    | Linux_arm64.tar.gz  |
 
 ## Docker Deployment
 

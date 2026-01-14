@@ -85,7 +85,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Windows_x86_64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-main-debian7 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-main-debian12 \
 	 --build-cmd "make windows_x86_64_cgo_docker VERSION=$(VERSION)" \
 	 -p "windows/amd64"
 endif
@@ -109,7 +109,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Windows_i386" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-main-debian7 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-main-debian12 \
 	 --build-cmd "make windows_i386_cgo_docker VERSION=$(VERSION)" \
 	 -p "windows/386"
 endif
@@ -177,7 +177,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="MacOS_x86_64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-darwin \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-darwin-debian12 \
 	 --build-cmd "make darwin_x86_64_cgo_docker VERSION=$(VERSION)" \
 	 -p "darwin/amd64"
 endif
@@ -199,7 +199,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="MacOS_arm64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-darwin-arm64-debian10 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-darwin-arm64-debian12 \
 	 --build-cmd "make darwin_arm64_cgo_docker VERSION=$(VERSION)" \
 	 -p "darwin/arm64"
 endif
