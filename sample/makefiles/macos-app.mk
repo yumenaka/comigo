@@ -136,13 +136,13 @@ version: $(INFO_PLIST_TMP)
 $(BUILD_DIR)/$(MAC_APP_NAME)_amd64: $(VERSION_GO)
 	@echo "==> 构建 amd64 版本..."
 	@mkdir -p $(BUILD_DIR)
-	@GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=v$(VERSION)'" -o $@ ./cmd/comigo
+	@GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=$(VERSION)'" -o $@ ./cmd/comigo
 
 # 构建 arm64 版本（使用 CGO 和版本号）
 $(BUILD_DIR)/$(MAC_APP_NAME)_arm64: $(VERSION_GO)
 	@echo "==> 构建 arm64 版本..."
 	@mkdir -p $(BUILD_DIR)
-	@GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=v$(VERSION)'" -o $@ ./cmd/comigo
+	@GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=$(VERSION)'" -o $@ ./cmd/comigo
 
 # 用 lipo 合成 universal binary
 $(BUILD_DIR)/$(MAC_APP_NAME): $(BUILD_DIR)/$(MAC_APP_NAME)_amd64 $(BUILD_DIR)/$(MAC_APP_NAME)_arm64
