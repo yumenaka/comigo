@@ -73,76 +73,6 @@ md5SumThemAll:
 ## 查看编译用Docker镜像信息：
 # https://github.com/elastic/golang-crossbuild/releases
 
-# make Windows_x86_64_cgo VERSION=v1.0.5
-Windows_x86_64_cgo:
-ifndef DOCKER
-	$(error "No docker found! Please install docker to build Windows_x86_64_cgo")
-endif
-ifdef DOCKER
-	docker run -it  \
-	 -v "$$PWD":/go/src/github.com/user/go-project \
-	 -w /go/src/github.com/user/go-project \
-	 -e CGO_ENABLED=1 \
-	 -e VERSION=$(VERSION) \
-	 -e FILE_LABLE="Windows_x86_64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-main-debian12 \
-	 --build-cmd "make windows_x86_64_cgo_docker VERSION=$(VERSION)" \
-	 -p "windows/amd64"
-endif
-
-windows_x86_64_cgo_docker:
-	cp resource.syso.windows_amd64 resource.syso
-	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'" -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME).exe
-	rm -rf  $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
-	rm   resource.syso
-
-#make Windows_i386_cgo VERSION=v1.0.5
-Windows_i386_cgo:
-ifndef DOCKER
-	$(error "No docker found! Please install docker to build Windows_i386_cgo")
-endif
-ifdef DOCKER
-	docker run -it  \
-	 -v "$$PWD":/go/src/github.com/user/go-project \
-	 -w /go/src/github.com/user/go-project \
-	 -e CGO_ENABLED=1 \
-	 -e VERSION=$(VERSION) \
-	 -e FILE_LABLE="Windows_i386" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-main-debian12 \
-	 --build-cmd "make windows_i386_cgo_docker VERSION=$(VERSION)" \
-	 -p "windows/386"
-endif
-
-windows_i386_cgo_docker:
-	cp resource.syso.windows_386 resource.syso
-	CGO_ENABLED=1 GOOS=windows GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME).exe
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
-	rm   resource.syso
-
-#make Windows_arm64_cgo VERSION=v1.0.5
-Windows_arm64_cgo:
-ifndef DOCKER
-	$(error "No docker found! Please install docker to build Windows_arm64_cgo")
-endif
-ifdef DOCKER
-	docker run -it  \
-	 -v "$$PWD":/go/src/github.com/user/go-project \
-	 -w /go/src/github.com/user/go-project \
-	 -e CGO_ENABLED=1 \
-	 -e VERSION=$(VERSION) \
-	 -e FILE_LABLE="Windows_arm64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.5-windows-arm64-debian12 \
-	 --build-cmd "make windows_arm64_cgo_docker VERSION=$(VERSION)" \
-	 -p "windows/arm64"
-endif
-
-windows_arm64_cgo_docker:
-	CGO_ENABLED=1 GOOS=windows GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME).exe cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME).exe
-	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
-
 #  make Linux_armv7_cgo VERSION=v1.0.5
 Linux_armv7_cgo:
 ifndef DOCKER
@@ -419,8 +349,10 @@ deb-amd64:
 	@# Build binary
 	GOARCH=amd64 GOOS=linux $(GOBUILD) -o $(DEB_DIR)/usr/bin/$(NAME) cmd/comi/main.go
 	@# Create control file
+	@# Debian 包版本号必须是纯数字格式，去掉 v 前缀
+	$(eval DEB_VERSION := $(patsubst v%,%,$(VERSION)))
 	@echo "Package: $(DEB_NAME)" > $(DEB_DIR)/DEBIAN/control
-	@echo "Version: $(VERSION)" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Version: $(DEB_VERSION)" >> $(DEB_DIR)/DEBIAN/control
 	@echo "Section: web" >> $(DEB_DIR)/DEBIAN/control
 	@echo "Priority: optional" >> $(DEB_DIR)/DEBIAN/control
 	@echo "Architecture: $(DEB_ARCH)" >> $(DEB_DIR)/DEBIAN/control
@@ -447,8 +379,10 @@ deb-arm64:
 	@# Build binary
 	GOARCH=arm64 GOOS=linux $(GOBUILD) -o $(DEB_DIR)/usr/bin/$(NAME) cmd/comi/main.go
 	@# Create control file
+	@# Debian 包版本号必须是纯数字格式，去掉 v 前缀
+	$(eval DEB_VERSION := $(patsubst v%,%,$(VERSION)))
 	@echo "Package: $(DEB_NAME)" > $(DEB_DIR)/DEBIAN/control
-	@echo "Version: $(VERSION)" >> $(DEB_DIR)/DEBIAN/control
+	@echo "Version: $(DEB_VERSION)" >> $(DEB_DIR)/DEBIAN/control
 	@echo "Section: web" >> $(DEB_DIR)/DEBIAN/control
 	@echo "Priority: optional" >> $(DEB_DIR)/DEBIAN/control
 	@echo "Architecture: $(DEB_ARCH)" >> $(DEB_DIR)/DEBIAN/control

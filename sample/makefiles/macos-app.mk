@@ -28,7 +28,7 @@ VERSION_GO := config/version.go
 ifndef VERSION
   VERSION := $(shell grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' $(VERSION_GO) | head -1)
   ifeq ($(VERSION),)
-    VERSION := 1.1.5
+    VERSION := v1.1.5
   endif
 endif
 
@@ -126,9 +126,11 @@ $(INFO_PLIST_TMP): $(INFO_PLIST) $(VERSION_GO)
 	@echo "==> 从 $(VERSION_GO) 提取版本号: $(VERSION)"
 	@mkdir -p $(BUILD_DIR)
 	@cp $(INFO_PLIST) $(INFO_PLIST_TMP)
-	@plutil -replace CFBundleVersion -string "$(VERSION)" $(INFO_PLIST_TMP)
-	@plutil -replace CFBundleShortVersionString -string "$(VERSION)" $(INFO_PLIST_TMP)
-	@echo "==> 已更新 Info.plist 版本号为 $(VERSION)"
+	@# macOS Info.plist 版本号必须是纯数字格式，去掉 v 前缀
+	$(eval MAC_VERSION := $(patsubst v%,%,$(VERSION)))
+	@plutil -replace CFBundleVersion -string "$(MAC_VERSION)" $(INFO_PLIST_TMP)
+	@plutil -replace CFBundleShortVersionString -string "$(MAC_VERSION)" $(INFO_PLIST_TMP)
+	@echo "==> 已更新 Info.plist 版本号为 $(MAC_VERSION)"
 
 version: $(INFO_PLIST_TMP)
 
