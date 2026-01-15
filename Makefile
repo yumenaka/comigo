@@ -23,7 +23,7 @@
 ##   make icon             - 仅生成 App 图标
 ##   make clean-app        - 清理 macOS App 构建文件
 ##
-## 【Docker 镜像】https://hub.docker.com/r/yumenaka/comigo
+## 【Docker 镜像】https://hub.docker.com/repository/docker/yumenaka/comigo/image-management
 ##   make docker-build     - 构建 Docker 镜像（本地单平台）
 ##   make docker-buildx    - 构建并推送多平台 Docker 镜像（需要 docker login）
 ##   make docker-test      - 本地测试 Docker 镜像
