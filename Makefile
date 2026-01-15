@@ -3,8 +3,8 @@
 ## ============================================================================
 ##
 ## 本 Makefile 已拆分为模块化结构，主要功能分为两部分：
-## 1. macOS App 打包（assets/makefiles/macos-app.mk）
-## 2. 跨平台编译（assets/makefiles/cross-compile.mk）
+## 1. macOS App 打包（sample/makefiles/macos-app.mk）
+## 2. 跨平台编译（sample/makefiles/cross-compile.mk）
 ##
 ## 常用命令：
 ##   make all              - 编译所有平台（CGO 版本）+App 并生成校验
@@ -64,13 +64,13 @@
 ## 公共变量定义
 ## ============================================================================
 
-# 从 config/version.go 提取版本号（去掉 v 前缀）
+# 从 config/version.go 提取版本号（保留 v 前缀）
 # 如果通过命令行指定了 VERSION，则使用命令行指定的版本
 VERSION_GO := config/version.go
 ifndef VERSION
-  VERSION := $(shell grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' $(VERSION_GO) | head -1 | sed 's/^v//')
+  VERSION := $(shell grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' $(VERSION_GO) | head -1)
   ifeq ($(VERSION),)
-    VERSION := 1.0.0
+    VERSION := v1.0.0
   endif
 endif
 
@@ -82,10 +82,10 @@ export VERSION
 ## ============================================================================
 
 # 引入 macOS App 打包相关规则
-include assets/makefiles/macos-app.mk
+include sample/makefiles/macos-app.mk
 
 # 引入跨平台编译相关规则
-include assets/makefiles/cross-compile.mk
+include sample/makefiles/cross-compile.mk
 
 ## ============================================================================
 ## Docker 镜像构建目标

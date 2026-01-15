@@ -5,7 +5,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// ComigoXYZPlugin 在书架顶部添加软件项目首页功能块。需要限定域名的时候：(c.Request().Host == "comigo.xyz" || strings.HasSuffix(c.Request().Host, ".comigo.xyz"))
+// ComigoXYZPlugin 在书架底部添加软件项目首页功能块。需要限定域名的时候：(c.Request().Host == "comigo.xyz" || strings.HasSuffix(c.Request().Host, ".comigo.xyz"))
 // x-init="$nextTick(() => { $el.value = selectedIndex; })" 确保：使用 $nextTick 等待 Alpine.js 完成所有 DOM 更新（包括 x-for 生成的选项）在下一个渲染周期中强制设置 select 元素的值  这样可以保证选项已经生成后再设置默认选中值
 templ ComigoXYZPlugin(c echo.Context) {
 	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("comigo_xyz") && c.Param("id") == "" {
@@ -17,7 +17,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 		<!-- 版本号数据，通过 data 属性传递 -->
 		<div id="comigo-xyz-plugin-data" data-version={ config.GetVersion() } style="display: none;"></div>
 		<script>
-			// 等待页面加载完成后在书架顶部插入主页功能块
+			// 等待页面加载完成后在书架底部插入主页功能块
 			let retryCount = 0;
 			const maxRetries = 50; // 最多重试5秒（50 * 100ms）
 
@@ -37,7 +37,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 				}
 
 				// 检查是否已经插入过
-				if (shelfMainArea.querySelector(".comigo_plugin")) {
+				if (shelfMainArea.querySelector(".comigo_xyz_plugin")) {
 					return;
 				}
 
@@ -179,7 +179,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 				//console.log(`Comigo.xyz插件: 检测到系统 ${currentSystem.os} ${currentSystem.arch}，默认选择平台索引 ${selectedIndex}`,);
 				// 创建主页功能块
 				const homePageBlock = document.createElement("div");
-				homePageBlock.className = "comigo_plugin w-full mb-6";
+				homePageBlock.className = "comigo_plugin comigo_xyz_plugin w-full mt-2";
 				homePageBlock.setAttribute(
 					"x-data",
 					`{
@@ -332,8 +332,8 @@ templ ComigoXYZPlugin(c echo.Context) {
 					</div>
 				`;
 
-				// 在书架顶部插入主页功能块
-				shelfMainArea.insertBefore(homePageBlock, shelfMainArea.firstChild);
+				// 在书架底部插入主页功能块
+				shelfMainArea.appendChild(homePageBlock);
 
 				// 初始化Alpine.js（如果还没有初始化）
 				if (typeof Alpine !== "undefined") {
