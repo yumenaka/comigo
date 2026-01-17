@@ -119,8 +119,8 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 			logger.Infof(locale.GetString("exceeds_maximum_depth")+" %d, base: %s, scan: %s", cfg.GetMaxScanDepth(), storePathAbs, file.Path)
 			continue
 		}
-		// 如果书库里已经有这本书，跳过
-		if checkBookInStore(storePathAbs, file.Path) {
+		// 如果书库里已经有这本书(文件类型)，跳过。文件夹类型不能跳过。
+		if tools.IsFile(file.Path) && checkBookInStore(storePathAbs, file.Path) {
 			continue
 		}
 		// 扫描文件
@@ -133,7 +133,7 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 	}
 
 	if len(newBookList) > 0 {
-		logger.Infof(locale.GetString("library_new_books_found"), storePathAbs, len(newBookList))
+		logger.Infof(locale.GetString("how_many_books_update"), storePathAbs, len(newBookList))
 	}
 	AddBooksToStore(newBookList)
 	return nil

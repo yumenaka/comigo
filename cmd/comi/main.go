@@ -39,6 +39,8 @@ func main() {
 			cmd.ScanStore()
 			// 保存书籍元数据
 			cmd.SaveMetadata()
+			// 生成书组
+			model.GenerateBookGroup()
 			return nil
 		}
 
@@ -72,6 +74,8 @@ func main() {
 	cmd.ScanStore()
 	// 保存书籍元数据（包括书签）
 	cmd.SaveMetadata()
+	// 生成书组
+	model.GenerateBookGroup()
 	// 启动自动扫描（如果配置了间隔）
 	config.StartOrStopAutoRescan()
 	// 在命令行显示QRCode

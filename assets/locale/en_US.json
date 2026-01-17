@@ -39,7 +39,7 @@
   "format_customization_error": "This format does not support customization:",
   "found_config_file": "Found the configuration file:",
   "found_in_bookstore": "Found in the bookstore, skipping scan:",
-  "library_new_books_found": "Found %v new books in path %v",
+  "how_many_books_update": "Path %v updated %v books",
   "frp_command": "frpc command or frpc executable file path (default: frpc)",
   "frp_random_remote_port": "frp remote random port (40000~50000)",
   "frp_remote_port": "frp remote port. If set to -1, it uses the same port as local",

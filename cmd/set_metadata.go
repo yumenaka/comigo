@@ -36,10 +36,7 @@ func LoadMetadata() {
 		}
 		model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
 		model.ClearBookNotExist()
-		// 生成虚拟书籍组
-		if err := model.IStore.GenerateBookGroup(); err != nil {
-			logger.Infof("%s", err)
-		}
+		model.GenerateBookGroup()
 	}
 }
 
@@ -72,9 +69,5 @@ func SaveMetadata() {
 			logger.Infof(locale.GetString("log_failed_savebookstodatabase"), err)
 			return
 		}
-	}
-	// 重新生成书组
-	if err := model.IStore.GenerateBookGroup(); err != nil {
-		logger.Infof("%s", err)
 	}
 }

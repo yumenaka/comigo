@@ -3,7 +3,6 @@ package scan
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -67,10 +66,8 @@ func HandleDirectory(currentPath string, depth int) (DirNode, []string, []model.
 			foundDirs = append(foundDirs, subDirs...)
 			foundFiles = append(foundFiles, subFiles...)
 		} else {
-			// 文件：检查扩展名是否为支持的格式
-			ext := strings.ToLower(filepath.Ext(name))
-			// 非支持媒体或压缩包格式，跳过
-			if (!IsSupportMedia(ext)) && (!IsSupportFile(ext)) {
+			// 文件：检查扩展名是否为支持的格式 非支持媒体或压缩包格式，跳过
+			if (!IsSupportMedia(fullPath)) && (!IsSupportFile(fullPath)) {
 				continue
 			}
 			// 获取文件信息

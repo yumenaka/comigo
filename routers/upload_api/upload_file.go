@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
@@ -172,6 +173,7 @@ func UploadFile(c echo.Context) error {
 			})
 		}
 	}
+	model.GenerateBookGroup()
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "文件上传成功",
 		"files":   uploadedFiles,
