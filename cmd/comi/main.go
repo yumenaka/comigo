@@ -7,6 +7,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
