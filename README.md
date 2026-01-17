@@ -7,7 +7,7 @@
 
 <!--
 [![Downloads](https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success)](https://github.com/yumenaka/comigo/releases)
-<img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：简单粗暴的漫画阅读器" width="200">
+<img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：简单方便的漫画阅读器" width="200">
 -->
 </div>
 

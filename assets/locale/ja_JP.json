@@ -39,7 +39,7 @@
   "format_customization_error": "この抽出フォーマットはサポートしていません：",
   "found_config_file": "設定ファイルが見つかりました：",
   "found_in_bookstore": "本棚で見つかりました：",
-  "library_new_books_found": "パス %v で新たに %v 冊の書籍が見つかりました",
+  "how_many_books_update": "パス %v 更新 %v 冊の書籍",
   "frp_command": "frpcコマンド、またはfrpc実行ファイルのパス",
   "frp_random_remote_port": "frp リモートランダムポート(40000~50000)",
   "frp_remote_port": "frp リモートポート、-1でローカルと同じポートを使用",

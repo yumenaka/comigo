@@ -31,7 +31,9 @@ func main() {
 	cmd.ScanStore()
 	// 保存书籍元数据（包括书签）
 	cmd.SaveMetadata()
-	// 在命令行显示QRCode
+	// 生成书组
+	model.GenerateBookGroup()
+	// 在命令行显示 QRCode
 	cmd.ShowQRCode()
 	// 退出时清理临时文件的处理函数
 	cmd.SetShutdownHandler()

@@ -15,12 +15,12 @@ import (
 
 // UpdateConfig 修改服务器配置(post json)
 func UpdateConfig(c echo.Context) error {
-	// 读取请求体中的JSON数据
+	// 读取请求体中的 JSON 数据
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Failed to read request body"})
 	}
-	// 将JSON数据转换为字符串并打印
+	// 将 JSON 数据转换为字符串并打印
 	jsonString := string(body)
 	logger.Infof(locale.GetString("log_received_json_data"), jsonString)
 	// 如果配置被锁定，返回错误
@@ -29,7 +29,7 @@ func UpdateConfig(c echo.Context) error {
 	}
 	// 复制当前配置以便后续比较
 	oldConfig := config.CopyCfg()
-	// 解析JSON数据并更新服务器配置
+	// 解析 JSON 数据并更新服务器配置
 	err = config.UpdateConfigByJson(jsonString)
 	if err != nil {
 		logger.Infof("%s", err.Error())

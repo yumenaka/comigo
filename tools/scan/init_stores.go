@@ -17,6 +17,7 @@ func InitAllStore(cfg ConfigInterface) error {
 			continue
 		}
 	}
+	model.GenerateBookGroup()
 	return nil
 }
 
