@@ -138,3 +138,4 @@ frontend/dist
 *.pid
 assets/AppIcon.icns
 assets/icon.png
+assets/icon_no_frame.png
