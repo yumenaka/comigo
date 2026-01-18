@@ -168,7 +168,9 @@ Alpine.store('global', {
             }
         }
         // 跳转到新的阅读模式URL
-        window.location.href = this.getReadURL(book_id, this.nowPageNum);
+        if (pathname.startsWith('/scroll')||pathname.startsWith('/flip')) {
+            window.location.href = this.getReadURL(book_id, this.nowPageNum);
+        }
     },
     getReadURL(book_id, start_index) {
         // TODO: 处理旧版本数据干扰的问题。若干个版本后大概就不需要了，到时候删除这段代码。
