@@ -23,54 +23,58 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 				try {
 					return JSON.parse(el.textContent);
 				} catch (e) {
-					console.error('[player] Failed to parse JSONScript:', id, e);
+					console.error("[player] Failed to parse JSONScript:", id, e);
 					return fallback;
 				}
 			}
 
 			function toast(msg, type) {
-				if (typeof window.showToast === 'function') {
+				if (typeof window.showToast === "function") {
 					window.showToast(msg, type);
 					return;
 				}
-				console.log('[toast]', type || 'info', msg);
+				console.log("[toast]", type || "info", msg);
 			}
 
 			window.playerData = function () {
-				const nowBook = readJSONScript('NowBook', null);
-				const playlistRaw = readJSONScript('Playlist', []);
+				const nowBook = readJSONScript("NowBook", null);
+				const playlistRaw = readJSONScript("Playlist", []);
 				const playlistArr = Array.isArray(playlistRaw) ? playlistRaw : [];
 
 				// 根据文件扩展名猜测 MIME，避免 <source type="audio/*"> 被浏览器判定为不支持
 				function guessMimeType(filename, fallbackType) {
 					if (!filename) {
-						return fallbackType === 'video' ? 'video/mp4' : fallbackType === 'audio' ? 'audio/mpeg' : '';
+						return fallbackType === "video"
+							? "video/mp4"
+							: fallbackType === "audio"
+								? "audio/mpeg"
+								: "";
 					}
 					const lower = String(filename).toLowerCase();
-					const dot = lower.lastIndexOf('.');
-					const ext = dot >= 0 ? lower.slice(dot) : '';
+					const dot = lower.lastIndexOf(".");
+					const ext = dot >= 0 ? lower.slice(dot) : "";
 					switch (ext) {
-						case '.mp3':
-							return 'audio/mpeg';
-						case '.wav':
-							return 'audio/wav';
-						case '.ogg':
-							return 'audio/ogg';
-						case '.wma':
-							return 'audio/x-ms-wma';
-						case '.mp4':
-							return 'video/mp4';
-						case '.webm':
-							return 'video/webm';
-						case '.m4v':
-							return 'video/x-m4v';
-						case '.avi':
-							return 'video/x-msvideo';
-						case '.flv':
-							return 'video/x-flv';
+						case ".mp3":
+							return "audio/mpeg";
+						case ".wav":
+							return "audio/wav";
+						case ".ogg":
+							return "audio/ogg";
+						case ".wma":
+							return "audio/x-ms-wma";
+						case ".mp4":
+							return "video/mp4";
+						case ".webm":
+							return "video/webm";
+						case ".m4v":
+							return "video/x-m4v";
+						case ".avi":
+							return "video/x-msvideo";
+						case ".flv":
+							return "video/x-flv";
 						default:
 							// 兜底：不写 type，让浏览器自行探测
-							return '';
+							return "";
 					}
 				}
 
@@ -86,7 +90,12 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 				});
 
 				// 兜底：如果播放列表为空，至少把当前媒体塞进去，避免 currentMedia 为空导致无法加载
-				if (playlistData.length === 0 && nowBook && nowBook.id && nowBook.title) {
+				if (
+					playlistData.length === 0 &&
+					nowBook &&
+					nowBook.id &&
+					nowBook.title
+				) {
 					const url = `/api/raw/${nowBook.id}/${encodeURIComponent(nowBook.title)}`;
 					playlistData.push({
 						id: nowBook.id,
@@ -113,7 +122,7 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 					// 封面加载失败时显示默认图标
 					showFallbackCover: false,
 					// 标题后缀（例如 " - Comigo x.y.z"），用于同步更新浏览器标签页标题
-					titleSuffix: '',
+					titleSuffix: "",
 
 					// 播放状态
 					isPlaying: false,
@@ -126,12 +135,12 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 
 					// 初始化（Alpine 生命周期）
 					init() {
-						this.player = document.getElementById('mediaPlayer');
+						this.player = document.getElementById("mediaPlayer");
 						// 记录初始标题后缀（只取一次），后续切歌沿用
 						if (!this.titleSuffix) {
-							const t = document.title || '';
-							const idx = t.indexOf(' - Comigo');
-							this.titleSuffix = idx >= 0 ? t.slice(idx) : '';
+							const t = document.title || "";
+							const idx = t.indexOf(" - Comigo");
+							this.titleSuffix = idx >= 0 ? t.slice(idx) : "";
 						}
 						// 初始化时同步一次标题（当前书名 -> 当前播放文件名）
 						this.applyNowPlayingTitle();
@@ -143,23 +152,23 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 
 					// applyNowPlayingTitle 同步 header 标题与浏览器标签页标题
 					applyNowPlayingTitle() {
-						const name = this.currentMedia?.title || '';
+						const name = this.currentMedia?.title || "";
 						if (!name) return;
 						// 更新浏览器标签页标题
-						document.title = name + (this.titleSuffix || '');
+						document.title = name + (this.titleSuffix || "");
 						// 更新 header 标题（id=headerTitle）
-						const el = document.getElementById('headerTitle');
+						const el = document.getElementById("headerTitle");
 						if (!el) return;
 						try {
-							el.setAttribute('title', name);
-							const a = el.querySelector('a');
+							el.setAttribute("title", name);
+							const a = el.querySelector("a");
 							if (a) {
 								a.textContent = name;
 							} else {
 								el.textContent = name;
 							}
 						} catch (e) {
-							console.error('[player] applyNowPlayingTitle error:', e);
+							console.error("[player] applyNowPlayingTitle error:", e);
 						}
 					},
 
@@ -169,14 +178,15 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 
 					onTimeUpdate(event) {
 						this.currentTime = event?.target?.currentTime || 0;
-						this.progress = this.duration > 0 ? (this.currentTime / this.duration) * 100 : 0;
+						this.progress =
+							this.duration > 0 ? (this.currentTime / this.duration) * 100 : 0;
 					},
 
 					onEnded() {
 						// 自动下一曲/循环播放：遵守全局设置
 						try {
-							if (window.Alpine && Alpine.store && Alpine.store('global')) {
-								const g = Alpine.store('global');
+							if (window.Alpine && Alpine.store && Alpine.store("global")) {
+								const g = Alpine.store("global");
 								if (g.autoPlayNext === false) {
 									return;
 								}
@@ -192,7 +202,7 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 								}
 							}
 						} catch (e) {
-							console.error('[player] onEnded flags error:', e);
+							console.error("[player] onEnded flags error:", e);
 						}
 						// 默认：自动下一曲（强制开始播放下一首，避免 ended 后 paused=true 导致不自动播放）
 						this.playNext({ forcePlay: true });
@@ -202,8 +212,8 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 						if (!this.player) return;
 						if (this.player.paused) {
 							this.player.play().catch((e) => {
-								console.error('[player] play failed:', e);
-								toast(i18next.t('play_failed') || '播放失败', 'error');
+								console.error("[player] play failed:", e);
+								toast(i18next.t("play_failed") || "播放失败", "error");
 							});
 						} else {
 							this.player.pause();
@@ -235,14 +245,16 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 						this.$nextTick(() => {
 							this.player.load();
 							if (shouldAutoPlay) {
-								this.player.play().catch((e) => console.error('[player] autoplay failed:', e));
+								this.player
+									.play()
+									.catch((e) => console.error("[player] autoplay failed:", e));
 							}
 						});
 					},
 
 					playPrevious(opts = {}) {
 						if (this.currentIndex <= 0) {
-							toast(i18next.t('first_media') || '已经是第一个了', 'info');
+							toast(i18next.t("first_media") || "已经是第一个了", "info");
 							return;
 						}
 						this.playMedia(this.currentIndex - 1, opts);
@@ -250,7 +262,7 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 
 					playNext(opts = {}) {
 						if (this.currentIndex >= this.playlistData.length - 1) {
-							toast(i18next.t('last_media') || '已经是最后一个了', 'info');
+							toast(i18next.t("last_media") || "已经是最后一个了", "info");
 							if (this.player) this.player.pause();
 							this.isPlaying = false;
 							return;
@@ -265,10 +277,10 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 					},
 
 					formatTime(seconds) {
-						if (!seconds || isNaN(seconds)) return '00:00';
+						if (!seconds || isNaN(seconds)) return "00:00";
 						const minutes = Math.floor(seconds / 60);
 						const secs = Math.floor(seconds % 60);
-						return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+						return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 					},
 				};
 			};
@@ -278,7 +290,7 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 		id="PlayerMainArea"
 		x-data="playerData()"
 		x-init="init()"
-		class="flex flex-col items-center justify-start flex-1 w-full max-w-full pt-2 pb-32 text-base-content"
+		class="flex flex-col items-center justify-start flex-1 w-full max-w-full pt-2 pb-4 text-base-content"
 	>
 		<!-- 播放器容器 -->
 		<div class="w-full max-w-4xl px-4 mb-4">
@@ -405,12 +417,10 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 					</button>
 				</div>
 			</div>
-		</div>
-		<!-- 播放列表 -->
-		<div class="fixed bottom-0 left-0 right-0 bg-base-100 border-t border-gray-300 shadow-lg">
-			<div class="max-w-4xl mx-auto p-4">
+			<!-- 播放列表（普通布局，放在控制条下方） -->
+			<div class="mt-4 p-4 bg-base-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow">
 				<h3 class="text-lg font-semibold mb-2" x-text="i18next.t('playlist')">播放列表</h3>
-				<div class="max-h-40 overflow-y-auto">
+				<div class="max-h-56 overflow-y-auto">
 					<template x-for="(item, index) in playlistData" :key="item.id">
 						<div
 							@click="playMedia(index)"
@@ -442,9 +452,4 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 			</div>
 		</div>
 	</div>
-}
-
-// getMediaUrl 保留：历史兼容（当前模板已改为使用 currentMedia.url）
-func getMediaUrl(book *model.Book) string {
-	return fmt.Sprintf("'/api/raw/%s/%s'", book.BookID, url.QueryEscape(book.Title))
 }
