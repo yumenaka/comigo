@@ -87,8 +87,12 @@ func generateReadURL(book model.BookInfo, lastReadPage int) string {
 	if book.Type == model.TypeBooksGroup {
 		return fmt.Sprintf("\"/shelf/%s\"", book.BookID)
 	}
-	// 如果是视频、音频、未知文件，就在新窗口打开
-	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeHTML || book.Type == model.TypeUnknownFile {
+	// 如果是视频、音频，跳转到播放器页面
+	if book.Type == model.TypeVideo || book.Type == model.TypeAudio {
+		return fmt.Sprintf("\"/player/%s\"", book.BookID)
+	}
+	// 如果是 HTML、未知文件，就在新窗口打开原始文件
+	if book.Type == model.TypeHTML || book.Type == model.TypeUnknownFile {
 		return fmt.Sprintf("\"/api/raw/%s/%s\"", book.BookID, url.QueryEscape(book.Title))
 	}
 	// 其他情况，跳转到阅读页面，类似 /scroll/4cTOjFm?page=1

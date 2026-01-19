@@ -245,7 +245,7 @@ templ ReSortIcon() {
 					href="#"
 					@click.prevent="setCookie('filename')"
 					x-text="i18next.t('sort_by_filename')"
-					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filename'}"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename'}"
 					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white "
 				></a>
 			</li>
@@ -254,7 +254,7 @@ templ ReSortIcon() {
 					href="#"
 					@click.prevent="setCookie('modify_time')"
 					x-text="i18next.t('sort_by_modify_time')"
-					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'modify_time'}"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time'}"
 					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
@@ -263,7 +263,7 @@ templ ReSortIcon() {
 					href="#"
 					@click.prevent="setCookie('filesize')"
 					x-text="i18next.t('sort_by_filesize')"
-					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filesize'}"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize'}"
 					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
@@ -272,7 +272,7 @@ templ ReSortIcon() {
 					href="#"
 					@click.prevent="setCookie('filename_reverse')"
 					x-text="i18next.t('sort_by_filename_reverse')"
-					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filename_reverse'}"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename_reverse'}"
 					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
@@ -281,7 +281,7 @@ templ ReSortIcon() {
 					href="#"
 					@click.prevent="setCookie('modify_time_reverse')"
 					x-text="i18next.t('sort_by_modify_time_reverse')"
-					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'modify_time_reverse'}"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time_reverse'}"
 					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
@@ -290,7 +290,7 @@ templ ReSortIcon() {
 					href="#"
 					@click.prevent="setCookie('filesize_reverse')"
 					x-text="i18next.t('sort_by_filesize_reverse')"
-					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filesize_reverse'}"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize_reverse'}"
 					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>

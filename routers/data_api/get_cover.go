@@ -1,11 +1,14 @@
 package data_api
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 
+	taglib "github.com/dhowden/tag"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/assets/locale"
@@ -52,6 +55,25 @@ func GetCover(c echo.Context) error {
 			if err == nil {
 				return c.Blob(http.StatusOK, "image/jpeg", coverData)
 			}
+		}
+	}
+	// 尝试从 MP3 的 ID3(APIC) 内嵌图片中读取封面（仅在本地缓存未命中时）
+	// 说明：
+	// - 优先使用第三方库提高兼容性（dhowden/tag）
+	// - 成功读取后统一转为 JPEG，并复用现有的封面缓存（bookID.jpg）
+	if book.Type == model.TypeAudio && strings.EqualFold(filepath.Ext(book.BookPath), ".mp3") {
+		// 使用第三方库解析（dhowden/tag）
+		imgData, err := extractMP3CoverByTag(book.BookPath)
+		if err == nil && len(imgData) > 0 {
+			// 缩放图片到指定高度，并编码成 JPEG（tools.ImageResizeByHeight 会输出 JPEG）
+			imgData = tools.ImageResizeByHeight(imgData, resizeHeight)
+			// 缓存封面到本地
+			if metaPath != "" {
+				if err := fileutil.SaveCoverToLocal(metaPath, id, imgData); err != nil {
+					logger.Infof("SaveCoverToLocal error: %s", err)
+				}
+			}
+			return c.Blob(http.StatusOK, "image/jpeg", imgData)
 		}
 	}
 	// 如果本地没有缓存封面，就从压缩文件中获取封面
@@ -137,4 +159,23 @@ func GetCover(c echo.Context) error {
 	}
 	// 返回图片数据
 	return c.Blob(http.StatusOK, contentType, imgData)
+}
+
+// extractMP3CoverByTag 使用 github.com/dhowden/tag 从 MP3 中提取内嵌封面（APIC）
+func extractMP3CoverByTag(mp3Path string) ([]byte, error) {
+	f, err := os.Open(mp3Path)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+
+	meta, err := taglib.ReadFrom(f)
+	if err != nil {
+		return nil, err
+	}
+	pic := meta.Picture()
+	if pic == nil || len(pic.Data) == 0 {
+		return nil, errors.New("no picture")
+	}
+	return pic.Data, nil
 }

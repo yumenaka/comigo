@@ -15,6 +15,7 @@ import (
 	"github.com/yumenaka/comigo/routers/websocket"
 	"github.com/yumenaka/comigo/templ/pages/flip"
 	"github.com/yumenaka/comigo/templ/pages/login_page"
+	"github.com/yumenaka/comigo/templ/pages/player"
 	"github.com/yumenaka/comigo/templ/pages/scroll"
 	"github.com/yumenaka/comigo/templ/pages/settings"
 	"github.com/yumenaka/comigo/templ/pages/shelf"
@@ -92,6 +93,8 @@ func bindProtectedView(group *echo.Group) {
 	group.GET("/scroll/:id", scroll.ScrollModeHandler)
 	// 翻页模式
 	group.GET("/flip/:id", flip.FlipModeHandler)
+	// 播放器模式
+	group.GET("/player/:id", player.PlayerModeHandler)
 	// 上传页面
 	group.GET("/upload", upload_page.PageHandler)
 	// 设置页面

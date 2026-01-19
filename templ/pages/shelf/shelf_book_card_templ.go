@@ -100,13 +100,13 @@ func BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) te
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if book.Type == model.TypeZip || book.Type == model.TypeCbz || book.Type == model.TypeEpub || book.Type == model.TypeRar || book.Type == model.TypeDir || book.Type == model.TypeCbr || book.Type == model.TypeTar || book.Type == model.TypeHTML {
+		if book.Type == model.TypeZip || book.Type == model.TypeCbz || book.Type == model.TypeEpub || book.Type == model.TypeRar || book.Type == model.TypeDir || book.Type == model.TypeCbr || book.Type == model.TypeTar || book.Type == model.TypeHTML || book.Type == model.TypeVideo || book.Type == model.TypeAudio {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " :target=\"$store.shelf.openInNewTab ? '_blank' : '_self'\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
+		if book.Type == model.TypeUnknownFile {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " target=\"_blank\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
