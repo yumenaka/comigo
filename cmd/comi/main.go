@@ -1,4 +1,4 @@
-//go:generate goversioninfo -icon=icon.ico -manifest=goversioninfo.exe.manifest
+//go:generate goversioninfo -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
 package main
 
 import (
