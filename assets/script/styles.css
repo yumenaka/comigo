@@ -2975,8 +2975,8 @@
     height: 100vh;
   }
 
-  .max-h-40 {
-    max-height: calc(var(--spacing) * 40);
+  .max-h-56 {
+    max-height: calc(var(--spacing) * 56);
   }
 
   .max-h-128 {
@@ -5374,10 +5374,6 @@
 
   .pb-4 {
     padding-bottom: calc(var(--spacing) * 4);
-  }
-
-  .pb-32 {
-    padding-bottom: calc(var(--spacing) * 32);
   }
 
   .pl-2 {
