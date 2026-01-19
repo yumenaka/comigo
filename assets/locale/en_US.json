@@ -898,5 +898,20 @@
   "err_rescan_store_failed": "Failed to rescan store",
   "err_delete_store_failed": "Failed to delete store",
   "log_book_file_not_exist_skip": "Book file does not exist, skipping load: %s",
-  "log_error_deleting_orphan_metadata": "Error deleting orphan metadata file %s: %s"
+  "log_error_deleting_orphan_metadata": "Error deleting orphan metadata file %s: %s",
+  "player": "Player",
+  "play": "Play",
+  "pause": "Pause",
+  "previous": "Previous",
+  "next": "Next",
+  "playlist": "Playlist",
+  "audio": "Audio",
+  "video": "Video",
+  "browser_not_support_video": "Your browser does not support video playback",
+  "browser_not_support_audio": "Your browser does not support audio playback",
+  "play_failed": "Playback failed",
+  "first_media": "This is the first item",
+  "last_media": "This is the last item",
+  "auto_play_next": "Auto play next",
+  "loop_playlist": "Loop playlist"
 }

@@ -63,6 +63,10 @@ Alpine.store('global', {
     nowPageNum: 1,
     allPageNum: 1,
     onlineBook: true,
+    // 播放器：是否自动播放下一曲
+    autoPlayNext: Alpine.$persist(true).as('global.autoPlayNext'),
+    // 播放器：是否循环播放播放列表
+    loopPlaylist: Alpine.$persist(true).as('global.loopPlaylist'),
     // 自动切边
     autoCrop: Alpine.$persist(false).as('global.autoCrop'),
     // 自动切边阈值,范围是0~100。多数情况下 1 就够了。

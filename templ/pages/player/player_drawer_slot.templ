@@ -1,0 +1,36 @@
+package player
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/model"
+)
+
+// DrawerSlot 播放器页面侧栏设置
+templ DrawerSlot(c echo.Context, book *model.Book) {
+	<!-- 【自动播放下一曲】 -->
+	<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+		<input
+			type="checkbox"
+			:value="$store.global.autoPlayNext"
+			x-on:click="$store.global.autoPlayNext = !$store.global.autoPlayNext;"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="font-medium ms-3" x-text="i18next.t('auto_play_next')">自动播放下一曲</span>
+	</label>
+	<!-- 【循环播放播放列表】 -->
+	<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+		<input
+			type="checkbox"
+			:value="$store.global.loopPlaylist"
+			x-on:click="$store.global.loopPlaylist = !$store.global.loopPlaylist;"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="font-medium ms-3" x-text="i18next.t('loop_playlist')">循环播放列表</span>
+	</label>
+}

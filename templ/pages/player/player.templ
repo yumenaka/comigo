@@ -1,0 +1,47 @@
+package player
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/tools"
+)
+
+// PlayerPage 定义播放器页面主体
+templ PlayerPage(c echo.Context, book *model.Book, playlist *model.BookInfos) {
+	@InsertData(book, playlist, tools.GetServerInfo(
+		tools.ServerInfoParams{
+			Cfg:            config.GetCfg(),
+			Version:        config.GetVersion(),
+			AllBooksNumber: model.GetAllBooksNumber(),
+			ClientIP:       c.RealIP(),
+		}))
+	@common.Toast()
+	if book != nil {
+		@common.Header(
+			common.HeaderProps{
+				TitleText:      common.GetBookTitle(book.BookInfo.BookID),
+				ShowReturnIcon: true,
+				ReturnUrl:      common.GetReturnUrl(book.BookInfo.BookID),
+			})
+		@MainArea(c, book, playlist)
+	}
+	if book != nil {
+		@common.Drawer(c, book, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
+	}
+	@common.QRCode()
+}
+
+// InsertData 插入书籍数据和播放列表到页面
+templ InsertData(bookData any, playlist any, serverStatus any) {
+	if bookData != nil {
+		@templ.JSONScript("NowBook", bookData)
+	}
+	if playlist != nil {
+		@templ.JSONScript("Playlist", playlist)
+	}
+	if serverStatus != nil {
+		@templ.JSONScript("ServerStatus", serverStatus)
+	}
+}

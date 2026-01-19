@@ -898,5 +898,20 @@
   "err_rescan_store_failed": "書庫の再スキャンに失敗しました",
   "err_delete_store_failed": "書庫の削除に失敗しました",
   "log_book_file_not_exist_skip": "書籍ファイルが存在しないため、読み込みをスキップしました: %s",
-  "log_error_deleting_orphan_metadata": "孤立したメタデータファイル %s の削除エラー: %s"
+  "log_error_deleting_orphan_metadata": "孤立したメタデータファイル %s の削除エラー: %s",
+  "player": "プレーヤー",
+  "play": "再生",
+  "pause": "一時停止",
+  "previous": "前へ",
+  "next": "次へ",
+  "playlist": "プレイリスト",
+  "audio": "オーディオ",
+  "video": "ビデオ",
+  "browser_not_support_video": "お使いのブラウザはビデオ再生に対応していません",
+  "browser_not_support_audio": "お使いのブラウザはオーディオ再生に対応していません",
+  "play_failed": "再生に失敗しました",
+  "first_media": "最初のアイテムです",
+  "last_media": "最後のアイテムです",
+  "auto_play_next": "次を自動再生",
+  "loop_playlist": "プレイリストをループ"
 }
