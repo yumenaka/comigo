@@ -3,6 +3,7 @@ package settings
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -19,6 +20,19 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
 )
+
+// decodeBase64URLStrict 将 base64url（RawURLEncoding，无 padding）解码为原始字符串。
+// 解码失败应视为客户端请求参数不合法。
+func decodeBase64URLStrict(s string) (string, error) {
+	if s == "" {
+		return "", errors.New("empty base64url value")
+	}
+	b, err := base64.RawURLEncoding.DecodeString(s)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
 
 // -------------------------
 // 更新配置的公共逻辑
@@ -427,20 +441,28 @@ func AddArrayConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "configName is required")
 	}
 
-	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", request.ConfigName, request.AddValue)
+	decodedConfigName, err := decodeBase64URLStrict(request.ConfigName)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "configName is not valid base64url")
+	}
+	decodedAddValue, err := decodeBase64URLStrict(request.AddValue)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "addValue is not valid base64url")
+	}
+	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", decodedConfigName, decodedAddValue)
 
-	values, err := doAdd(request.ConfigName, request.AddValue)
+	values, err := doAdd(decodedConfigName, decodedAddValue)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_add_config_failed"))
 	}
 
 	saveSuccessHint := false
-	if request.ConfigName == "StoreUrls" {
+	if decodedConfigName == "StoreUrls" {
 		saveSuccessHint = true
 	}
 
 	// 渲染更新后的 HTML
-	updatedHTML := StringArrayConfig(request.ConfigName, values, request.ConfigName+"_Description")
+	updatedHTML := StringArrayConfig(decodedConfigName, values, decodedConfigName+"_Description")
 	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
 	if renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
@@ -571,15 +593,23 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "deleteValue is required")
 	}
 
-	logger.Infof(locale.GetString("log_delete_array_config_handler")+"\n", request.ConfigName, request.DeleteValue)
+	decodedConfigName, err := decodeBase64URLStrict(request.ConfigName)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "configName is not valid base64url")
+	}
+	decodedDeleteValue, err := decodeBase64URLStrict(request.DeleteValue)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "deleteValue is not valid base64url")
+	}
+	logger.Infof(locale.GetString("log_delete_array_config_handler")+"\n", decodedConfigName, decodedDeleteValue)
 
-	values, err := doDelete(request.ConfigName, request.DeleteValue)
+	values, err := doDelete(decodedConfigName, decodedDeleteValue)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_config_failed"))
 	}
 
 	// 渲染更新后的 HTML
-	updatedHTML := StringArrayConfig(request.ConfigName, values, request.ConfigName+"_Description")
+	updatedHTML := StringArrayConfig(decodedConfigName, values, decodedConfigName+"_Description")
 	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
 	if renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
@@ -717,13 +747,17 @@ func RescanStoreHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is required")
 	}
 
-	logger.Infof("重新扫描书库: %s\n", request.StoreUrl)
+	storeUrl, err := decodeBase64URLStrict(request.StoreUrl)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is not valid base64url")
+	}
+	logger.Infof("重新扫描书库: %s\n", storeUrl)
 
 	// 记录扫描前的书籍数量
 	beforeCount := model.GetAllBooksNumber()
 
 	// 调用扫描功能
-	err := scan.InitStore(request.StoreUrl, config.GetCfg())
+	err = scan.InitStore(storeUrl, config.GetCfg())
 	if err != nil {
 		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
@@ -772,13 +806,17 @@ func DeleteStoreHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is required")
 	}
 
-	logger.Infof("删除书库: %s\n", request.StoreUrl)
+	storeUrl, err := decodeBase64URLStrict(request.StoreUrl)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is not valid base64url")
+	}
+	logger.Infof("删除书库: %s\n", storeUrl)
 
 	// 先删除该书库的所有书籍数据
-	targetStoreAbs, err := filepath.Abs(request.StoreUrl)
+	targetStoreAbs, err := filepath.Abs(storeUrl)
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
-		targetStoreAbs = request.StoreUrl
+		targetStoreAbs = storeUrl
 	}
 
 	// 遍历所有书籍，删除属于该书库的书籍
@@ -809,7 +847,7 @@ func DeleteStoreHandler(c echo.Context) error {
 	logger.Infof("删除了 %d 本书籍\n", deletedCount)
 
 	// 从配置中移除该书库 URL
-	values, err := doDelete("StoreUrls", request.StoreUrl)
+	values, err := doDelete("StoreUrls", storeUrl)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_store_failed"))
 	}

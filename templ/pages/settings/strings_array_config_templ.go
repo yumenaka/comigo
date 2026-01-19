@@ -8,8 +8,11 @@ package settings
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "strconv"
-import "github.com/yumenaka/comigo/templ/common/svg"
+import (
+	"encoding/base64"
+	"github.com/yumenaka/comigo/templ/common/svg"
+	"strconv"
+)
 
 // StringArrayConfig 字符串数组类型的配置
 func StringArrayConfig(name string, values []string, description string) templ.Component {
@@ -42,9 +45,9 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(name + "-string-array-config")
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(base64.RawURLEncoding.EncodeToString([]byte(name)) + "-string-array-config")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 10, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 13, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -57,7 +60,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 13, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 16, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -70,7 +73,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 13, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 16, Col: 99}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -88,7 +91,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 17, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 20, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -99,9 +102,9 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(name)
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(base64.RawURLEncoding.EncodeToString([]byte(name)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 20, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 23, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -114,7 +117,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(index))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 21, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 24, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -127,7 +130,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 22, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 25, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -140,7 +143,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs("deleteStringConfigValue($el.getAttribute('data-config-name'), $el.getAttribute('data-delete-value'))")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 23, Col: 121}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 26, Col: 121}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -164,9 +167,9 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(name + "Array")
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(base64.RawURLEncoding.EncodeToString([]byte(name)) + "Array")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 31, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 34, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -179,7 +182,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("type_or_paste_content"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 31, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 34, Col: 145}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -190,9 +193,9 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(name + "AddInput")
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 34, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 37, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -205,7 +208,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("type_or_paste_content"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 35, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 38, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -216,9 +219,9 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("if ($event.key === 'Enter') { addStringConfigValue('" + name + "'); }")
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("if ($event.key === 'Enter') { addStringConfigValue('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "'); }")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 37, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 40, Col: 137}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -231,7 +234,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("add"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 41, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 44, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -242,9 +245,9 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(name + "StringArrayAddButton")
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(base64.RawURLEncoding.EncodeToString([]byte(name)) + "StringArrayAddButton")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 43, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 46, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -255,9 +258,9 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs("addStringConfigValue('" + name + "')")
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs("addStringConfigValue('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 44, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 47, Col: 103}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -270,7 +273,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(description))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 52, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/strings_array_config.templ`, Line: 55, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -321,7 +324,7 @@ func StringArrayConfigJavaScript() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script>\n\t\t\t// 添加字符串数组配置中的元素\n\t\t\tasync function addStringConfigValue(configName) {\n\t\t\t\tconst addInput = document.getElementById(configName + \"AddInput\");\n\t\t\t\tif (!addInput) return;\n\t\t\t\tconst addValue = addInput.value.trim();\n\t\t\t\t// 验证：如果为空，显示错误提示\n\t\t\t\tif (addValue === \"\") {\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"content_empty_please_enter_before_submit\"),\n\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t});\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\t// 验证：如果已经有这个值了，显示错误提示\n\t\t\t\tconst container = document.getElementById(\n\t\t\t\t\tconfigName + \"-string-array-config\",\n\t\t\t\t);\n\t\t\t\tif (container) {\n\t\t\t\t\tconst existingNodes = container.querySelectorAll(\n\t\t\t\t\t\t\"[data-delete-value]\",\n\t\t\t\t\t);\n\t\t\t\t\tfor (const node of existingNodes) {\n\t\t\t\t\t\tconst existingValue = (\n\t\t\t\t\t\t\tnode.getAttribute(\"data-delete-value\") || \"\"\n\t\t\t\t\t\t).trim();\n\t\t\t\t\t\tif (existingValue === addValue) {\n\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\tmessage: i18next.t(\"value_already_exists_do_not_add_again\"),\n\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// 发送添加请求到服务器\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\"/api/add-array-config\", {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tconfigName: configName,\n\t\t\t\t\t\t\taddValue: addValue,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_add_config_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tif (data.saveSuccessHint) {\n\t\t\t\t\t\tshowToast(i18next.t(\"saveSuccessHint\"), \"info\");\n\t\t\t\t\t\t// 2秒后刷新页面\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t\t}, 2000);\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"saveSuccessHint\"), \"success\");\n\t\t\t\t\t}\n\n\t\t\t\t\t// 更新 UI：替换整个容器\n\t\t\t\t\tif (data.html) {\n\t\t\t\t\t\tconst container = document.getElementById(\n\t\t\t\t\t\t\tconfigName + \"-string-array-config\",\n\t\t\t\t\t\t);\n\t\t\t\t\t\tif (container && container.parentNode) {\n\t\t\t\t\t\t\t// 创建临时元素来解析 HTML\n\t\t\t\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t\t\t\ttemp.innerHTML = data.html;\n\t\t\t\t\t\t\tconst newContainer = temp.querySelector(\n\t\t\t\t\t\t\t\t\"#\" + configName + \"-string-array-config\",\n\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\tif (newContainer) {\n\t\t\t\t\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\t\t\t\t\t// 重新初始化 Alpine.js\n\t\t\t\t\t\t\t\tif (window.Alpine) {\n\t\t\t\t\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t// 清空输入框\n\t\t\t\t\t\t\t\tconst newInput = newContainer.querySelector(\n\t\t\t\t\t\t\t\t\t\"#\" + configName + \"AddInput\",\n\t\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\t\tif (newInput) {\n\t\t\t\t\t\t\t\t\tnewInput.value = \"\";\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"添加配置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 删除字符串数组配置中的元素\n\t\t\tasync function deleteStringConfigValue(configName, deleteValue) {\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\"/api/delete-array-config\", {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tconfigName: configName,\n\t\t\t\t\t\t\tdeleteValue: deleteValue,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_delete_config_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tshowToast(i18next.t(\"saveSuccessHint\"), \"success\");\n\t\t\t\t\t// 更新 UI：替换整个容器\n\t\t\t\t\tif (data.html) {\n\t\t\t\t\t\tconst container = document.getElementById(\n\t\t\t\t\t\t\tconfigName + \"-string-array-config\",\n\t\t\t\t\t\t);\n\t\t\t\t\t\tif (container && container.parentNode) {\n\t\t\t\t\t\t\t// 创建临时元素来解析 HTML\n\t\t\t\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t\t\t\ttemp.innerHTML = data.html;\n\t\t\t\t\t\t\tconst newContainer = temp.querySelector(\n\t\t\t\t\t\t\t\t\"#\" + configName + \"-string-array-config\",\n\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\tif (newContainer) {\n\t\t\t\t\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\t\t\t\t\t// 重新初始化 Alpine.js\n\t\t\t\t\t\t\t\tif (window.Alpine) {\n\t\t\t\t\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"删除配置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script>\n\t\t\t// base64UrlEncodeUtf8: 用于安全传输（含反斜杠/中文）\n\t\t\tif (!window.base64UrlEncodeUtf8) {\n\t\t\t\twindow.base64UrlEncodeUtf8 = (str) => {\n\t\t\t\t\tconst bytes = new TextEncoder().encode(str);\n\t\t\t\t\tlet binary = \"\";\n\t\t\t\t\tfor (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);\n\t\t\t\t\treturn btoa(binary).replace(/\\+/g, \"-\").replace(/\\//g, \"_\").replace(/=+$/g, \"\");\n\t\t\t\t};\n\t\t\t}\n\n\t\t\t// 添加字符串数组配置中的元素\n\t\t\tasync function addStringConfigValue(configName) {\n\t\t\t\tconst addInput = document.getElementById(configName + \"AddInput\");\n\t\t\t\tif (!addInput) return;\n\t\t\t\tconst addValue = addInput.value.trim();\n\t\t\t\t// 验证：如果为空，显示错误提示\n\t\t\t\tif (addValue === \"\") {\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"content_empty_please_enter_before_submit\"),\n\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t});\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\t// 验证：如果已经有这个值了，显示错误提示\n\t\t\t\tconst container = document.getElementById(\n\t\t\t\t\tconfigName + \"-string-array-config\",\n\t\t\t\t);\n\t\t\t\tif (container) {\n\t\t\t\t\tconst existingNodes = container.querySelectorAll(\n\t\t\t\t\t\t\"[data-delete-value]\",\n\t\t\t\t\t);\n\t\t\t\t\tfor (const node of existingNodes) {\n\t\t\t\t\t\tconst existingValue = (\n\t\t\t\t\t\t\tnode.getAttribute(\"data-delete-value\") || \"\"\n\t\t\t\t\t\t).trim();\n\t\t\t\t\t\tif (existingValue === addValue) {\n\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\tmessage: i18next.t(\"value_already_exists_do_not_add_again\"),\n\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// 发送添加请求到服务器\n\t\t\t\ttry {\n\t\t\t\t\tconst addValueB64 = window.base64UrlEncodeUtf8(addValue);\n\t\t\t\t\tconst response = await fetch(\"/api/add-array-config\", {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tconfigName: configName,\n\t\t\t\t\t\t\taddValue: addValueB64,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_add_config_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tif (data.saveSuccessHint) {\n\t\t\t\t\t\tshowToast(i18next.t(\"saveSuccessHint\"), \"info\");\n\t\t\t\t\t\t// 2秒后刷新页面\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t\t}, 2000);\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"saveSuccessHint\"), \"success\");\n\t\t\t\t\t}\n\n\t\t\t\t\t// 更新 UI：替换整个容器\n\t\t\t\t\tif (data.html) {\n\t\t\t\t\t\tconst container = document.getElementById(\n\t\t\t\t\t\t\tconfigName + \"-string-array-config\",\n\t\t\t\t\t\t);\n\t\t\t\t\t\tif (container && container.parentNode) {\n\t\t\t\t\t\t\t// 创建临时元素来解析 HTML\n\t\t\t\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t\t\t\ttemp.innerHTML = data.html;\n\t\t\t\t\t\t\tconst newContainer = temp.querySelector(\n\t\t\t\t\t\t\t\t\"#\" + configName + \"-string-array-config\",\n\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\tif (newContainer) {\n\t\t\t\t\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\t\t\t\t\t// 重新初始化 Alpine.js\n\t\t\t\t\t\t\t\tif (window.Alpine) {\n\t\t\t\t\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t// 清空输入框\n\t\t\t\t\t\t\t\tconst newInput = newContainer.querySelector(\n\t\t\t\t\t\t\t\t\t\"#\" + configName + \"AddInput\",\n\t\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\t\tif (newInput) {\n\t\t\t\t\t\t\t\t\tnewInput.value = \"\";\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"添加配置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 删除字符串数组配置中的元素\n\t\t\tasync function deleteStringConfigValue(configName, deleteValue) {\n\t\t\t\ttry {\n\t\t\t\t\tconst deleteValueB64 = window.base64UrlEncodeUtf8(deleteValue);\n\t\t\t\t\tconst response = await fetch(\"/api/delete-array-config\", {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tconfigName: configName,\n\t\t\t\t\t\t\tdeleteValue: deleteValueB64,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_delete_config_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tshowToast(i18next.t(\"saveSuccessHint\"), \"success\");\n\t\t\t\t\t// 更新 UI：替换整个容器\n\t\t\t\t\tif (data.html) {\n\t\t\t\t\t\tconst container = document.getElementById(\n\t\t\t\t\t\t\tconfigName + \"-string-array-config\",\n\t\t\t\t\t\t);\n\t\t\t\t\t\tif (container && container.parentNode) {\n\t\t\t\t\t\t\t// 创建临时元素来解析 HTML\n\t\t\t\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t\t\t\ttemp.innerHTML = data.html;\n\t\t\t\t\t\t\tconst newContainer = temp.querySelector(\n\t\t\t\t\t\t\t\t\"#\" + configName + \"-string-array-config\",\n\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\tif (newContainer) {\n\t\t\t\t\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\t\t\t\t\t// 重新初始化 Alpine.js\n\t\t\t\t\t\t\t\tif (window.Alpine) {\n\t\t\t\t\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"删除配置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
