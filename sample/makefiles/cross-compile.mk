@@ -210,64 +210,57 @@ linux_i386_cgo_docker:
 # 64位Windows	$(NAME)_$(VERSION)_$@
 Windows_x86_64:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
-	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
-	cp resource.syso cmd/comi/resource.syso
-	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
+	cd cmd/comi && goversioninfo -64 -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
+	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe ./cmd/comi 
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
-	rm  cmd/comi/resource.syso
-	rm  resource.syso 
+	rm  cmd/comi/resource.syso 
 
 # 64位Windows + system_tray	$(NAME)_$(VERSION)_$@
 Windows_x86_64_full:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
-	GOARCH=amd64 GOOS=windows go generate #go: cannot install cross-compiled binaries when GOBIN is set
-	cp resource.syso cmd/comigo/resource.syso
-	GOARCH=amd64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe cmd/comigo/main.go
+	cd cmd/comigo && goversioninfo -64 -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
+	GOARCH=amd64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe ./cmd/comigo
 	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
 	rm cmd/comigo/resource.syso
-	rm  resource.syso
 
 # 32位Windows
 Windows_i386:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
-	GOARCH=386 GOOS=windows go generate
-	cp resource.syso cmd/comi/resource.syso
-	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
+	cd cmd/comi && goversioninfo -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
+	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe ./cmd/comi 
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rm  cmd/comi/resource.syso
-	rm   resource.syso
 
 # 32位Windows + system_tray
 Windows_i386_full:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
-	GOARCH=386 GOOS=windows go generate
-	cp resource.syso cmd/comigo/resource.syso
-	GOARCH=386 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui  -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe cmd/comigo/main.go
+	cd cmd/comigo && goversioninfo -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
+	GOARCH=386 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui  -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe ./cmd/comigo
 	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
 	rm cmd/comigo/resource.syso
-	rm   resource.syso
 
 #windows arm64
 Windows_arm64:
-	GOARCH=arm64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe cmd/comi/main.go 
+	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
+	cd cmd/comi && goversioninfo -arm -64 -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
+	GOARCH=arm64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME).exe ./cmd/comi
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$@.zip $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$@
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
+	rm cmd/comi/resource.syso
 
 # windows arm64 + system_tray
 Windows_arm64_full:
 	go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo # Window icon Need
-	GOARCH=arm64 GOOS=windows go generate
-	cp resource.syso cmd/comigo/resource.syso
-	GOARCH=arm64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe cmd/comigo/main.go
+	cd cmd/comigo && goversioninfo -arm -64 -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
+	GOARCH=arm64 GOOS=windows $(GOBUILD) -ldflags -H=windowsgui -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@/$(FULL_NAME).exe ./cmd/comigo
 	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@.zip $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
 	rmdir $(BINDIR)/$(FULL_NAME)_$(VERSION)_$@
 	rm cmd/comigo/resource.syso
-	rm resource.syso
 
 #Linux_armv6 RaspberryPi1,2,zero,GOARM=6：仅使用 VFPv1；交叉编译时默认；通常是 ARM11 或更好的内核（也支持 VFPv2 或更好的内核）
 Linux_armv6:

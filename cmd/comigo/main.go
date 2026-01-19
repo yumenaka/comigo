@@ -1,5 +1,4 @@
-//go:generate go install -v github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-//go:generate goversioninfo -icon=icon.ico -manifest=goversioninfo.exe.manifest
+//go:generate goversioninfo -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
 package main
 
 import (

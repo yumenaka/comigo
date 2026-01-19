@@ -38,6 +38,6 @@
             "CharsetID": "04B0"
         }
     },
-    "IconPath": "icon.ico",
+    "IconPath": "../../icon.ico",
     "ManifestPath": "goversioninfo.exe.manifest"
 }
