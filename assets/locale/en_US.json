@@ -913,5 +913,6 @@
   "first_media": "This is the first item",
   "last_media": "This is the last item",
   "auto_play_next": "Auto play next",
-  "loop_playlist": "Loop playlist"
+  "loop_playlist": "Loop playlist",
+  "player_autoplay_help": "Auto play next and loop require media playback permission in your browser. On mobile devices, it may also fail due to battery saver/background restrictions."
 }
