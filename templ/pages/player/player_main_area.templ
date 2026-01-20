@@ -146,8 +146,36 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 						this.applyNowPlayingTitle();
 						// 当页面刚进入时，确保 source 已绑定 currentMedia
 						this.$nextTick(() => {
+							this.applyVolumeFromStore();
 							if (this.player) this.player.load();
 						});
+					},
+
+					// applyVolumeFromStore 将全局存储的音量/静音状态应用到媒体元素
+					applyVolumeFromStore() {
+						if (!this.player) return;
+						try {
+							if (!(window.Alpine && Alpine.store && Alpine.store("global")))
+								return;
+							const g = Alpine.store("global");
+							// clamp 0..1
+							let v = Number(g.playerVolume);
+							if (isNaN(v)) v = 100;
+							v = Math.max(0, Math.min(100, v));
+							this.player.volume = v / 100;
+							this.player.muted = !!g.playerMuted;
+						} catch (e) {
+							console.error("[player] applyVolumeFromStore error:", e);
+						}
+					},
+
+					// toggleMute 切换静音状态（并持久化到 global store）
+					toggleMute() {
+						if (!(window.Alpine && Alpine.store && Alpine.store("global")))
+							return;
+						const g = Alpine.store("global");
+						g.playerMuted = !g.playerMuted;
+						if (this.player) this.player.muted = !!g.playerMuted;
 					},
 
 					// applyNowPlayingTitle 同步 header 标题与浏览器标签页标题
@@ -243,7 +271,9 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 
 						// 让 Alpine 先把 :src 更新到 DOM，再 load/play
 						this.$nextTick(() => {
+							this.applyVolumeFromStore();
 							this.player.load();
+							this.applyVolumeFromStore();
 							if (shouldAutoPlay) {
 								this.player
 									.play()
@@ -290,12 +320,12 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 		id="PlayerMainArea"
 		x-data="playerData()"
 		x-init="init()"
-		class="flex flex-col items-center justify-start flex-1 w-full max-w-full pt-2 pb-4 text-base-content"
+		class="flex flex-col items-center justify-start flex-1 w-full max-w-full pt-2 pb-2 text-base-content"
 	>
 		<!-- 播放器容器 -->
 		<div class="w-full max-w-4xl px-4 mb-4">
-			<!-- 视频播放器 -->
 			if book.Type == model.TypeVideo {
+				<!-- 视频播放器 -->
 				<video
 					id="mediaPlayer"
 					class="w-full rounded-lg shadow-lg bg-black"
@@ -319,24 +349,183 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 					<p x-text="i18next.t('browser_not_support_video')">您的浏览器不支持视频播放</p>
 				</video>
 			}
-			<!-- 音频播放器 -->
 			if book.Type == model.TypeAudio {
-				<div class="w-full p-8 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg">
+				<!-- 音频播放器 -->
+				<div class="w-full p-8 audioPlayerBg shadow-lg border-2 border-gray-500 dark:border-gray-200 rounded">
+					<style>
+						/* 音频封面：黑胶唱片背景与旋转（仅此页面使用） */
+						/* 音频播放器背景：中心更亮、四周更暗（径向渐变） */
+						.audioPlayerBg {
+							background:
+								radial-gradient(
+									circle at 50% 40%,
+									rgba(255, 255, 255, 0.32) 0%,
+									rgba(255, 255, 255, 0.14) 30%,
+									rgba(0, 0, 0, 0.18) 62%,
+									rgba(0, 0, 0, 0.55) 100%
+								),
+								radial-gradient(
+									circle at 20% 20%,
+									rgba(255, 255, 255, 0.1) 0%,
+									rgba(255, 255, 255, 0) 55%
+								),
+								linear-gradient(180deg, #7b7f86 0%, #2f343d 55%, #1a1f27 100%);
+						}
+
+						@keyframes vinylSpin {
+							from {
+								transform: rotate(0deg);
+							}
+							to {
+								transform: rotate(360deg);
+							}
+						}
+
+						.vinylDisc {
+							position: relative;
+							width: 12rem; /* 192px */
+							height: 12rem;
+							border-radius: 9999px;
+							/* 黑胶底盘：纹理 + 高光 */
+							background:
+								radial-gradient(
+									circle at 30% 28%,
+									rgba(255, 255, 255, 0.14),
+									rgba(255, 255, 255, 0) 38%
+								),
+								radial-gradient(
+									circle at 70% 75%,
+									rgba(255, 255, 255, 0.08),
+									rgba(255, 255, 255, 0) 46%
+								),
+								repeating-radial-gradient(
+									circle,
+									rgba(255, 255, 255, 0.045) 0px,
+									rgba(255, 255, 255, 0.02) 1px,
+									rgba(0, 0, 0, 0) 6px
+								),
+								radial-gradient(circle, #1b1b1b 0%, #0b0b0b 62%, #000 100%);
+							box-shadow:
+								0 18px 40px rgba(0, 0, 0, 0.55),
+								inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+							overflow: hidden;
+						}
+
+						.vinylHighlight {
+							position: absolute;
+							inset: -20%;
+							border-radius: 9999px;
+							background: radial-gradient(
+								circle at 25% 25%,
+								rgba(255, 255, 255, 0.22),
+								rgba(255, 255, 255, 0) 45%
+							);
+							pointer-events: none;
+							mix-blend-mode: screen;
+							opacity: 0.55;
+						}
+
+						.vinylLabel {
+							position: absolute;
+							left: 50%;
+							top: 50%;
+							transform: translate(-50%, -50%);
+							width: 7.25rem; /* 116px */
+							height: 7.25rem;
+							border-radius: 9999px;
+							background:
+								radial-gradient(
+									circle,
+									rgba(255, 255, 255, 0.14) 0%,
+									rgba(255, 255, 255, 0) 50%
+								),
+								radial-gradient(
+									circle,
+									rgba(30, 41, 59, 0.85) 0%,
+									rgba(15, 23, 42, 0.85) 100%
+								);
+							box-shadow:
+								inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+								0 8px 20px rgba(0, 0, 0, 0.35);
+							overflow: hidden;
+						}
+
+						.vinylCoverSpin {
+							width: 100%;
+							height: 100%;
+							border-radius: 9999px;
+							overflow: hidden;
+							animation: vinylSpin 7s linear infinite;
+							animation-play-state: paused;
+							will-change: transform;
+						}
+						.vinylSpinRunning {
+							animation-play-state: running;
+						}
+						.vinylSpinPaused {
+							animation-play-state: paused;
+						}
+
+						.vinylHole {
+							position: absolute;
+							left: 50%;
+							top: 50%;
+							transform: translate(-50%, -50%);
+							width: 0.7rem;
+							height: 0.7rem;
+							border-radius: 9999px;
+							background: radial-gradient(
+								circle,
+								#000 0%,
+								#101010 60%,
+								#000 100%
+							);
+							box-shadow:
+								inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+								0 0 0 6px rgba(0, 0, 0, 0.2);
+							pointer-events: none;
+						}
+
+						@media (prefers-reduced-motion: reduce) {
+							.vinylCoverSpin {
+								animation: none !important;
+							}
+						}
+					</style>
 					<div class="flex flex-col items-center">
 						<!-- 音频封面图标 -->
-						<div class="w-48 h-48 mb-6 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-							<!-- 优先显示封面（对 MP3：后端会尝试读取 ID3 APIC 内嵌封面） -->
-							<img
-								class="w-48 h-48 rounded-full object-cover"
-								src={ templ.SafeURL(fmt.Sprintf("/api/get_cover?id=%s&resize_height=%d", book.BookID, 352)) }
-								:src="`/api/get_cover?id=${currentMedia?.id || ''}&resize_height=352`"
-								x-show="!showFallbackCover"
-								@error="showFallbackCover = true"
-							/>
-							<!-- 回退默认音频图标 -->
-							<svg x-show="showFallbackCover" class="w-24 h-24 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-								<path fill-rule="evenodd" d="M19.952 1.651a.75.75 0 0 1 .298.599V16.303a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.403-4.909l2.311-.66a1.5 1.5 0 0 0 1.088-1.442V6.994l-9 2.572v9.737a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.402-4.909l2.31-.66a1.5 1.5 0 0 0 1.088-1.442V5.25a.75.75 0 0 1 .544-.721l10.5-3a.75.75 0 0 1 .658.122Z" clip-rule="evenodd"></path>
-							</svg>
+						<div class="mb-6">
+							<div
+								class="vinylDisc cursor-pointer select-none"
+								role="button"
+								tabindex="0"
+								:title="isPlaying ? i18next.t('pause') : i18next.t('play')"
+								@click="togglePlay"
+								@keydown.enter.prevent="togglePlay"
+								@keydown.space.prevent="togglePlay"
+							>
+								<div class="vinylHighlight"></div>
+								<!-- 中心“标签”层：只旋转封面图标，不转黑胶底盘 -->
+								<div class="vinylLabel">
+									<div class="vinylCoverSpin" :class="isPlaying ? 'vinylSpinRunning' : 'vinylSpinPaused'">
+										<!-- 优先显示封面（对 MP3：后端会尝试读取 ID3 APIC 内嵌封面） -->
+										<img
+											class="w-full h-full object-cover"
+											src={ templ.SafeURL(fmt.Sprintf("/api/get_cover?id=%s&resize_height=%d", book.BookID, 352)) }
+											:src="`/api/get_cover?id=${currentMedia?.id || ''}&resize_height=352`"
+											x-show="!showFallbackCover"
+											@error="showFallbackCover = true"
+										/>
+										<!-- 回退默认音频图标 -->
+										<div x-show="showFallbackCover" class="w-full h-full flex items-center justify-center">
+											<svg class="w-14 h-14 text-white/90" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+												<path fill-rule="evenodd" d="M19.952 1.651a.75.75 0 0 1 .298.599V16.303a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.403-4.909l2.311-.66a1.5 1.5 0 0 0 1.088-1.442V6.994l-9 2.572v9.737a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.402-4.909l2.31-.66a1.5 1.5 0 0 0 1.088-1.442V5.25a.75.75 0 0 1 .544-.721l10.5-3a.75.75 0 0 1 .658.122Z" clip-rule="evenodd"></path>
+											</svg>
+										</div>
+									</div>
+								</div>
+								<div class="vinylHole"></div>
+							</div>
 						</div>
 						<!-- 音频标题 -->
 						<h2 class="text-2xl font-bold text-white text-center mb-2" x-text="currentMedia?.title || i18next.t('audio')">音频播放</h2>
@@ -360,72 +549,171 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 				</audio>
 			}
 			<!-- 播放控制栏 -->
-			<div class="mt-4 p-4 bg-base-200 rounded-lg shadow">
+			<style>
+				/* 统一修复 range 在 Chrome/Firefox 的填充色与厚度差异 */
+				.rangeBar {
+					--range-value: 0; /* 0~100 */
+					--range-fill: #3b82f6; /* blue-500 */
+					/* 浅色模式：未填充部分稍微加深，提升辨识度 */
+					--range-bg: #9ca3af; /* gray-400 */
+					-webkit-appearance: none;
+					appearance: none;
+					width: 100%;
+					background: transparent;
+					cursor: pointer;
+				}
+				/* dark 模式保持不变（按需覆盖回之前的颜色） */
+				.dark .rangeBar {
+					--range-bg: #d1d5db; /* gray-300 */
+				}
+				.rangeBar:focus {
+					outline: none;
+				}
+
+				/* WebKit (Chrome/Safari) */
+				.rangeBar::-webkit-slider-runnable-track {
+					height: 0.5rem;
+					border-radius: 9999px;
+					background:
+						linear-gradient(var(--range-fill), var(--range-fill)) 0 /
+							calc(var(--range-value) * 1%) 100% no-repeat,
+						var(--range-bg);
+				}
+				.rangeBar::-webkit-slider-thumb {
+					-webkit-appearance: none;
+					appearance: none;
+					width: 14px;
+					height: 14px;
+					border-radius: 9999px;
+					background: #fff;
+					border: 2px solid var(--range-fill);
+					margin-top: -3px; /* (8px track - 14px thumb) / 2 */
+				}
+
+				/* Firefox */
+				/* 用更高权重覆盖类似 input[type="range"] 的全局规则 */
+				input[type="range"].rangeBar::-moz-range-track {
+					height: 0.5rem;
+					border-radius: 9999px;
+					background: var(--range-bg) !important;
+				}
+				input[type="range"].rangeBar::-moz-range-progress {
+					height: 0.5rem;
+					border-radius: 9999px;
+					background: var(--range-fill) !important;
+				}
+				input[type="range"].rangeBar::-moz-range-thumb {
+					width: 14px;
+					height: 14px;
+					border-radius: 9999px;
+					background: #fff;
+					border: 2px solid var(--range-fill) !important;
+				}
+			</style>
+			<div class="mt-4 p-4 bg-base-200 shadow  border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100">
 				<!-- 进度条 -->
 				<div class="mb-4">
 					<input
 						type="range"
-						class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-blue-500"
+						class="rangeBar shadow-2xl"
 						min="0"
 						max="100"
 						:value="progress"
+						:style="`--range-value:${progress}`"
 						@input="seekTo($event.target.value)"
 					/>
-					<div class="flex justify-between text-sm text-gray-600 mt-1">
+					<div class="flex justify-between text-sm mt-1">
 						<span x-text="formatTime(currentTime)">00:00</span>
 						<span x-text="formatTime(duration)">00:00</span>
 					</div>
 				</div>
 				<!-- 控制按钮 -->
-				<div class="flex items-center justify-center gap-4">
-					<!-- 上一曲 -->
-					<button
-						@click="playPrevious"
-						:disabled="currentIndex <= 0"
-						:class="currentIndex <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'"
-						class="p-3 bg-gray-200 rounded-full transition-colors"
-						:title="i18next.t('previous')"
-					>
-						<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-							<path d="M9.195 18.44c1.25.713 2.805-.19 2.805-1.629v-2.34l6.945 3.968c1.25.714 2.805-.188 2.805-1.628V8.688c0-1.44-1.555-2.342-2.805-1.628L12 11.03v-2.34c0-1.44-1.555-2.343-2.805-1.629l-7.108 4.062c-1.26.72-1.26 2.536 0 3.256l7.108 4.061z"></path>
-						</svg>
-					</button>
-					<!-- 播放/暂停 -->
-					<button
-						@click="togglePlay"
-						class="p-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
-						:title="isPlaying ? i18next.t('pause') : i18next.t('play')"
-					>
-						<svg x-show="!isPlaying" class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-							<path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd"></path>
-						</svg>
-						<svg x-show="isPlaying" class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-							<path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" clip-rule="evenodd"></path>
-						</svg>
-					</button>
-					<!-- 下一曲 -->
-					<button
-						@click="playNext"
-						:disabled="currentIndex >= playlistData.length - 1"
-						:class="currentIndex >= playlistData.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'"
-						class="p-3 bg-gray-200 rounded-full transition-colors"
-						:title="i18next.t('next')"
-					>
-						<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-							<path d="M5.055 7.06c-1.25-.714-2.805.189-2.805 1.628v8.123c0 1.44 1.555 2.342 2.805 1.628L12 14.471v2.34c0 1.44 1.555 2.342 2.805 1.628l7.108-4.061c1.26-.72 1.26-2.536 0-3.256L14.805 7.06C13.555 6.346 12 7.25 12 8.688v2.34L5.055 7.06z"></path>
-						</svg>
-					</button>
+				<div class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+					<!-- 左侧占位（确保中间组居中且不与右侧重合） -->
+					<div class="hidden sm:block"></div>
+					<!-- 上一曲/播放/下一曲（作为一组，始终居中） -->
+					<div class="flex items-center justify-center gap-4 sm:justify-self-center">
+						<!-- 上一曲 -->
+						<button
+							@click="playPrevious"
+							:disabled="currentIndex <= 0"
+							:class="currentIndex <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'"
+							class="p-3 bg-gray-200 rounded-full transition-colors"
+							:title="i18next.t('previous')"
+						>
+							<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M9.195 18.44c1.25.713 2.805-.19 2.805-1.629v-2.34l6.945 3.968c1.25.714 2.805-.188 2.805-1.628V8.688c0-1.44-1.555-2.342-2.805-1.628L12 11.03v-2.34c0-1.44-1.555-2.343-2.805-1.629l-7.108 4.062c-1.26.72-1.26 2.536 0 3.256l7.108 4.061z"></path>
+							</svg>
+						</button>
+						<!-- 播放/暂停 -->
+						<button
+							@click="togglePlay"
+							class="p-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+							:title="isPlaying ? i18next.t('pause') : i18next.t('play')"
+						>
+							<svg x-show="!isPlaying" class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+								<path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd"></path>
+							</svg>
+							<svg x-show="isPlaying" class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+								<path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" clip-rule="evenodd"></path>
+							</svg>
+						</button>
+						<!-- 下一曲 -->
+						<button
+							@click="playNext"
+							:disabled="currentIndex >= playlistData.length - 1"
+							:class="currentIndex >= playlistData.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'"
+							class="p-3 bg-gray-200 rounded-full transition-colors"
+							:title="i18next.t('next')"
+						>
+							<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M5.055 7.06c-1.25-.714-2.805.189-2.805 1.628v8.123c0 1.44 1.555 2.342 2.805 1.628L12 14.471v2.34c0 1.44 1.555 2.342 2.805 1.628l7.108-4.061c1.26-.72 1.26-2.536 0-3.256L14.805 7.06C13.555 6.346 12 7.25 12 8.688v2.34L5.055 7.06z"></path>
+							</svg>
+						</button>
+					</div>
+					<!-- 音量控制（右侧；sm+ 固定靠右） -->
+					<div class="flex items-center justify-center gap-2 sm:justify-self-end">
+						<!-- 静音按钮 -->
+						<button
+							@click="toggleMute"
+							class="p-1.5 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
+							:title="$store.global.playerMuted ? 'Unmute' : 'Mute'"
+						>
+							<svg x-show="!$store.global.playerMuted" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M11.5 5.5 6.75 9H4.5A1.5 1.5 0 0 0 3 10.5v3A1.5 1.5 0 0 0 4.5 15h2.25l4.75 3.5a.75.75 0 0 0 1.2-.6V6.1a.75.75 0 0 0-1.2-.6Z"></path>
+								<path d="M15.5 8.5a.75.75 0 0 1 1.06 0 5.5 5.5 0 0 1 0 7.78.75.75 0 1 1-1.06-1.06 4 4 0 0 0 0-5.66.75.75 0 0 1 0-1.06Z"></path>
+							</svg>
+							<svg x-show="$store.global.playerMuted" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M11.5 5.5 6.75 9H4.5A1.5 1.5 0 0 0 3 10.5v3A1.5 1.5 0 0 0 4.5 15h2.25l4.75 3.5a.75.75 0 0 0 1.2-.6V6.1a.75.75 0 0 0-1.2-.6Z"></path>
+								<path d="M16.28 9.22a.75.75 0 0 1 1.06 1.06L16.06 11.56l1.28 1.28a.75.75 0 1 1-1.06 1.06L15 12.62l-1.28 1.28a.75.75 0 1 1-1.06-1.06l1.28-1.28-1.28-1.28a.75.75 0 0 1 1.06-1.06L15 10.5l1.28-1.28Z"></path>
+							</svg>
+						</button>
+						<!-- 音量滑条 -->
+						<div class="flex items-center gap-1.5">
+							<input
+								type="range"
+								min="0"
+								max="100"
+								step="1"
+								x-model="$store.global.playerVolume"
+								:style="`--range-value:${$store.global.playerVolume}`"
+								@input="applyVolumeFromStore()"
+								class="rangeBar w-20 sm:w-24"
+							/>
+							<span class="text-[11px] font-semibold w-8 text-right" x-text="Math.round($store.global.playerVolume) + '%'">100%</span>
+						</div>
+					</div>
 				</div>
 			</div>
 			<!-- 播放列表（普通布局，放在控制条下方） -->
-			<div class="mt-4 p-4 bg-base-100 border border-gray-300 dark:border-gray-600 rounded-lg shadow">
+			<div class="mt-4 p-4 shadow border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100">
 				<h3 class="text-lg font-semibold mb-2" x-text="i18next.t('playlist')">播放列表</h3>
-				<div class="max-h-56 overflow-y-auto">
+				<div class="max-h-72 overflow-y-auto">
 					<template x-for="(item, index) in playlistData" :key="item.id">
 						<div
 							@click="playMedia(index)"
 							:class="currentIndex === index ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
-							class="flex items-center p-2 cursor-pointer rounded transition-colors"
+							class="flex items-center p-2 my-0.5 cursor-pointer rounded transition-colors border-2 border-gray-500 dark:border-gray-200"
 						>
 							<!-- 媒体类型图标 -->
 							<div class="mr-3">
@@ -438,7 +726,11 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 							</div>
 							<!-- 媒体标题 -->
 							<div class="flex-1 min-w-0">
-								<p class="text-sm font-medium truncate" x-text="item.title"></p>
+								<p
+									class="text-sm font-medium truncate"
+									:class="currentIndex === index ? 'text-black' : ''"
+									x-text="item.title"
+								></p>
 							</div>
 							<!-- 当前播放指示器 -->
 							<div x-show="currentIndex === index" class="ml-2">

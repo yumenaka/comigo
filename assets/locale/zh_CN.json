@@ -912,6 +912,7 @@
   "play_failed": "播放失败",
   "first_media": "已经是第一个了",
   "last_media": "已经是最后一个了",
-  "auto_play_next": "自动播放下一曲",
-  "loop_playlist": "循环播放列表"
+  "auto_play_next": "自动下一曲",
+  "loop_playlist": "循环播放列表",
+  "player_autoplay_help": "自动下一曲与循环播放功能，需要浏览器开启媒体播放权限。在移动设备上也可能因省电/后台限制而失效。"
 }

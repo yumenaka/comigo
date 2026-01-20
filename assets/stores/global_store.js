@@ -63,6 +63,10 @@ Alpine.store('global', {
     nowPageNum: 1,
     allPageNum: 1,
     onlineBook: true,
+    // 播放器：音量（0~100）
+    playerVolume: Alpine.$persist(100).as('global.playerVolume'),
+    // 播放器：是否静音
+    playerMuted: Alpine.$persist(false).as('global.playerMuted'),
     // 播放器：是否自动播放下一曲
     autoPlayNext: Alpine.$persist(true).as('global.autoPlayNext'),
     // 播放器：是否循环播放播放列表

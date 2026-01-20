@@ -2,6 +2,7 @@
 
 ## Code Style
 - 代码应该有必要的中文注释，尤其是函数和复杂逻辑部分
+- 保持代码简洁易读
 
 ## 架构
 - 本项目后端使用golang编写，前端使用bun+javascript+alpine.js(+persist插件)+flowbite+tailwindcss编写。虽然有htmx，但在计划逐步减少htmx的使用。

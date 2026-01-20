@@ -33,4 +33,11 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 		></div>
 		<span class="font-medium ms-3" x-text="i18next.t('loop_playlist')">循环播放列表</span>
 	</label>
+	<!-- 【帮助说明】 -->
+	<div class="w-full mt-3 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-2">
+		<div class="text-sm font-semibold mb-1" x-text="i18next.t('hint')">提示</div>
+		<div class="text-xs leading-relaxed text-gray-600 dark:text-gray-300" x-text="i18next.t('player_autoplay_help')">
+			自动下一曲与循环播放功能，需要浏览器开启媒体播放权限。在移动设备上也可能因省电/后台限制而失效。
+		</div>
+	</div>
 }
