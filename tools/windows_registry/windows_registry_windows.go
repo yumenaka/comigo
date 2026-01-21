@@ -492,7 +492,9 @@ func CreateDesktopShortcut() error {
 		exePath,
 		filepath.Dir(exePath))
 
-	cmd := exec.Command("powershell", "-Command", psScript)
+	// 使用隐藏窗口方式执行，避免 powershell 闪黑框
+	cmd := exec.Command("powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command", psScript)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("create shortcut: %w", err)
 	}

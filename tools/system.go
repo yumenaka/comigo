@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net"
-	"os/exec"
 	"runtime"
 	"strconv"
 	"time"
@@ -157,19 +156,9 @@ func OpenBrowserByURL(uri string) {
 	}
 	logger.Info(locale.GetString("log_api_healthy_ready"))
 
-	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		cmd = exec.Command("CMD", "/C", "start", uri)
-		if err := cmd.Start(); err != nil {
-			logger.Infof(locale.GetString("open_browser_error")+"%s", err.Error())
-		}
-	} else if runtime.GOOS == "darwin" {
-		cmd = exec.Command("open", uri)
-		if err := cmd.Start(); err != nil {
-			logger.Infof(locale.GetString("open_browser_error")+"%s", err.Error())
-		}
-	} else if runtime.GOOS == "linux" {
-		cmd = exec.Command("xdg-open", uri)
+	// 打开浏览器（Windows 使用 ShellExecute，避免闪黑框）
+	if err := openURL(uri); err != nil {
+		logger.Infof(locale.GetString("open_browser_error")+"%s", err.Error())
 	}
 }
 

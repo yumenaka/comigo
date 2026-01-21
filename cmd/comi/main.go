@@ -60,7 +60,6 @@ func main() {
 		// 注册退出时清理单实例资源
 		defer tools.CleanupSingleInstance()
 	}
-	config.OpenBrowserIfNeeded()
 	// 启动网页服务器（不阻塞）
 	routers.StartWebServer()
 	// 启动或停止 Tailscale 服务（如启用）

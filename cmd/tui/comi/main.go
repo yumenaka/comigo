@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/yumenaka/comigo/cmd"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers"
 )
 
