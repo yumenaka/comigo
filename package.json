@@ -1,6 +1,6 @@
 {
   "name": "comigo",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Frontend for Comigo.",
   "license": "MIT",
   "browserslist": "> 0.5%, last 2 versions, not dead",

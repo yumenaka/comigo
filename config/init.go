@@ -40,7 +40,7 @@ var cfg = Config{
 	OpenBrowser:           true,
 	Port:                  1234,
 	Password:              "",
-	SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".mp4", ".webm", ".mov", ".pdf", ".flv", ".avi", ".mp3", ".aac", ".ogg", ".wav", ".wma", ".html", ".htm"},
+	SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".mp4", ".m4a", ".webm", ".mov", ".pdf", ".flv", ".avi", ".mp3", ".aac", ".ogg", ".wav", ".wma", ".html", ".htm"},
 	SupportMediaType:      []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
 	SupportTemplateFile:   []string{".html"},
 	UseCache:              true,

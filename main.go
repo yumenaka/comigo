@@ -39,8 +39,8 @@ func main() {
 	cmd.SaveMetadata()
 	// 启动自动扫描（如果配置了间隔）
 	config.StartOrStopAutoRescan()
-	// 在命令行显示 QRCode
-	cmd.ShowQRCode()
+	//// 在命令行显示 QRCode
+	//cmd.ShowQRCode()
 	// 退出时清理临时文件的处理函数
 	cmd.SetShutdownHandler()
 }

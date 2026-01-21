@@ -8654,6 +8654,9 @@ class $1bac384020b50752$var$I18n extends $1bac384020b50752$var$EventEmitter {
         if (options.keySeparator !== undefined) this.options.userDefinedKeySeparator = options.keySeparator;
         if (options.nsSeparator !== undefined) this.options.userDefinedNsSeparator = options.nsSeparator;
         if (typeof this.options.overloadTranslationOptionHandler !== 'function') this.options.overloadTranslationOptionHandler = defOpts.overloadTranslationOptionHandler;
+        if (this.options.debug === true) {
+            if (typeof console !== 'undefined') console.warn("i18next is maintained with support from locize.com \u2014 consider powering your project with managed localization (AI, CDN, integrations): https://locize.com");
+        }
         const createClassOnDemand = (ClassOrObject)=>{
             if (!ClassOrObject) return null;
             if (typeof ClassOrObject === 'function') return new ClassOrObject();
@@ -10260,6 +10263,7 @@ function $8c83eaf28779ff46$var$outNonAlpineAttributes({ name: name }) {
 var $8c83eaf28779ff46$var$alpineAttributeRegex = ()=>new RegExp(`^${$8c83eaf28779ff46$var$prefixAsString}([^:^.]+)\\b`);
 function $8c83eaf28779ff46$var$toParsedDirectives(transformedAttributeMap, originalAttributeOverride) {
     return ({ name: name, value: value })=>{
+        if (name === value) value = "";
         let typeMatch = name.match($8c83eaf28779ff46$var$alpineAttributeRegex());
         let valueMatch = name.match(/:([a-zA-Z0-9\-_:]+)/);
         let modifiers = name.match(/\.[^.\]]+(?=[^\]]*$)/g) || [];
@@ -11183,7 +11187,7 @@ var $8c83eaf28779ff46$var$Alpine = {
     get raw () {
         return $8c83eaf28779ff46$var$raw;
     },
-    version: "3.15.3",
+    version: "3.15.4",
     flushAndStopDeferringMutations: $8c83eaf28779ff46$var$flushAndStopDeferringMutations,
     dontAutoEvaluateFunctions: $8c83eaf28779ff46$var$dontAutoEvaluateFunctions,
     disableEffectScheduling: $8c83eaf28779ff46$var$disableEffectScheduling,
