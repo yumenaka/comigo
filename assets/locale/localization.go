@@ -31,31 +31,9 @@ func getLocale() (string, string) {
 	defaultLoc := "US"
 	switch osHost {
 	case "windows":
-		// 在 Windows 上通过 PowerShell 获取当前 UI 语言
-		// 使用 Culture 的 Name（如 zh-CN、en-US、ja-JP），而不是 Title（如 "Chinese (Simplified, China)"）
-		// 避免在 Windows 11 等系统上解析失败
-		cmd := exec.Command("powershell", "-NoProfile", "-Command", "[System.Globalization.CultureInfo]::CurrentUICulture.Name")
-		output, err := cmd.Output()
-		if err == nil {
-			langLocRaw := strings.TrimSpace(string(output))
-			if langLocRaw != "" {
-				// 统一处理可能出现的后缀和分隔符：
-				// 例如：zh-CN, en-US, ja-JP, zh-Hans-CN
-				// 1. 去掉编码后缀（如果有的话），例如 zh-CN.UTF-8
-				langLocRaw = strings.Split(langLocRaw, ".")[0]
-				langLocRaw = strings.TrimSpace(langLocRaw)
-				// 2. 将 - 统一替换为 _，方便按 "_" 切分
-				langLocRaw = strings.ReplaceAll(langLocRaw, "-", "_")
-
-				langLoc := strings.Split(langLocRaw, "_")
-				lang := langLoc[0]
-				loc := lang
-				// Windows 上可能出现 zh_CN、zh_Hans_CN 等形式，这里统一取最后一段作为地区信息
-				if len(langLoc) > 1 {
-					loc = langLoc[len(langLoc)-1]
-				}
-				return lang, loc
-			}
+		// Windows 使用 WinAPI 获取 UI 语言，避免 powershell 子进程导致黑框闪烁。
+		if lang, loc, ok := getWindowsLocale(); ok {
+			return lang, loc
 		}
 	case "linux":
 		envlang, ok := os.LookupEnv("LANG")
