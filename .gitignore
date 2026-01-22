@@ -20,6 +20,7 @@
 *config.toml
 *comigo.sqlite
 *comigo.sqlite*
+.gocache
 .cache
 cache
 .idea

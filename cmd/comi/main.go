@@ -80,6 +80,7 @@ func main() {
 	config.StartOrStopAutoRescan()
 	// 在命令行显示QRCode
 	cmd.ShowQRCode()
+	config.OpenBrowserIfNeeded()
 	// 退出时清理临时文件的处理函数
 	cmd.SetShutdownHandler()
 }

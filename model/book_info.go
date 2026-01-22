@@ -20,7 +20,7 @@ type BookInfo struct {
 	BookID          string          `json:"id"`                // 根据 BookPath 生成的唯一 ID
 	StoreUrl        string          `json:"store_url"`         // 在哪个子书库
 	ChildBooksNum   int             `json:"child_books_num"`   // 子书籍数量，只统计直接的子书籍
-	ChildBooksID    []string        `json:"child_books_id"`    // 子书籍BookID
+	ChildBooksID    []string        `json:"child_books_id"`    // 子书籍 BookID
 	Cover           PageInfo        `json:"cover"`             // 封面图
 	Deleted         bool            `json:"deleted"`           // 源文件是否已删除
 	Depth           int             `json:"depth"`             // 书籍深度

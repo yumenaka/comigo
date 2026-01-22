@@ -14,3 +14,4 @@
 - golang使用 templ 进行 HTML 模板渲染，模板文件放在`templ`目录下。
 - 内置插件放在`templ/plugins`目录下。用户可以设置启用插件，插件会自动加载到特定页面。
 - 运行指令：templ fmt ./templ && templ generate && go run main.go
+- 开发时，假设相关 cli 工具与 golang 依赖都已经安装了
