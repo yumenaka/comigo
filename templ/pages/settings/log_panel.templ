@@ -3,14 +3,36 @@ package settings
 // 服务器日志面板，使用 SSE 实时显示后端日志，并允许发送全局广播消息
 templ LogPanel() {
 	<div
-		id="log_panel"
-		class="w-full h-[400px] p-4 mx-2 mt-1.5 bg-gray-900 text-sm text-white rounded overflow-auto whitespace-pre-line break-all"
+		id="settings_log"
+		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
-		<!-- 日志内容将通过 JavaScript 动态插入 -->
-	</div>
-	<div class="row flex items-center justify-center w-5/6 p-2 my-2">
-		<input id="msg" placeholder="输入全局广播消息" class="ml-4 px-2 py-1 h-10 rounded"/>
-		<button id="send" class="ml-2 p-1 h-10 w-24 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900">POST</button>
+		<div
+			class="w-full text-center"
+			x-text="i18next.t('settings_log_title')"
+		>
+			实时服务器日志
+		</div>
+		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+		<div
+			id="log_panel"
+			class="w-full h-[400px] p-4 mt-1 bg-gray-900 text-sm text-white rounded overflow-y-auto overflow-x-hidden whitespace-pre-wrap wrap-break-word"
+		>
+			<!-- 日志内容将通过 JavaScript 动态插入 -->
+		</div>
+		<div class="flex items-center justify-center w-full px-2 pt-3">
+			<input
+				id="msg"
+				placeholder="输入广播消息"
+				x-bind:placeholder="i18next.t('settings_log_broadcast_placeholder')"
+				class="flex-1 min-w-0 px-2 py-1 h-10 rounded text-base-content bg-base-200 border border-base-300"
+			/>
+			<button
+				id="send"
+				class="ml-2 p-1 h-10 w-24 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
+			>
+				<span x-text="i18next.t('settings_log_broadcast_send')">POST</span>
+			</button>
+		</div>
 	</div>
 	<script>
 		// 日志内容着色函数
@@ -37,24 +59,74 @@ templ LogPanel() {
 				)
 				.replace(/\[DEBUG\]/g, '<span style="color:gray">[DEBUG]</span>');
 		}
-		// 日志输出函数，追加日志并自动滚动到底部
+		// 日志输出函数（性能优化版）：
+		// - 不再使用 innerHTML +=（会导致整块 HTML 反复重建/解析，日志多时直接卡死）
+		// - 批量追加，合并滚动操作
+		// - 限制最大行数，避免 DOM 无限增长
+		const LOG_MAX_LINES = 2000;
+		const LOG_FLUSH_INTERVAL_MS = 80;
+
+		const logBox = () => document.getElementById("log_panel");
+		const logPending = [];
+		let logFlushTimer = null;
+
+		function isNearBottom(el) {
+			// 允许 12px 的误差，避免浮点/滚动条误差导致“吸底”失效
+			return el.scrollTop + el.clientHeight >= el.scrollHeight - 12;
+		}
+
+		function pruneLogLines(box) {
+			// 以“行”为单位裁剪，保持最近 LOG_MAX_LINES 行
+			while (box.childElementCount > LOG_MAX_LINES) {
+				box.removeChild(box.firstElementChild);
+			}
+		}
+
+		function flushLogs() {
+			logFlushTimer = null;
+			const box = logBox();
+			if (!box) return;
+
+			const shouldAutoScroll = isNearBottom(box);
+			if (logPending.length === 0) return;
+
+			// 用 template 一次性解析新增内容，避免频繁触发重排/回流
+			const tpl = document.createElement("template");
+			tpl.innerHTML = logPending
+				.splice(0, logPending.length)
+				.map((line) => `<div class="log-line">${line}</div>`)
+				.join("");
+			box.appendChild(tpl.content);
+
+			pruneLogLines(box);
+
+			if (shouldAutoScroll) {
+				box.scrollTop = box.scrollHeight;
+			}
+		}
+
+		// 外部统一调用的 log：入队 + 定时批量 flush
 		const log = (s) => {
-			s = colorize(s);
-			const box = document.getElementById("log_panel");
-			box.innerHTML += s + "\n";
-			box.scrollTop = box.scrollHeight;
+			const box = logBox();
+			if (!box) return;
+			logPending.push(colorize(s));
+			if (logFlushTimer) return;
+			logFlushTimer = setTimeout(flushLogs, LOG_FLUSH_INTERVAL_MS);
 		};
 		// 创建 EventSource 连接到后端 SSE API,withCredentials:true 允许携带cookie
 		// https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource
 		const es = new EventSource("/api/sse", { withCredentials: true });
 		es.onopen = (e) =>
 			log(
-				`<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> log server connected`,
+				`<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> ` +
+					t("settings_log_sse_connected", "log server connected"),
 			);
 		es.onerror = (e) =>
 			log(
 				`<span style="color:oklch(57.7% 0.245 27.325)">[error]</span> ` +
-					(es.readyState === EventSource.CLOSED ? "closed" : "retrying..."),
+					(es.readyState === EventSource.CLOSED
+						? t("settings_log_sse_closed", "closed")
+						: t("settings_log_sse_retrying", "retrying...")),
 			);
 		// 全局消息事件
 		es.onmessage = (e) => {
@@ -71,7 +143,9 @@ templ LogPanel() {
 
 		// 发送消息按钮的点击事件
 		document.getElementById("send").onclick = async () => {
-			const message = document.getElementById("msg").value || "Hello ~";
+			const message =
+				document.getElementById("msg").value ||
+				t("settings_log_broadcast_default_message", "Hello ~");
 			await fetch("/api/push", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },

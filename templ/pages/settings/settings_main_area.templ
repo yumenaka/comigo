@@ -76,6 +76,8 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			@ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(),
 				config.GetHomeDirectoryConfig(),
 				config.GetProgramDirectoryConfig())
+			<!-- 服务器日志 -->
+			@LogPanel()
 			<!-- 实验功能 -->
 			<div
 				id="settings_labs"
@@ -95,9 +97,5 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				}
 			</div>
 		</div>
-		if config.GetCfg().Debug {
-			<!-- 服务器日志 -->
-			@LogPanel()
-		}
 	</div>
 }
