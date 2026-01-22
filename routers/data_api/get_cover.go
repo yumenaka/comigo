@@ -57,7 +57,7 @@ func GetCover(c echo.Context) error {
 			}
 		}
 	}
-	// 尝试从 MP3 的 ID3(APIC) 内嵌图片中读取封面（仅在本地缓存未命中时）
+	// 尝试从 MP3 的 ID3(APIC) 内嵌图片中读取封面（在本地缓存未命中时）
 	// 说明：
 	// - 优先使用第三方库提高兼容性（dhowden/tag）
 	// - 成功读取后统一转为 JPEG，并复用现有的封面缓存（bookID.jpg）

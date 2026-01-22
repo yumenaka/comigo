@@ -24,11 +24,17 @@ func InitAllStore(cfg ConfigInterface) error {
 // AddBooksToStore 添加一组书到书库
 func AddBooksToStore(books []*model.Book) {
 	for _, book := range books {
-		if book.Type == model.TypeDir ||
-			book.Type == model.TypeZip || book.Type == model.TypeRar ||
+		// 压缩包类型的书籍，页数小于最小图片数，跳过添加
+		if book.Type == model.TypeZip || book.Type == model.TypeRar ||
 			book.Type == model.TypeCbz || book.Type == model.TypeCbr ||
 			book.Type == model.TypeTar || book.Type == model.TypeEpub {
 			if len(book.PageInfos) < config.GetCfg().MinImageNum {
+				continue
+			}
+		}
+		// 目录类型的书籍，页数小于最小图片数(或1)，跳过添加
+		if book.Type == model.TypeDir {
+			if len(book.PageInfos) < config.GetCfg().MinImageNum || len(book.PageInfos) == 0 {
 				continue
 			}
 		}

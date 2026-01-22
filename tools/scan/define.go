@@ -21,14 +21,9 @@ type ConfigInterface interface {
 }
 
 var cfg ConfigInterface
-var minImageNum int
 
-func init() {
-	minImageNum = 1
-}
 func InitConfig(c ConfigInterface) {
 	cfg = c
-	minImageNum = cfg.GetMinImageNum()
 }
 
 // IsSupportTemplate 判断压缩包内的文件是否是支持的模板文件

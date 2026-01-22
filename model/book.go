@@ -160,6 +160,7 @@ func ClearBookNotExist() {
 				logger.Infof(locale.GetString("log_error_deleting_book"), book.BookID, err)
 			}
 		}
+		// TODO：如果是TypeDir类型，则检查所有图片是否存在,并删除不存在的图片，全部不存在则删除书籍
 	}
 	// 重新生成书组
 	if len(deletedBooks) > 0 {
