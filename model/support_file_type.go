@@ -44,9 +44,9 @@ func GetBookTypeByFilename(filename string) SupportFileType {
 		return TypePDF
 	case ".html", ".htm":
 		return TypeHTML
-	case ".mp4", ".m4v", ".flv", ".avi", ".webm":
+	case ".mp4", ".m4v", ".flv", ".avi", ".webm", ".mov":
 		return TypeVideo
-	case ".mp3", ".wav", ".wma", ".ogg":
+	case ".mp3", ".m4a", ".aac", ".wav", ".wma", ".ogg":
 		return TypeAudio
 	default:
 		return TypeUnknownFile

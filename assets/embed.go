@@ -21,6 +21,9 @@ var ScriptFS fs.FS
 var Images embed.FS
 var ImagesFS fs.FS
 
+//go:embed epub/*
+var Epub embed.FS
+
 // GetCSS 在页面中插入需要的css代码
 func GetCSS(oneFileMode bool) (cssString string) {
 	if oneFileMode {

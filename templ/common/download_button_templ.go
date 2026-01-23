@@ -36,64 +36,177 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- 下载按钮组件 --><div x-show=\"$store.global.onlineBook\" class=\"w-full mt-2 mb-2 pb-1 flex flex-row justify-center items-center border-2 border-gray-500 dark:border-gray-200 rounded relative\"><!-- 下载 --><span class=\"absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content\" x-text=\"i18next.t('download')\">下载</span><!-- 【下载网页文件】按钮，便携模式不可见 --><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- 下载按钮组件，便携模式不可见 --><div x-show=\"$store.global.onlineBook\" class=\"w-full mt-2 mb-2 pb-1 flex flex-row flex-wrap justify-center items-center border-2 border-gray-500 dark:border-gray-200 rounded relative\"><!-- 下载 --><span class=\"absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content\" x-text=\"i18next.t('download')\">下载</span><!-- 【下载原始文件】按钮 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 templ.SafeURL
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 25, Col: 100}
+		if book != nil && book.Type != model.TypeDir {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<a href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 templ.SafeURL
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/api/raw/%v/%v", book.BookID, book.BookInfo.Title)))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 26, Col: 89}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" download=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(book.BookInfo.Title)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 27, Col: 34}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" :title=\"i18next.t('download_raw_archive')\" x-text=\"i18next.t('download_raw_archive')\">下载原始文件</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" download=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(book.BookInfo.Title + ".html")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 26, Col: 43}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" x-show=\"$store.global.onlineBook\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\">下载便携网页</a><!-- 【下载原始文件】按钮，便携模式不可见 --><a href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var4 templ.SafeURL
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/api/raw/%v/%v", book.BookID, book.BookInfo.Title)))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 36, Col: 88}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" download=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- 【下载为ZIP】按钮，仅对 图片类书籍（TypeDir） 类型显示 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(book.BookInfo.Title)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 37, Col: 33}
+		if book != nil && book.Type == model.TypeDir {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<a href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 templ.SafeURL
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/api/download_zip?id=%v", book.BookID)))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 38, Col: 77}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" download=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(book.BookInfo.Title + ".zip")
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 39, Col: 43}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" :title=\"i18next.t('download_as_zip')\" x-text=\"i18next.t('download_as_zip')\">下载为ZIP</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<!-- 【下载为EPUB】按钮，对图片类书籍（TypeDir）显示 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" x-show=\"$store.global.onlineBook\" :title=\"i18next.t('download_raw_archive')\" x-text=\"i18next.t('download_raw_archive')\">下载原始文件</a></div>")
+		if book != nil && canDownloadAsEpub(book.Type) {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<a href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 templ.SafeURL
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/api/download_epub?id=%v", book.BookID)))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 50, Col: 78}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" download=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(getEpubFileName(book.BookInfo.Title))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 51, Col: 51}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" :title=\"i18next.t('download_as_epub')\" x-text=\"i18next.t('download_as_epub')\">EPUB文件</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<!-- 下载【便携网页】按钮--><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 templ.SafeURL
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 61, Col: 100}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" download=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(book.BookInfo.Title + ".html")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 62, Col: 43}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-1 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\">便携网页</a><!-- 【清除缓存】按钮,暂时注释掉 -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if book != nil && false {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<button type=\"button\" x-data=\"{ deleting: false }\" @click=\"\n\t\t\t\t\tif (confirm(i18next.t('confirm_clear_cache'))) {\n\t\t\t\t\t\tdeleting = true;\n\t\t\t\t\t\tfetch('/api/book_cache?id=' + encodeURIComponent($store.global.bookID || window.location.pathname.split('/').pop()), { method: 'DELETE' })\n\t\t\t\t\t\t\t.then(res => res.json())\n\t\t\t\t\t\t\t.then(data => {\n\t\t\t\t\t\t\t\tdeleting = false;\n\t\t\t\t\t\t\t\tif (typeof window.showToast === 'function') {\n\t\t\t\t\t\t\t\t\twindow.showToast(i18next.t('clear_cache_success'), 'success');\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\talert(i18next.t('clear_cache_success'));\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t.catch(err => {\n\t\t\t\t\t\t\t\tdeleting = false;\n\t\t\t\t\t\t\t\tconsole.error('Delete cache error:', err);\n\t\t\t\t\t\t\t\tif (typeof window.showToast === 'function') {\n\t\t\t\t\t\t\t\t\twindow.showToast(i18next.t('clear_cache_failed'), 'error');\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\talert(i18next.t('clear_cache_failed'));\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300\" :title=\"i18next.t('clear_cache')\" :disabled=\"deleting\"><span x-show=\"!deleting\" x-text=\"i18next.t('clear_cache')\">清除缓存</span> <span x-show=\"deleting\" class=\"animate-pulse\">...</span></button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return nil
 	})
+}
+
+// canDownloadAsEpub 判断书籍类型是否可以转换为 EPUB
+func canDownloadAsEpub(bookType model.SupportFileType) bool {
+	switch bookType {
+	case model.TypeBooksGroup, model.TypeVideo, model.TypeAudio, model.TypeHTML:
+		return false
+	default:
+		return true
+	}
+}
+
+// getEpubFileName 获取 EPUB 文件名
+func getEpubFileName(title string) string {
+	// 移除原有扩展名后添加 .epub
+	for _, ext := range []string{".zip", ".rar", ".cbz", ".cbr", ".tar", ".pdf", ".epub"} {
+		if len(title) > len(ext) && title[len(title)-len(ext):] == ext {
+			return title[:len(title)-len(ext)] + ".epub"
+		}
+	}
+	return title + ".epub"
 }
 
 var _ = templruntime.GeneratedTemplate

@@ -1,29 +1,21 @@
 package common
 
-// ReadingHistory 阅读历史记录列表组件
+import "strconv"
+
+// ReadingHistory 阅读历史记录列表组件（限制显示数量，默认10条）
+// 用于各个页面的 drawer 侧边栏
 templ ReadingHistory() {
+	@ReadingHistoryWithLimit(10)
+}
+
+// ReadingHistoryWithLimit 阅读历史记录列表组件（可指定限制数量）
+// 调用 /api/reading_history?limit=X 获取数据，后端已完成过滤和排序
+templ ReadingHistoryWithLimit(limit int) {
 	<!-- ReadingHistory 阅读历史记录列表组件 -->
 	<div
-		x-data="{ collapsed: $persist(true).as('reading_history_collapsed'), bookmarks: [], loading: false }"
+		x-data={ getReadingHistoryXData(limit) }
 		x-show="!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')"
-		x-init="
-			(async () => {
-				loading = true;
-				try {
-					const response = await fetch('/api/all_bookmarks');
-					if (response.ok) {
-						const data = await response.json();
-						// 过滤掉没有阅读记录的书签（PageIndex > 0），并按更新时间降序排序
-						bookmarks = data.filter(item => item.book_mark.page_index > 0)
-							.sort((a, b) => new Date(b.book_mark.updated_at) - new Date(a.book_mark.updated_at));
-					}
-				} catch (error) {
-					console.error('Failed to load bookmarks:', error);
-				} finally {
-					loading = false;
-				}
-			})();
-		"
+		x-init={ getReadingHistoryXInit(limit) }
 		class="flex flex-col w-full my-1 max-h-128"
 	>
 		<!-- 折叠/展开按钮 -->
@@ -43,7 +35,7 @@ templ ReadingHistory() {
 			</svg>
 			<!-- 阅读历史Title -->
 			<div class="flex-1 flex flex-row justify-center items-center">
-				<span class="text-center flex-1 font-medium ms-3" x-text="i18next.t('reading_history')+(bookmarks.length > 0?'(' + bookmarks.length + ')':'')"></span>
+				<span class="text-center flex-1 font-medium ms-3" x-text="i18next.t('reading_history')+(bookmarks.length > 0 ? '(' + bookmarks.length + ')' : '')"></span>
 			</div>
 			<!-- 折叠指示图标 -->
 			<svg
@@ -102,6 +94,41 @@ templ ReadingHistory() {
 					</div>
 				</a>
 			</template>
+			<!-- 查看更多链接（当有更多记录时显示） -->
+			<a
+				x-show="limit > 0 && totalCount > limit"
+				href="/settings#reading_history"
+				class="flex justify-center items-center w-full py-2 text-sm text-blue-500 hover:text-blue-700 hover:underline"
+			>
+				<span x-text="i18next.t('view_all_reading_history') + ' (' + totalCount + ')'"></span>
+			</a>
 		</div>
 	</div>
+}
+
+// getReadingHistoryXData 生成阅读历史组件的 x-data
+func getReadingHistoryXData(limit int) string {
+	return "{ collapsed: $persist(true).as('reading_history_collapsed'), bookmarks: [], loading: false, limit: " + strconv.Itoa(limit) + ", totalCount: 0 }"
+}
+
+// getReadingHistoryXInit 生成阅读历史组件的 x-init（使用新API）
+func getReadingHistoryXInit(limit int) string {
+	return `
+		(async () => {
+			loading = true;
+			try {
+				const response = await fetch('/api/reading_history?limit=` + strconv.Itoa(limit) + `');
+				if (response.ok) {
+					const data = await response.json();
+					// 后端已完成过滤和排序，直接使用返回的数据
+					bookmarks = data.items || [];
+					totalCount = data.total_count || 0;
+				}
+			} catch (error) {
+				console.error('Failed to load reading history:', error);
+			} finally {
+				loading = false;
+			}
+		})();
+	`
 }
