@@ -19,7 +19,7 @@ templ AutoScrollPlugin(c echo.Context) {
 				autoScrollEnabled: false, 
 				autoScrollInterval: null,
 				intervalSeconds: $persist(3).as('autoScrollIntervalSeconds'),
-				scrollPercent: $persist(90).as('autoScrollPercent'),
+				scrollPercent: $persist(95).as('autoScrollPercent'),
 				startAutoScroll() {
 					const self = this;
 					// 清除旧定时器

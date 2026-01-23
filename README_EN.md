@@ -25,6 +25,10 @@
 - 🖼️ **Modern Image Formats**: In addition to `jpg` and `png`, it also supports next-gen formats like `heic` and `avif`
 - ✂️ **Smart Optimization**: Automatic image cropping and compression for bandwidth saving
 - 🔄 **Sync Reading**: Synchronized page-turning across different devices
+- 🔌 **Plugin System**: Built-in plugins like auto page-turn and clock, with custom plugin support
+- 🎬 **Media Playback**: Built-in audio and video player
+- 📥 **Flexible Download**: Batch download image folders, convert and download as EPUB format
+- 📜 **Reading History**: Automatic reading history tracking for easy continuation
 
 ## Installation Guide
 
