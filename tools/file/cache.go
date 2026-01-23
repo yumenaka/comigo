@@ -93,6 +93,27 @@ func GetQueryString(query url.Values) string {
 	return queryCopy.Encode()
 }
 
+// DeleteCoverCache 删除封面缓存文件
+func DeleteCoverCache(metaDataDir string, bookID string) error {
+	filename := bookID + ".jpg"
+	filePath := filepath.Join(metaDataDir, filename)
+	// 检查文件是否存在
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return nil // 文件不存在，无需删除
+	}
+	return os.Remove(filePath)
+}
+
+// DeleteBookCache 删除书籍的图片缓存目录
+func DeleteBookCache(cachePath string, bookID string) error {
+	cacheDir := filepath.Join(cachePath, bookID)
+	// 检查目录是否存在
+	if _, err := os.Stat(cacheDir); os.IsNotExist(err) {
+		return nil // 目录不存在，无需删除
+	}
+	return os.RemoveAll(cacheDir)
+}
+
 // GetFileFromCache 从缓存读取文件，加快第二次访问的速度
 func GetFileFromCache(id, filename, queryString string, cachePath string, debug bool) ([]byte, string, error) {
 	// 从映射中读取 ContentType

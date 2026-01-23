@@ -121,6 +121,8 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/get_book", data_api.GetBook)
 	// 获取所有书签的API
 	group.GET("/all_bookmarks", data_api.GetAllBookmarks)
+	// 获取阅读历史（支持limit和分页参数）
+	group.GET("/reading_history", data_api.GetReadingHistory)
 	// 更新书签信息
 	group.POST("/store_bookmark", data_api.StoreBookmark)
 	// 查询父书籍信息
@@ -170,4 +172,10 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/sse", sse_hub.SSEHandler)
 	// SSE 广播接口
 	group.POST("/push", sse_hub.PushHandler)
+	// 下载 TypeDir 书籍为 zip 文件
+	group.GET("/download_zip", data_api.DownloadZip)
+	// 下载书籍为 EPUB 文件
+	group.GET("/download_epub", data_api.DownloadEpub)
+	// 删除书籍的元数据和缓存文件
+	group.DELETE("/book_cache", data_api.DeleteBookCache)
 }

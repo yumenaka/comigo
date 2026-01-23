@@ -19,6 +19,7 @@ templ AutoScrollPlugin(c echo.Context) {
 				autoScrollEnabled: false, 
 				autoScrollInterval: null,
 				intervalSeconds: $persist(3).as('autoScrollIntervalSeconds'),
+				scrollPercent: $persist(90).as('autoScrollPercent'),
 				startAutoScroll() {
 					const self = this;
 					// 清除旧定时器
@@ -28,6 +29,8 @@ templ AutoScrollPlugin(c echo.Context) {
 					}
 					// 确保使用最新的 intervalSeconds 值
 					const currentInterval = parseInt(self.intervalSeconds) || 3;
+					// 确保使用最新的 scrollPercent 值
+					const currentPercent = parseInt(self.scrollPercent) || 90;
 					// 滚动模式：自动向下滚动
 
 					self.autoScrollInterval = setInterval(() => {
@@ -35,7 +38,7 @@ templ AutoScrollPlugin(c echo.Context) {
 						const scrollHeight = document.documentElement.scrollHeight;
 						const scrollTop = window.scrollY || document.documentElement.scrollTop;
 						const clientHeight = window.innerHeight;
-						const scrollStep = window.innerHeight * 9 / 10; // 每次滚 90% 屏幕高度
+						const scrollStep = window.innerHeight * currentPercent / 100; // 每次滚动指定百分比的屏幕高度
 						if (scrollTop + clientHeight >= scrollHeight - 10) {
 							// 到达底部，自动停止
 							clearInterval(self.autoScrollInterval);
@@ -109,6 +112,30 @@ templ AutoScrollPlugin(c echo.Context) {
 						}
 					"
 					step="1"
+					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+				/>
+			</div>
+			<!-- 滚动距离百分比设置 -->
+			<div class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+				<label
+					for="autoScrollPercent"
+					class="block w-full mb-0 font-medium"
+					x-text="i18next.t('auto_scroll_distance') + ' ' + scrollPercent + '%'"
+				></label>
+				<input
+					id="autoScrollPercent"
+					type="range"
+					min="50"
+					max="150"
+					x-model.number="scrollPercent"
+					@input="
+						scrollPercent = parseInt($event.target.value) || 90;
+						// 如果正在运行，重新启动定时器以应用新的滚动距离
+						if (autoScrollEnabled) {
+							startAutoScroll();
+						}
+					"
+					step="5"
 					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
 				/>
 			</div>
