@@ -3263,6 +3263,10 @@
     min-width: calc(var(--spacing) * 0);
   }
 
+  .min-w-10 {
+    min-width: calc(var(--spacing) * 10);
+  }
+
   .min-w-24 {
     min-width: calc(var(--spacing) * 24);
   }
@@ -3277,10 +3281,6 @@
 
   .min-w-80 {
     min-width: calc(var(--spacing) * 80);
-  }
-
-  .min-w-\[2\.5rem\] {
-    min-width: 2.5rem;
   }
 
   .min-w-\[20rem\] {
@@ -4553,6 +4553,10 @@
     background-color: var(--color-gray-600);
   }
 
+  .bg-gray-800 {
+    background-color: var(--color-gray-800);
+  }
+
   .bg-gray-900 {
     background-color: var(--color-gray-900);
   }
@@ -4671,14 +4675,23 @@
     background-color: var(--color-neutral-secondary);
   }
 
+  .bg-linear-to-r {
+    --tw-gradient-position: to right;
+  }
+
+  @supports (background-image: linear-gradient(in lab, red, red)) {
+    .bg-linear-to-r {
+      --tw-gradient-position: to right in oklab;
+    }
+  }
+
+  .bg-linear-to-r {
+    background-image: linear-gradient(var(--tw-gradient-stops));
+  }
+
   .-bg-conic, .bg-conic {
     --tw-gradient-position: in oklab;
     background-image: conic-gradient(var(--tw-gradient-stops));
-  }
-
-  .bg-gradient-to-r {
-    --tw-gradient-position: to right in oklab;
-    background-image: linear-gradient(var(--tw-gradient-stops));
   }
 
   .bg-radial {
@@ -6584,6 +6597,10 @@
 
     .hover\:bg-gray-400:hover {
       background-color: var(--color-gray-400);
+    }
+
+    .hover\:bg-gray-700:hover {
+      background-color: var(--color-gray-700);
     }
 
     .hover\:bg-green-400:hover {

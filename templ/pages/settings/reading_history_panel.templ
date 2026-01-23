@@ -83,7 +83,7 @@ templ ReadingHistoryPanel() {
 						@click="goToPage(page)"
 						:disabled="loading"
 						:class="currentPage === page ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'"
-						class="px-3 py-1 rounded border transition-colors min-w-[2.5rem] disabled:opacity-50 disabled:cursor-not-allowed"
+						class="px-3 py-1 rounded border transition-colors min-w-10 disabled:opacity-50 disabled:cursor-not-allowed"
 						x-text="page"
 					></button>
 					<span x-show="page === '...'" class="px-2 text-gray-500">...</span>
@@ -147,7 +147,7 @@ templ ReadingHistoryPanel() {
 								<!-- 阅读进度条 -->
 								<div class="w-full h-2 mt-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
 									<div
-										class="h-full bg-gradient-to-r from-blue-400 to-blue-600 transition-all duration-300"
+										class="h-full bg-linear-to-r from-blue-400 to-blue-600 transition-all duration-300"
 										:style="'width: ' + Math.round((item.book_mark.page_index / item.book_info.page_count) * 100) + '%'"
 									></div>
 								</div>
