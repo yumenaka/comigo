@@ -5259,6 +5259,10 @@
     padding-inline: calc(var(--spacing) * 1);
   }
 
+  .px-1\.5 {
+    padding-inline: calc(var(--spacing) * 1.5);
+  }
+
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
@@ -6607,6 +6611,10 @@
       background-color: var(--color-green-400);
     }
 
+    .hover\:bg-green-700:hover {
+      background-color: var(--color-green-700);
+    }
+
     .hover\:bg-indigo-300:hover {
       background-color: var(--color-indigo-300);
     }
@@ -6719,6 +6727,10 @@
 
   .focus\:ring-blue-500:focus {
     --tw-ring-color: var(--color-blue-500);
+  }
+
+  .focus\:ring-green-300:focus {
+    --tw-ring-color: var(--color-green-300);
   }
 
   .focus\:ring-indigo-500:focus {
@@ -6928,6 +6940,10 @@
       }
     }
 
+    .dark\:bg-green-500 {
+      background-color: var(--color-green-500);
+    }
+
     .dark\:text-blue-300 {
       color: var(--color-blue-300);
     }
@@ -6969,6 +6985,10 @@
         background-color: var(--color-gray-800);
       }
 
+      .dark\:hover\:bg-green-600:hover {
+        background-color: var(--color-green-600);
+      }
+
       .dark\:hover\:text-white:hover {
         color: var(--color-white);
       }
@@ -6980,6 +7000,10 @@
 
     .dark\:focus\:ring-gray-600:focus {
       --tw-ring-color: var(--color-gray-600);
+    }
+
+    .dark\:focus\:ring-green-800:focus {
+      --tw-ring-color: var(--color-green-800);
     }
   }
 }

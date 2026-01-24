@@ -26,6 +26,48 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 			用浏览器打开PDF
 		</a>
 	}
+	<!-- 添加书签按钮 -->
+	if book != nil {
+		<button
+			x-show="$store.global.onlineBook"
+			x-data="{ adding: false }"
+			@click="
+				if (adding) return;
+				adding = true;
+				const pageIndex = $store.global.nowPageNum;
+				$store.global.UpdateBookmark({
+					type: 'user',
+					bookId: $store.global.bookID || window.location.pathname.split('/').pop(),
+					pageIndex: pageIndex,
+					description: ''
+				}).then(() => {
+					adding = false;
+					if (typeof window.showToast === 'function') {
+						window.showToast(i18next.t('bookmark_added'), 'success');
+					} else {
+						alert(i18next.t('bookmark_added'));
+					}
+					// 刷新阅读历史
+					window.dispatchEvent(new CustomEvent('refresh-reading-history'));
+				}).catch(err => {
+					adding = false;
+					console.error('Add bookmark error:', err);
+					if (typeof window.showToast === 'function') {
+						window.showToast(i18next.t('bookmark_exists'), 'warning');
+					}
+				});
+			"
+			type="button"
+			class="flex justify-center items-center w-full px-3 py-2 my-1 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800"
+			:disabled="adding"
+		>
+			<svg x-show="!adding" class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+				<path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"></path>
+			</svg>
+			<span x-show="!adding" x-text="i18next.t('add_bookmark') + ' (P.' + $store.global.nowPageNum + ')'"></span>
+			<span x-show="adding" class="animate-pulse">...</span>
+		</button>
+	}
 	@common.ReadModeSwitchButton()
 	@common.DownloadButton(c, book)
 	<!-- 【显示页数】 -->

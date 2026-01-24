@@ -16,6 +16,7 @@ templ ReadingHistoryWithLimit(limit int) {
 		x-data={ getReadingHistoryXData(limit) }
 		x-show="!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')"
 		x-init={ getReadingHistoryXInit(limit) }
+		@refresh-reading-history.window="refresh()"
 		class="flex flex-col w-full my-1 max-h-128"
 	>
 		<!-- 折叠/展开按钮 -->
@@ -63,7 +64,7 @@ templ ReadingHistoryWithLimit(limit int) {
 				<span class="inline-block align-middle" x-text="i18next.t('no_reading_history')"></span>
 			</div>
 			<!-- 书签列表 -->
-			<template x-for="item in bookmarks" :key="item.book_info.id + '_' + item.book_mark.page_index">
+			<template x-for="(item, index) in bookmarks" :key="item.book_info?.id + '_' + item.book_mark?.mark_type + '_' + item.book_mark?.page_index + '_' + index">
 				<a
 					:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)"
 					class="flex flex-col gap-2 p-2 rounded border-2 border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
@@ -76,7 +77,15 @@ templ ReadingHistoryWithLimit(limit int) {
 						></div>
 						<!-- 信息 -->
 						<div class="flex-1 min-w-0">
-							<div class="font-medium text-sm truncate" x-text="item.book_info.title || i18next.t('unknown')"></div>
+							<div class="flex items-center gap-1">
+								<span class="font-medium text-sm truncate" x-text="item.book_info.title || i18next.t('unknown')"></span>
+								<!-- 书签类型标识 -->
+								<span
+									x-show="item.book_mark.mark_type === 'user'"
+									class="shrink-0 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded"
+									x-text="i18next.t('manual_bookmark')"
+								></span>
+							</div>
 							<div class="text-xs text-gray-500 mt-1">
 								<span x-text="item.book_mark.page_index + '/' + item.book_info.page_count"></span>
 								<span x-show="$store.shelf.readingProgressPercent" class="ml-2">
@@ -108,27 +117,31 @@ templ ReadingHistoryWithLimit(limit int) {
 
 // getReadingHistoryXData 生成阅读历史组件的 x-data
 func getReadingHistoryXData(limit int) string {
-	return "{ collapsed: $persist(true).as('reading_history_collapsed'), bookmarks: [], loading: false, limit: " + strconv.Itoa(limit) + ", totalCount: 0 }"
-}
-
-// getReadingHistoryXInit 生成阅读历史组件的 x-init（使用新API）
-func getReadingHistoryXInit(limit int) string {
-	return `
-		(async () => {
-			loading = true;
+	return `{
+		collapsed: $persist(true).as('reading_history_collapsed'),
+		bookmarks: [],
+		loading: false,
+		limit: ` + strconv.Itoa(limit) + `,
+		totalCount: 0,
+		async refresh() {
+			this.loading = true;
 			try {
 				const response = await fetch('/api/reading-history?limit=` + strconv.Itoa(limit) + `');
 				if (response.ok) {
 					const data = await response.json();
-					// 后端已完成过滤和排序，直接使用返回的数据
-					bookmarks = data.items || [];
-					totalCount = data.total_count || 0;
+					this.bookmarks = data.items || [];
+					this.totalCount = data.total_count || 0;
 				}
 			} catch (error) {
 				console.error('Failed to load reading history:', error);
 			} finally {
-				loading = false;
+				this.loading = false;
 			}
-		})();
-	`
+		}
+	}`
+}
+
+// getReadingHistoryXInit 生成阅读历史组件的 x-init（使用新API）
+func getReadingHistoryXInit(limit int) string {
+	return `refresh()`
 }

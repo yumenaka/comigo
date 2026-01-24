@@ -90,13 +90,15 @@ func getScrollPaginationURL(book *model.Book, page int) string {
 	return readURL
 }
 
-// 自动书签脚本
+// 自动书签脚本，同时更新当前页码
 func intersectScript(pageIndex int) string {
 	return fmt.Sprintf(`
     $nextTick(() => {
 	if(!loaded || counter < 1){
         return;
     }
+    // 更新当前页码
+    $store.global.nowPageNum = %d;
     if (loaded && !updateBookmarkCompleted) {
         $store.global.UpdateBookmark(
             {
@@ -108,5 +110,5 @@ func intersectScript(pageIndex int) string {
         updateBookmarkCompleted = true;
     }
   })
-	`, pageIndex)
+	`, pageIndex, pageIndex)
 }

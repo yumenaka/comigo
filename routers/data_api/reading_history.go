@@ -74,8 +74,13 @@ func GetReadingHistory(c echo.Context) error {
 		}
 	}
 
-	// 按更新时间降序排序
+	// 排序规则：手动书签（user）优先于自动书签（auto），同类型按更新时间降序
 	sort.Slice(readingHistory, func(i, j int) bool {
+		// 手动书签优先
+		if readingHistory[i].BookMark.Type != readingHistory[j].BookMark.Type {
+			return readingHistory[i].BookMark.Type == model.UserMark
+		}
+		// 同类型按更新时间降序
 		return readingHistory[i].BookMark.UpdatedAt.After(readingHistory[j].BookMark.UpdatedAt)
 	})
 

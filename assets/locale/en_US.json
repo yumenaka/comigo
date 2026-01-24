@@ -940,5 +940,10 @@
   "last_media": "This is the last item",
   "auto_play_next": "Auto play next",
   "loop_playlist": "Loop playlist",
-  "player_autoplay_help": "Auto play next and loop require media playback permission in your browser. On mobile devices, it may also fail due to battery saver/background restrictions."
+  "player_autoplay_help": "Auto play next and loop require media playback permission in your browser. On mobile devices, it may also fail due to battery saver/background restrictions.",
+  "add_bookmark": "Add Bookmark",
+  "manual_bookmark": "Manual",
+  "auto_bookmark": "Auto",
+  "bookmark_added": "Bookmark added",
+  "bookmark_exists": "Bookmark exists for this page"
 }
