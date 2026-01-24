@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
@@ -91,22 +92,60 @@ func UploadFile(c echo.Context) error {
 				"error": fmt.Sprintf("文件 %s 超过大小限制", file.Filename),
 			})
 		}
-		// 验证文件类型（可选）
-		// 例如，仅允许图片和PDF文件和压缩包文件
-		allowedTypes := map[string]bool{
+
+		// 验证文件类型
+		// 同时检查 Content-Type 和 文件扩展名，以支持更多格式
+		allowedContentTypes := map[string]bool{
 			"image/jpeg":                   true,
 			"image/png":                    true,
 			"image/gif":                    true,
+			"image/webp":                   true,
 			"application/pdf":              true,
 			"application/zip":              true,
 			"application/x-rar":            true,
 			"application/x-rar-compressed": true,
 			"application/x-zip-compressed": true,
-			// "application/octet-stream":     true, //application/octet-stream 这是二进制文件的默认值。 由于这意味着未知的二进制文件，浏览器一般不会自动执行或询问执行
+			"application/x-7z-compressed":  true,
+			"application/x-tar":            true,
+			"application/gzip":             true,
+			"application/epub+zip":         true,
 		}
-		if !allowedTypes[file.Header.Get("Content-Type")] {
+
+		// 允许的文件扩展名（用于处理 application/octet-stream 情况）
+		allowedExtensions := map[string]bool{
+			".zip":  true,
+			".cbz":  true,
+			".rar":  true,
+			".cbr":  true,
+			".7z":   true,
+			".cb7":  true,
+			".tar":  true,
+			".gz":   true,
+			".pdf":  true,
+			".epub": true,
+			".jpg":  true,
+			".jpeg": true,
+			".png":  true,
+			".gif":  true,
+			".webp": true,
+		}
+
+		contentType := file.Header.Get("Content-Type")
+		ext := strings.ToLower(filepath.Ext(file.Filename))
+
+		// 如果 Content-Type 是 application/octet-stream，则基于扩展名判断
+		isAllowed := allowedContentTypes[contentType]
+		if !isAllowed && (contentType == "application/octet-stream" || contentType == "") {
+			isAllowed = allowedExtensions[ext]
+		}
+		// 即使 Content-Type 不在列表中，如果扩展名合法也允许上传
+		if !isAllowed {
+			isAllowed = allowedExtensions[ext]
+		}
+
+		if !isAllowed {
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"error": fmt.Sprintf("文件类型不允许: %s", file.Filename),
+				"error": fmt.Sprintf("文件类型不允许: %s (类型: %s)", file.Filename, contentType),
 			})
 		}
 
@@ -117,13 +156,13 @@ func UploadFile(c echo.Context) error {
 		destPath := filepath.Join(storeUrl, filename)
 		// 如果文件已存在，追加编号
 		counter := 1
-		ext := filepath.Ext(filename)
-		name := filename[:len(filename)-len(ext)]
+		fileExt := filepath.Ext(filename)
+		name := filename[:len(filename)-len(fileExt)]
 		for {
 			if _, err := os.Stat(destPath); os.IsNotExist(err) {
 				break
 			}
-			filename = fmt.Sprintf("%s_%d%s", name, counter, ext)
+			filename = fmt.Sprintf("%s_%d%s", name, counter, fileExt)
 			destPath = filepath.Join(storeUrl, filename)
 			counter++
 		}

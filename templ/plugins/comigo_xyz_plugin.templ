@@ -48,12 +48,11 @@ templ ComigoXYZPlugin(c echo.Context) {
 					: "v1.0.0";
 
 				// 设置页面标题
-				document.title = i18next.t("comigo_xyz_title") + " " + version;
+				document.title = i18next.t("comigo_xyz_subtitle");
 				document.metaDescription = i18next.t("comigo_xyz_description");
 				const HeaderTextElement = document.getElementById("headerTitle");
 				if (HeaderTextElement) {
-					HeaderTextElement.textContent =
-						i18next.t("comigo_xyz_title") + " " + version;
+					HeaderTextElement.textContent = i18next.t("comigo_xyz_subtitle");
 				}
 
 				// 固定代理域名
@@ -229,7 +228,6 @@ templ ComigoXYZPlugin(c echo.Context) {
 						<div class="max-w-4xl w-full space-y-8">
 							<!-- 标题区域 -->
 							<div class="text-center space-y-4">
-								<p class="text-2xl text-base-content dark:text-white font-bold" x-text="i18next.t('comigo_xyz_subtitle')">简单方便的漫画浏览器</p>
 								<p class="text-base text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_description')">在所有设备上看漫画。无论电脑还是手机，Windows还是Linux、MacOS</p>
 							</div>
 							<!-- 下载区域 -->

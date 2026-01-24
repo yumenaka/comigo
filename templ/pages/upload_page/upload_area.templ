@@ -25,7 +25,7 @@ templ UploadArea() {
 		<!-- 进度条背景 显示与隐藏有过渡效果，不可点击。-->
 		<div id="progress-bar" class="absolute pointer-events-none top-0 left-0 h-full transition-opacity duration-500 bg-blue-500/30" style="width: 0%;"></div>
 		<!-- 上传按钮 -->
-		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:og-blue-600/50" disabled x-text="i18next.t('upload_file')">上传文件<p id="progress-text" class="mt-2 text-gray-700"></p></button>
+		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed" disabled x-text="i18next.t('upload_file')">上传文件</button>
 		<!-- 上传结果显示区域 -->
 		<div id="result" class="mt-4"></div>
 	</div>
@@ -45,68 +45,111 @@ templ UploadArea() {
 		// 保存可用的书库列表
 		let availableStores = [];
 
-		// 页面加载时获取书库列表
-		fetch("/api/stores")
-			.then((response) => response.json())
-			.then((data) => {
-				const stores = data.stores || [];
-				storeSelect.innerHTML = ""; // 清空加载提示
+		// 获取书库列表的函数
+		function loadStores() {
+			fetch("/api/stores")
+				.then((response) => response.json())
+				.then((data) => {
+					const stores = data.stores || [];
+					storeSelect.innerHTML = ""; // 清空加载提示
+					availableStores = []; // 重置可用书库列表
 
-				if (stores.length === 0) {
-					// 没有配置书库
+					if (stores.length === 0) {
+						// 没有配置书库，显示设置提示
+						const option = document.createElement("option");
+						option.value = "";
+						option.textContent = i18next.t("no_available_stores");
+						option.disabled = true;
+						storeSelect.appendChild(option);
+						// 显示更详细的提示，引导用户去设置书库
+						storeWarning.innerHTML =
+							i18next.t("no_available_stores") +
+							' <a href="/settings" class="text-blue-500 underline hover:text-blue-700">' +
+							i18next.t("settings_stores") +
+							"</a>";
+						storeWarning.classList.remove("hidden");
+						// 禁用拖拽区域和上传按钮
+						uploadButton.disabled = true;
+						dropArea.classList.add("opacity-50", "pointer-events-none");
+						return;
+					}
+
+					// 填充书库选项，找出第一个可用书库
+					let firstAvailableStore = null;
+					stores.forEach((store) => {
+						const option = document.createElement("option");
+						option.value = store.url;
+						if (store.exists) {
+							option.textContent = store.name;
+							availableStores.push(store.url);
+							// 记录第一个可用书库
+							if (firstAvailableStore === null) {
+								firstAvailableStore = store.url;
+							}
+						} else {
+							option.textContent =
+								store.name + " (" + i18next.t("store_not_exists") + ")";
+							option.disabled = true;
+						}
+						storeSelect.appendChild(option);
+					});
+
+					// 检查是否有可用书库
+					if (availableStores.length === 0) {
+						// 所有书库路径都不存在
+						storeWarning.innerHTML =
+							i18next.t("no_available_stores") +
+							' <a href="/settings" class="text-blue-500 underline hover:text-blue-700">' +
+							i18next.t("settings_stores") +
+							"</a>";
+						storeWarning.classList.remove("hidden");
+						uploadButton.disabled = true;
+						dropArea.classList.add("opacity-50", "pointer-events-none");
+					} else {
+						// 默认选中第一个可用书库
+						storeSelect.value = firstAvailableStore;
+						storeWarning.classList.add("hidden");
+						dropArea.classList.remove("opacity-50", "pointer-events-none");
+						// 更新上传按钮状态
+						updateUploadButtonState();
+					}
+				})
+				.catch((error) => {
+					console.error("获取书库列表失败:", error);
+					storeSelect.innerHTML = "";
 					const option = document.createElement("option");
 					option.value = "";
-					option.textContent = i18next.t("no_available_stores");
+					option.textContent = i18next.t("upload_failed_network_error");
 					option.disabled = true;
 					storeSelect.appendChild(option);
-					storeWarning.textContent = i18next.t("no_available_stores");
+					storeWarning.textContent = i18next.t("upload_failed_network_error");
 					storeWarning.classList.remove("hidden");
 					uploadButton.disabled = true;
-					return;
-				}
-
-				// 添加默认选项
-				const defaultOption = document.createElement("option");
-				defaultOption.value = "";
-				defaultOption.textContent = i18next.t("select_upload_target_store");
-				defaultOption.disabled = true;
-				defaultOption.selected = true;
-				storeSelect.appendChild(defaultOption);
-
-				// 填充书库选项
-				stores.forEach((store) => {
-					const option = document.createElement("option");
-					option.value = store.url;
-					if (store.exists) {
-						option.textContent = store.name;
-						availableStores.push(store.url);
-					} else {
-						option.textContent =
-							store.name + " (" + i18next.t("store_not_exists") + ")";
-						option.disabled = true;
-					}
-					storeSelect.appendChild(option);
+					dropArea.classList.add("opacity-50", "pointer-events-none");
 				});
+		}
 
-				// 检查是否有可用书库
-				if (availableStores.length === 0) {
-					storeWarning.textContent = i18next.t("no_available_stores");
-					storeWarning.classList.remove("hidden");
-					uploadButton.disabled = true;
-				}
-			})
-			.catch((error) => {
-				console.error("获取书库列表失败:", error);
-				storeSelect.innerHTML = "";
-				const option = document.createElement("option");
-				option.value = "";
-				option.textContent = i18next.t("upload_failed_network_error");
-				option.disabled = true;
-				storeSelect.appendChild(option);
-				storeWarning.textContent = i18next.t("upload_failed_network_error");
-				storeWarning.classList.remove("hidden");
-				uploadButton.disabled = true;
-			});
+		// 确保 i18next 初始化完成后再加载书库
+		// 检查 i18next 是否已初始化
+		function initUploadPage() {
+			if (typeof i18next !== "undefined" && i18next.isInitialized) {
+				loadStores();
+			} else if (typeof i18next !== "undefined") {
+				// i18next 存在但未初始化，等待初始化完成
+				i18next.on("initialized", loadStores);
+			} else {
+				// i18next 还未加载，等待 DOMContentLoaded 后重试
+				setTimeout(initUploadPage, 50);
+			}
+		}
+
+		// 页面加载完成后初始化
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", initUploadPage);
+		} else {
+			// DOMContentLoaded 已触发
+			initUploadPage();
+		}
 		// 触发文件选择对话框
 		dropArea.addEventListener("click", () => {
 			fileInput.click();

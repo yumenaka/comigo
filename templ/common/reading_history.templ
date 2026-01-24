@@ -79,18 +79,27 @@ templ ReadingHistoryWithLimit(limit int) {
 						<div class="flex-1 min-w-0">
 							<div class="flex items-center gap-1">
 								<span class="font-medium text-sm truncate" x-text="item.book_info.title || i18next.t('unknown')"></span>
-								<!-- 书签类型标识 -->
-								<span
-									x-show="item.book_mark.mark_type === 'user'"
-									class="shrink-0 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded"
-									x-text="i18next.t('manual_bookmark')"
-								></span>
 							</div>
-							<div class="text-xs text-gray-500 mt-1">
-								<span x-text="item.book_mark.page_index + '/' + item.book_info.page_count"></span>
-								<span x-show="$store.shelf.readingProgressPercent" class="ml-2">
-									<span x-text="Math.round((item.book_mark.page_index / item.book_info.page_count) * 100) + '%'"></span>
-								</span>
+							<div class="text-xs text-gray-500 mt-1 space-y-1">
+								<div class="flex items-center gap-1">
+									<span x-text="item.book_mark.page_index + '/' + item.book_info.page_count"></span>
+									<span x-show="$store.shelf.readingProgressPercent" class="ml-1">
+										<span x-text="Math.round((item.book_mark.page_index / item.book_info.page_count) * 100) + '%'"></span>
+									</span>
+								</div>
+								<!-- 书签类型标识 -->
+								<div class="flex items-center gap-1">
+									<span
+										x-show="item.book_mark.mark_type === 'user'"
+										class="shrink-0 px-1 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded"
+										x-text="i18next.t('manual_bookmark')"
+									></span>
+									<span
+										x-show="item.book_mark.mark_type === 'auto' || !item.book_mark.mark_type"
+										class="shrink-0 px-1 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded"
+										x-text="i18next.t('auto_bookmark')"
+									></span>
+								</div>
 							</div>
 						</div>
 					</div>
