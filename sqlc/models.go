@@ -9,32 +9,33 @@ import (
 )
 
 type Book struct {
-	ID              int64
-	Title           string
-	BookID          string
-	Owner           sql.NullString
-	BookPath        string
-	StoreUrl        string
-	Type            string
-	ChildBooksNum   sql.NullInt64
-	ChildBooksID    sql.NullString
-	Depth           sql.NullInt64
-	ParentFolder    sql.NullString
-	PageCount       sql.NullInt64
-	LastReadPage    sql.NullInt64
-	FileSize        sql.NullInt64
-	Author          sql.NullString
-	Isbn            sql.NullString
-	Press           sql.NullString
-	PublishedAt     sql.NullString
-	ExtractPath     sql.NullString
-	ModifiedTime    sql.NullTime
-	ExtractNum      sql.NullInt64
-	BookComplete    sql.NullBool
-	InitComplete    sql.NullBool
-	NonUtf8zip      sql.NullBool
-	ZipTextEncoding sql.NullString
-	Deleted         sql.NullBool
+	ID               int64
+	Title            string
+	BookID           string
+	Owner            sql.NullString
+	BookPath         string
+	StoreUrl         string
+	Type             string
+	ChildBooksNum    sql.NullInt64
+	ChildBooksID     sql.NullString
+	Depth            sql.NullInt64
+	ParentFolder     sql.NullString
+	PageCount        sql.NullInt64
+	LastReadPage     sql.NullInt64
+	FileSize         sql.NullInt64
+	Author           sql.NullString
+	Isbn             sql.NullString
+	Press            sql.NullString
+	PublishedAt      sql.NullString
+	ExtractPath      sql.NullString
+	ModifiedTime     sql.NullTime
+	ExtractNum       sql.NullInt64
+	BookComplete     sql.NullBool
+	InitComplete     sql.NullBool
+	NonUtf8zip       sql.NullBool
+	ZipTextEncoding  sql.NullString
+	CreatedByVersion sql.NullString
+	Deleted          sql.NullBool
 }
 
 type Bookmark struct {

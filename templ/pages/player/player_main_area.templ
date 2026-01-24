@@ -511,8 +511,8 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 										<!-- 优先显示封面（对 MP3：后端会尝试读取 ID3 APIC 内嵌封面） -->
 										<img
 											class="w-full h-full object-cover"
-											src={ templ.SafeURL(fmt.Sprintf("/api/get_cover?id=%s&resize_height=%d", book.BookID, 352)) }
-											:src="`/api/get_cover?id=${currentMedia?.id || ''}&resize_height=352`"
+											src={ templ.SafeURL(fmt.Sprintf("/api/get-cover?id=%s&resize_height=%d", book.BookID, 352)) }
+											:src="`/api/get-cover?id=${currentMedia?.id || ''}&resize_height=352`"
 											x-show="!showFallbackCover"
 											@error="showFallbackCover = true"
 										/>

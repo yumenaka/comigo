@@ -16,10 +16,10 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
-// http://127.0.0.1:1234/api/get_cover?id=2b17a13 获取封面图片的URL
+// http://127.0.0.1:1234/api/get-cover?id=2b17a13 获取封面图片的URL
 func GetCoverBackgroundCSS(id string) templ.CSSClass {
 	templ_7745c5c3_CSSBuilder := templruntime.GetBuilder()
-	templ_7745c5c3_CSSBuilder.WriteString(string(templ.SanitizeCSS(`background-image`, "url("+"/api/get_cover?id="+id+")")))
+	templ_7745c5c3_CSSBuilder.WriteString(string(templ.SanitizeCSS(`background-image`, "url("+"/api/get-cover?id="+id+")")))
 	templ_7745c5c3_CSSID := templ.CSSID(`GetCoverBackgroundCSS`, templ_7745c5c3_CSSBuilder.String())
 	return templ.ComponentCSSClass{
 		ID:    templ_7745c5c3_CSSID,

@@ -45,7 +45,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*model.Book, e
 		}
 
 		absPath := filepath.Join(dirPath, fileName)
-		tempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(fileName)
+		tempURL := "/api/get-file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(fileName)
 		newBook.PageInfos = append(newBook.PageInfos, model.PageInfo{
 			Path:    absPath,
 			Size:    fileInfo.Size(),

@@ -104,35 +104,35 @@ func bindProtectedView(group *echo.Group) {
 // bindProtectedAPI 注册需要认证的路由
 func bindProtectedAPI(group *echo.Group) {
 	// 服务器状态
-	group.GET("/server_info", data_api.GetServerInfoHandler)
+	group.GET("/server-info", data_api.GetServerInfoHandler)
 	// 获取书库列表
 	group.GET("/stores", data_api.GetStores)
 	// 文件上传
 	group.POST("/upload", upload_api.UploadFile)
 	// 获取特定文件
-	group.GET("/get_file", data_api.GetFile)
+	group.GET("/get-file", data_api.GetFile)
 	// 获取书籍封面
-	group.GET("/get_cover", data_api.GetCover)
+	group.GET("/get-cover", data_api.GetCover)
 	// 直接下载原始文件
 	group.GET("/raw/:book_id/:file_name", data_api.GetRawFile)
 	// 获取书架信息
-	group.GET("/top_shelf", data_api.GetTopOfShelfInfo)
+	group.GET("/top-shelf", data_api.GetTopOfShelfInfo)
 	// 查询书籍信息
-	group.GET("/get_book", data_api.GetBook)
+	group.GET("/get-book", data_api.GetBook)
 	// 获取所有书签的API
-	group.GET("/all_bookmarks", data_api.GetAllBookmarks)
+	group.GET("/all-bookmarks", data_api.GetAllBookmarks)
 	// 获取阅读历史（支持limit和分页参数）
-	group.GET("/reading_history", data_api.GetReadingHistory)
+	group.GET("/reading-history", data_api.GetReadingHistory)
 	// 更新书签信息
-	group.POST("/store_bookmark", data_api.StoreBookmark)
+	group.POST("/store-bookmark", data_api.StoreBookmark)
 	// 查询父书籍信息
-	group.GET("/parent_book_info", data_api.GetParentBook)
+	group.GET("/parent-book-info", data_api.GetParentBook)
 	// 下载 reg 设置文件
 	group.GET("/comigo.reg", data_api.GetRegFile)
 	// 获取配置
 	group.GET("/config", config_api.GetConfig)
-	// 生成图片 http://localhost:1234/api/generate_image?height=220&width=160&text=12345&font_size=32
-	group.GET("/generate_image", data_api.GetGeneratedImage)
+	// 生成图片 http://localhost:1234/api/generate-image?height=220&width=160&text=12345&font_size=32
+	group.GET("/generate-image", data_api.GetGeneratedImage)
 	// 获取配置状态
 	group.GET("/config/status", config_api.GetConfigStatus)
 	// 更新配置
@@ -167,15 +167,15 @@ func bindProtectedAPI(group *echo.Group) {
 	group.POST("/config-save", settings.HandleConfigSave)
 	group.POST("/config-delete", settings.HandleConfigDelete)
 	// 获取 tailscale 状态
-	group.GET("/tailscale_status", data_api.GetTailscaleStatus)
+	group.GET("/tailscale-status", data_api.GetTailscaleStatus)
 	// SSE 服务器发送事件
 	group.GET("/sse", sse_hub.SSEHandler)
 	// SSE 广播接口
 	group.POST("/push", sse_hub.PushHandler)
 	// 下载 TypeDir 书籍为 zip 文件
-	group.GET("/download_zip", data_api.DownloadZip)
+	group.GET("/download-zip", data_api.DownloadZip)
 	// 下载书籍为 EPUB 文件
-	group.GET("/download_epub", data_api.DownloadEpub)
+	group.GET("/download-epub", data_api.DownloadEpub)
 	// 删除书籍的元数据和缓存文件
-	group.DELETE("/book_cache", data_api.DeleteBookCache)
+	group.DELETE("/book-cache", data_api.DeleteBookCache)
 }

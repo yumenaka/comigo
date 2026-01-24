@@ -10,12 +10,12 @@ import (
 )
 
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
-// x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
+// x-data="{  isDoublePage: false, imageUrl: '/api/get-file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
 func ImageXData(Url string) string {
 	return fmt.Sprintf(`{ isDoublePage: false, loaded: false, updateBookmarkCompleted: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
-// 压缩尺寸，切白边，无缓存等选项，http://192.168.3.26:58642/api/get_file?id=xE2Nmdj&filename=001_By_zhonyk_cover.jpg&resize_max_width=200&no-cache=true
+// 压缩尺寸，切白边，无缓存等选项，http://192.168.3.26:58642/api/get-file?id=xE2Nmdj&filename=001_By_zhonyk_cover.jpg&resize_max_width=200&no-cache=true
 func ImageSrc(Url string) string {
 	autoCrop := `$store.global.autoCrop?"&auto_crop=1":''`
 	autoResize := `$store.global.autoResize?"&resize_max_width="+$store.global.autoResizeWidth:''`

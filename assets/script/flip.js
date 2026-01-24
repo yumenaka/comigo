@@ -675,7 +675,7 @@ function addPageNum(n = 1) {
     }
     
     // 保存页数到本地存储
-    Alpine.store('global').savePageNumToLocalStorage()
+    Alpine.store('global').savePageNumToLocalStorage(book.id)
 }
 
 /**
@@ -718,7 +718,7 @@ function jumpPageNum(jumpNum, sync = true) {
         }
     }
     
-    Alpine.store('global').savePageNumToLocalStorage()
+    Alpine.store('global').savePageNumToLocalStorage(book.id)
     setImageSrc()
 }
 

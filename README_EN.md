@@ -5,6 +5,8 @@
 [![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
 [![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)
 
+[中文文档](https://github.com/yumenaka/comigo/blob/master/README.md) |[日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md) | [English](https://github.com/yumenaka/comigo/blob/master/README_EN.md)
+
 <!--
 [![Downloads](https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success)](https://github.com/yumenaka/comigo/releases)
 <img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：Simple Comig & Manga Reader" width="200">
@@ -13,7 +15,6 @@
 
 ![Windows Sample](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows Sample")
 
-[中文文档](https://github.com/yumenaka/comigo/blob/master/README.md) |[日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md) | [English](https://github.com/yumenaka/comigo/blob/master/README_EN.md)
 
 ## Features
 
@@ -120,6 +121,36 @@ For more details, see the complete [Docker documentation](sample/docker/README.m
 
 ```bash
 comi [flags] file_or_dir
+```
+
+### Command Line Options
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--config` | `-c` | - | Specify config file path |
+| `--port` | `-p` | 1234 | Service port |
+| `--host` | - | - | Custom hostname/domain |
+| `--local` | - | false | Local access only |
+| `--max-depth` | `-m` | 5 | Max scan depth |
+| `--open-browser` | `-o` | false | Open browser on start |
+| `--enable-upload` | - | true | Enable file upload |
+| `--read-only` | - | false | Read-only mode |
+| `--username` | - | - | Login username |
+| `--password` | - | - | Login password |
+| `--lang` | - | auto | Language (auto/zh/en/ja) |
+| `--debug` | - | false | Debug mode |
+
+### Examples
+
+```bash
+# Open current directory
+comi .
+
+# Specify port and path
+comi -p 8080 /path/to/manga
+
+# Local only with login protection
+comi --local --username admin --password 123456 /path/to/manga
 ```
 
 ## Configuration File

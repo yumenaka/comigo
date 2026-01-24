@@ -48,7 +48,7 @@ func InsertData(bookData any, stateData any) templ.Component {
 }
 
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
-// x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ”) }"
+// x-data="{  isDoublePage: false, imageUrl: '/api/get-file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ”) }"
 func ImageXData(Url string) string {
 	return fmt.Sprintf(`{ isDoublePage: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }

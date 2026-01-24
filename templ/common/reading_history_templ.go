@@ -42,7 +42,7 @@ func ReadingHistory() templ.Component {
 }
 
 // ReadingHistoryWithLimit 阅读历史记录列表组件（可指定限制数量）
-// 调用 /api/reading_history?limit=X 获取数据，后端已完成过滤和排序
+// 调用 /api/reading-history?limit=X 获取数据，后端已完成过滤和排序
 func ReadingHistoryWithLimit(limit int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -109,7 +109,7 @@ func getReadingHistoryXInit(limit int) string {
 		(async () => {
 			loading = true;
 			try {
-				const response = await fetch('/api/reading_history?limit=` + strconv.Itoa(limit) + `');
+				const response = await fetch('/api/reading-history?limit=` + strconv.Itoa(limit) + `');
 				if (response.ok) {
 					const data = await response.json();
 					// 后端已完成过滤和排序，直接使用返回的数据

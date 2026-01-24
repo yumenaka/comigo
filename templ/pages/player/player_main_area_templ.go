@@ -66,7 +66,7 @@ func MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) templ
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.SafeURL(fmt.Sprintf("/api/get_cover?id=%s&resize_height=%d", book.BookID, 352)))
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.SafeURL(fmt.Sprintf("/api/get-cover?id=%s&resize_height=%d", book.BookID, 352)))
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/player/player_main_area.templ`, Line: 514, Col: 102}
 			}
@@ -74,7 +74,7 @@ func MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) templ
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" :src=\"`/api/get_cover?id=${currentMedia?.id || ''}&resize_height=352`\" x-show=\"!showFallbackCover\" @error=\"showFallbackCover = true\"><!-- 回退默认音频图标 --><div x-show=\"showFallbackCover\" class=\"w-full h-full flex items-center justify-center\"><svg class=\"w-14 h-14 text-white/90\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M19.952 1.651a.75.75 0 0 1 .298.599V16.303a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.403-4.909l2.311-.66a1.5 1.5 0 0 0 1.088-1.442V6.994l-9 2.572v9.737a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.402-4.909l2.31-.66a1.5 1.5 0 0 0 1.088-1.442V5.25a.75.75 0 0 1 .544-.721l10.5-3a.75.75 0 0 1 .658.122Z\" clip-rule=\"evenodd\"></path></svg></div></div></div><div class=\"vinylHole\"></div></div></div><!-- 音频标题 --><h2 class=\"text-2xl font-bold text-white text-center mb-2\" x-text=\"currentMedia?.title || i18next.t('audio')\">音频播放</h2></div></div><audio id=\"mediaPlayer\" class=\"hidden\" @loadedmetadata=\"onLoadedMetadata($event)\" @timeupdate=\"onTimeUpdate($event)\" @ended=\"onEnded\" @play=\"isPlaying = true\" @pause=\"isPlaying = false\"><source src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" :src=\"`/api/get-cover?id=${currentMedia?.id || ''}&resize_height=352`\" x-show=\"!showFallbackCover\" @error=\"showFallbackCover = true\"><!-- 回退默认音频图标 --><div x-show=\"showFallbackCover\" class=\"w-full h-full flex items-center justify-center\"><svg class=\"w-14 h-14 text-white/90\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M19.952 1.651a.75.75 0 0 1 .298.599V16.303a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.403-4.909l2.311-.66a1.5 1.5 0 0 0 1.088-1.442V6.994l-9 2.572v9.737a3 3 0 0 1-2.176 2.884l-1.32.377a2.553 2.553 0 1 1-1.402-4.909l2.31-.66a1.5 1.5 0 0 0 1.088-1.442V5.25a.75.75 0 0 1 .544-.721l10.5-3a.75.75 0 0 1 .658.122Z\" clip-rule=\"evenodd\"></path></svg></div></div></div><div class=\"vinylHole\"></div></div></div><!-- 音频标题 --><h2 class=\"text-2xl font-bold text-white text-center mb-2\" x-text=\"currentMedia?.title || i18next.t('audio')\">音频播放</h2></div></div><audio id=\"mediaPlayer\" class=\"hidden\" @loadedmetadata=\"onLoadedMetadata($event)\" @timeupdate=\"onTimeUpdate($event)\" @ended=\"onEnded\" @play=\"isPlaying = true\" @pause=\"isPlaying = false\"><source src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

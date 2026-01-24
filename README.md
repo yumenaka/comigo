@@ -4,7 +4,7 @@
 
 [![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
 [![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)
-
+[English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md) | [中文文档](https://github.com/yumenaka/comigo/blob/master/README.md)
 <!--
 [![Downloads](https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success)](https://github.com/yumenaka/comigo/releases)
 <img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：简单方便的漫画阅读器" width="200">
@@ -12,8 +12,6 @@
 </div>
 
 ![Windows示例](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")
-
-[English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md) | [中文文档](https://github.com/yumenaka/comigo/blob/master/README.md) 
 
 ## 功能特点
 
@@ -39,7 +37,8 @@
 | Windows 64位 | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
 | macOS (Intel/Apple芯片) | [Comigo.app.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo.app.zip) |
 
-> 💡 **说明**：托盘版提供系统托盘图标，可最小化到后台运行。Windows 用户双击运行，macOS 用户拖入 Applications 文件夹。
+> 💡 **说明**：托盘版提供系统托盘图标，可最小化到后台运行。
+>  Windows 用户双击运行即可，macOS 用户需要将APP拖入 应用程序 文件夹。
 
 ### 一键安装(命令行版)
 
@@ -108,6 +107,65 @@ docker-compose up -d
 comi [flags] file_or_dir
 ```
 
+### 命令行参数
+
+| 参数 | 简写 | 默认值 | 说明                   |
+|------|------|--------|----------------------|
+| `--config` | `-c` | - | 指定配置文件路径             |
+| `--port` | `-p` | 1234 | 服务端口                 |
+| `--host` | - | - | 自定义主机名/域名            |
+| `--local` | - | false | 仅本地访问，不对局域网开放        |
+| `--max-depth` | `-m` | 5 | 文件扫描最大深度             |
+| `--open-browser` | `-o` | false | 启动后自动打开浏览器           |
+| `--enable-upload` | - | true | 启用文件上传功能             |
+| `--read-only` | - | false | 只读模式，禁止网页端修改配置       |
+| `--username` | - | - | 登录用户名（设置后启用登录保护）     |
+| `--password` | - | - | 登录密码                 |
+| `--lang` | - | auto | CLI语言（auto/zh/en/ja） |
+| `--debug` | - | false | 启用调试模式               |
+
+<details>
+<summary>更多参数（点击展开）</summary>
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `--tls` | false | 启用 HTTPS |
+| `--auto-tls` | false | 自动申请 Let's Encrypt 证书 |
+| `--tls-crt` | - | TLS 证书文件路径 |
+| `--tls-key` | - | TLS 密钥文件路径 |
+| `--use-cache` | false | 启用本地图片缓存 |
+| `--cache-dir` | - | 缓存目录路径 |
+| `--cache-clean` | false | 退出时清除缓存 |
+| `--database` | false | 启用本地数据库存储 |
+| `--auto-rescan-min` | 0 | 自动扫描间隔（分钟，0为禁用） |
+| `--min-image` | 1 | 最少图片数量才认定为漫画 |
+| `--zip-encode` | gbk | 非UTF-8 ZIP文件的编码 |
+| `--log-file` | false | 输出日志到文件 |
+| `--print-all` | false | 打印所有网卡的访问地址 |
+| `--single-instance` | false | 单实例模式 |
+| `--plugin` | true | 启用插件系统 |
+| `--tailscale` | false | 启用 Tailscale 网络 |
+| `--tailscale-hostname` | comigo | Tailscale 主机名 |
+| `--tailscale-funnel` | false | 启用 Tailscale Funnel |
+
+</details>
+
+### 使用示例
+
+```bash
+# 打开当前目录
+comi .
+
+# 指定端口和书库路径
+comi -p 8080 /path/to/manga
+
+# 仅本地访问，启用登录保护
+comi --local --username admin --password 123456 /path/to/manga
+
+# 使用配置文件
+comi -c /path/to/comigo.toml
+```
+
 ## 配置文件说明
 
 Comigo 支持多种配置文件位置：
@@ -127,6 +185,44 @@ Comigo 支持多种配置文件位置：
 4. **自定义位置**  
    - 使用 `--config` 参数指定配置文件路径
 
+### 配置文件示例
+
+```toml
+# comigo.toml 配置示例
+
+# 服务设置
+Port = 1234                    # 服务端口
+Host = ""                      # 自定义主机名（留空自动检测）
+DisableLAN = false             # 仅本地访问
+OpenBrowser = false            # 启动后打开浏览器
+Language = "auto"              # 界面语言 (auto/zh/en/ja)
+
+# 书库设置
+StoreUrls = ["/path/to/manga", "/path/to/comics"]  # 书库路径列表
+MaxScanDepth = 5               # 扫描深度
+MinImageNum = 1                # 最少图片数量
+AutoRescanIntervalMinutes = 0  # 自动扫描间隔（0为禁用）
+
+# 登录保护
+Username = ""                  # 用户名（留空禁用登录）
+Password = ""                  # 密码
+Timeout = 43200                # Cookie过期时间（分钟）
+
+# 功能开关
+EnableUpload = true            # 启用上传
+ReadOnlyMode = false           # 只读模式
+EnablePlugin = true            # 启用插件
+Debug = false                  # 调试模式
+
+# 缓存设置
+UseCache = false               # 启用图片缓存
+CacheDir = ""                  # 缓存目录（留空使用系统临时目录）
+ClearCacheExit = false         # 退出时清除缓存
+
+# ZIP文件设置
+ZipFileTextEncoding = "gbk"    # 非UTF-8编码ZIP的解析编码
+```
+
 ## 反馈与支持
 
 如果您有任何建议或遇到问题，欢迎：
@@ -134,7 +230,7 @@ Comigo 支持多种配置文件位置：
 - 通过 [Twitter](https://x.com/yumenaka7) 联系我
 - Discord讨论群 [Discord](https://discord.gg/c5q6d3dM8r)
 ## 开发与TODO
-- [开发备忘](https://github.com/yumenaka/comigo/blob/master/todo.md)
+- [开发备忘](https://github.com/yumenaka/comigo/blob/master/TODO.md)
 
 ## 特别鸣谢
 

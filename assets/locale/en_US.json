@@ -923,6 +923,8 @@
   "err_delete_store_failed": "Failed to delete store",
   "log_book_file_not_exist_skip": "Book file does not exist, skipping load: %s",
   "log_error_deleting_orphan_metadata": "Error deleting orphan metadata file %s: %s",
+  "log_book_version_mismatch_skip": "Book %s version mismatch (cached: %s, current: %s), skipping load",
+  "log_error_deleting_version_mismatch_metadata": "Error deleting version mismatch metadata file %s: %s",
   "player": "Player",
   "play": "Play",
   "pause": "Pause",

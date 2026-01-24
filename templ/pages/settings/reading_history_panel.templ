@@ -1,7 +1,7 @@
 package settings
 
 // ReadingHistoryPanel 设置页面的完整阅读历史面板（带服务端分页）
-// 调用 /api/reading_history?page=X&page_size=Y 获取数据
+// 调用 /api/reading-history?page=X&page_size=Y 获取数据
 templ ReadingHistoryPanel() {
 	<div
 		id="reading_history"
@@ -16,7 +16,7 @@ templ ReadingHistoryPanel() {
 			async fetchPage(page) {
 				this.loading = true;
 				try {
-					const response = await fetch('/api/reading_history?page=' + page + '&page_size=' + this.pageSize);
+					const response = await fetch('/api/reading-history?page=' + page + '&page_size=' + this.pageSize);
 					if (response.ok) {
 						const data = await response.json();
 						// 后端已完成过滤和排序，直接使用返回的数据

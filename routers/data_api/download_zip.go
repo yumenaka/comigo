@@ -15,7 +15,7 @@ import (
 )
 
 // DownloadZip 将 TypeDir 类型的书籍打包为 zip 文件下载
-// 示例 URL： http://127.0.0.1:1234/api/download_zip?id=2b17a13
+// 示例 URL： http://127.0.0.1:1234/api/download-zip?id=2b17a13
 // 相关参数：
 // id：书籍的ID，必须参数  &id=2b17a13
 func DownloadZip(c echo.Context) error {

@@ -4,12 +4,15 @@
 
 [![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
 [![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)
-
+[中文文档](https://github.com/yumenaka/comigo/blob/master/README.md) | [English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
+![Windowsサンプル](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windowsサンプル")
+<!--
+[![Downloads](https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success)](https://github.com/yumenaka/comigo/releases)
+<img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：Simple Comig & Manga Reader" width="200">
+-->
 </div>
 
-![Windowsサンプル](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windowsサンプル")
 
-[中文文档](https://github.com/yumenaka/comigo/blob/master/README.md) | [English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
 
 ## 主な機能
 
@@ -118,6 +121,36 @@ docker-compose up -d
 comi [flags] file_or_dir
 ```
 
+### コマンドラインオプション
+
+| オプション | 短縮形 | デフォルト | 説明 |
+|------------|--------|-----------|------|
+| `--config` | `-c` | - | 設定ファイルのパス |
+| `--port` | `-p` | 1234 | サービスポート |
+| `--host` | - | - | カスタムホスト名 |
+| `--local` | - | false | ローカルアクセスのみ |
+| `--max-depth` | `-m` | 5 | 最大スキャン深度 |
+| `--open-browser` | `-o` | false | 起動時にブラウザを開く |
+| `--enable-upload` | - | true | アップロード機能を有効化 |
+| `--read-only` | - | false | 読み取り専用モード |
+| `--username` | - | - | ログインユーザー名 |
+| `--password` | - | - | ログインパスワード |
+| `--lang` | - | auto | 言語設定（auto/zh/en/ja） |
+| `--debug` | - | false | デバッグモード |
+
+### 使用例
+
+```bash
+# カレントディレクトリを開く
+comi .
+
+# ポートとパスを指定
+comi -p 8080 /path/to/manga
+
+# ローカルのみ、ログイン保護付き
+comi --local --username admin --password 123456 /path/to/manga
+```
+
 ## 設定ファイルについて
 
 Comigo は複数の設定ファイルの場所をサポートしています：
@@ -142,7 +175,7 @@ Comigo は複数の設定ファイルの場所をサポートしています：
 ご意見や問題がございましたら、以下からお気軽にご連絡ください：
 - [Issue](https://github.com/yumenaka/comigo/issues) を投稿
 - [Twitter](https://x.com/yumenaka7) でメッセージを送信
-- [Discord](https://discord.gg/c5q6d3dM8r) でディスカッションに参加ß
+- [Discord](https://discord.gg/c5q6d3dM8r) でディスカッションに参加
 ## 特別な感謝
 
 以下のオープンソースプロジェクトとその貢献者に感謝いたします：
