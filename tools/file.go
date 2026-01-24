@@ -11,19 +11,6 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// 规范化路径，确保路径格式一致
-func NormalizePath(path string) string {
-	// 替换反斜杠为正斜杠
-	path = strings.ReplaceAll(path, "\\", "/")
-	// 移除末尾的斜杠
-	path = strings.TrimSuffix(path, "/")
-	// 确保路径不为空
-	if path == "" {
-		path = "."
-	}
-	return path
-}
-
 // 验证路径是否有效
 func IsValidPath(path string) bool {
 	// 路径不能为空

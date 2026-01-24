@@ -102,7 +102,7 @@ Alpine.store('global', {
             return;
         }
         try {
-            const key = `pageNum_${book.id}`;
+            const key = `pageNum_${book_id}`;
             const savedPageNum = localStorage.getItem(key);
             if (savedPageNum !== null && !isNaN(parseInt(savedPageNum))) {
                 const pageNum = parseInt(savedPageNum);
@@ -117,12 +117,16 @@ Alpine.store('global', {
         }
     },
     // 保存当前页码到本地存储
-    savePageNumToLocalStorage() {
+    savePageNumToLocalStorage(book_id) {
         if (!this.saveReadingProgress) {
             return;
         }
+        if (!book_id) {
+            console.warn("savePageNumToLocalStorage: book_id is required");
+            return;
+        }
         try {
-            const key = `pageNum_${book.id}`;
+            const key = `pageNum_${book_id}`;
             const nowPageNum = Alpine.store('global').nowPageNum;
             localStorage.setItem(key, nowPageNum);
         } catch (e) {
@@ -241,7 +245,7 @@ Alpine.store('global', {
         window.location.reload();
     },
     /**
-     * 调用后端 /api/store_bookmark 接口，更新书签信息
+     * 调用后端 /api/store-bookmark 接口，更新书签信息
      * @param {Object} params
      * @param {string} params.type - 书签类型，例如 'auto'
      * @param {string} params.bookId - 书籍ID
@@ -273,7 +277,7 @@ Alpine.store('global', {
             page_index: pageIndex,
             description: description
         };
-        const response = await fetch('/api/store_bookmark', {
+        const response = await fetch('/api/store-bookmark', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

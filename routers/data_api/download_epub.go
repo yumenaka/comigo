@@ -14,7 +14,7 @@ import (
 )
 
 // DownloadEpub 将书籍转换为 EPUB 格式下载
-// 示例 URL： http://127.0.0.1:1234/api/download_epub?id=2b17a13
+// 示例 URL： http://127.0.0.1:1234/api/download-epub?id=2b17a13
 // 相关参数：
 // id：书籍的ID，必须参数  &id=2b17a13
 func DownloadEpub(c echo.Context) error {

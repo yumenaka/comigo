@@ -40,8 +40,9 @@ CREATE TABLE IF NOT EXISTS books
     book_complete     BOOLEAN  DEFAULT FALSE,             -- Book complete flag
     init_complete     BOOLEAN  DEFAULT FALSE,             -- Initialization complete flag
     non_utf8zip       BOOLEAN  DEFAULT FALSE,             -- Non-UTF8 zip flag
-    zip_text_encoding TEXT,                               -- Zip text encoding
-    deleted           BOOLEAN  DEFAULT FALSE              -- Soft delete flag
+    zip_text_encoding  TEXT,                               -- Zip text encoding
+    created_by_version TEXT,                               -- Comigo version when data was created
+    deleted            BOOLEAN  DEFAULT FALSE              -- Soft delete flag
 );
 
 -- Pages information table (for storing page image information)

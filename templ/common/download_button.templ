@@ -35,7 +35,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 		<!-- 【下载为ZIP】按钮，仅对 图片类书籍（TypeDir） 类型显示 -->
 		if book != nil && book.Type == model.TypeDir {
 			<a
-				href={ templ.SafeURL(fmt.Sprintf("/api/download_zip?id=%v", book.BookID)) }
+				href={ templ.SafeURL(fmt.Sprintf("/api/download-zip?id=%v", book.BookID)) }
 				download={ book.BookInfo.Title + ".zip" }
 				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
 				:title="i18next.t('download_as_zip')"
@@ -47,7 +47,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 		<!-- 【下载为EPUB】按钮，对图片类书籍（TypeDir）显示 -->
 		if book != nil && canDownloadAsEpub(book.Type) {
 			<a
-				href={ templ.SafeURL(fmt.Sprintf("/api/download_epub?id=%v", book.BookID)) }
+				href={ templ.SafeURL(fmt.Sprintf("/api/download-epub?id=%v", book.BookID)) }
 				download={ getEpubFileName(book.BookInfo.Title) }
 				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
 				:title="i18next.t('download_as_epub')"
@@ -74,7 +74,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 				@click="
 					if (confirm(i18next.t('confirm_clear_cache'))) {
 						deleting = true;
-						fetch('/api/book_cache?id=' + encodeURIComponent($store.global.bookID || window.location.pathname.split('/').pop()), { method: 'DELETE' })
+						fetch('/api/book-cache?id=' + encodeURIComponent($store.global.bookID || window.location.pathname.split('/').pop()), { method: 'DELETE' })
 							.then(res => res.json())
 							.then(data => {
 								deleting = false;

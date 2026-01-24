@@ -7,11 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"strconv"
 	"strings"
 
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -136,30 +136,18 @@ func (c *Config) GetClearDatabaseWhenExit() bool {
 // - conflictPath: 冲突的已有路径
 // - message: 错误消息
 func (c *Config) IsPathOverlapping(newPath string) (overlapping bool, conflictPath string, message string) {
-	// 将新路径转换为绝对路径并清理
-	newPathAbs, err := filepath.Abs(newPath)
+	// 使用统一的路径标准化函数
+	newPathAbs, err := tools.NormalizeAbsPath(newPath)
 	if err != nil {
 		return true, "", fmt.Sprintf(locale.GetString("err_invalid_store_path"), newPath)
-	}
-	newPathAbs = filepath.Clean(newPathAbs)
-
-	// Windows 路径统一转换为小写进行比较（Windows 文件系统不区分大小写）
-	if runtime.GOOS == "windows" {
-		newPathAbs = strings.ToLower(newPathAbs)
 	}
 
 	// 检查是否与已有路径冲突
 	for _, existingUrl := range c.StoreUrls {
-		existingAbs, err := filepath.Abs(existingUrl)
+		existingAbs, err := tools.NormalizeAbsPath(existingUrl)
 		if err != nil {
 			// 如果现有路径无法转换，跳过检查
 			continue
-		}
-		existingAbs = filepath.Clean(existingAbs)
-
-		// Windows 路径统一转换为小写
-		if runtime.GOOS == "windows" {
-			existingAbs = strings.ToLower(existingAbs)
 		}
 
 		// 1. 检查是否完全相同
@@ -217,12 +205,11 @@ func (c *Config) StoreUrlIsExits(url string) bool {
 // AddStoreUrl 添加本地书库(单个路径)
 // 会将相对路径转换为绝对路径，并检查路径冲突
 func (c *Config) AddStoreUrl(storeURL string) error {
-	// 将路径转换为绝对路径
-	absPath, err := filepath.Abs(storeURL)
+	// 使用统一的路径标准化函数
+	absPath, err := tools.NormalizeAbsPath(storeURL)
 	if err != nil {
 		return fmt.Errorf(locale.GetString("err_invalid_store_path"), storeURL)
 	}
-	absPath = filepath.Clean(absPath)
 
 	// 检查路径是否存在（可选，不强制要求路径必须存在）
 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
@@ -268,7 +255,7 @@ func (c *Config) InitConfigStoreUrls() {
 
 // RequiresAuth 是否需要登录
 func (c *Config) RequiresAuth() bool {
-	return cfg.Username != "" && cfg.Password != ""
+	return c.Username != "" && c.Password != ""
 }
 
 func (c *Config) GetTopStoreName() string {
@@ -403,31 +390,19 @@ func (c *Config) AddStringArrayConfig(fieldName, addValue string) ([]string, err
 // DeleteStringArrayConfig 从指定的 []string 字段中删除某个字符串
 // 对于 StoreUrls 字段，删除时也需要使用绝对路径进行匹配
 func (c *Config) DeleteStringArrayConfig(fieldName, deleteValue string) ([]string, error) {
-	// 针对 StoreUrls 做特殊处理：使用绝对路径进行比较
+	// 针对 StoreUrls 做特殊处理：使用统一的路径标准化函数
 	if fieldName == "StoreUrls" {
 		// 将要删除的路径转换为绝对路径
-		deleteAbs, err := filepath.Abs(deleteValue)
+		deleteAbs, err := tools.NormalizeAbsPath(deleteValue)
 		if err == nil {
-			deleteAbs = filepath.Clean(deleteAbs)
-			// Windows 路径统一转换为小写
-			if runtime.GOOS == "windows" {
-				deleteAbs = strings.ToLower(deleteAbs)
-			}
-
 			// 过滤掉需要删除的路径
 			newSlice := make([]string, 0, len(c.StoreUrls))
 			found := false
 			for _, v := range c.StoreUrls {
-				vAbs, err := filepath.Abs(v)
-				if err == nil {
-					vAbs = filepath.Clean(vAbs)
-					if runtime.GOOS == "windows" {
-						vAbs = strings.ToLower(vAbs)
-					}
-					if vAbs == deleteAbs {
-						found = true
-						continue
-					}
+				vAbs, err := tools.NormalizeAbsPath(v)
+				if err == nil && vAbs == deleteAbs {
+					found = true
+					continue
 				}
 				newSlice = append(newSlice, v)
 			}
@@ -494,156 +469,70 @@ func (c *Config) DisablePlugin(pluginName string) error {
 	return err
 }
 
-// UpdateConfigByJson 使用 JSON 字符串反序列化将更新的配置解析为映射，遍历映射并更新配置，减少重复的代码。
+// UpdateConfigByJson 使用 JSON 字符串反序列化将更新的配置解析为映射，遍历映射并更新配置
+// 使用反射自动处理字段赋值，减少重复代码
 func UpdateConfigByJson(jsonString string) error {
 	var updates map[string]interface{}
 	if err := json.Unmarshal([]byte(jsonString), &updates); err != nil {
 		logger.Infof(locale.GetString("log_failed_to_unmarshal_json"), err)
 		return err
 	}
+
+	v := reflect.ValueOf(cfg).Elem()
+	t := v.Type()
+
 	for key, value := range updates {
-		switch key {
-		case "Port":
-			if v, ok := value.(float64); ok {
-				cfg.Port = int(v)
-			}
-		case "Host":
-			if v, ok := value.(string); ok {
-				cfg.Host = v
-			}
-		case "StoreUrls":
-			if v, ok := value.([]interface{}); ok {
-				var storeUrls []string
-				for _, s := range v {
-					if str, ok := s.(string); ok {
-						storeUrls = append(storeUrls, str)
-					}
-				}
-				cfg.StoreUrls = storeUrls
-			}
-		case "UseCache":
-			if v, ok := value.(bool); ok {
-				cfg.UseCache = v
-			}
-		case "CacheDir":
-			if v, ok := value.(string); ok {
-				cfg.CacheDir = v
-			}
-		case "ClearCacheExit":
-			if v, ok := value.(bool); ok {
-				cfg.ClearCacheExit = v
-			}
-		case "EnableUpload":
-			if v, ok := value.(bool); ok {
-				cfg.EnableUpload = v
-			}
-		case "EnableDatabase":
-			if v, ok := value.(bool); ok {
-				cfg.EnableDatabase = v
-			}
-		case "ClearDatabaseWhenExit":
-			if v, ok := value.(bool); ok {
-				cfg.ClearDatabaseWhenExit = v
-			}
-		case "OpenBrowser":
-			if v, ok := value.(bool); ok {
-				cfg.OpenBrowser = v
-			}
-		case "DisableLAN":
-			if v, ok := value.(bool); ok {
-				cfg.DisableLAN = v
-			}
-		case "AutoRescanIntervalMinutes":
-			if v, ok := value.(float64); ok {
-				cfg.AutoRescanIntervalMinutes = int(v)
-			}
-		case "LogToFile":
-			if v, ok := value.(bool); ok {
-				cfg.LogToFile = v
-			}
-		case "MaxScanDepth":
-			if v, ok := value.(float64); ok {
-				cfg.MaxScanDepth = int(v)
-			}
-		case "MinImageNum":
-			if v, ok := value.(float64); ok {
-				cfg.MinImageNum = int(v)
-			}
-		case "ZipFileTextEncoding":
-			if v, ok := value.(string); ok {
-				cfg.ZipFileTextEncoding = v
-			}
-		case "ExcludePath":
-			if v, ok := value.([]interface{}); ok {
-				var paths []string
-				for _, s := range v {
-					if str, ok := s.(string); ok {
-						paths = append(paths, str)
-					}
-				}
-				cfg.ExcludePath = paths
-			}
-		case "SupportMediaType":
-			if v, ok := value.([]interface{}); ok {
-				var mediaTypes []string
-				for _, s := range v {
-					if str, ok := s.(string); ok {
-						mediaTypes = append(mediaTypes, str)
-					}
-				}
-				cfg.SupportMediaType = mediaTypes
-			}
-		case "SupportFileType":
-			if v, ok := value.([]interface{}); ok {
-				var fileTypes []string
-				for _, s := range v {
-					if str, ok := s.(string); ok {
-						fileTypes = append(fileTypes, str)
-					}
-				}
-				cfg.SupportFileType = fileTypes
-			}
-		case "TimeoutLimitForScan":
-			if v, ok := value.(float64); ok {
-				cfg.TimeoutLimitForScan = int(v)
-			}
-		case "PrintAllPossibleQRCode":
-			if v, ok := value.(bool); ok {
-				cfg.PrintAllPossibleQRCode = v
-			}
-		case "Debug":
-			if v, ok := value.(bool); ok {
-				cfg.Debug = v
-			}
-		case "EnablePlugin":
-			if v, ok := value.(bool); ok {
-				cfg.EnablePlugin = v
-			}
-		case "Username":
-			if v, ok := value.(string); ok {
-				cfg.Username = v
-			}
-		case "Password":
-			if v, ok := value.(string); ok {
-				cfg.Password = v
-			}
-		case "Timeout":
-			if v, ok := value.(float64); ok {
-				cfg.Timeout = int(v)
-			}
-		case "GenerateMetaData":
-			if v, ok := value.(bool); ok {
-				cfg.GenerateMetaData = v
-			}
-		case "Language":
-			if v, ok := value.(string); ok {
-				cfg.Language = v
-				// 更新语言后，重新初始化语言设置
-				// 注意：这里需要导入 locale 包，但为了避免循环依赖，我们延迟初始化
-				// 实际的语言初始化会在下次使用 locale 包时自动完成
-			}
-		default:
+		// 查找字段
+		field := v.FieldByName(key)
+		if !field.IsValid() || !field.CanSet() {
 			logger.Infof(locale.GetString("log_unknown_config_key"), key)
+			continue
+		}
+
+		// 根据字段类型进行赋值
+		if err := setFieldValue(field, value); err != nil {
+			logger.Infof("Failed to set field %s: %v", key, err)
+			continue
+		}
+
+		// 特殊处理：Language 字段更新后的附加逻辑可在此处理
+		_ = t // 避免未使用警告
+	}
+	return nil
+}
+
+// setFieldValue 根据字段类型设置值
+func setFieldValue(field reflect.Value, value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	switch field.Kind() {
+	case reflect.Bool:
+		if v, ok := value.(bool); ok {
+			field.SetBool(v)
+		}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		// JSON 数字默认解析为 float64
+		if v, ok := value.(float64); ok {
+			field.SetInt(int64(v))
+		}
+	case reflect.String:
+		if v, ok := value.(string); ok {
+			field.SetString(v)
+		}
+	case reflect.Slice:
+		// 处理 []string 类型
+		if field.Type().Elem().Kind() == reflect.String {
+			if arr, ok := value.([]interface{}); ok {
+				strSlice := make([]string, 0, len(arr))
+				for _, item := range arr {
+					if str, ok := item.(string); ok {
+						strSlice = append(strSlice, str)
+					}
+				}
+				field.Set(reflect.ValueOf(strSlice))
+			}
 		}
 	}
 	return nil

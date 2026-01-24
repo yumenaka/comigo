@@ -23,8 +23,8 @@ import (
 // 相关参数：
 // id：书籍的ID，必须参数 &id=2B17a
 // resize_height：可选参数，指定封面高度，默认值为352 &resize_height=500
-// 示例 URL： http://127.0.0.1:1234/api/get_cover?id=2b17a13
-// 示例 URL（自定义高度）： http://127.0.0.1:1234/api/get_cover?id=2b17a13&resize_height=500
+// 示例 URL： http://127.0.0.1:1234/api/get-cover?id=2b17a13
+// 示例 URL（自定义高度）： http://127.0.0.1:1234/api/get-cover?id=2b17a13&resize_height=500
 func GetCover(c echo.Context) error {
 	// 获取书籍ID
 	id := c.QueryParam("id")
@@ -83,9 +83,9 @@ func GetCover(c echo.Context) error {
 	needFile := cover.Name
 	// 处理 TypeBooksGroup 的情况：封面来自子书籍
 	coverBook := book
-	if book.Type == model.TypeBooksGroup && strings.HasPrefix(cover.Url, "/api/get_file") {
+	if book.Type == model.TypeBooksGroup && strings.HasPrefix(cover.Url, "/api/get-file") {
 		// 解析封面 URL 获取子书籍 ID 和文件名
-		// URL 格式：/api/get_file?id=子书籍ID&filename=文件名
+		// URL 格式：/api/get-file?id=子书籍ID&filename=文件名
 		parsedURL, err := url.Parse(cover.Url)
 		if err != nil {
 			logger.Infof("Failed to parse cover URL: %s", err)

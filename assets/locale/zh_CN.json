@@ -923,6 +923,8 @@
   "err_delete_store_failed": "删除书库失败",
   "log_book_file_not_exist_skip": "书籍文件不存在，跳过加载: %s",
   "log_error_deleting_orphan_metadata": "删除孤立元数据文件 %s 错误: %s",
+  "log_book_version_mismatch_skip": "书籍 %s 版本不匹配（缓存: %s, 当前: %s），跳过加载",
+  "log_error_deleting_version_mismatch_metadata": "删除版本不匹配的元数据文件 %s 错误: %s",
   "player": "播放器",
   "play": "播放",
   "pause": "暂停",

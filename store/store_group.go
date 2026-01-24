@@ -213,6 +213,17 @@ func (ramStore *StoreInRam) LoadBooks() error {
 				}
 				continue // 继续处理其他文件
 			}
+			// 检查版本号：为空或与当前版本不一致时跳过加载并删除元数据文件
+			currentVersion := config.GetVersion()
+			if book.CreatedByVersion == "" || book.CreatedByVersion != currentVersion {
+				logger.Infof(locale.GetString("log_book_version_mismatch_skip"), book.BookID, book.CreatedByVersion, currentVersion)
+				// 删除版本不匹配的元数据文件
+				errDel := os.Remove(filePath)
+				if errDel != nil {
+					logger.Infof(locale.GetString("log_error_deleting_version_mismatch_metadata"), fileName, errDel)
+				}
+				continue // 跳过版本不匹配的书籍
+			}
 			// 检查书籍文件或目录是否存在，如果不存在则跳过加载并删除元数据文件
 			if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
 				logger.Infof(locale.GetString("log_book_file_not_exist_skip"), book.BookPath)

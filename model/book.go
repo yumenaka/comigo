@@ -8,6 +8,7 @@ import (
 
 	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -47,12 +48,13 @@ func NewBook(bookPath string, modified time.Time, fileSize int64, storePath stri
 	// 初始化书籍
 	book := &Book{
 		BookInfo: BookInfo{
-			Modified:     modified,
-			FileSize:     fileSize,
-			InitComplete: false,
-			Depth:        depth,
-			StoreUrl:     storePath,
-			Type:         bookType,
+			Modified:         modified,
+			FileSize:         fileSize,
+			InitComplete:     false,
+			Depth:            depth,
+			StoreUrl:         storePath,
+			Type:             bookType,
+			CreatedByVersion: config.GetVersion(), // 记录创建时的版本号
 		},
 	}
 	// 设置文件路径、书名、BookID

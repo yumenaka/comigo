@@ -619,7 +619,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 					}
 				};
 				// 发起请求获取最新状态
-				const url = "/api/tailscale_status";
+				const url = "/api/tailscale-status";
 				fetch(url, { headers: { Accept: "application/json" } })
 					.then((res) => {
 						if (!res.ok) throw new Error("HTTP " + res.status);

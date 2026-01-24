@@ -8,10 +8,10 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
-// http://127.0.0.1:1234/api/get_cover?id=2b17a13 获取封面图片的URL
+// http://127.0.0.1:1234/api/get-cover?id=2b17a13 获取封面图片的URL
 
 css GetCoverBackgroundCSS(id string) {
-	background-image: { "url(" + "/api/get_cover?id=" +id+")" };
+	background-image: { "url(" + "/api/get-cover?id=" +id+")" };
 }
 
 templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
