@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net"
-	"os/exec"
 	"runtime"
 	"strconv"
 	"time"
@@ -21,7 +20,7 @@ import (
 // 使用时只需要写一行：defer TrackTIme(time.Now())
 func TrackTIme(pre time.Time) time.Duration {
 	elapsed := time.Since(pre)
-	logger.Info("耗时：", elapsed, "\n")
+	logger.Infof(locale.GetString("log_time_elapsed")+"\n", elapsed)
 	return elapsed
 }
 
@@ -37,7 +36,6 @@ func CheckPort(port uint16) bool {
 		logger.Infof(locale.GetString("check_port_error"), port)
 		return false
 	}
-	// logger.Infof("TCP Port %q is available", port)
 	return true
 }
 
@@ -117,18 +115,19 @@ func GetOutboundIP() net.IP {
 	return localAddr.IP
 }
 
-// OpenBrowser 打开浏览器，为了防止阻塞，需要使用go关键字调用
-func OpenBrowser(uri string) {
+func OpenBrowser(isHTTPS bool, host string, port int) {
+	if isHTTPS {
+		OpenBrowserByURL("https://" + host + ":" + strconv.Itoa(port))
+	} else {
+		OpenBrowserByURL("http://" + host + ":" + strconv.Itoa(port))
+	}
+}
+
+// OpenBrowserByURL 打开浏览器，为了防止阻塞，需要使用go关键字调用
+func OpenBrowserByURL(uri string) {
 	// Create a context with cancellation
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	// headers := http.Header{}
-	// headers.Add("Authorization", "Bearer my-token")
-	// headers.Add("Content-Type", "application/json")
-
-	// // Prepare a request body
-	// requestBody := strings.NewReader(`{"query": "status"}`)
-
 	// Create an HTTP checker with multiple validations
 	checker := httpChecker.New(
 		uri,
@@ -143,7 +142,7 @@ func OpenBrowser(uri string) {
 	)
 
 	// Wait for the API to be available and responding correctly
-	logger.Info("Waiting for API health endpoint...")
+	logger.Info(locale.GetString("log_waiting_for_api_health"))
 
 	err := waiter.WaitContext(
 		ctx,
@@ -155,21 +154,11 @@ func OpenBrowser(uri string) {
 	if err != nil {
 		log.Fatalf("API health check failed: %v", err)
 	}
-	logger.Info("Comigo API is healthy and ready!")
+	logger.Info(locale.GetString("log_api_healthy_ready"))
 
-	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		cmd = exec.Command("CMD", "/C", "start", uri)
-		if err := cmd.Start(); err != nil {
-			logger.Infof(locale.GetString("open_browser_error")+"%s", err.Error())
-		}
-	} else if runtime.GOOS == "darwin" {
-		cmd = exec.Command("open", uri)
-		if err := cmd.Start(); err != nil {
-			logger.Infof(locale.GetString("open_browser_error")+"%s", err.Error())
-		}
-	} else if runtime.GOOS == "linux" {
-		cmd = exec.Command("xdg-open", uri)
+	// 打开浏览器（Windows 使用 ShellExecute，避免闪黑框）
+	if err := openURL(uri); err != nil {
+		logger.Infof(locale.GetString("open_browser_error")+"%s", err.Error())
 	}
 }
 
@@ -271,15 +260,17 @@ func GetSystemStatus() SystemStatus {
 
 // ServerStatus 服务器当前状况
 type ServerStatus struct {
-	ServerName        string       // 服务器描述
-	ServerHost        string       // ServerHost 服务器主机或 IP 地址。
-	ServerPort        uint16       // ServerPort 服务运行的端口号。
-	TailscaleAuthURL  string       // Tailscale身份验证URL（如果适用）
-	TailscaleUrl      string       // Tailscale阅读地址（如果有）
-	NumberOfBooks     int          // 当前拥有的书籍总数
-	SupportUploadFile bool         // 是否支持上传文件
-	ClientIP          string       // 客户端IP
-	OSInfo            SystemStatus // 系统信息
+	ServerName            string       // 服务器描述
+	ServerHost            string       // ServerHost 服务器主机或 IP 地址。
+	ServerPort            uint16       // ServerPort 服务运行的端口号。
+	TailscaleAuthURL      string       // Tailscale身份验证URL（如果适用）
+	TailscaleUrl          string       // Tailscale阅读地址（如果有）
+	NumberOfBooks         int          // 当前拥有的书籍总数
+	SupportUploadFile     bool         // 是否支持上传文件
+	ClientIP              string       // 客户端IP
+	OSInfo                SystemStatus // 系统信息
+	ReScanServiceEnable   bool         // 是否启用自动扫描服务
+	ReScanServiceInterval int          // 自动扫描服务间隔（分钟）
 }
 
 type ConfigInterface interface {
@@ -289,10 +280,12 @@ type ConfigInterface interface {
 }
 
 type ServerInfoParams struct {
-	Cfg            ConfigInterface
-	Version        string
-	AllBooksNumber int
-	ClientIP       string
+	Cfg                   ConfigInterface
+	Version               string
+	AllBooksNumber        int
+	ClientIP              string
+	ReScanServiceEnable   bool
+	ReScanServiceInterval int
 }
 
 func GetServerInfo(params ServerInfoParams) *ServerStatus {
@@ -308,13 +301,15 @@ func GetServerInfo(params ServerInfoParams) *ServerStatus {
 		host = configHost
 	}
 	serverStatus := ServerStatus{
-		ServerName:        serverName,
-		ServerHost:        host,
-		ServerPort:        uint16(port),
-		SupportUploadFile: enableUpload,
-		NumberOfBooks:     params.AllBooksNumber,
-		ClientIP:          params.ClientIP,
-		OSInfo:            GetSystemStatus(),
+		ServerName:            serverName,
+		ServerHost:            host,
+		ServerPort:            uint16(port),
+		SupportUploadFile:     enableUpload,
+		NumberOfBooks:         params.AllBooksNumber,
+		ClientIP:              params.ClientIP,
+		ReScanServiceEnable:   params.ReScanServiceEnable,
+		ReScanServiceInterval: params.ReScanServiceInterval,
+		OSInfo:                GetSystemStatus(),
 	}
 	return &serverStatus
 }

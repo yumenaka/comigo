@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -23,7 +24,7 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*model.Book, e
 
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
-		logger.Infof("Failed to read directory: %s, error: %v", dirPath, err)
+		logger.Infof(locale.GetString("log_failed_to_read_directory"), dirPath, err)
 		return nil, err
 	}
 	pageNum := 1
@@ -39,12 +40,12 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*model.Book, e
 
 		fileInfo, err := entry.Info()
 		if err != nil {
-			logger.Infof("Failed to get file info: %s, error: %v", fileName, err)
+			logger.Infof(locale.GetString("log_failed_to_get_file_info_scan"), fileName, err)
 			continue
 		}
 
 		absPath := filepath.Join(dirPath, fileName)
-		tempURL := "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(fileName)
+		tempURL := "/api/get-file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(fileName)
 		newBook.PageInfos = append(newBook.PageInfos, model.PageInfo{
 			Path:    absPath,
 			Size:    fileInfo.Size(),

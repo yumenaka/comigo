@@ -1,31 +1,97 @@
 package settings
 
-import "strconv"
-import "fmt"
-import "github.com/yumenaka/comigo/templ/common/svg"
+import (
+	"encoding/base64"
+	"github.com/yumenaka/comigo/templ/common/svg"
+	"strconv"
+)
 
-var StringArrayOnceHandle = templ.NewOnceHandle()
+// StringArrayConfig 字符串数组类型的配置
+templ StringArrayConfig(name string, values []string, description string) {
+	@StringArrayConfigJavaScript()
+	<div
+		id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "-string-array-config" }
+		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+	>
+		<label class="w-full py-0 text-left" for={ getTranslations(name) } x-text={ getTranslations(name) }></label>
+		<div class="flex flex-row flex-wrap items-center w-3/4">
+			for index, value := range values {
+				<div class="flex flex-row items-center px-2 h-10.5 m-1 text-sm border border-gray-500 dark:border-gray-200 font-medium text-black bg-blue-300 rounded">
+					{ value }
+					<button
+						type="button"
+						data-config-name={ base64.RawURLEncoding.EncodeToString([]byte(name)) }
+						data-arraw-index={ strconv.Itoa(index) }
+						data-delete-value={ value }
+						x-on:click={ "deleteStringConfigValue($el.getAttribute('data-config-name'), $el.getAttribute('data-delete-value'))" }
+						class="flex justify-center items-center w-6 h-6 ml-1 mr-0.5 rounded hover:ring cursor-pointer hover:bg-white/30"
+					>
+						@svg.Delete()
+					</button>
+				</div>
+			}
+			<div class="relative my-1">
+				<label for={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "Array" } class="sr-only" x-text={ getTranslations("type_or_paste_content") }></label>
+				<input
+					type="text"
+					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput" }
+					:placeholder={ getTranslations("type_or_paste_content") }
+					class="w-full h-10.5 rounded border-gray-400 py-2.5 mx-1 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+					x-on:keydown={ "if ($event.key === 'Enter') { addStringConfigValue('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "'); }" }
+				/>
+				<span class="absolute top-0 -right-20 place-content-center text-black">
+					<button
+						x-text={ getTranslations("add") }
+						type="button"
+						id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "StringArrayAddButton" }
+						x-on:click={ "addStringConfigValue('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
+						class="w-16 h-10.5 mx-2 my-0 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+					>
+						添加
+					</button>
+				</span>
+			</div>
+		</div>
+		<div x-text={ getTranslations(description) } class="w-full py-1 text-left ml-2 text-xs text-gray-500"></div>
+		<div class="bg-red-600"></div>
+	</div>
+}
 
-// 出于安全考虑。onclick不能直接拼接函数，需要使用 templ.JSFuncCall()
-// https://templ.guide/syntax-and-usage/script-templates/
-templ StringArrayConfig(name string, values []string, description string, saveSuccessHint bool) {
-	@StringArrayOnceHandle.Once() {
+// stringArrayConfigScriptHandle 用于防止 JS 代码重复渲染
+var stringArrayConfigScriptHandle = templ.NewOnceHandle()
+
+// StringArrayConfigJavaScript 字符串数组配置相关的 JavaScript 代码
+templ StringArrayConfigJavaScript() {
+	@stringArrayConfigScriptHandle.Once() {
 		<script>
-			// 在htmx发送请求前进行验证，事件机制请参考 htmx event 与 htmx:afterRequest 文档
-			// https://htmx.org/docs/#events
-			// https://htmx.org/events/#htmx:afterRequest
-			document.body.addEventListener("htmx:beforeRequest", function (evt) {
-				// 发送请求的元素（form 或者触发按钮）
-				const buttonID = evt.detail.elt.id;
-				// 不是添加按钮，直接返回
-				if (!buttonID || !buttonID.endsWith("StringArrayAddButton")) {
+			// base64UrlEncodeUtf8: 用于安全传输（含反斜杠/中文）
+			if (!window.base64UrlEncodeUtf8) {
+				window.base64UrlEncodeUtf8 = (str) => {
+					const bytes = new TextEncoder().encode(str);
+					let binary = "";
+					for (let i = 0; i < bytes.length; i++)
+						binary += String.fromCharCode(bytes[i]);
+					return btoa(binary)
+						.replace(/\+/g, "-")
+						.replace(/\//g, "_")
+						.replace(/=+$/g, "");
+				};
+			}
+
+			// 添加字符串数组配置中的元素
+			async function addStringConfigValue(configName) {
+				const addInput = document.getElementById(configName + "AddInput");
+				if (!addInput) return;
+				const addValue = addInput.value.trim();
+				// 验证：如果为空，显示错误提示
+				if (addValue === "") {
+					showMessage({
+						message: i18next.t("content_empty_please_enter_before_submit"),
+						buttons: "confirm",
+					});
 					return;
 				}
-				const configName = buttonID.replace("StringArrayAddButton", "");
-				const addValue = document
-					.getElementById(configName + "AddInput")
-					.value.trim();
-				// 如果已经有这个值了，阻止提交
+				// 验证：如果已经有这个值了，显示错误提示
 				const container = document.getElementById(
 					configName + "-string-array-config",
 				);
@@ -37,108 +103,129 @@ templ StringArrayConfig(name string, values []string, description string, saveSu
 						const existingValue = (
 							node.getAttribute("data-delete-value") || ""
 						).trim();
-						if (existingValue === addValue && addValue !== "") {
+						if (existingValue === addValue) {
 							showMessage({
 								message: i18next.t("value_already_exists_do_not_add_again"),
 								buttons: "confirm",
 							});
-							evt.preventDefault();
 							return;
 						}
 					}
 				}
-				// 如果为空，阻止提交
-				if (addValue === "") {
-					// 设置项为空时，显示错误提示
-					showMessage({
-						message: i18next.t("content_empty_please_enter_before_submit"),
-						buttons: "confirm",
+				// 发送添加请求到服务器
+				try {
+					const addValueB64 = window.base64UrlEncodeUtf8(addValue);
+					const response = await fetch("/api/add-array-config", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							configName: configName,
+							addValue: addValueB64,
+						}),
 					});
-					evt.preventDefault();
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_add_config_failed"), "error");
+						return;
+					}
+					// 解析响应数据
+					const data = await response.json();
+					// 显示成功提示
+					if (data.saveSuccessHint) {
+						showToast(i18next.t("saveSuccessHint"), "info");
+						// 2秒后刷新页面
+						setTimeout(() => {
+							window.location.reload();
+						}, 2000);
+					} else {
+						showToast(i18next.t("saveSuccessHint"), "success");
+					}
+
+					// 更新 UI：替换整个容器
+					if (data.html) {
+						const container = document.getElementById(
+							configName + "-string-array-config",
+						);
+						if (container && container.parentNode) {
+							// 创建临时元素来解析 HTML
+							const temp = document.createElement("div");
+							temp.innerHTML = data.html;
+							const newContainer = temp.querySelector(
+								"#" + configName + "-string-array-config",
+							);
+							if (newContainer) {
+								container.parentNode.replaceChild(newContainer, container);
+								// 重新初始化 Alpine.js
+								if (window.Alpine) {
+									window.Alpine.initTree(newContainer);
+								}
+								// 清空输入框
+								const newInput = newContainer.querySelector(
+									"#" + configName + "AddInput",
+								);
+								if (newInput) {
+									newInput.value = "";
+								}
+							}
+						}
+					}
+				} catch (error) {
+					console.error("添加配置失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
 				}
-			});
-		</script>
-		<script>
-			// 删除字符串数组配置中的元素。
-			// 此处仅用作打印调试信息。删除操作是由 htmx 完成的。
-			function deleteStringConfigValue(self) {
-				const configName = self.getAttribute("data-config-name");
-				const arrawIndex = self.getAttribute("data-arraw-index");
-				const deleteValue = self.getAttribute("data-delete-value");
-				console.log(configName, arrawIndex, deleteValue);
 			}
-			// 添加字符串数组配置中的元素
-			// 此函数的作用，是修改 hx-vals 的值。实际的提交操作由 htmx 完成
-			function addStringConfigValue(self) {
-				const buttonID = self.getAttribute("id");
-				const configName = buttonID.replace("StringArrayAddButton", "");
-				const addValue = document.getElementById(configName + "AddInput").value;
-				self.setAttribute(
-					"hx-vals",
-					JSON.stringify({ configName: configName, addValue: addValue }),
-				);
-				console.log(configName, addValue);
+
+			// 删除字符串数组配置中的元素
+			async function deleteStringConfigValue(configName, deleteValue) {
+				try {
+					const deleteValueB64 = window.base64UrlEncodeUtf8(deleteValue);
+					const response = await fetch("/api/delete-array-config", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							configName: configName,
+							deleteValue: deleteValueB64,
+						}),
+					});
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_delete_config_failed"), "error");
+						return;
+					}
+					// 解析响应数据
+					const data = await response.json();
+					// 显示成功提示
+					showToast(i18next.t("saveSuccessHint"), "success");
+					// 更新 UI：替换整个容器
+					if (data.html) {
+						const container = document.getElementById(
+							configName + "-string-array-config",
+						);
+						if (container && container.parentNode) {
+							// 创建临时元素来解析 HTML
+							const temp = document.createElement("div");
+							temp.innerHTML = data.html;
+							const newContainer = temp.querySelector(
+								"#" + configName + "-string-array-config",
+							);
+							if (newContainer) {
+								container.parentNode.replaceChild(newContainer, container);
+								// 重新初始化 Alpine.js
+								if (window.Alpine) {
+									window.Alpine.initTree(newContainer);
+								}
+							}
+						}
+					}
+				} catch (error) {
+					console.error("删除配置失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
+				}
 			}
 		</script>
 	}
-	if saveSuccessHint {
-		<div
-			class="hidden"
-			x-init="showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {
-            window.location.reload();
-        }, 2000)"
-		></div>
-	}
-	<div
-		id={ name + "-string-array-config" }
-		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
-	>
-		<label class="w-full py-0 text-left" for={ getTranslations(name) } x-text={ getTranslations(name) }></label>
-		<div class="flex flex-row flex-wrap items-center w-3/4 py-1">
-			for index, value := range values {
-				<div class="flex flex-row items-center p-2 m-1 text-sm font-medium text-black bg-blue-300 rounded-2xl">
-					{ value }
-					<div
-						data-config-name={ name }
-						data-arraw-index={ strconv.Itoa(index) }
-						data-delete-value={ value }
-						hx-post="/api/delete-array-config"
-						hx-target={ "#" + name + "-string-array-config" }
-						hx-swap="outerHTML"
-						hx-vals={ fmt.Sprintf(`{"configName":"%s","deleteValue":"%s"}`, name, value) }
-						onsubmit={ templ.JSFuncCall("deleteStringConfigValue", templ.JSExpression("this")) }
-						class="flex justify-center items-center w-6 h-6 ml-1 mr-0.5 rounded hover:ring"
-					>
-						@svg.Delete()
-					</div>
-				</div>
-			}
-			<div class="relative">
-				<label for={ name + "Array" } class="sr-only" x-text={ getTranslations("type_or_paste_content") }></label>
-				<input
-					type="text"
-					id={ name + "AddInput" }
-					:placeholder={ getTranslations("type_or_paste_content") }
-					class="w-full h-10 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
-				/>
-				<span class="absolute top-[0px] right-[-80px] place-content-center">
-					<button
-						x-text={ getTranslations("submit") }
-						type="button"
-						id={ name + "StringArrayAddButton" }
-						hx-post="/api/add-array-config"
-						hx-target={ "#" + name + "-string-array-config" }
-						hx-swap="outerHTML"
-						hx-vals={ fmt.Sprintf(`{"configName":"%s","addValue":"%s"}`, name, "") }
-						onclick={ templ.JSFuncCall("addStringConfigValue", templ.JSExpression("this")) }
-						class="w-16 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
-					>
-						提交
-					</button>
-				</span>
-			</div>
-		</div>
-		<div x-text={ getTranslations(description) } class="w-full py-1 text-left ml-2 text-xs text-gray-500"></div>
-		<div class="bg-red-600"></div>
-	</div>
 }

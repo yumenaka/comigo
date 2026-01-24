@@ -2,23 +2,28 @@ package common
 
 import (
 	"fmt"
-
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common/svg"
+	"strings"
 )
 
 type HeaderProps struct {
-	BookID            string
-	Title             string
-	ShowReturnIcon    bool
-	ReturnUrl         string
-	SetDownLoadLink   bool
-	InShelf           bool
-	DownLoadLink      string
-	SetTheme          bool
-	FlipMode          bool
-	ShowQuickJumpBar  bool
+	// 标题
+	TitleText string
+	// 是否显示返回图标
+	ShowReturnIcon bool
+	// 返回链接
+	ReturnUrl string
+	// 是否显示设置图标
+	ShowServerSetting bool
+	//是否显示上传图标
+	ShowUploadIcon bool
+	// 是否显示重排序图标
+	ShowReSortIcon bool
+	// 下载链接
+	DownLoadLink string
+	// 快速跳转，设置之后标题变为快速跳转栏
 	QuickJumpBarBooks *model.BookInfos
 }
 
@@ -28,56 +33,170 @@ type HeaderProps struct {
 templ Header(prop HeaderProps) {
 	<header
 		id="header"
-		if prop.FlipMode {
-			x-data="{ FlipMode: true }"
-			onmouseover="showToolbar();"
-			onmouseout="hideToolbar()"
-		}
-		if !prop.FlipMode {
-			x-data="{ FlipMode: false }"
-		}
-		class={ "z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400",templ.KV("mx-auto bg-base-100/50", prop.FlipMode) }
-		if prop.FlipMode {
-			:class="{ 'fixed absolute top-0 ': $store.flip.autoHideToolbar}"
-		}
+		class="z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400"
+		:class="{ 'absolute top-0 ': window.location.pathname.startsWith(`/flip`) && $store.flip.autoHideToolbar && $store.global.readMode === 'page_flip','mx-auto bg-base-100/50': window.location.pathname.startsWith(`/flip`) && $store.global.readMode === 'page_flip'}"
 	>
 		<div class="flex flex-row">
 			if prop.ShowReturnIcon {
 				<!-- 返回箭头,点击返回上一页 -->
-				<a x-show="$store.global.isHTTPServer" href={ templ.SafeURL(prop.ReturnUrl) }>
+				<a x-show="!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')" href={ templ.SafeURL(prop.ReturnUrl) }>
 					<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 						@svg.Return()
 					</div>
 				</a>
 			}
-			if (prop.InShelf) {
+			<!-- 全屏按钮 offlineBook-->
+			<div
+				id="FullScreenIcon"
+				x-show="window.location.href.startsWith('file://') || window.location.href.startsWith('content://')"
+				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+			>
+				@svg.FullScreen()
+			</div>
+			if (prop.ShowServerSetting) {
 				<!-- 新服务器设置 -->
-				<a x-show="$store.global.isHTTPServer && !window.location.href.includes('settings') && !window.location.href.includes('upload')" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+				<a x-show="$store.global.onlineBook" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 					@svg.ServerDisk()
 				</a>
 			}
-			<!-- 上传按钮，点击进入上传页面 -->
-			<a x-show="$store.global.isHTTPServer && window.location.href.includes('settings')" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
-				@svg.Upload()
-			</a>
-			<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
-			<!-- data-dropdown-trigger="{hover|click}"  二选一-->
-			<svg
-				x-show="$store.global.isHTTPServer && !window.location.href.includes('settings') && !window.location.href.includes('upload')"
-				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
-				id="ResortButton"
-				data-dropdown-toggle="ReSortDropdownMenu"
-				data-dropdown-trigger="hover"
-				xmlns="http://www.w3.org/2000/svg"
-				xmlns:xlink="http://www.w3.org/1999/xlink"
-				viewBox="0 0 24 24"
-			>
-				<path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"></path>
-			</svg>
+			if (prop.ShowUploadIcon) {
+				<!-- 上传按钮，点击进入上传页面 -->
+				<a x-show="$store.global.onlineBook" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
+					@svg.Upload()
+				</a>
+			}
+			if (prop.ShowReSortIcon) {
+				@ReSortIcon()
+			}
+		</div>
+		<!-- 标题-->
+		@HeaderTitle(prop)
+		<!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
+		<div class="flex justify-between p-0 m-0 max-w-64">
+			<!-- 图标：点击显示二维码 -->
 			<div
-				id="ReSortDropdownMenu"
-				x-show="$store.global.isHTTPServer"
-				x-data="{
+				data-modal-target="qrcode-modal"
+				data-modal-toggle="qrcode-modal"
+				x-show="$store.global.onlineBook"
+				class="hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+			>
+				@svg.QRCode()
+			</div>
+			<!-- 全屏按钮 onlineBook-->
+			<div
+				id="FullScreenIcon"
+				x-show="$store.global.onlineBook"
+				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+			>
+				@svg.FullScreen()
+			</div>
+			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
+			<!-- data-drawer-body-scrolling="true"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 -->
+			<!-- https://flowbite.com/docs/components/drawer/#body-scrolling -->
+			<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring" id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true">
+				@svg.Setting()
+			</div>
+		</div>
+	</header>
+}
+
+// 根据阅读模式生成书籍链接，如果是“{}”，templ 可能会把 { something } 解析成模板语法，而不是输出字面量。用 `` 来包裹就不会报错了
+func BookURL(bookID string) string {
+	return fmt.Sprintf(`{BookURL: $store.global.readMode === 'page_flip' ? "/flip/%s" : "/scroll/%s"}`, bookID, bookID)
+}
+
+//	<!-- 标题-->
+templ HeaderTitle(prop HeaderProps) {
+	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
+		<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
+		<span x-show="!$store.global.onlineBook" class="text-lg font-semibold">{ prop.TitleText }</span>
+		if (prop.QuickJumpBarBooks != nil) {
+			<button
+				id="quickJumpBarDropdownButton"
+				title={ prop.TitleText }
+				x-show="$store.global.onlineBook"
+				data-dropdown-toggle="QuickJumpDropdown"
+				data-dropdown-trigger="click"
+				class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
+				type="button"
+			>
+				{ prop.TitleText }
+				@svg.ArrowDown()
+			</button>
+			<!-- 下拉菜单，同一阶层的其他书籍 -->
+			<div
+				id="QuickJumpDropdown"
+				x-show="$store.global.onlineBook"
+				class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700"
+			>
+				<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
+					for _, book := range *prop.QuickJumpBarBooks {
+						if book.Type == model.TypeBooksGroup {
+							<li>
+								<a href={ templ.SafeURL("/shelf/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+							</li>
+						}
+						if book.Type != model.TypeBooksGroup {
+							<li x-data={ BookURL(book.BookID) }>
+								<a :href="BookURL" class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+							</li>
+						}
+					}
+				</ul>
+			</div>
+		} else {
+			if (prop.DownLoadLink != "") {
+				<span
+					title={ prop.TitleText }
+					id="headerTitle"
+					class="text-lg font-semibold text-blue-700/90 hover:underline"
+					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
+					x-init="$nextTick(() => {document.title = $el.innerText + version});"
+				>
+					<a
+						href={ templ.URL(prop.DownLoadLink) }
+						if strings.HasPrefix(prop.TitleText,"i18next") {
+							x-text={ prop.TitleText }
+						}
+					>{ prop.TitleText }</a>
+				</span>
+			} else {
+				<span
+					title={ prop.TitleText }
+					id="headerTitle"
+					class="text-lg font-semibold"
+					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
+					x-init="$nextTick(() => {document.title = $el.innerText + version});"
+					if strings.HasPrefix(prop.TitleText,"i18next") {
+						x-text={ prop.TitleText }
+					}
+				>{ prop.TitleText }</span>
+			}
+		}
+	</div>
+}
+
+templ ReSortIcon() {
+	<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
+	<!-- data-dropdown-trigger="{hover|click}"  二选一-->
+	<svg
+		x-show="$store.global.onlineBook && !window.location.href.includes('settings') && !window.location.href.includes('upload')"
+		class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+		id="ResortButton"
+		data-dropdown-toggle="ReSortDropdownMenu"
+		data-dropdown-trigger="hover"
+		xmlns="http://www.w3.org/2000/svg"
+		xmlns:xlink="http://www.w3.org/1999/xlink"
+		viewBox="0 0 24 24"
+	>
+		<path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"></path>
+	</svg>
+	<div
+		id="ReSortDropdownMenu"
+		x-show="$store.global.onlineBook"
+		x-data="{
                     getCurrentSortBy() {
                         // 根据URL路径决定使用哪个cookie参数名
                         let paramName = '';
@@ -89,7 +208,7 @@ templ Header(prop HeaderProps) {
                         } else {
                             paramName = 'ShelfSortBy';
                         }
-                        
+
                         // 获取cookie
                         const cookies = document.cookie.split(';');
                         for (let i = 0; i < cookies.length; i++) {
@@ -109,7 +228,7 @@ templ Header(prop HeaderProps) {
                             paramName = 'ScrollSortBy';
                         } else {
                             paramName = 'ShelfSortBy';
-                        } 
+                        }
                         // 设置cookie，过期时间为365天
                         const expirationDate = new Date();
                         expirationDate.setDate(expirationDate.getDate() + 365);
@@ -117,159 +236,64 @@ templ Header(prop HeaderProps) {
                         window.location.reload();
                     }
                 }"
-				class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700"
-				x-init="currentSortBy = getCurrentSortBy()"
-			>
-				<ul class="py-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="ResortButton">
-					<li>
-						<a
-							href="#"
-							@click.prevent="setCookie('filename')"
-							x-text="i18next.t('sort_by_filename')"
-							:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filename'}"
-							class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white "
-						></a>
-					</li>
-					<li>
-						<a
-							href="#"
-							@click.prevent="setCookie('modify_time')"
-							x-text="i18next.t('sort_by_modify_time')"
-							:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'modify_time'}"
-							class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
-						></a>
-					</li>
-					<li>
-						<a
-							href="#"
-							@click.prevent="setCookie('filesize')"
-							x-text="i18next.t('sort_by_filesize')"
-							:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filesize'}"
-							class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
-						></a>
-					</li>
-					<li>
-						<a
-							href="#"
-							@click.prevent="setCookie('filename_reverse')"
-							x-text="i18next.t('sort_by_filename_reverse')"
-							:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filename_reverse'}"
-							class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
-						></a>
-					</li>
-					<li>
-						<a
-							href="#"
-							@click.prevent="setCookie('modify_time_reverse')"
-							x-text="i18next.t('sort_by_modify_time_reverse')"
-							:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'modify_time_reverse'}"
-							class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
-						></a>
-					</li>
-					<li>
-						<a
-							href="#"
-							@click.prevent="setCookie('filesize_reverse')"
-							x-text="i18next.t('sort_by_filesize_reverse')"
-							:class="{'bg-gray-300 dark:bg-gray-600 font-bold border-1 rounded': currentSortBy === 'filesize_reverse'}"
-							class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
-						></a>
-					</li>
-				</ul>
-			</div>
-		</div>
-		<!-- 标题-->
-		<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
-			<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
-			<span x-show="!$store.global.isHTTPServer" class="text-lg font-semibold" x-text={ "'" + prop.Title + "'" }></span>
-			if (prop.InShelf) {
-				<span
-					class="text-lg font-semibold"
-					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
-					x-init="
-					// $nextTick: 等到 Alpine 完全完成渲染后再执行某些代码
-                    $nextTick(() => {
-                        // 设置页面标题
-                        document.title = $el.innerText + version;
-                    });
-				"
-				>{ prop.Title }</span>
-			} else {
-				if (prop.ShowQuickJumpBar&&prop.QuickJumpBarBooks!=nil) {
-					<button
-						id="quickJumpBarDropdownButton"
-						x-show="$store.global.isHTTPServer"
-						data-dropdown-toggle="QuickJumpDropdown"
-						data-dropdown-trigger="click"
-						class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
-						type="button"
-					>
-						{ prop.Title }
-						@svg.ArrowDown()
-					</button>
-					<!-- Dropdown menu -->
-					<div
-						id="QuickJumpDropdown"
-						x-show="$store.global.isHTTPServer"
-						class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700"
-					>
-						<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
-							for _, book := range *prop.QuickJumpBarBooks {
-								if book.Type == model.TypeBooksGroup {
-									<li>
-										<a href={ templ.SafeURL("/shelf/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
-									</li>
-								}
-								if book.Type != model.TypeBooksGroup {
-									if prop.FlipMode {
-										<li>
-											<a href={ templ.SafeURL("/flip/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
-										</li>
-									} else {
-										<li>
-											<a href={ templ.SafeURL("/scroll/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
-										</li>
-									}
-								}
-							}
-						</ul>
-					</div>
-				} else {
-					if (prop.SetDownLoadLink) {
-						<span class="text-lg font-semibold text-blue-700/90 hover:underline">
-							<a href={ templ.URL(prop.DownLoadLink) }>{ prop.Title }</a>
-						</span>
-					} else {
-						<span class="text-lg font-semibold">{ prop.Title }</span>
-					}
-				}
-			}
-		</div>
-		<!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
-		<div class="flex justify-between p-0 m-0 max-w-64">
-			<!-- 图标：点击显示二维码 -->
-			<div
-				data-modal-target="qrcode-modal"
-				data-modal-toggle="qrcode-modal"
-				x-show="$store.global.isHTTPServer"
-				class="hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
-			>
-				@svg.QRCode()
-			</div>
-			<!-- 全屏按钮-->
-			<div
-				id="FullScreenIcon"
-				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
-				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
-			>
-				@svg.FullScreen()
-			</div>
-			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
-			<!-- data-drawer-body-scrolling="true"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 -->
-			<!-- https://flowbite.com/docs/components/drawer/#body-scrolling -->
-			<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring" id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true">
-				@svg.Setting()
-			</div>
-		</div>
-	</header>
+		class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700"
+		x-init="currentSortBy = getCurrentSortBy()"
+	>
+		<ul class="py-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="ResortButton">
+			<li>
+				<a
+					href="#"
+					@click.prevent="setCookie('filename')"
+					x-text="i18next.t('sort_by_filename')"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename'}"
+					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white "
+				></a>
+			</li>
+			<li>
+				<a
+					href="#"
+					@click.prevent="setCookie('modify_time')"
+					x-text="i18next.t('sort_by_modify_time')"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time'}"
+					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+				></a>
+			</li>
+			<li>
+				<a
+					href="#"
+					@click.prevent="setCookie('filesize')"
+					x-text="i18next.t('sort_by_filesize')"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize'}"
+					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+				></a>
+			</li>
+			<li>
+				<a
+					href="#"
+					@click.prevent="setCookie('filename_reverse')"
+					x-text="i18next.t('sort_by_filename_reverse')"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename_reverse'}"
+					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+				></a>
+			</li>
+			<li>
+				<a
+					href="#"
+					@click.prevent="setCookie('modify_time_reverse')"
+					x-text="i18next.t('sort_by_modify_time_reverse')"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time_reverse'}"
+					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+				></a>
+			</li>
+			<li>
+				<a
+					href="#"
+					@click.prevent="setCookie('filesize_reverse')"
+					x-text="i18next.t('sort_by_filesize_reverse')"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize_reverse'}"
+					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+				></a>
+			</li>
+		</ul>
+	</div>
 }

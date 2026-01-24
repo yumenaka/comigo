@@ -9,26 +9,35 @@ import (
 )
 
 // PrintAllReaderURL 打印阅读链接
-func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bool, ServerHost string, DisableLAN bool, enableTLS bool, etcStr string) {
+func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bool, ServerHost string, DisableLAN bool, customTLS bool, autoTLS bool, etcStr string) {
 	protocol := "http://"
-	if enableTLS {
+	if customTLS || autoTLS {
 		protocol = "https://"
 	}
 	localURL := protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr
 	logger.Info(locale.GetString("local_reading") + localURL + etcStr)
 	// 打开浏览器
 	if OpenBrowserFlag {
-		go OpenBrowser(protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr)
+		go OpenBrowserByURL(protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr)
 	}
 	if !DisableLAN {
-		printURLAndQRCode(Port, PrintAllPossibleQRCode, ServerHost, protocol, etcStr)
+		printURLAndQRCode(Port, PrintAllPossibleQRCode, ServerHost, protocol, customTLS, autoTLS, etcStr)
 	}
 }
 
-func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string, protocol string, etcStr string) {
+func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string, protocol string, customTLS bool, autoTLS bool, etcStr string) {
 	// 打印指定的服务器地址
 	if ServerHost != "" {
 		readURL := protocol + ServerHost + ":" + strconv.Itoa(port) + etcStr
+		// 自定义 TLS 时，如果是 443 端口，则不需要加端口号
+		if customTLS && port == 443 {
+			readURL = protocol + ServerHost + ":" + strconv.Itoa(port) + etcStr
+		}
+		// 自动 TLS 时，目前只支持443, 不需要加端口号
+		if autoTLS {
+			readURL = protocol + ServerHost + etcStr
+		}
+		// 打印指定的服务器地址
 		logger.Info(locale.GetString("reading_url_maybe") + readURL)
 		PrintQRCode(readURL)
 		return

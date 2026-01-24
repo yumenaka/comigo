@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -12,7 +13,7 @@ import (
 // GetBook 相关参数：
 // id：     书籍的ID，必须项目  &id=2b17a130
 // sort_by：页面排序方法，可选	 &sort_by=filename
-// 示例 URL： http://127.0.0.1:1234/api/get_book?id=1215a&sort_by=filename
+// 示例 URL： http://127.0.0.1:1234/api/get-book?id=1215a&sort_by=filename
 func GetBook(c echo.Context) error {
 	sortBy := c.QueryParam("sort_by")
 	if sortBy == "" {
@@ -22,6 +23,7 @@ func GetBook(c echo.Context) error {
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, "not set id param")
 	}
+	model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
 	model.ClearBookNotExist()
 	// 获取书籍信息
 	b, err := model.IStore.GetBook(id)

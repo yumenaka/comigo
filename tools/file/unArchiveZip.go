@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/yumenaka/archives"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/encoding"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -17,14 +18,14 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	// 如果解压路径不存在，创建路径
 	err := os.MkdirAll(extractPath, os.ModePerm)
 	if err != nil {
-		logger.Infof("Failed to create extract path: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_create_extract_path"), err)
 		return err
 	}
 
 	// 打开文件，只读模式
 	file, err := os.Open(filePath)
 	if err != nil {
-		logger.Infof("Failed to open file: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_open_file_unarchive"), err)
 		return err
 	}
 	defer file.Close()
@@ -32,7 +33,7 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 	// 确认文件格式
 	format, _, err := archives.Identify(context.Background(), filePath, file)
 	if err != nil {
-		logger.Infof("Failed to identify file format: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_identify_file_format"), err)
 		return err
 	}
 
@@ -45,13 +46,13 @@ func UnArchiveZip(filePath string, extractPath string, textEncoding string) erro
 
 		err := zipFormat.Extract(ctx, file, extractFileHandler)
 		if err != nil {
-			logger.Infof("Failed to extract zip file: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_extract_zip_file"), err)
 			return err
 		}
-		logger.Infof("ZIP 文件解压完成：%s 解压到：%s", tools.GetAbsPath(filePath), extractPath)
+		logger.Infof(locale.GetString("log_zip_file_extracted"), tools.GetAbsPath(filePath), extractPath)
 	} else {
-		logger.Infof("File is not a ZIP archive: %s", filePath)
-		return errors.New("file is not a ZIP archive")
+		logger.Infof(locale.GetString("err_file_not_zip_archive"), filePath)
+		return errors.New(locale.GetString("err_file_not_zip_archive"))
 	}
 
 	return nil

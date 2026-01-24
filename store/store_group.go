@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/jxskiss/base62"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -25,7 +26,7 @@ type StoreInRam struct {
 func (ramStore *StoreInRam) AddStore(storeURL string) error {
 	if _, ok := ramStore.ChildStores.Load(storeURL); ok {
 		// 已经有这个key了
-		return errors.New("add Bookstore Error： The key already exists [" + storeURL + "]")
+		return fmt.Errorf(locale.GetString("err_add_bookstore_key_exists"), storeURL)
 	}
 	s := Store{
 		StoreInfo: StoreInfo{
@@ -64,43 +65,45 @@ func (ramStore *StoreInRam) ListBooks() ([]*model.Book, error) {
 	return books, nil
 }
 
-// SaveBooks  保存书籍信息到本地硬盘
-func (ramStore *StoreInRam) SaveBooks() error {
+// SaveBooksToJson  保存书籍信息到本地硬盘（JSON 文件）
+func (ramStore *StoreInRam) SaveBooksToJson() error {
 	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return err
 	}
-	savePath := filepath.Join(configDir, "books")
-	logger.Infof("Saving books to %s", savePath)
+	metaPath := filepath.Join(configDir, "metadata")
+	logger.Infof(locale.GetString("log_saving_books_meta_data_to"), metaPath)
 	allBooks, err := ramStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 		return err
 	}
 	// 遍历并保存每本书
 	for _, book := range allBooks {
 		err := SaveBookJson(book)
 		if err != nil {
-			logger.Infof("Error saving book %s: %s", book.BookID, err)
+			logger.Infof(locale.GetString("log_error_saving_book"), book.BookID, err)
 		}
 	}
-	logger.Infof("Successfully saved %d books to %s", len(allBooks), savePath)
+	logger.Infof(locale.GetString("log_successfully_saved_books"), len(allBooks), metaPath)
 	return nil
 }
 
+// SaveBookJson 将单本书籍信息保存为 JSON 文件
 func SaveBookJson(book *model.Book) error {
 	configDir, err := config.GetConfigDir()
-	savePath := filepath.Join(configDir, "books")
 	if err != nil {
 		return err
 	}
+	// 构造保存路径
+	metaPath := filepath.Join(configDir, "metadata")
 	// 序列化书籍为 JSON 格式
 	jsonData, err := json.MarshalIndent(book, "", "  ")
 	if err != nil {
 		return err
 	}
 	// StoreID是书库URL路径的 base62 编码
-	cacheDir := filepath.Join(savePath, book.GetStoreID())
+	cacheDir := filepath.Join(metaPath, book.GetStoreID())
 	// 创建保存目录
 	err = os.MkdirAll(cacheDir, os.ModePerm)
 	if err != nil {
@@ -118,12 +121,12 @@ func SaveBookJson(book *model.Book) error {
 
 func DeleteBookJson(book *model.Book) error {
 	configDir, err := config.GetConfigDir()
-	savePath := filepath.Join(configDir, "books")
 	if err != nil {
 		return err
 	}
+	metaPath := filepath.Join(configDir, "metadata")
 	// StoreID是书库URL路径的 base62 编码
-	cacheDir := filepath.Join(savePath, book.GetStoreID())
+	cacheDir := filepath.Join(metaPath, book.GetStoreID())
 	// 创建保存目录
 	err = os.MkdirAll(cacheDir, os.ModePerm)
 	if err != nil {
@@ -145,34 +148,35 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	if err != nil {
 		return err
 	}
-	savePath := filepath.Join(configDir, "books")
-	logger.Infof("Loading books from %s", savePath)
+	metaPath := filepath.Join(configDir, "metadata")
+	logger.Infof(locale.GetString("log_loading_books_from"), metaPath)
+	logger.Infof(locale.GetString("log_configured_store_urls"), config.GetCfg().StoreUrls)
 	// 遍历所有 storeUrl 对应的目录
 	for _, storeUrl := range config.GetCfg().StoreUrls {
 		// 计算 storeUrl 的绝对路径
 		storePathAbs, err := filepath.Abs(storeUrl)
 		if err != nil {
-			logger.Infof("Failed to get absolute path: %s", err)
+			logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
 			storePathAbs = storeUrl
 		}
 		// 计算缓存目录路径
-		cacheDir := filepath.Join(savePath, base62.EncodeToString([]byte(storePathAbs)))
+		cacheDir := filepath.Join(metaPath, base62.EncodeToString([]byte(storePathAbs)))
 		// 检查目录是否存在
 		_, err = os.Stat(cacheDir)
 		// 目录不存在是正常的（首次运行），不返回错误
 		if os.IsNotExist(err) {
-			logger.Infof("Book data directory does not exist yet: %s", cacheDir)
+			logger.Infof(locale.GetString("log_book_data_directory_not_exist"), cacheDir)
 			continue
 		}
 		// 其他错误
 		if err != nil {
-			logger.Infof("Error accessing book_data directory: %s", err)
+			logger.Infof(locale.GetString("log_error_accessing_book_data_directory"), err)
 			continue
 		}
 		// 读取目录中的所有文件
 		entries, err := os.ReadDir(cacheDir)
 		if err != nil {
-			logger.Infof("Error reading book_data directory: %s", err)
+			logger.Infof(locale.GetString("log_error_reading_book_data_directory"), err)
 			return err
 		}
 		// 统计加载成功的书籍数量
@@ -181,41 +185,67 @@ func (ramStore *StoreInRam) LoadBooks() error {
 		for _, entry := range entries {
 			// 跳过目录，只处理文件
 			if entry.IsDir() {
+				logger.Infof(locale.GetString("log_skipping_directory"), entry.Name())
 				continue
 			}
 			// 只处理 .json 文件
 			fileName := entry.Name()
 			if !strings.HasSuffix(fileName, ".json") {
+				//logger.Infof(locale.GetString("log_skipping_non_json_file"), fileName)
 				continue
 			}
 			// 读取文件内容
 			filePath := filepath.Join(cacheDir, fileName)
 			jsonData, err := os.ReadFile(filePath)
 			if err != nil {
-				logger.Infof("Error reading file %s: %s", fileName, err)
+				logger.Infof(locale.GetString("log_error_reading_file"), fileName, err)
 				continue // 跳过这个文件，继续处理其他文件
 			}
 			// 反序列化为 Book 对象
 			var book model.Book
 			err = json.Unmarshal(jsonData, &book)
 			if err != nil {
-				logger.Infof("Warning: corrupted JSON file %s, skipping: %s", fileName, err)
+				logger.Infof(locale.GetString("log_warning_corrupted_json_file"), fileName, err)
 				// 尝试删除损坏的json文件
 				errDel := os.Remove(filePath)
 				if errDel != nil {
-					logger.Infof("Error deleting corrupted file %s: %s", fileName, errDel)
+					logger.Infof(locale.GetString("log_error_deleting_corrupted_file"), fileName, errDel)
 				}
 				continue // 继续处理其他文件
+			}
+			// 检查版本号：为空或与当前版本不一致时跳过加载并删除元数据文件
+			currentVersion := config.GetVersion()
+			if book.CreatedByVersion == "" || book.CreatedByVersion != currentVersion {
+				logger.Infof(locale.GetString("log_book_version_mismatch_skip"), book.BookID, book.CreatedByVersion, currentVersion)
+				// 删除版本不匹配的元数据文件
+				errDel := os.Remove(filePath)
+				if errDel != nil {
+					logger.Infof(locale.GetString("log_error_deleting_version_mismatch_metadata"), fileName, errDel)
+				}
+				continue // 跳过版本不匹配的书籍
+			}
+			// 检查书籍文件或目录是否存在，如果不存在则跳过加载并删除元数据文件
+			if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
+				logger.Infof(locale.GetString("log_book_file_not_exist_skip"), book.BookPath)
+				// 删除不存在书籍的元数据文件
+				errDel := os.Remove(filePath)
+				if errDel != nil {
+					logger.Infof(locale.GetString("log_error_deleting_orphan_metadata"), fileName, errDel)
+				}
+				continue // 跳过不存在的书籍
 			}
 			// 添加书籍到内存书库
 			err = ramStore.StoreBook(&book)
 			if err != nil {
-				logger.Infof("Error adding book %s to store: %s", book.BookID, err)
+				logger.Infof(locale.GetString("log_error_adding_book_to_store"), book.BookID, err)
 				continue // 跳过这本书，继续处理其他书籍
 			}
 			loadedCount++
+			if loadedCount%50 == 0 {
+				logger.Infof(locale.GetString("log_loaded_books_so_far"), loadedCount, cacheDir)
+			}
 		}
-		logger.Infof("Successfully loaded %d books from %s", loadedCount, cacheDir)
+		logger.Infof(locale.GetString("log_successfully_loaded_books"), loadedCount, cacheDir)
 	}
 
 	return nil
@@ -224,17 +254,17 @@ func (ramStore *StoreInRam) LoadBooks() error {
 // AddBook 添加一本书
 func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
 	if b.BookID == "" {
-		return errors.New("add book error: empty BookID")
+		return errors.New(locale.GetString("err_add_book_empty_bookid"))
 	}
 	// Load 返回存储在映射中的键值，如果不存在值，则返回 nil。ok 结果指示是否在映射中找到了值。
 	if _, ok := ramStore.ChildStores.Load(b.StoreUrl); !ok {
 		if err := ramStore.AddStore(b.StoreUrl); err != nil {
-			logger.Infof("Error adding subfolder: %s", err)
+			logger.Infof(locale.GetString("log_error_adding_subfolder"), err)
 		}
 	}
 	err := SaveBookJson(b)
 	if err != nil {
-		logger.Infof("Error saving book %s to JSON: %s", b.BookID, err)
+		logger.Infof(locale.GetString("log_error_saving_book_to_json"), b.BookID, err)
 	}
 	return ramStore.AddBookToSubStore(b.StoreUrl, b)
 }
@@ -252,7 +282,7 @@ func (ramStore *StoreInRam) AddBookToSubStore(storeURL string, b *model.Book) er
 		}
 		newSubStore.BookMap.Store(b.BookID, b)
 		ramStore.ChildStores.Store(storeURL, &newSubStore)
-		return errors.New("add Bookstore Error： The key not found [" + storeURL + "]")
+		return fmt.Errorf(locale.GetString("err_add_bookstore_key_not_found"), storeURL)
 	} else {
 		// 给已有子书库添加一本书
 		temp := f.(*Store)
@@ -265,11 +295,11 @@ func (ramStore *StoreInRam) AddBookToSubStore(storeURL string, b *model.Book) er
 func (ramStore *StoreInRam) AddBooks(books []*model.Book) error {
 	for _, b := range books {
 		if err := ramStore.StoreBook(b); err != nil {
-			logger.Infof("Error adding book %s: %s", b.BookID, err)
+			logger.Infof(locale.GetString("log_error_adding_book"), b.BookID, err)
 		}
 		err := SaveBookJson(b)
 		if err != nil {
-			logger.Infof("Error saving book %s to JSON: %s", b.BookID, err)
+			logger.Infof(locale.GetString("log_error_saving_book_to_json"), b.BookID, err)
 		}
 	}
 	return nil
@@ -279,7 +309,7 @@ func (ramStore *StoreInRam) AddBooks(books []*model.Book) error {
 func (ramStore *StoreInRam) GetParentBookID(childID string) (string, error) {
 	allBooks, err := ramStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, bookGroup := range allBooks {
 		if bookGroup.Type != model.TypeBooksGroup {
@@ -292,7 +322,7 @@ func (ramStore *StoreInRam) GetParentBookID(childID string) (string, error) {
 			}
 		}
 	}
-	return "", errors.New("cannot find group, id=" + childID)
+	return "", fmt.Errorf(locale.GetString("err_cannot_find_group"), childID)
 }
 
 // GetArchiveBooks 获取所有压缩包格式的书籍
@@ -300,7 +330,7 @@ func (ramStore *StoreInRam) GetArchiveBooks() []*model.Book {
 	var list []*model.Book
 	allBooks, err := ramStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, b := range allBooks {
 		if b.Type == model.TypeZip || b.Type == model.TypeRar || b.Type == model.TypeCbz || b.Type == model.TypeCbr || b.Type == model.TypeTar || b.Type == model.TypeEpub {
@@ -313,7 +343,7 @@ func (ramStore *StoreInRam) GetArchiveBooks() []*model.Book {
 // GetBook 根据 BookID 获取书籍
 // GetBookByID 根据 BookID 获取书籍
 func (ramStore *StoreInRam) GetBook(id string) (*model.Book, error) {
-	// 遍历 ChildStores ，删除指定 ID 的书籍
+	// 遍历 ChildStores ，获取指定 ID 的书籍
 	for _, value := range ramStore.ChildStores.Range {
 		childStore := value.(*Store)
 		if value, ok := childStore.BookMap.Load(id); ok {
@@ -321,14 +351,14 @@ func (ramStore *StoreInRam) GetBook(id string) (*model.Book, error) {
 			return b, nil
 		}
 	}
-	return nil, errors.New("GetBook：cannot find book, id=" + id)
+	return nil, fmt.Errorf(locale.GetString("err_getbook_cannot_find"), id)
 }
 
 func (ramStore *StoreInRam) StoreBookMark(mark *model.BookMark) error {
 	// 获取书籍
 	b, err := ramStore.GetBook(mark.BookID)
 	if err != nil {
-		return errors.New("StoreBookMark：cannot find book, id=" + mark.BookID)
+		return fmt.Errorf(locale.GetString("err_storebookmark_cannot_find"), mark.BookID)
 	}
 	switch mark.Type {
 	case model.UserMark:
@@ -359,7 +389,7 @@ func (ramStore *StoreInRam) StoreBookMark(mark *model.BookMark) error {
 		}
 	default:
 		// 目前没有其他类型书签
-		return errors.New("StoreBookMark：unknown bookmark type")
+		return errors.New(locale.GetString("err_storebookmark_unknown_type"))
 	}
 	err = ramStore.StoreBook(b)
 	if err != nil {
@@ -372,9 +402,35 @@ func (ramStore *StoreInRam) GetBookMarks(bookID string) (*model.BookMarks, error
 	// 获取书籍
 	b, err := ramStore.GetBook(bookID)
 	if err != nil {
-		return nil, errors.New("GetBookMark：cannot find book, id=" + bookID)
+		return nil, fmt.Errorf(locale.GetString("err_getbookmark_cannot_find"), bookID)
 	}
 	return &b.BookMarks, nil
+}
+
+// DeleteBookMark 删除指定书籍的特定书签
+// 根据 bookID + markType + pageIndex 唯一确定一个书签
+func (ramStore *StoreInRam) DeleteBookMark(bookID string, markType model.MarkType, pageIndex int) error {
+	// 获取书籍
+	b, err := ramStore.GetBook(bookID)
+	if err != nil {
+		return fmt.Errorf(locale.GetString("err_getbookmark_cannot_find"), bookID)
+	}
+	// 查找并删除匹配的书签
+	found := false
+	newBookMarks := make(model.BookMarks, 0, len(b.BookMarks))
+	for _, mark := range b.BookMarks {
+		if mark.Type == markType && mark.PageIndex == pageIndex {
+			found = true
+			continue // 跳过要删除的书签
+		}
+		newBookMarks = append(newBookMarks, mark)
+	}
+	if !found {
+		return fmt.Errorf("bookmark not found: bookID=%s, type=%s, pageIndex=%d", bookID, markType, pageIndex)
+	}
+	b.BookMarks = newBookMarks
+	// 持久化更新
+	return ramStore.StoreBook(b)
 }
 
 func (ramStore *StoreInRam) DeleteBook(id string) error {
@@ -385,37 +441,23 @@ func (ramStore *StoreInRam) DeleteBook(id string) error {
 			// 删除本地缓存的 JSON 文件
 			err := DeleteBookJson(b.(*model.Book))
 			if err != nil {
-				logger.Infof("Error deleting book %s JSON file: %s", id, err)
+				logger.Infof(locale.GetString("log_error_deleting_book_json_file"), id, err)
 			}
 			return nil
 		}
 	}
-	return errors.New("DeleteBook：cannot find book, id=" + id)
+	return fmt.Errorf(locale.GetString("err_deletebook_cannot_find"), id)
 }
-
-//func (ramStore *StoreInRam) UpdateBook(book *model.Book) error {
-//	for _, value := range ramStore.ChildStores.Range {
-//		childStore := value.(*Store)
-//		if _, ok := childStore.BookMap.Load(book.BookID); ok {
-//			childStore.BookMap.Store(book.BookID, book)
-//			err := SaveBookJson(book)
-//			if err != nil {
-//				logger.Infof("Error saving book %s to JSON: %s", book.BookID, err)
-//			}
-//			return nil
-//		}
-//	}
-//	return errors.New("UpdateBook：cannot find book, id=" + book.BookID)
-//}
 
 // TopOfShelfInfo 获取顶层书架信息
 func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
+	model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
 	model.ClearBookNotExist()
 	// 显示顶层书库的书籍
 	var topBookList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, b := range allBooks {
 		if b.Depth == 0 {
@@ -427,7 +469,7 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 	for _, storeUrl := range storeUrls {
 		storePathAbs, err := filepath.Abs(storeUrl)
 		if err != nil {
-			logger.Infof("Failed to get absolute path: %s", err)
+			logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
 			storePathAbs = storeUrl
 		}
 		newStoreBookInfo := model.StoreBookInfo{
@@ -443,7 +485,7 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 		for _, b := range allBooks {
 			if b.StoreUrl == storePathAbs && b.Type != model.TypeBooksGroup {
 				childBookNum++
-				//logger.Infof("[%v]Counting book %s in store %s, BookID=%s", childBookNum, b.Title, storePathAbs, b.BookID)
+				// logger.Infof("[%v]Counting book %s in store %s, BookID=%s", childBookNum, b.Title, storePathAbs, b.BookID)
 			}
 		}
 		newStoreBookInfo.ChildBookNum = childBookNum
@@ -453,27 +495,29 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 		return storeBookInfoList, nil
 	}
 	// 没找到任何书
-	return nil, errors.New("error: cannot find book in TopOfShelfInfo")
+	return nil, errors.New(locale.GetString("err_cannot_find_book_topofshelf"))
 }
 
 // GetChildBooksInfo 根据 ID 获取书籍列表
 func GetChildBooksInfo(BookID string) (*model.BookInfos, error) {
+	model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
+	model.ClearBookNotExist()
 	var infoList model.BookInfos
 	parentBook, err := model.IStore.GetBook(BookID)
 	if err != nil {
-		return nil, errors.New("cannot find child books info，BookID：" + BookID)
+		return nil, fmt.Errorf(locale.GetString("err_cannot_find_child_books"), BookID)
 	}
 	for _, childID := range parentBook.ChildBooksID {
 		b, err := model.IStore.GetBook(childID)
 		if err != nil {
-			return nil, errors.New("GetParentBook: cannot find book by childID=" + childID)
+			return nil, fmt.Errorf(locale.GetString("err_getparentbook_cannot_find"), childID)
 		}
 		infoList = append(infoList, b.BookInfo)
 	}
 	if len(infoList) > 0 {
 		return &infoList, nil
 	} else {
-		return nil, errors.New("cannot find child books info，BookID：" + BookID)
+		return nil, fmt.Errorf(locale.GetString("err_cannot_find_child_books"), BookID)
 	}
 }
 
@@ -482,7 +526,7 @@ func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfos, error
 	var infoList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, b := range allBooks {
 		if b.ParentFolder == parentFolder {
@@ -493,5 +537,5 @@ func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfos, error
 		infoList.SortBooks("filename")
 		return &infoList, nil
 	}
-	return nil, errors.New("cannot find book, parentFolder=" + parentFolder)
+	return nil, fmt.Errorf(locale.GetString("err_cannot_find_book_parentfolder"), parentFolder)
 }

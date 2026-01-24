@@ -1,45 +1,148 @@
 //此文件静态导入，不需要编译
-//https://www.runoob.com/js/js-strict.html
+//严格模式,不能使用未声明的变量
 'use strict'
 
-//隐藏工具栏的工具函数
-// https://www.runoob.com/js/js-htmldom-events.html
+// ============ DOM 元素缓存（避免重复查询）============
+const DOM = {
+    header: null,
+    range: null,
+    sliderContainer: null,
+    slider: null,
+    leftSlide: null,
+    rightSlide: null,
+    flipMainArea: null,
+    singleNowImage: null,
+    doubleNowImageLeft: null,
+    doubleNowImageRight: null,
+    openSettingButton: null,
+    reSortDropdownMenu: null,
+    quickJumpDropdown: null,
+}
+
+// 初始化 DOM 缓存（在 DOMContentLoaded 后调用）
+function initDOMCache() {
+    DOM.header = document.getElementById('header')
+    DOM.range = document.getElementById('StepsRangeArea')
+    DOM.sliderContainer = document.getElementById('slider_container')
+    DOM.slider = document.getElementById('slider')
+    DOM.leftSlide = document.getElementById('left-slide')
+    DOM.rightSlide = document.getElementById('right-slide')
+    DOM.flipMainArea = document.getElementById('FlipMainArea')
+    DOM.singleNowImage = document.getElementById('Single-NowImage')
+    DOM.doubleNowImageLeft = document.getElementById('Double-NowImage-Left')
+    DOM.doubleNowImageRight = document.getElementById('Double-NowImage-Right')
+    DOM.openSettingButton = document.getElementById('OpenSettingButton')
+    DOM.reSortDropdownMenu = document.getElementById('ReSortDropdownMenu')
+    DOM.quickJumpDropdown = document.getElementById('QuickJumpDropdown')
+}
+
+// ============ 配置获取函数 ============
+/**
+ * 从 Alpine Store 获取配置
+ * @returns {Object} 配置对象
+ */
+const getConfig = () => ({
+    // 滑动动画配置
+    swipeAnimationDuration: Alpine.store('flip').swipeAnimationDuration,
+    resetAnimationDuration: Alpine.store('flip').resetAnimationDuration,
+    swipeThreshold: Alpine.store('flip').swipeThreshold,
+    swipeTimeout: Alpine.store('flip').swipeTimeout,
+    // 其他配置
+    preloadRange: Alpine.store('flip').preloadRange,
+    wheelThrottleDelay: Alpine.store('flip').wheelThrottleDelay,
+    // WebSocket 配置
+    maxReconnectAttempts: Alpine.store('flip').websocketMaxReconnect,
+    reconnectInterval: Alpine.store('flip').websocketReconnectInterval,
+    // 静态配置
+    setAreaRatio: 0.15,  // 设置区域比例
+    slideBlockMargin: 30, // 边界回弹距离
+})
+
+// ============ 工具函数 ============
+/**
+ * 防抖函数
+ * @param {Function} func - 要防抖的函数
+ * @param {number} wait - 等待时间（毫秒）
+ * @returns {Function} 防抖后的函数
+ */
+function debounce(func, wait) {
+    let timeout
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout)
+            func(...args)
+        }
+        clearTimeout(timeout)
+        timeout = setTimeout(later, wait)
+    }
+}
+
+/**
+ * 节流函数
+ * @param {Function} func - 要节流的函数
+ * @param {number} limit - 时间限制（毫秒）
+ * @returns {Function} 节流后的函数
+ */
+function throttle(func, limit) {
+    let inThrottle
+    return function executedFunction(...args) {
+        if (!inThrottle) {
+            func(...args)
+            inThrottle = true
+            setTimeout(() => inThrottle = false, limit)
+        }
+    }
+}
+
+// ============ 工具栏显示/隐藏 ============
 let hideTimeout
-let header = document.getElementById('header')
-let range = document.getElementById('StepsRangeArea')
 
 // 显示工具栏
 function showToolbar() {
+    if (!DOM.header || !DOM.range) return
+    
     if (Alpine.store('flip').autoHideToolbar) {
-        header.style.opacity = '0.9'
-        range.style.opacity = '0.9'
-        header.style.transform = 'translateY(0)'
-        range.style.transform = 'translateY(0)'
+        DOM.header.style.opacity = '0.9'
+        DOM.range.style.opacity = '0.9'
+        DOM.header.style.transform = 'translateY(0)'
+        DOM.range.style.transform = 'translateY(0)'
     } else {
-        header.style.opacity = '1'
-        range.style.opacity = '1'
-        header.style.transform = 'translateY(0)'
-        range.style.transform = 'translateY(0)'
+        DOM.header.style.opacity = '1'
+        DOM.range.style.opacity = '1'
+        DOM.header.style.transform = 'translateY(0)'
+        DOM.range.style.transform = 'translateY(0)'
     }
 }
 
 // 隐藏工具栏
 function hideToolbar() {
+    if (!DOM.header || !DOM.range) return
+    
     if (Alpine.store('flip').autoHideToolbar) {
-        header.style.opacity = '0'
-        range.style.opacity = '0'
-        header.style.transform = 'translateY(-100%)'
-        range.style.transform = 'translateY(100%)'
+        DOM.header.style.opacity = '0'
+        DOM.range.style.opacity = '0'
+        DOM.header.style.transform = 'translateY(-100%)'
+        DOM.range.style.transform = 'translateY(100%)'
     }
 }
 
-// 初始化：如果autohidetoolbar为真,则自动隐藏工具栏
-if (Alpine.store('flip').autoHideToolbar) {
-    setTimeout(hideToolbar, 1000)
+// 初始化工具栏事件监听器（在 DOM 加载后调用）
+function initToolbarListeners() {
+    if (!DOM.header) return
+    
+    // 显示工具栏
+    DOM.header.addEventListener('mouseover', showToolbar)
+    // 隐藏工具栏
+    DOM.header.addEventListener('mouseout', hideToolbar)
+    
+    // 初始化：如果 autohidetoolbar 为真，则自动隐藏工具栏
+    if (Alpine.store('flip').autoHideToolbar) {
+        setTimeout(hideToolbar, 1000)
+    }
 }
 
 // Base64编码静态资源图片（鼠标图标）：
-// base64 -i SettingsOutline.svg ，然后// 把下面这行换成输出的
+// base64 -i SettingsOutline.svg ，然后// 把下面这行换成输出
 const SettingsOutlineBase64 = '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'
 // base64 -i Prohibited28Filled.png
 const Prohibited28FilledBase64 = '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'
@@ -49,42 +152,31 @@ const ArrowLeftBase64 = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0I
 const ArrowRightBase64 = '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'
 
 
-//设置初始值
+// ============ 全局数据初始化 ============
 const book = JSON.parse(document.getElementById('NowBook').textContent)
-// // 打印调试信息
-// if (Alpine.store('global').debugMode) {
-//     // const globalState = JSON.parse(document.getElementById('GlobalState').textContent);
-//     console.log('book', book)
-//     console.log('book.page_count:', book.page_count)
-// }
 const images = book.PageInfos
 Alpine.store('global').allPageNum = parseInt(book.page_count)
-// 临时用户标签ID
+
+// 临时用户标签 ID（用于多标签页同步）
 const tabID = (Date.now() % 10000000).toString(36) + Math.random().toString(36).substring(2, 5)
-// 假设token是一个有效的令牌 TODO:使用真正的令牌
+
+// WebSocket 令牌（TODO: 使用真正的令牌）
 const token = 'your_token'
 
-// 滑动相关变量
+// ============ 滑动相关变量 ============
 let touchStartX = 0
 let touchEndX = 0
 let isSwiping = false
 let currentTranslate = 0
 let startTime = 0
 let animationID = 0
-const sliderContainer = document.getElementById('manga_area')
-const slider = document.getElementById('slider')
-const leftSlide = document.getElementById('left-slide')
-//const middleSlide = document.getElementById('middle-slide')
-const rightSlide = document.getElementById('right-slide')
-const threshold = 100 // 滑动阈值，超过这个值才会触发翻页
-const swipeTimeout = 300 // 滑动超时时间（毫秒）
 
 // 设置图片资源，预加载等
 // 需要 HTTP 响应头中允许缓存（没有使用 Cache-Control: no-cache），也就是 gin 不能用htmx/router/server.go 里面的noCache 中间件。
-// 在预加载用到的图片资源URL
+// 在预加载用到的图片资源 URL
 let preloadedImages = new Set()
 
-//首次加载时
+// 首次加载时设置图片
 setImageSrc()
 
 // 首次加载时，检查URL参数中是否有页码
@@ -116,59 +208,95 @@ if (params.has('start')) {
 //判断当前浏览器是不是Safari，暂时没啥用
 // const isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1
 
+/**
+ * 获取图片源 URL
+ * @param {number} index - 图片索引
+ * @returns {string|undefined} 图片 URL
+ */
 function GetImageSrc(index) {
     if (index < 0 || index >= images.length) {
-        console.log(`Error,cannot use this index: ${index}`);
+        if (Alpine.store('global').debugMode) {
+            console.error(`GetImageSrc: 索引越界 ${index}`)
+        }
         return
     }
-    const Url = images[index].url
-    const autoCrop = Alpine.store('global').autoCrop ? "&auto_crop=" + Alpine.store('global').autoCropNum : ''
-    const autoResize = Alpine.store('global').autoResize ? "&resize_max_width=" + Alpine.store('global').autoResizeWidth : ''
-    const noCache = Alpine.store('global').noCache ? "&no-cache=true" : ''
-    return `${Url}${autoCrop}${autoResize}${noCache}`
+    
+    const url = images[index].url
+    if (!Alpine.store('global').onlineBook) {
+        return url
+    }
+    
+    // 在线书籍：添加图片处理参数
+    const autoCrop = Alpine.store('global').autoCrop 
+        ? `&auto_crop=${Alpine.store('global').autoCropNum}` 
+        : ''
+    const autoResize = Alpine.store('global').autoResize 
+        ? `&resize_max_width=${Alpine.store('global').autoResizeWidth}` 
+        : ''
+    const noCache = Alpine.store('global').noCache ? '&no-cache=true' : ''
+    
+    return `${url}${autoCrop}${autoResize}${noCache}`
 }
 
-// 加载图片资源
+/**
+ * 加载图片资源
+ */
 function setImageSrc() {
     const nowPageNum = Alpine.store('global').nowPageNum
-    if (nowPageNum === 0 && nowPageNum >= Alpine.store('global').allPageNum) {
-        console.log('setImageSrc: nowPageNum is 0 or out of range', nowPageNum)
+    const allPageNum = Alpine.store('global').allPageNum
+    const mangaMode = Alpine.store('flip').mangaMode
+    const config = getConfig()
+    
+    if (nowPageNum === 0 || nowPageNum > allPageNum) {
+        if (Alpine.store('global').debugMode) {
+            console.log('setImageSrc: nowPageNum is out of range', nowPageNum)
+        }
         return
     }
-    // console.log("setImageSrc: nowPageNum", nowPageNum);
-    // console.log("setImageSrc: NowImage", images[nowPageNum - 1].url);
-    // console.log("setImageSrc: NowImage+1=", images[nowPageNum].url);
+    
     // 加载当前图片
-    document.getElementById('Single-NowImage').src =
-        GetImageSrc(nowPageNum - 1)
-    if (!Alpine.store('flip').mangaMode) {
-        document.getElementById('Double-NowImage-Left').src = GetImageSrc(nowPageNum - 1);
-    } else {
-        document.getElementById('Double-NowImage-Right').src = GetImageSrc(nowPageNum - 1);
+    if (DOM.singleNowImage) {
+        DOM.singleNowImage.src = GetImageSrc(nowPageNum - 1)
     }
-
+    
+    // 根据漫画模式设置双页图片
+    if (mangaMode) {
+        if (DOM.doubleNowImageRight) {
+            DOM.doubleNowImageRight.src = GetImageSrc(nowPageNum - 1)
+        }
+    } else {
+        if (DOM.doubleNowImageLeft) {
+            DOM.doubleNowImageLeft.src = GetImageSrc(nowPageNum - 1)
+        }
+    }
+    
     preloadedImages.add(GetImageSrc(nowPageNum - 1))
+    
     // 更新滑动容器图片
     updateSliderImages(nowPageNum)
-
-    // 为双页模式，加载下一张图片。
-    // 因为用户有可能随时切换到双页模式，所以单页模式也预加载图片（尽管看不到）
-    if (nowPageNum < Alpine.store('global').allPageNum) {
-        if (Alpine.store('flip').mangaMode) {
-            document.getElementById('Double-NowImage-Left').src = GetImageSrc(nowPageNum);
+    
+    // 为双页模式预加载下一张图片
+    if (nowPageNum < allPageNum) {
+        const nextImgSrc = GetImageSrc(nowPageNum)
+        if (mangaMode) {
+            if (DOM.doubleNowImageLeft) {
+                DOM.doubleNowImageLeft.src = nextImgSrc
+            }
         } else {
-            document.getElementById('Double-NowImage-Right').src = GetImageSrc(nowPageNum);
+            if (DOM.doubleNowImageRight) {
+                DOM.doubleNowImageRight.src = nextImgSrc
+            }
         }
-        preloadedImages.add(GetImageSrc(nowPageNum))
+        preloadedImages.add(nextImgSrc)
     }
-
-    // 预加载前一张和后十张图片
-    const preloadRange = 10 // 预加载范围，可以根据需要调整
+    
+    // 预加载前后图片
+    const preloadRange = config.preloadRange
     for (let i = nowPageNum - 2; i <= nowPageNum + preloadRange; i++) {
-        if (i >= 0 && i < Alpine.store('global').allPageNum) {
+        if (i >= 0 && i < allPageNum) {
             const imgUrl = GetImageSrc(i)
             if (!preloadedImages.has(imgUrl)) {
-                let img = new Image()
+                const img = new Image()
                 img.src = imgUrl
                 preloadedImages.add(imgUrl)
             }
@@ -177,413 +305,420 @@ function setImageSrc() {
 }
 
 
-// 更新滑动容器图片
-function updateSliderImages(nowPageNum) {
-    // 根据阅读方向设置滑动元素的位置
-    const prevSlideElement = document.getElementById('left-slide')
-    const nextSlideElement = document.getElementById('right-slide')
-    if (Alpine.store('flip').mangaMode) {
-        // 日漫模式：prev在右侧，next在左侧
-        prevSlideElement.style.transform = 'translateX(100%)'
-        nextSlideElement.style.transform = 'translateX(-100%)'
-    } else {
-        // 美漫模式：prev在左侧，next在右侧
-        prevSlideElement.style.transform = 'translateX(-100%)'
-        nextSlideElement.style.transform = 'translateX(100%)'
-    }
-    // ------------ 单页模式设置 ------------
-    if (!Alpine.store('flip').doublePageMode) {
-        // 添加前一张图片（如果存在）
-        if (nowPageNum > 1) {
-            const prevImg = document.createElement('img')
-            prevImg.src = GetImageSrc(nowPageNum - 2)
-            prevImg.className = Alpine.store('global').isPortrait ? 'object-contain w-auto max-w-full h-screen' : 'h-screen w-auto max-w-full object-contain'
-            prevImg.draggable = false
-            leftSlide.innerHTML = ''
-            leftSlide.appendChild(prevImg)
-        } else {
-            leftSlide.innerHTML = ''
-        }
-        // // 更新当前图片 (确保当前图片也在这里更新，以防万一)
-        const currentImgElement = document.getElementById('Single-NowImage')
-        if (currentImgElement && nowPageNum >= 1 && nowPageNum <= Alpine.store('global').allPageNum) {
-            currentImgElement.src = GetImageSrc(nowPageNum - 1)
-        }
-        // 添加后一张图片（如果存在）
-        if (nowPageNum < Alpine.store('global').allPageNum) {
-            const nextImg = document.createElement('img')
-            nextImg.src = GetImageSrc(nowPageNum)
-            nextImg.className = Alpine.store('global').isPortrait ? 'object-contain w-auto max-w-full h-screen' : 'h-screen w-auto max-w-full object-contain'
-            nextImg.draggable = false
-            rightSlide.innerHTML = ''
-            rightSlide.appendChild(nextImg)
-        } else {
-            rightSlide.innerHTML = ''
-        }
-    }
-    // ------------ 双页模式设置 ------------
-    if (Alpine.store('flip').doublePageMode) {
-        // 添加双页模式前一屏图片（如果存在）
-        if (nowPageNum === 2) {
-            const prevImg = document.createElement('img')
-            prevImg.src = GetImageSrc(nowPageNum - 2)
-            prevImg.className = 'object-contain h-screen max-w-full max-h-screen m-0'
-            prevImg.draggable = false
-            leftSlide.innerHTML = ''
-            leftSlide.appendChild(prevImg)
-        }
-        if (nowPageNum >= 3) {
-            const prevImg_1 = document.createElement('img')
-            prevImg_1.src = GetImageSrc(nowPageNum - 2)
-            prevImg_1.className = 'object-contain w-auto max-h-screen m-0 select-none max-w-1/2 grow-0'
-            prevImg_1.draggable = false
-            const prevImg_2 = document.createElement('img')
-            prevImg_2.src = GetImageSrc(nowPageNum - 3)
-            prevImg_2.className = 'object-contain w-auto max-h-screen m-0 select-none max-w-1/2 grow-0'
-            prevImg_2.draggable = false
-            leftSlide.innerHTML = ''
-            if (Alpine.store('flip').mangaMode) {
-                leftSlide.appendChild(prevImg_1)
-                leftSlide.appendChild(prevImg_2)
-            } else {
-                leftSlide.appendChild(prevImg_2)
-                leftSlide.appendChild(prevImg_1)
-            }
-        }
-        if (nowPageNum <= 1) {
-            leftSlide.innerHTML = ''
-        }
-        // 添加后一屏图片（如果存在）
-        if (nowPageNum === Alpine.store('global').allPageNum - 3) {
-            const nextImg = document.createElement('img')
-            nextImg.src = GetImageSrc(nowPageNum - 2)
-            nextImg.className = 'object-contain h-screen max-w-full max-h-screen m-0'
-            nextImg.draggable = false
-            rightSlide.innerHTML = ''
-            rightSlide.appendChild(nextImg)
-        }
-        if (nowPageNum < Alpine.store('global').allPageNum - 3) {
-            const nextImg_1 = document.createElement('img')
-            nextImg_1.src = GetImageSrc(nowPageNum + 1)
-            nextImg_1.className = 'object-contain w-auto max-h-screen m-0 select-none max-w-1/2 grow-0'
-            nextImg_1.draggable = false
-            const nextImg_2 = document.createElement('img')
-            nextImg_2.src = GetImageSrc(nowPageNum + 2)
-            nextImg_2.className = 'object-contain w-auto max-h-screen m-0 select-none max-w-1/2 grow-0'
-            nextImg_2.draggable = false
-            rightSlide.innerHTML = ''
-            if (Alpine.store('flip').mangaMode) {
-                rightSlide.appendChild(nextImg_2)
-                rightSlide.appendChild(nextImg_1)
-            } else {
-                rightSlide.appendChild(nextImg_1)
-                rightSlide.appendChild(nextImg_2)
-            }
-        }
-        if (nowPageNum === Alpine.store('global').allPageNum - 1) {
-            rightSlide.innerHTML = ''
-        }
-    }
-
-    // 确保滑动容器在更新图片后回到初始位置 (没有动画)
-    slider.style.transition = 'none' // 暂时禁用过渡效果，防止闪烁
-    slider.style.transform = 'translateX(0)'
-    // 强制浏览器重新计算样式，确保 `transition = 'none'` 生效
-    slider.offsetHeight // 读取offsetHeight可以触发重排
-    slider.style.transition = '' // 恢复过渡效果
-    resetSlider() // 清理状态 (currentTranslate = 0, cancel animation)
+/**
+ * 创建图片元素
+ * @param {string} src - 图片源
+ * @param {string} className - CSS 类名
+ * @returns {HTMLImageElement} 图片元素
+ */
+function createImageElement(src, className) {
+    const img = document.createElement('img')
+    img.src = src
+    img.className = className
+    img.draggable = false
+    return img
 }
 
-// 重置滑动状态
+/**
+ * 更新滑动容器图片
+ * @param {number} nowPageNum - 当前页码
+ */
+function updateSliderImages(nowPageNum) {
+    if (!DOM.leftSlide || !DOM.rightSlide || !DOM.slider) return
+    
+    const mangaMode = Alpine.store('flip').mangaMode
+    const doublePageMode = Alpine.store('flip').doublePageMode
+    const allPageNum = Alpine.store('global').allPageNum
+    const isPortrait = Alpine.store('global').isPortrait
+    
+    // 根据阅读方向设置滑动元素的位置
+    if (mangaMode) {
+        DOM.leftSlide.style.transform = 'translateX(100%)'
+        DOM.rightSlide.style.transform = 'translateX(-100%)'
+    } else {
+        DOM.leftSlide.style.transform = 'translateX(-100%)'
+        DOM.rightSlide.style.transform = 'translateX(100%)'
+    }
+    
+    // CSS 类名
+    const singlePageClass = isPortrait 
+        ? 'object-contain w-auto max-w-full h-screen' 
+        : 'h-screen w-auto max-w-full object-contain'
+    const doublePageClass = 'object-contain w-auto max-h-screen m-0 select-none max-w-1/2 grow-0'
+    const singleImgClass = 'object-contain h-screen max-w-full max-h-screen m-0'
+    
+    // ========== 单页模式 ==========
+    if (!doublePageMode) {
+        // 前一张图片
+        DOM.leftSlide.innerHTML = ''
+        if (nowPageNum > 1) {
+            const prevImg = createImageElement(GetImageSrc(nowPageNum - 2), singlePageClass)
+            DOM.leftSlide.appendChild(prevImg)
+        }
+        
+        // 更新当前图片
+        if (DOM.singleNowImage && nowPageNum >= 1 && nowPageNum <= allPageNum) {
+            DOM.singleNowImage.src = GetImageSrc(nowPageNum - 1)
+        }
+        
+        // 后一张图片
+        DOM.rightSlide.innerHTML = ''
+        if (nowPageNum < allPageNum) {
+            const nextImg = createImageElement(GetImageSrc(nowPageNum), singlePageClass)
+            DOM.rightSlide.appendChild(nextImg)
+        }
+    }
+    
+    // ========== 双页模式 ==========
+    if (doublePageMode) {
+        // 前一屏图片
+        DOM.leftSlide.innerHTML = ''
+        if (nowPageNum === 2) {
+            const prevImg = createImageElement(GetImageSrc(nowPageNum - 2), singleImgClass)
+            DOM.leftSlide.appendChild(prevImg)
+        } else if (nowPageNum >= 3) {
+            const prevImg_1 = createImageElement(GetImageSrc(nowPageNum - 2), doublePageClass)
+            const prevImg_2 = createImageElement(GetImageSrc(nowPageNum - 3), doublePageClass)
+            if (mangaMode) {
+                DOM.leftSlide.appendChild(prevImg_1)
+                DOM.leftSlide.appendChild(prevImg_2)
+            } else {
+                DOM.leftSlide.appendChild(prevImg_2)
+                DOM.leftSlide.appendChild(prevImg_1)
+            }
+        }
+        
+        // 后一屏图片
+        DOM.rightSlide.innerHTML = ''
+        if (nowPageNum === allPageNum - 3) {
+            const nextImg = createImageElement(GetImageSrc(nowPageNum - 2), singleImgClass)
+            DOM.rightSlide.appendChild(nextImg)
+        } else if (nowPageNum < allPageNum - 3) {
+            const nextImg_1 = createImageElement(GetImageSrc(nowPageNum + 1), doublePageClass)
+            const nextImg_2 = createImageElement(GetImageSrc(nowPageNum + 2), doublePageClass)
+            if (mangaMode) {
+                DOM.rightSlide.appendChild(nextImg_2)
+                DOM.rightSlide.appendChild(nextImg_1)
+            } else {
+                DOM.rightSlide.appendChild(nextImg_1)
+                DOM.rightSlide.appendChild(nextImg_2)
+            }
+        }
+    }
+
+    // 确保滑动容器在更新图片后回到初始位置（没有动画）
+    DOM.slider.style.transition = 'none'
+    DOM.slider.style.transform = 'translateX(0)'
+    DOM.slider.offsetHeight // 触发重排
+    DOM.slider.style.transition = ''
+    resetSlider()
+}
+
+/**
+ * 重置滑动状态
+ */
 function resetSlider() {
     cancelAnimationFrame(animationID)
-    // 不再立即设置 transform
     currentTranslate = 0
 }
 
-// 触摸开始事件处理
+/**
+ * 触摸开始事件处理
+ * @param {TouchEvent|MouseEvent} e - 事件对象
+ */
 function touchStart(e) {
-    // 根据swipeTurn的值决定是否启用滑动翻页
-    if (!Alpine.store('flip').swipeTurn)
-        return
-    //console.log('touchStart,swipeTurn:' + Alpine.store('flip').swipeTurn)
+    if (!Alpine.store('flip').swipeTurn) return
+    
     startTime = new Date().getTime()
     isSwiping = true
     touchStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX
-
+    
     // 停止任何正在进行的动画
     cancelAnimationFrame(animationID)
 }
 
-// 如果在第一页或最后一页尝试向前翻或向后翻，阻止默认滚动
+/**
+ * 判断是否应该阻止滚动（在边界时）
+ * @param {number} diffX - 滑动距离
+ * @returns {boolean} 是否阻止滚动
+ */
 function shouldBlockScroll(diffX) {
     const mangaMode = Alpine.store('flip').mangaMode
     const nowPageNum = Alpine.store('global').nowPageNum
-    // 判断是否应该阻止默认滚动
-    let blockScroll = false
-    // 如果是第一页尝试向前翻
+    const allPageNum = Alpine.store('global').allPageNum
+    
+    // 第一页尝试向前翻
     if (nowPageNum === 1) {
-        // 日漫模式
-        if (diffX < 0 && mangaMode) {
-            blockScroll = true
-        }
-        // 美漫模式
-        if (diffX > 0 && !mangaMode) {
-            blockScroll = true
-        }
+        return (diffX < 0 && mangaMode) || (diffX > 0 && !mangaMode)
     }
-    // 如果是最后一页尝试向后翻
-    if (nowPageNum === Alpine.store('global').allPageNum) {
-        // 日漫模式
-        if (diffX > 0 && mangaMode) {
-            blockScroll = true
-        }
-        // 美漫模式
-        if (diffX < 0 && !mangaMode) {
-            blockScroll = true
-        }
+    
+    // 最后一页尝试向后翻
+    if (nowPageNum === allPageNum) {
+        return (diffX > 0 && mangaMode) || (diffX < 0 && !mangaMode)
     }
-    return blockScroll;
+    
+    return false
 }
 
-// 触摸移动事件处理
+/**
+ * 触摸移动事件处理
+ * @param {TouchEvent|MouseEvent} e - 事件对象
+ */
 function touchMove(e) {
-    if (!isSwiping)
+    if (!isSwiping || !Alpine.store('flip').swipeTurn || !DOM.slider)
         return
-    if (!Alpine.store('flip').swipeTurn)
-        return
+    
     const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX
     const diffX = currentX - touchStartX
+    const config = getConfig()
+    
     // 设置当前滑动距离
     currentTranslate = diffX
+    
     // 如果在第一页或最后一页尝试向前翻或向后翻，阻止默认滚动
     if (shouldBlockScroll(diffX)) {
-        if (diffX < 0) {
-            currentTranslate = -30
-        } else {
-            currentTranslate = 30
-        }
+        currentTranslate = diffX < 0 ? -config.slideBlockMargin : config.slideBlockMargin
     }
+    
     // 应用变换
-    slider.style.transform = `translateX(${currentTranslate}px)`
+    DOM.slider.style.transform = `translateX(${currentTranslate}px)`
+    
     // 防止页面滚动
     if (Math.abs(diffX) > 10) {
         e.preventDefault()
     }
 }
 
-// 触摸结束事件处理
+/**
+ * 触摸结束事件处理
+ * @param {TouchEvent|MouseEvent} e - 事件对象
+ */
 function touchEnd(e) {
-    // 根据swipeTurn的值决定是否滑动翻页
     if (!isSwiping || !Alpine.store('flip').swipeTurn)
         return
-    // 取消滑动状态
+    
     isSwiping = false
+    const config = getConfig()
     const endTime = new Date().getTime()
     const timeElapsed = endTime - startTime
     touchEndX = e.type === 'touchend' ? e.changedTouches[0].clientX : e.clientX
     const diffX = touchEndX - touchStartX
+    
     // 判断是否应该翻页（基于滑动距离和速度）
-    const isQuickSwipe = timeElapsed < swipeTimeout && Math.abs(diffX) > 50
+    const isQuickSwipe = timeElapsed < config.swipeTimeout && Math.abs(diffX) > 50
+    
     // 用于记录滑动方向
     let direction = null
-    if (diffX < -threshold || (isQuickSwipe && diffX < 0)) {
-        // 向左滑动
+    if (diffX < -config.swipeThreshold || (isQuickSwipe && diffX < 0)) {
         direction = 'left'
-    } else if (diffX > threshold || (isQuickSwipe && diffX > 0)) {
-        // 向右滑动
+    } else if (diffX > config.swipeThreshold || (isQuickSwipe && diffX > 0)) {
         direction = 'right'
     }
-    // 如果在第一页或最后一页尝试向前翻或向后翻，阻止默认滚动
+    
+    // 如果在第一页或最后一页尝试向前翻或向后翻，或没有足够的滑动距离，回到原始位置
     if (shouldBlockScroll(diffX) || direction === null) {
-        // 没有足够的滑动距离或在边界，回到原始位置
         animateReset()
         return
     }
-    // 如果确定了滑动方向，执行滑动动画及后续翻页
+    
+    // 执行滑动动画及后续翻页
     animateSlide(direction)
 }
 
-// 修改 animateSlideOut 为 animateSlide，处理滑动动画和翻页逻辑
+/**
+ * 滑动动画 - 处理滑动动画和翻页逻辑
+ * @param {string} direction - 滑动方向 ('left' 或 'right')
+ */
 function animateSlide(direction) {
+    if (!DOM.slider) return
+    
+    const config = getConfig()
     const width = window.innerWidth
-    // 根据滑动方向确定目标位置
-    let targetPosition = direction === 'left' ? -width : width
-    // 左滑是下一页（移到左侧），右滑是上一页（移到右侧）
+    const targetPosition = direction === 'left' ? -width : width
     const mangaMode = Alpine.store('flip').mangaMode
-    let startTime = null
-    const duration = 300 // 动画持续时间，单位毫秒
-    const startPosition = currentTranslate // 记录动画开始时的位置
-    // 定义动画函数
+    const startPosition = currentTranslate
+    const duration = config.swipeAnimationDuration
+    
+    let animStartTime = null
+    
     function animate(timestamp) {
-        if (!startTime) startTime = timestamp
-        const elapsed = timestamp - startTime
+        if (!animStartTime) animStartTime = timestamp
+        const elapsed = timestamp - animStartTime
         const progress = Math.min(elapsed / duration, 1)
-
-        // 使用缓动函数使动画更平滑
         const easeProgress = easeOutCubic(progress)
+        const position = startPosition + (targetPosition - startPosition) * easeProgress
 
-        // 计算当前位置（从startPosition到targetPosition的过渡）
-        const position =
-            startPosition + (targetPosition - startPosition) * easeProgress
-
-        // 应用变换
-        slider.style.transform = `translateX(${position}px)`
+        DOM.slider.style.transform = `translateX(${position}px)`
 
         if (progress < 1) {
             animationID = requestAnimationFrame(animate)
         } else {
             // 动画完成后执行翻页逻辑
-            // 1. 确定调用哪个翻页函数
-            let flipFunction
-            if (mangaMode) {
-                flipFunction = direction === 'left' ? toPreviousPage : toNextPage
-            } else {
-                flipFunction = direction === 'left' ? toNextPage : toPreviousPage
-            }
-            // 2. 执行翻页 (这会触发页面号码更新和 setImageSrc -> updateSliderImages)
+            const flipFunction = mangaMode
+                ? (direction === 'left' ? toPreviousPage : toNextPage)
+                : (direction === 'left' ? toNextPage : toPreviousPage)
+            
             if (flipFunction) {
-                // updateSliderImages 会负责加载新内容并将 slider transform 重置为 translateX(0)
                 flipFunction()
             } else {
-                // 以防万一没有确定翻页函数，动画重置回去
                 animateReset()
             }
         }
     }
 
-    // 启动动画
     animationID = requestAnimationFrame(animate)
 }
 
-// 动画回到原始位置
+/**
+ * 回弹动画 - 将滑块回到原始位置
+ */
 function animateReset() {
-    let startTime = null
-    const duration = 400 // 动画持续时间，单位毫秒
+    if (!DOM.slider) return
+    
+    const config = getConfig()
     const startPosition = currentTranslate
-
-    // 定义动画函数
+    const duration = config.resetAnimationDuration
+    
+    let animStartTime = null
+    
     function animate(timestamp) {
-        if (!startTime) startTime = timestamp
-        const elapsed = timestamp - startTime
+        if (!animStartTime) animStartTime = timestamp
+        const elapsed = timestamp - animStartTime
         const progress = Math.min(elapsed / duration, 1)
-        // 使用缓动函数使动画更平滑
         const easeProgress = easeOutCubic(progress)
-        // 计算当前位置（从startPosition到0的过渡）
         const position = startPosition * (1 - easeProgress)
-        // 应用变换
-        slider.style.transform = `translateX(${position}px)`
+        
+        DOM.slider.style.transform = `translateX(${position}px)`
+        
         if (progress < 1) {
             animationID = requestAnimationFrame(animate)
         } else {
-            // 动画完成后，确保transform为0并清理状态
-            if (slider) {
-                slider.style.transform = 'translateX(0)'
-            }
-            resetSlider() // 清理状态 (currentTranslate = 0, cancel animation)
+            DOM.slider.style.transform = 'translateX(0)'
+            resetSlider()
         }
     }
 
-    // 启动动画
     animationID = requestAnimationFrame(animate)
 }
 
-// 缓动函数 - 使动画更自然
+/**
+ * 缓动函数 - 使动画更自然
+ * @param {number} x - 进度值 (0-1)
+ * @returns {number} 缓动后的值
+ */
 function easeOutCubic(x) {
     return 1 - Math.pow(1 - x, 3)
 }
 
-// 为滑动容器添加事件监听器
-document.addEventListener('DOMContentLoaded', function () {
+/**
+ * 初始化滑动事件监听器
+ */
+function initSlideListeners() {
+    if (!DOM.sliderContainer) return
+    
     // 触摸事件（移动设备）
-    // 设置初始值
-    sliderContainer.addEventListener('touchstart', touchStart)
-    // 移动中
-    sliderContainer.addEventListener('touchmove', touchMove, {passive: false})
-    // 移动结束
-    sliderContainer.addEventListener('touchend', touchEnd)
+    DOM.sliderContainer.addEventListener('touchstart', touchStart)
+    DOM.sliderContainer.addEventListener('touchmove', touchMove, {passive: false})
+    DOM.sliderContainer.addEventListener('touchend', touchEnd)
+    
     // 鼠标事件（PC）
-    // 设置初始值
-    sliderContainer.addEventListener('mousedown', touchStart)
-    // 移动中
-    sliderContainer.addEventListener('mousemove', touchMove)
-    // 移动结束
-    sliderContainer.addEventListener('mouseup', touchEnd)
-    sliderContainer.addEventListener('mouseleave', touchEnd)
+    DOM.sliderContainer.addEventListener('mousedown', touchStart)
+    DOM.sliderContainer.addEventListener('mousemove', touchMove)
+    DOM.sliderContainer.addEventListener('mouseup', touchEnd)
+    DOM.sliderContainer.addEventListener('mouseleave', touchEnd)
+    
     // 初始化滑动容器中的图片
     const nowPageNum = Alpine.store('global').nowPageNum
     updateSliderImages(nowPageNum)
-})
+}
 
-//翻页函数，加页或减页
+/**
+ * 翻页函数 - 增加或减少页码
+ * @param {number} n - 要增加的页数（负数表示减少）
+ */
 function addPageNum(n = 1) {
-    // 防止n为字符串，转换为数字
-    let nowPageNum = parseInt(Alpine.store('global').nowPageNum)
-    // 无法继续翻
-    if (nowPageNum + n > Alpine.store('global').allPageNum) {
+    const nowPageNum = parseInt(Alpine.store('global').nowPageNum)
+    const allPageNum = Alpine.store('global').allPageNum
+    const targetPage = nowPageNum + n
+    
+    // 检查边界
+    if (targetPage > allPageNum) {
         showToast(i18next.t('hint_last_page'), 'warning')
         return
     }
-    if (nowPageNum + n < 1) {
+    if (targetPage < 1) {
         showToast(i18next.t('hint_first_page'), 'warning')
         return
     }
-    // 翻页
-    Alpine.store('global').nowPageNum = nowPageNum + n
-    // 更新书签
-    if (!!book && !!book.id && Alpine.store('global').isHTTPServer) {
+    
+    // 更新页码
+    Alpine.store('global').nowPageNum = targetPage
+    
+    // 更新书签（仅在线书籍）
+    if (book && book.id && Alpine.store('global').onlineBook) {
         Alpine.store('global').UpdateBookmark({
             type: 'auto',
             bookId: book.id,
-            pageIndex: Alpine.store('global').nowPageNum,
-            label: '自动书签'
-        });
+            pageIndex: targetPage,
+        })
     }
+    
+    // 更新图片
     setImageSrc()
-    // 设置标签页标题
-    setTitle();
-    // 通过ws通道发送翻页数据
-    if (Alpine.store('global').syncPageByWS === true) {
-        sendFlipData() // 发送翻页数据
+    
+    // 更新标签页标题
+    setTitle()
+    
+    // 通过 WebSocket 同步翻页数据
+    if (Alpine.store('global').syncPageByWS) {
+        sendFlipData()
     }
-    // 调用保存页数函数
-    Alpine.store('global').savePageNumToLocalStorage();
+    
+    // 保存页数到本地存储
+    Alpine.store('global').savePageNumToLocalStorage(book.id)
 }
 
-//翻页函数，跳转到指定页
+/**
+ * 从输入框跳转到指定页
+ * @param {Event} event - 输入事件
+ */
 function inputPageNum(event) {
     const i = parseInt(event.target.value)
-    let num = Alpine.store('flip').mangaMode ? (Alpine.store('global').allPageNum - i + 1) : i
-    //console.log(num)
+    const num = Alpine.store('flip').mangaMode 
+        ? (Alpine.store('global').allPageNum - i + 1) 
+        : i
     jumpPageNum(num)
 }
 
-
-//翻页函数，跳转到指定页
+/**
+ * 跳转到指定页
+ * @param {number} jumpNum - 目标页码
+ * @param {boolean} sync - 是否同步到其他设备（默认 true）
+ */
 function jumpPageNum(jumpNum, sync = true) {
-    let num = parseInt(jumpNum)
+    const num = parseInt(jumpNum)
+    const allPageNum = Alpine.store('global').allPageNum
 
-    if (num <= 0 || num > Alpine.store('global').allPageNum) {
+    if (num <= 0 || num > allPageNum) {
         alert(i18next.t('hintPageNumOutOfRange'))
         return
     }
+    
     Alpine.store('global').nowPageNum = num
-    if (Alpine.store('global').isHTTPServer) {
+    
+    if (Alpine.store('global').onlineBook) {
         Alpine.store('global').UpdateBookmark({
             type: 'auto',
             bookId: book.id,
-            pageIndex: Alpine.store('global').nowPageNum,
-            label: '自动书签'
-        });
-        if (sync) {
-            // 通过ws通道发送翻页数据
-            if (Alpine.store('global').syncPageByWS === true) {
-                sendFlipData() // 发送翻页数据
-            }
+            pageIndex: num,
+        })
+        
+        if (sync && Alpine.store('global').syncPageByWS) {
+            sendFlipData()
         }
     }
-    // 调用保存页数函数
-    Alpine.store('global').savePageNumToLocalStorage();
+    
+    Alpine.store('global').savePageNumToLocalStorage(book.id)
     setImageSrc()
 }
 
@@ -658,8 +793,8 @@ function getInSetArea(e) {
 // 翻页模式功能：显示工具栏时，点击设置区域，自动漫画区域居中。
 function scrollToMangaMain() {
     if (!Alpine.store('flip').autoHideToolbar) {
-        // 将 manga_area 顶部对齐到浏览器可见区域顶部
-        const mangaMain = document.getElementById('manga_area')
+        // 将 slider_container 顶部对齐到浏览器可见区域顶部
+        const mangaMain = document.getElementById('slider_container')
         mangaMain.scrollIntoView({
             behavior: 'smooth', // 平滑滚动
             block: 'start', // 与可视区顶部对齐
@@ -785,21 +920,30 @@ function onMouseMove(e) {
     }
 }
 
-// 获取两个元素的边界信息
+/**
+ * 获取元素的边界信息
+ * @returns {Object} 各元素的边界矩形
+ */
 function getElementsRect() {
     return {
-        rect1_header: header.getBoundingClientRect(),
-        rect2_range: range.getBoundingClientRect(),
-        rect3_sort_dropdown: document
-            .getElementById('ReSortDropdownMenu')
-            .getBoundingClientRect(),
-        rect4_dropdown_quick_jump: document
-            .getElementById('QuickJumpDropdown')
-            .getBoundingClientRect(),
-        rect5_steps_range_area: document
-            .getElementById('StepsRangeArea')
-            .getBoundingClientRect(),
+        rect1_header: DOM.header ? DOM.header.getBoundingClientRect() : null,
+        rect2_range: DOM.range ? DOM.range.getBoundingClientRect() : null,
+        rect3_sort_dropdown: DOM.reSortDropdownMenu ? DOM.reSortDropdownMenu.getBoundingClientRect() : null,
+        rect4_dropdown_quick_jump: DOM.quickJumpDropdown ? DOM.quickJumpDropdown.getBoundingClientRect() : null,
+        rect5_steps_range_area: DOM.range ? DOM.range.getBoundingClientRect() : null,
     }
+}
+
+/**
+ * 检查矩形区域是否包含坐标点
+ * @param {DOMRect|null} rect - 矩形区域
+ * @param {number} x - X 坐标
+ * @param {number} y - Y 坐标
+ * @returns {boolean} 是否在区域内
+ */
+function isPointInRect(rect, x, y) {
+    if (!rect) return false
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
 }
 
 document.addEventListener('mousemove', function (event) {
@@ -814,58 +958,30 @@ document.addEventListener('mousemove', function (event) {
     const y = event.clientY
     let inInElement1 = false
     let inInElement2 = false
-    // 因为header需要收起来，所以不能用left、right、top、bottom判断y是否在header的范围内
-    // 现在设定为固定的80px高度，这样会比较自然
+    
+    // 因为 header 需要收起来，所以不能用 left、right、top、bottom 判断 y 是否在 header 的范围内
+    // 现在设定为固定的 80px 高度，这样会比较自然
     if (Alpine.store('flip').autoHideToolbar) {
-        // 判断鼠标是否在元素 1 范围内(Header)。。
         inInElement1 = (y <= 80)
-        // 判断鼠标是否在元素 2 范围内(导航条)。因为header可能隐藏，所以不能直接用left、right、top、bottom判断y是否在header的范围内。
         inInElement2 = (y >= window.innerHeight - 80)
-    }
-    // 如果工具栏不自动隐藏，用left、right、top、bottom判断y是否在header的范围内
-    if (!Alpine.store('flip').autoHideToolbar) {
-        // 判断鼠标是否在元素 1 范围内(Header)
-        inInElement1 =
-            x >= rect1_header.left &&
-            x <= rect1_header.right &&
-            y >= rect1_header.top &&
-            y <= rect1_header.bottom
-        // 判断鼠标是否在元素 2 范围内(导航条)
-        inInElement2 =
-            x >= rect2_range.left &&
-            x <= rect2_range.right &&
-            y >= rect2_range.top &&
-            y <= rect2_range.bottom
+    } else {
+        // 如果工具栏不自动隐藏，用边界判断
+        inInElement1 = isPointInRect(rect1_header, x, y)
+        inInElement2 = isPointInRect(rect2_range, x, y)
     }
 
-    // 判断鼠标是否在元素 3 范围内(页面重新排序的下拉菜单。在菜单上面的时候，导航条需要保持显示状态。)
-    const inInElement3 =
-        x >= rect3_sort_dropdown.left &&
-        x <= rect3_sort_dropdown.right &&
-        y >= rect3_sort_dropdown.top &&
-        y <= rect3_sort_dropdown.bottom
-    // 判断鼠标是否在元素 4 范围内(快速跳转的下拉菜单。在菜单上面的时候，导航条需要保持显示状态。)
-    const inInElement4 =
-        x >= rect4_dropdown_quick_jump.left &&
-        x <= rect4_dropdown_quick_jump.right &&
-        y >= rect4_dropdown_quick_jump.top &&
-        y <= rect4_dropdown_quick_jump.bottom
-
-    // 判断鼠标是否在元素 5 范围内(翻页条)
-    const inInElement5 =
-        x >= rect5_steps_range_area.left &&
-        x <= rect5_steps_range_area.right &&
-        y >= rect5_steps_range_area.top &&
-        y <= rect5_steps_range_area.bottom
+    // 判断鼠标是否在各个下拉菜单范围内
+    const inInElement3 = isPointInRect(rect3_sort_dropdown, x, y)
+    const inInElement4 = isPointInRect(rect4_dropdown_quick_jump, x, y)
+    const inInElement5 = isPointInRect(rect5_steps_range_area, x, y)
 
     // 鼠标在设置区域
-    let inSetArea = getInSetArea(event)
-    // 鼠标不在设置区域 + 不在任何一个元素范围内
+    const inSetArea = getInSetArea(event)
+    
+    // 如果鼠标在任何感兴趣的区域，显示工具栏
     if (inSetArea || inInElement1 || inInElement2 || inInElement3 || inInElement4 || inInElement5) {
         showToolbar()
     } else {
-        // '鼠标不在设置区域 + 不在任何一个元素范围内'
-        //console.log(`inSetArea:${inSetArea}`)
         hideToolbar()
     }
 })
@@ -897,132 +1013,190 @@ function onMouseLeave(e) {
     e.currentTarget.style.cursor = ''
 }
 
-//获取ID为 mouseMoveArea 的元素
-let mouseMoveArea = document.getElementById('mouseMoveArea')
-// 鼠标移动时触发移动事件
-mouseMoveArea.addEventListener('mousemove', onMouseMove)
-//点击的时候触发点击事件
-mouseMoveArea.addEventListener('click', onMouseClick)
-// 触摸开始时触发点击事件
-mouseMoveArea.addEventListener('touchstart', onMouseClick)
-//离开的时候触发离开事件
-mouseMoveArea.addEventListener('mouseleave', onMouseLeave)
-
-// Websocket 连接和消息处理
-// https://www.ruanyifeng.com/blog/2017/05/websocket.html
-// https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket
-
-// 定义WebSocket变量和重连参数
-let socket = null // 初始化为 null
-let reconnectAttempts = 0
-const maxReconnectAttempts = 200
-const reconnectInterval = 3000 // 每次重连间隔3秒
-
-
-// 翻页数据，假设已在其他地方定义
-const flip_data = {
-    book_id: book.id,
-    now_page_num: Alpine.store('global').nowPageNum,
-    need_double_page_mode: false,
+/**
+ * 初始化 FlipMainArea 事件监听器
+ */
+function initFlipMainAreaListeners() {
+    if (!DOM.flipMainArea) return
+    
+    // 鼠标移动时触发移动事件
+    DOM.flipMainArea.addEventListener('mousemove', onMouseMove)
+    // 点击的时候触发点击事件
+    DOM.flipMainArea.addEventListener('click', onMouseClick)
+    // 触摸开始时触发点击事件
+    DOM.flipMainArea.addEventListener('touchstart', onMouseClick)
+    // 离开的时候触发离开事件
+    DOM.flipMainArea.addEventListener('mouseleave', onMouseLeave)
+    
+    // 绑定滚轮事件（使用 passive: false 以允许阻止默认滚动行为）
+    DOM.flipMainArea.addEventListener('wheel', onWheel, {passive: false})
 }
 
-// 建立WebSocket连接的函数
-function connectWebSocket() {
-    // 根据当前协议选择ws或wss
-    // 检查是否已存在连接或正在连接
-    if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
-        console.log("WebSocket 正在连接或已打开，跳过。");
-        return;
-    }
+// ============ WebSocket 管理对象 ============
+/**
+ * WebSocket 状态管理对象
+ * 参考: https://www.ruanyifeng.com/blog/2017/05/websocket.html
+ */
+const wsManager = {
+    socket: null,
+    reconnectAttempts: 0,
+    reconnectTimer: null,
+    isIntentionallyClosed: false,
 
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
-    const wsUrl = wsProtocol + window.location.host + '/api/ws'
-    socket = new WebSocket(wsUrl)
-
-    // 连接打开时的回调
-    socket.onopen = function () {
-        console.log('WebSocket连接已建立')
-        reconnectAttempts = 0 // 重置重连次数
-    }
-    // 收到消息时的回调
-    socket.onmessage = function (event) {
-        const message = JSON.parse(event.data)
-        handleMessage(message) // 调用处理函数
-    }
-    // 连接关闭时的回调
-    socket.onclose = function () {
-        console.log('WebSocket连接已关闭')
-        attemptReconnect() // 尝试重连
-    }
-    // 发生错误时的回调
-    socket.onerror = function (error) {
-        console.log('WebSocket发生错误：', error)
-        socket.close() // 关闭连接以触发重连
-    }
-}
-
-// 处理收到的翻页消息
-function handleMessage(message) {
-    // console.log("收到消息：", message);
-    // console.log("Local Tab：" + tabID);
-    // console.log("message_sender_id：" + message.user_id);// 用message_sender_id或许比较好区分？
-    // 根据消息类型进行处理
-    if (message.type === 'flip_mode_sync_page' && message.tab_id !== tabID) {
-        // 解析翻页数据
-        const data = JSON.parse(message.data_string)
-        if (Alpine.store('global').syncPageByWS && data.book_id === book.id) {
-            //console.log("同步页数：", data);
-            // 更新页面(跳转到指定页，但是不发送翻页消息，因为这样会引起是循环)
-            jumpPageNum(data.now_page_num, false)
+    /**
+     * 建立 WebSocket 连接
+     */
+    connect() {
+        // 检查是否已存在连接
+        if (this.socket && (this.socket.readyState === WebSocket.CONNECTING || this.socket.readyState === WebSocket.OPEN)) {
+            if (Alpine.store('global').debugMode) {
+                console.log("WebSocket 正在连接或已打开，跳过")
+            }
+            return
         }
-    } else if (message.type === 'heartbeat') {
-        console.log('收到心跳消息')
-    } else {
-        //console.log("不处理此消息"+message);
-    }
+
+        const config = getConfig()
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
+        const wsUrl = wsProtocol + window.location.host + '/api/ws'
+        
+        try {
+            this.socket = new WebSocket(wsUrl)
+            this.socket.onopen = () => this.handleOpen()
+            this.socket.onmessage = (event) => this.handleMessage(event)
+            this.socket.onclose = () => this.handleClose()
+            this.socket.onerror = (error) => this.handleError(error)
+        } catch (error) {
+            console.error('WebSocket 连接失败:', error)
+            this.scheduleReconnect()
+        }
+    },
+
+    /**
+     * 连接打开处理
+     */
+    handleOpen() {
+        console.log('WebSocket连接已建立')
+        this.reconnectAttempts = 0
+        this.isIntentionallyClosed = false
+    },
+
+    /**
+     * 处理收到的消息
+     * @param {MessageEvent} event - 消息事件
+     */
+    handleMessage(event) {
+        try {
+            const message = JSON.parse(event.data)
+            
+            if (message.type === 'flip_mode_sync_page' && message.tab_id !== tabID) {
+                const data = JSON.parse(message.data_string)
+                if (Alpine.store('global').syncPageByWS && data.book_id === book.id) {
+                    jumpPageNum(data.now_page_num, false)
+                }
+            } else if (message.type === 'heartbeat') {
+                if (Alpine.store('global').debugMode) {
+                    console.log('收到心跳消息')
+                }
+            }
+        } catch (error) {
+            console.error('WebSocket 消息解析失败:', error)
+        }
+    },
+
+    /**
+     * 连接关闭处理
+     */
+    handleClose() {
+        console.log('WebSocket连接已关闭')
+        if (!this.isIntentionallyClosed) {
+            this.scheduleReconnect()
+        }
+    },
+
+    /**
+     * 错误处理
+     * @param {Event} error - 错误事件
+     */
+    handleError(error) {
+        console.error('WebSocket发生错误：', error)
+        if (this.socket) {
+            this.socket.close()
+        }
+    },
+
+    /**
+     * 安排重连
+     */
+    scheduleReconnect() {
+        const config = getConfig()
+        
+        if (this.reconnectAttempts >= config.maxReconnectAttempts) {
+            console.log('已达到最大重连次数，停止重连')
+            return
+        }
+
+        this.reconnectAttempts++
+        if (Alpine.store('global').debugMode) {
+            console.log(`第 ${this.reconnectAttempts} 次重连...`)
+        }
+        
+        this.reconnectTimer = setTimeout(() => {
+            this.connect()
+        }, config.reconnectInterval)
+    },
+
+    /**
+     * 发送翻页数据
+     */
+    sendFlipData() {
+        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+            if (Alpine.store('global').debugMode) {
+                console.log('WebSocket 未连接或未准备好，无法发送消息')
+            }
+            return
+        }
+
+        const flipData = {
+            book_id: book.id,
+            now_page_num: Alpine.store('global').nowPageNum,
+        }
+
+        const flipMsg = {
+            type: 'flip_mode_sync_page',
+            status_code: 200,
+            tab_id: tabID,
+            token: token,
+            detail: '翻页模式，发送数据',
+            data_string: JSON.stringify(flipData),
+        }
+
+        try {
+            this.socket.send(JSON.stringify(flipMsg))
+        } catch (error) {
+            console.error('WebSocket 发送消息失败:', error)
+        }
+    },
+
+    /**
+     * 主动断开连接
+     */
+    disconnect() {
+        this.isIntentionallyClosed = true
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer)
+            this.reconnectTimer = null
+        }
+        if (this.socket) {
+            this.socket.close()
+            this.socket = null
+        }
+    },
 }
 
-// 发送翻页数据到服务器
+// 为了兼容旧代码，保留 sendFlipData 函数
 function sendFlipData() {
-    const flip_data = {
-        book_id: book.id,
-        now_page_num: Alpine.store('global').nowPageNum,
-    }
-    const flipMsg = {
-        type: 'flip_mode_sync_page', // 或 "heartbeat"
-        status_code: 200,
-        tab_id: tabID,
-        token: token,
-        detail: '翻页模式，发送数据',
-        data_string: JSON.stringify(flip_data),
-    }
-    // 确保 socket 已初始化并且处于 OPEN 状态
-    if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(flipMsg))
-    } else {
-        console.log('WebSocket 未连接或未准备好，无法发送消息。 State:', socket ? socket.readyState : 'null');
-    }
+    wsManager.sendFlipData()
 }
-
-// 尝试重连函数
-function attemptReconnect() {
-    if (reconnectAttempts < maxReconnectAttempts) {
-        reconnectAttempts++
-        console.log(`第 ${reconnectAttempts} 次重连...`)
-        setTimeout(() => {
-            connectWebSocket()
-        }, reconnectInterval)
-    } else {
-        console.log('已达到最大重连次数，停止重连')
-    }
-}
-
-// 页面加载完成后建立WebSocket连接
-document.addEventListener('DOMContentLoaded', () => {
-    if (Alpine.store('global').isHTTPServer) {
-        connectWebSocket()
-    }
-})
 
 // 设置标签页标题
 function setTitle(name) {
@@ -1217,3 +1391,74 @@ addEventListener("keyup", e => handle(e, false));
 // 	delete gamepads[e.gamepad.index];
 // 	console.log("已断开:", e.gamepad.id);
 // });
+
+// ============ 鼠标滚轮翻页功能 ============
+let wheelThrottleTimer = null
+
+/**
+ * 滚轮事件处理函数
+ * @param {WheelEvent} e - 滚轮事件对象
+ */
+function onWheel(e) {
+    if (!Alpine.store('flip').wheelFlip) return
+    
+    // 如果正在滑动翻页，则不处理滚轮事件
+    if (isSwiping || Math.abs(currentTranslate) > 10) return
+    
+    const deltaY = e.deltaY
+    const config = getConfig()
+    
+    // 如果滚轮有有效移动，阻止默认滚动行为
+    if (deltaY !== 0) {
+        e.preventDefault()
+    }
+    
+    // 节流处理：如果上次触发还在节流时间内，则忽略本次事件
+    if (wheelThrottleTimer !== null) return
+    
+    // 设置节流定时器
+    wheelThrottleTimer = setTimeout(() => {
+        wheelThrottleTimer = null
+    }, config.wheelThrottleDelay)
+    
+    // 向下滚动 → 下一页，向上滚动 → 上一页
+    if (deltaY > 0) {
+        toNextPage()
+    } else if (deltaY < 0) {
+        toPreviousPage()
+    }
+}
+
+// ============ 主初始化函数 ============
+/**
+ * 主初始化函数 - 在 DOM 加载完成后调用
+ */
+function initFlipMode() {
+    try {
+        // 1. 初始化 DOM 缓存
+        initDOMCache()
+        
+        // 2. 初始化工具栏事件监听器
+        initToolbarListeners()
+        
+        // 3. 初始化滑动事件监听器
+        initSlideListeners()
+        
+        // 4. 初始化 FlipMainArea 事件监听器
+        initFlipMainAreaListeners()
+        
+        // 5. 如果是在线书籍，连接 WebSocket
+        if (Alpine.store('global').onlineBook) {
+            wsManager.connect()
+        }
+        
+        if (Alpine.store('global').debugMode) {
+            console.log('翻页模式初始化完成')
+        }
+    } catch (error) {
+        console.error('翻页模式初始化失败:', error)
+    }
+}
+
+// DOM 加载完成后初始化
+document.addEventListener('DOMContentLoaded', initFlipMode)

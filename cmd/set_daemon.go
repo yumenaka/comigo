@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	"github.com/sevlyar/go-daemon"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -55,11 +56,11 @@ func SetDaemon() {
 	} else {
 		// 子进程运行到这里，child等于nil
 		logger.Info("- - - - - - - - - - - - - - -")
-		logger.Info("child daemon started?")
+		logger.Info(locale.GetString("log_child_daemon_started"))
 	}
 	// 释放PID文件
 	defer cntxt.Release()
 	// 这里是子进程运行的代码
 	logger.Info("- - - - - - - - - - - - - - -")
-	logger.Info("daemon started")
+	logger.Info(locale.GetString("log_daemon_started"))
 }

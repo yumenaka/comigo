@@ -2,9 +2,11 @@ package tools
 
 import (
 	"net"
+	"regexp"
 	"strconv"
 	"time"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -14,7 +16,7 @@ func WaitUntilServerReady(host string, port uint16, timeout time.Duration) {
 	addr := host + ":" + strconv.Itoa(int(port))
 	for {
 		if time.Now().After(deadline) {
-			logger.Infof("Server not ready within %v, continue anyway", timeout)
+			logger.Infof(locale.GetString("log_server_not_ready_within_timeout"), timeout)
 			return
 		}
 		conn, err := net.DialTimeout("tcp", addr, 1*time.Second)
@@ -24,4 +26,13 @@ func WaitUntilServerReady(host string, port uint16, timeout time.Duration) {
 		}
 		time.Sleep(300 * time.Millisecond)
 	}
+}
+
+var domainRegex = regexp.MustCompile(`^(?i)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$`)
+
+func IsValidDomain(host string) bool {
+	if len(host) == 0 || len(host) > 253 {
+		return false
+	}
+	return domainRegex.MatchString(host)
 }

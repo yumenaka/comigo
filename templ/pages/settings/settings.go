@@ -3,14 +3,15 @@ package settings
 import (
 	"encoding/json"
 	"net/http"
+	"path/filepath"
 	"reflect"
-	"strconv"
 	"time"
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/config_api"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/tools"
@@ -25,6 +26,34 @@ func getTranslations(value string) string {
 // getTranslationsGO 返回 Go 语言的翻译字符串  not working
 func getTranslationsGO(value string, lang string) string {
 	return locale.GetStringByLocal(value, lang)
+}
+
+// GetStoreBookCounts 获取每个书库的书籍数量
+// 返回 map[storeUrl]bookCount
+func GetStoreBookCounts() map[string]int {
+	counts := make(map[string]int)
+
+	// 获取所有书籍
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
+		return counts
+	}
+
+	// 统计每个书库的书籍数量
+	for _, book := range allBooks {
+		// 只统计非书籍组的实际书籍
+		if book.Type != model.TypeBooksGroup {
+			// 将书库路径转换为绝对路径以便匹配
+			storePathAbs, err := filepath.Abs(book.StoreUrl)
+			if err != nil {
+				storePathAbs = book.StoreUrl
+			}
+			counts[storePathAbs]++
+		}
+	}
+
+	return counts
 }
 
 // PageHandler 设定页面
@@ -42,7 +71,6 @@ func PageHandler(c echo.Context) error {
 	// 渲染页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 		// 渲染失败，返回 HTTP 500 错误。
-		//fmt.Printf("Error rendering settings page: %v\n", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	return nil
@@ -66,9 +94,9 @@ func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	// 记录需要执行的操作
 	actionString, err := json.Marshal(action)
 	if err != nil {
-		logger.Infof("Server action: %v,", action)
+		logger.Infof(locale.GetString("log_server_action")+",", action)
 	} else {
-		logger.Infof("Server action: %s", string(actionString))
+		logger.Infof(locale.GetString("log_server_action_string"), string(actionString))
 	}
 	// 重启网页服务器等，此处不能导入routers，因为会循环引用
 	if action.ReStartWebServer {
@@ -89,19 +117,19 @@ func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
 	if action.ReScanStores {
 		config_api.StartReScan()
 	}
+	// 处理自动扫描间隔的变化
+	if action.UpdateAutoRescan {
+		config.StartOrStopAutoRescan()
+	}
 	// 提示没有变化
-	if newConfig.Debug && !action.ReScanStores && !action.ReStartWebServer {
-		logger.Info("No changes in cfg, skipped rescan dir\n")
+	if newConfig.Debug && !action.ReScanStores && !action.ReStartWebServer && !action.UpdateAutoRescan {
+		logger.Info(locale.GetString("log_no_changes_skipped_rescan"))
 	}
 }
 
 func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
 	if !oldConfig.OpenBrowser && newConfig.OpenBrowser {
-		protocol := "http://"
-		if newConfig.EnableTLS {
-			protocol = "https://"
-		}
-		go tools.OpenBrowser(protocol + "localhost:" + strconv.Itoa(int(newConfig.Port)))
+		go tools.OpenBrowser(newConfig.EnableTLS, "127.0.0.1", newConfig.Port)
 	}
 }
 
@@ -111,6 +139,7 @@ type ConfigChangeAction struct {
 	StartTailscale   bool
 	StopTailscale    bool
 	ReStartTailscale bool
+	UpdateAutoRescan bool
 }
 
 // checkServerActions 检查旧的和新的配置是否需要更新，并返回需要重启网页服务器、重新扫描整个书库、重新扫描所有文件的布尔值
@@ -173,7 +202,7 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (act
 		if action.ReStartTailscale == true {
 			action.StartTailscale = false
 			action.StopTailscale = false
-			logger.Info("Tailscale config changed, will restart Tailscale server")
+			logger.Info(locale.GetString("log_tailscale_config_changed_restart"))
 		}
 	}
 	// 什么情况下需要启动或停止Tailscale服务器
@@ -181,13 +210,17 @@ func checkServerActions(oldConfig *config.Config, newConfig *config.Config) (act
 		action.StartTailscale = true
 		action.StopTailscale = false
 		action.ReStartTailscale = false
-		logger.Info("Tailscale enabled, will start Tailscale server")
+		logger.Info(locale.GetString("log_tailscale_enabled_start"))
 	}
 	if oldConfig.EnableTailscale != newConfig.EnableTailscale && newConfig.EnableTailscale == false {
 		action.StartTailscale = false
 		action.StopTailscale = true
 		action.ReStartTailscale = false
-		logger.Info("Tailscale disabled, will stop Tailscale server")
+		logger.Info(locale.GetString("log_tailscale_disabled_stop"))
+	}
+	// 自动扫描间隔变化时，需要更新定时扫描
+	if oldConfig.AutoRescanIntervalMinutes != newConfig.AutoRescanIntervalMinutes {
+		action.UpdateAutoRescan = true
 	}
 
 	return action

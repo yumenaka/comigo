@@ -29,7 +29,7 @@ func handleZipAndEpubFiles(filePath string, newBook *model.Book) error {
 		var pathError *fs.PathError
 		if errors.As(err, &pathError) {
 			if cfg.GetDebug() {
-				logger.Infof("NonUTF-8 ZIP: %s, Error: %s", filePath, err.Error())
+				logger.Infof(locale.GetString("log_nonutf8_zip_error"), filePath, err.Error())
 			}
 			err = scanNonUTF8ZipFile(filePath, newBook)
 		} else {
@@ -42,7 +42,7 @@ func handleZipAndEpubFiles(filePath string, newBook *model.Book) error {
 		if err == nil {
 			newBook.SortPagesByImageList(imageList)
 		} else {
-			logger.Infof("Failed to get image list from EPUB: %s, error: %v", newBook.BookPath, err)
+			logger.Infof(locale.GetString("log_failed_to_get_image_list_from_epub"), newBook.BookPath, err)
 		}
 
 		metaData, err := file.GetEpubMetadata(newBook.BookPath)
@@ -50,7 +50,7 @@ func handleZipAndEpubFiles(filePath string, newBook *model.Book) error {
 			newBook.Author = metaData.Creator
 			newBook.Press = metaData.Publisher
 		} else {
-			logger.Infof("Failed to get metadata from EPUB: %s, error: %v", newBook.BookPath, err)
+			logger.Infof(locale.GetString("log_failed_to_get_metadata_from_epub"), newBook.BookPath, err)
 		}
 	}
 	return nil
@@ -68,18 +68,18 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book) error {
 	pageNum := 1
 	err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			logger.Infof("Failed to access path %s in archive: %v", path, err)
+			logger.Infof(locale.GetString("log_failed_to_access_path_in_archive"), path, err)
 			return err
 		}
 
 		if IsSkipDir(path) {
-			logger.Infof("Skip Scan: %s", path)
+			logger.Infof(locale.GetString("log_skip_scan_path"), path)
 			return fs.SkipDir
 		}
 
 		f, err := d.Info()
 		if err != nil {
-			logger.Infof("Failed to get file info in archive: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_get_file_info_in_archive"), err)
 			return fs.SkipDir
 		}
 
@@ -87,14 +87,14 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book) error {
 			archivedFile, ok := f.(archives.FileInfo)
 			var tempURL string
 			if ok {
-				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(archivedFile.NameInArchive)
+				tempURL = "/api/get-file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(archivedFile.NameInArchive)
 				newBook.PageInfos = append(newBook.PageInfos, model.PageInfo{
 					Name:    archivedFile.NameInArchive,
 					Url:     tempURL,
 					PageNum: pageNum,
 				})
 			} else {
-				tempURL = "/api/get_file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
+				tempURL = "/api/get-file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(path)
 				newBook.PageInfos = append(newBook.PageInfos, model.PageInfo{
 					Url:     tempURL,
 					PageNum: pageNum,
@@ -122,7 +122,7 @@ func scanNonUTF8ZipFile(filePath string, b *model.Book) error {
 		if IsSupportMedia(f.Name) {
 			// 如果是压缩文件
 			// 替换特殊字符的时候，额外将“+替换成"%2b"，因为gin会将+解析为空格。
-			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
+			TempURL := "/api/get-file?id=" + b.BookID + "&filename=" + url.QueryEscape(f.Name)
 			b.PageInfos = append(b.PageInfos, model.PageInfo{Path: "", Size: f.FileInfo().Size(), ModTime: f.FileInfo().ModTime(), Name: f.Name, Url: TempURL, PageNum: pageNum})
 			pageNum++
 		} else {
@@ -163,7 +163,7 @@ func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *model.Book) error {
 			err = walkUTF8ZipFs(fsys, joinPath, base, b)
 		} else if IsSupportMedia(name) {
 			inArchiveName := path.Join(parent, f.Name())
-			TempURL := "/api/get_file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
+			TempURL := "/api/get-file?id=" + b.BookID + "&filename=" + url.QueryEscape(inArchiveName)
 			// 替换特殊字符的时候,不要用url.PathEscape()，PathEscape不会把“+“替换成"%2b"，会导致BUG，让gin会将+解析为空格。
 			b.PageInfos = append(b.PageInfos, model.PageInfo{Path: "", Size: f.Size(), ModTime: f.ModTime(), Name: inArchiveName, Url: TempURL, PageNum: pageNum})
 			pageNum++

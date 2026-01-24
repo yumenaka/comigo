@@ -17,18 +17,30 @@ func InitAllStore(cfg ConfigInterface) error {
 			continue
 		}
 	}
+	model.GenerateBookGroup()
 	return nil
 }
 
 // AddBooksToStore 添加一组书到书库
 func AddBooksToStore(books []*model.Book) {
 	for _, book := range books {
-		if len(book.PageInfos) < config.GetCfg().MinImageNum {
-			continue
+		// 压缩包类型的书籍，页数小于最小图片数，跳过添加
+		if book.Type == model.TypeZip || book.Type == model.TypeRar ||
+			book.Type == model.TypeCbz || book.Type == model.TypeCbr ||
+			book.Type == model.TypeTar || book.Type == model.TypeEpub {
+			if len(book.PageInfos) < config.GetCfg().MinImageNum {
+				continue
+			}
+		}
+		// 目录类型的书籍，页数小于最小图片数(或1)，跳过添加
+		if book.Type == model.TypeDir {
+			if len(book.PageInfos) < config.GetCfg().MinImageNum || len(book.PageInfos) == 0 {
+				continue
+			}
 		}
 		book.PageCount = len(book.PageInfos)
 		if err := model.IStore.StoreBook(book); err != nil {
-			logger.Infof("AddBook_error"+" bookID:%s %s", book.BookID, err)
+			logger.Infof(locale.GetString("log_add_book_error"), book.BookID, err)
 		}
 	}
 }

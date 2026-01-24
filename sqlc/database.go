@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -38,7 +39,7 @@ func (db *StoreDatabase) StoreBook(book *model.Book) error {
 		if err != nil {
 			return fmt.Errorf("create book error: %v", err)
 		}
-		logger.Infof("Created new book: %s", book.BookID)
+		logger.Infof(locale.GetString("log_created_new_book"), book.BookID)
 	} else {
 		// 书籍已存在，更新记录
 		updateParams := ToSQLCUpdateBookParams(book)
@@ -46,7 +47,7 @@ func (db *StoreDatabase) StoreBook(book *model.Book) error {
 		if err != nil {
 			return fmt.Errorf("update book error: %v", err)
 		}
-		logger.Infof("Updated existing book: %s %s", book.BookID, book.BookPath)
+		logger.Infof(locale.GetString("log_updated_existing_book"), book.BookID, book.BookPath)
 	}
 	// 保存书籍的页面信息（媒体文件）
 	if len(book.PageInfos) > 0 {
@@ -65,7 +66,7 @@ func (db *StoreDatabase) StoreBookMark(mark *model.BookMark) error {
 	// 获取书籍
 	b, err := db.GetBook(mark.BookID)
 	if err != nil {
-		return errors.New("StoreBookMark：cannot find book, id=" + mark.BookID)
+		return fmt.Errorf(locale.GetString("err_storebookmark_cannot_find"), mark.BookID)
 	}
 	switch mark.Type {
 	case model.UserMark:
@@ -96,7 +97,7 @@ func (db *StoreDatabase) StoreBookMark(mark *model.BookMark) error {
 		}
 	default:
 		// 目前没有其他类型书签
-		return errors.New("StoreBookMark：unknown bookmark type")
+		return errors.New(locale.GetString("err_storebookmark_unknown_type"))
 	}
 	err = db.StoreBook(b)
 	if err != nil {
@@ -109,9 +110,35 @@ func (db *StoreDatabase) GetBookMarks(bookID string) (*model.BookMarks, error) {
 	// 获取书籍
 	b, err := db.GetBook(bookID)
 	if err != nil {
-		return nil, errors.New("GetBookMark：cannot find book, id=" + bookID)
+		return nil, fmt.Errorf(locale.GetString("err_getbookmark_cannot_find"), bookID)
 	}
 	return &b.BookMarks, nil
+}
+
+// DeleteBookMark 删除指定书籍的特定书签
+// 根据 bookID + markType + pageIndex 唯一确定一个书签
+func (db *StoreDatabase) DeleteBookMark(bookID string, markType model.MarkType, pageIndex int) error {
+	// 获取书籍
+	b, err := db.GetBook(bookID)
+	if err != nil {
+		return fmt.Errorf(locale.GetString("err_getbookmark_cannot_find"), bookID)
+	}
+	// 查找并删除匹配的书签
+	found := false
+	newBookMarks := make(model.BookMarks, 0, len(b.BookMarks))
+	for _, mark := range b.BookMarks {
+		if mark.Type == markType && mark.PageIndex == pageIndex {
+			found = true
+			continue // 跳过要删除的书签
+		}
+		newBookMarks = append(newBookMarks, mark)
+	}
+	if !found {
+		return fmt.Errorf("bookmark not found: bookID=%s, type=%s, pageIndex=%d", bookID, markType, pageIndex)
+	}
+	b.BookMarks = newBookMarks
+	// 持久化更新
+	return db.StoreBook(b)
 }
 
 // SaveBookPageInfos  保存书籍的媒体文件信息
@@ -132,7 +159,7 @@ func (db *StoreDatabase) SaveBookPageInfos(ctx context.Context, bookID string, p
 		}
 	}
 	if config.GetCfg().Debug {
-		logger.Infof("Saved %d media files for book %s", len(pageInfos), bookID)
+		logger.Infof(locale.GetString("log_saved_media_files_for_book"), len(pageInfos), bookID)
 	}
 	return nil
 }
@@ -149,7 +176,7 @@ func (db *StoreDatabase) SaveBookBookmarks(ctx context.Context, bookID string, b
 		}
 	}
 	if config.GetCfg().Debug {
-		logger.Infof("Saved %d bookmarks for book %s", len(bookmarks), bookID)
+		logger.Infof(locale.GetString("log_saved_bookmarks_for_book"), len(bookmarks), bookID)
 	}
 	return nil
 }
@@ -176,14 +203,14 @@ func (db *StoreDatabase) ListBooks() (list []*model.Book, err error) {
 		}
 		sqlcPageInfos, err := db.queries.GetPageInfosByBookID(ctx, sqlcBook.BookID)
 		if err != nil {
-			logger.Infof("Get media files for book %s error: %s", sqlcBook.BookID, err.Error())
+			logger.Infof(locale.GetString("log_get_media_files_for_book_error"), sqlcBook.BookID, err.Error())
 			pagesMap[sqlcBook.BookID] = []model.PageInfo{}
 		} else {
 			pagesMap[sqlcBook.BookID] = FromSQLCPageInfos(sqlcPageInfos)
 		}
 		sqlcBookmarks, err := db.queries.ListBookmarksByBookID(ctx, sqlcBook.BookID)
 		if err != nil {
-			logger.Infof("Get bookmarks for book %s error: %s", sqlcBook.BookID, err.Error())
+			logger.Infof(locale.GetString("log_get_bookmarks_for_book_error"), sqlcBook.BookID, err.Error())
 			bookmarksMap[sqlcBook.BookID] = nil
 		} else {
 			bookmarksMap[sqlcBook.BookID] = FromSQLCBookmarks(sqlcBookmarks)
@@ -221,7 +248,7 @@ func (db *StoreDatabase) GetBook(bookID string) (*model.Book, error) {
 	if err == nil {
 		book.BookMarks = FromSQLCBookmarks(bookmarksSQL)
 	} else if config.GetCfg().Debug {
-		logger.Infof("Get bookmarks for book %s error: %s", sqlcBook.BookID, err.Error())
+		logger.Infof(locale.GetString("log_get_bookmarks_for_book_error"), sqlcBook.BookID, err.Error())
 	}
 	return book, nil
 }
@@ -284,7 +311,7 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 				tempBook, err := model.NewBook(filepath.Dir(sameParentBookList[0].BookPath), modTime, 0, storeUrl, depth-1, model.TypeBooksGroup)
 				if err != nil {
 					if config.GetCfg().Debug {
-						logger.Infof("Error creating new book group: %s", err)
+						logger.Infof(locale.GetString("log_error_creating_new_book_group"), err)
 					}
 					continue
 				}

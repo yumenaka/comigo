@@ -19,7 +19,7 @@ func SetHttpPort() {
 		// 获取一个空闲的系统端口号
 		port, err := tools.GetFreePort()
 		if err != nil {
-			logger.Infof("Failed to get a free port: %v", err)
+			logger.Infof(locale.GetString("log_failed_to_get_free_port"), err)
 			// 如果无法获取空闲端口，则随机选择一个端口
 			rand.New(rand.NewSource(time.Now().UnixNano()))
 			if config.GetCfg().Port+2000 > 65535 {
@@ -30,6 +30,6 @@ func SetHttpPort() {
 		} else {
 			config.SetPort(port)
 		}
-		logger.Infof("Using port: %d", config.GetCfg().Port)
+		logger.Infof(locale.GetString("log_using_port"), config.GetCfg().Port)
 	}
 }

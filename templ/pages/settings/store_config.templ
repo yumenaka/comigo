@@ -1,0 +1,347 @@
+package settings
+
+import (
+	"encoding/base64"
+	"fmt"
+	"path/filepath"
+)
+
+// StoreConfig 书库配置组件
+templ StoreConfig(name string, values []string, description string, bookCounts map[string]int) {
+	@StoreConfigJavaScript()
+	<div
+		id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "-store-config" }
+		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		x-data="{ selectedStoreB64: '' }"
+	>
+		<label class="w-full py-0 text-left" for={ getTranslations(name) } x-text={ getTranslations(name) }></label>
+		<div class="flex flex-col w-full">
+			<!-- 书库列表 -->
+			<div class="flex flex-col w-full my-2">
+				for _, value := range values {
+					<div
+						data-storeb64={ base64.RawURLEncoding.EncodeToString([]byte(value)) }
+						class="flex flex-row items-center mx-0 mb-2 px-3 py-2 text-sm border font-medium rounded cursor-pointer transition-colors"
+						:class={ "selectedStoreB64 === $el.dataset.storeb64 ? 'bg-blue-400 border-blue-600 text-white' : 'bg-blue-200 border-gray-500 dark:border-gray-200 text-black hover:bg-blue-300'" }
+						@click={ "selectedStoreB64 = selectedStoreB64 === $el.dataset.storeb64 ? '' : $el.dataset.storeb64" }
+					>
+						<span class="flex-1 truncate min-w-0">
+							{ value }
+						</span>
+						if count, ok := bookCounts[filepath.Clean(value)]; ok && count > 0 {
+							<span class="shrink-0 ml-1 opacity-75">{ fmt.Sprintf("(x%d)", count) }</span>
+						}
+						<span class="shrink-0 ml-2" x-show={ "selectedStoreB64 === $el.dataset.storeb64" }>✓</span>
+					</div>
+				}
+			</div>
+			<!-- 添加书库区域 -->
+			<div class="flex flex-row items-center pb-1">
+				<label for={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput" } class="sr-only" x-text={ getTranslations("type_or_paste_content") }></label>
+				<input
+					type="text"
+					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput" }
+					:placeholder={ getTranslations("type_or_paste_content") }
+					class="max-w-2/3 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+					x-on:keydown={ "if ($event.key === 'Enter') { addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "'); }" }
+				/>
+				<button
+					x-text={ getTranslations("add") }
+					type="button"
+					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "StoreAddButton" }
+					x-on:click={ "addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
+					class="w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				>
+					添加
+				</button>
+			</div>
+			<!-- 操作按钮区域（始终显示，未选中时禁用） -->
+			<div class="flex flex-row justify-center w-full text-black">
+				<button
+					x-text={ getTranslations("rescan_store") }
+					type="button"
+					:disabled="selectedStoreB64 === ''"
+					x-on:click={ "rescanStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
+					class="w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
+					:class="selectedStoreB64 === '' ? 'hidden' : 'bg-blue-200  hover:bg-indigo-300'"
+				>
+					重新扫描
+				</button>
+				<button
+					x-text={ getTranslations("delete_store") }
+					type="button"
+					:disabled="selectedStoreB64 === ''"
+					x-on:click={ "deleteStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
+					class="w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
+					:class="selectedStoreB64 === '' ? 'hidden' : 'bg-red-200  hover:bg-red-400'"
+				>
+					删除书库
+				</button>
+			</div>
+		</div>
+		<div x-text={ getTranslations(description) } class="w-full py-1 text-left ml-2 text-xs text-gray-500"></div>
+	</div>
+}
+
+// storeConfigScriptHandle 用于防止 JS 代码重复渲染
+var storeConfigScriptHandle = templ.NewOnceHandle()
+
+// StoreConfigJavaScript 书库配置相关的 JavaScript 代码
+templ StoreConfigJavaScript() {
+	@storeConfigScriptHandle.Once() {
+		<script>
+			// base64UrlEncodeUtf8: 用于安全传输 Windows 路径（含反斜杠/中文）
+			// 说明：使用 base64url（RawURLEncoding 风格，无 padding），与后端解码逻辑一致
+			if (!window.base64UrlEncodeUtf8) {
+				window.base64UrlEncodeUtf8 = (str) => {
+					const bytes = new TextEncoder().encode(str);
+					let binary = "";
+					for (let i = 0; i < bytes.length; i++)
+						binary += String.fromCharCode(bytes[i]);
+					return btoa(binary)
+						.replace(/\+/g, "-")
+						.replace(/\//g, "_")
+						.replace(/=+$/g, "");
+				};
+			}
+
+			// 添加书库
+			async function addStore(configName) {
+				const addInput = document.getElementById(configName + "AddInput");
+				if (!addInput) return;
+				const addValue = addInput.value.trim();
+
+				// 验证：如果为空，显示错误提示
+				if (addValue === "") {
+					showMessage({
+						message: i18next.t("content_empty_please_enter_before_submit"),
+						buttons: "confirm",
+					});
+					return;
+				}
+
+				// 验证：如果已经有这个值了，显示错误提示
+				const container = document.getElementById(configName + "-store-config");
+				if (container) {
+					const existingStores = container.querySelectorAll(
+						'[\\@click*="selectedStore"]',
+					);
+					for (const node of existingStores) {
+						const nodeText = node.textContent.trim();
+						if (nodeText === addValue || nodeText.startsWith(addValue + " ")) {
+							showMessage({
+								message: i18next.t("value_already_exists_do_not_add_again"),
+								buttons: "confirm",
+							});
+							return;
+						}
+					}
+				}
+
+				// 发送添加请求到服务器
+				try {
+					const addValueB64 = window.base64UrlEncodeUtf8(addValue);
+					const response = await fetch("/api/add-array-config", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							configName: configName,
+							addValue: addValueB64,
+						}),
+					});
+
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_add_config_failed"), "error");
+						return;
+					}
+
+					// 解析响应数据
+					const data = await response.json();
+
+					// 显示成功提示
+					if (data.saveSuccessHint) {
+						showToast(i18next.t("saveSuccessHint"), "info");
+						// 2秒后刷新页面
+						setTimeout(() => {
+							window.location.reload();
+						}, 2000);
+					} else {
+						showToast(i18next.t("saveSuccessHint"), "success");
+					}
+
+					// 更新 UI：替换整个容器
+					if (data.html) {
+						const container = document.getElementById(
+							configName + "-store-config",
+						);
+						if (container && container.parentNode) {
+							// 创建临时元素来解析 HTML
+							const temp = document.createElement("div");
+							temp.innerHTML = data.html;
+							const newContainer = temp.querySelector(
+								"#" + configName + "-store-config",
+							);
+							if (newContainer) {
+								container.parentNode.replaceChild(newContainer, container);
+								// 重新初始化 Alpine.js
+								if (window.Alpine) {
+									window.Alpine.initTree(newContainer);
+								}
+								// 清空输入框
+								const newInput = newContainer.querySelector(
+									"#" + configName + "AddInput",
+								);
+								if (newInput) {
+									newInput.value = "";
+								}
+							}
+						}
+					}
+				} catch (error) {
+					console.error("添加书库失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
+				}
+			}
+
+			// 重新扫描书库
+			async function rescanStore(configName) {
+				const container = document.getElementById(configName + "-store-config");
+				if (!container) return;
+
+				// 获取 Alpine.js 的数据
+				const alpineData = window.Alpine.$data(container);
+				if (!alpineData || !alpineData.selectedStoreB64) {
+					showMessage({
+						message: i18next.t("select_store_to_operate"),
+						buttons: "confirm",
+					});
+					return;
+				}
+
+				const storeUrlB64 = alpineData.selectedStoreB64;
+
+				// 显示扫描中提示
+				showToast(i18next.t("rescan_store_in_progress"), "info");
+
+				try {
+					const response = await fetch("/api/rescan-store", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							storeUrl: storeUrlB64,
+						}),
+					});
+
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_rescan_store_failed"), "error");
+						return;
+					}
+
+					// 解析响应数据
+					const data = await response.json();
+
+					// 显示成功提示
+					const message = i18next
+						.t("rescan_store_success")
+						.replace("{0}", data.newBooksCount || 0);
+					showToast(message, "success");
+
+					// 2秒后刷新页面
+					setTimeout(() => {
+						window.location.reload();
+					}, 2000);
+				} catch (error) {
+					console.error("重新扫描书库失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
+				}
+			}
+
+			// 删除书库
+			async function deleteStore(configName) {
+				const container = document.getElementById(configName + "-store-config");
+				if (!container) return;
+
+				// 获取 Alpine.js 的数据
+				const alpineData = window.Alpine.$data(container);
+				if (!alpineData || !alpineData.selectedStoreB64) {
+					showMessage({
+						message: i18next.t("select_store_to_operate"),
+						buttons: "confirm",
+					});
+					return;
+				}
+
+				const storeUrlB64 = alpineData.selectedStoreB64;
+
+				// 确认删除
+				const confirmed = await new Promise((resolve) => {
+					showMessage({
+						message: i18next.t("confirm_delete_store"),
+						buttons: "confirm_cancel",
+						onConfirm: () => resolve(true),
+						onCancel: () => resolve(false),
+					});
+				});
+
+				if (!confirmed) {
+					return;
+				}
+
+				try {
+					const response = await fetch("/api/delete-store", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							storeUrl: storeUrlB64,
+						}),
+					});
+
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_delete_store_failed"), "error");
+						return;
+					}
+
+					// 解析响应数据
+					const data = await response.json();
+
+					// 显示成功提示
+					showToast(i18next.t("delete_store_success"), "success");
+
+					// 更新 UI：替换整个容器
+					if (data.html) {
+						const container = document.getElementById(
+							configName + "-store-config",
+						);
+						if (container && container.parentNode) {
+							// 创建临时元素来解析 HTML
+							const temp = document.createElement("div");
+							temp.innerHTML = data.html;
+							const newContainer = temp.querySelector(
+								"#" + configName + "-store-config",
+							);
+							if (newContainer) {
+								container.parentNode.replaceChild(newContainer, container);
+								// 重新初始化 Alpine.js
+								if (window.Alpine) {
+									window.Alpine.initTree(newContainer);
+								}
+							}
+						}
+					}
+				} catch (error) {
+					console.error("删除书库失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
+				}
+			}
+		</script>
+	}
+}

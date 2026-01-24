@@ -3,6 +3,7 @@ package file
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"image/jpeg"
 	"io"
 	"log"
@@ -13,6 +14,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -24,14 +26,14 @@ func CountPagesOfPDF(pdfFileName string) (int, error) {
 	// recover 函数旨在捕获恐慌，但必须在延迟函数中调用它才能正常工作。https://victoriametrics.com/blog/defer-in-go/
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Infof("CountPagesOfPDF: invalid PDF: %v Error:%v", pdfFileName, r)
+			logger.Infof(locale.GetString("log_countpages_pdf_invalid_error"), pdfFileName, r)
 			// 这里可以根据需要进行错误处理，比如返回特定的错误值给调用者
 		}
 	}()
 	// use default configuration for pdfcpu ("nil")
 	err := api.ValidateFile(pdfFileName, nil)
 	if err != nil {
-		return -1, errors.New("CountPagesOfPDF: invalid PDF: " + pdfFileName + " " + err.Error())
+		return -1, fmt.Errorf(locale.GetString("err_countpages_pdf_invalid"), pdfFileName, err.Error())
 	}
 	return api.PageCountFile(pdfFileName)
 }
@@ -59,7 +61,7 @@ func GetImageFromPDF(pdfFileName string, pageNum int, Debug bool) ([]byte, error
 	// 虽然可以引用mupdf。但这会导致导入C代码，破坏跨平台兼容性。
 	// 或许可以cli调用imagemagick，曲线救国？
 	if Debug {
-		logger.Infof("GetImageFromPDF: %v", time.Now().Sub(start))
+		logger.Infof(locale.GetString("log_getimagefrompdf_time"), time.Now().Sub(start))
 	}
 
 	return buffer.Bytes(), nil
@@ -70,11 +72,11 @@ func digestImage(buff *bytes.Buffer) func(model.Image, bool, int) error {
 	return func(img model.Image, singleImgPerPage bool, maxPageDigits int) error {
 		imageOut, err := imaging.Decode(img)
 		if err != nil {
-			return errors.New("imaging.Decode() Error")
+			return errors.New(locale.GetString("err_imaging_decode_error"))
 		}
 		err = jpeg.Encode(buff, imageOut, &jpeg.Options{Quality: 75})
 		if err != nil {
-			return errors.New("digestImage jpeg.Encode( Error")
+			return errors.New(locale.GetString("err_jpeg_encode_error"))
 		}
 		return nil
 	}

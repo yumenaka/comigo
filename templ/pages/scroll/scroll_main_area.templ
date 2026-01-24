@@ -10,12 +10,12 @@ import (
 )
 
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
-// x-data="{  isDoublePage: false, imageUrl: '/api/get_file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
+// x-data="{  isDoublePage: false, imageUrl: '/api/get-file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
 func ImageXData(Url string) string {
 	return fmt.Sprintf(`{ isDoublePage: false, loaded: false, updateBookmarkCompleted: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
-// 压缩尺寸，切白边，无缓存等选项，http://192.168.3.26:58642/api/get_file?id=xE2Nmdj&filename=001_By_zhonyk_cover.jpg&resize_max_width=200&no-cache=true
+// 压缩尺寸，切白边，无缓存等选项，http://192.168.3.26:58642/api/get-file?id=xE2Nmdj&filename=001_By_zhonyk_cover.jpg&resize_max_width=200&no-cache=true
 func ImageSrc(Url string) string {
 	autoCrop := `$store.global.autoCrop?"&auto_crop=1":''`
 	autoResize := `$store.global.autoResize?"&resize_max_width="+$store.global.autoResizeWidth:''`
@@ -28,13 +28,12 @@ var PAGED_SIZE = 32
 // ScrollMainArea 定义 BodyHTML
 // 需要更复杂的屏幕状态判断的时候，可以参考：https://developer.mozilla.org/zh-CN/docs/Web/API/Screen/orientation
 // orientation: (screen.orientation || {}).type ||  screen.mozOrientation || screen.msOrientation
-// tips：hx-get 用于获取图片的URL，hx-trigger 用于触发加载，hx-swap 用于替换元素，innerHTML默认值，将内容放在目标元素内 outerHTML用返回的内容替换整个目标元素  hx-target 用于指定目标元素
-// https://htmx.org/docs/#triggers  https://htmx.org/docs/#swapping
+// tips：使用 alpine.js 的 x-init 和 fetch API 来加载 HTML 内容
 // tips： Alpine.js 动态CSS，只支持内联写法
 // min-h-16 是为了图片未加载时，图片高度为0，导致页面不美观。极端设置下会导致图片变形。  text-center：居中 alert文字，因为需要等待css加载，所以现在没设置alt文字。
 templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int, startIndex int) {
 	<div
-		id="mouseMoveArea"
+		id="ScrollMainArea"
 		x-data="{
             imageWidth: '', //图片的宽度
             counter: 0,//计数器
@@ -42,8 +41,8 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
         }"
 		x-init="let stoper= setInterval(() => {
             counter++;
-            console.log('Wait.. Attempt: ' + counter);
-            if (counter > 2) {
+            // console.log('Wait.. Attempt: ' + counter);
+            if (counter > 1) {
                 clearInterval(stoper);
             }
         }, 1000);"
@@ -53,11 +52,20 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 			@ScrollPagination(book, pagedIndex)
 		}
 		if (readMode == "infinite_scroll" && startIndex > 0) {
-			<div
-				class="w-full my-2 text-sm font-semibold text-center page_hint "
-				x-data={ fmt.Sprintf("{skipPageNum : %d}", startIndex-1) }
-				x-text="i18next.t('skip_and_load_full').replace('%d', skipPageNum)"
-			></div>
+			if (startIndex < book.PageCount) {
+				<div
+					class="w-full my-2 text-sm font-semibold text-center page_hint "
+					x-data={ fmt.Sprintf("{skipPageNum : %d}", startIndex-1) }
+					x-text="i18next.t('skip_and_load_full').replace('%d', skipPageNum)"
+				></div>
+			}
+			if (startIndex == book.PageCount) {
+				<div
+					class="w-full my-2 text-sm font-semibold text-center page_hint "
+					x-data={ fmt.Sprintf("{skipPageNum : %d}", startIndex-1) }
+					x-text="i18next.t('completed_and_load_full')"
+				></div>
+			}
 			<button
 				class="px-4 py-2 mb-4 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600"
 				@click="$store.global.infiniteScrollLoadAllPage();"
@@ -79,13 +87,18 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 			></template>
 		}
 		for key, image := range book.PageInfos {
-			if (readMode == "paged_scroll" && key/PAGED_SIZE + 1 == pagedIndex) || (readMode == "infinite_scroll" && key >= startIndex) {
+			if (readMode == "paged_scroll" && key/PAGED_SIZE + 1 == pagedIndex) || (readMode == "infinite_scroll" && (key >= startIndex || key+1 == book.GetPageCount())) {
 				<div
 					class="flex flex-col justify-start w-full max-w-full  m-0 rounded item-center"
 					:style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"
 				>
 					if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
-						<div hx-get={ image.Url } hx-trigger="load" hx-swap="innerHTML" class="w-full m-0"></div>
+						<div
+							x-data="{ htmlContent: '' }"
+							x-init={ "fetch('" + image.Url + "').then(response => response.text()).then(html => { htmlContent = html; }).catch(error => { console.error('加载HTML内容失败:', error); });" }
+							x-html="htmlContent"
+							class="w-full m-0"
+						></div>
 					}
 					if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
 						if c != nil && c.QueryParam("static") == "" {

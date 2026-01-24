@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -10,35 +9,53 @@ import (
 	"time"
 
 	"github.com/jxskiss/base62"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // BookInfo 与 Book 唯一的区别是没有 AllPageInfo，而是封面图 URL，减小 JSON 文件的大小
 type BookInfo struct {
-	Author          string          `json:"author"`            // 作者
-	BookID          string          `json:"id"`                // 根据 BookPath 生成的唯一 ID
-	StoreUrl        string          `json:"store_url"`         // 在哪个子书库
-	ChildBooksNum   int             `json:"child_books_num"`   // 子书籍数量，只统计直接的子书籍
-	ChildBooksID    []string        `json:"child_books_id"`    // 子书籍BookID
-	Cover           PageInfo        `json:"cover"`             // 封面图
-	Deleted         bool            `json:"deleted"`           // 源文件是否已删除
-	Depth           int             `json:"depth"`             // 书籍深度
-	ExtractPath     string          `json:"extract_path"`      // 解压路径，7z 用，JSON 不解析
-	ExtractNum      int             `json:"extract_num"`       // 文件解压数
-	FileSize        int64           `json:"file_size"`         // 文件大小
-	BookPath        string          `json:"book_path"`         // 文件绝对路径，JSON 不解析
-	ISBN            string          `json:"isbn"`              // ISBN
-	InitComplete    bool            `json:"init_complete"`     // 是否解压完成
-	Modified        time.Time       `json:"modified_time"`     // 修改时间
-	NonUTF8Zip      bool            `json:"non_utf_8_zip"`     // 是否为特殊编码 zip
-	PageCount       int             `json:"page_count"`        // 总页数
-	ParentFolder    string          `json:"parent_folder"`     // 父文件夹
-	Press           string          `json:"press"`             // 出版社
-	PublishedAt     string          `json:"published_at"`      // 出版日期
-	Title           string          `json:"title"`             // 书名
-	Type            SupportFileType `json:"type"`              // 书籍类型
-	ZipTextEncoding string          `json:"zip_text_encoding"` // zip 文件编码
+	// ===== 基本标识 =====
+	BookID string          `json:"id"`     // 根据 BookPath 生成的唯一 ID
+	Title  string          `json:"title"`  // 书名
+	Author string          `json:"author"` // 作者
+	Type   SupportFileType `json:"type"`   // 书籍类型
+
+	// ===== 文件路径 =====
+	BookPath     string `json:"book_path"`     // 文件绝对路径，JSON 不解析
+	ParentFolder string `json:"parent_folder"` // 父文件夹
+	StoreUrl     string `json:"store_url"`     // 在哪个子书库
+
+	// ===== 文件属性 =====
+	FileSize  int64     `json:"file_size"`     // 文件大小
+	Modified  time.Time `json:"modified_time"` // 修改时间
+	PageCount int       `json:"page_count"`    // 总页数
+	Cover     PageInfo  `json:"cover"`         // 封面图
+
+	// ===== 出版信息 =====
+	ISBN        string `json:"isbn"`         // ISBN
+	Press       string `json:"press"`        // 出版社
+	PublishedAt string `json:"published_at"` // 出版日期
+
+	// ===== 书组相关 =====
+	ChildBooksNum int      `json:"child_books_num"` // 子书籍数量，只统计直接的子书籍
+	ChildBooksID  []string `json:"child_books_id"`  // 子书籍 BookID
+	Depth         int      `json:"depth"`           // 书籍深度
+
+	// ===== 压缩包相关 =====
+	ExtractPath     string `json:"extract_path"`      // 解压路径，7z 用，JSON 不解析
+	ExtractNum      int    `json:"extract_num"`       // 文件解压数
+	NonUTF8Zip      bool   `json:"non_utf_8_zip"`     // 是否为特殊编码 zip
+	ZipTextEncoding string `json:"zip_text_encoding"` // zip 文件编码
+
+	// ===== 状态标记 =====
+	InitComplete bool `json:"init_complete"` // 是否初始化完成（todo：7z解压）
+	BookComplete bool `json:"book_complete"` // 书籍是否阅读完成
+	Deleted      bool `json:"deleted"`       // 源文件是否已删除
+
+	// ===== 元数据 =====
+	CreatedByVersion string `json:"created_by_version"` // 生成数据的 Comigo 版本
 }
 
 // GetAllChildBooksNum 递归获取所有子书籍的数量
@@ -63,16 +80,16 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 	//查看书库中是否已经有了这本书，有了就跳过
 	allBooks, err := IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, exitBook := range allBooks {
 		path, err := filepath.Abs(bookPath)
 		if err != nil {
-			logger.Infof("Error getting absolute path: %v", err)
+			logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
 			continue
 		}
 		if exitBook.BookPath == path && (exitBook.Type == b.Type) {
-			return nil, errors.New(fmt.Sprintf("Book already exists: %s  %s ", exitBook.BookID, bookPath))
+			return nil, fmt.Errorf(locale.GetString("log_book_data_already_exists"), exitBook.BookID, bookPath)
 		}
 	}
 	// 生成 BookID 的字符串
@@ -88,7 +105,7 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 	fullID := b62
 	minLength := 7
 	if len(fullID) <= minLength {
-		logger.Infof("Cannot shorten ID: %s", fullID)
+		logger.Infof(locale.GetString("log_cannot_shorten_id"), fullID)
 		b.BookID = fullID
 	}
 	shortID := fullID[:minLength]
@@ -97,7 +114,7 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 		conflict := false
 		allBooks, err := IStore.ListBooks()
 		if err != nil {
-			logger.Infof("Error listing books: %s", err)
+			logger.Infof(locale.GetString("log_error_listing_books"), err)
 		}
 		for _, b := range allBooks {
 			if b.BookID == shortID {
@@ -236,7 +253,6 @@ func (b *BookInfo) ShortName() string {
 		// 如果原标题也是空的，返回空字符串
 		return ""
 	}
-
 	// [简化标题] 如果简化后长度 <= 15，直接返回
 	if len(runes) <= 15 {
 		return shortTitle
@@ -253,7 +269,7 @@ func (b *BookInfo) GetCover() PageInfo {
 	case TypeBooksGroup:
 		bookGroup, err := IStore.GetBook(b.BookID)
 		if err != nil {
-			logger.Infof("Error getting book group: %s", err)
+			logger.Infof(locale.GetString("log_error_getting_book_group"), err)
 			return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
 		for _, childID := range bookGroup.ChildBooksID {
@@ -271,11 +287,13 @@ func (b *BookInfo) GetCover() PageInfo {
 		}
 		return tempBook.GuestCover()
 	case TypePDF:
-		return PageInfo{Name: "1.jpg", Url: "/api/get_file?id=" + b.BookID + "&filename=" + "1.jpg"}
+		return PageInfo{Name: "1.jpg", Url: "/api/get-file?id=" + b.BookID + "&filename=" + "1.jpg"}
 	case TypeVideo:
 		return PageInfo{Name: "video.png", Url: "/images/video.png"}
 	case TypeAudio:
 		return PageInfo{Name: "audio.png", Url: "/images/audio.png"}
+	case TypeHTML:
+		return PageInfo{Name: "html.png", Url: "/images/html.png"}
 	case TypeUnknownFile:
 		return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 	}

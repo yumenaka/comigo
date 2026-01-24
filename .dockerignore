@@ -1,0 +1,114 @@
+# ============================================================================
+# Docker 构建忽略文件
+# ============================================================================
+# 这些文件和目录在构建 Docker 镜像时会被排除，以减小构建上下文大小
+# ============================================================================
+
+# Git 相关
+.git/
+.gitignore
+.gitattributes
+
+# 编辑器和 IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.cursor
+
+# 构建产物
+bin/
+build/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.app
+*.zip
+*.tar.gz
+*.deb
+*.rpm
+
+# 测试和覆盖率
+test/
+*.test
+coverage.txt
+*.prof
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+*.log
+
+# 依赖目录
+node_modules/
+vendor/
+.parcel-cache/
+
+# 配置文件（运行时通过环境变量或挂载卷提供）
+config.toml
+*.yaml
+*.yml
+!docker-compose.yml
+
+# 数据目录
+data/
+cache/
+
+# 文档
+*.md
+!README.md
+docs/
+LICENSE
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Docker 相关（避免递归）
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# macOS App 相关
+*.app/
+*.icns
+*.plist
+icon.ico
+
+# Windows 相关
+goversioninfo.exe.manifest
+versioninfo.json
+
+# 开发工具配置
+.air.toml
+tui.air.toml
+Makefile
+Makefile.*
+*.mk
+
+# 示例和样本（除了插件）
+sample/
+!sample/plugins/
+
+# 脚本
+*.sh
+!build.sh
+
+# SQLite 数据库
+*.db
+*.sqlite
+*.sqlite3
+
+# 其他
+.env
+.env.*

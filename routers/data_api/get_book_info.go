@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -16,7 +17,7 @@ func GetParentBook(c echo.Context) error {
 	}
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, bookGroup := range allBooks {
 		if bookGroup.Type != model.TypeBooksGroup {

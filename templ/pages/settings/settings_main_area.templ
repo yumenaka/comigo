@@ -19,90 +19,85 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 		:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 	>
 		<div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative">
-			<script>
-				// htmx出错时报错（Toast）
-				document.addEventListener("htmx:responseError", (event) => {
-					json = JSON.parse(event.detail.xhr.responseText);
-					if (typeof json.message !== "undefined") {
-						showToast(json.message, "error");
-						console.error("Error:", json.message);
-					} else {
-						showToast(
-							event.detail.xhr.statusText + ": " + event.detail.xhr.responseURL,
-							"error",
-						);
-					}
-				});
-			</script>
-			if config.GetCfg().ConfigLocked {
+			if config.GetCfg().ReadOnlyMode {
 				<div
 					class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/50 flex items-start justify-center z-50 pointer-events-auto"
 				>
-					<div class="mt-32 p-2 font-semibold text-center border border-red-600 rounded-md bg-red-50 shadow-lg">
-						<span class="text-red-500" x-text="i18next.t('config_locked_description')">
+					<div class="mt-32 p-2 font-semibold text-center border border-red-600 rounded bg-red-50 shadow-lg">
+						<span class="text-red-500" x-text="i18next.t('read_only_mode_description')">
 							Configuration is locked.
 						</span>
 					</div>
 				</div>
 			}
-			<!-- 管理账号密码 -->
-			@UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password)
-			<!-- 远程连接 -->
-			@RemoteAccessConfig(tsStatus)
 			<!-- 书库设置 -->
 			<div
 				id="settings_stores"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<div x-text={ getTranslations("settings_stores") } class="w-full text-center"></div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-				@StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", false)
-				@NumberConfig("MaxScanDepth", config.GetCfg().MaxScanDepth, "MaxScanDepth_Description", 0, 65535, false)
-				@NumberConfig("MinImageNum", config.GetCfg().MinImageNum, "MinImageNum_Description", 0, 65535, false)
-				@BoolConfig("OpenBrowser", config.GetCfg().OpenBrowser, "OpenBrowser_Description", false)
-				@BoolConfig("EnableUpload", config.GetCfg().EnableUpload, "EnableUpload_Description", false)
-				@StringConfig("UploadPath", config.GetCfg().UploadPath, "UploadPath_Description", false)
-				@StringArrayConfig("ExcludePath", config.GetCfg().ExcludePath, "ExcludePath_Description", false)
-				@StringArrayConfig("SupportMediaType", config.GetCfg().SupportMediaType, "SupportMediaType_Description", false)
-				@StringArrayConfig("SupportFileType", config.GetCfg().SupportFileType, "SupportFileType_Description", false)
+				@StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", GetStoreBookCounts())
+				@NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535)
 			</div>
+			<!-- 阅读历史 -->
+			@ReadingHistoryPanel()
+			<!-- 管理账号密码 -->
+			@UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password)
+			<!-- Tailscale 远程连接 -->
+			@TailscaleConfig(tsStatus)
 			<!-- 网络设置 -->
 			<div
 				id="settings_network"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<div x-text="i18next.t('settings_network')" class="w-full text-center">网络设置</div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-				@NumberConfig("Port", int(config.GetCfg().Port), "Port_Description", 0, 65535, false)
-				@StringConfig("Host", config.GetCfg().Host, "Host_Description", false)
-				@BoolConfig("DisableLAN", config.GetCfg().DisableLAN, "DisableLAN_Description", false)
-				@NumberConfig("Timeout", config.GetCfg().Timeout, "Timeout_Description", 0, 65535, false)
+				@NumberConfig("Port", int(config.GetCfg().Port), "Port_Description", 0, 65535)
+				@StringConfig("Host", config.GetCfg().Host, "Host_Description")
+				@BoolConfig("DisableLAN", config.GetCfg().DisableLAN, "DisableLAN_Description")
+				@NumberConfig("Timeout", config.GetCfg().Timeout, "Timeout_Description", 0, 65535)
 			</div>
-			<!-- 保存toml设置文件 -->
+			<!-- 插件系统 -->
+			@PluginsConfig()
+			<!-- 其他设置 -->
+			<div
+				id="settings_stores"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			>
+				<div x-text={ getTranslations("other_settings") } class="w-full text-center"></div>
+				@NumberConfig("MaxScanDepth", config.GetCfg().MaxScanDepth, "MaxScanDepth_Description", 0, 65535)
+				@NumberConfig("MinImageNum", config.GetCfg().MinImageNum, "MinImageNum_Description", 0, 65535)
+				@BoolConfig("OpenBrowser", config.GetCfg().OpenBrowser, "OpenBrowser_Description")
+				@BoolConfig("EnableUpload", config.GetCfg().EnableUpload, "EnableUpload_Description")
+				@StringArrayConfig("ExcludePath", config.GetCfg().ExcludePath, "ExcludePath_Description")
+				@StringArrayConfig("SupportMediaType", config.GetCfg().SupportMediaType, "SupportMediaType_Description")
+				@StringArrayConfig("SupportFileType", config.GetCfg().SupportFileType, "SupportFileType_Description")
+			</div>
+			<!-- 配置文件管理 -->
 			@ConfigManager(config.DefaultConfigLocation(), config.GetWorkingDirectoryConfig(),
 				config.GetHomeDirectoryConfig(),
 				config.GetProgramDirectoryConfig())
+			<!-- 服务器日志 -->
+			@LogPanel()
 			<!-- 实验功能 -->
 			<div
 				id="settings_labs"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<div x-text={ getTranslations("settings_extra") } class="w-full text-center">实验功能</div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-				@BoolConfig("Debug", config.GetCfg().Debug, "Debug_Description", false)
+				@BoolConfig("Debug", config.GetCfg().Debug, "Debug_Description")
 				if config.GetCfg().Debug {
-					@BoolConfig("LogToFile", config.GetCfg().LogToFile, "LogToFile_Description", false)
-					@BoolConfig("GenerateMetaData", config.GetCfg().GenerateMetaData, "GenerateMetaData_Description", false)
-					@BoolConfig("EnableDatabase", config.GetCfg().EnableDatabase, "EnableDatabase_Description", false)
-					@BoolConfig("ClearCacheExit", config.GetCfg().ClearCacheExit, "ClearCacheExit_Description", false)
-					@StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description", false)
-					@StringConfig("ZipFileTextEncoding", config.GetCfg().ZipFileTextEncoding, "ZipFileTextEncoding_Description", false)
+					@BoolConfig("UseCache", config.GetCfg().LogToFile, "UseCache_Description")
+					@StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description")
+					@BoolConfig("ClearCacheExit", config.GetCfg().ClearCacheExit, "ClearCacheExit_Description")
+					@BoolConfig("LogToFile", config.GetCfg().LogToFile, "LogToFile_Description")
+					@BoolConfig("GenerateMetaData", config.GetCfg().GenerateMetaData, "GenerateMetaData_Description")
+					@BoolConfig("EnableDatabase", config.GetCfg().EnableDatabase, "EnableDatabase_Description")
+					@StringConfig("ZipFileTextEncoding", config.GetCfg().ZipFileTextEncoding, "ZipFileTextEncoding_Description")
 				}
 			</div>
 		</div>
-		if config.GetCfg().Debug {
-			<!-- 服务器日志 -->
-			@LogPanel()
-		}
 	</div>
 }

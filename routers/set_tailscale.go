@@ -21,8 +21,8 @@ func StartTailscale() {
 	// 启动或重启 Tailscale 服务
 	configDir, err := config.GetConfigDir()
 	if err != nil {
-		logger.Errorf("Failed to get config dir: %v", err)
-		configDir = ""
+		logger.Errorf(locale.GetString("err_failed_to_get_config_dir"), err)
+		return
 	}
 	if tsError := tailscale_plugin.RunTailscale(
 		engine,
@@ -34,7 +34,7 @@ func StartTailscale() {
 			AuthKey:    config.GetCfg().TailscaleAuthKey,
 		},
 	); tsError != nil {
-		logger.Errorf("Failed to run Tailscale: %v", tsError)
+		logger.Errorf(locale.GetString("err_failed_to_run_tailscale"), tsError)
 	}
 }
 
@@ -43,6 +43,6 @@ func StopTailscale() {
 	// 停止 Tailscale 服务
 	err := tailscale_plugin.StopTailscale()
 	if err != nil {
-		logger.Errorf("Error stopping Tailscale server: %v", err)
+		logger.Errorf(locale.GetString("err_error_stopping_tailscale_server"), err)
 	}
 }

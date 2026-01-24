@@ -1,19 +1,16 @@
 package settings
 
-// 关键 htmx 配置解说
-// hx-post 请求地址
-// hx-trigger 值发生变化后触发
-// hx-target用返回的 HTML 替换哪个 DOM 元素
-// hx-swap 替换方式
-// hx-params="*" 发送表单数据，包含所有 name/value
-// saveSuccessHint: 保存成功,三秒后执行各种动作
+// userInfoConfigScriptHandle 用于防止 JS 代码重复渲染
+var userInfoConfigScriptHandle = templ.NewOnceHandle()
+
+// UserInfoConfig 用户信息配置
 templ UserInfoConfig(nowUsername string, nowPassword string) {
-	<div id={ "user_config" } class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
+	<div id={ "user_config" } class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
 		<div x-text={ getTranslations("AdminAccountSetup") } class="w-full text-center"></div>
 		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<form
 			id="user_config_form"
-			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			x-data="{
 			username: '',
 			current_password: '',
@@ -27,21 +24,15 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 				this.current_password = this.$el.querySelector('#CurrentPassword') ? this.$el.querySelector('#CurrentPassword').value : '';
 				this.password = this.$el.querySelector('#Password').value;
                 this.ReEnterPassword = this.$el.querySelector('#ReEnterPassword').value;
-
 				this.$watch('username', value => {
 					this.isFormChanged = true; // 用户名有变化，表单被修改过
-					//console.log('Username changed. isFormChanged:', this.isFormChanged, 'New username:', value);
 				});
-				
 				this.$watch('password', value => {
 					this.isFormChanged = true; // 密码框变化，表单被修改过
 					this.passwordOK = this.password !== '' && this.ReEnterPassword !== '' && this.password === this.ReEnterPassword;
-					//console.log('Password changed. isFormChanged:', this.isFormChanged, 'New password:', value, 'Current username:', this.username);
 				});
-				
 				this.$watch('ReEnterPassword', value => {
 					this.passwordOK = this.password !== '' && this.ReEnterPassword !== '' && this.password === this.ReEnterPassword;
-					//console.log('Password changed. isFormChanged:', this.isFormChanged, 'New ReEnterPassword:', value, 'Current username:', this.username);
 				});
 			},
 			
@@ -50,20 +41,16 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 				if (!this.isFormChanged) {
 					return false;
 				}
-				// 两次输入的密码不一致，请重新输入'
+				// 两次输入的密码不一致，请重新输入
 				if (this.password !== this.ReEnterPassword){
-				    showToast(i18next.t('ErrPasswordMismatch'), 'info');
+				    showToast(i18next.t('ErrPasswordMismatch'), 'error');
                     return false;
 				}
 				// 请输入密码
 				if(this.password === '' && this.ReEnterPassword === ''){
-				    showToast(i18next.t('PromptSetPassword'), 'info');
+				    showToast(i18next.t('PromptSetPassword'), 'error');
 				    return false;
 				}
-				// 三秒后刷新页面
-                setTimeout(() => {
-                    location.reload();
-                }, 3000);
 				return true;
 			}
 		}"
@@ -77,7 +64,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 				:placeholder={ getTranslations("Username") }
 				value={ nowUsername }
 				x-model="username"
-				class="px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+				class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 			/>
 			<!-- 当前密码 -->
 			<div class="relative" hidden?={ nowPassword == "" } x-data="{ open: false }">
@@ -89,7 +76,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 						:type="showPassword ? 'text' : 'password'"
 						:placeholder={ getTranslations("CurrentPassword") }
 						x-model="current_password"
-						class="px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 					/>
 					<button
 						type="button"
@@ -116,7 +103,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 						:type="showPassword ? 'text' : 'password'"
 						:placeholder={ getTranslations("Password") }
 						x-model="password"
-						class="px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 					/>
 					<button
 						type="button"
@@ -143,7 +130,7 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 						:type="showPassword ? 'text' : 'password'"
 						:placeholder={ getTranslations("ReEnterPassword") }
 						x-model="ReEnterPassword"
-						class="px-2.5 w-full rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 						:class="{ 'border-red-500': passwordOK }"
 					/>
 					<button
@@ -163,18 +150,14 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 				<!-- 密码不匹配错误提示 -->
 				<div x-show="password !== ReEnterPassword" class="text-red-500 text-xs mt-1" x-text="i18next.t('passwords_not_match')">两次输入的密码不一致</div>
 			</div>
-			<!-- SAVE按钮 -->
+			<!-- 设置账号密码 按钮 -->
 			<div class="flex justify-center items-center w-full my-2">
 				<button
-					class="min-w-28 px-2 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
+					type="button"
+					class="min-w-28 px-2 h-10 mx-2 my-0 text-center text-black transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
 					:class="{ 'opacity-50 cursor-not-allowed': isFormChanged === false || passwordOK === false }"
 					:disabled="isFormChanged === false || passwordOK === false"
-					hx-post="/api/update-login-settings"
-					hx-trigger="click"
-					hx-target="#user_config"
-					hx-swap="outerHTML"
-					hx-params="*"
-					@click="if(!checkFormData()) $event.preventDefault()"
+					x-on:click={ "if (checkFormData()) { updateLoginSettings(username, current_password, password, ReEnterPassword); }" }
 					x-text={ getTranslations("set_account_password") }
 				>SAVE</button>
 			</div>
@@ -184,4 +167,55 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 			></div>
 		</form>
 	</div>
+	@userInfoConfigScriptHandle.Once() {
+		<script>
+			// 更新登录设置的函数
+			async function updateLoginSettings(
+				username,
+				currentPassword,
+				password,
+				reEnterPassword,
+			) {
+				// 验证：两次输入的密码不一致
+				if (password !== reEnterPassword) {
+					showToast(i18next.t("ErrPasswordMismatch"), "error");
+					return;
+				}
+				// 验证：用户名或密码为空
+				if (username === "" || password === "") {
+					showToast(i18next.t("PromptSetPassword"), "error");
+					return;
+				}
+				// 发送更新请求到后端 API
+				try {
+					const response = await fetch("/api/update-login-settings", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							username: username,
+							currentPassword: currentPassword,
+							password: password,
+							reEnterPassword: reEnterPassword,
+						}),
+					});
+					// 如果响应不成功，显示错误提示
+					if (!response.ok) {
+						showToast(i18next.t("err_update_login_settings_failed"), "error");
+						return;
+					}
+					// 显示成功提示
+					showToast(i18next.t("MsgLoginSettingsUpdated"), "success");
+					// 3秒后刷新页面（跳转到登录页面）
+					setTimeout(() => {
+						window.location.href = "/login";
+					}, 3000);
+				} catch (error) {
+					console.error("更新登录设置失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
+				}
+			}
+		</script>
+	}
 }
