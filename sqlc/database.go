@@ -115,6 +115,32 @@ func (db *StoreDatabase) GetBookMarks(bookID string) (*model.BookMarks, error) {
 	return &b.BookMarks, nil
 }
 
+// DeleteBookMark 删除指定书籍的特定书签
+// 根据 bookID + markType + pageIndex 唯一确定一个书签
+func (db *StoreDatabase) DeleteBookMark(bookID string, markType model.MarkType, pageIndex int) error {
+	// 获取书籍
+	b, err := db.GetBook(bookID)
+	if err != nil {
+		return fmt.Errorf(locale.GetString("err_getbookmark_cannot_find"), bookID)
+	}
+	// 查找并删除匹配的书签
+	found := false
+	newBookMarks := make(model.BookMarks, 0, len(b.BookMarks))
+	for _, mark := range b.BookMarks {
+		if mark.Type == markType && mark.PageIndex == pageIndex {
+			found = true
+			continue // 跳过要删除的书签
+		}
+		newBookMarks = append(newBookMarks, mark)
+	}
+	if !found {
+		return fmt.Errorf("bookmark not found: bookID=%s, type=%s, pageIndex=%d", bookID, markType, pageIndex)
+	}
+	b.BookMarks = newBookMarks
+	// 持久化更新
+	return db.StoreBook(b)
+}
+
 // SaveBookPageInfos  保存书籍的媒体文件信息
 func (db *StoreDatabase) SaveBookPageInfos(ctx context.Context, bookID string, pageInfos []model.PageInfo) error {
 	// 先删除旧的媒体文件记录

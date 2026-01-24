@@ -945,5 +945,9 @@
   "manual_bookmark": "Manual",
   "auto_bookmark": "Auto",
   "bookmark_added": "Bookmark added",
-  "bookmark_exists": "Bookmark exists for this page"
+  "bookmark_exists": "Bookmark exists for this page",
+  "continue_reading": "Continue",
+  "delete_record": "Delete",
+  "confirm_delete_bookmark": "Delete this reading record?",
+  "bookmark_deleted": "Deleted"
 }

@@ -908,7 +908,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "<!-- 提交按钮 --><div class=\"flex flex-col justify-center items-center w-full my-2 z-10\"><button id=\"tailscale-submit-btn\" type=\"button\" class=\"min-w-28 px-2 h-10 mx-2 my-0 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "<!-- 提交按钮 --><div class=\"flex flex-col justify-center items-center w-full my-2 z-10\"><button id=\"tailscale-submit-btn\" type=\"button\" class=\"min-w-28 px-2 h-10 mx-2 my-0 text-center font-semibold transition border border-black rounded bg-blue-200  hover:bg-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -945,5 +945,9 @@
   "manual_bookmark": "手動",
   "auto_bookmark": "自動",
   "bookmark_added": "ブックマークを追加しました",
-  "bookmark_exists": "このページにはすでにブックマークがあります"
+  "bookmark_exists": "このページにはすでにブックマークがあります",
+  "continue_reading": "続きを読む",
+  "delete_record": "削除",
+  "confirm_delete_bookmark": "この閲覧記録を削除しますか？",
+  "bookmark_deleted": "削除しました"
 }

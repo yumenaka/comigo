@@ -30,8 +30,6 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 					</div>
 				</div>
 			}
-			<!-- 阅读历史 -->
-			@ReadingHistoryPanel()
 			<!-- 书库设置 -->
 			<div
 				id="settings_stores"
@@ -42,8 +40,8 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				@StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", GetStoreBookCounts())
 				@NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535)
 			</div>
-			<!-- 插件系统 -->
-			@PluginsConfig()
+			<!-- 阅读历史 -->
+			@ReadingHistoryPanel()
 			<!-- 管理账号密码 -->
 			@UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password)
 			<!-- Tailscale 远程连接 -->
@@ -60,6 +58,8 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				@BoolConfig("DisableLAN", config.GetCfg().DisableLAN, "DisableLAN_Description")
 				@NumberConfig("Timeout", config.GetCfg().Timeout, "Timeout_Description", 0, 65535)
 			</div>
+			<!-- 插件系统 -->
+			@PluginsConfig()
 			<!-- 其他设置 -->
 			<div
 				id="settings_stores"

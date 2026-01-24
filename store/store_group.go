@@ -407,6 +407,32 @@ func (ramStore *StoreInRam) GetBookMarks(bookID string) (*model.BookMarks, error
 	return &b.BookMarks, nil
 }
 
+// DeleteBookMark 删除指定书籍的特定书签
+// 根据 bookID + markType + pageIndex 唯一确定一个书签
+func (ramStore *StoreInRam) DeleteBookMark(bookID string, markType model.MarkType, pageIndex int) error {
+	// 获取书籍
+	b, err := ramStore.GetBook(bookID)
+	if err != nil {
+		return fmt.Errorf(locale.GetString("err_getbookmark_cannot_find"), bookID)
+	}
+	// 查找并删除匹配的书签
+	found := false
+	newBookMarks := make(model.BookMarks, 0, len(b.BookMarks))
+	for _, mark := range b.BookMarks {
+		if mark.Type == markType && mark.PageIndex == pageIndex {
+			found = true
+			continue // 跳过要删除的书签
+		}
+		newBookMarks = append(newBookMarks, mark)
+	}
+	if !found {
+		return fmt.Errorf("bookmark not found: bookID=%s, type=%s, pageIndex=%d", bookID, markType, pageIndex)
+	}
+	b.BookMarks = newBookMarks
+	// 持久化更新
+	return ramStore.StoreBook(b)
+}
+
 func (ramStore *StoreInRam) DeleteBook(id string) error {
 	for _, value := range ramStore.ChildStores.Range {
 		childStore := value.(*Store)

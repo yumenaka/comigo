@@ -125,6 +125,8 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/reading-history", data_api.GetReadingHistory)
 	// 更新书签信息
 	group.POST("/store-bookmark", data_api.StoreBookmark)
+	// 删除特定书签
+	group.DELETE("/delete-bookmark", data_api.DeleteBookmark)
 	// 查询父书籍信息
 	group.GET("/parent-book-info", data_api.GetParentBook)
 	// 下载 reg 设置文件

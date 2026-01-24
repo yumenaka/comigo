@@ -119,14 +119,14 @@ templ LogPanel() {
 		es.onopen = (e) =>
 			log(
 				`<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> ` +
-					t("settings_log_sse_connected", "log server connected"),
+					i18next.t("settings_log_sse_connected"),
 			);
 		es.onerror = (e) =>
 			log(
 				`<span style="color:oklch(57.7% 0.245 27.325)">[error]</span> ` +
 					(es.readyState === EventSource.CLOSED
-						? t("settings_log_sse_closed", "closed")
-						: t("settings_log_sse_retrying", "retrying...")),
+						? i18next.t("settings_log_sse_closed")
+						: i18next.t("settings_log_sse_retrying")),
 			);
 		// 全局消息事件
 		es.onmessage = (e) => {
