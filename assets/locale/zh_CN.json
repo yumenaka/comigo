@@ -945,5 +945,9 @@
   "manual_bookmark": "手动",
   "auto_bookmark": "自动",
   "bookmark_added": "书签已添加",
-  "bookmark_exists": "该页已有书签"
+  "bookmark_exists": "该页已有书签",
+  "continue_reading": "继续阅读",
+  "delete_record": "删除",
+  "confirm_delete_bookmark": "确定删除此阅读记录？",
+  "bookmark_deleted": "已删除"
 }

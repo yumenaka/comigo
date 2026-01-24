@@ -22,6 +22,9 @@ func (s *fakeModelStore) StoreBookMark(mark *model.BookMark) error { return nil 
 func (s *fakeModelStore) GetBookMarks(bookID string) (*model.BookMarks, error) {
 	return &model.BookMarks{}, nil
 }
+func (s *fakeModelStore) DeleteBookMark(bookID string, markType model.MarkType, pageIndex int) error {
+	return nil
+}
 
 // TestGenerateBookGroup_ShouldCreateFolderGroupsForIntermediateDirs
 // 目标：当一个目录自身不满足“目录型书籍入库条件”（例如无图片），但其更深层有图片目录/书籍时，

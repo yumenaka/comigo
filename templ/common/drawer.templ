@@ -109,7 +109,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component, showReturnI
 				x-data="{ buttonText: i18next.t('reset_local_settings') }"
 				x-text="buttonText"
 				x-on:click="if(window.confirm(i18next.t('confirm_reset_settings'))) { localStorage.clear(); location.reload(); }"
-				class="mb-2 text-sm text-center inline-flex items-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
+				class="mb-2 text-sm text-center inline-flex items-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
 			>
 				重置本地设置
 			</button>

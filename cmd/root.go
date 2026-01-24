@@ -33,7 +33,9 @@ var RootCmd = &cobra.Command{
 		// 默认启用几个内置插件
 		if cfg.EnablePlugin {
 			cfg.EnabledPluginList = append(cfg.EnabledPluginList, "auto_flip", "auto_scroll")
-			if cfg.Debug || strings.Contains(cfg.Host, "comigo.xyz") {
+		}
+		if cfg.EnablePlugin && cfg.Debug {
+			if strings.Contains(cfg.Host, "comigo.xyz") {
 				cfg.EnabledPluginList = append(cfg.EnabledPluginList, "comigo_xyz")
 			}
 			logger.Infof("cfg.Host: %v , cfg.EnabledPluginList: %v ", cfg.Host, cfg.EnabledPluginList)

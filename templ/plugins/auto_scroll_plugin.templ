@@ -87,7 +87,7 @@ templ AutoScrollPlugin(c echo.Context) {
 					}
 				"
 				:class="autoScrollEnabled ? 'bg-green-300 hover:bg-green-400' : 'bg-blue-200 hover:bg-indigo-300'"
-				class="w-full mb-2 text-sm text-center inline-flex items-center justify-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out hover:scale-110"
+				class="w-full mb-2 text-sm text-center inline-flex items-center justify-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out "
 			>
 				<span x-text="autoScrollEnabled ? i18next.t('auto_flip_pause_scroll') : i18next.t('auto_flip_start_scroll')"></span>
 			</button>

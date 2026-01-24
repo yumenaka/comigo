@@ -50,7 +50,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					type="button"
 					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "StoreAddButton" }
 					x-on:click={ "addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
-					class="w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:scale-110 hover:bg-indigo-300"
+					class="w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
 				>
 					添加
 				</button>
@@ -63,7 +63,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					:disabled="selectedStoreB64 === ''"
 					x-on:click={ "rescanStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
 					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
-					:class="selectedStoreB64 === '' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-200 hover:scale-110 hover:bg-indigo-300'"
+					:class="selectedStoreB64 === '' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-200  hover:bg-indigo-300'"
 				>
 					重新扫描
 				</button>
@@ -73,7 +73,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					:disabled="selectedStoreB64 === ''"
 					x-on:click={ "deleteStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
 					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
-					:class="selectedStoreB64 === '' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-red-200 hover:scale-110 hover:bg-red-400'"
+					:class="selectedStoreB64 === '' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-red-200  hover:bg-red-400'"
 				>
 					删除书库
 				</button>
