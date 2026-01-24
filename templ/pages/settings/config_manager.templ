@@ -1,9 +1,11 @@
 package settings
 
+// ConfigManager 配置管理器：用于管理与保存配置文件
 templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirectoryConfig string, ProgramDirectoryConfig string) {
+	@ConfigManagerJavaScript()
 	<div
 		id="config-container"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		x-data={ "{ selectedDir: '" + initSaveTo + "',initinitSaveTo:'" + initSaveTo + "'}" }
 	>
 		<!-- 标题 -->
@@ -11,7 +13,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<label x-text={ getTranslations("ConfigStorageLocationPrompt") } class="w-full"></label>
 		<!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 -->
-		<div class="flex flex-col w-full mx-0">
+		<div class="flex flex-col w-full mx-0 text-black">
 			<div
 				class="flex flex-row items-center justify-between w-full p-2 my-1 text-xs font-normal border border-gray-500 rounded cursor-pointer WorkingDirectory min-h-15"
 				data-save_to="WorkingDirectory"
@@ -95,29 +97,23 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 			type="hidden"
 			x-model="selectedDir"
 		/>
-		<!-- SAVE 按钮：发起 HTMX 请求到 /api/new_config-save -->
-		<div class="flex flex-row justify-center w-full">
-			<!-- hx-include 将 #selectedDir 表单值一并提交 -->
-			<!-- hx-target 将返回结果替换到本容器内 -->
+		<!-- SAVE 和 DELETE 按钮 -->
+		<div class="flex flex-row justify-center w-full text-black">
 			<button
 				id="saveConfigButton"
-				class="w-24 h-10 mx-2 my-1 text-center transition bg-sky-300 active:bg-sky-500 border border-gray-500 rounded"
-				hx-post="/api/config-save"
-				hx-include="#selectedDir"
-				hx-target="#config-container"
-				hx-swap="outerHTML"
+				type="button"
+				class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
 				x-text={ getTranslations("save") }
+				x-on:click={ "saveConfig(selectedDir)" }
 			>
 				SAVE
 			</button>
 			<button
 				id="deleteConfigButton"
-				class="w-24 h-10 mx-2 my-1 text-center transition bg-red-300 active:bg-red-500 border border-gray-500 rounded"
-				hx-post="/api/config-delete"
-				hx-include="#selectedDir"
-				hx-target="#config-container"
-				hx-swap="outerHTML"
+				type="button"
+				class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-red-200 transition delay-150 duration-300 ease-in-out  hover:bg-red-400"
 				x-text={ getTranslations("delete") }
+				x-on:click={ "deleteConfig(selectedDir)" }
 			>
 				DELETE
 			</button>
@@ -126,97 +122,158 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 		<div class="w-full py-1 text-xs text-gray-500" x-text={ getTranslations("ConfigManagerDescription") }>
 			点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。
 		</div>
-		<script>
-			// 为保存按钮添加事件监听，拦截保存设置的 htmx 请求
-			document
-				.getElementById("saveConfigButton")
-				.addEventListener("htmx:beforeRequest", function (event) {
-					// 检查是否可以保存设置
-					let selectedDir = document.getElementById("selectedDir").value;
-					let canSave = false;
-					if (selectedDir === "WorkingDirectory") {
-						if (
-							document.getElementById("ProgramDirectoryConfigDiv") === null &&
-							document.getElementById("HomeDirectoryConfigDiv") === null
-						) {
-							console.log("WorkingDirectoryConfigDiv is null");
-							canSave = true;
-						}
-					}
-					if (selectedDir === "HomeDirectory") {
-						if (
-							document.getElementById("ProgramDirectoryConfigDiv") === null &&
-							document.getElementById("WorkingDirectoryConfigDiv") === null
-						) {
-							console.log("HomeDirectoryConfigDiv is null");
-							canSave = true;
-						}
-					}
-					if (selectedDir === "ProgramDirectory") {
-						if (
-							document.getElementById("HomeDirectoryConfigDiv") === null &&
-							document.getElementById("WorkingDirectoryConfigDiv") === null
-						) {
-							console.log("ProgramDirectoryConfigDiv is null");
-							canSave = true;
-						}
-					}
-					// 如果其他地方已经有配置了，则阻止请求并执行本地逻辑
-					if (!canSave) {
-						event.preventDefault();
-						// 请先删除其他位置的配置文件
-						showToast(i18next.t("please_delete_other_config_first"), "warning");
-					}
-				});
-			document
-				.getElementById("saveConfigButton")
-				.addEventListener("htmx:afterRequest", function (event) {
-					// 只对ID为myButton的请求进行监听
-					if (event.detail.successful) {
-						showToast(i18next.t("save_config_success"), "info");
-					} else {
-						showToast(i18next.t("save_config_failed"), "error");
-					}
-				});
-
-			// 为删除按钮添加事件监听，
-			document
-				.getElementById("deleteConfigButton")
-				.addEventListener("htmx:beforeRequest", function (event) {
-					// 检查是否可以删除配置
-					let selectedDir = document.getElementById("selectedDir").value;
-					canSelete = true;
-					if (selectedDir === "WorkingDirectory") {
-						if (document.getElementById("WorkingDirectoryConfigDiv") === null) {
-							canSelete = false;
-						}
-					}
-					if (selectedDir === "HomeDirectory") {
-						if (document.getElementById("HomeDirectoryConfigDiv") === null) {
-							canSelete = false;
-						}
-					}
-					if (selectedDir === "ProgramDirectory") {
-						if (document.getElementById("ProgramDirectoryConfigDiv") === null) {
-							canSelete = false;
-						}
-					}
-					// 如果不满足条件，则阻止请求并执行本地逻辑
-					if (!canSelete) {
-						event.preventDefault();
-						showToast(i18next.t("no_config_file_to_delete_in_path"), "warning");
-					}
-				});
-			document
-				.getElementById("deleteConfigButton")
-				.addEventListener("htmx:afterRequest", function (event) {
-					// 只对ID为myButton的请求进行监听
-					if (event.detail.successful) {
-						showToast(i18next.t("delete_config_success"), "info");
-					} else {
-						showToast(i18next.t("delete_config_failed"), "error");
-					}
-				});
-		</script>
 	</div>
+}
+
+// configManagerScriptHandle 用于防止 JS 代码重复渲染
+var configManagerScriptHandle = templ.NewOnceHandle()
+
+// ConfigManagerJavaScript 配置管理相关的 JavaScript 代码
+templ ConfigManagerJavaScript() {
+	@configManagerScriptHandle.Once() {
+		<script>
+			// 保存配置的函数
+			async function saveConfig(selectedDir) {
+				// 验证逻辑：检查其他位置是否已有配置
+				let canSave = false;
+				if (selectedDir === "WorkingDirectory") {
+					if (
+						document.getElementById("ProgramDirectoryConfigDiv") === null &&
+						document.getElementById("HomeDirectoryConfigDiv") === null
+					) {
+						canSave = true;
+					}
+				}
+				if (selectedDir === "HomeDirectory") {
+					if (
+						document.getElementById("ProgramDirectoryConfigDiv") === null &&
+						document.getElementById("WorkingDirectoryConfigDiv") === null
+					) {
+						canSave = true;
+					}
+				}
+				if (selectedDir === "ProgramDirectory") {
+					if (
+						document.getElementById("HomeDirectoryConfigDiv") === null &&
+						document.getElementById("WorkingDirectoryConfigDiv") === null
+					) {
+						canSave = true;
+					}
+				}
+				// 如果其他地方已经有配置了，则阻止请求并执行本地逻辑
+				if (!canSave) {
+					showToast(i18next.t("please_delete_other_config_first"), "warning");
+					return;
+				}
+				// 发送保存请求
+				try {
+					const response = await fetch("/api/config-save", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							selectedDir: selectedDir,
+						}),
+					});
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_save_config_failed"), "error");
+						return;
+					}
+					// 解析响应数据
+					const data = await response.json();
+					// 显示成功提示
+					showToast(i18next.t("save_config_success"), "success");
+					// 更新 UI：替换整个容器
+					if (data.html) {
+						const container = document.getElementById("config-container");
+						if (container && container.parentNode) {
+							// 创建临时元素来解析 HTML
+							const temp = document.createElement("div");
+							temp.innerHTML = data.html;
+							const newContainer = temp.querySelector("#config-container");
+							if (newContainer) {
+								container.parentNode.replaceChild(newContainer, container);
+								// 重新初始化 Alpine.js
+								if (window.Alpine) {
+									window.Alpine.initTree(newContainer);
+								}
+							}
+						}
+					}
+				} catch (error) {
+					console.error("保存配置失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
+				}
+			}
+			// 删除配置的函数
+			async function deleteConfig(selectedDir) {
+				// 验证逻辑：检查当前位置是否有配置
+				let canDelete = true;
+				if (selectedDir === "WorkingDirectory") {
+					if (document.getElementById("WorkingDirectoryConfigDiv") === null) {
+						canDelete = false;
+					}
+				}
+				if (selectedDir === "HomeDirectory") {
+					if (document.getElementById("HomeDirectoryConfigDiv") === null) {
+						canDelete = false;
+					}
+				}
+				if (selectedDir === "ProgramDirectory") {
+					if (document.getElementById("ProgramDirectoryConfigDiv") === null) {
+						canDelete = false;
+					}
+				}
+				// 如果不满足条件，则阻止请求并执行本地逻辑
+				if (!canDelete) {
+					showToast(i18next.t("no_config_file_to_delete_in_path"), "warning");
+					return;
+				}
+				// 发送删除请求
+				try {
+					const response = await fetch("/api/config-delete", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							selectedDir: selectedDir,
+						}),
+					});
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_delete_config_failed"), "error");
+						return;
+					}
+
+					// 解析响应数据
+					const data = await response.json();
+					// 显示成功提示
+					showToast(i18next.t("delete_config_success"), "success");
+					// 更新 UI：替换整个容器
+					if (data.html) {
+						const container = document.getElementById("config-container");
+						if (container && container.parentNode) {
+							// 创建临时元素来解析 HTML
+							const temp = document.createElement("div");
+							temp.innerHTML = data.html;
+							const newContainer = temp.querySelector("#config-container");
+							if (newContainer) {
+								container.parentNode.replaceChild(newContainer, container);
+								// 重新初始化 Alpine.js
+								if (window.Alpine) {
+									window.Alpine.initTree(newContainer);
+								}
+							}
+						}
+					}
+				} catch (error) {
+					console.error("删除配置失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
+				}
+			}
+		</script>
+	}
 }

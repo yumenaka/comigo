@@ -3,8 +3,7 @@
 package scan
 
 import (
-	"strconv"
-
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/sqlc"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -15,7 +14,7 @@ func SaveBooksToDatabase(cfg ConfigInterface) error {
 	InitConfig(cfg)
 	allBooks, err := store.RamStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, b := range allBooks {
 		saveErr := sqlc.DbStore.StoreBook(b)
@@ -24,6 +23,6 @@ func SaveBooksToDatabase(cfg ConfigInterface) error {
 			return saveErr
 		}
 	}
-	logger.Infof("SaveBooksToDatabase: Books saved to database successfully: " + strconv.Itoa(len(allBooks)))
+	logger.Infof(locale.GetString("log_books_saved_to_database_successfully"), len(allBooks))
 	return nil
 }

@@ -1,17 +1,15 @@
 package common
 
-templ ReadModeSelect(inShelf bool) {
-	<!-- 切换【无限卷轴/分页卷轴/翻页阅读】的select-->
+// 切换【无限卷轴/分页卷轴/翻页阅读】的select
+templ ReadModeSelect() {
 	<!-- https://alpinejs.dev/directives/model#select-inputs -->
 	<!-- https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLElement/change_event -->
 	<select
 		id="read_mode_select"
 		x-model="$store.global.readMode"
-		if !inShelf {
-			x-on:change="$store.global.onChangeReadMode();"
-		}
-		x-show="!window.location.href.startsWith('file:///')"
-		class="w-full h-10 py-0 mt-2 mb-2 font-semibold border rounded bg-base-100 text-accent-content focus:outline-none"
+		x-on:change="$store.global.onChangeReadMode();"
+		x-show="$store.global.onlineBook"
+		class="w-full h-10 py-0 mt-2 mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
 	>
 		<option value="infinite_scroll" x-text="i18next.t('infinite_scroll')">卷轴(无限)</option>
 		<option value="paged_scroll" x-text="i18next.t('paged_scroll')">卷轴(分页)</option>

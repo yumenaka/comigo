@@ -12,16 +12,14 @@ templ ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBook
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
-			Title:           common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
-			ShowReturnIcon:  c.Param("id") != "",
-			ReturnUrl:       common.GetReturnUrl(c.Param("id")),
-			SetDownLoadLink: false,
-			InShelf:         true,
-			DownLoadLink:    "",
-			SetTheme:        true,
+			TitleText:         common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
+			ShowReturnIcon:    c.Param("id") != "",
+			ShowReSortIcon:    true,
+			ShowServerSetting: true,
+			ReturnUrl:         common.GetReturnUrl(c.Param("id")),
 		})
 	@MainArea(c, nowBookNum, storeBookInfos, childBookInfos)
 	@common.Footer(config.GetVersion())
-	@common.Drawer(c, nil, ShelfDrawerSlot())
+	@common.Drawer(c, nil, ShelfDrawerSlot(), c.Param("id") != "", common.GetReturnUrl(c.Param("id")))
 	@common.QRCode()
 }

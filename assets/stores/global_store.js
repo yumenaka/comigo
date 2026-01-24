@@ -62,7 +62,15 @@ const initClientID = `Client_${randomString}_${system}_${browser}`;
 Alpine.store('global', {
     nowPageNum: 1,
     allPageNum: 1,
-    isHTTPServer: true,
+    onlineBook: true,
+    // 播放器：音量（0~100）
+    playerVolume: Alpine.$persist(100).as('global.playerVolume'),
+    // 播放器：是否静音
+    playerMuted: Alpine.$persist(false).as('global.playerMuted'),
+    // 播放器：是否自动播放下一曲
+    autoPlayNext: Alpine.$persist(true).as('global.autoPlayNext'),
+    // 播放器：是否循环播放播放列表
+    loopPlaylist: Alpine.$persist(true).as('global.loopPlaylist'),
     // 自动切边
     autoCrop: Alpine.$persist(false).as('global.autoCrop'),
     // 自动切边阈值,范围是0~100。多数情况下 1 就够了。
@@ -94,7 +102,7 @@ Alpine.store('global', {
             return;
         }
         try {
-            const key = `pageNum_${book.id}`;
+            const key = `pageNum_${book_id}`;
             const savedPageNum = localStorage.getItem(key);
             if (savedPageNum !== null && !isNaN(parseInt(savedPageNum))) {
                 const pageNum = parseInt(savedPageNum);
@@ -109,12 +117,16 @@ Alpine.store('global', {
         }
     },
     // 保存当前页码到本地存储
-    savePageNumToLocalStorage() {
+    savePageNumToLocalStorage(book_id) {
         if (!this.saveReadingProgress) {
             return;
         }
+        if (!book_id) {
+            console.warn("savePageNumToLocalStorage: book_id is required");
+            return;
+        }
         try {
-            const key = `pageNum_${book.id}`;
+            const key = `pageNum_${book_id}`;
             const nowPageNum = Alpine.store('global').nowPageNum;
             localStorage.setItem(key, nowPageNum);
         } catch (e) {
@@ -168,7 +180,9 @@ Alpine.store('global', {
             }
         }
         // 跳转到新的阅读模式URL
-        window.location.href = this.getReadURL(book_id, this.nowPageNum);
+        if (pathname.startsWith('/scroll')||pathname.startsWith('/flip')) {
+            window.location.href = this.getReadURL(book_id, this.nowPageNum);
+        }
     },
     getReadURL(book_id, start_index) {
         // TODO: 处理旧版本数据干扰的问题。若干个版本后大概就不需要了，到时候删除这段代码。
@@ -231,7 +245,7 @@ Alpine.store('global', {
         window.location.reload();
     },
     /**
-     * 调用后端 /api/store_bookmark 接口，更新书签信息
+     * 调用后端 /api/store-bookmark 接口，更新书签信息
      * @param {Object} params
      * @param {string} params.type - 书签类型，例如 'auto'
      * @param {string} params.bookId - 书籍ID
@@ -239,7 +253,7 @@ Alpine.store('global', {
      * @param {string} [params.label='自动书签'] - 书签名称，当前后端固定为自动书签，仅用于日志
      * @returns {Promise<Object|string>} 后端返回的响应体
      */
-    async UpdateBookmark({ type = 'auto', bookId, pageIndex, label = '自动书签' } = {}) {
+    async UpdateBookmark({ type = 'auto', bookId, pageIndex, description = '' } = {}) {
         if (!bookId) {
             const error = new Error('UpdateBookmark: bookId is required');
             if (this.debugMode) {
@@ -254,15 +268,16 @@ Alpine.store('global', {
             }
             throw error;
         }
-
-        const deviceDescription = `${browser} in ${system}`;
+        if (description === '') {
+            description = `${browser} in ${system}`;
+        }
         const payload = {
             type,
             book_id: bookId,
             page_index: pageIndex,
-            description: deviceDescription
+            description: description
         };
-        const response = await fetch('/api/store_bookmark', {
+        const response = await fetch('/api/store-bookmark', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -308,10 +323,8 @@ document.addEventListener('alpine:initialized', () => {
 
 const url = new URL(window.location.href);
 
-// if (url.protocol === 'http:'||url.protocol === 'https:') {
-//     Alpine.store('global').isHTTPServer=true;
-// } else {
-//     Alpine.store('global').isHTTPServer=false;
-// }
-
-Alpine.store('global').isHTTPServer=true;
+if ((url.protocol === 'http:'||url.protocol === 'https:' ) && !window.location.toString().endsWith('.html')) {
+    Alpine.store('global').onlineBook = true;
+} else {
+    Alpine.store('global').onlineBook = false;
+}

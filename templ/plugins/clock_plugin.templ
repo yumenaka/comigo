@@ -1,0 +1,141 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+)
+
+// ClockPlugin 在右下角显示当前时间的插件（支持拖动）
+templ ClockPlugin(c echo.Context) {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("clock") {
+		if config.GetCfg().Debug {
+			<script>
+				console.log("Clock plugin enabled");
+			</script>
+		}
+		<div
+			x-data="{ 
+				currentTime: new Date().toLocaleTimeString(),
+				isDragging: false,
+				dragPointerId: null,
+				startX: 0,
+				startY: 0,
+				offsetX: 0,
+				offsetY: 0,
+				pendingClientX: 0,
+				pendingClientY: 0,
+				rafScheduled: false,
+				left: $persist('auto').as('clockPluginLeft'),
+				top: $persist('auto').as('clockPluginTop'),
+				schedulePositionUpdate($el) {
+					if (this.rafScheduled) return;
+					this.rafScheduled = true;
+					requestAnimationFrame(() => {
+						this.rafScheduled = false;
+						if (!this.isDragging) return;
+						const newLeft = this.pendingClientX - this.offsetX;
+						const newTop = this.pendingClientY - this.offsetY;
+
+						// 限制在视口内
+						const maxLeft = window.innerWidth - $el.offsetWidth;
+						const maxTop = window.innerHeight - $el.offsetHeight;
+
+						this.left = Math.max(0, Math.min(newLeft, maxLeft)) + 'px';
+						this.top = Math.max(0, Math.min(newTop, maxTop)) + 'px';
+					});
+				},
+				stopDragging($el) {
+					this.isDragging = false;
+					if (typeof this.dragPointerId === 'number' && $el && $el.releasePointerCapture) {
+						try { $el.releasePointerCapture(this.dragPointerId); } catch (e) {}
+					}
+					this.dragPointerId = null;
+				}
+			}"
+			x-init="
+				// 更新时间
+				setInterval(() => { currentTime = new Date().toLocaleTimeString(); }, 1000);
+				
+				// 初始化位置：如果未设置过，默认在右下角
+				if (left === 'auto' || top === 'auto') {
+					// 延迟设置，确保页面已加载
+					setTimeout(() => {
+						const rect = $el.getBoundingClientRect();
+						left = (window.innerWidth - rect.width - 16) + 'px';
+						top = (window.innerHeight - rect.height - 16) + 'px';
+					}, 100);
+				}
+			"
+			@pointerdown.prevent="
+				if (!window.PointerEvent) return;
+				isDragging = true;
+				dragPointerId = $event.pointerId;
+				startX = $event.clientX;
+				startY = $event.clientY;
+				const rect = $el.getBoundingClientRect();
+				offsetX = startX - rect.left;
+				offsetY = startY - rect.top;
+
+				// 让后续 move/up 更可靠（尤其是快速拖动/触控设备）
+				if ($el.setPointerCapture) {
+					try { $el.setPointerCapture(dragPointerId); } catch (e) {}
+				}
+
+				pendingClientX = $event.clientX;
+				pendingClientY = $event.clientY;
+				schedulePositionUpdate($el);
+			"
+			@pointermove.window="
+				if (!window.PointerEvent) return;
+				if (!isDragging) return;
+				if (dragPointerId !== null && $event.pointerId !== dragPointerId) return;
+				pendingClientX = $event.clientX;
+				pendingClientY = $event.clientY;
+				schedulePositionUpdate($el);
+			"
+			@pointerup.window="
+				if (!window.PointerEvent) return;
+				if (!isDragging) return;
+				if (dragPointerId !== null && $event.pointerId !== dragPointerId) return;
+				stopDragging($el);
+			"
+			@pointercancel.window="
+				if (!window.PointerEvent) return;
+				if (!isDragging) return;
+				if (dragPointerId !== null && $event.pointerId !== dragPointerId) return;
+				stopDragging($el);
+			"
+			@mousedown.prevent="
+				if (window.PointerEvent) return;
+				isDragging = true;
+				dragPointerId = 'mouse';
+				startX = $event.clientX;
+				startY = $event.clientY;
+				const rect = $el.getBoundingClientRect();
+				offsetX = startX - rect.left;
+				offsetY = startY - rect.top;
+				pendingClientX = $event.clientX;
+				pendingClientY = $event.clientY;
+				schedulePositionUpdate($el);
+			"
+			@mousemove.window="
+				if (window.PointerEvent) return;
+				if (!isDragging) return;
+				pendingClientX = $event.clientX;
+				pendingClientY = $event.clientY;
+				schedulePositionUpdate($el);
+			"
+			@mouseup.window="
+				if (window.PointerEvent) return;
+				if (!isDragging) return;
+				stopDragging($el);
+			"
+			@blur.window="stopDragging($el)"
+			:style="{ left: left, top: top, bottom: left === 'auto' ? 'auto' : 'unset', right: left === 'auto' ? 'auto' : 'unset' }"
+			class="comigo_plugin fixed px-3 py-2 text-sm font-mono text-base-content bg-base-200/60 border border-black/50 rounded-lg shadow-lg z-50 cursor-move select-none"
+			:class="{ 'opacity-40': isDragging }"
+		>
+			<span x-text="currentTime"></span>
+		</div>
+	}
+}

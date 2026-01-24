@@ -1,0 +1,128 @@
+package common
+
+import (
+	"fmt"
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/model"
+)
+
+// DownloadButton 下载按钮组件
+templ DownloadButton(c echo.Context, book *model.Book) {
+	<!-- 下载按钮组件，便携模式不可见 -->
+	<div
+		x-show="$store.global.onlineBook"
+		class="w-full mt-2 mb-2 pb-1 flex flex-row flex-wrap justify-center items-center border-2 border-gray-500 dark:border-gray-200 rounded relative"
+	>
+		<!-- 下载 -->
+		<span
+			class="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content"
+			x-text="i18next.t('download')"
+		>
+			下载
+		</span>
+		<!-- 【下载原始文件】按钮 -->
+		if book != nil && book.Type != model.TypeDir {
+			<a
+				href={ templ.SafeURL(fmt.Sprintf("/api/raw/%v/%v", book.BookID, book.BookInfo.Title)) }
+				download={ book.BookInfo.Title }
+				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				:title="i18next.t('download_raw_archive')"
+				x-text="i18next.t('download_raw_archive')"
+			>
+				下载原始文件
+			</a>
+		}
+		<!-- 【下载为ZIP】按钮，仅对 图片类书籍（TypeDir） 类型显示 -->
+		if book != nil && book.Type == model.TypeDir {
+			<a
+				href={ templ.SafeURL(fmt.Sprintf("/api/download-zip?id=%v", book.BookID)) }
+				download={ book.BookInfo.Title + ".zip" }
+				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				:title="i18next.t('download_as_zip')"
+				x-text="i18next.t('download_as_zip')"
+			>
+				下载为ZIP
+			</a>
+		}
+		<!-- 【下载为EPUB】按钮，对图片类书籍（TypeDir）显示 -->
+		if book != nil && canDownloadAsEpub(book.Type) {
+			<a
+				href={ templ.SafeURL(fmt.Sprintf("/api/download-epub?id=%v", book.BookID)) }
+				download={ getEpubFileName(book.BookInfo.Title) }
+				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				:title="i18next.t('download_as_epub')"
+				x-text="i18next.t('download_as_epub')"
+			>
+				EPUB文件
+			</a>
+		}
+		<!-- 下载【便携网页】按钮-->
+		<a
+			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
+			download={ book.BookInfo.Title + ".html" }
+			class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-1 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+			:title="i18next.t('download_portable_web_file')"
+			x-text="i18next.t('download_portable_web_file')"
+		>
+			便携网页
+		</a>
+		<!-- 【清除缓存】按钮,暂时注释掉 -->
+		if book != nil &&  false {
+			<button
+				type="button"
+				x-data="{ deleting: false }"
+				@click="
+					if (confirm(i18next.t('confirm_clear_cache'))) {
+						deleting = true;
+						fetch('/api/book-cache?id=' + encodeURIComponent($store.global.bookID || window.location.pathname.split('/').pop()), { method: 'DELETE' })
+							.then(res => res.json())
+							.then(data => {
+								deleting = false;
+								if (typeof window.showToast === 'function') {
+									window.showToast(i18next.t('clear_cache_success'), 'success');
+								} else {
+									alert(i18next.t('clear_cache_success'));
+								}
+							})
+							.catch(err => {
+								deleting = false;
+								console.error('Delete cache error:', err);
+								if (typeof window.showToast === 'function') {
+									window.showToast(i18next.t('clear_cache_failed'), 'error');
+								} else {
+									alert(i18next.t('clear_cache_failed'));
+								}
+							});
+					}
+				"
+				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				:title="i18next.t('clear_cache')"
+				:disabled="deleting"
+			>
+				<span x-show="!deleting" x-text="i18next.t('clear_cache')">清除缓存</span>
+				<span x-show="deleting" class="animate-pulse">...</span>
+			</button>
+		}
+	</div>
+}
+
+// canDownloadAsEpub 判断书籍类型是否可以转换为 EPUB
+func canDownloadAsEpub(bookType model.SupportFileType) bool {
+	switch bookType {
+	case model.TypeBooksGroup, model.TypeVideo, model.TypeAudio, model.TypeHTML:
+		return false
+	default:
+		return true
+	}
+}
+
+// getEpubFileName 获取 EPUB 文件名
+func getEpubFileName(title string) string {
+	// 移除原有扩展名后添加 .epub
+	for _, ext := range []string{".zip", ".rar", ".cbz", ".cbr", ".tar", ".pdf", ".epub"} {
+		if len(title) > len(ext) && title[len(title)-len(ext):] == ext {
+			return title[:len(title)-len(ext)] + ".epub"
+		}
+	}
+	return title + ".epub"
+}

@@ -11,6 +11,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/yumenaka/comigo/assets/locale"
+
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -70,9 +72,9 @@ func getNumberFromString(s string) (int, error) {
 				}
 			}
 		}
-		// logger.Infof("get Number:",num," form string:",s,"numbers[]=",numbers)
+
 	} else {
-		err = errors.New("number not found")
+		err = errors.New(locale.GetString("err_number_not_found"))
 		return 0, err
 	}
 	return num, err

@@ -1,0 +1,144 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"strings"
+)
+
+// AutoScrollPlugin 自动滚动插件（仅支持滚动模式）
+templ AutoScrollPlugin(c echo.Context) {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_scroll") && strings.HasPrefix(c.Request().URL.Path, "/scroll/") {
+		if config.GetCfg().Debug {
+			<script>
+				console.log("Auto scroll plugin enabled");
+			</script>
+		}
+		<div
+			x-data="{ 
+				autoScrollEnabled: false, 
+				autoScrollInterval: null,
+				intervalSeconds: $persist(3).as('autoScrollIntervalSeconds'),
+				scrollPercent: $persist(95).as('autoScrollPercent'),
+				startAutoScroll() {
+					const self = this;
+					// 清除旧定时器
+					if (self.autoScrollInterval) {
+						clearInterval(self.autoScrollInterval);
+						self.autoScrollInterval = null;
+					}
+					// 确保使用最新的 intervalSeconds 值
+					const currentInterval = parseInt(self.intervalSeconds) || 3;
+					// 确保使用最新的 scrollPercent 值
+					const currentPercent = parseInt(self.scrollPercent) || 90;
+					// 滚动模式：自动向下滚动
+
+					self.autoScrollInterval = setInterval(() => {
+						// 检查是否到达页面底部
+						const scrollHeight = document.documentElement.scrollHeight;
+						const scrollTop = window.scrollY || document.documentElement.scrollTop;
+						const clientHeight = window.innerHeight;
+						const scrollStep = window.innerHeight * currentPercent / 100; // 每次滚动指定百分比的屏幕高度
+						if (scrollTop + clientHeight >= scrollHeight - 10) {
+							// 到达底部，自动停止
+							clearInterval(self.autoScrollInterval);
+							self.autoScrollEnabled = false;
+							self.autoScrollInterval = null;
+						} else {
+							// 继续向下滚动
+							window.scrollBy({
+								top: scrollStep,
+								behavior: 'smooth'
+							});
+						}
+					}, currentInterval * 1000);
+				}
+			}"
+			x-init="(() => {
+				// 确保 intervalSeconds 是数字类型
+				if (typeof intervalSeconds !== 'number') {
+					intervalSeconds = parseInt(intervalSeconds) || 3;
+				}
+				
+				// 页面卸载时清理定时器
+				window.addEventListener('beforeunload', () => {
+					if (autoScrollInterval) {
+						clearInterval(autoScrollInterval);
+					}
+				});
+			})()"
+			class="w-full comigo_plugin"
+		>
+			<!-- 自动滚动切换按钮 -->
+			<button
+				type="button"
+				@click="
+					if (autoScrollEnabled) {
+						// 停止自动滚动
+						if (autoScrollInterval) {
+							clearInterval(autoScrollInterval);
+							autoScrollInterval = null;
+						}
+						autoScrollEnabled = false;
+					} else {
+						// 开始自动滚动
+						autoScrollEnabled = true;
+						startAutoScroll();
+					}
+				"
+				:class="autoScrollEnabled ? 'bg-green-300 hover:bg-green-400' : 'bg-blue-200 hover:bg-indigo-300'"
+				class="w-full mb-2 text-sm text-center inline-flex items-center justify-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out "
+			>
+				<span x-text="autoScrollEnabled ? i18next.t('auto_flip_pause_scroll') : i18next.t('auto_flip_start_scroll')"></span>
+			</button>
+			<!-- 间隔时间设置 -->
+			<div class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+				<label
+					for="autoScrollIntervalSeconds"
+					class="block w-full mb-0 font-medium"
+					x-text="i18next.t('auto_flip_interval') + ' ' + intervalSeconds + ' ' + i18next.t('auto_flip_seconds')"
+				></label>
+				<input
+					id="autoScrollIntervalSeconds"
+					type="range"
+					min="1"
+					max="60"
+					x-model.number="intervalSeconds"
+					@input="
+						intervalSeconds = parseInt($event.target.value) || 3;
+						// 如果正在运行，重新启动定时器以应用新的间隔时间
+						if (autoScrollEnabled) {
+							startAutoScroll();
+						}
+					"
+					step="1"
+					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+				/>
+			</div>
+			<!-- 滚动距离百分比设置 -->
+			<div class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+				<label
+					for="autoScrollPercent"
+					class="block w-full mb-0 font-medium"
+					x-text="i18next.t('auto_scroll_distance') + ' ' + scrollPercent + '%'"
+				></label>
+				<input
+					id="autoScrollPercent"
+					type="range"
+					min="50"
+					max="150"
+					x-model.number="scrollPercent"
+					@input="
+						scrollPercent = parseInt($event.target.value) || 90;
+						// 如果正在运行，重新启动定时器以应用新的滚动距离
+						if (autoScrollEnabled) {
+							startAutoScroll();
+						}
+					"
+					step="5"
+					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+				/>
+			</div>
+		</div>
+	}
+}

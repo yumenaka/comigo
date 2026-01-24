@@ -1,6 +1,7 @@
 package shelf
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strconv"
 
@@ -10,25 +11,36 @@ import (
 	"github.com/yumenaka/comigo/templ/pages/settings"
 )
 
+// MainArea 书架页面主体部分
+// 为了避免特殊编码，showBook的persist key使用了Base64编码
 templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) {
 	<!-- 不包括Header与Footer的【书架主体部分】 -->
 	if nowBookNum != 0 && c.Param("id") == "" {
 		<div
 			x-data
+			id="ShelfMainArea"
 			class="flex flex-col flex-1 w-full h-full pt-6 pb-2 px-1 gap-2 overflow-y-auto bg-base-300"
 			:class="(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')"
 		>
 			for i, storeBooks := range storeBookInfos {
 				<div
 					id={ "book-shelf-" + strconv.Itoa(i) }
-					x-data={ fmt.Sprintf("{ showBook: $persist(true).as('showBook_%s') }", storeBooks.StoreUrl) }
-					class="w-full h-full mt-2 mb-6 border-4 border-slate-400 rounded-2xl flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8"
+					x-data={ fmt.Sprintf("{ showBook: $persist(true).as('showBook_%s') }", base64.StdEncoding.EncodeToString([]byte(storeBooks.StoreUrl))) }
+					class="w-full h-full mt-2 mb-6 border-2 border-gray-500 dark:border-gray-200 rounded flex flex-row flex-wrap content-start justify-center text-base-content relative pt-8"
 				>
 					<!-- 书架标题栏 -->
-					<button @click="showBook = !showBook" class="child_store flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 ">
-						<span class="flex flex-row size-fit min-w-64 max-w-3/4 mt-0 p-2 bg-base-100 border-4 border-slate-400 text-base-content rounded-xl text-center text-sm font-semibold">
-							<span class="flex-10 mx-2">{ storeBooks.StoreUrl } &nbsp;(x{ storeBooks.ChildBookNum })&nbsp;</span>
-							<svg class="flex-1 w-3 h-6 transition-transform" :class="{ 'rotate-90': !showBook }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+					<button title={ fmt.Sprintf("%v(x%v) ", storeBooks.StoreUrl, storeBooks.ChildBookNum) } @click="showBook = !showBook" class="child_store max-w-4/6 flex flex-wrap justify-center items-center absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2">
+						<span class="flex flex-row size-fit min-w-64 max-w-3/4 mt-0 p-2 bg-base-100 border-2 border-gray-500 dark:border-gray-200 text-base-content rounded text-center text-sm font-semibold">
+							<svg class="shrink-0 w-3 h-6 transition-transform" :class="{ '-rotate-90': !showBook }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+							</svg>
+							<span class="flex-1 mx-2 truncate min-w-0">
+								{ storeBooks.StoreUrl }
+							</span>
+							<span class="shrink-0 mr-2">
+								{ fmt.Sprintf("(x%v)", storeBooks.ChildBookNum) }
+							</span>
+							<svg class="shrink-0 w-3 h-6 transition-transform" :class="{ 'rotate-90': !showBook }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
 								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
 							</svg>
 						</span>
@@ -68,36 +80,16 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 				>
 					没有可读书籍，请设置书库路径。设置完成后，网页会自动刷新。
 				</div>
-				@settings.StringArrayConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", false)
+				@settings.StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", settings.GetStoreBookCounts())
 			</div>
 		</div>
 		<script>
-			// htmx出错时报错（Toast）
-			document.addEventListener("htmx:responseError", (event) => {
-				showToast(
-					event.detail.xhr.statusText + ": " + event.detail.xhr.responseURL,
-					"error",
-				);
+			// 全局错误处理：捕获 fetch 错误并显示 Toast
+			window.addEventListener("unhandledrejection", (event) => {
+				if (event.reason && event.reason.message) {
+					showToast(event.reason.message, "error");
+				}
 			});
-			// 删除字符串数组配置中的元素。此处仅用作打印调试信息。删除操作是由 htmx 完成的。
-			function deleteStringConfigValue(e) {
-				const configName = e.getAttribute("data-config-name");
-				const arrawIndex = e.getAttribute("data-arraw-index");
-				const deleteValue = e.getAttribute("data-delete-value");
-				console.log(configName, arrawIndex, deleteValue);
-			}
-			// 添加字符串数组配置中的元素
-			// 此函数的作用，是修改 hx-vals 的值。实际的提交操作是由 htmx 完成的
-			function addStringConfigValue(e) {
-				const buttonID = e.getAttribute("id");
-				const configName = buttonID.replace("StringArrayAddButton", "");
-				const addValue = document.getElementById(configName + "AddInput").value;
-				console.log(configName, addValue);
-				e.setAttribute(
-					"hx-vals",
-					JSON.stringify({ configName: configName, addValue: addValue }),
-				);
-			}
 		</script>
 	}
 }

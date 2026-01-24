@@ -9,10 +9,10 @@ tmp_dir = "test/temp"
 [build]
 ## 运行的时候，需要传给二进制文件的参数。
 #  args_bin = ["./test","--tailscale","--debug", "--config-locked"]
-args_bin = ["./test","--tailscale"]
+args_bin = ["./test","--tailscale","--debug"]
 #二进制文件
 bin = "./test/temp/comi"
-cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi main.go"
+cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi ./cmd/comigo/main.go"
 delay = 3000
 exclude_dir = ["app", "test", ".parcel-cache", "node_modules", "tmp", "bin", "testdata"]
 exclude_regex = ["_test\\.go", "node_modules", "_templ\\.go", "tar.gz", "zip", "tgz", "exe", "app"]
@@ -24,8 +24,8 @@ kill_delay = "0s"
 log = "test/temp/build-errors-air.log"
 poll = false
 poll_interval = 500
-post_cmd = []
 pre_cmd = ["bun run dev"]
+post_cmd = []
 rerun = true
 rerun_delay = 1000
 send_interrupt = false

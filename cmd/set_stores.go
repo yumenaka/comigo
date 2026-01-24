@@ -3,138 +3,72 @@ package cmd
 import (
 	"os"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/sqlc"
-	"github.com/yumenaka/comigo/store"
-	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
 )
 
-// ScanStore 解析命令,扫描文件，设置书库等
-func ScanStore(args []string) {
-	// 1. 初始化数据库
-	if config.GetCfg().EnableDatabase {
-		// 从数据库中读取书籍信息并持久化
-		configDir, err := config.GetConfigDir()
-		if err != nil {
-			logger.Errorf("Failed to get config dir: %v", err)
-			configDir = ""
+func init() {
+	// 设置扫描任务函数，用于自动扫描
+	config.SetScanTaskFunc(func() error {
+		if err := scan.InitAllStore(config.GetCfg()); err != nil {
+			logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
+			return err
 		}
-		if err := sqlc.OpenDatabase(configDir); err != nil {
-			logger.Infof("OpenDatabase Error: %s", err)
-			model.IStore = store.RamStore
-		} else {
-			model.IStore = sqlc.DbStore
-		}
-	}
-	//model.IStore = store.RamStore
-	// 2、设置默认书库路径：扫描CMD指定的路径，或添加当前文件夹为默认路径。
-	CreateStoreUrls(args)
-
-	// 从本地文件加载书籍信息到内存
-	if !config.GetCfg().EnableDatabase {
-		err := store.RamStore.LoadBooks()
-		if err != nil {
-			logger.Infof("LoadBooks_error %s", err)
-		}
-		model.ClearBookNotExist()
-		// 生成虚拟书籍组
-		if err := model.IStore.GenerateBookGroup(); err != nil {
-			logger.Infof("%s", err)
-		}
-	}
-
-	// 3、扫描配置文件里面的书库路径，取得书籍
-	err := scan.InitAllStore(config.GetCfg())
-	if err != nil {
-		logger.Infof("Failed to scan store path: %v", err)
-	}
-
-	if !config.GetCfg().EnableDatabase {
-		// 保存书籍到本地文件（调试用）
-		err = store.RamStore.SaveBooks()
-		if err != nil {
-			logger.Infof("SaveBooks_error %s", err)
-		}
-	}
-
-	// 4、生成虚拟书籍组
-	if config.GetCfg().EnableDatabase {
-		allBooks, err := sqlc.DbStore.ListBooks()
-		if err != nil {
-			logger.Infof("Error listing books from database: %s", err)
-		} else {
-			// 拿到的书加回RamStore
-			err = store.RamStore.AddBooks(allBooks)
-			if err != nil {
-				return
+		if config.GetCfg().EnableDatabase {
+			if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
+				logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
+				return err
 			}
 		}
-	}
-	if err := model.IStore.GenerateBookGroup(); err != nil {
-		logger.Infof("%s", err)
-	}
-	// 5、保存扫描结果到数据库
-	if config.GetCfg().EnableDatabase {
-		err = scan.SaveBooksToDatabase(config.GetCfg())
+		return nil
+	})
+}
+
+// SetCwdAsScanPath  当没有指定扫描路径时，把当前工作目录作为扫描路径
+func SetCwdAsScanPathIfNeed() {
+	if len(config.GetCfg().StoreUrls) == 0 {
+		// 获取当前工作目录
+		wd, err := os.Getwd()
 		if err != nil {
-			logger.Infof("Failed SaveBooksToDatabase: %v", err)
-			return
+			logger.Infof(locale.GetString("log_failed_to_get_working_directory"), err)
+		}
+		logger.Infof(locale.GetString("log_working_directory"), wd)
+		err = config.GetCfg().AddStoreUrl(wd)
+		if err != nil {
+			logger.Infof(locale.GetString("log_failed_to_add_working_directory_to_store_urls"), err)
 		}
 	}
 }
 
-// CreateStoreUrls 添加默认扫描路径 args[1:]是用户指定的扫描路径
-func CreateStoreUrls(args []string) {
-	// 如果用户指定了扫描路径，就把指定的路径都加入到扫描路径里面
-	config.GetCfg().InitStoreUrls()
-	// 没指定扫描路径,配置文件也没设置书库文件夹的时候，默认把【当前工作目录】作为扫描路径
-	if len(args) == 0 && len(config.GetCfg().StoreUrls) == 0 {
-		// 获取当前工作目录
-		wd, err := os.Getwd()
-		if err != nil {
-			logger.Infof("Failed to get working directory:%s", err)
-		}
-		logger.Infof("Working directory:%s", wd)
-		err = config.GetCfg().AddStoreUrl(wd)
-		if err != nil {
-			logger.Infof("Failed to add working directory to store urls:%s", err)
-		}
-	}
-	// 指定了书库路径，就都扫描一遍
-	for key, arg := range args {
+// AddStoreUrls  解析命令行参数,作为路径添加到StoreUrls里
+func AddStoreUrls(urls []string) {
+	for key, url := range urls {
 		if config.GetCfg().Debug {
-			logger.Infof("args[%d]: %s\n", key, arg)
+			logger.Infof(locale.GetString("log_args_index"), key, url)
 		}
-		err := config.GetCfg().AddStoreUrl(arg)
+		err := config.GetCfg().AddStoreUrl(url)
 		if err != nil {
-			logger.Infof("Failed to add store url from args:%s", err)
+			logger.Infof(locale.GetString("log_failed_to_add_store_url_from_args"), err)
 		}
 	}
-	// 如果用户启用上传，且用户指定的上传路径不为空，就把程序预先设定的【默认上传路径】当作书库
-	if config.GetCfg().EnableUpload {
-		if config.GetCfg().UploadPath != "" {
-			// 尝试把上传路径添加为书库里
-			err := config.GetCfg().AddStoreUrl(config.GetCfg().UploadPath)
-			if err != nil {
-				logger.Infof("Failed to add upload path to store urls:%s", err)
-			}
-		}
-		// 如果用户启用上传，但没有指定上传路径
-		if config.GetCfg().UploadPath == "" {
-			for _, storeUrl := range config.GetCfg().StoreUrls {
-				// 把【本地存储】里面的第一个可用路径作为上传路径
-				if tools.IsExist(storeUrl) {
-					config.SetUploadPath(storeUrl)
-					err := config.GetCfg().AddStoreUrl(config.GetCfg().UploadPath)
-					if err != nil {
-						logger.Infof("Failed to add upload path to store urls:%s", err)
-					}
-					break
-				}
-			}
+}
+
+// ScanStore 扫描所有书库，取得书籍
+func ScanStore() {
+	err := scan.InitAllStore(config.GetCfg())
+	if err != nil {
+		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
+	}
+}
+
+// LoadUserPlugins 加载用户自定义插件
+func LoadUserPlugins() {
+	if config.GetCfg().EnablePlugin {
+		err := config.ScanUserPlugins()
+		if err != nil {
+			logger.Infof("加载自定义插件失败: %v", err)
 		}
 	}
 }

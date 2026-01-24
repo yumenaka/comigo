@@ -4,7 +4,6 @@
 *.dll
 *.so
 *.dylib
-*comi
 *.wasm
 # Test binary, built with `go test -c`
 *.test
@@ -21,6 +20,7 @@
 *config.toml
 *comigo.sqlite
 *comigo.sqlite*
+.gocache
 .cache
 cache
 .idea
@@ -37,7 +37,8 @@ cache
 main
 *.DS_Store
 *comigo.yaml
-*comigo.ini
+*comigo
+*comigo.exe
 *comigo.db
 *.local
 *.lockb
@@ -49,7 +50,6 @@ main
 go_build_main_go
 archives
 bin
-comic
 .config
 *md5Sums.txt
 resource.syso
@@ -100,6 +100,7 @@ _temp
 # IDE files.
 .idea/
 .vscode/
+.cursor
 
 # Go workflow files.
 go.work
@@ -136,3 +137,6 @@ frontend/dist
 
 # deamon
 *.pid
+assets/AppIcon.icns
+assets/icon.png
+assets/icon_no_frame.png

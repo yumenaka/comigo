@@ -3,6 +3,7 @@ package common
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets"
+	"github.com/yumenaka/comigo/templ/plugins"
 )
 
 // Html 定义网页布局
@@ -37,5 +38,7 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScript []string) {
 		</body>
 		<!-- 导入js代码,包含htmx、Alpine等第三方库  -->
 		@templ.Raw(assets.GetJavaScript(c.QueryParam("static") != "", insertScript))
+		<!-- 导入 Plugins  -->
+		@plugins.RenderAllPlugins(c)
 	</html>
 }

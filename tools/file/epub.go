@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/yumenaka/archives"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 	"golang.org/x/net/html"
 )
@@ -21,7 +22,7 @@ import (
 func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) {
 	// 必须传值
 	if needFile == "" {
-		return nil, errors.New("needFile is empty")
+		return nil, errors.New(locale.GetString("err_needfile_empty"))
 	}
 	// 打开文件，只读模式
 	file, err := os.OpenFile(epubPath, os.O_RDONLY, 0o400) // Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
@@ -31,7 +32,7 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			logger.Infof("file.Close() Error: %s", err)
+			logger.Infof(locale.GetString("log_file_close_error"), err)
 		}
 	}(file)
 	// 是否是压缩包
@@ -74,7 +75,7 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 		}
 		return data, nil
 	}
-	return nil, errors.New("getDataFromEpub Error. epubPath:" + epubPath + "  needFile:" + needFile)
+	return nil, fmt.Errorf(locale.GetString("err_getdata_from_epub_error"), epubPath, needFile)
 }
 
 // Container was generated 2025-04-15 23:51:38 by https://xml-to-go.github.io/ in Ukraine.
@@ -156,21 +157,21 @@ type Package struct {
 func getOPFPath(epubPath string) (opfPath string, err error) {
 	data, err := getDataFromEpub(epubPath, filepath.Base("META-INF/container.xml"))
 	if err != nil {
-		logger.Infof("获取container.xml失败: %s", err)
+		logger.Infof(locale.GetString("log_failed_to_get_container_xml"), err)
 		return "", fmt.Errorf("getOPFPath Error: %w", err)
 	}
 	if len(data) == 0 {
-		return "", errors.New("container.xml内容为空")
+		return "", errors.New(locale.GetString("err_container_xml_empty"))
 	}
 	con := new(Container)
 	err = xml.Unmarshal(data, con)
 	if err != nil {
-		logger.Infof("解析container.xml失败: %s", err)
+		logger.Infof(locale.GetString("log_failed_to_parse_container_xml"), err)
 		return "", fmt.Errorf("XML Unmarshal Error: %w", err)
 	}
 	opfPath = con.Rootfiles.Rootfile.FullPath
 	if opfPath == "" {
-		return "", errors.New("container.xml中未找到有效的OPF路径")
+		return "", errors.New(locale.GetString("err_no_valid_opf_path"))
 	}
 	return
 }
@@ -185,7 +186,7 @@ func findAttrValue(r io.Reader, imgKey string) (value string) {
 			if tokenizer.Err() == io.EOF {
 				return
 			}
-			logger.Infof("Error: %v", tokenizer.Err())
+			logger.Infof(locale.GetString("log_html_tokenizer_error"), tokenizer.Err())
 			return
 		}
 		tagName, _ := tokenizer.TagName()
@@ -303,17 +304,17 @@ func GetEpubMetadata(epubPath string) (metadata EpubMetadata, err error) {
 	pack := new(Package)
 	opfPath, err := getOPFPath(epubPath)
 	if err != nil {
-		logger.Infof("获取OPF文件路径失败: %s", err)
+		logger.Infof(locale.GetString("log_failed_to_get_opf_file_path"), err)
 		return EpubMetadata{}, fmt.Errorf("获取元数据失败: %w", err)
 	}
 	b, err := getDataFromEpub(epubPath, filepath.Base(opfPath))
 	if err != nil {
-		logger.Infof("读取OPF文件失败: %s", err)
+		logger.Infof(locale.GetString("log_failed_to_read_opf_file"), err)
 		return EpubMetadata{}, fmt.Errorf("读取OPF文件失败: %w", err)
 	}
 	err = xml.Unmarshal(b, pack)
 	if err != nil {
-		logger.Infof("解析OPF文件失败: %s", err)
+		logger.Infof(locale.GetString("log_failed_to_parse_opf_file"), err)
 		return EpubMetadata{}, fmt.Errorf("解析OPF文件失败: %w", err)
 	}
 	return EpubMetadata{

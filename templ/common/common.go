@@ -2,10 +2,11 @@ package common
 
 import (
 	"encoding/base64"
+	"fmt"
 	"mime"
 	"path/filepath"
-	"strconv"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
@@ -16,11 +17,11 @@ import (
 // GetPageTitle 获取页面标题
 func GetPageTitle(bookID string, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) string {
 	if bookID == "" {
-		return config.GetCfg().GetTopStoreName() + " (x" + strconv.Itoa(nowBookNum) + ")"
+		return fmt.Sprintf("%v(x%v) ", config.GetCfg().GetTopStoreName(), nowBookNum)
 	}
 	groupBook, err := model.IStore.GetBook(bookID)
 	if err != nil {
-		logger.Info("GetBook: %v", err)
+		logger.Infof(locale.GetString("log_getbook_error_scroll"), err)
 		return "Comigo " + config.GetVersion()
 	}
 	return groupBook.Title
@@ -33,7 +34,7 @@ func GetBookTitle(bookID string) string {
 	}
 	groupBook, err := model.IStore.GetBook(bookID)
 	if err != nil {
-		logger.Info("GetBook: %v", err)
+		logger.Infof(locale.GetString("log_getbook_error_scroll"), err)
 		return "Comigo " + config.GetVersion()
 	}
 	return groupBook.Title
@@ -47,7 +48,7 @@ func GetReturnUrl(BookID string) string {
 	}
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
-		logger.Infof("Error listing books: %s", err)
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, bookGroup := range allBooks {
 		if bookGroup.Type != model.TypeBooksGroup {
@@ -66,15 +67,6 @@ func GetReturnUrl(BookID string) string {
 	return "/"
 }
 
-func ShowQuickJumpBar(b *model.Book) (QuickJumpBar bool) {
-	_, err := store.GetBookInfoListByParentFolder(b.ParentFolder)
-	if err != nil {
-		logger.Infof("%s", err)
-		return false
-	}
-	return true
-}
-
 func QuickJumpBarBooks(b *model.Book) (list *model.BookInfos) {
 	list, err := store.GetBookInfoListByParentFolder(b.ParentFolder)
 	if err != nil {
@@ -88,7 +80,7 @@ func GetFileBase64Text(bookID string, fileName string) string {
 	// 获取书籍信息
 	bookByID, err := model.IStore.GetBook(bookID)
 	if err != nil {
-		logger.Infof("GetBook error: %s", err)
+		logger.Infof(locale.GetString("log_getbook_error_common"), err)
 		return ""
 	}
 
@@ -106,7 +98,7 @@ func GetFileBase64Text(bookID string, fileName string) string {
 	// 获取图片数据
 	imgData, _, err := fileutil.GetPictureData(option)
 	if err != nil {
-		logger.Infof("GetPictureData error: %s", err)
+		logger.Infof(locale.GetString("log_getpicturedata_error"), err)
 		return ""
 	}
 

@@ -21,12 +21,12 @@ func ShowQRCodeTailscale(ctx context.Context) {
 	// 前提： 启用 Tailscale 服务
 	if config.GetCfg().EnableTailscale == false {
 		if config.GetCfg().Debug {
-			logger.Info("Tailscale is disabled, skipping ShowQRCodeTailscale function.")
+			logger.Info(locale.GetString("log_tailscale_disabled_skip_qrcode"))
 		}
 		return
 	}
 	if counter > 100 {
-		logger.Info("Tailscale status check exceeded, stopping further checks.")
+		logger.Info(locale.GetString("log_tailscale_status_check_exceeded"))
 		return
 	}
 	// 1 秒后打印 Url（不会阻塞 main 线程）
@@ -35,7 +35,7 @@ func ShowQRCodeTailscale(ctx context.Context) {
 		st, err := tailscale_plugin.GetTailscaleStatus(ctx)
 		if err != nil {
 			if config.GetCfg().Debug {
-				logger.Infof("Tailscale status not available yet: %v", err)
+				logger.Infof(locale.GetString("log_tailscale_status_not_available"), err)
 			}
 			return
 		}
@@ -58,7 +58,7 @@ func ShowQRCodeTailscale(ctx context.Context) {
 					readUrlPrinted = true
 				}
 			} else {
-				logger.Info("tailscale_not_yet_fqdn")
+				logger.Info(locale.GetString("log_tailscale_not_yet_fqdn"))
 				ShowQRCodeTailscale(ctx)
 				return
 			}

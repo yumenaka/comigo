@@ -1,9 +1,7 @@
 /*此文件需要编译，相关指令请参考 package.json*/
-
 @import 'tailwindcss' source('../templ');
-@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/forms'; /* 重置表格样式的插件*/
 @plugin '@tailwindcss/typography';
-
 @plugin 'flowbite/plugin';
 @source '../node_modules/flowbite';
 
@@ -58,9 +56,40 @@ body {
 .scroll-hidden::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+/* 抽屉（Drawer）的半透明黑色背景 */
+.bg-dark-backdrop\/70 {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* @tailwindcss/forms注释掉以后需要这些代码来保证滑动条正常 */
+input[type="range"]::-moz-range-progress {
+    background: #0000cc;
+}
+
+/* chrome 滑动条的滑动块*/
+input[type="range"]::-webkit-slider-thumb {
+    background: #fff;
+    appearance: auto;
+    cursor: pointer;
+    border-width: 1px;
+    border-radius: 9999px;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* 火狐 滑动条的滑动块*/
+input[type="range"]::-moz-range-thumb {
+    background: #fff;
+    appearance: auto;
+    cursor: pointer;
+    border-width: 1px;
+    border-radius: 9999px;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
 
 /* Alpine.js styles */
-
 [x-cloak] {
   display: none !important;
 }
@@ -72,13 +101,13 @@ body {
             linear-gradient(to right, rgb(203 213 225) 1px, transparent 1px),
             linear-gradient(to bottom, rgb(203 213 225) 1px, transparent 1px);
     background-size: 20px 20px;
-    background-position: center center;
+    background-position: 0 0;
 }
 
 .grid-point {
     background-image: radial-gradient(circle, rgba(203 213 225) 2px, rgba(255 255 255 / 30% ) 2px);
     background-size: 20px 20px;
-    background-position: center center;
+    background-position: 0 0;
 }
 
 .grid-mosaic {
@@ -87,7 +116,7 @@ body {
             linear-gradient(-45deg, #8d8b8b 25%, transparent 0),
             linear-gradient(45deg, transparent 75%, #8d8b8b 0),
             linear-gradient(-45deg, transparent 75%, #8d8b8b 0);
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+    background-position: 0 0, 0 10px, 10px -10px, 10px 0;
     background-size: 20px 20px;
 }
 

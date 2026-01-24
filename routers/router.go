@@ -37,11 +37,6 @@ func SetMiddleware() {
 	// 设置 Echo 的日志输出
 	SetEchoLogger(engine)
 
-	// Auto TLS
-	// https://echo.labstack.com/docs/cookbook/auto-tls
-	// https://tatsuo.medium.com/lets-encrypt-aautotls-pitfalls-f0e278b265c4
-	// https://qiita.com/smith-30/items/147ba45fa74b2fc265b6
-
 	// 将 HTTP 流量重定向到 HTTPS，您可以使用重定向中间件
 	// 支持重定向到www子域名或非www子域名
 	// https://echo.labstack.com/docs/middleware/redirect#https-redirect

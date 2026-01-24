@@ -28,10 +28,10 @@ var cfg = Config{
 	ClearCacheExit:        true,
 	ClearDatabaseWhenExit: true,
 	DisableLAN:            false,
-	DefaultMode:           "scroll",
 	EnableUpload:          true,
 	EnableDatabase:        false,
 	EnableTLS:             false,
+	EnablePlugin:          false,
 	ExcludePath:           []string{"$RECYCLE.BIN", "System Volume Information", "node_modules"},
 	Host:                  "",
 	LogToFile:             false,
@@ -40,11 +40,17 @@ var cfg = Config{
 	OpenBrowser:           true,
 	Port:                  1234,
 	Password:              "",
-	SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".mp4", ".webm", ".pdf", ".flv", ".avi", ".mp3", ".wav", ".wma", ".ogg"},
+	SupportFileType:       []string{".zip", ".tar", ".rar", ".cbr", ".cbz", ".epub", ".mp4", ".m4a", ".webm", ".mov", ".pdf", ".flv", ".avi", ".mp3", ".aac", ".ogg", ".wav", ".wma", ".html", ".htm"},
 	SupportMediaType:      []string{".jpg", ".jpeg", ".jpe", ".jpf", ".jfif", ".jfi", ".png", ".gif", ".apng", ".bmp", ".webp", ".ico", ".heic", ".heif", ".avif"},
 	SupportTemplateFile:   []string{".html"},
 	UseCache:              true,
-	UploadPath:            "",
 	Username:              "comigo",
 	ZipFileTextEncoding:   "",
+	EnableSingleInstance:  false,
+	Language:              "auto",
+	// 初始化内置插件列表
+	BuildInPluginList: []string{"auto_flip", "auto_scroll", "clock", "comigo_xyz", "sample", "sketch_practice"},
+	// 用户自定义插件插（TODO）
+	UserPluginList:    []string{},
+	EnabledPluginList: []string{}, // 初始状态，不启用任何插件
 }

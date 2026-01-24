@@ -1,6 +1,6 @@
 package config
 
-var version = "v1.1.4"
+var version = "v1.2.12"
 
 func GetVersion() string {
 	return version

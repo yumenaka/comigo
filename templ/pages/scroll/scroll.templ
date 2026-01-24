@@ -21,20 +21,20 @@ templ ScrollPage(c echo.Context, book *model.Book, readMode string, pagedIndex i
 	if book != nil {
 		@common.Header(
 			common.HeaderProps{
-				Title:             common.GetBookTitle(book.BookInfo.BookID),
+				TitleText:         common.GetBookTitle(book.BookInfo.BookID),
 				ShowReturnIcon:    true,
+				ShowReSortIcon:    true,
 				ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
-				SetDownLoadLink:   false,
-				InShelf:           false,
-				DownLoadLink:      "",
-				SetTheme:          true,
-				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
 				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 			})
 		@MainArea(c, book, readMode, pagedIndex, startIndex)
 	}
 	@common.Footer(config.GetVersion())
-	@common.Drawer(c, book, DrawerSlot(c, book))
+	if book != nil {
+		@common.Drawer(c, book, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
+	} else {
+		@common.Drawer(c, book, DrawerSlot(c, book), true, "/")
+	}
 	@common.QRCode()
 }
 

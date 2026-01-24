@@ -21,15 +21,10 @@ templ FlipPage(c echo.Context, book *model.Book) {
 	if book != nil {
 		@common.Header(
 			common.HeaderProps{
-				Title:             common.GetBookTitle(book.BookInfo.BookID),
+				TitleText:         common.GetBookTitle(book.BookInfo.BookID),
 				ShowReturnIcon:    true,
+				ShowReSortIcon:    true,
 				ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
-				SetDownLoadLink:   false,
-				InShelf:           false,
-				DownLoadLink:      "",
-				SetTheme:          true,
-				FlipMode:          true,
-				ShowQuickJumpBar:  common.ShowQuickJumpBar(book),
 				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
 			})
 		@MainArea(book)
@@ -42,6 +37,10 @@ templ FlipPage(c echo.Context, book *model.Book) {
 		class="fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10"
 		x-text="$store.global.nowPageNum+'/'+$store.global.allPageNum"
 	></div>
-	@common.Drawer(c, book, FlipDrawerSlot(c, book))
+	if book != nil {
+		@common.Drawer(c, book, FlipDrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
+	} else {
+		@common.Drawer(c, book, FlipDrawerSlot(c, book), true, "/")
+	}
 	@common.QRCode()
 }

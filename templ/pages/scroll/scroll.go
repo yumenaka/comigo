@@ -7,6 +7,7 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
@@ -28,7 +29,7 @@ func ScrollModeHandler(c echo.Context) error {
 	bookID := c.Param("id")
 	book, err := model.IStore.GetBook(bookID)
 	if err != nil {
-		logger.Infof("GetBook: %v", err)
+		logger.Infof(locale.GetString("log_getbook_error_scroll"), err)
 		// 没有找到书，显示 HTTP 404 错误
 		indexHtml := common.Html(
 			c,
@@ -89,25 +90,25 @@ func getScrollPaginationURL(book *model.Book, page int) string {
 	return readURL
 }
 
-// 自动书签脚本
+// 自动书签脚本，同时更新当前页码
 func intersectScript(pageIndex int) string {
 	return fmt.Sprintf(`
     $nextTick(() => {
 	if(!loaded || counter < 1){
         return;
     }
-	//console.log({loaded});
+    // 更新当前页码
+    $store.global.nowPageNum = %d;
     if (loaded && !updateBookmarkCompleted) {
         $store.global.UpdateBookmark(
             {
                 type: 'auto',
                 bookId: book.id,
                 pageIndex: %d,
-                label: '自动书签'
             }
         );
         updateBookmarkCompleted = true;
     }
   })
-	`, pageIndex)
+	`, pageIndex, pageIndex)
 }

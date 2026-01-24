@@ -1,45 +1,66 @@
 package flip
 
 import (
-	"fmt"
-	"net/url"
-
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/templ/plugins"
 )
 
 templ FlipDrawerSlot(c echo.Context, book *model.Book) {
-	if (book != nil && book.Type == model.TypePDF) {
-		<!-- PDF【在浏览器中打开】 -->
-		<a
+	<!-- 添加书签按钮 -->
+	if book != nil {
+		<button
+			x-show="$store.global.onlineBook"
+			x-data="{ adding: false }"
+			@click="
+				if (adding) return;
+				adding = true;
+				const pageIndex = $store.global.nowPageNum;
+				$store.global.UpdateBookmark({
+					type: 'user',
+					bookId: $store.global.bookID || window.location.pathname.split('/').pop(),
+					pageIndex: pageIndex,
+					description: ''
+				}).then(() => {
+					adding = false;
+					if (typeof window.showToast === 'function') {
+						window.showToast(i18next.t('bookmark_added'), 'success');
+					} else {
+						alert(i18next.t('bookmark_added'));
+					}
+					// 刷新阅读历史
+					window.dispatchEvent(new CustomEvent('refresh-reading-history'));
+				}).catch(err => {
+					adding = false;
+					console.error('Add bookmark error:', err);
+					if (typeof window.showToast === 'function') {
+						window.showToast(i18next.t('bookmark_exists'), 'warning');
+					}
+				});
+			"
 			type="button"
-			target="_blank"
-			x-text="i18next.t('open_pdf_in_browser')"
-			href={ templ.SafeURL(fmt.Sprintf("/api/raw/%s/%s", book.BookID, url.QueryEscape(book.Title))) }
-			class="px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+			class="flex justify-center items-center w-full px-3 py-2 my-1 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800"
+			:disabled="adding"
 		>
-			用浏览器打开PDF
-		</a>
+			<svg x-show="!adding" class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+				<path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"></path>
+			</svg>
+			<span x-show="!adding" x-text="i18next.t('add_bookmark') + ' (P.' + $store.global.nowPageNum + ')'"></span>
+			<span x-show="adding" class="animate-pulse">...</span>
+		</button>
 	}
-	<!-- 【下载为便携网页文件】按钮，便携模式不可见 -->
-	<div class="flex justify-center w-full my-1 font-semibold" x-show="(!window.location.href.startsWith('file:///'))">
-		<a
-			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
-			download={ book.BookInfo.Title + ".html" }
-			class="inline-flex items-center px-4 py-2 text-white bg-blue-500 rounded shadow-lg hover:bg-blue-600 transition-colors"
-			:title="i18next.t('download_portable_web_file')"
-			x-text="i18next.t('download_portable_web_file')"
-		>
-			下载为便携网页文件
-		</a>
-	</div>
+	<!-- 自动翻页插件 -->
+	@plugins.AutoFlipPlugin(c)
+	<!-- 速写练习插件 -->
+	@plugins.SketchPracticePlugin(c)
 	@common.ReadModeSwitchButton()
+	@common.DownloadButton(c, book)
 	<!-- 远程同步翻页 -->
 	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
 	<label
-		x-show="(!window.location.href.startsWith('file:///'))"
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		x-show="$store.global.onlineBook"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -53,7 +74,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<span class="font-medium ms-3" x-text="i18next.t('sync_page')"></span>
 	</label>
 	<!-- 是否【滑动翻页】 -->
-	<label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
+	<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input
 			type="checkbox"
 			x-model="$store.flip.swipeTurn"
@@ -62,13 +83,27 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 			checked
 		/>
 		<div
-			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
 		<span class="font-medium ms-3" x-text="i18next.t('swipe_turn')"></span>
 	</label>
-	<!-- 日漫模式（右开本）  -->
+	<!-- 是否【鼠标滚轮翻页】 -->
+	<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+		<input
+			type="checkbox"
+			x-model="$store.flip.wheelFlip"
+			x-on:click="$store.flip.wheelFlip =!$store.flip.wheelFlip"
+			class="sr-only peer"
+			checked
+		/>
+		<div
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="font-medium ms-3" x-text="i18next.t('scroll_wheel_flip')"></span>
+	</label>
+	<!-- 日漫模式（右开本）或 美漫模式（左开本） -->
 	<label
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -87,7 +122,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	</label>
 	<!-- 单页模式  -->
 	<label
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -106,7 +141,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	</label>
 	<!-- 显示页数  -->
 	<label
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -121,8 +156,8 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	</label>
 	<!-- 【压缩图片】 -->
 	<label
-		x-show="(!window.location.href.startsWith('file:///'))"
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		x-show="$store.global.onlineBook"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -137,7 +172,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<span class="font-medium ms-3" x-text="i18next.t('compress_image')"></span>
 	</label>
 	<!-- 【压缩图片:宽度】 -->
-	<div x-show="$store.global.autoResize && (!window.location.href.startsWith('file:///'))" x-transition class="relative w-full my-2 rounded-sm outline-offset-4 outline-double outline-2 hover:outline-3 ">
+	<div x-show="$store.global.autoResize && $store.global.onlineBook" x-transition class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label
 			for="autoResizeWidth"
 			class="block w-full mb-0 font-medium"
@@ -156,8 +191,8 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	</div>
 	<!-- 【自动切边】 -->
 	<label
-		x-show="(!window.location.href.startsWith('file:///'))"
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		x-show="$store.global.onlineBook"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -172,7 +207,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<span class="font-medium ms-3" x-text="i18next.t('auto_crop')"></span>
 	</label>
 	<!-- 【切边阈值】 -->
-	<div x-show="$store.global.autoCrop && (!window.location.href.startsWith('file:///'))" x-transition class="relative w-full my-2 rounded-sm outline-offset-4 outline-double outline-2 hover:outline-3">
+	<div x-show="$store.global.autoCrop && $store.global.onlineBook" x-transition class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label
 			for="autoCropNum"
 			class="block w-full mb-0 font-medium"
@@ -192,7 +227,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	</div>
 	<!-- 自动隐藏工具栏  -->
 	<label
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"
@@ -208,7 +243,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	<!-- 自动对齐  -->
 	<label
 		x-show="!$store.flip.autoHideToolbar"
-		class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
 		<input
 			type="checkbox"

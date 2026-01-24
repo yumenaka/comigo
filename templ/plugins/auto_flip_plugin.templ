@@ -1,0 +1,111 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"strings"
+)
+
+// AutoFlipPlugin 自动翻页插件（仅支持翻页模式）
+templ AutoFlipPlugin(c echo.Context) {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_flip") && strings.HasPrefix(c.Request().URL.Path, "/flip/") {
+		if config.GetCfg().Debug {
+			<script>
+				console.log("Auto flip plugin enabled");
+			</script>
+		}
+		<div
+			x-data="{ 
+				autoFlipEnabled: false, 
+				autoFlipInterval: null,
+				intervalSeconds: $persist(3).as('autoFlipIntervalSeconds'),
+				startAutoFlip() {
+					const self = this;
+					// 清除旧定时器
+					if (self.autoFlipInterval) {
+						clearInterval(self.autoFlipInterval);
+						self.autoFlipInterval = null;
+					}
+					// 确保使用最新的 intervalSeconds 值
+					const currentInterval = parseInt(self.intervalSeconds) || 3;
+					// 翻页模式：调用翻页函数
+					if (typeof toNextPage === 'function') {
+						self.autoFlipInterval = setInterval(() => {
+							const nowPageNum = parseInt(Alpine.store('global').nowPageNum);
+							const allPageNum = parseInt(Alpine.store('global').allPageNum);
+							if (nowPageNum >= allPageNum) {
+								// 到达最后一页，自动停止
+								clearInterval(self.autoFlipInterval);
+								self.autoFlipEnabled = false;
+								self.autoFlipInterval = null;
+							} else {
+								toNextPage();
+							}
+						}, currentInterval * 1000);
+					}
+				}
+			}"
+			x-init="(() => {
+				// 确保 intervalSeconds 是数字类型
+				if (typeof intervalSeconds !== 'number') {
+					intervalSeconds = parseInt(intervalSeconds) || 3;
+				}
+				
+				// 页面卸载时清理定时器
+				window.addEventListener('beforeunload', () => {
+					if (autoFlipInterval) {
+						clearInterval(autoFlipInterval);
+					}
+				});
+			})()"
+			class="w-full comigo_plugin"
+		>
+			<!-- 自动翻页切换按钮 -->
+			<button
+				type="button"
+				@click="
+					if (autoFlipEnabled) {
+						// 停止自动翻页
+						if (autoFlipInterval) {
+							clearInterval(autoFlipInterval);
+							autoFlipInterval = null;
+						}
+						autoFlipEnabled = false;
+					} else {
+						// 开始自动翻页
+						autoFlipEnabled = true;
+						startAutoFlip();
+					}
+				"
+				:class="autoFlipEnabled ? 'bg-green-300 hover:bg-green-400' : 'bg-blue-200 hover:bg-indigo-300'"
+				class="w-full mb-2 text-sm text-center inline-flex items-center justify-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out "
+			>
+				<span x-text="autoFlipEnabled ? i18next.t('auto_flip_pause_flip') : i18next.t('auto_flip_start_flip')"></span>
+			</button>
+			<!-- 间隔时间设置 -->
+			<div class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+				<label
+					for="autoFlipIntervalSeconds"
+					class="block w-full mb-0 font-medium"
+					x-text="i18next.t('auto_flip_interval') + ' ' + intervalSeconds + ' ' + i18next.t('auto_flip_seconds')"
+				></label>
+				<input
+					id="autoFlipIntervalSeconds"
+					type="range"
+					min="1"
+					max="120"
+					x-model.number="intervalSeconds"
+					@input="
+						intervalSeconds = parseInt($event.target.value) || 3;
+						// 如果正在运行，重新启动定时器以应用新的间隔时间
+						if (autoFlipEnabled) {
+							startAutoFlip();
+						}
+					"
+					step="1"
+					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+				/>
+			</div>
+		</div>
+	}
+}

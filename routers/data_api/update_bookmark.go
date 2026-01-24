@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -39,16 +40,38 @@ func StoreBookmark(c echo.Context) error {
 	bookMark := model.NewBookMark(markType, book.BookID, book.GetStoreID(), request.PageIndex, request.Description)
 	err = model.IStore.StoreBookMark(bookMark)
 	if err != nil {
-		logger.Infof("Failed to store bookmark: %s", err)
+		logger.Infof(locale.GetString("log_failed_to_store_bookmark"), err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to store bookmark")
 	}
 	// 输出调试信息
 	jsonByte, err := json.MarshalIndent(book.BookMarks, "", "  ")
 	if err == nil {
 		if config.GetCfg().Debug {
-			logger.Infof("Updated bookmarks for book ID %s: %s", book.BookID, string(jsonByte))
+			logger.Infof(locale.GetString("log_updated_bookmarks_for_book_id"), book.BookID, string(jsonByte))
 		}
 	}
 	// 返回成功响应
 	return c.JSON(http.StatusOK, map[string]string{"message": "bookmark updated successfully"})
+}
+
+// GetAllBookmarks 获取所有书签的 API 处理函数
+func GetAllBookmarks(c echo.Context) error {
+	// 获取所有书籍
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
+	}
+	// 收集所有书签
+	allMarks := []model.BookinfoWithBookMark{}
+	for _, book := range allBooks {
+		for _, mark := range book.BookMarks {
+			book.BookInfo.Cover = book.GetCover()
+			bookinfoWithMark := model.BookinfoWithBookMark{
+				BookInfo: book.BookInfo,
+				BookMark: mark,
+			}
+			allMarks = append(allMarks, bookinfoWithMark)
+		}
+	}
+	return c.JSON(http.StatusOK, allMarks)
 }

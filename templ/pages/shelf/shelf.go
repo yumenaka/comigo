@@ -7,6 +7,7 @@ import (
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/templ/common"
@@ -38,23 +39,22 @@ func ShelfHandler(c echo.Context) error {
 	if bookID == "" {
 		storeBookInfos, err = store.TopOfShelfInfo(sortBy)
 		if err != nil {
-			logger.Errorf("GetBookShelf Error: %v", err)
+			logger.Errorf(locale.GetString("err_getbookshelf_error"), err)
 		}
 	}
 	var childBookInfos model.BookInfos
 	// 如果指定了书籍ID，获取子书架信息。
 	if bookID != "" {
-		model.ClearBookNotExist()
-		logger.Infof("Get child books for bookID %s", bookID)
+		logger.Infof(locale.GetString("log_get_child_books_for_bookid"), bookID)
 		childBooks, err := store.GetChildBooksInfo(bookID)
 		if err == nil {
-			logger.Infof("Get %d child books for bookID %s", len(*childBooks), bookID)
+			logger.Infof(locale.GetString("log_get_child_books_count"), bookID, len(*childBooks))
 			childBookInfos = *childBooks
 		}
 		childBookInfos.SortBooks(sortBy)
 		// 无图书的提示（返回主页\上传压缩包\远程下载示例漫画）
 		if err != nil {
-			logger.Infof("GetBookShelf Error: %v", err)
+			logger.Infof(locale.GetString("log_get_bookshelf_error"), err)
 			// 渲染 404 页面
 			indexHtml := common.Html(
 				c,
@@ -87,17 +87,28 @@ func generateReadURL(book model.BookInfo, lastReadPage int) string {
 	if book.Type == model.TypeBooksGroup {
 		return fmt.Sprintf("\"/shelf/%s\"", book.BookID)
 	}
-	// 如果是视频、音频、未知文件，就在新窗口打开
-	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
+	// 如果是视频、音频，跳转到播放器页面
+	if book.Type == model.TypeVideo || book.Type == model.TypeAudio {
+		return fmt.Sprintf("\"/player/%s\"", book.BookID)
+	}
+	// 如果是 HTML、未知文件，就在新窗口打开原始文件
+	if book.Type == model.TypeHTML || book.Type == model.TypeUnknownFile {
 		return fmt.Sprintf("\"/api/raw/%s/%s\"", book.BookID, url.QueryEscape(book.Title))
 	}
 	// 其他情况，跳转到阅读页面，类似 /scroll/4cTOjFm?page=1
 	return fmt.Sprintf("$store.global.getReadURL(\"%s\",%d)", book.BookID, lastReadPage)
 }
 
-func getTarget(book model.BookInfo) string {
+// getBookCardTarget 根据书籍类型，返回书籍卡片的 target 属性值。似乎有点问题，暂时未使用。
+func getBookCardTarget(book model.BookInfo) string {
+	// 新页面打开
 	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
-		return "_blank"
+		return `_blank`
 	}
-	return "_self"
+	// 按照用户设置决定
+	if book.Type == model.TypeZip || book.Type == model.TypeCbz || book.Type == model.TypeEpub || book.Type == model.TypeRar || book.Type == model.TypeCbr || book.Type == model.TypeTar {
+		return `$store.shelf.openInNewTab ? '_blank' : '_self'`
+	}
+	// 当前页面打开
+	return `_self`
 }

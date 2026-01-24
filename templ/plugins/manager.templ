@@ -1,0 +1,30 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+)
+
+// RenderAllPlugins 渲染位置无关的启用插件
+templ RenderAllPlugins(c echo.Context) {
+	if config.GetCfg().EnablePlugin {
+		// 渲染内置插件
+		for _, pluginName := range config.GetCfg().EnabledPluginList {
+			if pluginName == "clock" {
+				@ClockPlugin(c)
+			}
+			if pluginName == "comigo_xyz" {
+				@ComigoXYZPlugin(c)
+			}
+			if pluginName == "sample" {
+				@SamplePlugin(c)
+			}
+			if pluginName == "sketch_practice" {
+				// 速写练习插件的倒计时浮层（渲染在顶层）
+				@SketchPracticeOverlay(c)
+			}
+		}
+		// 渲染用户自定义插件
+		@RenderCustomPlugins(c)
+	}
+}

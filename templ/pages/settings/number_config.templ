@@ -2,36 +2,150 @@ package settings
 
 import "strconv"
 
-templ NumberConfig(name string, value int, description string, min int, max int, saveSuccessHint bool) {
-	if saveSuccessHint {
-		<div
-			class="hidden"
-			x-init="showToast(i18next.t('saveSuccessHint'), 'info');setTimeout(() => {
-            window.location.reload();
-        }, 2000)"
-		></div>
-	}
+// NumberConfig 数字类型的配置
+templ NumberConfig(name string, value int, description string, min int, max int) {
+	@NumberConfigJavaScript()
 	<div
 		id={ "numberConfig_" + name }
-		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<label for={ name } class="w-full py-0 text-left" x-text={ getTranslations(name) }></label>
 		<input
-			class="px-2.5 w-64 rounded-md border-gray-400 py-2.5 pe-10 shadow-sm sm:text-sm"
+			class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
 			id={ name }
 			name={ name }
 			type="number"
 			placeholder={ getTranslations(name) }
 			value={ strconv.Itoa(value) }
+			if name == "AutoRescanIntervalMinutes" {
+				step="10"
+			}
+			if name == "Timeout" {
+				step="10"
+			}
 			max={ strconv.Itoa(max) }
 			min={ strconv.Itoa(min) }
-			hx-post="/api/update-number-config"
-			hx-trigger="change"
-			hx-target={ "#numberConfig_" + name }
-			hx-swap="outerHTML"
-			hx-params="*"
+			data-original-value={ strconv.Itoa(value) }
+			x-on:change={ "updateNumberConfig('" + name + "', $event.target.value, " + strconv.Itoa(min) + ", " + strconv.Itoa(max) + ")" }
 		/>
 		<div class="w-full py-1 text-left text-xs text-gray-500" x-text={ getTranslations(description) }></div>
 		<div class="bg-red-600"></div>
 	</div>
+}
+
+// numberConfigScriptHandle 用于防止 JS 代码重复渲染
+var numberConfigScriptHandle = templ.NewOnceHandle()
+
+// NumberConfigJavaScript 数字配置相关的 JavaScript 代码
+templ NumberConfigJavaScript() {
+	@numberConfigScriptHandle.Once() {
+		<script>
+			// 更新数字配置的函数
+			async function updateNumberConfig(name, value, min, max) {
+				// 验证数值范围
+				const numValue = parseInt(value);
+				if (isNaN(numValue)) {
+					showToast(i18next.t("err_invalid_number"), "error");
+					return;
+				}
+				if (numValue < min || numValue > max) {
+					showToast(
+						i18next
+							.t("err_number_range")
+							.replace("{0}", min)
+							.replace("{1}", max),
+						"error",
+					);
+					// 恢复输入框的值
+					const input = document.getElementById(name);
+					if (input) {
+						input.value = input.getAttribute("data-original-value") || value;
+					}
+					return;
+				}
+				try {
+					const response = await fetch("/api/update-number-config", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							name: name,
+							value: numValue,
+						}),
+					});
+					// 检查响应状态
+					if (!response.ok) {
+						showToast(i18next.t("err_update_config_failed"), "error");
+						// 恢复输入框的值
+						const input = document.getElementById(name);
+						if (input) {
+							input.value = input.getAttribute("data-original-value") || value;
+						}
+						return;
+					}
+					// 解析响应数据
+					const data = await response.json();
+					// 更新原始值标记
+					const input = document.getElementById(name);
+					if (input) {
+						input.setAttribute("data-original-value", numValue);
+					}
+					// 显示成功提示
+					if (data.saveSuccessHint) {
+						if (name === "Port") {
+							// 如果更新的是端口号，提示用户需要跳转新端口
+							showToast(i18next.t("port_change_hint"), "info");
+							// 2秒后跳转到新端口
+							setTimeout(() => {
+								const newUrl = new URL(window.location.href);
+								newUrl.port = numValue;
+								window.location.href = newUrl.href;
+							}, 2000);
+							return;
+						}
+						//如果更新的是自动重扫间隔
+						if (name === "AutoRescanIntervalMinutes") {
+							// 如果numValue > 0，提示用户自动重扫已启用
+							if (numValue > 0) {
+								showMessage({
+									message: i18next.t("auto_rescan_enabled_hint"),
+									buttons: "confirm",
+									onConfirm: function () {
+										window.location.reload();
+									},
+								});
+							}
+							// 如果numValue === 0，提示用户自动重扫已禁用
+							if (numValue === 0) {
+								showMessage({
+									message: i18next.t("auto_rescan_disabled_hint"),
+									buttons: "confirm",
+									onConfirm: function () {
+										window.location.reload();
+									},
+								});
+							}
+							return;
+						}
+						showToast(i18next.t("saveSuccessHint"), "info");
+						// 2秒后刷新页面
+						setTimeout(() => {
+							window.location.reload();
+						}, 2000);
+					} else {
+						showToast(i18next.t("saveSuccessHint"), "success");
+					}
+				} catch (error) {
+					console.error("更新配置失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
+					// 恢复输入框的值
+					const input = document.getElementById(name);
+					if (input) {
+						input.value = input.getAttribute("data-original-value") || value;
+					}
+				}
+			}
+		</script>
+	}
 }
