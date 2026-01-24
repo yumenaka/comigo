@@ -38,7 +38,7 @@ func AutoScrollPlugin(c echo.Context) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_scroll") && strings.HasPrefix(c.Request().URL.Path, "/scroll/") {
 			if config.GetCfg().Debug {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\t\tconsole.log(\"自动滚动插件已启用\");\n\t\t\t</script>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\t\tconsole.log(\"Auto scroll plugin enabled\");\n\t\t\t</script>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

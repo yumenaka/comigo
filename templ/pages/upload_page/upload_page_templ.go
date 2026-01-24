@@ -44,7 +44,7 @@ func UploadPage(c echo.Context) templ.Component {
 			common.HeaderProps{
 				TitleText:      "i18next.t('upload_page')",
 				ShowReturnIcon: true,
-				ReturnUrl:      "/",
+				ReturnUrl:      "/settings",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -57,7 +57,7 @@ func UploadPage(c echo.Context) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(c, nil, nil, true, "/").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(c, nil, nil, true, "/settings").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

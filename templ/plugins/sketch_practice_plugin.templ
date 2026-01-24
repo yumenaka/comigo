@@ -1,0 +1,227 @@
+package plugins
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
+	"strings"
+)
+
+// sketchPracticeScriptHandle 用于防止 JS 代码重复渲染
+var sketchPracticeScriptHandle = templ.NewOnceHandle()
+
+// SketchPracticeScript 初始化 Alpine.js store（只渲染一次）
+templ SketchPracticeScript() {
+	@sketchPracticeScriptHandle.Once() {
+		<script>
+			// 初始化速写练习 Alpine store
+			document.addEventListener("alpine:init", () => {
+				Alpine.store("sketchPractice", {
+					enabled: false,
+					sketchInterval: null,
+					countdownInterval: null,
+					intervalSeconds: Alpine.$persist(30).as(
+						"sketchPracticeIntervalSeconds",
+					),
+					remainingSeconds: 0,
+					// 可拖动浮层位置
+					floatX: Alpine.$persist(20).as("sketchPracticeFloatX"),
+					floatY: Alpine.$persist(20).as("sketchPracticeFloatY"),
+					isDragging: false,
+					dragOffsetX: 0,
+					dragOffsetY: 0,
+
+					start() {
+						const self = this;
+						// 清除旧定时器
+						if (self.sketchInterval) {
+							clearInterval(self.sketchInterval);
+							self.sketchInterval = null;
+						}
+						if (self.countdownInterval) {
+							clearInterval(self.countdownInterval);
+							self.countdownInterval = null;
+						}
+						// 确保使用最新的 intervalSeconds 值
+						const currentInterval = parseInt(self.intervalSeconds) || 30;
+						self.remainingSeconds = currentInterval;
+
+						// 倒计时更新（每秒）
+						self.countdownInterval = setInterval(() => {
+							if (self.remainingSeconds > 0) {
+								self.remainingSeconds--;
+							}
+						}, 1000);
+
+						// 翻页模式：调用翻页函数
+						if (typeof toNextPage === "function") {
+							self.sketchInterval = setInterval(() => {
+								const nowPageNum = parseInt(Alpine.store("global").nowPageNum);
+								const allPageNum = parseInt(Alpine.store("global").allPageNum);
+								if (nowPageNum >= allPageNum) {
+									// 到达最后一页，自动停止
+									self.stop();
+									self.enabled = false;
+								} else {
+									toNextPage();
+									// 重置倒计时
+									self.remainingSeconds = currentInterval;
+								}
+							}, currentInterval * 1000);
+						}
+					},
+
+					stop() {
+						if (this.sketchInterval) {
+							clearInterval(this.sketchInterval);
+							this.sketchInterval = null;
+						}
+						if (this.countdownInterval) {
+							clearInterval(this.countdownInterval);
+							this.countdownInterval = null;
+						}
+						this.remainingSeconds = 0;
+					},
+
+					toggle() {
+						if (this.enabled) {
+							this.stop();
+							this.enabled = false;
+						} else {
+							this.enabled = true;
+							this.start();
+						}
+					},
+
+					updateInterval(value) {
+						this.intervalSeconds = parseInt(value) || 30;
+						if (this.enabled) {
+							this.start();
+						}
+					},
+
+					// 拖动相关方法
+					startDrag(e) {
+						this.isDragging = true;
+						const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+						const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+						this.dragOffsetX = clientX - this.floatX;
+						this.dragOffsetY = clientY - this.floatY;
+					},
+
+					onDrag(e) {
+						if (!this.isDragging) return;
+						e.preventDefault();
+						const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+						const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+						this.floatX = clientX - this.dragOffsetX;
+						this.floatY = clientY - this.dragOffsetY;
+					},
+
+					endDrag() {
+						this.isDragging = false;
+					},
+				});
+
+				// 全局拖动事件监听
+				document.addEventListener("mousemove", (e) => {
+					const store = Alpine.store("sketchPractice");
+					if (store && store.isDragging) {
+						store.onDrag(e);
+					}
+				});
+				document.addEventListener("mouseup", () => {
+					const store = Alpine.store("sketchPractice");
+					if (store) store.endDrag();
+				});
+				document.addEventListener(
+					"touchmove",
+					(e) => {
+						const store = Alpine.store("sketchPractice");
+						if (store && store.isDragging) {
+							store.onDrag(e);
+						}
+					},
+					{ passive: false },
+				);
+				document.addEventListener("touchend", () => {
+					const store = Alpine.store("sketchPractice");
+					if (store) store.endDrag();
+				});
+
+				// 页面卸载时清理定时器
+				window.addEventListener("beforeunload", () => {
+					const store = Alpine.store("sketchPractice");
+					if (store) store.stop();
+				});
+			});
+		</script>
+	}
+}
+
+// SketchPracticeOverlay 可拖动的倒计时浮层（渲染在页面顶层）
+templ SketchPracticeOverlay(c echo.Context) {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("sketch_practice") && strings.HasPrefix(c.Request().URL.Path, "/flip/") {
+		@SketchPracticeScript()
+		<!-- 可拖动的倒计时浮层 -->
+		<div
+			x-data
+			x-show="$store.sketchPractice && $store.sketchPractice.enabled && $store.sketchPractice.remainingSeconds > 0"
+			x-transition
+			:style="$store.sketchPractice ? 'left: ' + $store.sketchPractice.floatX + 'px; top: ' + $store.sketchPractice.floatY + 'px;' : ''"
+			@mousedown="$store.sketchPractice.startDrag($event)"
+			@touchstart="$store.sketchPractice.startDrag($event)"
+			class="fixed z-[9999] px-4 py-2 bg-black/70 text-white rounded-lg cursor-move select-none shadow-lg"
+			style="touch-action: none;"
+		>
+			<div class="text-center">
+				<div class="text-3xl font-bold" x-text="$store.sketchPractice ? $store.sketchPractice.remainingSeconds : ''"></div>
+				<div class="text-xs opacity-80" x-text="i18next.t('sketch_practice_countdown')"></div>
+			</div>
+		</div>
+	}
+}
+
+// SketchPracticePlugin 速写练习插件控制面板（仅支持翻页模式）
+// 与自动翻页插件功能相同，但会在画面上显示可拖动的倒计时提示
+templ SketchPracticePlugin(c echo.Context) {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("sketch_practice") && strings.HasPrefix(c.Request().URL.Path, "/flip/") {
+		if config.GetCfg().Debug {
+			<script>
+				console.log("Sketch practice plugin enabled");
+			</script>
+		}
+		@SketchPracticeScript()
+		<div
+			x-data
+			class="w-full comigo_plugin"
+		>
+			<!-- 速写练习切换按钮 -->
+			<button
+				type="button"
+				@click="$store.sketchPractice.toggle()"
+				:class="$store.sketchPractice && $store.sketchPractice.enabled ? 'bg-orange-400 hover:bg-orange-500' : 'bg-purple-300 hover:bg-purple-400'"
+				class="w-full mb-2 text-sm text-center inline-flex items-center justify-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out "
+			>
+				<span x-text="$store.sketchPractice && $store.sketchPractice.enabled ? i18next.t('sketch_practice_pause') : i18next.t('sketch_practice_start')"></span>
+			</button>
+			<!-- 间隔时间设置 -->
+			<div class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+				<label
+					for="sketchPracticeIntervalSeconds"
+					class="block w-full mb-0 font-medium"
+					x-text="i18next.t('auto_flip_interval') + ' ' + ($store.sketchPractice ? $store.sketchPractice.intervalSeconds : 30) + ' ' + i18next.t('auto_flip_seconds')"
+				></label>
+				<input
+					id="sketchPracticeIntervalSeconds"
+					type="range"
+					min="5"
+					max="300"
+					:value="$store.sketchPractice ? $store.sketchPractice.intervalSeconds : 30"
+					@input="$store.sketchPractice.updateInterval($event.target.value)"
+					step="5"
+					class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+				/>
+			</div>
+		</div>
+	}
+}

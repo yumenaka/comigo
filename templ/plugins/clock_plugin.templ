@@ -10,7 +10,7 @@ templ ClockPlugin(c echo.Context) {
 	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("clock") {
 		if config.GetCfg().Debug {
 			<script>
-				console.log("时钟插件已启用");
+				console.log("Clock plugin enabled");
 			</script>
 		}
 		<div

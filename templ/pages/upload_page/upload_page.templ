@@ -13,10 +13,10 @@ templ UploadPage(c echo.Context) {
 		common.HeaderProps{
 			TitleText:      "i18next.t('upload_page')",
 			ShowReturnIcon: true,
-			ReturnUrl:      "/",
+			ReturnUrl:      "/settings",
 		})
 	@UploadArea()
 	@common.Footer(config.GetVersion())
-	@common.Drawer(c, nil, nil, true, "/")
+	@common.Drawer(c, nil, nil, true, "/settings")
 	@common.QRCode()
 }

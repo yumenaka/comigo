@@ -307,7 +307,7 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" class=\"w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out\" :class=\"selectedStoreB64 === '' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-200  hover:bg-indigo-300'\">重新扫描</button> <button x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" class=\"w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out\" :class=\"selectedStoreB64 === '' ? 'hidden' : 'bg-blue-200  hover:bg-indigo-300'\">重新扫描</button> <button x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -333,7 +333,7 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out\" :class=\"selectedStoreB64 === '' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-red-200  hover:bg-red-400'\">删除书库</button></div></div><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out\" :class=\"selectedStoreB64 === '' ? 'hidden' : 'bg-red-200  hover:bg-red-400'\">删除书库</button></div></div><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

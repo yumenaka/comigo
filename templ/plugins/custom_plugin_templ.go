@@ -86,7 +86,7 @@ func RenderCustomPlugins(c echo.Context) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if config.GetCfg().Debug {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<script>\n\t\t\t\tconsole.log(\"开始加载自定义插件，当前路径:\", window.location.pathname);\n\t\t\t</script>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<script>\n\t\t\t\tconsole.log(\n\t\t\t\t\t\"Loading custom plugin, current path:\",\n\t\t\t\t\twindow.location.pathname,\n\t\t\t\t);\n\t\t\t</script>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

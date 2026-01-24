@@ -25,7 +25,10 @@ templ RenderCustomPlugins(c echo.Context) {
 		// 获取当前路径
 		if config.GetCfg().Debug {
 			<script>
-				console.log("开始加载自定义插件，当前路径:", window.location.pathname);
+				console.log(
+					"Loading custom plugin, current path:",
+					window.location.pathname,
+				);
 			</script>
 		}
 		// 全局插件：在所有页面加载

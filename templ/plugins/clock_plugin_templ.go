@@ -37,7 +37,7 @@ func ClockPlugin(c echo.Context) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("clock") {
 			if config.GetCfg().Debug {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\t\tconsole.log(\"时钟插件已启用\");\n\t\t\t</script>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\t\tconsole.log(\"Clock plugin enabled\");\n\t\t\t</script>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

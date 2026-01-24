@@ -19,6 +19,10 @@ templ RenderAllPlugins(c echo.Context) {
 			if pluginName == "sample" {
 				@SamplePlugin(c)
 			}
+			if pluginName == "sketch_practice" {
+				// 速写练习插件的倒计时浮层（渲染在顶层）
+				@SketchPracticeOverlay(c)
+			}
 		}
 		// 渲染用户自定义插件
 		@RenderCustomPlugins(c)
