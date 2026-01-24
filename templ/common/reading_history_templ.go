@@ -90,7 +90,7 @@ func ReadingHistoryWithLimit(limit int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"flex flex-col w-full my-1 max-h-128\"><!-- 折叠/展开按钮 --><button @click=\"collapsed = !collapsed\" class=\"flex justify-between items-center mb-1 w-full cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><!-- 折叠指示图标 --><svg class=\"w-5 h-5 transition-transform\" :class=\"{ '-rotate-90': collapsed }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg><!-- 阅读历史Title --><div class=\"flex-1 flex flex-row justify-center items-center\"><span class=\"text-center flex-1 font-medium ms-3\" x-text=\"i18next.t('reading_history')+(bookmarks.length > 0 ? '(' + bookmarks.length + ')' : '')\"></span></div><!-- 折叠指示图标 --><svg class=\"w-5 h-5 transition-transform\" :class=\"{ 'rotate-90': collapsed }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg></button><!-- 阅读历史列表 --><div x-show=\"!collapsed\" x-transition class=\"mt-0 p-1 space-y-2 overflow-y-auto rounded border-t-2 border-2 border-gray-500 dark:border-gray-200\"><!-- 加载中 --><div x-show=\"loading\" class=\"text-center text-gray-500 py-4\"><span class=\"w-full h-full text-center text-gray-500\" x-text=\"i18next.t('loading')\"></span></div><!-- 暂无阅读历史 --><div x-show=\"!loading && bookmarks.length === 0\" class=\"flex justify-center items-center w-full h-full text-center text-gray-500\"><span class=\"inline-block align-middle\" x-text=\"i18next.t('no_reading_history')\"></span></div><!-- 书签列表 --><template x-for=\"item in bookmarks\" :key=\"item.book_info.id + '_' + item.book_mark.page_index\"><a :href=\"$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)\" class=\"flex flex-col gap-2 p-2 rounded border-2 border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer\"><div class=\"flex items-center gap-3\"><!-- 封面 --><div class=\"w-16 h-20 bg-cover bg-center rounded shrink-0 border-2 border-gray-500 dark:border-gray-200\" :style=\"'background-image: url(' + (item.book_info.cover.url.includes('api/get_file?') ? item.book_info.cover.url + '&resize_height=128&no-cache=true' : item.book_info.cover.url) + ')'\"></div><!-- 信息 --><div class=\"flex-1 min-w-0\"><div class=\"font-medium text-sm truncate\" x-text=\"item.book_info.title || i18next.t('unknown')\"></div><div class=\"text-xs text-gray-500 mt-1\"><span x-text=\"item.book_mark.page_index + '/' + item.book_info.page_count\"></span> <span x-show=\"$store.shelf.readingProgressPercent\" class=\"ml-2\"><span x-text=\"Math.round((item.book_mark.page_index / item.book_info.page_count) * 100) + '%'\"></span></span></div></div></div><!-- 阅读进度条 --><div class=\"w-full h-1.5 bg-white dark:bg-gray-700 rounded-full overflow-hidden\"><div class=\"h-full bg-blue-500 transition-all duration-300\" :style=\"'width: ' + Math.round((item.book_mark.page_index / item.book_info.page_count) * 100) + '%'\"></div></div></a></template><!-- 查看更多链接（当有更多记录时显示） --><a x-show=\"limit > 0 && totalCount > limit\" href=\"/settings#reading_history\" class=\"flex justify-center items-center w-full py-2 text-sm text-blue-500 hover:text-blue-700 hover:underline\"><span x-text=\"i18next.t('view_all_reading_history') + ' (' + totalCount + ')'\"></span></a></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" @refresh-reading-history.window=\"refresh()\" class=\"flex flex-col w-full my-1 max-h-128\"><!-- 折叠/展开按钮 --><button @click=\"collapsed = !collapsed\" class=\"flex justify-between items-center mb-1 w-full cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><!-- 折叠指示图标 --><svg class=\"w-5 h-5 transition-transform\" :class=\"{ '-rotate-90': collapsed }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg><!-- 阅读历史Title --><div class=\"flex-1 flex flex-row justify-center items-center\"><span class=\"text-center flex-1 font-medium ms-3\" x-text=\"i18next.t('reading_history')+(bookmarks.length > 0 ? '(' + bookmarks.length + ')' : '')\"></span></div><!-- 折叠指示图标 --><svg class=\"w-5 h-5 transition-transform\" :class=\"{ 'rotate-90': collapsed }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg></button><!-- 阅读历史列表 --><div x-show=\"!collapsed\" x-transition class=\"mt-0 p-1 space-y-2 overflow-y-auto rounded border-t-2 border-2 border-gray-500 dark:border-gray-200\"><!-- 加载中 --><div x-show=\"loading\" class=\"text-center text-gray-500 py-4\"><span class=\"w-full h-full text-center text-gray-500\" x-text=\"i18next.t('loading')\"></span></div><!-- 暂无阅读历史 --><div x-show=\"!loading && bookmarks.length === 0\" class=\"flex justify-center items-center w-full h-full text-center text-gray-500\"><span class=\"inline-block align-middle\" x-text=\"i18next.t('no_reading_history')\"></span></div><!-- 书签列表 --><template x-for=\"(item, index) in bookmarks\" :key=\"item.book_info?.id + '_' + item.book_mark?.mark_type + '_' + item.book_mark?.page_index + '_' + index\"><a :href=\"$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)\" class=\"flex flex-col gap-2 p-2 rounded border-2 border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer\"><div class=\"flex items-center gap-3\"><!-- 封面 --><div class=\"w-16 h-20 bg-cover bg-center rounded shrink-0 border-2 border-gray-500 dark:border-gray-200\" :style=\"'background-image: url(' + (item.book_info.cover.url.includes('api/get_file?') ? item.book_info.cover.url + '&resize_height=128&no-cache=true' : item.book_info.cover.url) + ')'\"></div><!-- 信息 --><div class=\"flex-1 min-w-0\"><div class=\"flex items-center gap-1\"><span class=\"font-medium text-sm truncate\" x-text=\"item.book_info.title || i18next.t('unknown')\"></span><!-- 书签类型标识 --><span x-show=\"item.book_mark.mark_type === 'user'\" class=\"shrink-0 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded\" x-text=\"i18next.t('manual_bookmark')\"></span></div><div class=\"text-xs text-gray-500 mt-1\"><span x-text=\"item.book_mark.page_index + '/' + item.book_info.page_count\"></span> <span x-show=\"$store.shelf.readingProgressPercent\" class=\"ml-2\"><span x-text=\"Math.round((item.book_mark.page_index / item.book_info.page_count) * 100) + '%'\"></span></span></div></div></div><!-- 阅读进度条 --><div class=\"w-full h-1.5 bg-white dark:bg-gray-700 rounded-full overflow-hidden\"><div class=\"h-full bg-blue-500 transition-all duration-300\" :style=\"'width: ' + Math.round((item.book_mark.page_index / item.book_info.page_count) * 100) + '%'\"></div></div></a></template><!-- 查看更多链接（当有更多记录时显示） --><a x-show=\"limit > 0 && totalCount > limit\" href=\"/settings#reading_history\" class=\"flex justify-center items-center w-full py-2 text-sm text-blue-500 hover:text-blue-700 hover:underline\"><span x-text=\"i18next.t('view_all_reading_history') + ' (' + totalCount + ')'\"></span></a></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -100,29 +100,33 @@ func ReadingHistoryWithLimit(limit int) templ.Component {
 
 // getReadingHistoryXData 生成阅读历史组件的 x-data
 func getReadingHistoryXData(limit int) string {
-	return "{ collapsed: $persist(true).as('reading_history_collapsed'), bookmarks: [], loading: false, limit: " + strconv.Itoa(limit) + ", totalCount: 0 }"
-}
-
-// getReadingHistoryXInit 生成阅读历史组件的 x-init（使用新API）
-func getReadingHistoryXInit(limit int) string {
-	return `
-		(async () => {
-			loading = true;
+	return `{
+		collapsed: $persist(true).as('reading_history_collapsed'),
+		bookmarks: [],
+		loading: false,
+		limit: ` + strconv.Itoa(limit) + `,
+		totalCount: 0,
+		async refresh() {
+			this.loading = true;
 			try {
 				const response = await fetch('/api/reading-history?limit=` + strconv.Itoa(limit) + `');
 				if (response.ok) {
 					const data = await response.json();
-					// 后端已完成过滤和排序，直接使用返回的数据
-					bookmarks = data.items || [];
-					totalCount = data.total_count || 0;
+					this.bookmarks = data.items || [];
+					this.totalCount = data.total_count || 0;
 				}
 			} catch (error) {
 				console.error('Failed to load reading history:', error);
 			} finally {
-				loading = false;
+				this.loading = false;
 			}
-		})();
-	`
+		}
+	}`
+}
+
+// getReadingHistoryXInit 生成阅读历史组件的 x-init（使用新API）
+func getReadingHistoryXInit(limit int) string {
+	return `refresh()`
 }
 
 var _ = templruntime.GeneratedTemplate

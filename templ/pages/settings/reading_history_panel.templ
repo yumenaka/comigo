@@ -115,7 +115,7 @@ templ ReadingHistoryPanel() {
 			</div>
 			<!-- 书签列表（加载时保持显示） -->
 			<div x-show="bookmarks.length > 0" class="space-y-3 p-2">
-				<template x-for="item in bookmarks" :key="item.book_info.id + '_' + item.book_mark.page_index">
+				<template x-for="(item, index) in bookmarks" :key="item.book_info?.id + '_' + item.book_mark?.mark_type + '_' + item.book_mark?.page_index + '_' + index">
 					<a
 						:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)"
 						class="flex flex-col gap-2 p-3 rounded-lg border-2 border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-blue-400 transition-all cursor-pointer"
@@ -128,7 +128,20 @@ templ ReadingHistoryPanel() {
 							></div>
 							<!-- 信息 -->
 							<div class="flex-1 min-w-0">
-								<div class="font-semibold text-base truncate" x-text="item.book_info.title || i18next.t('unknown')"></div>
+								<div class="flex items-center gap-2">
+									<span class="font-semibold text-base truncate" x-text="item.book_info.title || i18next.t('unknown')"></span>
+									<!-- 书签类型标识 -->
+									<span
+										x-show="item.book_mark.mark_type === 'user'"
+										class="shrink-0 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded"
+										x-text="i18next.t('manual_bookmark')"
+									></span>
+									<span
+										x-show="item.book_mark.mark_type === 'auto' || !item.book_mark.mark_type"
+										class="shrink-0 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded"
+										x-text="i18next.t('auto_bookmark')"
+									></span>
+								</div>
 								<div class="text-sm text-gray-500 mt-2 space-y-1">
 									<div class="flex items-center gap-2">
 										<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
