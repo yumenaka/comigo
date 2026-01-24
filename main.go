@@ -15,6 +15,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/cmd/tui"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -32,19 +33,26 @@ func main() {
 	}
 	// Create an instance of the app structure
 	app := NewApp()
-	// 初始化命令行flag与args，环境变量与配置文件
+	// 初始化命令行flag与args: 读取环境变量 -> 根据可执行文件名设置部分默认参数 -> 读取配置文件
 	cmd.Execute()
 	// 启动网页服务器（不阻塞）
 	routers.StartWebServer()
-	//// 启动或停止 Tailscale 服务（如启用）
-	//routers.StartTailscale()
-	// 扫描书库（命令行指定）
-	cmd.ScanStore(cmd.Args)
-	// 在命令行显示QRCode
-	cmd.ShowQRCode()
-	//// 退出时清理临时文件的处理函数
-	//cmd.SetShutdownHandler()
-	//// RunTui()
+	// 启动或停止 Tailscale 服务（如启用）
+	routers.StartTailscale()
+	// 加载用户自定义插件
+	cmd.LoadUserPlugins()
+	// 分析命令行参数，生成书库URL
+	cmd.AddStoreUrls(cmd.Args)
+	// 如果没有指定扫描路径，就把当前工作目录作为扫描路径
+	cmd.SetCwdAsScanPathIfNeed()
+	// 加载书籍元数据（包括书签）
+	cmd.LoadMetadata()
+	// 扫描书库
+	cmd.ScanStore()
+	// 保存书籍元数据（包括书签）
+	cmd.SaveMetadata()
+	// 启动自动扫描（如果配置了间隔）
+	config.StartOrStopAutoRescan()
 
 	// 获取网页服务器（echo）
 	echo := routers.GetWebServer()
@@ -88,7 +96,7 @@ func RunTui() {
 		// 启动网页服务器（不阻塞）
 		routers.StartWebServer()
 		// 扫描书库（命令行指定）
-		cmd.ScanStore(cmd.Args)
+		cmd.ScanStore()
 
 		// 3. 调用 Bubble Tea 对象的Start()方法开始执行，运行 TUI 程序
 		if _, err := program.Run(); err != nil {
@@ -100,7 +108,7 @@ func RunTui() {
 		// 启动网页服务器（不阻塞）
 		routers.StartWebServer()
 		// 扫描书库（命令行指定）
-		cmd.ScanStore(cmd.Args)
+		cmd.ScanStore()
 		// 在命令行显示QRCode
 		cmd.ShowQRCode()
 		// 退出时清理临时文件的处理函数
