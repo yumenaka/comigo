@@ -36,13 +36,13 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 				}
 			</div>
 			<!-- 添加书库区域 -->
-			<div class="flex flex-row items-center">
+			<div class="flex flex-row items-center pb-1">
 				<label for={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput" } class="sr-only" x-text={ getTranslations("type_or_paste_content") }></label>
 				<input
 					type="text"
 					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput" }
 					:placeholder={ getTranslations("type_or_paste_content") }
-					class="w-full h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+					class="max-w-2/3 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 					x-on:keydown={ "if ($event.key === 'Enter') { addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "'); }" }
 				/>
 				<button
@@ -62,7 +62,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					type="button"
 					:disabled="selectedStoreB64 === ''"
 					x-on:click={ "rescanStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
-					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
+					class="w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
 					:class="selectedStoreB64 === '' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-200  hover:bg-indigo-300'"
 				>
 					重新扫描
@@ -72,7 +72,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					type="button"
 					:disabled="selectedStoreB64 === ''"
 					x-on:click={ "deleteStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
-					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
+					class="w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
 					:class="selectedStoreB64 === '' ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-red-200  hover:bg-red-400'"
 				>
 					删除书库

@@ -128,7 +128,7 @@ templ ReadingHistoryPanel() {
 		<!-- 内容区域（可折叠） -->
 		<div x-show="!collapsed" x-transition>
 			<!-- 分页控件（加载时保持显示，按钮禁用） -->
-			<div x-show="totalPages > 1" class="flex flex-col items-center gap-1 pb-2 mb-2 border-b border-gray-500 dark:border-gray-200">
+			<div x-show="totalPages > 1" class="flex flex-col items-center gap-1 pb-1 border-gray-500 dark:border-gray-200">
 				<div class="flex justify-center items-center gap-2">
 					<!-- 上一页 -->
 					<button
@@ -190,22 +190,22 @@ templ ReadingHistoryPanel() {
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center gap-2 flex-wrap">
 									<span class="font-semibold text-sm sm:text-base truncate" x-text="item.book_info.title || i18next.t('unknown')"></span>
-									<!-- 书签类型标识 -->
-									<span
-										x-show="item.book_mark.mark_type === 'user'"
-										class="shrink-0 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded"
-										x-text="i18next.t('manual_bookmark')"
-									></span>
-									<span
-										x-show="item.book_mark.mark_type === 'auto' || !item.book_mark.mark_type"
-										class="shrink-0 px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded"
-										x-text="i18next.t('auto_bookmark')"
-									></span>
 								</div>
 								<div class="text-xs sm:text-sm text-gray-500 mt-1 space-y-0.5">
 									<div class="flex items-center gap-1 sm:gap-2 flex-wrap">
 										<span x-text="i18next.t('page') + ' ' + item.book_mark.page_index + ' / ' + item.book_info.page_count"></span>
 										<span class="px-1.5 py-0.5 text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-full" x-text="Math.round((item.book_mark.page_index / item.book_info.page_count) * 100) + '%'"></span>
+										<!-- 书签类型标识 -->
+										<span
+											x-show="item.book_mark.mark_type === 'user'"
+											class="shrink-0 px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded"
+											x-text="i18next.t('manual_bookmark')"
+										></span>
+										<span
+											x-show="item.book_mark.mark_type === 'auto' || !item.book_mark.mark_type"
+											class="shrink-0 px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded"
+											x-text="i18next.t('auto_bookmark')"
+										></span>
 									</div>
 									<div class="flex items-center gap-2 text-xs" x-show="item.book_mark.updated_at">
 										<span x-text="new Date(item.book_mark.updated_at).toLocaleString()"></span>
@@ -224,7 +224,7 @@ templ ReadingHistoryPanel() {
 								<!-- 继续阅读按钮 -->
 								<a
 									:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)"
-									class="flex items-center justify-center gap-1 px-3 py-1.5 text-sm border shadow-lg text-black font-semibold focus:ring rounded bg-blue-200  hover:bg-indigo-300 transition-colors"
+									class="flex h-10 items-center justify-center gap-1 px-3 py-1.5 text-sm border shadow-lg text-black font-semibold focus:ring rounded bg-blue-200  hover:bg-indigo-300 transition-colors"
 								>
 									<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"></path>
@@ -235,7 +235,7 @@ templ ReadingHistoryPanel() {
 								<button
 									@click="deleteBookmark(item, index)"
 									:disabled="deleting[item.book_info.id + '_' + item.book_mark.mark_type + '_' + item.book_mark.page_index] === true"
-									class="flex items-center justify-center gap-1 px-3 py-1.5 text-sm border shadow-lg text-black font-semibold focus:ring bg-red-300 rounded hover:bg-red-400 transition-colors"
+									class="flex h-10 items-center justify-center gap-1 px-3 py-1.5 text-sm border shadow-lg text-black font-semibold focus:ring bg-red-300 rounded hover:bg-red-400 transition-colors"
 								>
 									<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>

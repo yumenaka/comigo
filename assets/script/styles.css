@@ -3148,6 +3148,10 @@
     width: calc(var(--spacing) * 24);
   }
 
+  .w-26 {
+    width: calc(var(--spacing) * 26);
+  }
+
   .w-32 {
     width: calc(var(--spacing) * 32);
   }
@@ -3178,6 +3182,10 @@
 
   .max-w-1\/2 {
     max-width: 50%;
+  }
+
+  .max-w-2\/3 {
+    max-width: 66.6667%;
   }
 
   .max-w-2xl {
@@ -6778,6 +6786,10 @@
     cursor: not-allowed;
   }
 
+  .disabled\:bg-blue-300:disabled {
+    background-color: var(--color-blue-300);
+  }
+
   .disabled\:opacity-50:disabled {
     opacity: .5;
   }
@@ -7113,19 +7125,19 @@ input[type="range"]::-moz-range-thumb {
 
 .grid-line {
   background-image: linear-gradient(90deg, #cbd5e1 1px, #0000 1px), linear-gradient(#cbd5e1 1px, #0000 1px);
-  background-position: 50%;
+  background-position: 0 0;
   background-size: 20px 20px;
 }
 
 .grid-point {
   background-image: radial-gradient(circle, #cbd5e1 2px, #ffffff4d 2px);
-  background-position: 50%;
+  background-position: 0 0;
   background-size: 20px 20px;
 }
 
 .grid-mosaic {
   background-image: linear-gradient(45deg, #8d8b8b 25%, #0000 0), linear-gradient(-45deg, #8d8b8b 25%, #0000 0), linear-gradient(45deg, #0000 75%, #8d8b8b 0), linear-gradient(-45deg, #0000 75%, #8d8b8b 0);
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  background-position: 0 0, 0 10px, 10px -10px, 10px 0;
   background-size: 20px 20px;
 }
 
