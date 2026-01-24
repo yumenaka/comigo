@@ -49,7 +49,7 @@ var cfg = Config{
 	EnableSingleInstance:  false,
 	Language:              "auto",
 	// 初始化内置插件列表
-	BuildInPluginList: []string{"auto_flip", "auto_scroll", "clock", "comigo_xyz", "sample"},
+	BuildInPluginList: []string{"auto_flip", "auto_scroll", "clock", "comigo_xyz", "sample", "sketch_practice"},
 	// 用户自定义插件插（TODO）
 	UserPluginList:    []string{},
 	EnabledPluginList: []string{}, // 初始状态，不启用任何插件

@@ -52,6 +52,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component, showReturnI
                             }"
 							x-init="checkLoginStatus()"
 							x-show="isLoggedIn"
+							x-text="i18next.t('logout')"
 						>logout</button>
 					}
 				</div>

@@ -4,7 +4,7 @@ package settings
 templ LogPanel() {
 	<div
 		id="settings_log"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<div
 			class="w-full text-center"
@@ -15,11 +15,12 @@ templ LogPanel() {
 		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<div
 			id="log_panel"
-			class="w-full h-[400px] p-4 mt-1 bg-gray-900 text-sm text-white rounded overflow-y-auto overflow-x-hidden whitespace-pre-wrap wrap-break-word"
+			class="w-full h-[400px] p-4 mt-1 bg-gray-900 text-sm text-white rounded overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-all"
 		>
 			<!-- 日志内容将通过 JavaScript 动态插入 -->
 		</div>
-		<div class="flex items-center justify-center w-full px-2 pt-3">
+		<!-- 发送信息按钮，目前用不着，隐藏 -->
+		<div class="hidden flex items-center justify-center w-full px-2 pt-3">
 			<input
 				id="msg"
 				placeholder="输入广播消息"

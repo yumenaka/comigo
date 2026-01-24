@@ -16,7 +16,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		id="tailscale_config_form"
 		action="/api/submit-tailscale-config"
 		method="post"
-		class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 sm:px-4"
 		x-data="{
 			    	enable_tailscale: true,
 			    	tailscale_auth_key: '',
@@ -56,7 +56,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<!-- 启用Tailscale -->
 		<div id={ "boolConfig_EnableTailscale" } class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
-			<div x-text={ getTranslations("EnableTailscale") }></div>
+			<div x-text={ getTranslations("EnableTailscale") } class="wrap-break-word"></div>
 			<!--  如果一个复选框在其表单被提交时没有被选中，就不会有任何代表其未被选中的状态（例如 value=unchecked）的值被提交给服务器——该值根本就没有被提交给服务器！-->
 			<!-- 如果你想在复选框未被选中时提交一个默认值，你可以在表单中加入一个具有相同的 name 和 value 的 <input type="hidden"> 字段，它可以由 JavaScript 生成。 -->
 			<!-- https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Elements/input/checkbox -->
@@ -88,7 +88,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 				<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
 			</label>
-			<div x-text={ getTranslations("EnableTailscale_Description") } class="w-full py-1 text-xs text-gray-500"></div>
+			<div x-text={ getTranslations("EnableTailscale_Description") } class="w-full py-1 text-xs text-gray-500 wrap-break-word"></div>
 		</div>
 		<!-- Tailscale服务主机名-->
 		<div
@@ -96,17 +96,17 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			x-show="enable_tailscale"
 			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		>
-			<label x-text={ getTranslations("TailscaleHostname") } for={ "TailscaleHostname" }></label>
+			<label x-text={ getTranslations("TailscaleHostname") } for={ "TailscaleHostname" } class="wrap-break-word"></label>
 			<input
 				id={ "TailscaleHostname" }
 				name={ "TailscaleHostname" }
 				type="text"
 				:placeholder={ getTranslations("TailscaleHostname") }
 				value={ config.GetCfg().TailscaleHostname }
-				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+				class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 			/>
 			<div
-				class="w-full py-1 text-xs text-gray-500"
+				class="w-full py-1 text-xs text-gray-500 wrap-break-word"
 				x-text={ getTranslations("TailscaleHostname_Description") }
 			></div>
 			<div class="bg-red-600"></div>
@@ -117,9 +117,9 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			x-show="enable_tailscale"
 		>
-			<label for={ "TailscalePort" } x-text={ getTranslations("TailscalePort") }></label>
+			<label for={ "TailscalePort" } x-text={ getTranslations("TailscalePort") } class="wrap-break-word"></label>
 			<input
-				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm  placeholder-gray-500 placeholder-opacity-50"
+				class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm  placeholder-gray-500 placeholder-opacity-50"
 				id={ "TailscalePort" }
 				name={ "TailscalePort" }
 				type="number"
@@ -128,7 +128,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				max={ strconv.Itoa(65535) }
 				min={ strconv.Itoa(0) }
 			/>
-			<div class="w-full py-1 text-xs text-gray-500" x-text={ getTranslations("TailscalePort_Description") }></div>
+			<div class="w-full py-1 text-xs text-gray-500 wrap-break-word" x-text={ getTranslations("TailscalePort_Description") }></div>
 			<div class="bg-red-600"></div>
 		</div>
 		<!-- Tailscale预授权密钥 -->
@@ -137,18 +137,18 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			x-show="enable_tailscale"
 			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		>
-			<label x-text={ getTranslations("TailscaleAuthKey") } for={ "TailscaleAuthKey" }></label>
+			<label x-text={ getTranslations("TailscaleAuthKey") } for={ "TailscaleAuthKey" } class="wrap-break-word"></label>
 			<input
 				id={ "TailscaleAuthKey" }
 				name={ "TailscaleAuthKey" }
 				type="text"
 				:placeholder={ getTranslations("TailscaleAuthKey") }
 				value={ config.GetCfg().TailscaleAuthKey }
-				class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+				class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
 			/>
 			<div
-				class="w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline"
-			><a href="https://login.tailscale.com/admin/settings/keys" target="_blank" x-text={ getTranslations("TailscaleAuthKeyDescription") }></a></div>
+				class="w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline wrap-break-word"
+			><a href="https://login.tailscale.com/admin/settings/keys" target="_blank" x-text={ getTranslations("TailscaleAuthKeyDescription") } class="wrap-break-word"></a></div>
 			<div class="bg-red-600"></div>
 		</div>
 		<!-- Funnel密码保护检查 -->
@@ -172,7 +172,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					style="display:none;"
 				}
 			></div>
-			<div x-text={ getTranslations("FunnelLoginCheck") }></div>
+			<div x-text={ getTranslations("FunnelLoginCheck") } class="wrap-break-word"></div>
 			<!-- 隐藏input -->
 			<input type="hidden" name={ "FunnelLoginCheck" } value="true" x-bind:disabled="funnel_password_protection"/>
 			<label for={ "FunnelLoginCheck" } class="relative h-8 cursor-pointer w-14">
@@ -193,7 +193,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 				<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
 			</label>
-			<div x-text={ getTranslations("FunnelLoginCheckDescription") } class="w-full py-1 text-xs text-gray-500"></div>
+			<div x-text={ getTranslations("FunnelLoginCheckDescription") } class="w-full py-1 text-xs text-gray-500 wrap-break-word"></div>
 		</div>
 		<!-- Funnel模式（公网访问） -->
 		<div
@@ -216,7 +216,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					style="display:none;"
 				}
 			></div>
-			<div x-text={ getTranslations("FunnelTunnel") }></div>
+			<div x-text={ getTranslations("FunnelTunnel") } class="wrap-break-word"></div>
 			<!-- 隐藏input -->
 			<input type="hidden" name={ "FunnelTunnel" } value="false" x-bind:disabled="tailscale_enable_funnel"/>
 			<label for={ "FunnelTunnel" } class="relative h-8 cursor-pointer w-14">
@@ -235,7 +235,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 				<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
 			</label>
-			<div x-text={ getTranslations("FunnelTunnel_Description") } class="w-full py-1 text-xs text-gray-500"></div>
+			<div x-text={ getTranslations("FunnelTunnel_Description") } class="w-full py-1 text-xs text-gray-500 wrap-break-word"></div>
 		</div>
 		<!-- 帮助面板：如何设置Funnel ACL 权限 -->
 		<div
@@ -253,11 +253,11 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				style="display:none;"
 			}
 		>
-			<p x-text={ getTranslations("funnel_not_set_hint") }>Funnel 功能未设置。需要：</p>
-			<ol class="list-decimal ml-5 space-y-1">
-				<li><a x-text={ getTranslations("funnel_require_dns_1") } href="https://login.tailscale.com/admin/dns" target="_blank" class="underline">在控制台DNS面板</a>，<span x-text={ getTranslations("funnel_require_dns_2") }>开启MagicDNS功能与HTTPS功能</span></li>
-				<li><a x-text={ getTranslations("funnel_require_acl_1") } href="https://login.tailscale.com/admin/acls/file" target="_blank" class="underline">在控制台ACL面板</a><span x-text={ getTranslations("funnel_require_acl_2") }>在Tailscale控制台ACL面板</span><a id="download-funnel-acl-example" href="#" download="tailscale_acl.json" class="underline" x-text={ getTranslations("funnel_require_acl_3") }>点此下载示例JSON文件</a></li>
-				<li x-text={ getTranslations("funnel_require_password_1") }></li>
+			<p x-text={ getTranslations("funnel_not_set_hint") } class="wrap-break-word">Funnel 功能未设置。需要：</p>
+			<ol class="list-decimal ml-5 space-y-1 wrap-break-word">
+				<li class="wrap-break-word"><a x-text={ getTranslations("funnel_require_dns_1") } href="https://login.tailscale.com/admin/dns" target="_blank" class="underline wrap-break-word">在控制台DNS面板</a>，<span x-text={ getTranslations("funnel_require_dns_2") } class="wrap-break-word">开启MagicDNS功能与HTTPS功能</span></li>
+				<li class="wrap-break-word"><a x-text={ getTranslations("funnel_require_acl_1") } href="https://login.tailscale.com/admin/acls/file" target="_blank" class="underline wrap-break-word">在控制台ACL面板</a><span x-text={ getTranslations("funnel_require_acl_2") } class="wrap-break-word">在Tailscale控制台ACL面板</span><a id="download-funnel-acl-example" href="#" download="tailscale_acl.json" class="underline wrap-break-word" x-text={ getTranslations("funnel_require_acl_3") }>点此下载示例JSON文件</a></li>
+				<li x-text={ getTranslations("funnel_require_password_1") } class="wrap-break-word"></li>
 			</ol>
 			<script>
 				(function () {
@@ -483,71 +483,91 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 				@svg.Refresh()
 			</div>
 		</div>
-		<table class="table table-auto w-full">
-			<tbody>
-				<tr id="ts-auth-row" class="border-separate border-b-1 border-gray-500" style="display:none">
-					<td class="min-w-24 font-semibold align-top" x-text={ getTranslations("verify_link") }>验证链接</td>
-					<td class="align-top">
-						<a id="ts-auth-link" class="text-indigo-600 no-underline hover:underline" href={ tsStatus.AuthURL } target="_blank">{ tsStatus.AuthURL }</a>
-					</td>
-				</tr>
-				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("service_status") } class="min-w-24 font-semibold">服务状态</td>
-					<td id="ts-state">{ tsStatus.BackendState }</td>
-				</tr>
-				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("client_count") } class="min-w-24 font-semibold">客户端数</td>
-					<td id="ts-clients">{ strconv.Itoa(len(tsStatus.Clients)) }</td>
-				</tr>
-				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("host_system") } class="min-w-24 font-semibold">宿主系统</td>
-					<td id="ts-os">{ tsStatus.OS }</td>
-				</tr>
-				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("connection_status") } class="min-w-24 font-semibold">连接状况</td>
-					<td>
-						if tsStatus.Online {
-							<span id="ts-online" x-text={ getTranslations("connected") }></span>
+		<div class="overflow-x-auto">
+			<table class="table table-auto w-full min-w-full">
+				<tbody>
+					<tr id="ts-auth-row" class="border-separate border-b border-gray-500" style="display:none">
+						<td class="min-w-24 font-semibold align-top" x-text={ getTranslations("verify_link") }>验证链接</td>
+						<td class="align-top wrap-break-word">
+							<a id="ts-auth-link" class="text-indigo-600 no-underline hover:underline wrap-break-word" href={ tsStatus.AuthURL } target="_blank">{ tsStatus.AuthURL }</a>
+						</td>
+					</tr>
+					<tr class="border-separate border-b border-gray-400">
+						<td x-text={ getTranslations("service_status") } class="min-w-24 font-semibold">服务状态</td>
+						<td id="ts-state" class="wrap-break-word">{ tsStatus.BackendState }</td>
+					</tr>
+					<tr class="border-separate border-b border-gray-400">
+						<td x-text={ getTranslations("client_count") } class="min-w-24 font-semibold">客户端数</td>
+						<td id="ts-clients" class="wrap-break-word">{ strconv.Itoa(len(tsStatus.Clients)) }</td>
+					</tr>
+					<tr class="border-separate border-b border-gray-400">
+						<td x-text={ getTranslations("host_system") } class="min-w-24 font-semibold">宿主系统</td>
+						<td id="ts-os" class="wrap-break-word">{ tsStatus.OS }</td>
+					</tr>
+					<tr class="border-separate border-b border-gray-400">
+						<td x-text={ getTranslations("connection_status") } class="min-w-24 font-semibold">连接状况</td>
+						<td class="wrap-break-word">
+							if tsStatus.Online {
+								<span id="ts-online" x-text={ getTranslations("connected") }></span>
+							}
+							if !tsStatus.Online {
+								<span id="ts-online" x-text={ getTranslations("not_connected") }></span>
+							}
+						</td>
+					</tr>
+					<tr id="ts-funnel-capability-row" class="border-separate border-b border-gray-400" style="display:none">
+						<td x-text={ getTranslations("funnel_status") } class="min-w-24 font-semibold">Funnel状态</td>
+						if tsStatus.FunnelCapability == "true" {
+							<td id="ts-funnel-capability" x-text={ getTranslations("funnel_setup_done") } class="wrap-break-word"></td>
 						}
-						if !tsStatus.Online {
-							<span id="ts-online" x-text={ getTranslations("not_connected") }></span>
+						if tsStatus.FunnelCapability == "false" {
+							<td id="ts-funnel-capability" x-text={ getTranslations("funnel_setup_not_done") } class="wrap-break-word"></td>
 						}
-					</td>
-				</tr>
-				<tr id="ts-funnel-capability-row" class="border-separate border-b-1 border-gray-400" style="display:none">
-					<td x-text={ getTranslations("funnel_status") } class="min-w-24 font-semibold">Funnel状态</td>
-					if tsStatus.FunnelCapability == "true" {
-						<td id="ts-funnel-capability" x-text={ getTranslations("funnel_setup_done") }></td>
-					}
-					if tsStatus.FunnelCapability == "false" {
-						<td id="ts-funnel-capability" x-text={ getTranslations("funnel_setup_not_done") }></td>
-					}
-				</tr>
-				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("enable_funnel") } class="min-w-24 font-semibold">Funnel模式</td>
-					if config.GetCfg().FunnelTunnel {
-						<td id="ts-funnel-mode" x-text={ getTranslations("enable") }></td>
-					}
-					if !config.GetCfg().FunnelTunnel {
-						<td id="ts-funnel-mode" x-text={ getTranslations("disable") }></td>
-					}
-				</tr>
-				<tr class="border-separate border-b-1 border-gray-400">
+					</tr>
+					<tr class="border-separate border-b border-gray-400">
+						<td x-text={ getTranslations("enable_funnel") } class="min-w-24 font-semibold">Funnel模式</td>
+						if config.GetCfg().FunnelTunnel {
+							<td id="ts-funnel-mode" x-text={ getTranslations("enable") } class="wrap-break-word"></td>
+						}
+						if !config.GetCfg().FunnelTunnel {
+							<td id="ts-funnel-mode" x-text={ getTranslations("disable") } class="wrap-break-word"></td>
+						}
+					</tr>
+					<!--
+				<tr class="border-separate border-b border-gray-400">
 					<td x-text={ getTranslations("ip_address") } class="min-w-24 font-semibold">IP地址</td>
 					<td id="ts-ip">{ tsStatus.GetTailscaleIP() }</td>
 				</tr>
-				<tr class="border-separate border-b-1 border-gray-400">
-					<td x-text={ getTranslations("service_version") } class="min-w-24 font-semibold">服务版本</td>
-					<td id="ts-version">{ tsStatus.Version }</td>
-				</tr>
-				<tr id="ts-fqdn-row" class="border-separate border-b-1 border-gray-400" style="display:none">
-					<td x-text={ getTranslations("read_link") } class="min-w-24 font-semibold">阅读链接</td>
-					<td>
-						<a id="ts-fqdn-link" class="text-indigo-600 no-underline hover:underline" href={ tsStatus.FQDN } target="_blank">{ tsStatus.FQDN }</a>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+			-->
+					<tr class="border-separate border-b border-gray-400">
+						<td x-text={ getTranslations("service_version") } class="min-w-24 font-semibold">服务版本</td>
+						<td id="ts-version" class="wrap-break-word">{ tsStatus.Version }</td>
+					</tr>
+					<tr id="ts-fqdn-row" class="border-separate border-b border-gray-400" style="display:none">
+						<td x-text={ getTranslations("read_link") } class="min-w-24 font-semibold">阅读链接</td>
+						<td class="wrap-break-word">
+							<a id="ts-fqdn-link" class="text-indigo-600 no-underline hover:underline wrap-break-word" href={ tsStatus.FQDN } target="_blank">{ tsStatus.FQDN }</a>
+						</td>
+					</tr>
+					<tr id="ts-qrcode-row" class="border-separate border-b border-gray-400" style="display:none">
+						<td colspan="2" class="text-center align-top">
+							<div
+								id="ts-qrcode-container"
+								class="relative w-full max-w-64 mx-auto p-1"
+							>
+								<img
+									id="ts-qrcode-img"
+									draggable="false"
+									src=""
+									class="w-full h-auto rounded shadow-lg border border-gray-300"
+									alt="QR Code"
+								/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 	<script>
 		// 更新Tailscale状态面板
@@ -687,6 +707,9 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 						// FQDN row/link
 						const fqdnRow = panel.querySelector("#ts-fqdn-row");
 						const fqdnLink = panel.querySelector("#ts-fqdn-link");
+						const qrcodeRow = panel.querySelector("#ts-qrcode-row");
+						const qrcodeContainer = panel.querySelector("#ts-qrcode-container");
+						const qrcodeImg = panel.querySelector("#ts-qrcode-img");
 						if (data.FQDN) {
 							if (fqdnRow) fqdnRow.style.display = "";
 							if (fqdnLink) {
@@ -703,6 +726,28 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 								//console.log('Setting FQDN link to:', href);
 								fqdnLink.href = href;
 								fqdnLink.textContent = href;
+								// 更新二维码：当 Online 为 true 且 FQDN 不为空时显示
+								if (data.Online && href) {
+									if (qrcodeRow) qrcodeRow.style.display = "";
+									if (qrcodeImg) {
+										const qrcodeUrl =
+											window.location.origin +
+											"/api/qrcode.png?base64=true&qrcode_str=" +
+											encodeURIComponent(href);
+										fetch(qrcodeUrl)
+											.then((response) => response.text())
+											.then((data) => {
+												if (qrcodeImg) {
+													qrcodeImg.src = data;
+												}
+											})
+											.catch((error) => {
+												console.error("加载二维码失败:", error);
+											});
+									}
+								} else {
+									if (qrcodeRow) qrcodeRow.style.display = "none";
+								}
 							}
 						} else {
 							if (fqdnRow) fqdnRow.style.display = "none";
@@ -710,6 +755,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 								fqdnLink.href = "";
 								fqdnLink.textContent = "";
 							}
+							if (qrcodeRow) qrcodeRow.style.display = "none";
 						}
 						// FunnelCapability
 						const funnelRow = panel.querySelector("#ts-funnel-capability-row");

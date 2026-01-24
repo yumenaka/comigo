@@ -45,6 +45,28 @@ templ UploadArea() {
 		// 保存可用的书库列表
 		let availableStores = [];
 
+		// localStorage key，与 $persist 的命名风格保持一致
+		const LAST_STORE_KEY = "_x_upload.lastSelectedStore";
+
+		// 获取上次选择的书库
+		function getLastSelectedStore() {
+			try {
+				const stored = localStorage.getItem(LAST_STORE_KEY);
+				return stored ? JSON.parse(stored) : null;
+			} catch (e) {
+				return null;
+			}
+		}
+
+		// 保存选择的书库
+		function saveSelectedStore(storeUrl) {
+			try {
+				localStorage.setItem(LAST_STORE_KEY, JSON.stringify(storeUrl));
+			} catch (e) {
+				console.warn("无法保存书库选择到 localStorage:", e);
+			}
+		}
+
 		// 获取书库列表的函数
 		function loadStores() {
 			fetch("/api/stores")
@@ -106,8 +128,17 @@ templ UploadArea() {
 						uploadButton.disabled = true;
 						dropArea.classList.add("opacity-50", "pointer-events-none");
 					} else {
-						// 默认选中第一个可用书库
-						storeSelect.value = firstAvailableStore;
+						// 尝试恢复上次选择的书库
+						const lastStore = getLastSelectedStore();
+						// 检查上次选择的书库是否还在可用列表中
+						if (lastStore && availableStores.includes(lastStore)) {
+							storeSelect.value = lastStore;
+						} else {
+							// 如果上次选择的书库不可用，使用第一个可用书库
+							storeSelect.value = firstAvailableStore;
+							// 更新存储
+							saveSelectedStore(firstAvailableStore);
+						}
 						storeWarning.classList.add("hidden");
 						dropArea.classList.remove("opacity-50", "pointer-events-none");
 						// 更新上传按钮状态
@@ -268,6 +299,10 @@ templ UploadArea() {
 
 		// 监听书库选择变化
 		storeSelect.addEventListener("change", () => {
+			// 保存选择到 localStorage
+			if (storeSelect.value && availableStores.includes(storeSelect.value)) {
+				saveSelectedStore(storeSelect.value);
+			}
 			updateUploadButtonState();
 		});
 		// 处理文件上传

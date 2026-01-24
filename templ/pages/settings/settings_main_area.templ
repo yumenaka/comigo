@@ -33,7 +33,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<!-- 书库设置 -->
 			<div
 				id="settings_stores"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<div x-text={ getTranslations("settings_stores") } class="w-full text-center"></div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
@@ -49,7 +49,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<!-- 网络设置 -->
 			<div
 				id="settings_network"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<div x-text="i18next.t('settings_network')" class="w-full text-center">网络设置</div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
@@ -63,7 +63,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<!-- 其他设置 -->
 			<div
 				id="settings_stores"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<div x-text={ getTranslations("other_settings") } class="w-full text-center"></div>
 				@NumberConfig("MaxScanDepth", config.GetCfg().MaxScanDepth, "MaxScanDepth_Description", 0, 65535)
@@ -83,7 +83,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<!-- 实验功能 -->
 			<div
 				id="settings_labs"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<div x-text={ getTranslations("settings_extra") } class="w-full text-center">实验功能</div>
 				<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>

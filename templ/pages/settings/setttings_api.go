@@ -514,6 +514,17 @@ func EnablePluginHandler(c echo.Context) error {
 
 	logger.Infof("启用插件: %s\n", request.PluginName)
 
+	// 互斥逻辑：auto_flip 和 sketch_practice 不能同时启用
+	if request.PluginName == "sketch_practice" && config.GetCfg().IsPluginEnabled("auto_flip") {
+		// 启用 sketch_practice 时，禁用 auto_flip
+		logger.Infof("禁用互斥插件: auto_flip\n")
+		_ = config.GetCfg().DisablePlugin("auto_flip")
+	} else if request.PluginName == "auto_flip" && config.GetCfg().IsPluginEnabled("sketch_practice") {
+		// 启用 auto_flip 时，禁用 sketch_practice
+		logger.Infof("禁用互斥插件: sketch_practice\n")
+		_ = config.GetCfg().DisablePlugin("sketch_practice")
+	}
+
 	// 启用插件
 	err := config.GetCfg().AddPlugin(request.PluginName)
 	if err != nil {
@@ -526,8 +537,9 @@ func EnablePluginHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "插件已启用",
+		"success":         true,
+		"message":         "插件已启用",
+		"saveSuccessHint": true,
 	})
 }
 

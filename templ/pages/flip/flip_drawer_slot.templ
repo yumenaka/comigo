@@ -52,6 +52,8 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	}
 	<!-- 自动翻页插件 -->
 	@plugins.AutoFlipPlugin(c)
+	<!-- 速写练习插件 -->
+	@plugins.SketchPracticePlugin(c)
 	@common.ReadModeSwitchButton()
 	@common.DownloadButton(c, book)
 	<!-- 远程同步翻页 -->

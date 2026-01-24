@@ -11,7 +11,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("comigo_xyz") && c.Param("id") == "" {
 		if config.GetCfg().Debug {
 			<script>
-				console.log("Comigo.xyz插件已启用");
+				console.log("Comigo.xyz plugin enabled");
 			</script>
 		}
 		<!-- 版本号数据，通过 data 属性传递 -->

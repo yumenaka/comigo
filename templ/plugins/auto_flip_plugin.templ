@@ -11,7 +11,7 @@ templ AutoFlipPlugin(c echo.Context) {
 	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_flip") && strings.HasPrefix(c.Request().URL.Path, "/flip/") {
 		if config.GetCfg().Debug {
 			<script>
-				console.log("自动翻页插件已启用");
+				console.log("Auto flip plugin enabled");
 			</script>
 		}
 		<div
@@ -93,7 +93,7 @@ templ AutoFlipPlugin(c echo.Context) {
 					id="autoFlipIntervalSeconds"
 					type="range"
 					min="1"
-					max="60"
+					max="120"
 					x-model.number="intervalSeconds"
 					@input="
 						intervalSeconds = parseInt($event.target.value) || 3;

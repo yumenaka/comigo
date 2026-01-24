@@ -41,7 +41,7 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
         }"
 		x-init="let stoper= setInterval(() => {
             counter++;
-            console.log('Wait.. Attempt: ' + counter);
+            // console.log('Wait.. Attempt: ' + counter);
             if (counter > 1) {
                 clearInterval(stoper);
             }
