@@ -87,6 +87,8 @@ func startServer() {
 	cmd.LoadMetadata()
 	// 扫描书库
 	cmd.ScanStore()
+	// 生成书组
+	model.GenerateBookGroup()
 	// 保存书籍元数据（包括书签）
 	cmd.SaveMetadata()
 	// 启动自动扫描（如果配置了间隔）
