@@ -55,7 +55,8 @@ bin
 resource.syso
 \[*
 *upload
-
+sample/docker/books
+sample/docker/config
 __*
 #routers/web_static
 tmp

@@ -149,14 +149,14 @@ Alpine.store('global', {
         // 使用 URLSearchParams 提取键值对
         const params = new URLSearchParams(url.search);
         // 分割路径为各层级关键词, filter(Boolean) 的作用是去除空字符串 如//aa/bb/ 会产生空字符串(虽然这里不会这么做)
-        const pathSegments = url.pathname.split('/').filter(Boolean); // like ["scroll", "id3DcA1v9"]
-        const book_id = pathSegments[1];
+        const pathSegments = url.pathname.split('/').filter(Boolean); // like ["nginx_test", "scroll", "id3DcA1v9"]
+        const book_id = pathSegments[pathSegments.length - 1];
         console.log(`切换阅读模式到: ${this.readMode}, 当前路径: ${pathname},${pathSegments}, 查询参数: ${params.toString()}`);
         // 卷轴(无限)模式
         if (this.readMode === 'infinite_scroll') {
             // 如果已经是无限卷轴模式
-            if (pathSegments[0] === "scroll" && params.get("page") === null) {
-                console.log(`${pathSegments[0]} , ${params.get("page")}`);
+            if (pathSegments.includes("scroll") && params.get("page") === null) {
+                console.log(`${pathSegments} , ${params.get("page")}`);
                 console.log("已经是无限卷轴模式，无需切换");
                 return;
             }
@@ -164,8 +164,8 @@ Alpine.store('global', {
         // 卷轴(分页)模式
         if (this.readMode === 'paged_scroll') {
             // 如果已经是分页卷轴模式
-            if (pathSegments[0] === "scroll" && params.get("page") !== null) {
-                console.log(`${pathSegments[0]} , ${params.get("page")}`);
+            if (pathSegments.includes("scroll") && params.get("page") !== null) {
+                console.log(`${pathSegments} , ${params.get("page")}`);
                 console.log("已经是分页卷轴模式，无需切换");
                 return;
             }
@@ -173,14 +173,14 @@ Alpine.store('global', {
         // 翻页模式
         if (this.readMode === 'page_flip') {
             // 如果已经是翻页模式
-            if (pathSegments[0] === "flip") {
+            if (pathSegments.includes("flip")) {
                 console.log("已经是翻页模式，无需切换");
-                console.log(`${pathSegments[0]} , ${params.get("start")}`);
+                console.log(`${pathSegments} , ${params.get("start")}`);
                 return;
             }
         }
         // 跳转到新的阅读模式URL
-        if (pathname.startsWith('/scroll')||pathname.startsWith('/flip')) {
+        if (pathSegments.includes("scroll")||pathSegments.includes("flip")) {
             window.location.href = this.getReadURL(book_id, this.nowPageNum);
         }
     },
