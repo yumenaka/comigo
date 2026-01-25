@@ -879,7 +879,7 @@
   "plugin_enable": "启用插件",
   "err_failed_to_get_config_dir": "获取配置目录失败: %v",
   "comigo_xyz_title": "Comigo",
-  "comigo_xyz_subtitle": "Comigo - 简单方便的漫画浏览器",
+  "comigo_xyz_subtitle": "Comigo - 简单方便的漫画阅读器",
   "comigo_xyz_description": "在所有设备上看漫画。无论电脑还是手机，Windows还是Linux、MacOS",
   "comigo_xyz_feature_format": "📚 多格式支持",
   "comigo_xyz_feature_format_desc": "支持 ZIP、RAR、CBZ、EPUB、PDF 等多种漫画格式",

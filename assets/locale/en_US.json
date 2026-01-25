@@ -879,7 +879,7 @@
   "plugin_enable": "Enable Plugin",
   "err_failed_to_get_config_dir": "Failed to get config directory: %v",
   "comigo_xyz_title": "Comigo",
-  "comigo_xyz_subtitle": "Comigo - Simple and EasyUse Manga Browser",
+  "comigo_xyz_subtitle": "Comigo - Simple and EasyUse Manga Reader",
   "comigo_xyz_description": "Help you read manga on all devices - Whether computer or phone, Windows, Linux,　MacOS",
   "comigo_xyz_feature_format": "📚 Multi-format Support",
   "comigo_xyz_feature_format_desc": "Supports ZIP, RAR, CBZ, EPUB, PDF and other comic formats",
