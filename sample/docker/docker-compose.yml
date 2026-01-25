@@ -7,25 +7,26 @@
 #   停止服务: docker-compose down
 #   重启服务: docker-compose restart
 # ============================================================================
+# 访问方式：
+#   直接访问: http://127.0.0.1:1234
+#   通过 Nginx 反代: http://127.0.0.1:12380/nginx_test/
+# ============================================================================
 
 services:
   comigo:
     # 使用预构建的镜像
     image: yumenaka/comigo:latest
-    
-    # 或者从本地 Dockerfile 构建
-    # build:
-    #   context: ../../
-    #   dockerfile: sample/docker/Dockerfile
-    #   args:
-    #     VERSION: v1.2.4
+#     # 或从本地 Dockerfile 构建
+#    build:
+#       context: ../../
+#       dockerfile: sample/docker/Dockerfile
+#       args:
+#         VERSION: v1.2.4
     
     container_name: comigo
-    
     # 重启策略
     restart: unless-stopped
-    
-    # 端口映射
+    # 端口映射（直接访问）
     ports:
       - "1234:1234"
     
@@ -33,26 +34,20 @@ services:
     environment:
       # 服务端口（默认 1234）
       - COMIGO_PORT=1234
-
       # 用户认证（可选，启用后需要登录）
       # - COMIGO_USERNAME=admin
       # - COMIGO_PASSWORD=your_secure_password
-      
       # 启用文件上传功能（默认 true）
       - COMIGO_ENABLE_UPLOAD=true
-      
       # 只读模式（禁止网页端更改配置或上传文件）
       # - COMIGO_READ_ONLY=false
-      
       # 终端输出语言（auto/zh/en/ja，默认 auto）
       - COMIGO_LANGUAGE=auto
-      
       # 最大扫描深度（默认 5）
       # - COMIGO_MAX_DEPTH=5
       
       # 最少图片数量（默认 1）
       # - COMIGO_MIN_IMAGE=1
-      
       # 时区设置
       - TZ=Asia/Shanghai
     
@@ -74,7 +69,40 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
-
     # 网络配置
-    # networks:
-    #   - comigo-network
+    networks:
+      - comigo-network
+
+  # Nginx 反向代理服务
+  # 提供二级目录 /nginx_test/ 访问 comigo 服务，修改设置请查看 sample/docker/nginx/nginx.conf
+  nginx:
+    image: nginx:alpine
+    container_name: comigo-nginx
+    restart: unless-stopped
+    ports:
+      - "12380:80"
+    volumes:
+      # Nginx 配置文件
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - comigo
+    networks:
+      - comigo-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/test/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+#  # 自动更新服务
+#  watchtower:
+#    image: nickfedor/watchtower:latest
+#    restart: unless-stopped
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+
+# 网络定义
+networks:
+  comigo-network:
+    driver: bridge

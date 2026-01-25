@@ -30,7 +30,6 @@ dist/
 *.test
 *.out
 *.app
-*.zip
 *.tar.gz
 *.deb
 *.rpm
@@ -39,8 +38,8 @@ dist/
 test/
 coverage.txt
 *.prof
-sample/docker/config
-sample/docker/books
+config
+books
 
 # 临时文件
 tmp/
@@ -52,12 +51,6 @@ temp/
 node_modules/
 vendor/
 .parcel-cache/
-
-# 配置文件（运行时通过环境变量或挂载卷提供）
-config.toml
-*.yaml
-*.yml
-!docker-compose.yml
 
 # 数据目录
 data/
@@ -97,19 +90,7 @@ Makefile
 Makefile.*
 *.mk
 
-# 示例和样本（除了插件）
-sample/
-!sample/plugins/
-
-# 脚本
-*.sh
-!build.sh
-
 # SQLite 数据库
 *.db
 *.sqlite
 *.sqlite3
-
-# 其他
-.env
-.env.*

@@ -13427,14 +13427,14 @@ Alpine.store('global', {
         // 使用 URLSearchParams 提取键值对
         const params = new URLSearchParams(url.search);
         // 分割路径为各层级关键词, filter(Boolean) 的作用是去除空字符串 如//aa/bb/ 会产生空字符串(虽然这里不会这么做)
-        const pathSegments = url.pathname.split('/').filter(Boolean); // like ["scroll", "id3DcA1v9"]
-        const book_id = pathSegments[1];
+        const pathSegments = url.pathname.split('/').filter(Boolean); // like ["nginx_test", "scroll", "id3DcA1v9"]
+        const book_id = pathSegments[pathSegments.length - 1];
         console.log(`\u{5207}\u{6362}\u{9605}\u{8BFB}\u{6A21}\u{5F0F}\u{5230}: ${this.readMode}, \u{5F53}\u{524D}\u{8DEF}\u{5F84}: ${pathname},${pathSegments}, \u{67E5}\u{8BE2}\u{53C2}\u{6570}: ${params.toString()}`);
         // 卷轴(无限)模式
         if (this.readMode === 'infinite_scroll') // 如果已经是无限卷轴模式
         {
-            if (pathSegments[0] === "scroll" && params.get("page") === null) {
-                console.log(`${pathSegments[0]} , ${params.get("page")}`);
+            if (pathSegments.includes("scroll") && params.get("page") === null) {
+                console.log(`${pathSegments} , ${params.get("page")}`);
                 console.log("\u5DF2\u7ECF\u662F\u65E0\u9650\u5377\u8F74\u6A21\u5F0F\uFF0C\u65E0\u9700\u5207\u6362");
                 return;
             }
@@ -13442,8 +13442,8 @@ Alpine.store('global', {
         // 卷轴(分页)模式
         if (this.readMode === 'paged_scroll') // 如果已经是分页卷轴模式
         {
-            if (pathSegments[0] === "scroll" && params.get("page") !== null) {
-                console.log(`${pathSegments[0]} , ${params.get("page")}`);
+            if (pathSegments.includes("scroll") && params.get("page") !== null) {
+                console.log(`${pathSegments} , ${params.get("page")}`);
                 console.log("\u5DF2\u7ECF\u662F\u5206\u9875\u5377\u8F74\u6A21\u5F0F\uFF0C\u65E0\u9700\u5207\u6362");
                 return;
             }
@@ -13451,14 +13451,14 @@ Alpine.store('global', {
         // 翻页模式
         if (this.readMode === 'page_flip') // 如果已经是翻页模式
         {
-            if (pathSegments[0] === "flip") {
+            if (pathSegments.includes("flip")) {
                 console.log("\u5DF2\u7ECF\u662F\u7FFB\u9875\u6A21\u5F0F\uFF0C\u65E0\u9700\u5207\u6362");
-                console.log(`${pathSegments[0]} , ${params.get("start")}`);
+                console.log(`${pathSegments} , ${params.get("start")}`);
                 return;
             }
         }
         // 跳转到新的阅读模式URL
-        if (pathname.startsWith('/scroll') || pathname.startsWith('/flip')) window.location.href = this.getReadURL(book_id, this.nowPageNum);
+        if (pathSegments.includes("scroll") || pathSegments.includes("flip")) window.location.href = this.getReadURL(book_id, this.nowPageNum);
     },
     getReadURL (book_id, start_index) {
         // TODO: 处理旧版本数据干扰的问题。若干个版本后大概就不需要了，到时候删除这段代码。
