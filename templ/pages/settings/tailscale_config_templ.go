@@ -43,27 +43,27 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form id=\"tailscale_config_form\" action=\"/api/submit-tailscale-config\" method=\"post\" class=\"flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 sm:px-4\" x-data=\"{\n\t\t\t    \tenable_tailscale: true,\n\t\t\t    \ttailscale_auth_key: '',\n                \ttailscale_hostname: '',\n                \ttailscale_port: '',\n                \ttailscale_enable_funnel: '',\n                \tfunnel_password_protection: false,\n        \t\t\tnowTailscaleStatus: {\n        \t\t\t    AuthURL: '', BackendState: '', Clients: null, OS: 'unknown', Online: true, FQDN: '', TailscaleIPs: [], Version: ''\n        \t\t\t},\n        \t\t\tisFormChanged:false,\n        \t\t\tinit() {\n        \t\t\t    // 初始化数据\n                        this.enable_tailscale = this.$el.querySelector('#EnableTailscale').value === 'true';\n\n                        this.tailscale_auth_key = this.$el.querySelector('#TailscaleAuthKey').value? this.$el.querySelector('#TailscaleAuthKey').value: '';\n\n                        this.tailscale_hostname = this.$el.querySelector('#TailscaleHostname') .value? this.$el.querySelector('#TailscaleHostname') .value: 'comigo';\n\n                        this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';\n\n                        this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').value === 'true';\n\n                        this.funnel_password_protection = this.$el.querySelector('#FunnelLoginCheck').value === 'true';\n\n                        this.nowTailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)\n\n        \t\t\t\tthis.$watch('enable_tailscale', value => {\n        \t\t\t\t    this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n        \t\t\t\t});\n        \t\t\t\tthis.$watch('tailscale_enable_funnel', value => {\n                            this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n                       });\n        \t\t\t}}\"><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"tailscale_config_wrapper\" x-data=\"{ collapsed: $persist(true).as('settings_tailscale_collapsed') }\" class=\"flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 sm:px-4\"><!-- 折叠/展开按钮 --><button @click=\"collapsed = !collapsed\" class=\"flex justify-between items-center w-full cursor-pointer px-2 py-1.5\"><svg class=\"w-5 h-5 transition-transform\" :class=\"{ '-rotate-90': collapsed }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg> <span x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("remote_access"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 55, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 34, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"w-full text-center\"></div><hr class=\"my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200\"><!-- 启用Tailscale --><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex-1 text-center font-semibold\"></span> <svg class=\"w-5 h-5 transition-transform\" :class=\"{ 'rotate-90': collapsed }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg></button><hr x-show=\"!collapsed\" class=\"my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200\"><!-- 可折叠内容 --><div x-show=\"!collapsed\" x-transition><form id=\"tailscale_config_form\" action=\"/api/submit-tailscale-config\" method=\"post\" class=\"flex flex-col justify-start w-full font-semibold items-left text-base-content\" x-data=\"{\n\t\t\t\t\t    \tenable_tailscale: true,\n\t\t\t\t\t    \ttailscale_auth_key: '',\n\t\t                \ttailscale_hostname: '',\n\t\t                \ttailscale_port: '',\n\t\t                \ttailscale_enable_funnel: '',\n\t\t                \tfunnel_password_protection: false,\n\t\t        \t\t\tnowTailscaleStatus: {\n\t\t        \t\t\t    AuthURL: '', BackendState: '', Clients: null, OS: 'unknown', Online: true, FQDN: '', TailscaleIPs: [], Version: ''\n\t\t        \t\t\t},\n\t\t        \t\t\tisFormChanged:false,\n\t\t        \t\t\tinit() {\n\t\t        \t\t\t    // 初始化数据\n\t\t                        this.enable_tailscale = this.$el.querySelector('#EnableTailscale').value === 'true';\n\n\t\t                        this.tailscale_auth_key = this.$el.querySelector('#TailscaleAuthKey').value? this.$el.querySelector('#TailscaleAuthKey').value: '';\n\n\t\t                        this.tailscale_hostname = this.$el.querySelector('#TailscaleHostname') .value? this.$el.querySelector('#TailscaleHostname') .value: 'comigo';\n\n\t\t                        this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';\n\n\t\t                        this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').value === 'true';\n\n\t\t                        this.funnel_password_protection = this.$el.querySelector('#FunnelLoginCheck').value === 'true';\n\n\t\t                        this.nowTailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)\n\n\t\t        \t\t\t\tthis.$watch('enable_tailscale', value => {\n\t\t        \t\t\t\t    this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n\t\t        \t\t\t\t});\n\t\t        \t\t\t\tthis.$watch('tailscale_enable_funnel', value => {\n\t\t                            this.isFormChanged = true; // 启用Tailscale 有变化，表单被修改过\n\t\t                       });\n\t\t        \t\t\t}}\"><!-- 启用Tailscale --><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("boolConfig_EnableTailscale")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 58, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 89, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -76,7 +76,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("EnableTailscale"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 59, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 90, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -89,7 +89,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("EnableTailscaleHidden")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 66, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 97, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -117,7 +117,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("EnableTailscale")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 73, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 104, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -130,7 +130,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs("EnableTailscale")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 76, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 107, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -143,7 +143,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("EnableTailscale")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 77, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 108, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -171,7 +171,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("EnableTailscale_Description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 91, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 122, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -184,7 +184,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("stringConfig_TailscaleHostname")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 95, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 126, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -197,7 +197,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleHostname"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 99, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 130, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -210,7 +210,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleHostname")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 99, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 130, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -223,7 +223,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleHostname")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 101, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 132, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -236,7 +236,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleHostname")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 102, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 133, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -249,7 +249,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleHostname"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 104, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 135, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -262,7 +262,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(config.GetCfg().TailscaleHostname)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 105, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 136, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -275,7 +275,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleHostname_Description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 110, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 141, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -288,7 +288,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs("numberConfig_TailscalePort")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 116, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 147, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -301,7 +301,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs("TailscalePort")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 120, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 151, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -314,7 +314,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscalePort"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 120, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 151, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -327,7 +327,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs("TailscalePort")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 123, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 154, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -340,7 +340,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs("TailscalePort")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 124, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 155, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -353,7 +353,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscalePort"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 126, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 157, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -366,7 +366,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(config.GetCfg().TailscalePort))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 127, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 158, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -379,7 +379,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(65535))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 128, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 159, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -392,7 +392,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(0))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 129, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 160, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -405,7 +405,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscalePort_Description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 131, Col: 119}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 162, Col: 121}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -418,7 +418,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs("stringConfig_TailscaleAuthKey")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 136, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 167, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
@@ -431,7 +431,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleAuthKey"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 140, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 171, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
@@ -444,7 +444,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleAuthKey")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 140, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 171, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
@@ -457,7 +457,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleAuthKey")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 142, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 173, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
@@ -470,7 +470,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var32 string
 		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs("TailscaleAuthKey")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 143, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 174, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 		if templ_7745c5c3_Err != nil {
@@ -483,7 +483,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var33 string
 		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleAuthKey"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 145, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 176, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
@@ -496,7 +496,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(config.GetCfg().TailscaleAuthKey)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 146, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 177, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
@@ -509,7 +509,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var35 string
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscaleAuthKeyDescription"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 151, Col: 133}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 182, Col: 135}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -522,7 +522,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var36 string
 		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs("boolConfig_FunnelLoginCheck")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 156, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 187, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
@@ -558,7 +558,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelLoginCheck"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 175, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 206, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
@@ -571,7 +571,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelLoginCheck")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 177, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 208, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
@@ -584,7 +584,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var39 string
 		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelLoginCheck")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 178, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 209, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 		if templ_7745c5c3_Err != nil {
@@ -597,7 +597,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelLoginCheck")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 181, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 212, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -610,7 +610,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var41 string
 		templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelLoginCheck")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 182, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 213, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 		if templ_7745c5c3_Err != nil {
@@ -638,7 +638,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var42 string
 		templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(config.GetCfg().FunnelLoginCheck)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 192, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 223, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 		if templ_7745c5c3_Err != nil {
@@ -651,7 +651,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var43 string
 		templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelLoginCheckDescription"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 196, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 227, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
 		if templ_7745c5c3_Err != nil {
@@ -664,7 +664,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var44 string
 		templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs("boolConfig_FunnelTunnel")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 200, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 231, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 		if templ_7745c5c3_Err != nil {
@@ -700,7 +700,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var45 string
 		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelTunnel"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 219, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 250, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 		if templ_7745c5c3_Err != nil {
@@ -713,7 +713,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var46 string
 		templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelTunnel")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 221, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 252, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
 		if templ_7745c5c3_Err != nil {
@@ -726,7 +726,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var47 string
 		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelTunnel")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 222, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 253, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {
@@ -739,7 +739,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var48 string
 		templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelTunnel")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 225, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 256, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
 		if templ_7745c5c3_Err != nil {
@@ -752,7 +752,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var49 string
 		templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs("FunnelTunnel")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 226, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 257, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 		if templ_7745c5c3_Err != nil {
@@ -780,7 +780,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var50 string
 		templ_7745c5c3_Var50, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("FunnelTunnel_Description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 238, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 269, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var50))
 		if templ_7745c5c3_Err != nil {
@@ -816,7 +816,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var51 string
 		templ_7745c5c3_Var51, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_not_set_hint"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 256, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 287, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var51))
 		if templ_7745c5c3_Err != nil {
@@ -829,7 +829,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var52 string
 		templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_dns_1"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 258, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 289, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 		if templ_7745c5c3_Err != nil {
@@ -842,7 +842,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var53 string
 		templ_7745c5c3_Var53, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_dns_2"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 258, Col: 263}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 289, Col: 265}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var53))
 		if templ_7745c5c3_Err != nil {
@@ -855,7 +855,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var54 string
 		templ_7745c5c3_Var54, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_acl_1"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 259, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 290, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var54))
 		if templ_7745c5c3_Err != nil {
@@ -868,7 +868,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var55 string
 		templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_acl_2"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 259, Col: 266}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 290, Col: 268}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 		if templ_7745c5c3_Err != nil {
@@ -881,7 +881,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var56 string
 		templ_7745c5c3_Var56, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_acl_3"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 259, Col: 487}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 290, Col: 489}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var56))
 		if templ_7745c5c3_Err != nil {
@@ -894,13 +894,13 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var57 string
 		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_require_password_1"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 260, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 291, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "\" class=\"wrap-break-word\"></li></ol><script>\n\t\t\t\t(function () {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tvar link = document.getElementById(\"download-funnel-acl-example\");\n\t\t\t\t\t\tif (!link) return;\n\t\t\t\t\t\tvar jsonText =\n\t\t\t\t\t\t\t'{\\n  \"groups\": {\\n    \"group:funnel\":  [\"you-email@sample.com\"]\\n  },\\n  \"nodeAttrs\": [\\n    {\\n      \"target\": [\"group:funnel\"],\\n      \"attr\":   [\"funnel\"]\\n    }\\n  ],\\n // Other ACL settings\\n}\\n';\n\t\t\t\t\t\tvar blob = new Blob([jsonText], {\n\t\t\t\t\t\t\ttype: \"application/json;charset=utf-8\",\n\t\t\t\t\t\t});\n\t\t\t\t\t\tvar url = URL.createObjectURL(blob);\n\t\t\t\t\t\tlink.href = url;\n\t\t\t\t\t\tlink.addEventListener(\"click\", function () {\n\t\t\t\t\t\t\tsetTimeout(function () {\n\t\t\t\t\t\t\t\tURL.revokeObjectURL(url);\n\t\t\t\t\t\t\t}, 4000);\n\t\t\t\t\t\t});\n\t\t\t\t\t} catch (_) {}\n\t\t\t\t})();\n\t\t\t</script></div><!-- Tailscale状态面板 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 81, "\" class=\"wrap-break-word\"></li></ol><script>\n\t\t\t\t\t\t(function () {\n\t\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\t\tvar link = document.getElementById(\n\t\t\t\t\t\t\t\t\t\"download-funnel-acl-example\",\n\t\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\t\tif (!link) return;\n\t\t\t\t\t\t\t\tvar jsonText =\n\t\t\t\t\t\t\t\t\t'{\\n  \"groups\": {\\n    \"group:funnel\":  [\"you-email@sample.com\"]\\n  },\\n  \"nodeAttrs\": [\\n    {\\n      \"target\": [\"group:funnel\"],\\n      \"attr\":   [\"funnel\"]\\n    }\\n  ],\\n // Other ACL settings\\n}\\n';\n\t\t\t\t\t\t\t\tvar blob = new Blob([jsonText], {\n\t\t\t\t\t\t\t\t\ttype: \"application/json;charset=utf-8\",\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\tvar url = URL.createObjectURL(blob);\n\t\t\t\t\t\t\t\tlink.href = url;\n\t\t\t\t\t\t\t\tlink.addEventListener(\"click\", function () {\n\t\t\t\t\t\t\t\t\tsetTimeout(function () {\n\t\t\t\t\t\t\t\t\t\tURL.revokeObjectURL(url);\n\t\t\t\t\t\t\t\t\t}, 4000);\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t} catch (_) {}\n\t\t\t\t\t\t})();\n\t\t\t\t\t</script></div><!-- Tailscale状态面板 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -915,13 +915,13 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		var templ_7745c5c3_Var58 string
 		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("submit"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 291, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 324, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "\">Submit</button><script>\n\t\t\t\t(function () {\n\t\t\t\t\tconst btn = document.getElementById(\"tailscale-submit-btn\");\n\t\t\t\t\tif (!btn) return;\n\t\t\t\t\tbtn.addEventListener(\"click\", function (e) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tif (e && typeof e.preventDefault === \"function\")\n\t\t\t\t\t\t\t\te.preventDefault();\n\t\t\t\t\t\t\t// 在请求期间禁用提交按钮，防止重复提交\n\t\t\t\t\t\t\tbtn.disabled = true;\n\t\t\t\t\t\t\tconst enable = !!(\n\t\t\t\t\t\t\t\tdocument.getElementById(\"EnableTailscale\") &&\n\t\t\t\t\t\t\t\tdocument.getElementById(\"EnableTailscale\").checked\n\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\tconst auth_key =\n\t\t\t\t\t\t\t\t(document.getElementById(\"TailscaleAuthKey\") &&\n\t\t\t\t\t\t\t\t\tdocument.getElementById(\"TailscaleAuthKey\").value) ||\n\t\t\t\t\t\t\t\t\"\";\n\t\t\t\t\t\t\tconst host =\n\t\t\t\t\t\t\t\t(document.getElementById(\"TailscaleHostname\") &&\n\t\t\t\t\t\t\t\t\tdocument.getElementById(\"TailscaleHostname\").value) ||\n\t\t\t\t\t\t\t\t\"\";\n\t\t\t\t\t\t\tconst port =\n\t\t\t\t\t\t\t\t(document.getElementById(\"TailscalePort\") &&\n\t\t\t\t\t\t\t\t\tdocument.getElementById(\"TailscalePort\").value) ||\n\t\t\t\t\t\t\t\t\"\";\n\t\t\t\t\t\t\tconst portNum = parseInt(port, 10);\n\t\t\t\t\t\t\tconst funnel = !!(\n\t\t\t\t\t\t\t\tdocument.getElementById(\"FunnelTunnel\") &&\n\t\t\t\t\t\t\t\tdocument.getElementById(\"FunnelTunnel\").checked\n\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\tconst funnel_password_protection = !!(\n\t\t\t\t\t\t\t\tdocument.getElementById(\"FunnelLoginCheck\") &&\n\t\t\t\t\t\t\t\tdocument.getElementById(\"FunnelLoginCheck\").checked\n\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\tconsole.log(\"Submitting Tailscale config:\", {\n\t\t\t\t\t\t\t\tenable,\n\t\t\t\t\t\t\t\tauth_key,\n\t\t\t\t\t\t\t\thost,\n\t\t\t\t\t\t\t\tport: portNum,\n\t\t\t\t\t\t\t\tfunnel,\n\t\t\t\t\t\t\t\tfunnel_password_protection,\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t// 如果页面上存在 id 为 \"logout_button\" 的元素，则 now_login 为 true，否则为 false。\n\t\t\t\t\t\t\tconst now_login = !!document.getElementById(\"logout_button\");\n\t\t\t\t\t\t\tif (\n\t\t\t\t\t\t\t\tfunnel === true &&\n\t\t\t\t\t\t\t\tfunnel_password_protection &&\n\t\t\t\t\t\t\t\tnow_login === false\n\t\t\t\t\t\t\t) {\n\t\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\t\tmessage: i18next.t(\n\t\t\t\t\t\t\t\t\t\t\"funnel_login_check_enabled_but_no_password\",\n\t\t\t\t\t\t\t\t\t),\n\t\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t// 恢复按钮可用\n\t\t\t\t\t\t\t\tbtn.disabled = false;\n\t\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t// 构造 JSON 数据\n\t\t\t\t\t\t\tconst payload = {\n\t\t\t\t\t\t\t\tEnableTailscale: enable,\n\t\t\t\t\t\t\t\tTailscaleAuthKey: auth_key,\n\t\t\t\t\t\t\t\tTailscaleHostname: host,\n\t\t\t\t\t\t\t\tTailscalePort: isNaN(portNum) ? 0 : portNum,\n\t\t\t\t\t\t\t\tFunnelTunnel: funnel,\n\t\t\t\t\t\t\t\tFunnelLoginCheck: funnel_password_protection,\n\t\t\t\t\t\t\t};\n\t\t\t\t\t\t\tfetch(\"/api/submit-tailscale-config\", {\n\t\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t\t\t\tAccept: \"application/json\",\n\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\tbody: JSON.stringify(payload),\n\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t\t.then((res) => {\n\t\t\t\t\t\t\t\t\tif (!res.ok) throw new Error(\"HTTP \" + res.status);\n\t\t\t\t\t\t\t\t\treturn res.json().catch(() => ({}));\n\t\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t\t.then(() => {\n\t\t\t\t\t\t\t\t\t// 提示Tailscale设置已提交\n\t\t\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\t\t\tmessage: i18next.t(\n\t\t\t\t\t\t\t\t\t\t\t\"tailscale_settings_submitted_check_status\",\n\t\t\t\t\t\t\t\t\t\t),\n\t\t\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t\t\t\tonConfirm: function () {\n\t\t\t\t\t\t\t\t\t\t\t// 提交后，定时刷新Tailscale状态面板，最多刷新10次\n\t\t\t\t\t\t\t\t\t\t\tif (typeof UpdateTailscaleStatus === \"function\") {\n\t\t\t\t\t\t\t\t\t\t\t\tlet __tsRefreshCount = 0;\n\t\t\t\t\t\t\t\t\t\t\t\tconst __tsRefreshTimer = setInterval(() => {\n\t\t\t\t\t\t\t\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tUpdateTailscaleStatus();\n\t\t\t\t\t\t\t\t\t\t\t\t\t} catch (_) {}\n\t\t\t\t\t\t\t\t\t\t\t\t\t__tsRefreshCount++;\n\t\t\t\t\t\t\t\t\t\t\t\t\tif (__tsRefreshCount >= 10) {\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tclearInterval(__tsRefreshTimer);\n\t\t\t\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\t\t\t}, 1500);\n\t\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t\t.catch((err) => {\n\t\t\t\t\t\t\t\t\tconsole.error(\"submit tailscale config failed:\", err);\n\t\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t\t.finally(() => {\n\t\t\t\t\t\t\t\t\t// 无论成功或失败，恢复按钮可用\n\t\t\t\t\t\t\t\t\tbtn.disabled = false;\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t} catch (err) {\n\t\t\t\t\t\t\tconsole.error(\"submit tailscale config error:\", err);\n\t\t\t\t\t\t\t// JS 执行阶段的异常也要恢复按钮\n\t\t\t\t\t\t\tbtn.disabled = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t})();\n\t\t\t</script></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "\">Submit</button><script>\n\t\t\t\t\t\t(function () {\n\t\t\t\t\t\t\tconst btn = document.getElementById(\"tailscale-submit-btn\");\n\t\t\t\t\t\t\tif (!btn) return;\n\t\t\t\t\t\t\tbtn.addEventListener(\"click\", function (e) {\n\t\t\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\t\t\tif (e && typeof e.preventDefault === \"function\")\n\t\t\t\t\t\t\t\t\t\te.preventDefault();\n\t\t\t\t\t\t\t\t\t// 在请求期间禁用提交按钮，防止重复提交\n\t\t\t\t\t\t\t\t\tbtn.disabled = true;\n\t\t\t\t\t\t\t\t\tconst enable = !!(\n\t\t\t\t\t\t\t\t\t\tdocument.getElementById(\"EnableTailscale\") &&\n\t\t\t\t\t\t\t\t\t\tdocument.getElementById(\"EnableTailscale\").checked\n\t\t\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\t\t\tconst auth_key =\n\t\t\t\t\t\t\t\t\t\t(document.getElementById(\"TailscaleAuthKey\") &&\n\t\t\t\t\t\t\t\t\t\t\tdocument.getElementById(\"TailscaleAuthKey\").value) ||\n\t\t\t\t\t\t\t\t\t\t\"\";\n\t\t\t\t\t\t\t\t\tconst host =\n\t\t\t\t\t\t\t\t\t\t(document.getElementById(\"TailscaleHostname\") &&\n\t\t\t\t\t\t\t\t\t\t\tdocument.getElementById(\"TailscaleHostname\").value) ||\n\t\t\t\t\t\t\t\t\t\t\"\";\n\t\t\t\t\t\t\t\t\tconst port =\n\t\t\t\t\t\t\t\t\t\t(document.getElementById(\"TailscalePort\") &&\n\t\t\t\t\t\t\t\t\t\t\tdocument.getElementById(\"TailscalePort\").value) ||\n\t\t\t\t\t\t\t\t\t\t\"\";\n\t\t\t\t\t\t\t\t\tconst portNum = parseInt(port, 10);\n\t\t\t\t\t\t\t\t\tconst funnel = !!(\n\t\t\t\t\t\t\t\t\t\tdocument.getElementById(\"FunnelTunnel\") &&\n\t\t\t\t\t\t\t\t\t\tdocument.getElementById(\"FunnelTunnel\").checked\n\t\t\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\t\t\tconst funnel_password_protection = !!(\n\t\t\t\t\t\t\t\t\t\tdocument.getElementById(\"FunnelLoginCheck\") &&\n\t\t\t\t\t\t\t\t\t\tdocument.getElementById(\"FunnelLoginCheck\").checked\n\t\t\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\t\t\tconsole.log(\"Submitting Tailscale config:\", {\n\t\t\t\t\t\t\t\t\t\tenable,\n\t\t\t\t\t\t\t\t\t\tauth_key,\n\t\t\t\t\t\t\t\t\t\thost,\n\t\t\t\t\t\t\t\t\t\tport: portNum,\n\t\t\t\t\t\t\t\t\t\tfunnel,\n\t\t\t\t\t\t\t\t\t\tfunnel_password_protection,\n\t\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t\t// 如果页面上存在 id 为 \"logout_button\" 的元素，则 now_login 为 true，否则为 false。\n\t\t\t\t\t\t\t\t\tconst now_login = !!document.getElementById(\"logout_button\");\n\t\t\t\t\t\t\t\t\tif (\n\t\t\t\t\t\t\t\t\t\tfunnel === true &&\n\t\t\t\t\t\t\t\t\t\tfunnel_password_protection &&\n\t\t\t\t\t\t\t\t\t\tnow_login === false\n\t\t\t\t\t\t\t\t\t) {\n\t\t\t\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\t\t\t\tmessage: i18next.t(\n\t\t\t\t\t\t\t\t\t\t\t\t\"funnel_login_check_enabled_but_no_password\",\n\t\t\t\t\t\t\t\t\t\t\t),\n\t\t\t\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t\t\t// 恢复按钮可用\n\t\t\t\t\t\t\t\t\t\tbtn.disabled = false;\n\t\t\t\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t// 构造 JSON 数据\n\t\t\t\t\t\t\t\t\tconst payload = {\n\t\t\t\t\t\t\t\t\t\tEnableTailscale: enable,\n\t\t\t\t\t\t\t\t\t\tTailscaleAuthKey: auth_key,\n\t\t\t\t\t\t\t\t\t\tTailscaleHostname: host,\n\t\t\t\t\t\t\t\t\t\tTailscalePort: isNaN(portNum) ? 0 : portNum,\n\t\t\t\t\t\t\t\t\t\tFunnelTunnel: funnel,\n\t\t\t\t\t\t\t\t\t\tFunnelLoginCheck: funnel_password_protection,\n\t\t\t\t\t\t\t\t\t};\n\t\t\t\t\t\t\t\t\tfetch(\"/api/submit-tailscale-config\", {\n\t\t\t\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t\t\t\t\t\tAccept: \"application/json\",\n\t\t\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\t\t\tbody: JSON.stringify(payload),\n\t\t\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t\t\t\t.then((res) => {\n\t\t\t\t\t\t\t\t\t\t\tif (!res.ok) throw new Error(\"HTTP \" + res.status);\n\t\t\t\t\t\t\t\t\t\t\treturn res.json().catch(() => ({}));\n\t\t\t\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t\t\t\t.then(() => {\n\t\t\t\t\t\t\t\t\t\t\t// 提示Tailscale设置已提交\n\t\t\t\t\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\t\t\t\t\tmessage: i18next.t(\n\t\t\t\t\t\t\t\t\t\t\t\t\t\"tailscale_settings_submitted_check_status\",\n\t\t\t\t\t\t\t\t\t\t\t\t),\n\t\t\t\t\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t\t\t\t\t\tonConfirm: function () {\n\t\t\t\t\t\t\t\t\t\t\t\t\t// 提交后，定时刷新Tailscale状态面板，最多刷新10次\n\t\t\t\t\t\t\t\t\t\t\t\t\tif (typeof UpdateTailscaleStatus === \"function\") {\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tlet __tsRefreshCount = 0;\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tconst __tsRefreshTimer = setInterval(() => {\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tUpdateTailscaleStatus();\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t} catch (_) {}\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t__tsRefreshCount++;\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tif (__tsRefreshCount >= 10) {\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tclearInterval(__tsRefreshTimer);\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t}, 1500);\n\t\t\t\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t\t\t\t.catch((err) => {\n\t\t\t\t\t\t\t\t\t\t\tconsole.error(\"submit tailscale config failed:\", err);\n\t\t\t\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t\t\t\t.finally(() => {\n\t\t\t\t\t\t\t\t\t\t\t// 无论成功或失败，恢复按钮可用\n\t\t\t\t\t\t\t\t\t\t\tbtn.disabled = false;\n\t\t\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t} catch (err) {\n\t\t\t\t\t\t\t\t\tconsole.error(\"submit tailscale config error:\", err);\n\t\t\t\t\t\t\t\t\t// JS 执行阶段的异常也要恢复按钮\n\t\t\t\t\t\t\t\t\tbtn.disabled = false;\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t})();\n\t\t\t\t\t</script></div></form></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -958,7 +958,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var60 string
 		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("tailscale_status"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 481, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 516, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 		if templ_7745c5c3_Err != nil {
@@ -979,7 +979,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var61 string
 		templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("verify_link"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 490, Col: 90}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 525, Col: 90}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 		if templ_7745c5c3_Err != nil {
@@ -992,7 +992,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var62 templ.SafeURL
 		templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinURLErrs(tsStatus.AuthURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 492, Col: 120}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 527, Col: 120}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 		if templ_7745c5c3_Err != nil {
@@ -1005,7 +1005,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var63 string
 		templ_7745c5c3_Var63, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.AuthURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 492, Col: 157}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 527, Col: 157}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
 		if templ_7745c5c3_Err != nil {
@@ -1018,7 +1018,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var64 string
 		templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("service_status"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 496, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 531, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 		if templ_7745c5c3_Err != nil {
@@ -1031,7 +1031,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var65 string
 		templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.BackendState)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 497, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 532, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 		if templ_7745c5c3_Err != nil {
@@ -1044,7 +1044,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var66 string
 		templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("client_count"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 500, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 535, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
 		if templ_7745c5c3_Err != nil {
@@ -1057,7 +1057,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var67 string
 		templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(tsStatus.Clients)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 501, Col: 87}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 536, Col: 87}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
 		if templ_7745c5c3_Err != nil {
@@ -1070,7 +1070,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var68 string
 		templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("host_system"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 504, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 539, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
 		if templ_7745c5c3_Err != nil {
@@ -1083,7 +1083,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var69 string
 		templ_7745c5c3_Var69, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.OS)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 505, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 540, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var69))
 		if templ_7745c5c3_Err != nil {
@@ -1096,7 +1096,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var70 string
 		templ_7745c5c3_Var70, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("connection_status"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 508, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 543, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var70))
 		if templ_7745c5c3_Err != nil {
@@ -1114,7 +1114,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 			var templ_7745c5c3_Var71 string
 			templ_7745c5c3_Var71, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("connected"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 511, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 546, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var71))
 			if templ_7745c5c3_Err != nil {
@@ -1133,7 +1133,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 			var templ_7745c5c3_Var72 string
 			templ_7745c5c3_Var72, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("not_connected"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 514, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 549, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var72))
 			if templ_7745c5c3_Err != nil {
@@ -1151,7 +1151,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var73 string
 		templ_7745c5c3_Var73, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_status"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 519, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 554, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var73))
 		if templ_7745c5c3_Err != nil {
@@ -1169,7 +1169,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 			var templ_7745c5c3_Var74 string
 			templ_7745c5c3_Var74, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_setup_done"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 521, Col: 82}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 556, Col: 82}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var74))
 			if templ_7745c5c3_Err != nil {
@@ -1188,7 +1188,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 			var templ_7745c5c3_Var75 string
 			templ_7745c5c3_Var75, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("funnel_setup_not_done"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 524, Col: 86}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 559, Col: 86}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var75))
 			if templ_7745c5c3_Err != nil {
@@ -1206,7 +1206,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var76 string
 		templ_7745c5c3_Var76, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("enable_funnel"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 528, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 563, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var76))
 		if templ_7745c5c3_Err != nil {
@@ -1224,7 +1224,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 			var templ_7745c5c3_Var77 string
 			templ_7745c5c3_Var77, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("enable"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 530, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 565, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var77))
 			if templ_7745c5c3_Err != nil {
@@ -1243,7 +1243,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 			var templ_7745c5c3_Var78 string
 			templ_7745c5c3_Var78, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("disable"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 533, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 568, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var78))
 			if templ_7745c5c3_Err != nil {
@@ -1261,7 +1261,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var79 string
 		templ_7745c5c3_Var79, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("service_version"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 543, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 578, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var79))
 		if templ_7745c5c3_Err != nil {
@@ -1274,7 +1274,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var80 string
 		templ_7745c5c3_Var80, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.Version)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 544, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 579, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var80))
 		if templ_7745c5c3_Err != nil {
@@ -1287,7 +1287,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var81 string
 		templ_7745c5c3_Var81, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("read_link"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 547, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 582, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var81))
 		if templ_7745c5c3_Err != nil {
@@ -1300,7 +1300,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var82 templ.SafeURL
 		templ_7745c5c3_Var82, templ_7745c5c3_Err = templ.JoinURLErrs(tsStatus.FQDN)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 549, Col: 117}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 584, Col: 117}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var82))
 		if templ_7745c5c3_Err != nil {
@@ -1313,7 +1313,7 @@ func TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) templ.Comp
 		var templ_7745c5c3_Var83 string
 		templ_7745c5c3_Var83, templ_7745c5c3_Err = templ.JoinStringErrs(tsStatus.FQDN)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 549, Col: 151}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 584, Col: 151}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var83))
 		if templ_7745c5c3_Err != nil {

@@ -36,20 +36,20 @@ func PluginsConfig() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"plugins-config\" class=\"flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"plugins-config\" x-data=\"{ collapsed: $persist(false).as('settings_plugins_collapsed') }\" class=\"flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"><!-- 折叠/展开按钮 --><button @click=\"collapsed = !collapsed\" class=\"flex justify-between items-center w-full cursor-pointer px-2 py-1.5\"><svg class=\"w-5 h-5 transition-transform\" :class=\"{ '-rotate-90': collapsed }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg> <span x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("plugins_config"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 12, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 27, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"w-full text-center\">插件系统</div><hr class=\"my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200\"><!-- 启用插件系统开关 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex-1 text-center font-semibold\">插件系统</span> <svg class=\"w-5 h-5 transition-transform\" :class=\"{ 'rotate-90': collapsed }\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 10 6\"><path stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"m1 1 4 4 4-4\"></path></svg></button><hr x-show=\"!collapsed\" class=\"my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200\"><!-- 可折叠内容 --><div x-show=\"!collapsed\" x-transition><!-- 启用插件系统开关 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,7 +69,7 @@ func PluginsConfig() templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("enabled_plugins"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 19, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 46, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -87,7 +87,7 @@ func PluginsConfig() templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs("i18next.t('plugin_name_" + pluginName + "')")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 23, Col: 83}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 50, Col: 84}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -100,7 +100,7 @@ func PluginsConfig() templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(pluginName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 23, Col: 98}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 50, Col: 99}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -113,7 +113,7 @@ func PluginsConfig() templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("plugin_" + pluginName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 27, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 54, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -126,7 +126,7 @@ func PluginsConfig() templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(pluginName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 28, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 55, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -149,7 +149,7 @@ func PluginsConfig() templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("togglePlugin('" + pluginName + "', $event.target.checked)")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 31, Col: 82}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 58, Col: 83}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -165,7 +165,7 @@ func PluginsConfig() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

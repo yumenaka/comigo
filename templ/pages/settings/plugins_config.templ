@@ -7,37 +7,65 @@ templ PluginsConfig() {
 	@PluginsConfigJavaScript()
 	<div
 		id="plugins-config"
+		x-data="{ collapsed: $persist(false).as('settings_plugins_collapsed') }"
 		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
-		<div x-text={ getTranslations("plugins_config") } class="w-full text-center">插件系统</div>
-		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-		<!-- 启用插件系统开关 -->
-		@BoolConfig("EnablePlugin", config.GetCfg().EnablePlugin, "EnablePlugin_Description")
-		<!-- 已启用插件列表（可启用/禁用） -->
-		if config.GetCfg().EnablePlugin {
-			<div class="flex flex-col w-full p-2 m-1 font-semibold border rounded shadow-md justify-left items-left bg-base-200 text-base-content border-slate-300">
-				<div x-text={ getTranslations("enabled_plugins") } class="w-full py-1 text-left text-sm">已启用插件</div>
-				<div class="flex flex-col w-full">
-					for _, pluginName := range config.GetCfg().BuildInPluginList {
-						<div class="flex flex-row items-center justify-between w-full p-2 m-1 border rounded bg-base-100">
-							<span class="text-sm" x-text={ "i18next.t('plugin_name_" + pluginName + "')" }>{ pluginName }</span>
-							<label class="relative h-6 cursor-pointer w-12">
-								<input
-									type="checkbox"
-									id={ "plugin_" + pluginName }
-									data-plugin-name={ pluginName }
-									checked?={ config.GetCfg().IsPluginEnabled(pluginName) }
-									class="sr-only peer"
-									x-on:change={ "togglePlugin('" + pluginName + "', $event.target.checked)" }
-								/>
-								<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
-								<span class="absolute inset-y-0 w-4 h-4 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-5"></span>
-							</label>
-						</div>
-					}
+		<!-- 折叠/展开按钮 -->
+		<button
+			@click="collapsed = !collapsed"
+			class="flex justify-between items-center w-full cursor-pointer px-2 py-1.5"
+		>
+			<svg
+				class="w-5 h-5 transition-transform"
+				:class="{ '-rotate-90': collapsed }"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 10 6"
+			>
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+			</svg>
+			<span x-text={ getTranslations("plugins_config") } class="flex-1 text-center font-semibold">插件系统</span>
+			<svg
+				class="w-5 h-5 transition-transform"
+				:class="{ 'rotate-90': collapsed }"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 10 6"
+			>
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+			</svg>
+		</button>
+		<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+		<!-- 可折叠内容 -->
+		<div x-show="!collapsed" x-transition>
+			<!-- 启用插件系统开关 -->
+			@BoolConfig("EnablePlugin", config.GetCfg().EnablePlugin, "EnablePlugin_Description")
+			<!-- 已启用插件列表（可启用/禁用） -->
+			if config.GetCfg().EnablePlugin {
+				<div class="flex flex-col w-full p-2 m-1 font-semibold border rounded shadow-md justify-left items-left bg-base-200 text-base-content border-slate-300">
+					<div x-text={ getTranslations("enabled_plugins") } class="w-full py-1 text-left text-sm">已启用插件</div>
+					<div class="flex flex-col w-full">
+						for _, pluginName := range config.GetCfg().BuildInPluginList {
+							<div class="flex flex-row items-center justify-between w-full p-2 m-1 border rounded bg-base-100">
+								<span class="text-sm" x-text={ "i18next.t('plugin_name_" + pluginName + "')" }>{ pluginName }</span>
+								<label class="relative h-6 cursor-pointer w-12">
+									<input
+										type="checkbox"
+										id={ "plugin_" + pluginName }
+										data-plugin-name={ pluginName }
+										checked?={ config.GetCfg().IsPluginEnabled(pluginName) }
+										class="sr-only peer"
+										x-on:change={ "togglePlugin('" + pluginName + "', $event.target.checked)" }
+									/>
+									<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
+									<span class="absolute inset-y-0 w-4 h-4 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-5"></span>
+								</label>
+							</div>
+						}
+					</div>
 				</div>
-			</div>
-		}
+			}
+		</div>
 	</div>
 }
 
