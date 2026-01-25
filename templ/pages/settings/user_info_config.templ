@@ -5,13 +5,43 @@ var userInfoConfigScriptHandle = templ.NewOnceHandle()
 
 // UserInfoConfig 用户信息配置
 templ UserInfoConfig(nowUsername string, nowPassword string) {
-	<div id={ "user_config" } class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
-		<div x-text={ getTranslations("AdminAccountSetup") } class="w-full text-center"></div>
-		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-		<form
-			id="user_config_form"
-			class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
-			x-data="{
+	<div
+		id={ "user_config" }
+		x-data="{ collapsed: $persist(false).as('settings_user_info_collapsed') }"
+		class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+	>
+		<!-- 折叠/展开按钮 -->
+		<button
+			@click="collapsed = !collapsed"
+			class="flex justify-between items-center w-full cursor-pointer px-2 py-1.5"
+		>
+			<svg
+				class="w-5 h-5 transition-transform"
+				:class="{ '-rotate-90': collapsed }"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 10 6"
+			>
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+			</svg>
+			<span x-text={ getTranslations("AdminAccountSetup") } class="flex-1 text-center font-semibold"></span>
+			<svg
+				class="w-5 h-5 transition-transform"
+				:class="{ 'rotate-90': collapsed }"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 10 6"
+			>
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+			</svg>
+		</button>
+		<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+		<!-- 可折叠内容 -->
+		<div x-show="!collapsed" x-transition>
+			<form
+				id="user_config_form"
+				class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				x-data="{
 			username: '',
 			current_password: '',
 			password: '',
@@ -54,118 +84,119 @@ templ UserInfoConfig(nowUsername string, nowPassword string) {
 				return true;
 			}
 		}"
-		>
-			<!-- 用户名 -->
-			<label x-text={ getTranslations("Username") } for="Username" class="w-64"></label>
-			<input
-				id="Username"
-				name="Username"
-				type="text"
-				:placeholder={ getTranslations("Username") }
-				value={ nowUsername }
-				x-model="username"
-				class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
-			/>
-			<!-- 当前密码 -->
-			<div class="relative" hidden?={ nowPassword == "" } x-data="{ open: false }">
-				<label x-text={ getTranslations("CurrentPassword") } for="CurrentPassword" class="w-64"></label>
+			>
+				<!-- 用户名 -->
+				<label x-text={ getTranslations("Username") } for="Username" class="w-64"></label>
+				<input
+					id="Username"
+					name="Username"
+					type="text"
+					:placeholder={ getTranslations("Username") }
+					value={ nowUsername }
+					x-model="username"
+					class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+				/>
+				<!-- 当前密码 -->
+				<div class="relative" hidden?={ nowPassword == "" } x-data="{ open: false }">
+					<label x-text={ getTranslations("CurrentPassword") } for="CurrentPassword" class="w-64"></label>
+					<div class="relative">
+						<input
+							id="CurrentPassword"
+							name="CurrentPassword"
+							:type="showPassword ? 'text' : 'password'"
+							:placeholder={ getTranslations("CurrentPassword") }
+							x-model="current_password"
+							class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+						/>
+						<button
+							type="button"
+							class="absolute right-2 top-1/2 transform -translate-y-1/2"
+							@click="showPassword = !showPassword"
+						>
+							<svg x-show="!showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+							</svg>
+							<svg x-show="showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+							</svg>
+						</button>
+					</div>
+				</div>
+				<!-- 新密码 -->
 				<div class="relative">
-					<input
-						id="CurrentPassword"
-						name="CurrentPassword"
-						:type="showPassword ? 'text' : 'password'"
-						:placeholder={ getTranslations("CurrentPassword") }
-						x-model="current_password"
-						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
-					/>
+					<label x-text={ getTranslations("Password") } for="Password" class="w-64"></label>
+					<div class="relative">
+						<input
+							id="Password"
+							name="Password"
+							:type="showPassword ? 'text' : 'password'"
+							:placeholder={ getTranslations("Password") }
+							x-model="password"
+							class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+						/>
+						<button
+							type="button"
+							class="absolute right-2 top-1/2 transform -translate-y-1/2"
+							@click="showPassword = !showPassword"
+						>
+							<svg x-show="!showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+							</svg>
+							<svg x-show="showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+							</svg>
+						</button>
+					</div>
+				</div>
+				<!-- 再次输入密码 -->
+				<div class="relative">
+					<label x-text={ getTranslations("ReEnterPassword") } for="ReEnterPassword" class="w-64"></label>
+					<div class="relative">
+						<input
+							id="ReEnterPassword"
+							name="ReEnterPassword"
+							:type="showPassword ? 'text' : 'password'"
+							:placeholder={ getTranslations("ReEnterPassword") }
+							x-model="ReEnterPassword"
+							class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+							:class="{ 'border-red-500': passwordOK }"
+						/>
+						<button
+							type="button"
+							class="absolute right-2 top-1/2 transform -translate-y-1/2"
+							@click="showPassword = !showPassword"
+						>
+							<svg x-show="!showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+							</svg>
+							<svg x-show="showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+							</svg>
+						</button>
+					</div>
+					<!-- 密码不匹配错误提示 -->
+					<div x-show="password !== ReEnterPassword" class="text-red-500 text-xs mt-1" x-text="i18next.t('passwords_not_match')">两次输入的密码不一致</div>
+				</div>
+				<!-- 设置账号密码 按钮 -->
+				<div class="flex justify-center items-center w-full my-2">
 					<button
 						type="button"
-						class="absolute right-2 top-1/2 transform -translate-y-1/2"
-						@click="showPassword = !showPassword"
-					>
-						<svg x-show="!showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-						</svg>
-						<svg x-show="showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-						</svg>
-					</button>
+						class="min-w-28 px-2 h-10 mx-2 my-0 text-center text-black transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
+						:class="{ 'opacity-50 cursor-not-allowed': isFormChanged === false || passwordOK === false }"
+						:disabled="isFormChanged === false || passwordOK === false"
+						x-on:click={ "if (checkFormData()) { updateLoginSettings(username, current_password, password, ReEnterPassword); }" }
+						x-text={ getTranslations("set_account_password") }
+					>SAVE</button>
 				</div>
-			</div>
-			<!-- 新密码 -->
-			<div class="relative">
-				<label x-text={ getTranslations("Password") } for="Password" class="w-64"></label>
-				<div class="relative">
-					<input
-						id="Password"
-						name="Password"
-						:type="showPassword ? 'text' : 'password'"
-						:placeholder={ getTranslations("Password") }
-						x-model="password"
-						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
-					/>
-					<button
-						type="button"
-						class="absolute right-2 top-1/2 transform -translate-y-1/2"
-						@click="showPassword = !showPassword"
-					>
-						<svg x-show="!showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-						</svg>
-						<svg x-show="showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-						</svg>
-					</button>
-				</div>
-			</div>
-			<!-- 再次输入密码 -->
-			<div class="relative">
-				<label x-text={ getTranslations("ReEnterPassword") } for="ReEnterPassword" class="w-64"></label>
-				<div class="relative">
-					<input
-						id="ReEnterPassword"
-						name="ReEnterPassword"
-						:type="showPassword ? 'text' : 'password'"
-						:placeholder={ getTranslations("ReEnterPassword") }
-						x-model="ReEnterPassword"
-						class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
-						:class="{ 'border-red-500': passwordOK }"
-					/>
-					<button
-						type="button"
-						class="absolute right-2 top-1/2 transform -translate-y-1/2"
-						@click="showPassword = !showPassword"
-					>
-						<svg x-show="!showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-						</svg>
-						<svg x-show="showPassword" class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-						</svg>
-					</button>
-				</div>
-				<!-- 密码不匹配错误提示 -->
-				<div x-show="password !== ReEnterPassword" class="text-red-500 text-xs mt-1" x-text="i18next.t('passwords_not_match')">两次输入的密码不一致</div>
-			</div>
-			<!-- 设置账号密码 按钮 -->
-			<div class="flex justify-center items-center w-full my-2">
-				<button
-					type="button"
-					class="min-w-28 px-2 h-10 mx-2 my-0 text-center text-black transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
-					:class="{ 'opacity-50 cursor-not-allowed': isFormChanged === false || passwordOK === false }"
-					:disabled="isFormChanged === false || passwordOK === false"
-					x-on:click={ "if (checkFormData()) { updateLoginSettings(username, current_password, password, ReEnterPassword); }" }
-					x-text={ getTranslations("set_account_password") }
-				>SAVE</button>
-			</div>
-			<div
-				class="w-full py-1 text-xs text-gray-500"
-				x-text={ getTranslations("AdminAccountSetupDescription") }
-			></div>
-		</form>
+				<div
+					class="w-full py-1 text-xs text-gray-500"
+					x-text={ getTranslations("AdminAccountSetupDescription") }
+				></div>
+			</form>
+		</div>
 	</div>
 	@userInfoConfigScriptHandle.Once() {
 		<script>

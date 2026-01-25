@@ -4,35 +4,58 @@ package settings
 templ LogPanel() {
 	<div
 		id="settings_log"
+		x-data="{ collapsed: $persist(true).as('settings_log_collapsed') }"
 		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
-		<div
-			class="w-full text-center"
-			x-text="i18next.t('settings_log_title')"
+		<!-- 折叠/展开按钮 -->
+		<button
+			@click="collapsed = !collapsed"
+			class="flex justify-between items-center w-full cursor-pointer px-2 py-1.5"
 		>
-			服务器实时日志
-		</div>
-		<hr class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
-		<div
-			id="log_panel"
-			class="w-full h-[400px] p-4 mt-1 bg-gray-900 text-sm text-white rounded overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-all"
-		>
-			<!-- 日志内容将通过 JavaScript 动态插入 -->
-		</div>
-		<!-- 发送信息按钮，目前用不着，隐藏 -->
-		<div class="hidden flex items-center justify-center w-full px-2 pt-3">
-			<input
-				id="msg"
-				placeholder="输入广播消息"
-				x-bind:placeholder="i18next.t('settings_log_broadcast_placeholder')"
-				class="flex-1 min-w-0 px-2 py-1 h-10 rounded text-base-content bg-base-200 border border-base-300"
-			/>
-			<button
-				id="send"
-				class="ml-2 p-1 h-10 w-24 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
+			<svg
+				class="w-5 h-5 transition-transform"
+				:class="{ '-rotate-90': collapsed }"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 10 6"
 			>
-				<span x-text="i18next.t('settings_log_broadcast_send')">POST</span>
-			</button>
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+			</svg>
+			<span x-text="i18next.t('settings_log_title')" class="flex-1 text-center font-semibold">服务器实时日志</span>
+			<svg
+				class="w-5 h-5 transition-transform"
+				:class="{ 'rotate-90': collapsed }"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 10 6"
+			>
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+			</svg>
+		</button>
+		<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+		<!-- 可折叠内容 -->
+		<div x-show="!collapsed" x-transition>
+			<div
+				id="log_panel"
+				class="w-full h-[400px] p-4 mt-1 bg-gray-900 text-sm text-white rounded overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-all"
+			>
+				<!-- 日志内容将通过 JavaScript 动态插入 -->
+			</div>
+			<!-- 发送信息按钮，目前用不着，隐藏 -->
+			<div class="hidden flex items-center justify-center w-full px-2 pt-3">
+				<input
+					id="msg"
+					placeholder="输入广播消息"
+					x-bind:placeholder="i18next.t('settings_log_broadcast_placeholder')"
+					class="flex-1 min-w-0 px-2 py-1 h-10 rounded text-base-content bg-base-200 border border-base-300"
+				/>
+				<button
+					id="send"
+					class="ml-2 p-1 h-10 w-24 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
+				>
+					<span x-text="i18next.t('settings_log_broadcast_send')">POST</span>
+				</button>
+			</div>
 		</div>
 	</div>
 	<script>
