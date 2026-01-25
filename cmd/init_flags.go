@@ -68,12 +68,15 @@ func InitFlags() {
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTLS, "tls", false, locale.GetString("tls_enable"))
 	runtimeViper.BindPFlag("EnableTLS", RootCmd.PersistentFlags().Lookup("tls"))
 
+	// 自动获取HTTPS证书
 	RootCmd.PersistentFlags().BoolVar(&cfg.AutoTLSCertificate, "auto-tls", false, locale.GetString("auto_https_cert"))
 	runtimeViper.BindPFlag("AutoTLSCertificate", RootCmd.PersistentFlags().Lookup("auto-tls"))
 
+	// TLS 证书文件路径
 	RootCmd.PersistentFlags().StringVar(&cfg.CertFile, "tls-crt", "", locale.GetString("tls_crt"))
 	runtimeViper.BindPFlag("CertFile", RootCmd.PersistentFlags().Lookup("tls-crt"))
 
+	// TLS 密钥文件路径
 	RootCmd.PersistentFlags().StringVar(&cfg.KeyFile, "tls-key", "", locale.GetString("tls_key"))
 	runtimeViper.BindPFlag("KeyFile", RootCmd.PersistentFlags().Lookup("tls-key"))
 
@@ -246,7 +249,7 @@ func SetByExecutableFilename() {
 	filenameLower := strings.ToLower(filename)
 	cfg := config.GetCfg()
 	// Windows 默认打开浏览器
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" || filenameLower == "comigo" {
 		cfg.OpenBrowser = true
 	}
 	// 打开浏览器
