@@ -39,6 +39,17 @@ cd sample/docker
 docker-compose up -d
 ```
 
+访问方式：
+
+- **直接访问（Comigo）**：`http://localhost:1234`
+- **通过 Nginx 二级目录反代**：`http://localhost:12380/nginx_test/`
+
+该 Compose 示例会挂载以下目录/文件：
+
+- `./books` -> `/data`（书库目录）
+- `./config` -> `/root/.config/comigo`（配置目录）
+- `./nginx/nginx.conf` -> `/etc/nginx/nginx.conf`（Nginx 配置）
+
 ### 📋 支持的架构
 
 - `linux/amd64` - 标准 x86_64 服务器
@@ -157,6 +168,14 @@ server {
     }
 }
 ```
+
+#### 反向代理（Nginx 二级目录 /nginx_test/）
+
+如果你需要通过二级目录（如 `/nginx_test/`）访问同一服务，可以参考本仓库示例配置：
+
+- `sample/docker/nginx/nginx.conf`
+
+该示例会将 `http://localhost:12380/nginx_test/` 反向代理到 `comigo` 服务。
 
 #### 资源限制
 
@@ -336,6 +355,17 @@ cd sample/docker
 docker-compose up -d
 ```
 
+Access:
+
+- **Direct (Comigo)**: `http://localhost:1234`
+- **Via Nginx subpath proxy**: `http://localhost:12380/nginx_test/`
+
+This compose example mounts:
+
+- `./books` -> `/data` (library)
+- `./config` -> `/root/.config/comigo` (config)
+- `./nginx/nginx.conf` -> `/etc/nginx/nginx.conf` (nginx config)
+
 ### 📋 Supported Architectures
 
 - `linux/amd64` - Standard x86_64 servers
@@ -435,6 +465,17 @@ docker run -d \
 cd sample/docker
 docker-compose up -d
 ```
+
+アクセス：
+
+- **直接（Comigo）**：`http://localhost:1234`
+- **Nginx のサブパス（/nginx_test/）経由**：`http://localhost:12380/nginx_test/`
+
+この compose 例のマウント：
+
+- `./books` -> `/data`（ライブラリ）
+- `./config` -> `/root/.config/comigo`（設定）
+- `./nginx/nginx.conf` -> `/etc/nginx/nginx.conf`（nginx 設定）
 
 ### 📋 サポートされているアーキテクチャ
 
