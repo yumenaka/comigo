@@ -73,27 +73,27 @@ services:
     networks:
       - comigo-network
 
-  # Nginx 反向代理服务
-  # 提供二级目录 /nginx_test/ 访问 comigo 服务，修改设置请查看 sample/docker/nginx/nginx.conf
-  nginx:
-    image: nginx:alpine
-    container_name: comigo-nginx
-    restart: unless-stopped
-    ports:
-      - "12380:80"
-    volumes:
-      # Nginx 配置文件
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - comigo
-    networks:
-      - comigo-network
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/nginx_test/"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
+#  # Nginx 反向代理服务
+#  # 提供二级目录 /nginx_test/ 访问 comigo 服务，修改设置请查看 sample/docker/nginx/nginx.conf
+#  nginx:
+#    image: nginx:alpine
+#    container_name: comigo-nginx
+#    restart: unless-stopped
+#    ports:
+#      - "12380:80"
+#    volumes:
+#      # Nginx 配置文件
+#      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+#    depends_on:
+#      - comigo
+#    networks:
+#      - comigo-network
+#    healthcheck:
+#      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/nginx_test/"]
+#      interval: 30s
+#      timeout: 3s
+#      retries: 3
+#      start_period: 5s
 
 #  # 自动更新服务
 #  watchtower:

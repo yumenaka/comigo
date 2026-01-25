@@ -4,15 +4,19 @@
 # git update-index --no-assume-unchanged .air.toml
 root = "."
 testdata_dir = "test"
-tmp_dir = "test/temp"
+tmp_dir = "temp"
 
 [build]
-## 运行的时候，需要传给二进制文件的参数。
+pre_cmd = ["bun run dev"]
+cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/comi ./cmd/comigo/main.go"
+# Array of commands to run after ^C
+post_cmd = []
+  ## 运行的时候，需要传给二进制文件的参数。
 #  args_bin = ["./test","--tailscale","--debug", "--config-locked"]
 args_bin = ["./test","--tailscale","--debug"]
 #二进制文件
-bin = "./test/temp/comi"
-cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/temp/comi ./cmd/comigo/main.go"
+bin = "./test/comi"
+entrypoint = ["./test/comi"]
 delay = 3000
 exclude_dir = ["app", "test", ".parcel-cache", "node_modules", "tmp", "bin", "testdata"]
 exclude_regex = ["_test\\.go", "node_modules", "_templ\\.go", "tar.gz", "zip", "tgz", "exe", "app"]
@@ -20,14 +24,12 @@ exclude_unchanged = false
 follow_symlink = false
 full_bin = ""
 include_ext = ["go", "templ", "html", "json", "js", "ts", "css", "scss"]
-kill_delay = "0s"
-log = "test/temp/build-errors-air.log"
+kill_delay = 500 # nanosecond
+log = "test/air.log"
 poll = false
 poll_interval = 500
-pre_cmd = ["bun run dev"]
-post_cmd = []
 rerun = true
-rerun_delay = 1000
+rerun_delay = 1000 # Delay after each execution
 send_interrupt = false
 stop_on_error = true
 
@@ -37,20 +39,20 @@ silent = false
 time = false
 
 [color]
-app = ""
-build = "yellow"
 main = "magenta"
-runner = "green"
 watcher = "cyan"
+build = "yellow"
+runner = "green"
 
 [misc]
 clean_on_exit = true
+
+[screen]
+clear_on_rebuild = false
+keep_scroll = true
 
 [proxy]
 app_port = 1234
 enabled = true
 proxy_port = 7777
-
-[screen]
-clear_on_rebuild = false
-keep_scroll = true
+app_start_timeout = 5000
