@@ -15,7 +15,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 	<div
 		id="tailscale_config_wrapper"
 		x-data="{ collapsed: $persist(true).as('settings_tailscale_collapsed') }"
-		class="flex flex-col justify-start w-full px-2 py-2 mx-2 my-4 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 sm:px-4"
+		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<!-- 折叠/展开按钮 -->
 		<button
@@ -468,7 +468,9 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 				if (refreshInterval) return;
 				refreshInterval = setInterval(() => {
 					if (document.visibilityState === 'visible' && getEnableTailscale()) {
-						UpdateTailscaleStatus();
+					    if (!collapsed){
+					        UpdateTailscaleStatus();
+					    }
 						count++;
 					}
 					if (count >= 10) {
@@ -510,7 +512,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 				setTimeout(() => startAutoRefresh(), 1000);
 			}
 		"
-		class="flex flex-col justify-start w-full mx-0 my-2 px-4 pt-2 pb-4 font-normal text-base border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<div class="flex flex-row w-full mb-2 justify-center items-center" @click="UpdateTailscaleStatus">
 			<div id="refresh-text" x-text={ getTranslations("tailscale_status") } class="text-center font-semibold"></div>

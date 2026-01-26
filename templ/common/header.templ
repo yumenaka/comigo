@@ -66,6 +66,10 @@ templ Header(prop HeaderProps) {
 					@svg.Upload()
 				</a>
 			}
+			if (!prop.ShowServerSetting && prop.ShowUploadIcon) {
+				<!-- 使标题居中的占位符 -->
+				<div class="place_holder w-10 h-10 mx-1 hidden md:flex" x-show="$store.global.onlineBook"></div>
+			}
 			if (prop.ShowReSortIcon) {
 				@ReSortIcon()
 			}

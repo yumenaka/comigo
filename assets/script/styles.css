@@ -2510,10 +2510,6 @@
     margin-block: calc(var(--spacing) * 2.5);
   }
 
-  .my-4 {
-    margin-block: calc(var(--spacing) * 4);
-  }
-
   .ms-0 {
     margin-inline-start: calc(var(--spacing) * 0);
   }
@@ -4483,6 +4479,16 @@
     }
   }
 
+  .bg-black\/30 {
+    background-color: #0000004d;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-black\/30 {
+      background-color: color-mix(in oklab, var(--color-black) 30%, transparent);
+    }
+  }
+
   .bg-black\/50 {
     background-color: #00000080;
   }
@@ -5440,10 +5446,6 @@
 
   .pb-2 {
     padding-bottom: calc(var(--spacing) * 2);
-  }
-
-  .pb-4 {
-    padding-bottom: calc(var(--spacing) * 4);
   }
 
   .pl-2 {
@@ -6879,10 +6881,6 @@
 
     .sm\:justify-self-end {
       justify-self: flex-end;
-    }
-
-    .sm\:px-4 {
-      padding-inline: calc(var(--spacing) * 4);
     }
 
     .sm\:px-6 {
