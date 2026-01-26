@@ -7,8 +7,8 @@ templ PluginsConfig() {
 	@PluginsConfigJavaScript()
 	<div
 		id="plugins-config"
-		x-data="{ collapsed: $persist(false).as('settings_plugins_collapsed') }"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		x-data="{ collapsed: $persist(true).as('settings_plugins_collapsed') }"
+		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<!-- 折叠/展开按钮 -->
 		<button
