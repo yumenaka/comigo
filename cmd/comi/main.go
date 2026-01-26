@@ -42,6 +42,8 @@ func main() {
 			cmd.SaveMetadata()
 			// 生成书组
 			model.GenerateBookGroup()
+			// 判断是否需要打开浏览器
+			config.OpenBrowserIfNeeded()
 			return nil
 		}
 
@@ -80,6 +82,7 @@ func main() {
 	config.StartOrStopAutoRescan()
 	// 在命令行显示QRCode
 	cmd.ShowQRCode()
+	// 判断是否需要打开浏览器
 	config.OpenBrowserIfNeeded()
 	// 退出时清理临时文件的处理函数
 	cmd.SetShutdownHandler()
