@@ -46,6 +46,8 @@ func main() {
 			cmd.ScanStore()
 			// 保存书籍元数据
 			cmd.SaveMetadata()
+			// 判断是否需要打开浏览器
+			config.OpenBrowserIfNeeded()
 			return nil
 		}
 		// 确保单实例模式运行
@@ -93,8 +95,10 @@ func startServer() {
 	cmd.SaveMetadata()
 	// 启动自动扫描（如果配置了间隔）
 	config.StartOrStopAutoRescan()
-	// 在命令行显示QRCode
+	// 在命令行显示 QRCode
 	cmd.ShowQRCode()
+	// 判断是否需要打开浏览器
+	config.OpenBrowserIfNeeded()
 }
 
 // getServerURL 获取服务器URL
