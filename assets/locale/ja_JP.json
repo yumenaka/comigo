@@ -916,6 +916,7 @@
   "comigo_xyz_cli_install_copy": "コピー",
   "comigo_xyz_cli_install_copied": "コピーしました",
   "comigo_xyz_cli_install_cn_desc": "中国大陸ユーザーにおすすめ：",
+  "comigo_xyz_docker_deploy_title": "Dockerでデプロイ：",
   "rescan_store": "再スキャン",
   "delete_store": "書庫削除",
   "select_store_to_operate": "操作する書庫を選択してください",
