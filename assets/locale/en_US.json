@@ -916,6 +916,7 @@
   "comigo_xyz_cli_install_copy": "Copy",
   "comigo_xyz_cli_install_copied": "Copied",
   "comigo_xyz_cli_install_cn_desc": "Recommended for Mainland China users:",
+  "comigo_xyz_docker_deploy_title": "Deploy with Docker:",
   "rescan_store": "Rescan",
   "delete_store": "Delete",
   "select_store_to_operate": "Please select a store to operate",

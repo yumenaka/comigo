@@ -211,13 +211,57 @@ templ ComigoXYZPlugin(c echo.Context) {
 					},
 					async copyToClipboard(text, index) {
 						try {
-							await navigator.clipboard.writeText(text);
-							this.copiedIndex = index;
-							setTimeout(() => {
-								this.copiedIndex = -1;
-							}, 2000);
+							// 优先使用现代 Clipboard API
+							if (navigator.clipboard && navigator.clipboard.writeText) {
+								await navigator.clipboard.writeText(text);
+								this.copiedIndex = index;
+								setTimeout(() => {
+									this.copiedIndex = -1;
+								}, 2000);
+							} else {
+								// 降级方案：使用传统的 execCommand 方法
+								const textArea = document.createElement('textarea');
+								textArea.value = text;
+								textArea.style.position = 'fixed';
+								textArea.style.left = '-999999px';
+								textArea.style.top = '-999999px';
+								document.body.appendChild(textArea);
+								textArea.focus();
+								textArea.select();
+								const successful = document.execCommand('copy');
+								document.body.removeChild(textArea);
+								if (successful) {
+									this.copiedIndex = index;
+									setTimeout(() => {
+										this.copiedIndex = -1;
+									}, 2000);
+								} else {
+									console.error('复制失败: execCommand 不支持');
+								}
+							}
 						} catch (err) {
 							console.error('复制失败:', err);
+							// 如果 Clipboard API 失败，尝试降级方案
+							try {
+								const textArea = document.createElement('textarea');
+								textArea.value = text;
+								textArea.style.position = 'fixed';
+								textArea.style.left = '-999999px';
+								textArea.style.top = '-999999px';
+								document.body.appendChild(textArea);
+								textArea.focus();
+								textArea.select();
+								const successful = document.execCommand('copy');
+								document.body.removeChild(textArea);
+								if (successful) {
+									this.copiedIndex = index;
+									setTimeout(() => {
+										this.copiedIndex = -1;
+									}, 2000);
+								}
+							} catch (fallbackErr) {
+								console.error('降级复制方案也失败:', fallbackErr);
+							}
 						}
 					}
 				}`,
@@ -284,6 +328,23 @@ templ ComigoXYZPlugin(c echo.Context) {
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
 											</svg>
 											<svg x-show="copiedIndex === 1" class="w-5 h-5 text-green-500" fill="none" stroke="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+											</svg>
+										</button>
+									</div>
+									<!-- Docker 部署代码块 -->
+									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_docker_deploy_title')">使用Docker部署：</p>
+									<div class="bg-black relative border border-gray-500 dark:border-gray-200 rounded-lg p-4">
+										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code>docker run -d --name comigo -p 1234:1234 -v /path/to/books:/data yumenaka/comigo:latest</code></pre>
+										<button
+											@click="copyToClipboard('docker run -d --name comigo -p 1234:1234 -v /path/to/books:/data yumenaka/comigo:latest', 2)"
+											class="absolute top-2 right-2 p-2 text-base-content/70 dark:text-base-content/80 hover:text-base-content dark:hover:text-white transition-colors"
+											:title="copiedIndex === 2 ? i18next.t('comigo_xyz_cli_install_copied') : i18next.t('comigo_xyz_cli_install_copy')"
+										>
+											<svg x-show="copiedIndex !== 2" class="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+											</svg>
+											<svg x-show="copiedIndex === 2" class="w-5 h-5 text-green-500" fill="none" stroke="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
 											</svg>
 										</button>
