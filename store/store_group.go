@@ -19,7 +19,35 @@ import (
 // StoreInRam 内存书库，扫描后生成。可以有多个子书库。
 type StoreInRam struct {
 	StoreInfo
-	ChildStores sync.Map // key为路径 存储 *Store
+	ChildStores      sync.Map // key为路径 存储 *Store
+	PendingBookmarks sync.Map // 待迁移的书签，key为BookID，value为model.BookMarks
+}
+
+// getMajorMinorVersion 提取版本号的前两段（major.minor）
+// 支持格式："v1.2.23"、"1.13.4"、"v1.2"、"1.13" 等
+// 返回格式："v1.2" 或 "1.13"，如果解析失败返回空字符串
+func getMajorMinorVersion(version string) string {
+	if version == "" {
+		return ""
+	}
+	// 去除可能的前缀 "v" 或 "V"
+	trimmed := version
+	hasPrefix := false
+	if len(version) > 0 && (version[0] == 'v' || version[0] == 'V') {
+		trimmed = version[1:]
+		hasPrefix = true
+	}
+	// 按 "." 分割版本号
+	parts := strings.Split(trimmed, ".")
+	if len(parts) < 2 {
+		return "" // 版本号格式不正确，至少需要 major.minor
+	}
+	// 拼接前两段
+	majorMinor := parts[0] + "." + parts[1]
+	if hasPrefix {
+		return "v" + majorMinor
+	}
+	return majorMinor
 }
 
 // AddStore 创建一个新书库
@@ -213,9 +241,13 @@ func (ramStore *StoreInRam) LoadBooks() error {
 				}
 				continue // 继续处理其他文件
 			}
-			// 检查版本号：为空或与当前版本不一致时跳过加载并删除元数据文件
+			// 检查版本号：根据前两段版本号(major.minor)决定处理方式
 			currentVersion := config.GetVersion()
-			if book.CreatedByVersion == "" || book.CreatedByVersion != currentVersion {
+			bookMajorMinor := getMajorMinorVersion(book.CreatedByVersion)
+			currentMajorMinor := getMajorMinorVersion(currentVersion)
+
+			// 版本号为空或前两段版本号不一致时，跳过加载并删除元数据文件
+			if book.CreatedByVersion == "" || bookMajorMinor == "" || bookMajorMinor != currentMajorMinor {
 				logger.Infof(locale.GetString("log_book_version_mismatch_skip"), book.BookID, book.CreatedByVersion, currentVersion)
 				// 删除版本不匹配的元数据文件
 				errDel := os.Remove(filePath)
@@ -223,6 +255,22 @@ func (ramStore *StoreInRam) LoadBooks() error {
 					logger.Infof(locale.GetString("log_error_deleting_version_mismatch_metadata"), fileName, errDel)
 				}
 				continue // 跳过版本不匹配的书籍
+			}
+
+			// 前两段版本号一致但完整版本号不同时，保存bookmark后删除老数据
+			if book.CreatedByVersion != currentVersion {
+				logger.Infof(locale.GetString("log_book_version_minor_mismatch"), book.BookID, book.CreatedByVersion, currentVersion)
+				// 如果有bookmark，保存到待迁移列表中
+				if len(book.BookMarks) > 0 {
+					ramStore.PendingBookmarks.Store(book.BookID, book.BookMarks)
+					logger.Infof(locale.GetString("log_bookmark_saved_for_migration"), book.BookID, len(book.BookMarks))
+				}
+				// 删除老的元数据文件
+				errDel := os.Remove(filePath)
+				if errDel != nil {
+					logger.Infof(locale.GetString("log_error_deleting_version_mismatch_metadata"), fileName, errDel)
+				}
+				continue // 跳过，等待重新扫描生成新数据
 			}
 			// 检查书籍文件或目录是否存在，如果不存在则跳过加载并删除元数据文件
 			if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
@@ -251,7 +299,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	return nil
 }
 
-// AddBook 添加一本书
+// StoreBook 添加一本书
 func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
 	if b.BookID == "" {
 		return errors.New(locale.GetString("err_add_book_empty_bookid"))
@@ -260,6 +308,14 @@ func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
 	if _, ok := ramStore.ChildStores.Load(b.StoreUrl); !ok {
 		if err := ramStore.AddStore(b.StoreUrl); err != nil {
 			logger.Infof(locale.GetString("log_error_adding_subfolder"), err)
+		}
+	}
+	// 检查是否有待迁移的书签（来自版本升级时的老数据）
+	if pendingMarks, ok := ramStore.PendingBookmarks.LoadAndDelete(b.BookID); ok {
+		if marks, valid := pendingMarks.(model.BookMarks); valid && len(marks) > 0 {
+			// 合并书签到新书中（保留新书中已有的书签，追加老书签）
+			b.BookMarks = append(b.BookMarks, marks...)
+			logger.Infof(locale.GetString("log_bookmark_migrated"), b.BookID, len(marks))
 		}
 	}
 	err := SaveBookJson(b)
