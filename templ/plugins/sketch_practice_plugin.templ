@@ -170,7 +170,7 @@ templ SketchPracticeOverlay(c echo.Context) {
 			:style="$store.sketchPractice ? 'left: ' + $store.sketchPractice.floatX + 'px; top: ' + $store.sketchPractice.floatY + 'px;' : ''"
 			@mousedown="$store.sketchPractice.startDrag($event)"
 			@touchstart="$store.sketchPractice.startDrag($event)"
-			class="fixed z-[9999] px-4 py-2 bg-black/70 text-white rounded-lg cursor-move select-none shadow-lg"
+			class="fixed z-9999 px-4 py-2 bg-black/70 text-white rounded-lg cursor-move select-none shadow-lg"
 			style="touch-action: none;"
 		>
 			<div class="text-center">
