@@ -3,7 +3,7 @@
 # ComiGo：シンプルで使いやすい漫画リーダー  
 [![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
 [![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)  
-[中文文档](https://github.com/yumenaka/comigo/blob/master/README.md) | [English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)  
+[English](https://github.com/yumenaka/comigo/blob/master/README.md) | [中文文档](https://github.com/yumenaka/comigo/blob/master/README_ZH.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)  
 ![Windowsサンプル](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windowsサンプル") 
 <!--
 [![Downloads](https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success)](https://github.com/yumenaka/comigo/releases)
