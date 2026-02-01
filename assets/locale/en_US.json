@@ -917,7 +917,7 @@
   "comigo_xyz_cli_install_copied": "Copied",
   "comigo_xyz_cli_install_cn_desc": "Recommended for Mainland China users:",
   "comigo_xyz_docker_deploy_title": "Deploy with Docker:",
-  "rescan_store": "Rescan",
+  "rescan_store": "Scan",
   "delete_store": "Delete",
   "select_store_to_operate": "Please select a store to operate",
   "confirm_delete_store": "Confirm to delete the store? This will also delete all book data in this store",

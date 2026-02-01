@@ -122,7 +122,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"w-1/3 flex items-center justify-center p-1 m-1 text-sm bg-blue-300 rounded min-h-15\">在当前目录运行时（局部有效）</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"w-2/3 flex items-center justify-center p-1 m-1 text-sm bg-blue-300 rounded min-h-15\">在当前目录运行时（局部有效）</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
