@@ -46,6 +46,8 @@ func main() {
 			cmd.ScanStore()
 			// 保存书籍元数据
 			cmd.SaveMetadata()
+			// 生成书组
+			model.GenerateBookGroup()
 			// 判断是否需要打开浏览器
 			config.OpenBrowserIfNeeded()
 			return nil

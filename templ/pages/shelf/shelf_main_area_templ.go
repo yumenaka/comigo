@@ -170,7 +170,15 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div><script>\n\t\t\t// 全局错误处理：捕获 fetch 错误并显示 Toast\n\t\t\twindow.addEventListener(\"unhandledrejection\", (event) => {\n\t\t\t\tif (event.reason && event.reason.message) {\n\t\t\t\t\tshowToast(event.reason.message, \"error\");\n\t\t\t\t}\n\t\t\t});\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<!-- 服务器日志 -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = settings.LogPanel().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div></div><script>\n\t\t\t// 全局错误处理：捕获 fetch 错误并显示 Toast\n\t\t\twindow.addEventListener(\"unhandledrejection\", (event) => {\n\t\t\t\tif (event.reason && event.reason.message) {\n\t\t\t\t\tshowToast(event.reason.message, \"error\");\n\t\t\t\t}\n\t\t\t});\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

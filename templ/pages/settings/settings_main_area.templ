@@ -68,6 +68,8 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 					@NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535)
 				</div>
 			</div>
+			<!-- 服务器日志 -->
+			@LogPanel()
 			<!-- 阅读历史 -->
 			@ReadingHistoryPanel()
 			<!-- 管理账号密码 -->
@@ -159,8 +161,6 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 					@StringArrayConfig("SupportFileType", config.GetCfg().SupportFileType, "SupportFileType_Description")
 				</div>
 			</div>
-			<!-- 服务器日志 -->
-			@LogPanel()
 			<!-- 实验功能 -->
 			<div
 				id="settings_labs"
