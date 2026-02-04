@@ -136,12 +136,16 @@ func GetCover(c echo.Context) error {
 	// 获取图片数据的选项
 	option := fileutil.GetPictureDataOption{
 		PictureName:      needFile,
+		BookID:           coverBook.BookID,
 		BookPath:         coverBook.BookPath,
 		BookIsPDF:        coverBook.Type == model.TypePDF,
 		BookIsDir:        coverBook.Type == model.TypeDir,
 		BookIsNonUTF8Zip: coverBook.NonUTF8Zip,
 		Debug:            config.GetCfg().Debug,
 		ResizeHeight:     resizeHeight,
+		// 远程书籍支持
+		IsRemote:  coverBook.IsRemote,
+		RemoteURL: coverBook.RemoteURL,
 	}
 	// 获取图片数据
 	imgData, contentType, err := fileutil.GetPictureData(option)

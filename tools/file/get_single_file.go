@@ -13,6 +13,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/encoding"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/vfs"
 )
 
 // 使用sync.Map代替map，保证并发情况下的读写安全
@@ -139,4 +140,82 @@ func extractFileFromArchive(ctx context.Context, extractor archives.Extractor, s
 		return data, nil
 	}
 	return nil, errors.New(locale.GetString("err_file_not_found_in_archive"))
+}
+
+// GetSingleFileFromStream 从流中获取单个文件（支持远程文件系统）
+// stream 必须实现 ReaderAtSeeker 接口（io.Reader + io.ReaderAt + io.Seeker）
+func GetSingleFileFromStream(ctx context.Context, filename string, stream vfs.ReaderAtSeeker, nameInArchive, textEncoding string) ([]byte, error) {
+	if nameInArchive == "" {
+		return nil, errors.New(locale.GetString("err_name_in_archive_empty"))
+	}
+
+	// 识别压缩格式
+	format, sourceArchiveReader, err := archives.Identify(ctx, filename, stream)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			logger.Info(locale.GetString("log_timeout_identify_archive_format"))
+		} else {
+			logger.Infof(locale.GetString("log_failed_to_identify_archive_format"), err)
+		}
+		return nil, err
+	}
+
+	// 处理 ZIP 文件
+	if zipFormat, ok := format.(archives.Zip); ok {
+		if textEncoding != "" {
+			zipFormat.TextEncoding = encoding.ByName(textEncoding)
+		}
+		// 重置流到开头
+		if _, err := stream.Seek(0, io.SeekStart); err != nil {
+			return nil, err
+		}
+		return extractFileFromArchive(ctx, zipFormat, stream, nameInArchive)
+	}
+
+	// 使用 FileSystem API（需要 ReaderAtSeeker）
+	fileSystem, err := archives.FileSystem(ctx, filename, stream)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			logger.Info(locale.GetString("log_timeout_create_filesystem"))
+		} else {
+			logger.Infof(locale.GetString("log_failed_to_create_filesystem"), err)
+		}
+		return nil, err
+	}
+
+	// 从虚拟文件系统中读取文件
+	fileInArchive, err := fileSystem.Open(nameInArchive)
+	if err == nil {
+		defer fileInArchive.Close()
+		data, err := io.ReadAll(fileInArchive)
+		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				logger.Info(locale.GetString("log_timeout_read_file_content"))
+			} else {
+				logger.Infof(locale.GetString("log_failed_to_read_file_content"), err)
+			}
+			return nil, err
+		}
+		return data, nil
+	}
+
+	// 处理 RAR 文件
+	if rarFormat, ok := format.(archives.Rar); ok {
+		// 重置流到开头
+		if _, err := stream.Seek(0, io.SeekStart); err != nil {
+			return nil, err
+		}
+		return extractFileFromArchive(ctx, rarFormat, sourceArchiveReader, nameInArchive)
+	}
+
+	// 处理其他格式的压缩文件
+	if extractor, ok := format.(archives.Extractor); ok {
+		// 重置流到开头
+		if _, err := stream.Seek(0, io.SeekStart); err != nil {
+			return nil, err
+		}
+		return extractFileFromArchive(ctx, extractor, sourceArchiveReader, nameInArchive)
+	}
+
+	return nil, errors.New(locale.GetString("err_unsupported_archive_format"))
 }

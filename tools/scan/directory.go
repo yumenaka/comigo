@@ -2,12 +2,14 @@ package scan
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"sync"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/vfs"
 )
 
 // 全局变量：标记是否正在扫描，避免并发扫描
@@ -24,7 +26,7 @@ type DirNode struct {
 	Files   []model.PageInfo `json:"files"`    // 本目录下的图片文件列表
 }
 
-// HandleDirectory 扫描目录的核心函数：递归遍历目录，忽略指定名称的文件夹，收集图片文件信息
+// HandleDirectory 扫描本地目录的核心函数：递归遍历目录，忽略指定名称的文件夹，收集图片文件信息
 func HandleDirectory(currentPath string, depth int) (DirNode, []string, []model.PageInfo, error) {
 	node := DirNode{
 		Name: filepath.Base(currentPath), // filepath.Base():返回路径的最后一个元素
@@ -79,6 +81,78 @@ func HandleDirectory(currentPath string, depth int) (DirNode, []string, []model.
 			size := info.Size()
 			modTime := info.ModTime()
 			// 说明: Go 的标准库 os.FileInfo 不直接提供创建时间。如果需要准确创建时间，可以使用第三方库获取。
+			mediaFileInfo := model.PageInfo{
+				Name:    name,
+				Path:    fullPath,
+				Size:    size,
+				ModTime: modTime,
+				PageNum: pageNum,
+			}
+			pageNum++
+			node.Files = append(node.Files, mediaFileInfo)
+			foundFiles = append(foundFiles, mediaFileInfo)
+		}
+	}
+	return node, foundDirs, foundFiles, nil
+}
+
+// HandleDirectoryVFS 使用 VFS 扫描目录（支持远程文件系统）
+func HandleDirectoryVFS(fs vfs.FileSystem, currentPath string, depth int) (DirNode, []string, []model.PageInfo, error) {
+	node := DirNode{
+		Name: path.Base(currentPath), // 使用 path.Base 处理 URL 风格路径
+		Path: currentPath,
+	}
+	var foundDirs []string
+	var foundFiles []model.PageInfo
+
+	// 如果超过最大深度限制，直接返回空节点
+	if cfg.GetMaxScanDepth() >= 0 && depth > cfg.GetMaxScanDepth() {
+		return node, foundDirs, foundFiles, nil
+	}
+
+	entries, err := fs.ReadDir(currentPath)
+	if err != nil {
+		return node, foundDirs, foundFiles, err
+	}
+
+	// 当前目录计入 foundDirs（用于记录树状结构）
+	foundDirs = append(foundDirs, currentPath)
+	pageNum := 1
+
+	for _, entry := range entries {
+		name := entry.Name()
+		fullPath := fs.JoinPath(currentPath, name)
+
+		if entry.IsDir() {
+			// 检查是否在忽略列表
+			if IsSkipDir(name) {
+				continue
+			}
+			// 递归扫描子目录
+			subNode, subDirs, subFiles, subErr := HandleDirectoryVFS(fs, fullPath, depth+1)
+			if subErr != nil {
+				// 忽略单个子目录出错，继续扫描其他目录
+				logger.Infof(locale.GetString("log_scan_subdirectory_error"), subErr)
+				continue
+			}
+			node.SubDirs = append(node.SubDirs, subNode)
+			// 合并子目录扫描结果
+			foundDirs = append(foundDirs, subDirs...)
+			foundFiles = append(foundFiles, subFiles...)
+		} else {
+			// 文件：检查扩展名是否为支持的格式
+			if (!IsSupportMedia(fullPath)) && (!IsSupportFile(fullPath)) {
+				continue
+			}
+			// 获取文件信息
+			info, err := entry.Info()
+			if err != nil {
+				logger.Infof(locale.GetString("log_get_file_info_failed"), err)
+				continue
+			}
+			size := info.Size()
+			modTime := info.ModTime()
+
 			mediaFileInfo := model.PageInfo{
 				Name:    name,
 				Path:    fullPath,

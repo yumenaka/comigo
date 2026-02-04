@@ -42,6 +42,8 @@ CREATE TABLE IF NOT EXISTS books
     non_utf8zip       BOOLEAN  DEFAULT FALSE,             -- Non-UTF8 zip flag
     zip_text_encoding  TEXT,                               -- Zip text encoding
     created_by_version TEXT,                               -- Comigo version when data was created
+    is_remote          BOOLEAN  DEFAULT FALSE,             -- Whether the book is from remote storage (WebDAV, etc.)
+    remote_url         TEXT,                               -- Remote storage base URL
     deleted            BOOLEAN  DEFAULT FALSE              -- Soft delete flag
 );
 
