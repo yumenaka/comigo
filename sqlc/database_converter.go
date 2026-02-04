@@ -51,6 +51,8 @@ func FromSQLCBook(sqlcBook Book) *model.Book {
 			Type:             model.SupportFileType(sqlcBook.Type),
 			ZipTextEncoding:  sqlcBook.ZipTextEncoding.String,
 			CreatedByVersion: sqlcBook.CreatedByVersion.String,
+			IsRemote:         sqlcBook.IsRemote.Bool,
+			RemoteURL:        sqlcBook.RemoteUrl.String,
 		},
 	}
 }
@@ -81,6 +83,8 @@ func ToSQLCCreateBookParams(book *model.Book) CreateBookParams {
 		NonUtf8zip:       sql.NullBool{Bool: book.NonUTF8Zip, Valid: true},
 		ZipTextEncoding:  sql.NullString{String: book.ZipTextEncoding, Valid: book.ZipTextEncoding != ""},
 		CreatedByVersion: sql.NullString{String: book.CreatedByVersion, Valid: book.CreatedByVersion != ""},
+		IsRemote:         sql.NullBool{Bool: book.IsRemote, Valid: true},
+		RemoteUrl:        sql.NullString{String: book.RemoteURL, Valid: book.RemoteURL != ""},
 	}
 }
 
@@ -108,6 +112,8 @@ func ToSQLCUpdateBookParams(book *model.Book) UpdateBookParams {
 		InitComplete:    sql.NullBool{Bool: book.InitComplete, Valid: true},
 		NonUtf8zip:      sql.NullBool{Bool: book.NonUTF8Zip, Valid: true},
 		ZipTextEncoding: sql.NullString{String: book.ZipTextEncoding, Valid: book.ZipTextEncoding != ""},
+		IsRemote:        sql.NullBool{Bool: book.IsRemote, Valid: true},
+		RemoteUrl:       sql.NullString{String: book.RemoteURL, Valid: book.RemoteURL != ""},
 		BookID:          book.BookID,
 	}
 }

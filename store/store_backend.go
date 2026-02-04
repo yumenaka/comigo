@@ -305,3 +305,21 @@ func (backend *Backend) ParseS3URL(u *url.URL) error {
 
 	return nil
 }
+
+// IsRemoteURL 判断 URL 是否为远程存储（非本地文件系统）
+func IsRemoteURL(storeURL string) bool {
+	backend := &Backend{}
+	if err := backend.ParseStoreURL(storeURL); err != nil {
+		return false
+	}
+	return backend.Type != LocalDisk
+}
+
+// GetBackendType 获取 URL 对应的后端类型
+func GetBackendType(storeURL string) (BackendType, error) {
+	backend := &Backend{}
+	if err := backend.ParseStoreURL(storeURL); err != nil {
+		return 0, err
+	}
+	return backend.Type, nil
+}

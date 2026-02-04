@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -14,6 +15,45 @@ import (
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
+
+// isRemoteStoreURL 判断是否为远程存储 URL（WebDAV、SMB、SFTP等）
+// 这是一个简单的检查，避免循环导入 store 包
+func isRemoteStoreURL(storeURL string) bool {
+	// 检查是否为本地绝对路径
+	if strings.HasPrefix(storeURL, "/") ||
+		(len(storeURL) > 2 && storeURL[1] == ':' && (storeURL[2] == '\\' || storeURL[2] == '/')) ||
+		strings.HasPrefix(storeURL, "\\\\") {
+		return false
+	}
+
+	// 检查是否为 file:// 协议
+	if strings.HasPrefix(storeURL, "file://") {
+		return false
+	}
+
+	// 尝试解析为 URL
+	u, err := url.Parse(storeURL)
+	if err != nil {
+		return false
+	}
+
+	// 检查 scheme 是否为远程协议
+	switch strings.ToLower(u.Scheme) {
+	case "webdav", "dav", "davs", "http", "https", "smb", "sftp", "ftp", "ftps", "s3":
+		return true
+	default:
+		return false
+	}
+}
+
+// getRemoteStoreHost 获取远程存储的主机名
+func getRemoteStoreHost(storeURL string) string {
+	u, err := url.Parse(storeURL)
+	if err != nil {
+		return ""
+	}
+	return u.Hostname()
+}
 
 // Config Comigo全局配置
 type Config struct {
@@ -136,33 +176,55 @@ func (c *Config) GetClearDatabaseWhenExit() bool {
 // - conflictPath: 冲突的已有路径
 // - message: 错误消息
 func (c *Config) IsPathOverlapping(newPath string) (overlapping bool, conflictPath string, message string) {
-	// 使用统一的路径标准化函数
-	newPathAbs, err := tools.NormalizeAbsPath(newPath)
-	if err != nil {
-		return true, "", fmt.Sprintf(locale.GetString("err_invalid_store_path"), newPath)
+	// 判断新路径是否为远程 URL
+	isNewRemote := isRemoteStoreURL(newPath)
+
+	var newPathNormalized string
+	if isNewRemote {
+		// 远程 URL 直接使用原始 URL（已在 AddStoreUrl 中标准化）
+		newPathNormalized = newPath
+	} else {
+		// 本地路径使用统一的路径标准化函数
+		var err error
+		newPathNormalized, err = tools.NormalizeAbsPath(newPath)
+		if err != nil {
+			return true, "", fmt.Sprintf(locale.GetString("err_invalid_store_path"), newPath)
+		}
 	}
 
 	// 检查是否与已有路径冲突
 	for _, existingUrl := range c.StoreUrls {
-		existingAbs, err := tools.NormalizeAbsPath(existingUrl)
-		if err != nil {
-			// 如果现有路径无法转换，跳过检查
-			continue
+		isExistingRemote := isRemoteStoreURL(existingUrl)
+
+		var existingNormalized string
+		if isExistingRemote {
+			existingNormalized = existingUrl
+		} else {
+			var err error
+			existingNormalized, err = tools.NormalizeAbsPath(existingUrl)
+			if err != nil {
+				// 如果现有路径无法转换，跳过检查
+				continue
+			}
 		}
 
 		// 1. 检查是否完全相同
-		if newPathAbs == existingAbs {
+		if newPathNormalized == existingNormalized {
 			return true, existingUrl, fmt.Sprintf(locale.GetString("err_store_url_already_exists_error"), existingUrl)
 		}
 
-		// 2. 检查新路径是否是已有路径的子目录
-		if isSubPath(existingAbs, newPathAbs) {
-			return true, existingUrl, fmt.Sprintf(locale.GetString("err_store_path_is_subdir_of_existing"), newPath, existingUrl)
-		}
+		// 2. 对于本地路径，检查父子目录关系
+		// 远程 URL 之间或远程与本地之间不需要检查父子关系
+		if !isNewRemote && !isExistingRemote {
+			// 检查新路径是否是已有路径的子目录
+			if isSubPath(existingNormalized, newPathNormalized) {
+				return true, existingUrl, fmt.Sprintf(locale.GetString("err_store_path_is_subdir_of_existing"), newPath, existingUrl)
+			}
 
-		// 3. 检查新路径是否是已有路径的父目录
-		if isSubPath(newPathAbs, existingAbs) {
-			return true, existingUrl, fmt.Sprintf(locale.GetString("err_store_path_is_parent_of_existing"), newPath, existingUrl)
+			// 检查新路径是否是已有路径的父目录
+			if isSubPath(newPathNormalized, existingNormalized) {
+				return true, existingUrl, fmt.Sprintf(locale.GetString("err_store_path_is_parent_of_existing"), newPath, existingUrl)
+			}
 		}
 	}
 
@@ -202,39 +264,65 @@ func (c *Config) StoreUrlIsExits(url string) bool {
 	return false
 }
 
-// AddStoreUrl 添加本地书库(单个路径)
-// 会将相对路径转换为绝对路径，并检查路径冲突
+// AddStoreUrl 添加书库（支持本地路径和远程 URL）
+// 本地路径会将相对路径转换为绝对路径，并检查路径冲突
+// 远程 URL（WebDAV 等）会在扫描时验证连接
 func (c *Config) AddStoreUrl(storeURL string) error {
-	// 使用统一的路径标准化函数
-	absPath, err := tools.NormalizeAbsPath(storeURL)
-	if err != nil {
-		return fmt.Errorf(locale.GetString("err_invalid_store_path"), storeURL)
-	}
+	var normalizedURL string
 
-	// 检查路径是否存在（可选，不强制要求路径必须存在）
-	if _, err := os.Stat(absPath); os.IsNotExist(err) {
-		// 路径不存在，记录警告但不阻止添加
-		if c.Debug {
-			logger.Infof(locale.GetString("path_not_exist")+": %s", absPath)
+	if isRemoteStoreURL(storeURL) {
+		// 远程 URL 处理（WebDAV, SMB, SFTP 等）
+		// 验证 URL 格式
+		u, err := url.Parse(storeURL)
+		if err != nil {
+			return fmt.Errorf(locale.GetString("err_invalid_store_path")+": %w", err)
 		}
+
+		if u.Host == "" {
+			return fmt.Errorf(locale.GetString("err_invalid_store_path")+": 缺少主机名", storeURL)
+		}
+
+		if c.Debug {
+			logger.Infof("添加远程书库: %s (协议: %s, 主机: %s)", storeURL, u.Scheme, u.Host)
+		}
+
+		// 使用原始 URL（保留认证信息）
+		normalizedURL = storeURL
+	} else {
+		// 本地路径处理
+		absPath, err := tools.NormalizeAbsPath(storeURL)
+		if err != nil {
+			return fmt.Errorf(locale.GetString("err_invalid_store_path"), storeURL)
+		}
+
+		// 检查路径是否存在（可选，不强制要求路径必须存在）
+		if _, err := os.Stat(absPath); os.IsNotExist(err) {
+			// 路径不存在，记录警告但不阻止添加
+			if c.Debug {
+				logger.Infof(locale.GetString("path_not_exist")+": %s", absPath)
+			}
+		}
+
+		normalizedURL = absPath
 	}
 
-	// 使用新的路径重合检测
-	overlapping, conflictPath, message := c.IsPathOverlapping(absPath)
+	// 使用路径重合检测
+	overlapping, conflictPath, message := c.IsPathOverlapping(normalizedURL)
 	if overlapping {
 		if c.Debug {
-			logger.Infof("%s: %s <-> %s", locale.GetString("err_store_path_conflict"), absPath, conflictPath)
+			logger.Infof("%s: %s <-> %s", locale.GetString("err_store_path_conflict"), normalizedURL, conflictPath)
 		}
 		return errors.New(message)
 	}
 
-	// 添加绝对路径到配置（使用接收者而不是全局变量）
-	c.StoreUrls = append(c.StoreUrls, absPath)
+	// 添加到配置
+	c.StoreUrls = append(c.StoreUrls, normalizedURL)
 	return nil
 }
 
-// InitConfigStoreUrls 初始化配置文件中的书库，将相对路径转换为绝对路径
-// TODO: 后续支持网络书库的时候需要修改
+// InitConfigStoreUrls 初始化配置文件中的书库
+// 本地路径会将相对路径转换为绝对路径
+// 远程 URL（WebDAV 等）保持原样
 func (c *Config) InitConfigStoreUrls() {
 	// 保存原始的 StoreUrls
 	originalUrls := make([]string, len(c.StoreUrls))
@@ -244,7 +332,7 @@ func (c *Config) InitConfigStoreUrls() {
 	c.StoreUrls = []string{}
 
 	for _, storeUrl := range originalUrls {
-		// 使用 AddStoreUrl 添加，会自动转换为绝对路径并验证
+		// 使用 AddStoreUrl 添加，会自动处理本地路径和远程 URL
 		err := c.AddStoreUrl(storeUrl)
 		if err != nil {
 			// 如果添加失败，记录错误但继续处理其他路径
@@ -263,9 +351,21 @@ func (c *Config) GetTopStoreName() string {
 		return "No Found Store"
 	}
 	storeUrls := make([]string, len(c.StoreUrls))
-	for i, url := range c.StoreUrls {
-		// 只取路径的最后一部分作为书库名称, path.Base只处理 UNIX 风格路径,filepath.Base 才会根据系统（Windows/Unix）自动处理分隔符
-		storeUrls[i] = filepath.Base(url)
+	for i, storeUrl := range c.StoreUrls {
+		// 判断是否为远程 URL
+		if isRemoteStoreURL(storeUrl) {
+			// 远程 URL：尝试提取主机名
+			host := getRemoteStoreHost(storeUrl)
+			if host != "" {
+				storeUrls[i] = host
+			} else {
+				// 回退：使用 URL 的最后路径部分
+				storeUrls[i] = filepath.Base(storeUrl)
+			}
+		} else {
+			// 本地路径：只取路径的最后一部分作为书库名称
+			storeUrls[i] = filepath.Base(storeUrl)
+		}
 	}
 	return strings.Join(storeUrls, ", ")
 }

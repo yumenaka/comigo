@@ -57,6 +57,7 @@ require (
 	github.com/minio/selfupdate v0.6.0
 	github.com/pdfcpu/pdfcpu v0.11.1
 	github.com/sevlyar/go-daemon v0.1.6
+	github.com/studio-b12/gowebdav v0.12.0
 	github.com/yumenaka/archives v0.0.0-20251213105147-9aacc4911770
 	golang.org/x/crypto v0.47.0
 	golang.org/x/image v0.35.0
@@ -289,4 +290,4 @@ require (
 //清理mod缓存
 // go clean -modcache
 
-//replace github.com/mholt/archives v0.0.0-20241129155617-ff6062f60091 => ./archives
+//replace github.com/yumenaka/archives v0.0.0-20251213105147-9aacc4911770 => ./archives

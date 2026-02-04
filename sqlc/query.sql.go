@@ -86,9 +86,9 @@ const createBook = `-- name: CreateBook :one
 INSERT INTO books (title, book_id, owner, book_path, store_url, type,
                    child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size,
                    author, isbn, press, published_at, extract_path, extract_num, book_complete,
-                   init_complete, non_utf8zip, zip_text_encoding, created_by_version)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, deleted
+                   init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 `
 
 type CreateBookParams struct {
@@ -116,6 +116,8 @@ type CreateBookParams struct {
 	NonUtf8zip       sql.NullBool
 	ZipTextEncoding  sql.NullString
 	CreatedByVersion sql.NullString
+	IsRemote         sql.NullBool
+	RemoteUrl        sql.NullString
 }
 
 // Create new book
@@ -145,6 +147,8 @@ func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, e
 		arg.NonUtf8zip,
 		arg.ZipTextEncoding,
 		arg.CreatedByVersion,
+		arg.IsRemote,
+		arg.RemoteUrl,
 	)
 	var i Book
 	err := row.Scan(
@@ -174,6 +178,8 @@ func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, e
 		&i.NonUtf8zip,
 		&i.ZipTextEncoding,
 		&i.CreatedByVersion,
+		&i.IsRemote,
+		&i.RemoteUrl,
 		&i.Deleted,
 	)
 	return i, err
@@ -377,7 +383,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getBookByBookPath = `-- name: GetBookByBookPath :one
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
 WHERE book_path = ?
 LIMIT 1
@@ -414,6 +420,8 @@ func (q *Queries) GetBookByBookPath(ctx context.Context, bookPath string) (Book,
 		&i.NonUtf8zip,
 		&i.ZipTextEncoding,
 		&i.CreatedByVersion,
+		&i.IsRemote,
+		&i.RemoteUrl,
 		&i.Deleted,
 	)
 	return i, err
@@ -421,7 +429,7 @@ func (q *Queries) GetBookByBookPath(ctx context.Context, bookPath string) (Book,
 
 const getBookByID = `-- name: GetBookByID :one
 
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
 WHERE book_id = ?
 LIMIT 1
@@ -459,6 +467,8 @@ func (q *Queries) GetBookByID(ctx context.Context, bookID string) (Book, error) 
 		&i.NonUtf8zip,
 		&i.ZipTextEncoding,
 		&i.CreatedByVersion,
+		&i.IsRemote,
+		&i.RemoteUrl,
 		&i.Deleted,
 	)
 	return i, err
@@ -693,7 +703,7 @@ func (q *Queries) ListBookmarksByBookID(ctx context.Context, bookID string) ([]B
 }
 
 const listBooks = `-- name: ListBooks :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
 ORDER BY modified_time DESC
 `
@@ -735,6 +745,8 @@ func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 			&i.NonUtf8zip,
 			&i.ZipTextEncoding,
 			&i.CreatedByVersion,
+			&i.IsRemote,
+			&i.RemoteUrl,
 			&i.Deleted,
 		); err != nil {
 			return nil, err
@@ -751,7 +763,7 @@ func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 }
 
 const listBooksByStorePath = `-- name: ListBooksByStorePath :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
 WHERE store_url = ?
 ORDER BY modified_time DESC
@@ -794,6 +806,8 @@ func (q *Queries) ListBooksByStorePath(ctx context.Context, storeUrl string) ([]
 			&i.NonUtf8zip,
 			&i.ZipTextEncoding,
 			&i.CreatedByVersion,
+			&i.IsRemote,
+			&i.RemoteUrl,
 			&i.Deleted,
 		); err != nil {
 			return nil, err
@@ -810,7 +824,7 @@ func (q *Queries) ListBooksByStorePath(ctx context.Context, storeUrl string) ([]
 }
 
 const listBooksByType = `-- name: ListBooksByType :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
 WHERE type = ?
 ORDER BY modified_time DESC
@@ -853,6 +867,8 @@ func (q *Queries) ListBooksByType(ctx context.Context, type_ string) ([]Book, er
 			&i.NonUtf8zip,
 			&i.ZipTextEncoding,
 			&i.CreatedByVersion,
+			&i.IsRemote,
+			&i.RemoteUrl,
 			&i.Deleted,
 		); err != nil {
 			return nil, err
@@ -922,7 +938,7 @@ func (q *Queries) MarkBookAsDeleted(ctx context.Context, bookID string) error {
 }
 
 const searchBooksByTitle = `-- name: SearchBooksByTitle :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
 WHERE title LIKE '%' || ? || '%'
 ORDER BY modified_time DESC
@@ -965,6 +981,8 @@ func (q *Queries) SearchBooksByTitle(ctx context.Context, dollar_1 sql.NullStrin
 			&i.NonUtf8zip,
 			&i.ZipTextEncoding,
 			&i.CreatedByVersion,
+			&i.IsRemote,
+			&i.RemoteUrl,
 			&i.Deleted,
 		); err != nil {
 			return nil, err
@@ -1004,6 +1022,8 @@ SET title             = ?,
     init_complete     = ?,
     non_utf8zip       = ?,
     zip_text_encoding = ?,
+    is_remote         = ?,
+    remote_url        = ?,
     modified_time     = CURRENT_TIMESTAMP
 WHERE book_id = ?
 `
@@ -1031,6 +1051,8 @@ type UpdateBookParams struct {
 	InitComplete    sql.NullBool
 	NonUtf8zip      sql.NullBool
 	ZipTextEncoding sql.NullString
+	IsRemote        sql.NullBool
+	RemoteUrl       sql.NullString
 	BookID          string
 }
 
@@ -1059,6 +1081,8 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 		arg.InitComplete,
 		arg.NonUtf8zip,
 		arg.ZipTextEncoding,
+		arg.IsRemote,
+		arg.RemoteUrl,
 		arg.BookID,
 	)
 	return err

@@ -51,8 +51,8 @@ ORDER BY modified_time DESC;
 INSERT INTO books (title, book_id, owner, book_path, store_url, type,
                    child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size,
                    author, isbn, press, published_at, extract_path, extract_num, book_complete,
-                   init_complete, non_utf8zip, zip_text_encoding, created_by_version)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *;
 
 -- Update book information
@@ -80,6 +80,8 @@ SET title             = ?,
     init_complete     = ?,
     non_utf8zip       = ?,
     zip_text_encoding = ?,
+    is_remote         = ?,
+    remote_url        = ?,
     modified_time     = CURRENT_TIMESTAMP
 WHERE book_id = ?;
 

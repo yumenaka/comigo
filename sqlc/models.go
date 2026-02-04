@@ -35,6 +35,8 @@ type Book struct {
 	NonUtf8zip       sql.NullBool
 	ZipTextEncoding  sql.NullString
 	CreatedByVersion sql.NullString
+	IsRemote         sql.NullBool
+	RemoteUrl        sql.NullString
 	Deleted          sql.NullBool
 }
 

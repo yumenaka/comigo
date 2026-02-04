@@ -1,8 +1,11 @@
 package scan
 
 import (
+	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/yumenaka/comigo/tools/vfs"
 )
 
 type ConfigInterface interface {
@@ -22,8 +25,42 @@ type ConfigInterface interface {
 
 var cfg ConfigInterface
 
+// currentFS 当前使用的文件系统实例（扫描期间有效）
+var currentFS vfs.FileSystem
+
 func InitConfig(c ConfigInterface) {
 	cfg = c
+}
+
+// SetCurrentFS 设置当前扫描使用的文件系统
+func SetCurrentFS(fs vfs.FileSystem) {
+	currentFS = fs
+}
+
+// GetCurrentFS 获取当前扫描使用的文件系统
+func GetCurrentFS() vfs.FileSystem {
+	return currentFS
+}
+
+// IsRemoteFS 判断当前文件系统是否为远程文件系统
+func IsRemoteFS() bool {
+	return currentFS != nil && currentFS.IsRemote()
+}
+
+// getBaseName 根据文件系统类型获取路径的基本名称
+func getBaseName(p string) string {
+	if currentFS != nil && currentFS.IsRemote() {
+		return path.Base(p)
+	}
+	return filepath.Base(p)
+}
+
+// getPathSeparator 获取路径分隔符
+func getPathSeparator() string {
+	if currentFS != nil && currentFS.IsRemote() {
+		return "/"
+	}
+	return string(filepath.Separator)
 }
 
 // IsSupportTemplate 判断压缩包内的文件是否是支持的模板文件

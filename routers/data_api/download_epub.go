@@ -66,10 +66,14 @@ func DownloadEpub(c echo.Context) error {
 		// 根据书籍类型获取图片数据
 		option := fileutil.GetPictureDataOption{
 			PictureName:      page.Name,
+			BookID:           book.BookID,
 			BookIsDir:        book.Type == model.TypeDir,
 			BookIsPDF:        book.Type == model.TypePDF,
 			BookIsNonUTF8Zip: book.NonUTF8Zip,
 			BookPath:         book.BookPath,
+			// 远程书籍支持
+			IsRemote:  book.IsRemote,
+			RemoteURL: book.RemoteURL,
 		}
 
 		imgData, _, imgErr = fileutil.GetPictureData(option)

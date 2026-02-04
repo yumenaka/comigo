@@ -80,6 +80,7 @@ func GetFile(c echo.Context) error {
 	// 获取图片数据的选项
 	option := fileutil.GetPictureDataOption{
 		PictureName:      needFile,
+		BookID:           book.BookID,
 		BookIsPDF:        book.Type == model.TypePDF,
 		BookIsDir:        book.Type == model.TypeDir,
 		BookIsNonUTF8Zip: book.NonUTF8Zip,
@@ -94,6 +95,9 @@ func GetFile(c echo.Context) error {
 		Gray:             gray,
 		BlurHash:         blurhash,
 		BlurHashImage:    blurhashImage,
+		// 远程书籍支持
+		IsRemote:  book.IsRemote,
+		RemoteURL: book.RemoteURL,
 	}
 
 	// 获取图片数据
