@@ -141,6 +141,14 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 
 // setFilePath 初始化 Book 时，设置 BookPath
 func (b *BookInfo) setFilePath(path string) *BookInfo {
+	// 如果 StoreUrl 是远程 URL（包含 ://），说明这是远程书籍，直接使用原始路径
+	// 因为远程路径不应该使用 filepath.Abs 转换为本地绝对路径
+	if strings.Contains(b.StoreUrl, "://") {
+		b.BookPath = path
+		return b
+	}
+
+	// 本地书籍：转换为绝对路径
 	fileAbsPath, err := filepath.Abs(path)
 	if err != nil {
 		// 因为权限问题，无法取得绝对路径的情况下，用相对路径

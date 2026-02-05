@@ -148,6 +148,7 @@ func GetAllBooksNumber() int {
 // ClearBookNotExist  检查内存中的书的源文件是否存在，不存在就删掉
 func ClearBookNotExist() {
 	logger.Info(locale.GetString("log_checking_book_files_exist"))
+	//return
 	// 遍历所有书籍
 	var deletedBooks []string
 	allBooks, err := IStore.ListBooks()
@@ -169,8 +170,10 @@ func ClearBookNotExist() {
 			}
 			exists, err = fs.Exists(book.BookPath)
 			if err != nil {
-				// 检查出错，跳过这本书
+				// 检查出错，跳过这本书（可能是网络问题或路径问题，不删除书籍）
 				logger.Infof(locale.GetString("log_remote_book_existence_check_failed"), book.BookPath, err)
+				logger.Infof("远程书籍存在性检查失败 - BookID: %s, RemoteURL: %s, BookPath: %s, 错误: %v",
+					book.BookID, book.RemoteURL, book.BookPath, err)
 				continue
 			}
 		} else {
