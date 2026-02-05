@@ -957,5 +957,17 @@
   "continue_reading": "Continue",
   "delete_record": "Delete",
   "confirm_delete_bookmark": "Delete this reading record?",
-  "bookmark_deleted": "Deleted"
+  "bookmark_deleted": "Deleted",
+  "log_remote_store_connect_failed": "Failed to connect to remote store: %s, error: %v",
+  "log_remote_file_stat_failed": "Failed to get remote file info: %s, error: %v",
+  "log_remote_file_open_failed": "Failed to open remote file: %s, error: %v",
+  "log_remote_pdf_download_on_demand": "Downloading remote PDF on demand: %s",
+  "log_webdav_filesystem_connected": "WebDAV filesystem connected: %s, base path: %s",
+  "log_epub_metadata_remote_not_supported": "EPUB metadata extraction is not supported for remote streaming",
+  "log_remote_file_download_to_cache": "Downloading remote file to cache: %s -> %s",
+  "log_scan_remote_store_start": "Starting to scan remote store: %s",
+  "log_scan_start_hint_remote": "Scan: %s (remote path: %s)",
+  "log_remote_store_check_book_existence_failed": "Failed to connect to remote store to check book existence: %s, error: %v",
+  "log_remote_book_existence_check_failed": "Failed to check remote book existence: %s, error: %v",
+  "log_add_remote_store": "Adding remote store: %s (protocol: %s, host: %s)"
 }

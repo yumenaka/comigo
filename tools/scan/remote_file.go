@@ -98,7 +98,7 @@ func handleRemoteZipFile(vfsInstance vfs.FileSystem, filePath string, newBook *m
 	if newBook.Type == model.TypeEpub {
 		// EPUB 元数据需要读取文件，暂时跳过（或使用流式读取）
 		// 这里可以后续优化
-		logger.Infof("EPUB 元数据提取暂不支持远程流式读取")
+		logger.Infof(locale.GetString("log_epub_metadata_remote_not_supported"))
 	}
 
 	newBook.SortPages("default")
@@ -236,7 +236,7 @@ func downloadToCache(fs vfs.FileSystem, remotePath string, bookID string) (strin
 	}
 
 	// 下载文件
-	logger.Infof("下载远程文件到缓存: %s -> %s", remotePath, localPath)
+	logger.Infof(locale.GetString("log_remote_file_download_to_cache"), remotePath, localPath)
 	data, err := fs.ReadFile(remotePath)
 	if err != nil {
 		return "", fmt.Errorf("读取远程文件失败: %w", err)

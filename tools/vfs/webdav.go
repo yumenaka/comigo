@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/studio-b12/gowebdav"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -96,7 +97,7 @@ func NewWebDAVFS(urlStr string, opts ...Options) (*WebDAVFS, error) {
 	}
 
 	if options.Debug {
-		logger.Infof("WebDAV 文件系统已连接: %s, 基础路径: %s", serverURL, basePath)
+		logger.Infof(locale.GetString("log_webdav_filesystem_connected"), serverURL, basePath)
 	}
 
 	return wfs, nil
