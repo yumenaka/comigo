@@ -963,6 +963,7 @@
   "log_remote_file_open_failed": "Failed to open remote file: %s, error: %v",
   "log_remote_pdf_download_on_demand": "Downloading remote PDF on demand: %s",
   "log_webdav_filesystem_connected": "WebDAV filesystem connected: %s, base path: %s",
+  "log_sftp_filesystem_connected": "SFTP filesystem connected: %s, base path: %s",
   "log_epub_metadata_remote_not_supported": "EPUB metadata extraction is not supported for remote streaming",
   "log_remote_file_download_to_cache": "Downloading remote file to cache: %s -> %s",
   "log_scan_remote_store_start": "Starting to scan remote store: %s",

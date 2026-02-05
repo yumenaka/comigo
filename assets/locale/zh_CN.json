@@ -963,6 +963,7 @@
   "log_remote_file_open_failed": "无法打开远程文件: %s, 错误: %v",
   "log_remote_pdf_download_on_demand": "按需下载远程 PDF: %s",
   "log_webdav_filesystem_connected": "WebDAV 文件系统已连接: %s, 基础路径: %s",
+  "log_sftp_filesystem_connected": "SFTP 文件系统已连接: %s, 基础路径: %s",
   "log_epub_metadata_remote_not_supported": "EPUB 元数据提取暂不支持远程流式读取",
   "log_remote_file_download_to_cache": "下载远程文件到缓存: %s -> %s",
   "log_scan_remote_store_start": "开始扫描远程书库: %s",
