@@ -7,11 +7,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/vfs"
 )
 
 // StoreBook 向数据库中插入一本书
@@ -292,23 +295,90 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 		// 从深往浅遍历
 		// 如果有几本书同时有同一个父文件夹，那么应该【新建】一本书(组)，并加入到depth-1层里面
 		for depth := maxDepth; depth >= 0; depth-- {
-			// 用父文件夹做key的parentMap，后面遍历用
+			// 用父目录"绝对路径"做 key 的 parentMap（仅用 ParentFolder 的名字会发生同名目录误合并）
 			parentTempMap := make(map[string][]*model.Book)
 			// //遍历depth等于i的所有book
 			for _, b := range depthBooksMap[depth] {
-				parentTempMap[b.ParentFolder] = append(parentTempMap[b.ParentFolder], b)
+				// 计算父目录路径：
+				// - 文件型书籍：BookPath 是文件路径，父目录为 Dir(BookPath)
+				// - 目录型书籍/书组：BookPath 是目录路径，先去掉结尾分隔符再取父目录
+				parentPath := b.BookPath
+				if b.Type == model.TypeDir || b.Type == model.TypeBooksGroup {
+					parentPath = strings.TrimRight(parentPath, "/\\")
+				}
+				// 判断是否为远程路径
+				if b.IsRemote {
+					// 远程路径：使用字符串操作计算父目录
+					parentPath = strings.TrimRight(parentPath, "/\\")
+					lastSlash := strings.LastIndexAny(parentPath, "/\\")
+					if lastSlash >= 0 {
+						parentPath = parentPath[:lastSlash]
+					} else {
+						// 已经是根目录，使用书库根路径
+						parentPath = b.RemoteURL
+					}
+				} else {
+					// 本地路径：使用 filepath.Dir
+					parentPath = filepath.Dir(parentPath)
+				}
+				parentTempMap[parentPath] = append(parentTempMap[parentPath], b)
 			}
 			// 循环parentMap，把有相同parent的书创建为一个书组
-			for parent, sameParentBookList := range parentTempMap {
-				// 新建一本书,类型是书籍组
-				// 获取文件夹信息
-				pathInfo, err := os.Stat(sameParentBookList[0].BookPath)
-				if err != nil {
-					return err
+			for parentPath, sameParentBookList := range parentTempMap {
+				// depth-1 小于 0 说明已经到达子书库根目录以上，不生成书组
+				if (depth - 1) < 0 {
+					continue
 				}
-				// 获取修改时间
-				modTime := pathInfo.ModTime()
-				tempBook, err := model.NewBook(filepath.Dir(sameParentBookList[0].BookPath), modTime, 0, storeUrl, depth-1, model.TypeBooksGroup)
+				// 新建一本书,类型是书籍组
+				// 获取父目录信息（作为书组的时间信息来源）
+				var modTime time.Time
+				isRemote := vfs.IsRemoteURL(storeUrl)
+				if isRemote {
+					// 远程书库：使用 VFS 获取文件信息
+					vfsInstance, err := vfs.GetOrCreate(storeUrl, vfs.Options{
+						CacheEnabled: false,
+						Timeout:      10,
+					})
+					if err != nil {
+						// 无法连接远程服务器，退化为使用子项目的时间信息
+						if len(sameParentBookList) > 0 {
+							firstBook := sameParentBookList[0]
+							if firstBook.IsRemote {
+								modTime = firstBook.Modified
+							} else {
+								modTime = time.Now()
+							}
+						} else {
+							modTime = time.Now()
+						}
+					} else {
+						// 尝试获取父目录信息
+						pathInfo, err := vfsInstance.Stat(parentPath)
+						if err != nil {
+							// 父目录可能暂时不可访问，退化为使用子项目的时间信息
+							if len(sameParentBookList) > 0 {
+								firstBook := sameParentBookList[0]
+								modTime = firstBook.Modified
+							} else {
+								modTime = time.Now()
+							}
+						} else {
+							modTime = pathInfo.ModTime()
+						}
+					}
+				} else {
+					// 本地书库：使用 os.Stat
+					pathInfo, err := os.Stat(parentPath)
+					if err != nil {
+						// 父目录可能暂时不可访问，退化为使用子项目的时间信息
+						pathInfo, err = os.Stat(sameParentBookList[0].BookPath)
+						if err != nil {
+							return err
+						}
+					}
+					modTime = pathInfo.ModTime()
+				}
+				tempBook, err := model.NewBook(parentPath, modTime, 0, storeUrl, depth-1, model.TypeBooksGroup)
 				if err != nil {
 					if config.GetCfg().Debug {
 						logger.Infof(locale.GetString("log_error_creating_new_book_group"), err)
@@ -316,9 +386,22 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 					continue
 				}
 				newBookGroup := tempBook
-				// 书名应该设置成parent
-				if newBookGroup.Title != parent {
-					newBookGroup.Title = parent
+				// 书名设置为目录名（更符合"文件夹/书组"语义）
+				var parentName string
+				if isRemote {
+					// 远程路径：使用字符串操作提取目录名
+					trimmedPath := strings.TrimRight(parentPath, "/\\")
+					lastSlash := strings.LastIndexAny(trimmedPath, "/\\")
+					if lastSlash >= 0 {
+						parentName = trimmedPath[lastSlash+1:]
+					} else {
+						parentName = trimmedPath
+					}
+				} else {
+					parentName = filepath.Base(parentPath)
+				}
+				if newBookGroup.Title != parentName {
+					newBookGroup.Title = parentName
 				}
 				// 初始化ChildBook
 				// 然后把同一parent的书，都加进某个书籍组

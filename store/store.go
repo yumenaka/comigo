@@ -5,11 +5,13 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/vfs"
 )
 
 // StoreInfo 书库基本信息
@@ -63,7 +65,21 @@ func (store *Store) GenerateBookGroup() error {
 			if b.Type == model.TypeDir || b.Type == model.TypeBooksGroup {
 				parentPath = strings.TrimRight(parentPath, "/\\")
 			}
-			parentPath = filepath.Dir(parentPath)
+			// 判断是否为远程路径
+			if b.IsRemote {
+				// 远程路径：使用字符串操作计算父目录
+				parentPath = strings.TrimRight(parentPath, "/\\")
+				lastSlash := strings.LastIndexAny(parentPath, "/\\")
+				if lastSlash >= 0 {
+					parentPath = parentPath[:lastSlash]
+				} else {
+					// 已经是根目录，使用书库根路径
+					parentPath = b.RemoteURL
+				}
+			} else {
+				// 本地路径：使用 filepath.Dir
+				parentPath = filepath.Dir(parentPath)
+			}
 			parentTempMap[parentPath] = append(parentTempMap[parentPath], b)
 		}
 		// 循环parentMap，把有相同parent的书创建为一个书组
@@ -79,16 +95,53 @@ func (store *Store) GenerateBookGroup() error {
 			addedGroupPath[parentPath] = true
 			// 新建一本书,类型是书籍组
 			// 获取父目录信息（作为书组的时间信息来源）
-			pathInfo, err := os.Stat(parentPath)
-			if err != nil {
-				// 父目录可能暂时不可访问，退化为使用子项目的时间信息
-				pathInfo, err = os.Stat(sameParentBookList[0].BookPath)
+			var modTime time.Time
+			isRemote := vfs.IsRemoteURL(store.BackendURL)
+			if isRemote {
+				// 远程书库：使用 VFS 获取文件信息
+				vfsInstance, err := vfs.GetOrCreate(store.BackendURL, vfs.Options{
+					CacheEnabled: false,
+					Timeout:      10,
+				})
 				if err != nil {
-					return err
+					// 无法连接远程服务器，退化为使用子项目的时间信息
+					if len(sameParentBookList) > 0 {
+						firstBook := sameParentBookList[0]
+						if firstBook.IsRemote {
+							modTime = firstBook.Modified
+						} else {
+							modTime = time.Now()
+						}
+					} else {
+						modTime = time.Now()
+					}
+				} else {
+					// 尝试获取父目录信息
+					pathInfo, err := vfsInstance.Stat(parentPath)
+					if err != nil {
+						// 父目录可能暂时不可访问，退化为使用子项目的时间信息
+						if len(sameParentBookList) > 0 {
+							firstBook := sameParentBookList[0]
+							modTime = firstBook.Modified
+						} else {
+							modTime = time.Now()
+						}
+					} else {
+						modTime = pathInfo.ModTime()
+					}
 				}
+			} else {
+				// 本地书库：使用 os.Stat
+				pathInfo, err := os.Stat(parentPath)
+				if err != nil {
+					// 父目录可能暂时不可访问，退化为使用子项目的时间信息
+					pathInfo, err = os.Stat(sameParentBookList[0].BookPath)
+					if err != nil {
+						return err
+					}
+				}
+				modTime = pathInfo.ModTime()
 			}
-			// 获取修改时间
-			modTime := pathInfo.ModTime()
 			tempBook, err := model.NewBook(parentPath, modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
 			if err != nil {
 				if config.GetCfg().Debug {
@@ -98,7 +151,19 @@ func (store *Store) GenerateBookGroup() error {
 			}
 			newBookGroup := tempBook
 			// 书名设置为目录名（更符合“文件夹/书组”语义）
-			parentName := filepath.Base(parentPath)
+			var parentName string
+			if isRemote {
+				// 远程路径：使用字符串操作提取目录名
+				trimmedPath := strings.TrimRight(parentPath, "/\\")
+				lastSlash := strings.LastIndexAny(trimmedPath, "/\\")
+				if lastSlash >= 0 {
+					parentName = trimmedPath[lastSlash+1:]
+				} else {
+					parentName = trimmedPath
+				}
+			} else {
+				parentName = filepath.Base(parentPath)
+			}
 			if newBookGroup.Title != parentName {
 				newBookGroup.Title = parentName
 			}
