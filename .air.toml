@@ -14,7 +14,7 @@ post_cmd = []
 ## 运行的时候，需要传给二进制文件的参数。
 # args_bin = ["./test","--tailscale","--debug", "--config-locked"]
 ## 可配置远程书库 
-# args_bin = ["https://test:test@localhost/dav/","sftp://test:test@192.168.1.1/path/to/books","--tailscale","--debug"]
+# args_bin = ["https://test:test@localhost/dav/","sftp://test:test@192.168.1.1/path/to/books","smb://guest@192.168.1.1:445/some/path"，"--tailscale","--debug"]
 args_bin = [".test","--debug"]
 #二进制文件
 bin = "./test/comi"

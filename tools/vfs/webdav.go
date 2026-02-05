@@ -236,17 +236,43 @@ func (w *WebDAVFS) RelPath(basePath, targetPath string) (string, error) {
 	basePath = path.Clean(basePath)
 	targetPath = path.Clean(targetPath)
 
-	// 如果 targetPath 不以 basePath 开头，无法计算相对路径
-	if !strings.HasPrefix(targetPath, basePath) {
-		return "", fmt.Errorf("目标路径 %s 不在基础路径 %s 下", targetPath, basePath)
+	// 如果 basePath 是 "." 或 ""，表示根目录，直接返回 targetPath
+	if basePath == "." || basePath == "" {
+		// 移除开头的 "./" 或 "/"
+		rel := strings.TrimPrefix(targetPath, "./")
+		rel = strings.TrimPrefix(rel, "/")
+		if rel == "" {
+			rel = "."
+		}
+		return rel, nil
 	}
 
-	rel := strings.TrimPrefix(targetPath, basePath)
-	rel = strings.TrimPrefix(rel, "/")
-	if rel == "" {
-		rel = "."
+	// 确保 basePath 以 "/" 结尾以便正确匹配
+	basePathWithSlash := basePath
+	if !strings.HasSuffix(basePathWithSlash, "/") {
+		basePathWithSlash = basePathWithSlash + "/"
 	}
-	return rel, nil
+
+	// 如果 targetPath 以 basePath 或 basePathWithSlash 开头
+	if strings.HasPrefix(targetPath, basePathWithSlash) {
+		rel := strings.TrimPrefix(targetPath, basePathWithSlash)
+		if rel == "" {
+			rel = "."
+		}
+		return rel, nil
+	}
+
+	if strings.HasPrefix(targetPath, basePath) {
+		rel := strings.TrimPrefix(targetPath, basePath)
+		rel = strings.TrimPrefix(rel, "/")
+		if rel == "" {
+			rel = "."
+		}
+		return rel, nil
+	}
+
+	// 如果 targetPath 不以 basePath 开头，无法计算相对路径
+	return "", fmt.Errorf("目标路径 %s 不在基础路径 %s 下", targetPath, basePath)
 }
 
 // Exists 检查路径是否存在

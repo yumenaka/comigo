@@ -192,6 +192,8 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 		basePath = webdavFS.GetBasePath()
 	} else if sftpFS, ok := fs.(*vfs.SFTPFS); ok {
 		basePath = sftpFS.GetBasePath()
+	} else if smbFS, ok := fs.(*vfs.SMBFS); ok {
+		basePath = smbFS.GetBasePath()
 	}
 	if basePath == "" {
 		basePath = "/"

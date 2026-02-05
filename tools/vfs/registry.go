@@ -87,6 +87,18 @@ func GetOrCreate(storeURL string, opts ...Options) (FileSystem, error) {
 					sfs.options.Debug = sfs.options.Debug || desired.Debug
 					sfs.cache = NewFileCache(sfs.options.CacheDir, sfs.options.Debug)
 				}
+			} else if smbfs, ok := fs.(*SMBFS); ok {
+				// SMBFS 配置升级：更新缓存设置
+				// 注意：SMB 连接的超时在创建时设置，无法动态更新
+				// 但可以更新缓存设置
+				if desired.CacheEnabled && smbfs.cache == nil {
+					smbfs.options.CacheEnabled = true
+					if desired.CacheDir != "" {
+						smbfs.options.CacheDir = desired.CacheDir
+					}
+					smbfs.options.Debug = smbfs.options.Debug || desired.Debug
+					smbfs.cache = NewFileCache(smbfs.options.CacheDir, smbfs.options.Debug)
+				}
 			}
 		}
 		return fs, nil
@@ -121,8 +133,7 @@ func New(storeURL string, opts ...Options) (FileSystem, error) {
 		return NewWebDAVFS(storeURL, options)
 
 	case SMB:
-		// TODO: 实现 SMB 支持
-		return nil, fmt.Errorf("SMB 支持尚未实现")
+		return NewSMBFS(storeURL, options)
 
 	case SFTP:
 		return NewSFTPFS(storeURL, options)
@@ -213,11 +224,14 @@ func normalizeURL(storeURL string) string {
 	case "sftp":
 		// SFTP scheme 保持不变
 		scheme = "sftp"
+	case "smb":
+		// SMB scheme 保持不变
+		scheme = "smb"
 	}
 
 	// 重建 URL（不包含认证信息，用于作为 key）
-	// 对于 SFTP，包含端口号以确保唯一性
-	if scheme == "sftp" && u.Port() != "" {
+	// 对于 SFTP 和 SMB，包含端口号以确保唯一性
+	if (scheme == "sftp" || scheme == "smb") && u.Port() != "" {
 		result := fmt.Sprintf("%s://%s:%s%s", scheme, u.Hostname(), u.Port(), u.Path)
 		return result
 	}
