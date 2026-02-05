@@ -45,8 +45,9 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 	// 如果是远程压缩包，直接从 WebDAV 流式读取
 	if option.IsRemote && !option.BookIsDir && !option.BookIsPDF && option.RemoteURL != "" {
 		// 获取 VFS 实例
+		// 启用 VFS 缓存以复用已下载的数据，提升性能
 		fs, fsErr := vfs.GetOrCreate(option.RemoteURL, vfs.Options{
-			CacheEnabled: false, // 不缓存，直接流式读取
+			CacheEnabled: true, // 启用缓存，复用已下载的压缩包数据
 			Timeout:      30,
 		})
 		if fsErr != nil {
@@ -76,7 +77,8 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 		if option.BookIsNonUTF8Zip {
 			textEncoding = "gbk"
 		}
-		imgData, err = GetSingleFileFromStream(ctx, fileName, reader, pictureName, textEncoding)
+		// 传入 remoteURL 和 bookPath 用于缓存 FileSystem
+		imgData, err = GetSingleFileFromStream(ctx, fileName, reader, pictureName, textEncoding, option.RemoteURL, bookPath)
 		if err != nil {
 			return nil, "", err
 		}

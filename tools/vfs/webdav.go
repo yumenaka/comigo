@@ -92,7 +92,9 @@ func NewWebDAVFS(urlStr string, opts ...Options) (*WebDAVFS, error) {
 	}
 
 	// 初始化缓存
-	if options.CacheEnabled && options.CacheDir != "" {
+	// 只要启用缓存，就初始化 FileCache
+	// 注意：即使 CacheDir 为空，也会启用内存缓存，从而避免重复下载同一远程文件
+	if options.CacheEnabled {
 		wfs.cache = NewFileCache(options.CacheDir, options.Debug)
 	}
 
@@ -271,39 +273,234 @@ func (w *WebDAVFS) IsDir(p string) (bool, error) {
 	return info.IsDir(), nil
 }
 
+// fragmentCacheEntry 片段缓存条目
+type fragmentCacheEntry struct {
+	data []byte
+	mu   sync.RWMutex
+}
+
+// RangeReaderAtSeeker 基于 HTTP Range 请求的 ReaderAtSeeker 实现
+// 支持按需下载文件片段，避免下载整个文件
+type RangeReaderAtSeeker struct {
+	client       *gowebdav.Client
+	path         string
+	size         int64
+	pos          int64
+	fragments    sync.Map // key: fragmentOffset (int64), value: *fragmentCacheEntry
+	fragmentSize int64    // 片段大小（256KB）
+	debug        bool
+}
+
+// NewRangeReaderAtSeeker 创建新的 RangeReaderAtSeeker
+func NewRangeReaderAtSeeker(client *gowebdav.Client, path string, size int64, debug bool) *RangeReaderAtSeeker {
+	return &RangeReaderAtSeeker{
+		client:       client,
+		path:         path,
+		size:         size,
+		pos:          0,
+		fragmentSize: 256 * 1024, // 256KB 片段大小
+		debug:        debug,
+	}
+}
+
+// getFragmentOffset 计算片段起始偏移量
+func (r *RangeReaderAtSeeker) getFragmentOffset(offset int64) int64 {
+	return (offset / r.fragmentSize) * r.fragmentSize
+}
+
+// getFragmentKey 获取片段在缓存中的 key
+func (r *RangeReaderAtSeeker) getFragmentKey(offset int64) int64 {
+	return r.getFragmentOffset(offset)
+}
+
+// fetchFragment 从服务器获取指定范围的片段
+func (r *RangeReaderAtSeeker) fetchFragment(offset, length int64) ([]byte, error) {
+	if r.debug {
+		logger.Infof("下载片段: %s [%d-%d]", r.path, offset, offset+length-1)
+	}
+
+	reader, err := r.client.ReadStreamRange(r.path, offset, length)
+	if err != nil {
+		return nil, fmt.Errorf("无法读取片段 %s [%d-%d]: %w", r.path, offset, offset+length-1, err)
+	}
+	defer reader.Close()
+
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, fmt.Errorf("无法读取片段数据 %s [%d-%d]: %w", r.path, offset, offset+length-1, err)
+	}
+
+	return data, nil
+}
+
+// getFragment 获取片段（从缓存或服务器）
+func (r *RangeReaderAtSeeker) getFragment(offset int64) ([]byte, error) {
+	fragmentOffset := r.getFragmentOffset(offset)
+	fragmentKey := fragmentOffset
+
+	// 尝试从缓存获取
+	if entry, ok := r.fragments.Load(fragmentKey); ok {
+		frag := entry.(*fragmentCacheEntry)
+		frag.mu.RLock()
+		data := frag.data
+		frag.mu.RUnlock()
+		return data, nil
+	}
+
+	// 计算需要读取的长度
+	length := r.fragmentSize
+	if fragmentOffset+length > r.size {
+		length = r.size - fragmentOffset
+	}
+
+	// 从服务器获取
+	data, err := r.fetchFragment(fragmentOffset, length)
+	if err != nil {
+		return nil, err
+	}
+
+	// 缓存片段
+	frag := &fragmentCacheEntry{data: data}
+	r.fragments.Store(fragmentKey, frag)
+
+	return data, nil
+}
+
+// ReadAt 实现 io.ReaderAt 接口
+func (r *RangeReaderAtSeeker) ReadAt(p []byte, off int64) (n int, err error) {
+	if off < 0 {
+		return 0, fmt.Errorf("无效的偏移量: %d", off)
+	}
+	if off >= r.size {
+		return 0, io.EOF
+	}
+
+	// 计算实际可读长度
+	remaining := r.size - off
+	toRead := int64(len(p))
+	if toRead > remaining {
+		toRead = remaining
+	}
+
+	// 读取数据
+	totalRead := int64(0)
+	for totalRead < toRead {
+		currentOffset := off + totalRead
+		fragmentOffset := r.getFragmentOffset(currentOffset)
+
+		// 获取片段
+		fragmentData, err := r.getFragment(currentOffset)
+		if err != nil {
+			return int(totalRead), err
+		}
+
+		// 计算在片段内的偏移量
+		offsetInFragment := currentOffset - fragmentOffset
+		availableInFragment := int64(len(fragmentData)) - offsetInFragment
+		needToRead := toRead - totalRead
+		if needToRead > availableInFragment {
+			needToRead = availableInFragment
+		}
+
+		// 复制数据
+		copy(p[totalRead:totalRead+needToRead], fragmentData[offsetInFragment:offsetInFragment+needToRead])
+		totalRead += needToRead
+	}
+
+	if totalRead < int64(len(p)) && off+totalRead >= r.size {
+		return int(totalRead), io.EOF
+	}
+
+	return int(totalRead), nil
+}
+
+// Seek 实现 io.Seeker 接口
+func (r *RangeReaderAtSeeker) Seek(offset int64, whence int) (int64, error) {
+	var newPos int64
+	switch whence {
+	case io.SeekStart:
+		newPos = offset
+	case io.SeekCurrent:
+		newPos = r.pos + offset
+	case io.SeekEnd:
+		newPos = r.size + offset
+	default:
+		return 0, fmt.Errorf("无效的 whence 值: %d", whence)
+	}
+
+	if newPos < 0 {
+		return 0, fmt.Errorf("无效的偏移量: %d", newPos)
+	}
+	if newPos > r.size {
+		newPos = r.size
+	}
+
+	r.pos = newPos
+	return r.pos, nil
+}
+
+// Read 实现 io.Reader 接口
+func (r *RangeReaderAtSeeker) Read(p []byte) (n int, err error) {
+	if r.pos >= r.size {
+		return 0, io.EOF
+	}
+
+	n, err = r.ReadAt(p, r.pos)
+	if err != nil && err != io.EOF {
+		return n, err
+	}
+
+	r.pos += int64(n)
+	return n, err
+}
+
 // OpenReaderAtSeeker 打开文件并返回支持 Seek 的 Reader
-// WebDAV 协议不支持随机访问，所以需要将整个文件读取到内存中
-// 如果启用了缓存，会先检查缓存，未命中则从服务器读取并缓存
-// 返回的 bytes.Reader 实现了 io.Reader, io.ReaderAt, io.Seeker 接口
+// 如果启用了 UseRangeRequests，将使用 RangeReaderAtSeeker 进行按需读取
+// 否则将整个文件下载到内存（向后兼容）
 func (w *WebDAVFS) OpenReaderAtSeeker(p string) (ReaderAtSeeker, error) {
 	fullPath := w.resolvePath(p)
 
-	// 检查缓存
+	// 检查完整文件缓存（用于小文件或禁用 Range 请求时）
 	if w.cache != nil {
 		if data, ok := w.cache.Get(fullPath); ok {
 			return bytes.NewReader(data), nil
 		}
 	}
 
-	// 从服务器读取整个文件到内存
-	reader, err := w.client.ReadStream(fullPath)
+	// 获取文件大小
+	info, err := w.client.Stat(fullPath)
 	if err != nil {
-		return nil, fmt.Errorf("无法打开 WebDAV 文件 %s: %w", fullPath, err)
+		return nil, fmt.Errorf("无法获取文件信息 %s: %w", fullPath, err)
 	}
-	defer reader.Close()
+	fileSize := info.Size()
 
-	data, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, fmt.Errorf("无法读取 WebDAV 文件 %s: %w", fullPath, err)
+	// 如果禁用 Range 请求或文件很小（< 1MB），使用完整下载
+	useRangeRequests := w.options.UseRangeRequests
+	smallFileThreshold := int64(1024 * 1024) // 1MB
+
+	if !useRangeRequests || fileSize < smallFileThreshold {
+		// 从服务器读取整个文件到内存
+		reader, err := w.client.ReadStream(fullPath)
+		if err != nil {
+			return nil, fmt.Errorf("无法打开 WebDAV 文件 %s: %w", fullPath, err)
+		}
+		defer reader.Close()
+
+		data, err := io.ReadAll(reader)
+		if err != nil {
+			return nil, fmt.Errorf("无法读取 WebDAV 文件 %s: %w", fullPath, err)
+		}
+
+		// 保存到缓存（如果启用）
+		if w.cache != nil {
+			w.cache.Set(fullPath, data)
+		}
+
+		return bytes.NewReader(data), nil
 	}
 
-	// 保存到缓存（如果启用）
-	if w.cache != nil {
-		w.cache.Set(fullPath, data)
-	}
-
-	// bytes.Reader 实现了 io.Reader, io.ReaderAt, io.Seeker
-	return bytes.NewReader(data), nil
+	// 使用 RangeReaderAtSeeker 进行按需读取
+	return NewRangeReaderAtSeeker(w.client, fullPath, fileSize, w.options.Debug), nil
 }
 
 // GetBasePath 返回 WebDAV 基础路径
