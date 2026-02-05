@@ -236,7 +236,7 @@ func getRemotePdfCachePath(bookID string, remotePath string, remoteURL string) s
 
 	// 如果缓存不存在，按需下载（PDF 在扫描时应该已经下载，这里作为后备）
 	if _, err := os.Stat(cachePath); os.IsNotExist(err) {
-		logger.Infof("按需下载远程 PDF: %s", remotePath)
+		logger.Infof(locale.GetString("log_remote_pdf_download_on_demand"), remotePath)
 		fs, err := vfs.GetOrCreate(remoteURL, vfs.Options{
 			CacheEnabled: false,
 			Timeout:      30,

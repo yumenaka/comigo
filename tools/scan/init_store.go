@@ -167,7 +167,7 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 
 // initRemoteStore 扫描远程书库（WebDAV 等）
 func initRemoteStore(storeURL string, cfg ConfigInterface) error {
-	logger.Infof("开始扫描远程书库: %s", storeURL)
+	logger.Infof(locale.GetString("log_scan_remote_store_start"), storeURL)
 
 	// 创建 VFS 实例
 	opts := vfs.Options{
@@ -195,7 +195,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 		basePath = "/"
 	}
 
-	logger.Infof(locale.GetString("scan_start_hint")+" %s (远程路径: %s)", storeURL, basePath)
+	logger.Infof(locale.GetString("log_scan_start_hint_remote"), storeURL, basePath)
 
 	// 检查路径是否存在
 	exists, err := fs.Exists(basePath)

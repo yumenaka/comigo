@@ -164,13 +164,13 @@ func ClearBookNotExist() {
 			})
 			if fsErr != nil {
 				// 无法连接远程服务器，跳过检查（可能是网络问题）
-				logger.Infof("无法连接远程书库检查书籍存在性: %s, 错误: %v", book.RemoteURL, fsErr)
+				logger.Infof(locale.GetString("log_remote_store_check_book_existence_failed"), book.RemoteURL, fsErr)
 				continue
 			}
 			exists, err = fs.Exists(book.BookPath)
 			if err != nil {
 				// 检查出错，跳过这本书
-				logger.Infof("检查远程书籍存在性失败: %s, 错误: %v", book.BookPath, err)
+				logger.Infof(locale.GetString("log_remote_book_existence_check_failed"), book.BookPath, err)
 				continue
 			}
 		} else {

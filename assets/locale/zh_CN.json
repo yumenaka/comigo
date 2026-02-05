@@ -957,5 +957,17 @@
   "continue_reading": "继续阅读",
   "delete_record": "删除",
   "confirm_delete_bookmark": "确定删除此阅读记录？",
-  "bookmark_deleted": "已删除"
+  "bookmark_deleted": "已删除",
+  "log_remote_store_connect_failed": "无法连接远程书库: %s, 错误: %v",
+  "log_remote_file_stat_failed": "无法获取远程文件信息: %s, 错误: %v",
+  "log_remote_file_open_failed": "无法打开远程文件: %s, 错误: %v",
+  "log_remote_pdf_download_on_demand": "按需下载远程 PDF: %s",
+  "log_webdav_filesystem_connected": "WebDAV 文件系统已连接: %s, 基础路径: %s",
+  "log_epub_metadata_remote_not_supported": "EPUB 元数据提取暂不支持远程流式读取",
+  "log_remote_file_download_to_cache": "下载远程文件到缓存: %s -> %s",
+  "log_scan_remote_store_start": "开始扫描远程书库: %s",
+  "log_scan_start_hint_remote": "开始扫描：%s (远程路径: %s)",
+  "log_remote_store_check_book_existence_failed": "无法连接远程书库检查书籍存在性: %s, 错误: %v",
+  "log_remote_book_existence_check_failed": "检查远程书籍存在性失败: %s, 错误: %v",
+  "log_add_remote_store": "添加远程书库: %s (协议: %s, 主机: %s)"
 }

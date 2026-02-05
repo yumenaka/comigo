@@ -957,5 +957,17 @@
   "continue_reading": "続きを読む",
   "delete_record": "削除",
   "confirm_delete_bookmark": "この閲覧記録を削除しますか？",
-  "bookmark_deleted": "削除しました"
+  "bookmark_deleted": "削除しました",
+  "log_remote_store_connect_failed": "リモート書庫への接続に失敗しました: %s, エラー: %v",
+  "log_remote_file_stat_failed": "リモートファイル情報の取得に失敗しました: %s, エラー: %v",
+  "log_remote_file_open_failed": "リモートファイルのオープンに失敗しました: %s, エラー: %v",
+  "log_remote_pdf_download_on_demand": "リモートPDFをオンデマンドでダウンロード中: %s",
+  "log_webdav_filesystem_connected": "WebDAVファイルシステムに接続しました: %s, ベースパス: %s",
+  "log_epub_metadata_remote_not_supported": "EPUBメタデータ抽出はリモートストリーミングではサポートされていません",
+  "log_remote_file_download_to_cache": "リモートファイルをキャッシュにダウンロード中: %s -> %s",
+  "log_scan_remote_store_start": "リモート書庫のスキャンを開始: %s",
+  "log_scan_start_hint_remote": "スキャン開始：%s (リモートパス: %s)",
+  "log_remote_store_check_book_existence_failed": "書籍の存在確認のためリモート書庫に接続できませんでした: %s, エラー: %v",
+  "log_remote_book_existence_check_failed": "リモート書籍の存在確認に失敗しました: %s, エラー: %v",
+  "log_add_remote_store": "リモート書庫を追加: %s (プロトコル: %s, ホスト: %s)"
 }

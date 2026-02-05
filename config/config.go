@@ -283,7 +283,7 @@ func (c *Config) AddStoreUrl(storeURL string) error {
 		}
 
 		if c.Debug {
-			logger.Infof("添加远程书库: %s (协议: %s, 主机: %s)", storeURL, u.Scheme, u.Host)
+			logger.Infof(locale.GetString("log_add_remote_store"), storeURL, u.Scheme, u.Host)
 		}
 
 		// 使用原始 URL（保留认证信息）
