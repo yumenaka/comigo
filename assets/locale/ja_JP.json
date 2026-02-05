@@ -963,6 +963,7 @@
   "log_remote_file_open_failed": "リモートファイルのオープンに失敗しました: %s, エラー: %v",
   "log_remote_pdf_download_on_demand": "リモートPDFをオンデマンドでダウンロード中: %s",
   "log_webdav_filesystem_connected": "WebDAVファイルシステムに接続しました: %s, ベースパス: %s",
+  "log_sftp_filesystem_connected": "SFTPファイルシステムに接続しました: %s, ベースパス: %s",
   "log_epub_metadata_remote_not_supported": "EPUBメタデータ抽出はリモートストリーミングではサポートされていません",
   "log_remote_file_download_to_cache": "リモートファイルをキャッシュにダウンロード中: %s -> %s",
   "log_scan_remote_store_start": "リモート書庫のスキャンを開始: %s",

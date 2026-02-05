@@ -1,12 +1,10 @@
 package data_api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -43,13 +41,13 @@ func StoreBookmark(c echo.Context) error {
 		logger.Infof(locale.GetString("log_failed_to_store_bookmark"), err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to store bookmark")
 	}
-	// 输出调试信息
-	jsonByte, err := json.MarshalIndent(book.BookMarks, "", "  ")
-	if err == nil {
-		if config.GetCfg().Debug {
-			logger.Infof(locale.GetString("log_updated_bookmarks_for_book_id"), book.BookID, string(jsonByte))
-		}
-	}
+	//// 输出调试信息
+	//jsonByte, err := json.MarshalIndent(book.BookMarks, "", "  ")
+	//if err == nil {
+	//	if config.GetCfg().Debug {
+	//		logger.Infof(locale.GetString("log_updated_bookmarks_for_book_id"), book.BookID, string(jsonByte))
+	//	}
+	//}
 	// 返回成功响应
 	return c.JSON(http.StatusOK, map[string]string{"message": "bookmark updated successfully"})
 }

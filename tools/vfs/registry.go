@@ -56,7 +56,7 @@ func GetOrCreate(storeURL string, opts ...Options) (FileSystem, error) {
 		// 典型场景：某处曾用 CacheEnabled=false 创建了 WebDAVFS，后续读取图片希望 CacheEnabled=true 来复用下载结果
 		if len(opts) > 0 {
 			desired := opts[0]
-			// 目前只有 WebDAVFS 支持 FileCache，其他后端后续可按需扩展
+			// WebDAVFS 和 SFTPFS 支持 FileCache 和配置升级
 			if wfs, ok := fs.(*WebDAVFS); ok {
 				// 升级超时（以最新传入为准，避免旧实例超时过短/过长）
 				if desired.Timeout > 0 && desired.Timeout != wfs.options.Timeout {
@@ -74,6 +74,18 @@ func GetOrCreate(storeURL string, opts ...Options) (FileSystem, error) {
 					// Debug 取并集：任一处开启 debug 都可以输出缓存命中日志
 					wfs.options.Debug = wfs.options.Debug || desired.Debug
 					wfs.cache = NewFileCache(wfs.options.CacheDir, wfs.options.Debug)
+				}
+			} else if sfs, ok := fs.(*SFTPFS); ok {
+				// SFTPFS 配置升级：更新超时和缓存设置
+				// 注意：SSH 连接的超时在创建时设置，无法动态更新
+				// 但可以更新缓存设置
+				if desired.CacheEnabled && sfs.cache == nil {
+					sfs.options.CacheEnabled = true
+					if desired.CacheDir != "" {
+						sfs.options.CacheDir = desired.CacheDir
+					}
+					sfs.options.Debug = sfs.options.Debug || desired.Debug
+					sfs.cache = NewFileCache(sfs.options.CacheDir, sfs.options.Debug)
 				}
 			}
 		}
@@ -113,8 +125,7 @@ func New(storeURL string, opts ...Options) (FileSystem, error) {
 		return nil, fmt.Errorf("SMB 支持尚未实现")
 
 	case SFTP:
-		// TODO: 实现 SFTP 支持
-		return nil, fmt.Errorf("SFTP 支持尚未实现")
+		return NewSFTPFS(storeURL, options)
 
 	case S3:
 		// TODO: 实现 S3 支持
@@ -199,9 +210,17 @@ func normalizeURL(storeURL string) string {
 		scheme = "http"
 	case "davs":
 		scheme = "https"
+	case "sftp":
+		// SFTP scheme 保持不变
+		scheme = "sftp"
 	}
 
 	// 重建 URL（不包含认证信息，用于作为 key）
+	// 对于 SFTP，包含端口号以确保唯一性
+	if scheme == "sftp" && u.Port() != "" {
+		result := fmt.Sprintf("%s://%s:%s%s", scheme, u.Hostname(), u.Port(), u.Path)
+		return result
+	}
 	result := fmt.Sprintf("%s://%s%s", scheme, u.Host, u.Path)
 	return result
 }
