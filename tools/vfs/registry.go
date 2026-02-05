@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 )
 
 // registry 全局文件系统注册表
@@ -51,6 +52,31 @@ func GetOrCreate(storeURL string, opts ...Options) (FileSystem, error) {
 
 	// 检查是否已存在
 	if fs, ok := Get(key); ok {
+		// 如果调用方传入了 options，且希望启用缓存/更新超时，则尝试“升级”已有实例配置
+		// 典型场景：某处曾用 CacheEnabled=false 创建了 WebDAVFS，后续读取图片希望 CacheEnabled=true 来复用下载结果
+		if len(opts) > 0 {
+			desired := opts[0]
+			// 目前只有 WebDAVFS 支持 FileCache，其他后端后续可按需扩展
+			if wfs, ok := fs.(*WebDAVFS); ok {
+				// 升级超时（以最新传入为准，避免旧实例超时过短/过长）
+				if desired.Timeout > 0 && desired.Timeout != wfs.options.Timeout {
+					wfs.options.Timeout = desired.Timeout
+					wfs.client.SetTimeout(time.Duration(desired.Timeout) * time.Second)
+				}
+
+				// 升级缓存：如果期望启用缓存且当前未初始化缓存，则初始化（内存缓存始终可用）
+				if desired.CacheEnabled && wfs.cache == nil {
+					wfs.options.CacheEnabled = true
+					// 仅在调用方显式传入 CacheDir 时才启用磁盘缓存；否则只用内存缓存，避免落盘
+					if desired.CacheDir != "" {
+						wfs.options.CacheDir = desired.CacheDir
+					}
+					// Debug 取并集：任一处开启 debug 都可以输出缓存命中日志
+					wfs.options.Debug = wfs.options.Debug || desired.Debug
+					wfs.cache = NewFileCache(wfs.options.CacheDir, wfs.options.Debug)
+				}
+			}
+		}
 		return fs, nil
 	}
 

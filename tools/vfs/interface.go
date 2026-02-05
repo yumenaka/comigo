@@ -170,14 +170,19 @@ type Options struct {
 
 	// Debug 是否启用调试日志
 	Debug bool
+
+	// UseRangeRequests 是否使用 HTTP Range 请求进行按需读取（默认 true）
+	// 启用后，大文件将按需下载片段而不是完整下载
+	UseRangeRequests bool
 }
 
 // DefaultOptions 返回默认配置选项
 func DefaultOptions() Options {
 	return Options{
-		CacheEnabled: false,
-		CacheDir:     "",
-		Timeout:      30,
-		Debug:        false,
+		CacheEnabled:     false,
+		CacheDir:         "",
+		Timeout:          30,
+		Debug:            false,
+		UseRangeRequests: true, // 默认启用 Range 请求以优化大文件读取
 	}
 }

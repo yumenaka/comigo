@@ -19,6 +19,11 @@ import (
 // 使用sync.Map代替map，保证并发情况下的读写安全
 var mapBookFS sync.Map
 
+// mapRemoteBookFS 缓存远程压缩包的 archives.FileSystem
+// key: remoteURL + "|" + bookPath
+// value: archives.FileSystem 实例
+var mapRemoteBookFS sync.Map
+
 // GetSingleFile 获取单个文件
 func GetSingleFile(filePath, nameInArchive, textEncoding string) ([]byte, error) {
 	if nameInArchive == "" {
@@ -144,9 +149,40 @@ func extractFileFromArchive(ctx context.Context, extractor archives.Extractor, s
 
 // GetSingleFileFromStream 从流中获取单个文件（支持远程文件系统）
 // stream 必须实现 ReaderAtSeeker 接口（io.Reader + io.ReaderAt + io.Seeker）
-func GetSingleFileFromStream(ctx context.Context, filename string, stream vfs.ReaderAtSeeker, nameInArchive, textEncoding string) ([]byte, error) {
+// remoteURL 和 bookPath 用于生成缓存 key，如果为空则不使用缓存
+func GetSingleFileFromStream(ctx context.Context, filename string, stream vfs.ReaderAtSeeker, nameInArchive, textEncoding, remoteURL, bookPath string) ([]byte, error) {
 	if nameInArchive == "" {
 		return nil, errors.New(locale.GetString("err_name_in_archive_empty"))
+	}
+
+	// 构建缓存 key（如果提供了 remoteURL 和 bookPath）
+	cacheKey := ""
+	if remoteURL != "" && bookPath != "" {
+		cacheKey = remoteURL + "|" + bookPath
+	}
+
+	// 尝试从缓存获取 FileSystem（仅对非 ZIP 格式，因为 ZIP 格式使用 extractFileFromArchive）
+	var fileSystem fs.FS
+	if cacheKey != "" {
+		if fsInterface, ok := mapRemoteBookFS.Load(cacheKey); ok {
+			fileSystem = fsInterface.(fs.FS)
+			// 从缓存的虚拟文件系统中读取文件
+			fileInArchive, err := fileSystem.Open(nameInArchive)
+			if err == nil {
+				defer fileInArchive.Close()
+				data, err := io.ReadAll(fileInArchive)
+				if err != nil {
+					if errors.Is(err, context.DeadlineExceeded) {
+						logger.Info(locale.GetString("log_timeout_read_file_content"))
+					} else {
+						logger.Infof(locale.GetString("log_failed_to_read_file_content"), err)
+					}
+					return nil, err
+				}
+				return data, nil
+			}
+			// 如果从缓存的文件系统读取失败，继续使用原始流程（可能是文件不存在）
+		}
 	}
 
 	// 识别压缩格式
@@ -160,7 +196,7 @@ func GetSingleFileFromStream(ctx context.Context, filename string, stream vfs.Re
 		return nil, err
 	}
 
-	// 处理 ZIP 文件
+	// 处理 ZIP 文件（ZIP 格式不使用 FileSystem 缓存，直接提取）
 	if zipFormat, ok := format.(archives.Zip); ok {
 		if textEncoding != "" {
 			zipFormat.TextEncoding = encoding.ByName(textEncoding)
@@ -173,14 +209,21 @@ func GetSingleFileFromStream(ctx context.Context, filename string, stream vfs.Re
 	}
 
 	// 使用 FileSystem API（需要 ReaderAtSeeker）
-	fileSystem, err := archives.FileSystem(ctx, filename, stream)
-	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			logger.Info(locale.GetString("log_timeout_create_filesystem"))
-		} else {
-			logger.Infof(locale.GetString("log_failed_to_create_filesystem"), err)
+	// 如果缓存中没有，创建新的 FileSystem
+	if fileSystem == nil {
+		fileSystem, err = archives.FileSystem(ctx, filename, stream)
+		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				logger.Info(locale.GetString("log_timeout_create_filesystem"))
+			} else {
+				logger.Infof(locale.GetString("log_failed_to_create_filesystem"), err)
+			}
+			return nil, err
 		}
-		return nil, err
+		// 缓存 FileSystem（如果提供了 cacheKey）
+		if cacheKey != "" {
+			mapRemoteBookFS.Store(cacheKey, fileSystem)
+		}
 	}
 
 	// 从虚拟文件系统中读取文件
