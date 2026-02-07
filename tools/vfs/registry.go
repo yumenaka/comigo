@@ -99,6 +99,26 @@ func GetOrCreate(storeURL string, opts ...Options) (FileSystem, error) {
 					smbfs.options.Debug = smbfs.options.Debug || desired.Debug
 					smbfs.cache = NewFileCache(smbfs.options.CacheDir, smbfs.options.Debug)
 				}
+			} else if ftpfs, ok := fs.(*FTPFS); ok {
+				// FTPFS 配置升级：更新缓存设置
+				if desired.CacheEnabled && ftpfs.cache == nil {
+					ftpfs.options.CacheEnabled = true
+					if desired.CacheDir != "" {
+						ftpfs.options.CacheDir = desired.CacheDir
+					}
+					ftpfs.options.Debug = ftpfs.options.Debug || desired.Debug
+					ftpfs.cache = NewFileCache(ftpfs.options.CacheDir, ftpfs.options.Debug)
+				}
+			} else if s3fs, ok := fs.(*S3FS); ok {
+				// S3FS 配置升级：更新缓存设置
+				if desired.CacheEnabled && s3fs.cache == nil {
+					s3fs.options.CacheEnabled = true
+					if desired.CacheDir != "" {
+						s3fs.options.CacheDir = desired.CacheDir
+					}
+					s3fs.options.Debug = s3fs.options.Debug || desired.Debug
+					s3fs.cache = NewFileCache(s3fs.options.CacheDir, s3fs.options.Debug)
+				}
 			}
 		}
 		return fs, nil
@@ -139,12 +159,10 @@ func New(storeURL string, opts ...Options) (FileSystem, error) {
 		return NewSFTPFS(storeURL, options)
 
 	case S3:
-		// TODO: 实现 S3 支持
-		return nil, fmt.Errorf("S3 支持尚未实现")
+		return NewS3FS(storeURL, options)
 
 	case FTP:
-		// TODO: 实现 FTP 支持
-		return nil, fmt.Errorf("FTP 支持尚未实现")
+		return NewFTPFS(storeURL, options)
 
 	default:
 		return nil, fmt.Errorf("不支持的后端类型: %v", backendType)
@@ -222,16 +240,20 @@ func normalizeURL(storeURL string) string {
 	case "davs":
 		scheme = "https"
 	case "sftp":
-		// SFTP scheme 保持不变
 		scheme = "sftp"
 	case "smb":
-		// SMB scheme 保持不变
 		scheme = "smb"
+	case "ftp":
+		scheme = "ftp"
+	case "ftps":
+		scheme = "ftps"
+	case "s3":
+		scheme = "s3"
 	}
 
 	// 重建 URL（不包含认证信息，用于作为 key）
-	// 对于 SFTP 和 SMB，包含端口号以确保唯一性
-	if (scheme == "sftp" || scheme == "smb") && u.Port() != "" {
+	// 对于 SFTP、SMB、FTP、FTPS，包含端口号以确保唯一性
+	if (scheme == "sftp" || scheme == "smb" || scheme == "ftp" || scheme == "ftps") && u.Port() != "" {
 		result := fmt.Sprintf("%s://%s:%s%s", scheme, u.Hostname(), u.Port(), u.Path)
 		return result
 	}

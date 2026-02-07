@@ -965,6 +965,8 @@
   "log_webdav_filesystem_connected": "WebDAV filesystem connected: %s, base path: %s",
   "log_sftp_filesystem_connected": "SFTP filesystem connected: %s, base path: %s",
   "log_smb_filesystem_connected": "SMB filesystem connected: %s, base path: %s",
+  "log_ftp_filesystem_connected": "FTP filesystem connected: %s, base path: %s",
+  "log_s3_filesystem_connected": "S3 filesystem connected: %s, base path: %s",
   "log_epub_metadata_remote_not_supported": "EPUB metadata extraction is not supported for remote streaming",
   "log_remote_file_download_to_cache": "Downloading remote file to cache: %s -> %s",
   "log_scan_remote_store_start": "Starting to scan remote store: %s",

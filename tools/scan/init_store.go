@@ -194,6 +194,10 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 		basePath = sftpFS.GetBasePath()
 	} else if smbFS, ok := fs.(*vfs.SMBFS); ok {
 		basePath = smbFS.GetBasePath()
+	} else if ftpFS, ok := fs.(*vfs.FTPFS); ok {
+		basePath = ftpFS.GetBasePath()
+	} else if s3FS, ok := fs.(*vfs.S3FS); ok {
+		basePath = s3FS.GetBasePath()
 	}
 	if basePath == "" {
 		basePath = "/"
