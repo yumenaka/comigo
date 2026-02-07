@@ -68,7 +68,7 @@ func LoadUserPlugins() {
 	if config.GetCfg().EnablePlugin {
 		err := config.ScanUserPlugins()
 		if err != nil {
-			logger.Infof("加载自定义插件失败: %v", err)
+			logger.Infof(locale.GetString("log_load_custom_plugin_failed"), err)
 		}
 	}
 }

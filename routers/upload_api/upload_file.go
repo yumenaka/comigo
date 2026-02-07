@@ -33,7 +33,7 @@ func UploadFile(c echo.Context) error {
 	// 获取用户选择的书库路径
 	storeUrl := c.QueryParam("store_url")
 	if storeUrl == "" {
-		logger.Infof("未选择上传目标书库")
+		logger.Infof(locale.GetString("log_upload_no_store_selected"))
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": locale.GetString("store_validation_failed"),
 		})
@@ -53,7 +53,7 @@ func UploadFile(c echo.Context) error {
 		}
 	}
 	if !isValidStore {
-		logger.Infof("无效的书库路径: %s", storeUrl)
+		logger.Infof(locale.GetString("log_upload_invalid_store_path"), storeUrl)
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": locale.GetString("store_validation_failed"),
 		})
@@ -61,7 +61,7 @@ func UploadFile(c echo.Context) error {
 
 	// 检查书库路径是否存在
 	if !tools.IsExist(storeUrl) {
-		logger.Infof("书库路径不存在: %s", storeUrl)
+		logger.Infof(locale.GetString("log_upload_store_path_not_exist"), storeUrl)
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": locale.GetString("store_not_exists"),
 		})

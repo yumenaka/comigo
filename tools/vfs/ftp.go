@@ -93,7 +93,7 @@ func NewFTPFS(urlStr string, opts ...Options) (*FTPFS, error) {
 	timeout := time.Duration(options.Timeout) * time.Second
 
 	if options.Debug {
-		logger.Infof("正在连接 FTP 服务器 %s (TLS: %v, 超时: %v)", addr, useTLS, timeout)
+		logger.Infof(locale.GetString("log_ftp_connecting"), addr, useTLS, timeout)
 	}
 
 	// 建立 FTP 连接

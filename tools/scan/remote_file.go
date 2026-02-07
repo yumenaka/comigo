@@ -229,7 +229,7 @@ func downloadToCache(fs vfs.FileSystem, remotePath string, bookID string) (strin
 		if remoteErr == nil {
 			// 如果本地缓存文件的修改时间不早于远程文件，直接使用缓存
 			if !info.ModTime().Before(remoteInfo.ModTime()) {
-				logger.Infof("使用缓存文件: %s", localPath)
+				logger.Infof(locale.GetString("log_using_cached_file"), localPath)
 				return localPath, nil
 			}
 		}

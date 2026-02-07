@@ -512,16 +512,16 @@ func EnablePluginHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "pluginName is required")
 	}
 
-	logger.Infof("启用插件: %s\n", request.PluginName)
+	logger.Infof(locale.GetString("log_plugin_enabled")+"\n", request.PluginName)
 
 	// 互斥逻辑：auto_flip 和 sketch_practice 不能同时启用
 	if request.PluginName == "sketch_practice" && config.GetCfg().IsPluginEnabled("auto_flip") {
 		// 启用 sketch_practice 时，禁用 auto_flip
-		logger.Infof("禁用互斥插件: auto_flip\n")
+		logger.Infof(locale.GetString("log_disable_mutex_plugin_auto_flip") + "\n")
 		_ = config.GetCfg().DisablePlugin("auto_flip")
 	} else if request.PluginName == "auto_flip" && config.GetCfg().IsPluginEnabled("sketch_practice") {
 		// 启用 auto_flip 时，禁用 sketch_practice
-		logger.Infof("禁用互斥插件: sketch_practice\n")
+		logger.Infof(locale.GetString("log_disable_mutex_plugin_sketch_practice") + "\n")
 		_ = config.GetCfg().DisablePlugin("sketch_practice")
 	}
 
@@ -562,7 +562,7 @@ func DisablePluginHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "pluginName is required")
 	}
 
-	logger.Infof("禁用插件: %s\n", request.PluginName)
+	logger.Infof(locale.GetString("log_plugin_disabled")+"\n", request.PluginName)
 
 	// 禁用插件
 	err := config.GetCfg().DisablePlugin(request.PluginName)
@@ -763,7 +763,7 @@ func RescanStoreHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is not valid base64url")
 	}
-	logger.Infof("重新扫描书库: %s\n", storeUrl)
+	logger.Infof(locale.GetString("log_rescan_store")+"\n", storeUrl)
 
 	// 记录扫描前的书籍数量
 	beforeCount := model.GetAllBooksNumber()
@@ -790,7 +790,7 @@ func RescanStoreHandler(c echo.Context) error {
 		newBooksCount = 0
 	}
 
-	logger.Infof("书库扫描完成，新增 %d 本书\n", newBooksCount)
+	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success":       true,
@@ -822,7 +822,7 @@ func DeleteStoreHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is not valid base64url")
 	}
-	logger.Infof("删除书库: %s\n", storeUrl)
+	logger.Infof(locale.GetString("log_delete_store")+"\n", storeUrl)
 
 	// 先删除该书库的所有书籍数据
 	targetStoreAbs, err := filepath.Abs(storeUrl)
@@ -856,7 +856,7 @@ func DeleteStoreHandler(c echo.Context) error {
 		}
 	}
 
-	logger.Infof("删除了 %d 本书籍\n", deletedCount)
+	logger.Infof(locale.GetString("log_deleted_books_count")+"\n", deletedCount)
 
 	// 从配置中移除该书库 URL
 	values, err := doDelete("StoreUrls", storeUrl)

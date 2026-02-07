@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -27,12 +28,12 @@ func Login(c echo.Context) error {
 	password := c.FormValue("password")
 	// 检查是否需要登录
 	if config.GetCfg().Username == "" || config.GetCfg().Password == "" {
-		logger.Infof("Cannot set Username or Password\n")
+		logger.Infof(locale.GetString("log_cannot_set_username_or_password") + "\n")
 		return echo.ErrTeapot
 	}
 	// 如果未设置密码或密码错误，则不生成 JWT
 	if username != config.GetCfg().Username || password != config.GetCfg().Password {
-		logger.Infof("Login failed: %s-%s, %s-%s\n", username, config.GetCfg().Username, config.GetCfg().Password, password)
+		logger.Infof(locale.GetString("log_login_failed")+"\n", username, config.GetCfg().Username, config.GetCfg().Password, password)
 		return echo.ErrUnauthorized
 	}
 

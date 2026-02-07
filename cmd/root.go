@@ -38,7 +38,7 @@ var RootCmd = &cobra.Command{
 			if strings.Contains(cfg.Host, "comigo.xyz") {
 				cfg.EnabledPluginList = append(cfg.EnabledPluginList, "comigo_xyz")
 			}
-			logger.Infof("cfg.Host: %v , cfg.EnabledPluginList: %v ", cfg.Host, cfg.EnabledPluginList)
+			logger.Infof(locale.GetString("log_cfg_host_enabled_plugin_list"), cfg.Host, cfg.EnabledPluginList)
 		}
 
 		// 设置临时文件夹

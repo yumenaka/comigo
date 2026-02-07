@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	fileutil "github.com/yumenaka/comigo/tools/file"
@@ -73,7 +74,7 @@ func GetFile(c echo.Context) error {
 	// 获取书籍信息
 	book, err := model.IStore.GetBook(id)
 	if err != nil {
-		logger.Infof("GetBook error: %s", err)
+		logger.Infof(locale.GetString("log_getbook_error_common"), err)
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
 	}
 
@@ -103,7 +104,7 @@ func GetFile(c echo.Context) error {
 	// 获取图片数据
 	imgData, contentType, err := fileutil.GetPictureData(option)
 	if err != nil {
-		logger.Infof("Get file error: %s", err)
+		logger.Infof(locale.GetString("log_get_file_error"), err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Get file error: " + err.Error()})
 	}
 
@@ -121,7 +122,7 @@ func GetFile(c echo.Context) error {
 			config.GetCfg().Debug,
 		)
 		if errSave != nil {
-			logger.Infof("SaveFileToCache error: %s", errSave)
+			logger.Infof(locale.GetString("log_save_file_to_cache_error"), errSave)
 		}
 	}
 	// 返回图片数据

@@ -87,7 +87,7 @@ func NewS3FS(urlStr string, opts ...Options) (*S3FS, error) {
 	}
 
 	if options.Debug {
-		logger.Infof("正在连接 S3 服务 %s (存储桶: %s, 前缀: %s)", endpointURL, bucket, basePath)
+		logger.Infof(locale.GetString("log_s3_connecting"), endpointURL, bucket, basePath)
 	}
 
 	// 创建 S3 客户端
