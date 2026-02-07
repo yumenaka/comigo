@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -30,7 +31,7 @@ func NewFileCache(cacheDir string, debug bool) *FileCache {
 	// 确保缓存目录存在
 	if cacheDir != "" {
 		if err := os.MkdirAll(cacheDir, 0o755); err != nil {
-			logger.Infof("创建缓存目录失败: %v", err)
+			logger.Infof(locale.GetString("log_cache_mkdir_failed"), err)
 		}
 	}
 
@@ -62,7 +63,7 @@ func (c *FileCache) Get(path string) ([]byte, bool) {
 	if entry, ok := c.memory.Load(path); ok {
 		ce := entry.(*cacheEntry)
 		if c.debug {
-			logger.Infof("从内存缓存命中: %s", path)
+			logger.Infof(locale.GetString("log_cache_hit_memory"), path)
 		}
 		return ce.data, true
 	}
@@ -77,7 +78,7 @@ func (c *FileCache) Get(path string) ([]byte, bool) {
 				timestamp: time.Now(),
 			})
 			if c.debug {
-				logger.Infof("从磁盘缓存命中: %s", path)
+				logger.Infof(locale.GetString("log_cache_hit_disk"), path)
 			}
 			return data, true
 		}
@@ -99,10 +100,10 @@ func (c *FileCache) Set(path string, data []byte) {
 		cachePath := c.getCacheFilePath(path)
 		if err := os.WriteFile(cachePath, data, 0o644); err != nil {
 			if c.debug {
-				logger.Infof("写入磁盘缓存失败: %v", err)
+				logger.Infof(locale.GetString("log_cache_write_disk_failed"), err)
 			}
 		} else if c.debug {
-			logger.Infof("已缓存到磁盘: %s -> %s", path, cachePath)
+			logger.Infof(locale.GetString("log_cached_to_disk"), path, cachePath)
 		}
 	}
 }

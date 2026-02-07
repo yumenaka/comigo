@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -43,7 +44,7 @@ func ScanUserPlugins() error {
 	// 检查是否启用插件
 	if !cfg.EnablePlugin {
 		if cfg.Debug {
-			logger.Infof("插件系统未启用，跳过自定义插件扫描")
+			logger.Infof(locale.GetString("log_plugin_system_disabled_skip_scan"))
 		}
 		return nil
 	}
@@ -59,7 +60,7 @@ func ScanUserPlugins() error {
 	// 检查插件目录是否存在
 	if _, err := os.Stat(pluginsPath); os.IsNotExist(err) {
 		if cfg.Debug {
-			logger.Infof("插件目录不存在: %s，跳过自定义插件加载", pluginsPath)
+			logger.Infof(locale.GetString("log_plugin_dir_not_exist_skip_load"), pluginsPath)
 		}
 		return nil
 	}
@@ -80,14 +81,14 @@ func ScanUserPlugins() error {
 
 	for _, scope := range scopes {
 		if err := loadPluginsFromDir(scope.path, scope.name); err != nil {
-			logger.Infof("加载 %s 范围插件时出错: %v", scope.name, err)
+			logger.Infof(locale.GetString("log_plugin_scope_load_error"), scope.name, err)
 		}
 	}
 
 	if cfg.Debug {
-		logger.Infof("成功加载 %d 个自定义插件", len(cfg.CustomPlugins))
+		logger.Infof(locale.GetString("log_plugin_custom_loaded_count"), len(cfg.CustomPlugins))
 		for _, plugin := range cfg.CustomPlugins {
-			logger.Infof("  - [%s] %s (%s)", plugin.Scope, plugin.Name, plugin.FileType)
+			logger.Infof(locale.GetString("log_plugin_loaded_item"), plugin.Scope, plugin.Name, plugin.FileType)
 		}
 	}
 
@@ -100,7 +101,7 @@ func loadPluginsFromDir(dirPath, scope string) error {
 	info, err := os.Stat(dirPath)
 	if os.IsNotExist(err) {
 		if cfg.Debug {
-			logger.Infof("插件目录不存在: %s", dirPath)
+			logger.Infof(locale.GetString("log_plugin_dir_not_exist"), dirPath)
 		}
 		return nil
 	}
@@ -138,7 +139,7 @@ func loadPluginsFromDir(dirPath, scope string) error {
 		filePath := filepath.Join(dirPath, fileName)
 		content, err := os.ReadFile(filePath)
 		if err != nil {
-			logger.Infof("读取插件文件失败 %s: %v", filePath, err)
+			logger.Infof(locale.GetString("log_plugin_read_file_failed"), filePath, err)
 			continue
 		}
 
@@ -214,7 +215,7 @@ func LoadBookPlugins(bookID, scope string) ([]CustomPlugin, error) {
 		filePath := filepath.Join(bookPluginPath, fileName)
 		content, err := os.ReadFile(filePath)
 		if err != nil {
-			logger.Infof("读取书籍插件文件失败 %s: %v", filePath, err)
+			logger.Infof(locale.GetString("log_plugin_read_book_file_failed"), filePath, err)
 			continue
 		}
 
@@ -230,7 +231,7 @@ func LoadBookPlugins(bookID, scope string) ([]CustomPlugin, error) {
 	}
 
 	if cfg.Debug && len(plugins) > 0 {
-		logger.Infof("加载书籍 %s 的 %s 插件: %d 个", bookID, scope, len(plugins))
+		logger.Infof(locale.GetString("log_plugin_loaded_for_book"), bookID, scope, len(plugins))
 	}
 
 	return plugins, nil

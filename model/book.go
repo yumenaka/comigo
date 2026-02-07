@@ -172,7 +172,7 @@ func ClearBookNotExist() {
 			if err != nil {
 				// 检查出错，跳过这本书（可能是网络问题或路径问题，不删除书籍）
 				logger.Infof(locale.GetString("log_remote_book_existence_check_failed"), book.BookPath, err)
-				logger.Infof("远程书籍存在性检查失败 - BookID: %s, RemoteURL: %s, BookPath: %s, 错误: %v",
+				logger.Infof(locale.GetString("log_remote_book_existence_check_failed_detail"),
 					book.BookID, book.RemoteURL, book.BookPath, err)
 				continue
 			}
@@ -182,7 +182,7 @@ func ClearBookNotExist() {
 				exists = false
 			} else if err != nil {
 				// 其他错误，跳过这本书
-				logger.Infof("检查本地书籍存在性失败: %s, 错误: %v", book.BookPath, err)
+				logger.Infof(locale.GetString("log_local_book_existence_check_failed"), book.BookPath, err)
 				continue
 			} else {
 				exists = true

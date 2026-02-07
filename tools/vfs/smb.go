@@ -24,9 +24,9 @@ type SMBFS struct {
 	session   *smb2.Session
 	share     *smb2.Share
 	baseURL   string
-	basePath  string  // 共享内的基础路径
-	shareName string  // SMB 共享名称
-	server    string  // 服务器地址（host:port）
+	basePath  string // 共享内的基础路径
+	shareName string // SMB 共享名称
+	server    string // 服务器地址（host:port）
 	options   Options
 	cache     *FileCache
 	mu        sync.RWMutex
@@ -137,7 +137,7 @@ func NewSMBFS(urlStr string, opts ...Options) (*SMBFS, error) {
 	defer cancel()
 
 	if options.Debug {
-		logger.Infof("正在连接 SMB 服务器 %s (超时: %d秒, 用户: %s, 共享: %s)", server, timeout, username, shareName)
+		logger.Infof(locale.GetString("log_smb_connecting"), server, timeout, username, shareName)
 	}
 
 	session, err := dialer.Dial(ctx, server)
@@ -151,7 +151,7 @@ func NewSMBFS(urlStr string, opts ...Options) (*SMBFS, error) {
 
 	// 挂载共享
 	if options.Debug {
-		logger.Infof("正在挂载 SMB 共享: %s", shareName)
+		logger.Infof(locale.GetString("log_smb_mount_share"), shareName)
 	}
 	share, err := session.Mount(shareName)
 	if err != nil {
@@ -227,7 +227,7 @@ func (s *SMBFS) resolvePath(p string) string {
 	if p == "" || p == "." {
 		return basePath
 	}
-	
+
 	// 使用正斜杠拼接路径
 	if basePath == "." || basePath == "" {
 		return p

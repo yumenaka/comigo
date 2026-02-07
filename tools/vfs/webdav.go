@@ -342,7 +342,7 @@ func (r *RangeReaderAtSeeker) getFragmentKey(offset int64) int64 {
 // fetchFragment 从服务器获取指定范围的片段
 func (r *RangeReaderAtSeeker) fetchFragment(offset, length int64) ([]byte, error) {
 	if r.debug {
-		logger.Infof("下载片段: %s [%d-%d]", r.path, offset, offset+length-1)
+		logger.Infof(locale.GetString("log_webdav_download_range"), r.path, offset, offset+length-1)
 	}
 
 	reader, err := r.client.ReadStreamRange(r.path, offset, length)

@@ -23,7 +23,7 @@ func GetRawFile(c echo.Context) error {
 		return c.String(http.StatusNotFound, "404 page not found")
 	}
 	fileName := c.Param("file_name")
-	logger.Infof("下载文件：%s", fileName)
+	logger.Infof(locale.GetString("log_download_file"), fileName)
 
 	var file http.File
 	var modTime time.Time

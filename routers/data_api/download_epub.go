@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/epub"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -26,7 +27,7 @@ func DownloadEpub(c echo.Context) error {
 	// 获取书籍信息
 	book, err := model.IStore.GetBook(id)
 	if err != nil {
-		logger.Infof("GetBook error: %s", err)
+		logger.Infof(locale.GetString("log_getbook_error_common"), err)
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
 	}
 
@@ -53,7 +54,7 @@ func DownloadEpub(c echo.Context) error {
 	// 创建 EPUB 生成器
 	generator, err := epub.NewGenerator()
 	if err != nil {
-		logger.Infof("Failed to create EPUB generator: %s", err)
+		logger.Infof(locale.GetString("log_failed_to_create_epub_generator"), err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create EPUB generator"})
 	}
 
@@ -78,7 +79,7 @@ func DownloadEpub(c echo.Context) error {
 
 		imgData, _, imgErr = fileutil.GetPictureData(option)
 		if imgErr != nil {
-			logger.Infof("Failed to get image %s: %v", page.Name, imgErr)
+			logger.Infof(locale.GetString("log_failed_to_get_image_epub"), page.Name, imgErr)
 			continue
 		}
 
@@ -112,7 +113,7 @@ func DownloadEpub(c echo.Context) error {
 
 	// 生成 EPUB 并写入响应
 	if err := generator.Generate(c.Response().Writer, bookData, imageFiles); err != nil {
-		logger.Infof("Failed to generate EPUB: %s", err)
+		logger.Infof(locale.GetString("log_failed_to_generate_epub"), err)
 		// 由于已经开始写入响应，无法返回 JSON 错误
 		return nil
 	}

@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -27,7 +28,7 @@ func DownloadZip(c echo.Context) error {
 	// 获取书籍信息
 	book, err := model.IStore.GetBook(id)
 	if err != nil {
-		logger.Infof("GetBook error: %s", err)
+		logger.Infof(locale.GetString("log_getbook_error_common"), err)
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
 	}
 
@@ -58,7 +59,7 @@ func DownloadZip(c echo.Context) error {
 	zipWriter := zip.NewWriter(c.Response().Writer)
 	defer func() {
 		if err := zipWriter.Close(); err != nil {
-			logger.Infof("Error closing zip writer: %s", err)
+			logger.Infof(locale.GetString("log_error_closing_zip_writer"), err)
 		}
 	}()
 
@@ -74,7 +75,7 @@ func DownloadZip(c echo.Context) error {
 		// 检查文件是否存在
 		fileInfo, err := os.Stat(filePath)
 		if err != nil {
-			logger.Infof("File not found, skipping: %s", filePath)
+			logger.Infof(locale.GetString("log_file_not_found_skipping"), filePath)
 			continue
 		}
 
@@ -86,7 +87,7 @@ func DownloadZip(c echo.Context) error {
 		// 打开源文件
 		srcFile, err := os.Open(filePath)
 		if err != nil {
-			logger.Infof("Error opening file: %s, error: %s", filePath, err)
+			logger.Infof(locale.GetString("log_error_opening_file"), filePath, err)
 			continue
 		}
 
@@ -101,7 +102,7 @@ func DownloadZip(c echo.Context) error {
 		writer, err := zipWriter.CreateHeader(header)
 		if err != nil {
 			srcFile.Close()
-			logger.Infof("Error creating zip entry: %s, error: %s", page.Name, err)
+			logger.Infof(locale.GetString("log_error_creating_zip_entry"), page.Name, err)
 			continue
 		}
 
@@ -109,7 +110,7 @@ func DownloadZip(c echo.Context) error {
 		_, err = io.Copy(writer, srcFile)
 		srcFile.Close()
 		if err != nil {
-			logger.Infof("Error writing file to zip: %s, error: %s", page.Name, err)
+			logger.Infof(locale.GetString("log_error_writing_file_to_zip"), page.Name, err)
 			continue
 		}
 	}

@@ -591,7 +591,7 @@ func UpdateConfigByJson(jsonString string) error {
 
 		// 根据字段类型进行赋值
 		if err := setFieldValue(field, value); err != nil {
-			logger.Infof("Failed to set field %s: %v", key, err)
+			logger.Infof(locale.GetString("log_failed_to_set_field"), key, err)
 			continue
 		}
 
