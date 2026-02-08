@@ -66,6 +66,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<div x-show="!collapsed" x-transition>
 					@StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", GetStoreBookCounts())
 					@NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535)
+					@StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description")
 				</div>
 			</div>
 			<!-- 服务器日志 -->
@@ -197,8 +198,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<div x-show="!collapsed" x-transition>
 					@BoolConfig("Debug", config.GetCfg().Debug, "Debug_Description")
 					if config.GetCfg().Debug {
-						@BoolConfig("UseCache", config.GetCfg().LogToFile, "UseCache_Description")
-						@StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description")
+						@BoolConfig("UseCache", config.GetCfg().UseCache, "UseCache_Description")
 						@BoolConfig("ClearCacheExit", config.GetCfg().ClearCacheExit, "ClearCacheExit_Description")
 						@BoolConfig("LogToFile", config.GetCfg().LogToFile, "LogToFile_Description")
 						@BoolConfig("GenerateMetaData", config.GetCfg().GenerateMetaData, "GenerateMetaData_Description")
