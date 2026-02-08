@@ -198,7 +198,7 @@
   "KeyFile": "キーファイル",
   "KeyFile_Description": "TLS/SSL キー ファイル パス (デフォルト: \"~/.config/.comigo/key.key\")",
   "StoreUrls": "ライブラリフォルダー",
-  "StoreUrls_Description": "絶対ディレクトリと相対ディレクトリがサポートされている。 相対ディレクトリは実行ディレクトリを基準とします。",
+  "StoreUrls_Description": "書庫フォルダ。絶対パスと相対パスに対応。相対パスは現在の作業ディレクトリを基準とします。<br>SFTP・SMB リモートパスは試験的対応。形式例:<br>sftp://user:pass@192.168.1.1:22/some/path <br>smb://guest@192.168.1.1:445/some/path",
   "LogFileName": "ログファイル名",
   "LogFileName_Description": "ログファイル名",
   "LogFilePath": "ログの保存場所",

@@ -198,7 +198,7 @@
   "KeyFile": "KeyFile",
   "KeyFile_Description": "TLS/SSL key file path (default: \"~/.config/.comigo/key.key\")",
   "StoreUrls": "Library folder",
-  "StoreUrls_Description": "The library folder supports absolute and relative directories. \nRelative directories are based on the current execution directory.",
+  "StoreUrls_Description": "Library folder; supports absolute and relative paths.Relative paths are based on the current working directory.<br>Experimental support for SFTP and SMB remote paths. Format examples:<br>sftp://user:pass@192.168.1.1:22/some/path <br>smb://guest@192.168.1.1:445/some/path",
   "LogFileName": "Log file name",
   "LogFileName_Description": "Log file name",
   "LogFilePath": "Log save location",

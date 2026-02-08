@@ -198,7 +198,7 @@
   "KeyFile": "KeyFile",
   "KeyFile_Description": "TLS/SSL key文件路径 (default: \"~/.config/.comigo/key.key\")",
   "StoreUrls": "书库文件夹",
-  "StoreUrls_Description": "书库文件夹，支持绝对目录与相对目录。相对目录以当前执行目录为基准",
+  "StoreUrls_Description": "书库文件夹，支持绝对目录与相对目录。相对目录以当前执行目录为基准。<br>试验性支持sftp与smb远程目录。格式类似:<br>sftp://user:pass@192.168.1.1:22/some/path <br>smb://guest@192.168.1.1:445/some/path",
   "LogFileName": "Log文件名",
   "LogFileName_Description": "Log文件名",
   "LogFilePath": "Log保存位置",
