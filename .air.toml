@@ -4,7 +4,7 @@
 # git update-index --no-assume-unchanged .air.toml
 root = "."
 testdata_dir = "test"
-tmp_dir = "test"
+# tmp_dir = ".temp"
 
 [build]
 pre_cmd = ["bun run dev"]
