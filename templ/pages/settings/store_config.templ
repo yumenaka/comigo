@@ -79,7 +79,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 				</button>
 			</div>
 		</div>
-		<div x-text={ getTranslations(description) } class="w-full py-1 text-left ml-2 text-xs text-gray-500"></div>
+		<div x-html={ getTranslations(description) } class="w-full py-1 text-left ml-2 text-xs text-gray-500"></div>
 	</div>
 }
 
