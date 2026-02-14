@@ -42,11 +42,11 @@ func FlipModeHandler(c echo.Context) error {
 	}
 	book.SortPages(sortBy)
 
-	// 翻页模式
+	// 翻页模式（先加载共享 WebSocket 模块，再加载页面逻辑）
 	indexHtml := common.Html(
 		c,
 		FlipPage(c, book),
-		[]string{"script/flip.js", "script/flip_sketch.js"})
+		[]string{"script/ws_sync.js", "script/flip.js"})
 	// 静态模式
 	staticMode := c.QueryParam("static") != ""
 	if staticMode {
@@ -62,7 +62,7 @@ func FlipModeHandler(c echo.Context) error {
 		indexHtml = common.Html(
 			c,
 			FlipPage(c, &staticBook),
-			[]string{"script/flip.js", "script/flip_sketch.js"})
+			[]string{"script/ws_sync.js", "script/flip.js"})
 	}
 	// 渲染翻页模式阅读页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {

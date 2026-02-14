@@ -157,12 +157,6 @@ const book = JSON.parse(document.getElementById('NowBook').textContent)
 const images = book.PageInfos
 Alpine.store('global').allPageNum = parseInt(book.page_count)
 
-// 临时用户标签 ID（用于多标签页同步）
-const tabID = (Date.now() % 10000000).toString(36) + Math.random().toString(36).substring(2, 5)
-
-// WebSocket 令牌（TODO: 使用真正的令牌）
-const token = 'your_token'
-
 // ============ 滑动相关变量 ============
 let touchStartX = 0
 let touchEndX = 0
@@ -1032,170 +1026,14 @@ function initFlipMainAreaListeners() {
     DOM.flipMainArea.addEventListener('wheel', onWheel, {passive: false})
 }
 
-// ============ WebSocket 管理对象 ============
-/**
- * WebSocket 状态管理对象
- * 参考: https://www.ruanyifeng.com/blog/2017/05/websocket.html
- */
-const wsManager = {
-    socket: null,
-    reconnectAttempts: 0,
-    reconnectTimer: null,
-    isIntentionallyClosed: false,
-
-    /**
-     * 建立 WebSocket 连接
-     */
-    connect() {
-        // 检查是否已存在连接
-        if (this.socket && (this.socket.readyState === WebSocket.CONNECTING || this.socket.readyState === WebSocket.OPEN)) {
-            if (Alpine.store('global').debugMode) {
-                console.log("WebSocket 正在连接或已打开，跳过")
-            }
-            return
-        }
-
-        const config = getConfig()
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
-        const wsUrl = wsProtocol + window.location.host + '/api/ws'
-        
-        try {
-            this.socket = new WebSocket(wsUrl)
-            this.socket.onopen = () => this.handleOpen()
-            this.socket.onmessage = (event) => this.handleMessage(event)
-            this.socket.onclose = () => this.handleClose()
-            this.socket.onerror = (error) => this.handleError(error)
-        } catch (error) {
-            console.error('WebSocket 连接失败:', error)
-            this.scheduleReconnect()
-        }
-    },
-
-    /**
-     * 连接打开处理
-     */
-    handleOpen() {
-        console.log('WebSocket连接已建立')
-        this.reconnectAttempts = 0
-        this.isIntentionallyClosed = false
-    },
-
-    /**
-     * 处理收到的消息
-     * @param {MessageEvent} event - 消息事件
-     */
-    handleMessage(event) {
-        try {
-            const message = JSON.parse(event.data)
-            
-            if (message.type === 'flip_mode_sync_page' && message.tab_id !== tabID) {
-                const data = JSON.parse(message.data_string)
-                if (Alpine.store('global').syncPageByWS && data.book_id === book.id) {
-                    jumpPageNum(data.now_page_num, false)
-                }
-            } else if (message.type === 'heartbeat') {
-                if (Alpine.store('global').debugMode) {
-                    console.log('收到心跳消息')
-                }
-            }
-        } catch (error) {
-            console.error('WebSocket 消息解析失败:', error)
-        }
-    },
-
-    /**
-     * 连接关闭处理
-     */
-    handleClose() {
-        console.log('WebSocket连接已关闭')
-        if (!this.isIntentionallyClosed) {
-            this.scheduleReconnect()
-        }
-    },
-
-    /**
-     * 错误处理
-     * @param {Event} error - 错误事件
-     */
-    handleError(error) {
-        console.error('WebSocket发生错误：', error)
-        if (this.socket) {
-            this.socket.close()
-        }
-    },
-
-    /**
-     * 安排重连
-     */
-    scheduleReconnect() {
-        const config = getConfig()
-        
-        if (this.reconnectAttempts >= config.maxReconnectAttempts) {
-            console.log('已达到最大重连次数，停止重连')
-            return
-        }
-
-        this.reconnectAttempts++
-        if (Alpine.store('global').debugMode) {
-            console.log(`第 ${this.reconnectAttempts} 次重连...`)
-        }
-        
-        this.reconnectTimer = setTimeout(() => {
-            this.connect()
-        }, config.reconnectInterval)
-    },
-
-    /**
-     * 发送翻页数据
-     */
-    sendFlipData() {
-        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-            if (Alpine.store('global').debugMode) {
-                console.log('WebSocket 未连接或未准备好，无法发送消息')
-            }
-            return
-        }
-
-        const flipData = {
-            book_id: book.id,
-            now_page_num: Alpine.store('global').nowPageNum,
-        }
-
-        const flipMsg = {
-            type: 'flip_mode_sync_page',
-            status_code: 200,
-            tab_id: tabID,
-            token: token,
-            detail: '翻页模式，发送数据',
-            data_string: JSON.stringify(flipData),
-        }
-
-        try {
-            this.socket.send(JSON.stringify(flipMsg))
-        } catch (error) {
-            console.error('WebSocket 发送消息失败:', error)
-        }
-    },
-
-    /**
-     * 主动断开连接
-     */
-    disconnect() {
-        this.isIntentionallyClosed = true
-        if (this.reconnectTimer) {
-            clearTimeout(this.reconnectTimer)
-            this.reconnectTimer = null
-        }
-        if (this.socket) {
-            this.socket.close()
-            this.socket = null
-        }
-    },
-}
-
-// 为了兼容旧代码，保留 sendFlipData 函数
+// ============ WebSocket 同步（使用共享模块 ComiGoWS）============
+/** 通过 ComiGoWS 发送翻页数据，供 jumpPageNum、setImageSrc 等处调用 */
 function sendFlipData() {
-    wsManager.sendFlipData()
+    if (typeof window.ComiGoWS === 'undefined') return
+    window.ComiGoWS.send('flip_mode_sync_page', {
+        book_id: book.id,
+        now_page_num: Alpine.store('global').nowPageNum,
+    }, '翻页模式，发送数据')
 }
 
 // 设置标签页标题
@@ -1447,9 +1285,34 @@ function initFlipMode() {
         // 4. 初始化 FlipMainArea 事件监听器
         initFlipMainAreaListeners()
         
-        // 5. 如果是在线书籍，连接 WebSocket
-        if (Alpine.store('global').onlineBook) {
-            wsManager.connect()
+        // 5. 初始化共享 WebSocket 并连接（在线书籍时）
+        if (typeof window.ComiGoWS !== 'undefined') {
+            window.ComiGoWS.init({
+                pageType: 'flip',
+                getBookId: () => book?.id,
+                getWsConfig: () => ({
+                    maxReconnectAttempts: Alpine.store('flip').websocketMaxReconnect,
+                    reconnectInterval: Alpine.store('flip').websocketReconnectInterval,
+                }),
+                isDebug: () => Alpine.store('global').debugMode,
+                onMessage(msg) {
+                    if (msg.type === 'flip_mode_sync_page' && msg.tab_id !== window.ComiGoWS.getTabId()) {
+                        try {
+                            const data = JSON.parse(msg.data_string || '{}')
+                            if (Alpine.store('global').syncPageByWS && data.book_id === book.id) {
+                                jumpPageNum(data.now_page_num, false)
+                            }
+                        } catch (e) {
+                            console.error('WebSocket 翻页同步数据解析失败:', e)
+                        }
+                    } else if (msg.type === 'heartbeat' && Alpine.store('global').debugMode) {
+                        console.log('收到心跳消息')
+                    }
+                },
+            })
+            if (Alpine.store('global').onlineBook) {
+                window.ComiGoWS.connect()
+            }
         }
         
         if (Alpine.store('global').debugMode) {

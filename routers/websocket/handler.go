@@ -23,7 +23,9 @@ type Message struct {
 	TabID      string `json:"tab_id"`      // 前端页面的 Tab ID
 	Token      string `json:"Token"`       // 认证用
 	Detail     string `json:"detail"`
-	DataString string `json:"data_string"` // 附加的json字符串数据，服务器根据情况解析
+	DataString string `json:"data_string"`         // 附加的json字符串数据，服务器根据情况解析
+	PageType   string `json:"page_type,omitempty"` // 当前页面类型：flip / scroll / shelf
+	BookID     string `json:"book_id,omitempty"`   // 当前书籍 ID（可选）
 }
 
 type MessageWithClientID struct {

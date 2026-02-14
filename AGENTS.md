@@ -12,6 +12,10 @@ ComiGo 是一个漫画/图片阅读器，提供 Web 界面，支持多种压缩�
 - `store/` - 书库管理
 - `assets/stores/` - 前端 Alpine.js store
 
+## 前端目录
+- `assets/script/` - 前端 JavaScript 代码 与  CSS 样式，通过 templ/common/html.templ 这个模板文件`common.Html()`的 insertScripts 这个参数来插入网页之中
+- 其中的 `assets/script/styles.css` 与 `assets/script/main.js` 是 `bun run dev` 编译生成的文件，不应该直接修改。
+- 
 ## Code Style
 - 代码应该有必要的中文注释，尤其是函数和复杂逻辑部分
 - 保持代码简洁易读
@@ -21,9 +25,9 @@ ComiGo 是一个漫画/图片阅读器，提供 Web 界面，支持多种压缩�
 - 前端：bun + JavaScript + Alpine.js（+persist 插件）+ Flowbite + TailwindCSS
 - 数据存储：默认内存+json持久化，`sqlc generate` 用于生成 SQLite 查询（未来扩展）
 - 模板：templ，`*_templ.go` 是生成文件，修改 `*.templ` 后执行 `templ fmt ./templ && templ generate`
-- 国际化：`assets/locale/` 下的 json 文件（en_US.json, ja_JP.json, zh_CN.json）
-  - 后端：`locale.GetString("key")`
-  - 前端：`i18next.t('key')`
+- 国际化：`assets/locale/` 下的 json 文件，log一般不会硬编码文字，而是修改（en_US.json, ja_JP.json, zh_CN.json）这三个文件来添加或修改文本内容
+  - 后端使用翻译字符串：`locale.GetString("key")`
+  - 前端使用翻译字符串：`i18next.t('key')`
 - 前端状态：Alpine.js store 持久化键名格式 `模块.配置项`（如 `flip.autoHideToolbar`）
 - 前端构建：`bun run dev`
 - 运行指令：`templ fmt ./templ && templ generate && go run main.go`
