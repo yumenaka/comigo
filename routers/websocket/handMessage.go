@@ -81,10 +81,11 @@ func handSyncPageMessageToFlipMode(client *websocket.Conn, msg Message, clientID
 		log.Printf("handSyncPageMessageToFlipMode error: %v", err)
 		return
 	}
+	// log_syncpage_message_to_flipmode 翻页模式同步页数消息 data: %v, clientID: %v
 	if *WsDebug {
 		logger.Infof(locale.GetString("log_syncpage_message_to_flipmode"), data, clientID)
 	}
-	// 验证收到的数据
+	// 验证收到的数据 SyncPage消息发送到FlipMode
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt {
 		log.Printf("handSyncPage_ToFlipode data error: %v", data)
 		return

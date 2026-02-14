@@ -66,7 +66,7 @@
             console.log(`第 ${reconnectAttempts} 次重连...`)
         }
         reconnectTimer = setTimeout(() => {
-            connect()
+            ComiGoWS.connect()
         }, config.reconnectInterval)
     }
 
