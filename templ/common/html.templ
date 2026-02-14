@@ -7,7 +7,7 @@ import (
 )
 
 // Html 定义网页布局
-templ Html(c echo.Context, bodyContent templ.Component, insertScript []string) {
+templ Html(c echo.Context, bodyContent templ.Component, insertScripts []string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -37,7 +37,7 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScript []string) {
 			@bodyContent
 		</body>
 		<!-- 导入js代码,包含htmx、Alpine等第三方库  -->
-		@templ.Raw(assets.GetJavaScript(c.QueryParam("static") != "", insertScript))
+		@templ.Raw(assets.GetJavaScript(c.QueryParam("static") != "", insertScripts))
 		<!-- 导入 Plugins  -->
 		@plugins.RenderAllPlugins(c)
 	</html>
