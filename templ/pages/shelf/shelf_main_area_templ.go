@@ -47,7 +47,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 			return templ_7745c5c3_Err
 		}
 		if nowBookNum != 0 && c.Param("id") == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div x-data id=\"ShelfMainArea\" class=\"flex flex-col flex-1 w-full h-full pt-6 pb-2 px-1 gap-2 overflow-y-auto bg-base-300\" :class=\"(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div x-data id=\"ShelfMainArea\" class=\"flex flex-col flex-1 w-full h-full pt-6 pb-2 px-1 gap-2 overflow-y-auto bg-base-300\" :class=\"$store.global.getMainAreaBgClass()\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -162,7 +162,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 			return templ_7745c5c3_Err
 		}
 		if nowBookNum == 0 && c.Param("id") == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div id=\"tab-contents\" role=\"tabpanel\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\" :class=\"(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] \"><div x-text=\"i18next.t('no_books_library_path_notice')\" class=\"flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\">没有可读书籍，请设置书库路径。设置完成后，网页会自动刷新。</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div id=\"tab-contents\" role=\"tabpanel\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\" :class=\"$store.global.getMainAreaBgClass()\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] \"><div x-text=\"i18next.t('no_books_library_path_notice')\" class=\"flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\">没有可读书籍，请设置书库路径。设置完成后，网页会自动刷新。</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

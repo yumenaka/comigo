@@ -132,7 +132,7 @@ input[type="range"]::-moz-range-thumb {
     --neutral-content: #EDE6D4;
     --base-100: #ece3ca;
     --base-200: #e4d8b4;
-    --base-300: #DBCA9A;
+    --base-300: var(--custom-base-300, #DBCA9A);
     --base-content: #282425;
     --info: #2563eb;
     --success: #16a34a;
@@ -301,6 +301,31 @@ input[type="range"]::-moz-range-thumb {
     --base-200: #e4d8b4;
     --base-300: #DBCA9A;
     --base-content: #282425;
+    --info: #2563eb;
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: #f35248;
+    --rounded-box: 0.4rem;
+    --rounded-btn: 0.4rem;
+    --rounded-badge: 0.4rem;
+    --tab-radius: 0.4rem;
+  }
+
+  /* ====================== Custom ====================== */
+  [data-theme="custom"] {
+    color-scheme: light dark;
+    --primary: #ef9995;
+    --primary-content: #282425;
+    --secondary: #a4cbb4;
+    --secondary-content: #282425;
+    --accent: #DC8850;
+    --accent-content: #282425;
+    --neutral: #2E282A;
+    --neutral-content: #EDE6D4;
+    --base-100: var(--custom-base-100, #ece3ca);
+    --base-200: #e4d8b4;
+    --base-300: var(--custom-base-300, #DBCA9A);
+    --base-content: var(--custom-base-content, #282425);
     --info: #2563eb;
     --success: #16a34a;
     --warning: #d97706;

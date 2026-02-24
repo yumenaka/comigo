@@ -12,7 +12,6 @@ import './stores/global_store'
 import './stores/shelf_store'
 import './stores/scroll_store'
 import './stores/flip_store'
-import './stores/theme_store'
 import './utils/imageParameters'
 
 // Start Alpine.
