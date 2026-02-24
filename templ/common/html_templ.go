@@ -57,7 +57,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</head><!-- x-bind: Alpine.js的语法，声明全局主题 theme --><!-- $persist 可以存储原始值以及数组和对象。本地存储，默认的key是 _x_变量名 --><!-- ！！！当变量的类型发生变化时，必须手动清除 localStorage，否则相应数值将无法正确更新。！！！ --><!-- 详细用法参见： https://alpinejs.dev/plugins/persist --><body x-data=\"{ theme: $persist('retro') }\" x-bind:data-theme=\"theme\" class=\"text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between  h-full min-h-screen w-full max-w-full p-0 m-0 font-sans\" :class=\"(theme.toString() ==='light'||theme.toString() ==='dark'||theme.toString() ==='retro'||theme.toString() ==='lofi'||theme.toString() ==='nord') ? ($store.global.bgPattern !== 'none'?$store.global.bgPattern+' bg-base-300':'bg-base-300'):($store.global.bgPattern !== 'none'?$store.global.bgPattern:'')\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</head><!-- x-bind: Alpine.js的语法，全局主题从 $store.global.theme 读取 --><!-- 主题值通过 Alpine Persist 持久化到 localStorage，key 为 global.theme --><body x-data=\"{}\" x-bind:data-theme=\"$store.global.theme\" x-bind:style=\"'--custom-base-100:' + $store.global.customBase100 + ';--custom-base-300:' + $store.global.customBase300 + ';--custom-base-content:' + $store.global.customBaseContent + ';'\" class=\"text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between  h-full min-h-screen w-full max-w-full p-0 m-0 font-sans\" :class=\"$store.global.getMainAreaBgClass()\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

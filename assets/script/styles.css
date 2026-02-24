@@ -811,7 +811,7 @@
     --neutral-content: #ede6d4;
     --base-100: #ece3ca;
     --base-200: #e4d8b4;
-    --base-300: #dbca9a;
+    --base-300: var(--custom-base-300, #dbca9a);
     --base-content: #282425;
     --info: #2563eb;
     --success: #16a34a;
@@ -1002,6 +1002,39 @@
     --rounded-btn: .4rem;
     --rounded-badge: .4rem;
     --tab-radius: .4rem;
+  }
+
+  [data-theme="custom"] {
+    --lightningcss-light: initial;
+    --lightningcss-dark: ;
+    color-scheme: light dark;
+    --primary: #ef9995;
+    --primary-content: #282425;
+    --secondary: #a4cbb4;
+    --secondary-content: #282425;
+    --accent: #dc8850;
+    --accent-content: #282425;
+    --neutral: #2e282a;
+    --neutral-content: #ede6d4;
+    --base-100: var(--custom-base-100, #ece3ca);
+    --base-200: #e4d8b4;
+    --base-300: var(--custom-base-300, #dbca9a);
+    --base-content: var(--custom-base-content, #282425);
+    --info: #2563eb;
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: #f35248;
+    --rounded-box: .4rem;
+    --rounded-btn: .4rem;
+    --rounded-badge: .4rem;
+    --tab-radius: .4rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    [data-theme="custom"] {
+      --lightningcss-light: ;
+      --lightningcss-dark: initial;
+    }
   }
 
   [data-theme="dark"] {

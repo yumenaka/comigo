@@ -79,8 +79,32 @@ Alpine.store('global', {
     autoResize: Alpine.$persist(false).as('global.autoResize'),
     // 压缩图片限宽
     autoResizeWidth: Alpine.$persist(800).as('global.autoResizeWidth'),
+    // 主题，daisyUI 使用的 data-theme
+    theme: Alpine.$persist('retro').as('global.theme'),
+    // custom 主题：背景颜色1（与 retro 默认值一致）
+    customBase100: Alpine.$persist('#ece3ca').as('global.customBase100'),
+    // custom 主题：背景颜色3（与 retro 默认值一致）
+    customBase300: Alpine.$persist('#DBCA9A').as('global.customBase300'),
+    // custom 主题：文字颜色（与 retro 默认值一致）
+    customBaseContent: Alpine.$persist('#282425').as('global.customBaseContent'),
     // bgPattern 背景花纹
     bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
+    // 需要保留 bg-base-300 的主题名单（例如 custom 主题也要使用该背景层级）
+    bgBase300ThemeList: ['light', 'dark', 'retro', 'custom', 'lofi', 'nord'],
+    /**
+     * 返回主区域背景类名：统一处理背景花纹和 bg-base-300 的组合逻辑
+     * @returns {string} 例如 "grid-line bg-base-300" / "bg-base-300" / "grid-line" / ""
+     */
+    getMainAreaBgClass() {
+        const classes = [];
+        if (this.bgPattern !== 'none') {
+            classes.push(this.bgPattern);
+        }
+        if (this.bgBase300ThemeList.includes(this.theme.toString())) {
+            classes.push('bg-base-300');
+        }
+        return classes.join(' ');
+    },
     // 是否禁止缓存（TODO：缓存功能优化与测试）
     noCache: Alpine.$persist(false).as('global.noCache'),
     // clientID 用于识别匿名用户与设备
