@@ -6,7 +6,7 @@ templ ReadingHistoryPanel() {
 	<div
 		id="reading_history"
 		x-data="{
-			collapsed: $persist(false).as('settings_reading_history_collapsed'),
+			collapsed: $persist(true).as('settings_reading_history_collapsed'),
 			bookmarks: [],
 			loading: false,
 			deleting: {},

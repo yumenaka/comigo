@@ -18,7 +18,7 @@ templ BoolConfig(name string, value bool, description string) {
 			<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 			<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
 		</label>
-		<div x-text={ getTranslations(description) } class="w-full py-1 text-left text-xs text-gray-500"></div>
+		<div x-text={ getTranslations(description) } class="w-full py-1 text-left text-xs text-base-content"></div>
 	</div>
 }
 

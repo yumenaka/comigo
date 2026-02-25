@@ -36,7 +36,7 @@ templ StringArrayConfig(name string, values []string, description string) {
 					type="text"
 					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput" }
 					:placeholder={ getTranslations("type_or_paste_content") }
-					class="w-full h-10.5 rounded border-gray-400 py-2.5 mx-1 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
+					class="w-full h-10.5 rounded border-gray-400 py-2.5 mx-1 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 					x-on:keydown={ "if ($event.key === 'Enter') { addStringConfigValue('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "'); }" }
 				/>
 				<span class="absolute top-0 -right-20 place-content-center text-black">
@@ -52,7 +52,7 @@ templ StringArrayConfig(name string, values []string, description string) {
 				</span>
 			</div>
 		</div>
-		<div x-text={ getTranslations(description) } class="w-full py-1 text-left ml-2 text-xs text-gray-500"></div>
+		<div x-text={ getTranslations(description) } class="w-full py-1 text-left ml-2 text-xs text-base-content"></div>
 		<div class="bg-red-600"></div>
 	</div>
 }
