@@ -81,11 +81,11 @@ Alpine.store('global', {
     autoResizeWidth: Alpine.$persist(800).as('global.autoResizeWidth'),
     // 主题，daisyUI 使用的 data-theme
     theme: Alpine.$persist('retro').as('global.theme'),
-    // custom 主题：背景颜色1（与 retro 默认值一致）
-    customBase100: Alpine.$persist('#ece3ca').as('global.customBase100'),
-    // custom 主题：背景颜色3（与 retro 默认值一致）
-    customBase300: Alpine.$persist('#DBCA9A').as('global.customBase300'),
-    // custom 主题：文字颜色（与 retro 默认值一致）
+    // custom 主题：组件颜色
+    customBase100: Alpine.$persist('#dce6ff').as('global.customBase100'),
+    // custom 主题：背景颜色
+    customBase300: Alpine.$persist('#076c0a').as('global.customBase300'),
+    // custom 主题：文字颜色
     customBaseContent: Alpine.$persist('#282425').as('global.customBaseContent'),
     // bgPattern 背景花纹
     bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),

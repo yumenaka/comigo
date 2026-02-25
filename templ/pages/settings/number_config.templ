@@ -11,7 +11,7 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 	>
 		<label for={ name } class="w-full py-0 text-left" x-text={ getTranslations(name) }></label>
 		<input
-			class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
+			class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black"
 			id={ name }
 			name={ name }
 			type="number"
@@ -28,7 +28,7 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 			data-original-value={ strconv.Itoa(value) }
 			x-on:change={ "updateNumberConfig('" + name + "', $event.target.value, " + strconv.Itoa(min) + ", " + strconv.Itoa(max) + ")" }
 		/>
-		<div class="w-full py-1 text-left text-xs text-gray-500" x-text={ getTranslations(description) }></div>
+		<div class="w-full py-1 text-left text-xs text-base-content" x-text={ getTranslations(description) }></div>
 		<div class="bg-red-600"></div>
 	</div>
 }

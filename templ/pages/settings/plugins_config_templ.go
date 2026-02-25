@@ -62,7 +62,7 @@ func PluginsConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if config.GetCfg().EnablePlugin {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex flex-col w-full p-2 m-1 font-semibold border rounded shadow-md justify-left items-left bg-base-200 text-base-content border-slate-300\"><div x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"flex flex-col w-full p-2 m-1 font-semibold border rounded shadow-md justify-left items-left bg-base-100 text-base-content border-slate-300\"><div x-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -229,7 +229,7 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" class=\"max-w-2/3 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50\" x-on:keydown=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" class=\"max-w-2/3 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50\" x-on:keydown=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -281,7 +281,7 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300\">添加</button></div><!-- 操作按钮区域（始终显示，未选中时禁用） --><div class=\"flex flex-row justify-center w-full text-black\"><button x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold text-black focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300\">添加</button></div><!-- 操作按钮区域（始终显示，未选中时禁用） --><div class=\"flex flex-row justify-center w-full text-black\"><button x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -346,7 +346,7 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"w-full py-1 text-left ml-2 text-xs text-gray-500\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"w-full py-1 text-left ml-2 text-xs text-base-content\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

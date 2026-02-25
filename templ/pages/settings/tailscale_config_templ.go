@@ -177,7 +177,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"w-full py-1 text-xs text-gray-500 wrap-break-word\"></div></div><!-- Tailscale服务主机名--><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"w-full py-1 text-xs text-base-content wrap-break-word\"></div></div><!-- Tailscale服务主机名--><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -268,7 +268,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50\"><div class=\"w-full py-1 text-xs text-gray-500 wrap-break-word\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50\"><div class=\"w-full py-1 text-xs text-base-content wrap-break-word\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -320,7 +320,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"wrap-break-word\"></label> <input class=\"px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm  placeholder-gray-500 placeholder-opacity-50\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"wrap-break-word\"></label> <input class=\"px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black  placeholder-gray-500 placeholder-opacity-50\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -398,14 +398,14 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\"><div class=\"w-full py-1 text-xs text-gray-500 wrap-break-word\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\"><div class=\"w-full py-1 text-xs text-base-content wrap-break-word\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("TailscalePort_Description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 162, Col: 121}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/tailscale_config.templ`, Line: 162, Col: 125}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -502,7 +502,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50\"><div class=\"w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline wrap-break-word\"><a href=\"https://login.tailscale.com/admin/settings/keys\" target=\"_blank\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50\"><div class=\"w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline wrap-break-word\"><a href=\"https://login.tailscale.com/admin/settings/keys\" target=\"_blank\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -657,7 +657,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\" class=\"w-full py-1 text-xs text-gray-500 wrap-break-word\"></div></div><!-- Funnel模式（公网访问） --><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\" class=\"w-full py-1 text-xs text-base-content wrap-break-word\"></div></div><!-- Funnel模式（公网访问） --><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -786,7 +786,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "\" class=\"w-full py-1 text-xs text-gray-500 wrap-break-word\"></div></div><!-- 帮助面板：如何设置Funnel ACL 权限 --><div id=\"funnel-acl-hint\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 mt-0 mb-2 px-4 py-2 font-semibold items-left bg-base-100 text-base-content text-xs/4 md:text-sm/6 border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 70, "\" class=\"w-full py-1 text-xs text-base-content wrap-break-word\"></div></div><!-- 帮助面板：如何设置Funnel ACL 权限 --><div id=\"funnel-acl-hint\" x-show=\"enable_tailscale\" class=\"flex flex-col justify-start w-full mx-0 mt-0 mb-2 px-4 py-2 font-semibold items-left bg-base-100 text-base-content text-xs/4 md:text-sm/6 border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -908,7 +908,7 @@ func TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "<!-- 提交按钮 --><div class=\"flex flex-col justify-center items-center w-full my-2 z-10\"><button id=\"tailscale-submit-btn\" type=\"button\" class=\"min-w-28 px-2 h-10 mx-2 my-0 text-center font-semibold transition border border-black rounded bg-blue-200  hover:bg-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 82, "<!-- 提交按钮 --><div class=\"flex flex-col justify-center items-center w-full my-2 z-10\"><button id=\"tailscale-submit-btn\" type=\"button\" class=\"min-w-28 px-2 h-10 mx-2 my-0 text-center font-semibold transition border border-black text-black rounded bg-blue-200  hover:bg-indigo-300 disabled:opacity-70 disabled:cursor-not-allowed\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
