@@ -23,7 +23,7 @@ else
 endif
 
 # 跨平台编译的默认目标
-all: app Windows_x86_64_full Windows_i386_full Windows_arm64_full compileAll_CGO deb-all md5SumThemAll
+all: dmg Windows_x86_64_full Windows_i386_full Windows_arm64_full compileAll_CGO deb-all md5SumThemAll
 
 ## windows 可能不需要CGO就能支持Tailscale？
 
@@ -46,12 +46,10 @@ md5SumThemAll:
 	rm -f $(MD5_TEXTFILE)
 	find $(BINDIR) -type f -name "$(NAME)_*" -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
 	find $(BINDIR) -type f -name "$(FULL_NAME)_*" -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
-	# 如果存在 Comigo.app 目录，则先打包为 zip 再计算 md5
-	if [ -d "$(BINDIR)/Comigo.app" ]; then \
-		echo "==> 打包 Comigo.app 为 Comigo.app.zip 用于计算 md5"; \
-		rm -f "$(BINDIR)/Comigo.app.zip"; \
-		cd "$(BINDIR)" && zip -r "Comigo.app.zip" "Comigo.app" > /dev/null; \
-		cd .. && $(MD5_UTIL) "$(BINDIR)/Comigo.app.zip" >> $(MD5_TEXTFILE); \
+	# 如果存在版本化 DMG 文件，则计算并写入 md5
+	if [ -f "$(BINDIR)/Comigo_$(VERSION).dmg" ]; then \
+		echo "==> 计算 Comigo_$(VERSION).dmg 的 md5"; \
+		$(MD5_UTIL) "$(BINDIR)/Comigo_$(VERSION).dmg" >> $(MD5_TEXTFILE); \
 	fi
 	# 删除 $(MD5_TEXTFILE)里面的 ./bin/ 字符串
 	sed -i '' 's|./bin/||g' $(MD5_TEXTFILE)

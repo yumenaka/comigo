@@ -35,7 +35,7 @@
 | システム | ダウンロード |
 |----------|-------------|
 | Windows 64bit | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
-| macOS (Intel/Apple Silicon) | [Comigo.app.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo.app.zip) |
+| macOS (Intel/Apple Silicon) | [Comigo_latest.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo_latest.dmg) |
 
 > 💡 **説明**：GUI版はシステムトレイアイコンを提供し、バックグラウンドで実行できます。Windows: ダブルクリックで実行; macOS: Applicationsフォルダにドラッグ。
 

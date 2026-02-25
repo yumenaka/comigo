@@ -200,8 +200,8 @@ templ ComigoXYZPlugin(c echo.Context) {
 								// Windows 托盘版：comigo_v{version}_Windows_x86_64_full.zip
 								filename = \`comigo_\${this.version}_Windows_x86_64_full.zip\`;
 							} else if (platform.os === "MacOS") {
-								// MacOS 托盘版：Comigo.app.zip
-								filename = \`Comigo.app.zip\`;
+								// MacOS 托盘版：Comigo_v{version}.dmg
+								filename = \`Comigo_\${this.version}.dmg\`;
 							}
 						} else {
 							// 命令行版本：comi_v{version}_{OS}_{ARCH}.tar.gz

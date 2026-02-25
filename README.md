@@ -35,7 +35,7 @@
 | System | Download |
 |--------|----------|
 | Windows 64-bit | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
-| macOS (Intel/Apple Silicon) | [Comigo.app.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo.app.zip) |
+| macOS (Intel/Apple Silicon) | [Comigo_latest.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo_latest.dmg) |
 
 > 💡 **Note**: GUI version provides system tray icon, can run minimized in background. Windows: Double-click to run; macOS: Drag to Applications folder.
 
