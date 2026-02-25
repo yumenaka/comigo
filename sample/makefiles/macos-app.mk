@@ -8,6 +8,8 @@ BIN_DIR     := bin
 # 中间构建目录（放在 bin 下，编译完成后自动清理）
 BUILD_DIR   := $(BIN_DIR)/build
 APP_DIR     := $(BIN_DIR)/$(MAC_APP_NAME).app
+DMG_ROOT_DIR := $(BIN_DIR)/dmg-root
+DMG_FILE    := $(BIN_DIR)/$(MAC_APP_NAME)_$(VERSION).dmg
 
 # Info.plist / 图标文件在 assets 目录下
 ASSETS_DIR  := assets
@@ -32,11 +34,12 @@ ifndef VERSION
   endif
 endif
 
-.PHONY: macos-app clean-app app universal icon version favicon windows-icon systray-icon all-icons FORCE
+.PHONY: macos-app macos-dmg dmg clean-app app universal icon version favicon windows-icon systray-icon all-icons FORCE
 FORCE:
 
 # macOS app 打包的默认目标
 macos-app: app
+macos-dmg: dmg
 
 # 从 icon.png 生成 AppIcon.icns，同时确保网站和 Windows 图标也已生成（强制重新生成）
 $(APP_ICON): FORCE $(ICON_PNG) $(FAVICON_ICO) $(FAVICON_PNG) $(WINDOWS_ICO)
@@ -176,6 +179,19 @@ app: $(BUILD_DIR)/$(MAC_APP_NAME) $(INFO_PLIST_TMP) $(APP_ICON)
 	@rm -rf "$(BUILD_DIR)"
 	@echo "==> 构建完成！"
 
+# 生成 DMG 安装包（包含 Comigo.app 与 Applications 快捷方式）
+dmg: app
+	@echo "==> 创建 DMG 临时目录..."
+	@rm -f "$(DMG_FILE)"
+	@rm -rf "$(DMG_ROOT_DIR)"
+	@mkdir -p "$(DMG_ROOT_DIR)"
+	@cp -R "$(APP_DIR)" "$(DMG_ROOT_DIR)/$(MAC_APP_NAME).app"
+	@ln -s /Applications "$(DMG_ROOT_DIR)/Applications"
+	@echo "==> 生成 $(DMG_FILE)"
+	@hdiutil create -volname "$(MAC_APP_NAME)" -srcfolder "$(DMG_ROOT_DIR)" -ov -format UDZO "$(DMG_FILE)" > /dev/null
+	@rm -rf "$(DMG_ROOT_DIR)"
+	@echo "==> 已生成 $(DMG_FILE)"
+
 # macOS App 专用的清理目标（避免与跨平台编译的 clean 冲突）
 clean-app:
-	@rm -rf "$(BUILD_DIR)" "$(APP_DIR)"
+	@rm -rf "$(BUILD_DIR)" "$(APP_DIR)" "$(DMG_ROOT_DIR)"

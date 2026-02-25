@@ -34,7 +34,7 @@
 | 系统 | 下载链接 |
 |------|---------|
 | Windows 64位 | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
-| macOS (Intel/Apple芯片) | [Comigo.app.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo.app.zip) |
+| macOS (Intel/Apple芯片) | [Comigo_latest.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo_latest.dmg) |
 
 > 💡 **说明**：托盘版提供系统托盘图标，可最小化到后台运行。
 >  Windows 用户双击运行即可，macOS 用户需要将APP拖入 应用程序 文件夹。
