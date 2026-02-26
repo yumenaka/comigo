@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"errors"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -8,6 +9,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/yumenaka/comigo/assets"
+	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -21,6 +25,7 @@ func InitEcho() {
 	engine = echo.New()
 	// 禁用 Echo 的 banner
 	engine.HideBanner = true
+	SetHTTPErrorHandler(engine)
 	// 设置中间件
 	SetMiddleware()
 	// 绑定路由：内嵌资源
@@ -29,10 +34,44 @@ func InitEcho() {
 	BindURLs()
 }
 
+func SetHTTPErrorHandler(e *echo.Echo) {
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		status := http.StatusInternalServerError
+		code := "internal_error"
+		message := locale.GetString("err_internal_server")
+		var details interface{}
+
+		var he *echo.HTTPError
+		if errors.As(err, &he) {
+			status = he.Code
+			switch v := he.Message.(type) {
+			case string:
+				message = v
+			default:
+				details = v
+			}
+			if status >= 400 && status < 500 {
+				code = "bad_request"
+			}
+			if status == http.StatusUnauthorized {
+				code = "unauthorized"
+			}
+			if status == http.StatusForbidden {
+				code = "forbidden"
+			}
+			if status == http.StatusNotFound {
+				code = "not_found"
+			}
+		}
+		_ = apiresp.Error(c, status, code, message, details)
+	}
+}
+
 // SetMiddleware 设置 Echo 的中间件等
 func SetMiddleware() {
 	// Recovery 中间件。返回 500 错误，避免程序直接崩溃，同时记录错误日志。
 	engine.Use(middleware.Recover())
+	engine.Use(middleware.RequestID())
 
 	// 设置 Echo 的日志输出
 	SetEchoLogger(engine)
@@ -94,12 +133,28 @@ func SetMiddleware() {
 	// e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(20))))
 
 	// CORS 中间件
+	allowOrigins := []string{"*"}
+	allowCredentials := false
+	if config.GetCfg().RequiresAuth() {
+		//port := strconv.Itoa(config.GetCfg().Port)
+		//allowOrigins = []string{
+		//	"http://127.0.0.1:" + port,
+		//	"http://localhost:" + port,
+		//	"https://127.0.0.1:" + port,
+		//	"https://localhost:" + port,
+		//}
+		//if host := strings.TrimSpace(config.GetCfg().Host); host != "" {
+		//	allowOrigins = append(allowOrigins, "http://"+host, "https://"+host)
+		//}
+		allowOrigins = []string{"*"}
+		allowCredentials = true
+	}
 	engine.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     allowOrigins,
 		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodPatch},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderContentLength, echo.HeaderAcceptEncoding, "X-CSRF-Token", echo.HeaderAuthorization},
-		ExposeHeaders:    []string{echo.HeaderContentLength},
-		AllowCredentials: true,
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderContentLength, echo.HeaderAcceptEncoding, "X-CSRF-Token", echo.HeaderAuthorization, echo.HeaderXRequestID},
+		ExposeHeaders:    []string{echo.HeaderContentLength, echo.HeaderXRequestID},
+		AllowCredentials: allowCredentials,
 	}))
 }
 

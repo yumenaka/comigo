@@ -58,6 +58,9 @@ const getConfig = () => ({
     slideBlockMargin: 30, // 边界回弹距离
 })
 
+const getFlipPaginationUtils = () => window.ComiGoFlip?.pagination
+const getFlipInteractionUtils = () => window.ComiGoFlip?.interaction
+
 // ============ 工具函数 ============
 /**
  * 防抖函数
@@ -440,17 +443,10 @@ function shouldBlockScroll(diffX) {
     const mangaMode = Alpine.store('flip').mangaMode
     const nowPageNum = Alpine.store('global').nowPageNum
     const allPageNum = Alpine.store('global').allPageNum
-    
-    // 第一页尝试向前翻
-    if (nowPageNum === 1) {
-        return (diffX < 0 && mangaMode) || (diffX > 0 && !mangaMode)
+    const paginationUtils = getFlipPaginationUtils()
+    if (paginationUtils?.shouldBlockScrollBoundary) {
+        return paginationUtils.shouldBlockScrollBoundary(diffX, mangaMode, nowPageNum, allPageNum)
     }
-    
-    // 最后一页尝试向后翻
-    if (nowPageNum === allPageNum) {
-        return (diffX > 0 && mangaMode) || (diffX < 0 && !mangaMode)
-    }
-    
     return false
 }
 
@@ -718,40 +714,32 @@ function jumpPageNum(jumpNum, sync = true) {
 
 // 翻页函数，下一页
 function toNextPage() {
-    let doublePageMode = Alpine.store('flip').doublePageMode === true
-    let nowPageNum = parseInt(Alpine.store('global').nowPageNum)
-    // 单页模式
-    if (!doublePageMode) {
-        if (nowPageNum <= Alpine.store('global').allPageNum) {
-            addPageNum(1)
-        }
-    }
-    //双页模式
-    if (doublePageMode) {
-        if (nowPageNum < Alpine.store('global').allPageNum - 1) {
-            addPageNum(2)
-        } else {
-            addPageNum(1)
-        }
+    const doublePageMode = Alpine.store('flip').doublePageMode === true
+    const nowPageNum = parseInt(Alpine.store('global').nowPageNum)
+    const allPageNum = Alpine.store('global').allPageNum
+    const paginationUtils = getFlipPaginationUtils()
+    const step = paginationUtils?.getNextPageStep
+        ? paginationUtils.getNextPageStep(doublePageMode, nowPageNum, allPageNum)
+        : 1
+    if (step !== 0) {
+        addPageNum(step)
     }
 }
 
 // 翻页函数，前一页
 function toPreviousPage() {
-    //错误值,第0或第1页。
-    if (Alpine.store('global').nowPageNum <= 1) {
+    const nowPageNum = Alpine.store('global').nowPageNum
+    if (nowPageNum <= 1) {
         showToast(i18next.t('hint_first_page'), 'warning')
         return
     }
-    //双页模式
-    if (Alpine.store('flip').doublePageMode) {
-        if (Alpine.store('global').nowPageNum - 2 > 0) {
-            addPageNum(-2)
-        } else {
-            addPageNum(-1)
-        }
-    } else {
-        addPageNum(-1)
+    const doublePageMode = Alpine.store('flip').doublePageMode
+    const paginationUtils = getFlipPaginationUtils()
+    const step = paginationUtils?.getPreviousPageStep
+        ? paginationUtils.getPreviousPageStep(doublePageMode, nowPageNum)
+        : -1
+    if (step !== 0) {
+        addPageNum(step)
     }
 }
 
@@ -760,28 +748,11 @@ function toPreviousPage() {
 function getInSetArea(e) {
     let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
     let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
-    //浏览器的视口,不包括工具栏和滚动条:
-    let innerWidth = window.innerWidth
-    let innerHeight = window.innerHeight
-    //设置区域为正方形，边长按照宽或高里面，比较小的值决定
-    const setArea = 0.15
-    // innerWidth >= innerHeight 的情况下
-    let MinY = innerHeight * (0.5 - setArea)
-    let MaxY = innerHeight * (0.5 + setArea)
-    let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5
-    let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5
-    if (innerWidth < innerHeight) {
-        MinX = innerWidth * (0.5 - setArea)
-        MaxX = innerWidth * (0.5 + setArea)
-        MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5
-        MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5
+    const interactionUtils = getFlipInteractionUtils()
+    if (interactionUtils?.isInSetArea) {
+        return interactionUtils.isInSetArea(clickX, clickY, window.innerWidth, window.innerHeight, 0.15)
     }
-    //在设置区域
-    let inSetArea = false
-    if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
-        inSetArea = true
-    }
-    return inSetArea
+    return false
 }
 
 // 翻页模式功能：显示工具栏时，点击设置区域，自动漫画区域居中。
@@ -936,8 +907,11 @@ function getElementsRect() {
  * @returns {boolean} 是否在区域内
  */
 function isPointInRect(rect, x, y) {
-    if (!rect) return false
-    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+    const interactionUtils = getFlipInteractionUtils()
+    if (interactionUtils?.isPointInRect) {
+        return interactionUtils.isPointInRect(rect, x, y)
+    }
+    return false
 }
 
 document.addEventListener('mousemove', function (event) {

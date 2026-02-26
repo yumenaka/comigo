@@ -87,7 +87,8 @@ func GetJwtSigningKey() string {
 		for _, store := range cfg.StoreUrls {
 			tempStr = tempStr + store
 		}
-		base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(tempStr))))
+		// 未配置账号密码时，回退到可复现但不为空的签名 key。
+		return base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(tempStr))))
 	}
 	return cfg.Username + cfg.Password
 }
