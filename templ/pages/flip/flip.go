@@ -46,7 +46,12 @@ func FlipModeHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		FlipPage(c, book),
-		[]string{"script/ws_sync.js", "script/flip.js"})
+		[]string{
+			"script/ws_sync.js",
+			"script/flip_modules/pagination_utils.js",
+			"script/flip_modules/interaction_utils.js",
+			"script/flip.js",
+		})
 	// 静态模式
 	staticMode := c.QueryParam("static") != ""
 	if staticMode {
@@ -62,7 +67,12 @@ func FlipModeHandler(c echo.Context) error {
 		indexHtml = common.Html(
 			c,
 			FlipPage(c, &staticBook),
-			[]string{"script/ws_sync.js", "script/flip.js"})
+			[]string{
+				"script/ws_sync.js",
+				"script/flip_modules/pagination_utils.js",
+				"script/flip_modules/interaction_utils.js",
+				"script/flip.js",
+			})
 	}
 	// 渲染翻页模式阅读页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {

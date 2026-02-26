@@ -17,12 +17,16 @@ import (
 )
 
 var (
-	Server *http.Server
-	Mutex  sync.Mutex
+	Server         *http.Server
+	Mutex          sync.Mutex
+	ConfigFileLock sync.Mutex
 )
 
 // UpdateConfigFile 如果存在本地配置，更新本地配置
 func UpdateConfigFile() error {
+	ConfigFileLock.Lock()
+	defer ConfigFileLock.Unlock()
+
 	bytes, err := toml.Marshal(cfg)
 	if err != nil {
 		return err
@@ -33,7 +37,7 @@ func UpdateConfigFile() error {
 		return err
 	}
 	if tools.FileExist(filepath.Join(userConfigDir, "comigo", "config.toml")) {
-		err = os.WriteFile(filepath.Join(userConfigDir, "comigo", "config.toml"), bytes, 0o644)
+		err = writeFileAtomically(filepath.Join(userConfigDir, "comigo", "config.toml"), bytes, 0o644)
 		if err != nil {
 			return err
 		}
@@ -41,7 +45,7 @@ func UpdateConfigFile() error {
 
 	// 当前执行目录
 	if tools.FileExist("config.toml") {
-		err = os.WriteFile("config.toml", bytes, 0o644)
+		err = writeFileAtomically("config.toml", bytes, 0o644)
 		if err != nil {
 			return err
 		}
@@ -55,7 +59,7 @@ func UpdateConfigFile() error {
 	}
 	p := path.Join(path.Dir(executable), "config.toml")
 	if tools.FileExist(p) {
-		err = os.WriteFile(p, bytes, 0o644)
+		err = writeFileAtomically(p, bytes, 0o644)
 		if err != nil {
 			logger.Info(path.Join(executable, "config.toml"))
 			return err
@@ -136,6 +140,9 @@ func SaveConfig(to string) error {
 	if runtime.GOOS == "js" {
 		return nil
 	}
+	ConfigFileLock.Lock()
+	defer ConfigFileLock.Unlock()
+
 	// 保存配置
 	bytes, errMarshal := toml.Marshal(cfg)
 	if errMarshal != nil {
@@ -152,12 +159,12 @@ func SaveConfig(to string) error {
 		if err != nil {
 			return err
 		}
-		err = os.WriteFile(path.Join(home, ".config/comigo/config.toml"), bytes, 0o644)
+		err = writeFileAtomically(path.Join(home, ".config/comigo/config.toml"), bytes, 0o644)
 		if err != nil {
 			return err
 		}
 	case WorkingDirectory:
-		err := os.WriteFile("config.toml", bytes, 0o644)
+		err := writeFileAtomically("config.toml", bytes, 0o644)
 		if err != nil {
 			return err
 		}
@@ -168,7 +175,7 @@ func SaveConfig(to string) error {
 			return err
 		}
 		p := path.Join(path.Dir(executable), "config.toml")
-		err = os.WriteFile(p, bytes, 0o644)
+		err = writeFileAtomically(p, bytes, 0o644)
 		if err != nil {
 			logger.Info(path.Join(executable, "config.toml"))
 			return err
@@ -235,6 +242,9 @@ func DeleteConfigIn(in string) error {
 	if runtime.GOOS == "js" {
 		return nil
 	}
+	ConfigFileLock.Lock()
+	defer ConfigFileLock.Unlock()
+
 	logger.Infof(locale.GetString("log_try_delete_cfg_in"), in)
 	var configFile string
 	switch in {
@@ -254,6 +264,37 @@ func DeleteConfigIn(in string) error {
 		configFile = path.Join(path.Dir(executable), "config.toml")
 	}
 	return tools.DeleteFileIfExist(configFile)
+}
+
+func writeFileAtomically(filePath string, data []byte, perm os.FileMode) error {
+	dir := filepath.Dir(filePath)
+	tempFile, err := os.CreateTemp(dir, ".config-*.tmp")
+	if err != nil {
+		return err
+	}
+	tmpName := tempFile.Name()
+	cleanup := func() {
+		_ = os.Remove(tmpName)
+	}
+	if _, err = tempFile.Write(data); err != nil {
+		_ = tempFile.Close()
+		cleanup()
+		return err
+	}
+	if err = tempFile.Chmod(perm); err != nil {
+		_ = tempFile.Close()
+		cleanup()
+		return err
+	}
+	if err = tempFile.Close(); err != nil {
+		cleanup()
+		return err
+	}
+	if err = os.Rename(tmpName, filePath); err != nil {
+		cleanup()
+		return err
+	}
+	return nil
 }
 
 func GetQrcodeURL() string {
