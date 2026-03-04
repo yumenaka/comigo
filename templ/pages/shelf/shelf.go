@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
@@ -80,6 +81,180 @@ func ShelfHandler(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	return nil
+}
+
+// SearchHandler 书架搜索页面处理程序。
+// 支持两种范围：
+// 1. /search?keyword=xxx               -> 全部顶层书架搜索
+// 2. /search?keyword=xxx&parent=bookID -> 指定子书架搜索
+func SearchHandler(c echo.Context) error {
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+
+	keyword := strings.TrimSpace(c.QueryParam("keyword"))
+	parentID := strings.TrimSpace(c.QueryParam("parent"))
+	if keyword == "" {
+		// 空关键词时回到对应书架，避免渲染无意义的搜索页。
+		if parentID != "" {
+			return c.Redirect(http.StatusFound, "/shelf/"+parentID)
+		}
+		return c.Redirect(http.StatusFound, "/")
+	}
+
+	sortBy := getShelfSortBy(c)
+
+	var (
+		storeBookInfos []model.StoreBookInfo
+		childBookInfos model.BookInfos
+		nowBookNum     int
+		err            error
+	)
+
+	// parent 为空：在顶层书架中搜索
+	if parentID == "" {
+		storeBookInfos, err = store.TopOfShelfInfo(sortBy)
+		if err != nil {
+			logger.Errorf(locale.GetString("err_getbookshelf_error"), err)
+		}
+		storeBookInfos = filterStoreBookInfosByKeyword(storeBookInfos, keyword)
+		nowBookNum = countStoreBookInfos(storeBookInfos)
+	}
+
+	// parent 不为空：仅在子书架中搜索
+	if parentID != "" {
+		logger.Infof(locale.GetString("log_get_child_books_for_bookid"), parentID)
+		childBooks, childErr := store.GetChildBooksInfo(parentID)
+		if childErr != nil {
+			logger.Infof(locale.GetString("log_get_bookshelf_error"), childErr)
+			return renderShelfNotFound(c)
+		}
+
+		childBookInfos = filterBookInfosByKeyword(*childBooks, keyword)
+		childBookInfos.SortBooks(sortBy)
+		nowBookNum = len(childBookInfos)
+	}
+
+	indexHtml := common.Html(
+		c,
+		ShelfPage(c, nowBookNum, storeBookInfos, childBookInfos),
+		[]string{"script/shelf.js"},
+	)
+	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	return nil
+}
+
+// getShelfSortBy 获取书架排序方式（与原书架页面保持一致）。
+func getShelfSortBy(c echo.Context) string {
+	sortBy := "default"
+	sortBookBy, err := c.Cookie("ShelfSortBy")
+	if err == nil {
+		sortBy = sortBookBy.Value
+	}
+	return sortBy
+}
+
+// renderShelfNotFound 统一渲染 404 页面，复用 ShelfHandler 的行为。
+func renderShelfNotFound(c echo.Context) error {
+	indexHtml := common.Html(
+		c,
+		error_page.NotFound404(c),
+		[]string{},
+	)
+	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	return nil
+}
+
+// filterStoreBookInfosByKeyword 在顶层书架中按标题过滤。
+func filterStoreBookInfosByKeyword(storeBookInfos []model.StoreBookInfo, keyword string) []model.StoreBookInfo {
+	normalized := normalizeSearchKeyword(keyword)
+	if normalized == "" {
+		return storeBookInfos
+	}
+
+	filteredStoreBookInfos := make([]model.StoreBookInfo, 0, len(storeBookInfos))
+	for _, shelf := range storeBookInfos {
+		filteredBooks := filterBookInfosByKeyword(shelf.BookInfos, normalized)
+		if len(filteredBooks) == 0 {
+			continue
+		}
+		shelf.BookInfos = filteredBooks
+		// 搜索结果中显示命中条目数量，而不是原始总数。
+		shelf.ChildBookNum = len(filteredBooks)
+		filteredStoreBookInfos = append(filteredStoreBookInfos, shelf)
+	}
+	return filteredStoreBookInfos
+}
+
+// filterBookInfosByKeyword 在书籍列表中按标题过滤。
+func filterBookInfosByKeyword(bookInfos model.BookInfos, keyword string) model.BookInfos {
+	normalized := normalizeSearchKeyword(keyword)
+	if normalized == "" {
+		return bookInfos
+	}
+
+	filtered := make(model.BookInfos, 0, len(bookInfos))
+	for _, book := range bookInfos {
+		if strings.Contains(strings.ToLower(book.Title), normalized) {
+			filtered = append(filtered, book)
+		}
+	}
+	return filtered
+}
+
+func normalizeSearchKeyword(keyword string) string {
+	return strings.ToLower(strings.TrimSpace(keyword))
+}
+
+func countStoreBookInfos(storeBookInfos []model.StoreBookInfo) int {
+	total := 0
+	for _, shelf := range storeBookInfos {
+		total += len(shelf.BookInfos)
+	}
+	return total
+}
+
+// getShelfParentID 获取当前书架上下文中的父级书籍 ID。
+// 优先使用路径参数 /shelf/:id，其次读取 /search?parent=xxx。
+func getShelfParentID(c echo.Context) string {
+	pathParentID := strings.TrimSpace(c.Param("id"))
+	if pathParentID != "" {
+		return pathParentID
+	}
+	return strings.TrimSpace(c.QueryParam("parent"))
+}
+
+func isShelfSearchPage(c echo.Context) bool {
+	return c.Path() == "/search"
+}
+
+// getShelfHeaderTitle 根据当前页面上下文生成标题文本。
+func getShelfHeaderTitle(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) string {
+	if !isShelfSearchPage(c) {
+		return common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos)
+	}
+	keyword := strings.TrimSpace(c.QueryParam("keyword"))
+	if keyword == "" {
+		return fmt.Sprintf(locale.GetString("search_result_title"), nowBookNum)
+	}
+	return fmt.Sprintf(locale.GetString("search_result_title_with_keyword"), keyword, nowBookNum)
+}
+
+func shouldShowShelfReturnIcon(c echo.Context) bool {
+	return getShelfParentID(c) != "" || isShelfSearchPage(c)
+}
+
+func getShelfReturnURL(c echo.Context) string {
+	if isShelfSearchPage(c) {
+		parentID := getShelfParentID(c)
+		if parentID != "" {
+			return "/shelf/" + parentID
+		}
+		return "/"
+	}
+	return common.GetReturnUrl(c.Param("id"))
 }
 
 func generateReadURL(book model.BookInfo, lastReadPage int) string {
