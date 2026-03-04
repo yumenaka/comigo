@@ -82,7 +82,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Linux_armv7" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-armhf-debian9 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.0-armhf-debian9 \
 	 --build-cmd "make linux_armv7_cgo_docker VERSION=$(VERSION)" \
 	 -p "linux/armv7"
 endif
@@ -104,7 +104,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="MacOS_x86_64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-darwin-debian12 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.0-darwin-debian12 \
 	 --build-cmd "make darwin_x86_64_cgo_docker VERSION=$(VERSION)" \
 	 -p "darwin/amd64"
 endif
@@ -126,7 +126,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="MacOS_arm64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-darwin-arm64-debian12 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.0-darwin-arm64-debian12 \
 	 --build-cmd "make darwin_arm64_cgo_docker VERSION=$(VERSION)" \
 	 -p "darwin/arm64"
 endif
@@ -148,7 +148,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Linux_arm64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-base-arm-debian9 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.0-base-arm-debian9 \
 	 --build-cmd "make linux_arm64_cgo_docker VERSION=$(VERSION)" \
 	 -p "linux/arm64"
 endif
@@ -170,7 +170,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Linux_x86_64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-main-debian7 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.0-main-debian7 \
 	 --build-cmd "make linux_x86_64_cgo_docker VERSION=$(VERSION)" \
 	 -p "linux/amd64"
 endif
@@ -192,7 +192,7 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Linux_i386" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-main-debian7 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.0-main-debian7 \
 	 --build-cmd "make linux_i386_cgo_docker VERSION=$(VERSION)" \
 	 -p "linux/386"
 endif

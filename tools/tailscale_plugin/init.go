@@ -19,8 +19,7 @@ type TailscaleConfig struct {
 }
 
 func InitTailscale(c TailscaleConfig) error {
-	// 设置 Tailscale 服务器的主机名。此名称将用于 Tailscale 网络中的节点标识。
-	// 如果未设置，Tailscale 将使用机器的主机名。默认将会是二进制文件名。
+	// 设置 Tailscale 服务器的主机名。此名称将用于 Tailscale 网络中的节点标识。如果未设置，Tailscale 将使用机器的主机名。默认将会是二进制文件名。
 	tsServer = new(tsnet.Server)
 	// 用于Tailscale网络中的标识节点，不影响监听地址
 	tsServer.Hostname = c.Hostname
