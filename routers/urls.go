@@ -85,10 +85,11 @@ func bindPublicAPI(group *echo.Group) {
 
 // bindProtectedView 注册需要登录的页面
 func bindProtectedView(group *echo.Group) {
-	// 主页
-	group.GET("/", shelf.ShelfHandler)
+	// 书架相关页面
+	group.GET("/", shelf.ShelfHandler) //主书架
 	group.GET("/index.html", shelf.ShelfHandler)
-	group.GET("/shelf/:id", shelf.ShelfHandler)
+	group.GET("/shelf/:id", shelf.ShelfHandler) //子书架
+	group.GET("/search", shelf.SearchHandler)   //书架搜索
 	// 卷轴模式
 	group.GET("/scroll/:id", scroll.ScrollModeHandler)
 	// 翻页模式

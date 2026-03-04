@@ -3306,6 +3306,10 @@
     max-width: calc(var(--spacing) * 64);
   }
 
+  .max-w-96 {
+    max-width: calc(var(--spacing) * 96);
+  }
+
   .max-w-fit {
     max-width: fit-content;
   }
@@ -5497,6 +5501,10 @@
 
   .pt-3 {
     padding-top: calc(var(--spacing) * 3);
+  }
+
+  .pt-4 {
+    padding-top: calc(var(--spacing) * 4);
   }
 
   .pt-6 {
