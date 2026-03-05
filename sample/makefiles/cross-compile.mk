@@ -37,6 +37,15 @@ android: Linux_arm_android Linux_arm64-android
 
 UPX := $(shell command -v upx 2> /dev/null)
 DOCKER := $(shell command -v docker 2> /dev/null)
+UNAME_M := $(shell uname -m)
+
+# Apple Silicon 等 ARM64 主机在拉取纯 amd64 镜像时，需要强制 --platform=linux/amd64。
+# 适用于：main-debian9、darwin-debian12、armhf-debian9（这些镜像只发布了 amd64 manifest）。
+# 不适用于：base-arm-debian9、darwin-arm64-debian12（这些镜像本身就是 arm64）。
+DOCKER_PLATFORM_AMD64 :=
+ifeq ($(UNAME_M),arm64)
+DOCKER_PLATFORM_AMD64 := --platform=linux/amd64
+endif
 
 gomobile:
 	export ANDROID_NDK_HOME=/Users/bai/Library/Android/sdk/ndk/26.1.10909125
@@ -77,7 +86,7 @@ ifndef DOCKER
 	$(error "No docker found! Please install docker to build Linux_armv7_cgo")
 endif
 ifdef DOCKER
-	docker run -it  \
+	docker run $(DOCKER_PLATFORM_AMD64) -it  \
 	 -v "$$PWD":/go/src/github.com/user/go-project \
 	 -w /go/src/github.com/user/go-project \
 	 -e CGO_ENABLED=1 \
@@ -99,7 +108,7 @@ ifndef DOCKER
 	$(error "No docker found! Please install docker to build MacOS_x86_64_cgo")
 endif
 ifdef DOCKER
-	docker run -it  \
+	docker run $(DOCKER_PLATFORM_AMD64) -it  \
 	 -v "$$PWD":/go/src/github.com/user/go-project \
 	 -w /go/src/github.com/user/go-project \
 	 -e CGO_ENABLED=1 \
@@ -165,13 +174,13 @@ ifndef DOCKER
 	$(error "No docker found! Please install docker to build Linux_x86_64_cgo")
 endif
 ifdef DOCKER
-	docker run -it  \
+	docker run $(DOCKER_PLATFORM_AMD64) -it  \
 	 -v "$$PWD":/go/src/github.com/user/go-project \
 	 -w /go/src/github.com/user/go-project \
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Linux_x86_64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.0-main-debian7 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.0-main-debian9 \
 	 --build-cmd "make linux_x86_64_cgo_docker VERSION=$(VERSION)" \
 	 -p "linux/amd64"
 endif
@@ -187,13 +196,13 @@ ifndef DOCKER
 	$(error "No docker found! Please install docker to build Linux_i386_cgo")
 endif
 ifdef DOCKER
-	docker run -it  \
+	docker run $(DOCKER_PLATFORM_AMD64) -it  \
 	 -v "$$PWD":/go/src/github.com/user/go-project \
 	 -w /go/src/github.com/user/go-project \
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Linux_i386" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.0-main-debian7 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.0-main-debian9 \
 	 --build-cmd "make linux_i386_cgo_docker VERSION=$(VERSION)" \
 	 -p "linux/386"
 endif
