@@ -601,8 +601,9 @@ case "$ARCH" in
     x86_64)
         ARCH_NAME="x86_64"
         ;;
-    armv7l)
-        ARCH_NAME="arm"
+    armv7l|armv7)
+        # Linux armv7l 实际对应的发布文件名为 *_Linux_armv7.tar.gz
+        ARCH_NAME="armv7"
         ;;
     arm64|aarch64)
         ARCH_NAME="arm64"
