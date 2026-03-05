@@ -169,11 +169,12 @@ func renderShelfNotFound(c echo.Context) error {
 
 // filterStoreBookInfosByKeyword 在顶层书架中按标题过滤。
 func filterStoreBookInfosByKeyword(storeBookInfos []model.StoreBookInfo, keyword string) []model.StoreBookInfo {
+	// 搜索关键词规范化：去除首尾空格并转换为小写，确保搜索不受大小写和多余空格影响。
 	normalized := normalizeSearchKeyword(keyword)
 	if normalized == "" {
 		return storeBookInfos
 	}
-
+	// 过滤书架列表，保留至少有一个子书籍标题匹配关键词的书架。
 	filteredStoreBookInfos := make([]model.StoreBookInfo, 0, len(storeBookInfos))
 	for _, shelf := range storeBookInfos {
 		filteredBooks := filterBookInfosByKeyword(shelf.BookInfos, normalized)
