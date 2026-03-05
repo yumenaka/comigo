@@ -379,7 +379,7 @@
   "saveSuccessHint": "Settings saved successfully. The page will refresh automatically in 2 seconds.",
   "port_change_hint": "Port has been changed. Redirecting to the new port in 2 seconds.",
   "no_books_library_path_notice": "No readable books were found. Please configure a library path. The page will automatically refresh once the configuration is complete.",
-  "search_books_placeholder": "Search book titles",
+  "search_books_placeholder": "Enter text to search",
   "search_button": "Search",
   "search_no_result": "No matching books found",
   "search_result_title": "Search Results (x%v)",

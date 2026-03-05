@@ -13,22 +13,22 @@ import (
 
 // ShelfSearchBar 书架搜索栏（主书架、子书架、搜索页共用）
 templ ShelfSearchBar(c echo.Context) {
-	<div class="w-full flex flex-row items-center justify-center mb-4">
-		<form action="/search" method="get" class="max-w-96 flex flex-row items-center justify-center gap-2 w-full">
+	<div class="w-full my-1">
+		<form action="/search" method="get" class="flex flex-col items-stretch gap-2 w-full">
 			<input
 				type="search"
 				name="keyword"
 				value={ c.QueryParam("keyword") }
 				x-bind:placeholder="i18next.t('search_books_placeholder')"
 				required
-				class="flex-1 h-10 px-3 text-sm border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-base-content focus:outline-none"
+				class="w-full h-10 px-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-white text-black placeholder-gray-500 focus:outline-none"
 			/>
 			if getShelfParentID(c) != "" {
 				<input type="hidden" name="parent" value={ getShelfParentID(c) }/>
 			}
 			<button
 				type="submit"
-				class="h-10 px-4 w-24 text-sm font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-blue-200 hover:bg-blue-300"
+				class="w-full text-sm text-center inline-flex items-center justify-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
 				x-text="i18next.t('search_button')"
 			></button>
 		</form>
@@ -46,7 +46,6 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 			class="flex flex-col flex-1 w-full h-full pt-6 pb-2 px-1 gap-2 overflow-y-auto bg-base-300"
 			:class="$store.global.getMainAreaBgClass()"
 		>
-			@ShelfSearchBar(c)
 			for i, storeBooks := range storeBookInfos {
 				<div
 					id={ "book-shelf-" + strconv.Itoa(i) }
@@ -83,7 +82,6 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 			x-data="{ showBook: true }"
 			class="flex flex-col flex-1 w-full h-full gap-2 px-1 pt-2"
 		>
-			@ShelfSearchBar(c)
 			<div id="book-shelf" class="flex flex-row flex-wrap content-start justify-center flex-1 w-full h-full overflow-y-auto text-base-content">
 				for _, book := range childBookInfos {
 					@BookCard(c, book, GetBookmarks(book.BookID))
@@ -97,7 +95,6 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 			class="flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content gap-4 pt-4 px-1"
 			:class="$store.global.getMainAreaBgClass()"
 		>
-			@ShelfSearchBar(c)
 			<div
 				x-text="i18next.t('search_no_result')"
 				class="w-5/6 md:w-3/5 p-3 text-base text-center border rounded bg-base-100 border-slate-400"
