@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /login/
+Allow: /shelf/
+# Sitemap: https://www.example.com/sitemap.xml
