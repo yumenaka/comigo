@@ -9572,6 +9572,7 @@ $654fabe7e18f36ba$exports = JSON.parse('{"auth":"\u8A8D\u8A3C","book_not_found":
 (0, $1bac384020b50752$export$2e2bcd8739ae039).use((0, $199830a05f92d3d0$export$2e2bcd8739ae039)).init({
     debug: false,
     initImmediate: true,
+    showSupportNotice: false,
     supportedLngs: [
         'en-US',
         'ja-JP',

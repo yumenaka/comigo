@@ -70,9 +70,8 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 
 	logger.Infof(locale.GetString("log_update_config"), name, newValue)
 
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	if setErr := config.GetCfg().SetConfigValue(name, newValue); setErr != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
@@ -111,9 +110,8 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name, request.Value)
 
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	if setErr := config.GetCfg().SetConfigValue(request.Name, request.Value); setErr != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
@@ -175,9 +173,8 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name, newValue)
 
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	if setErr := config.GetCfg().SetConfigValue(request.Name, newValue); setErr != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
@@ -239,9 +236,8 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, er
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name, newValue)
 
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	if setErr := config.GetCfg().SetConfigValue(request.Name, newValue); setErr != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
@@ -326,9 +322,8 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 		return errors.New("Current Password is incorrect")
 	}
 
-	// 旧配置做个备份（后面需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新用户名
 	if err := config.GetCfg().SetConfigValue("Username", request.Username); err != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_username"), err)
@@ -400,7 +395,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, "Cannot Turn on FunnelMode when no password not set")
 		}
 	}
-	// 旧配置做个备份（后面需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
 	// 更新Tailscale配置
 	config.GetCfg().EnableTailscale = request.EnableTailscale
@@ -475,9 +470,8 @@ func AddArrayConfigHandler(c echo.Context) error {
 }
 
 func doAdd(configName, addValue string) ([]string, error) {
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	values, err := config.GetCfg().AddStringArrayConfig(configName, addValue)
 	if err != nil {
@@ -633,9 +627,8 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 }
 
 func doDelete(configName string, deleteValue string) ([]string, error) {
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	values, err := config.GetCfg().DeleteStringArrayConfig(configName, deleteValue)
 	if err != nil {
