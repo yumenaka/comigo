@@ -63,7 +63,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		        			isFormChanged:false,
 		        			init() {
 		        			    // 初始化数据
-		                        this.enable_tailscale = this.$el.querySelector('#EnableTailscale').value === 'true';
+		                        this.enable_tailscale = !!(this.$el.querySelector('#EnableTailscale') && this.$el.querySelector('#EnableTailscale').checked);
 
 		                        this.tailscale_auth_key = this.$el.querySelector('#TailscaleAuthKey').value? this.$el.querySelector('#TailscaleAuthKey').value: '';
 
@@ -71,9 +71,9 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 
 		                        this.tailscale_port = this.$el.querySelector('#TailscalePort').value? this.$el.querySelector('#TailscalePort').value: '443';
 
-		                        this.tailscale_enable_funnel = this.$el.querySelector('#FunnelTunnel').value === 'true';
+		                        this.tailscale_enable_funnel = !!(this.$el.querySelector('#FunnelTunnel') && this.$el.querySelector('#FunnelTunnel').checked);
 
-		                        this.funnel_password_protection = this.$el.querySelector('#FunnelLoginCheck').value === 'true';
+		                        this.funnel_password_protection = !!(this.$el.querySelector('#FunnelLoginCheck') && this.$el.querySelector('#FunnelLoginCheck').checked);
 
 		                        this.nowTailscaleStatus = JSON.parse(document.getElementById('tsStatus').textContent)
 
@@ -108,16 +108,12 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 							name={ "EnableTailscale" }
 							x-model="enable_tailscale"
 							if  config.GetCfg().EnableTailscale {
-								value="true"
 								checked
-							} else {
-								value="false"
 							}
-							value="true"
 							class="sr-only peer"
 						/>
 						<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
-						<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
+						<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
 					</label>
 					<div x-text={ getTranslations("EnableTailscale_Description") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
 				</div>
@@ -213,16 +209,13 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 							name={ "FunnelLoginCheck" }
 							x-model="funnel_password_protection"
 							if  config.GetCfg().FunnelLoginCheck {
-								value="true"
 								checked
-							} else {
-								value="false"
 							}
 							class="sr-only peer"
 						/>
 						{ config.GetCfg().FunnelLoginCheck }
 						<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
-						<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
+						<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
 					</label>
 					<div x-text={ getTranslations("FunnelLoginCheckDescription") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
 				</div>
@@ -257,14 +250,12 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 							name={ "FunnelTunnel" }
 							x-model="tailscale_enable_funnel"
 							if  config.GetCfg().FunnelTunnel {
-								value="true"
-							} else {
-								value="false"
+								checked
 							}
 							class="sr-only peer"
 						/>
 						<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
-						<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
+						<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
 					</label>
 					<div x-text={ getTranslations("FunnelTunnel_Description") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
 				</div>

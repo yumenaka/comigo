@@ -41,8 +41,7 @@ func SetHTTPErrorHandler(e *echo.Echo) {
 		message := locale.GetString("err_internal_server")
 		var details interface{}
 
-		var he *echo.HTTPError
-		if errors.As(err, &he) {
+		if he, ok := errors.AsType[*echo.HTTPError](err); ok {
 			status = he.Code
 			switch v := he.Message.(type) {
 			case string:

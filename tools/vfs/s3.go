@@ -272,12 +272,10 @@ func (s *S3FS) ReadDir(p string) ([]DirEntry, error) {
 	defer cancel()
 
 	var entries []DirEntry
-	delimiter := "/"
-
 	paginator := s3.NewListObjectsV2Paginator(s.client, &s3.ListObjectsV2Input{
 		Bucket:    &s.bucket,
 		Prefix:    &prefix,
-		Delimiter: &delimiter,
+		Delimiter: new("/"),
 	})
 
 	for paginator.HasMorePages() {

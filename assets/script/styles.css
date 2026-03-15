@@ -2360,6 +2360,10 @@
     inset-block: calc(var(--spacing) * 0);
   }
 
+  .inset-s-0 {
+    inset-inline-start: calc(var(--spacing) * 0);
+  }
+
   .start {
     inset-inline-start: var(--spacing);
   }
@@ -6611,6 +6615,10 @@
     .group-hover\:text-indigo-400:is(:where(.group):hover *) {
       color: var(--color-indigo-400);
     }
+  }
+
+  .peer-checked\:inset-s-6:is(:where(.peer):checked ~ *) {
+    inset-inline-start: calc(var(--spacing) * 6);
   }
 
   .peer-checked\:start-5:is(:where(.peer):checked ~ *) {

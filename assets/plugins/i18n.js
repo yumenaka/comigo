@@ -9,6 +9,7 @@ i18next
     .init({
         debug: false,
         initImmediate: true,
+        showSupportNotice: false,// 关闭 i18next 赞助信息
         supportedLngs: ['en-US', 'ja-JP', 'zh-CN', 'en', 'zh', 'ja'],
         fallbackLng: ['en', 'zh', 'ja'],
         resources: {
