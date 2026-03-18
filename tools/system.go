@@ -123,6 +123,11 @@ func OpenBrowser(isHTTPS bool, host string, port int) {
 	}
 }
 
+// OpenURL 直接调用系统默认浏览器打开指定 URL，不做健康检查。
+func OpenURL(uri string) error {
+	return openURL(uri)
+}
+
 // OpenBrowserByURL 打开浏览器，为了防止阻塞，需要使用go关键字调用
 func OpenBrowserByURL(uri string) {
 	// Create a context with cancellation

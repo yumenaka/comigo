@@ -22,7 +22,7 @@ type ConfigChangeAction struct {
 }
 
 // BuildConfigChangeAction 比较新旧配置，计算后续需要执行的动作。
-func BuildConfigChangeAction(oldConfig *config.Config, newConfig *config.Config) (action ConfigChangeAction) {
+func BuildConfigChangeAction(oldConfig config.Config, newConfig *config.Config) (action ConfigChangeAction) {
 	if !reflect.DeepEqual(oldConfig.StoreUrls, newConfig.StoreUrls) {
 		action.ReScanStores = true
 	}
@@ -89,7 +89,7 @@ func BuildConfigChangeAction(oldConfig *config.Config, newConfig *config.Config)
 
 // ApplyConfigChange 执行配置变更副作用。
 // restartSignal 可为空；为空时将跳过网页服务重启与 tailscale 信号广播。
-func ApplyConfigChange(oldConfig *config.Config, newConfig *config.Config, restartSignal chan<- string) {
+func ApplyConfigChange(oldConfig config.Config, newConfig *config.Config, restartSignal chan<- string) {
 	openBrowserIfNeeded(oldConfig, newConfig)
 	action := BuildConfigChangeAction(oldConfig, newConfig)
 	logAction(action)
@@ -139,7 +139,7 @@ func logAction(action ConfigChangeAction) {
 	logger.Infof(locale.GetString("log_server_action_string"), string(actionString))
 }
 
-func openBrowserIfNeeded(oldConfig *config.Config, newConfig *config.Config) {
+func openBrowserIfNeeded(oldConfig config.Config, newConfig *config.Config) {
 	if !oldConfig.OpenBrowser && newConfig.OpenBrowser {
 		go tools.OpenBrowser(newConfig.EnableTLS, "127.0.0.1", newConfig.Port)
 	}

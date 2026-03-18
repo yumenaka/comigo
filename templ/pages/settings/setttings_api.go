@@ -84,7 +84,7 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 	}
 
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	return name, newValue, nil
 }
@@ -124,7 +124,7 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 	}
 
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	return request.Name, request.Value, nil
 }
@@ -187,7 +187,7 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 	}
 
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	return request.Name, request.Value, nil
 }
@@ -267,10 +267,10 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 		go func() {
 			// 延迟1秒执行
 			time.Sleep(1 * time.Second)
-			beforeConfigUpdate(oldConfig, config.GetCfg())
+			beforeConfigUpdate(*oldConfig, config.GetCfg())
 		}()
 	} else {
-		beforeConfigUpdate(oldConfig, config.GetCfg())
+		beforeConfigUpdate(*oldConfig, config.GetCfg())
 	}
 
 	// 判断是否需要显示保存成功提示并刷新页面
@@ -340,7 +340,7 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	}
 
 	// 根据配置的变化，做相应操作
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	return nil
 }
@@ -410,7 +410,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	}
 
 	// 根据配置的变化，做相应操作
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	// 返回成功响应
 	return c.NoContent(http.StatusOK)
@@ -483,7 +483,7 @@ func doAdd(configName, addValue string) ([]string, error) {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 	return values, nil
 }
 
@@ -640,7 +640,7 @@ func doDelete(configName string, deleteValue string) ([]string, error) {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 	return values, nil
 }
 

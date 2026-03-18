@@ -19,24 +19,30 @@ import (
 
 // 对外暴露的 log 接口
 var (
-	SetOutput func(output io.Writer)
-	Info      func(args ...interface{})
-	Infof     func(format string, args ...interface{})
-	Error     func(args ...interface{})
-	Errorf    func(format string, args ...interface{})
-	Fatal     func(args ...interface{})
-	Fatalf    func(format string, args ...interface{})
+	SetOutput         func(output io.Writer)
+	SetMirrorOutput   func(output io.Writer)
+	SetSuppressStdout func(disable bool)
+	Info              func(args ...interface{})
+	Infof             func(format string, args ...interface{})
+	Error             func(args ...interface{})
+	Errorf            func(format string, args ...interface{})
+	Fatal             func(args ...interface{})
+	Fatalf            func(format string, args ...interface{})
 )
 
 // 全局 logger
 var (
-	logger       *logrus.Logger
-	logLevel     = logrus.DebugLevel
-	ReportCaller bool
+	logger         *logrus.Logger
+	logLevel       = logrus.DebugLevel
+	ReportCaller   bool
+	baseOutput     io.Writer
+	mirrorOutput   io.Writer
+	suppressStdout bool
 )
 
 func init() {
 	logger = logrus.New()
+	baseOutput = os.Stderr
 	// 开启收集调用信息
 	logger.SetReportCaller(ReportCaller)
 
@@ -48,13 +54,38 @@ func init() {
 
 	// 将 logger 的输出函数赋值给外部调用
 	// 每个包的包级变量初始化是在 init 函数执行前完成的。所以不可以用 var Info = logger.Info 这种写法，会因为 logger 未初始化，导致空指针异常
-	SetOutput = logger.SetOutput
+	SetOutput = func(output io.Writer) {
+		baseOutput = output
+		applyOutput()
+	}
+	SetMirrorOutput = func(output io.Writer) {
+		mirrorOutput = output
+		applyOutput()
+	}
+	SetSuppressStdout = func(disable bool) {
+		suppressStdout = disable
+	}
 	Info = logger.Info
 	Infof = logger.Infof
 	Error = logger.Error
 	Errorf = logger.Errorf
 	Fatal = logger.Fatal
 	Fatalf = logger.Fatalf
+	applyOutput()
+}
+
+// applyOutput 把主输出和镜像输出统一到 logger 上。
+func applyOutput() {
+	switch {
+	case baseOutput != nil && mirrorOutput != nil:
+		logger.SetOutput(io.MultiWriter(baseOutput, mirrorOutput))
+	case baseOutput != nil:
+		logger.SetOutput(baseOutput)
+	case mirrorOutput != nil:
+		logger.SetOutput(mirrorOutput)
+	default:
+		logger.SetOutput(os.Stderr)
+	}
 }
 
 // EchoLogFormatter 可以根据自己需求自由命名
@@ -137,7 +168,11 @@ func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debu
 			logger.Info("logger err:", err)
 		}
 		// 设置多种输出类型(默认值“os.Stderr”)
-		logger.SetOutput(io.MultiWriter(os.Stdout, file))
+		if suppressStdout {
+			SetOutput(file)
+		} else {
+			SetOutput(io.MultiWriter(os.Stdout, file))
+		}
 		// 设置rotatelogs
 		logWriter, err := rotatelogs.New(
 			// 分割后的文件名

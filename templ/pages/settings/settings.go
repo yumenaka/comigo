@@ -84,7 +84,7 @@ var RestartWebServerBroadcast *chan string
 // -------------------------
 
 // beforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
-func beforeConfigUpdate(oldConfig *config.Config, newConfig *config.Config) {
+func beforeConfigUpdate(oldConfig config.Config, newConfig *config.Config) {
 	if RestartWebServerBroadcast == nil {
 		service.ApplyConfigChange(oldConfig, newConfig, nil)
 		return
