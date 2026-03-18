@@ -169,7 +169,7 @@ func GetCustomPluginsByScope(scope string) []CustomPlugin {
 }
 
 // LoadBookPlugins 加载特定书籍的插件（按需加载）
-// bookID: 书籍ID，如 "aBcE4Fz"
+// bookID: 书籍ID，如 "a1cE4Fz"
 // scope: 范围，如 "flip" 或 "scroll"
 // 返回该书籍在指定范围下的插件列表
 func LoadBookPlugins(bookID, scope string) ([]CustomPlugin, error) {
@@ -224,7 +224,7 @@ func LoadBookPlugins(bookID, scope string) ([]CustomPlugin, error) {
 			Name:     fileName,
 			Content:  string(content),
 			FileType: strings.TrimPrefix(ext, "."),
-			Scope:    scope + "/" + bookID, // 例如: "flip/aBcE4Fz"
+			Scope:    scope + "/" + bookID, // 例如: "flip/a1cE4Fz"
 		}
 
 		plugins = append(plugins, plugin)

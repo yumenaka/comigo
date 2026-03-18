@@ -171,7 +171,7 @@ func RenderCustomPlugins(c echo.Context) templ.Component {
 }
 
 // extractBookID 从 URL 路径中提取书籍 ID
-// 例如: "/flip/aBcE4Fz" -> "aBcE4Fz"
+// 例如: "/flip/a1cE4Fz" -> "a1cE4Fz"
 //
 //	"/scroll/abc123" -> "abc123"
 func extractBookID(path string) string {

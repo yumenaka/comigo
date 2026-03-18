@@ -144,8 +144,10 @@ type appModel struct {
 
 	currentShelfURL string
 	qrLines         []string
-	qrButtonFocus   int // 0 = 浏览器打开, 1 = 复制URL
-	qrButtonRow     int // 按钮在 QR 面板内容区的行号（用于鼠标点击检测）
+	qrButtonFocus   int // 0 = 浏览器打开, 1 = 复制URL, 2 = 模式切换
+	qrButtonRow     int // 操作按钮在 QR 面板内容区的行号
+	qrModeRow       int // 模式切换行在 QR 面板内容区的行号
+	readMode        int // 0 = scroll（卷轴阅读）, 1 = flip（翻页阅读）
 	status          systemSnapshot
 }
 
@@ -391,14 +393,30 @@ func (m *appModel) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	case focusQRCode:
 		switch msg.String() {
+		case "up", "k":
+			if m.qrButtonFocus < 2 {
+				m.qrButtonFocus = 2
+			}
+		case "down", "j":
+			if m.qrButtonFocus == 2 {
+				m.qrButtonFocus = 0
+			}
 		case "left", "h":
-			m.qrButtonFocus = 0
+			if m.qrButtonFocus < 2 {
+				m.qrButtonFocus = 0
+			}
 		case "right", "l":
-			m.qrButtonFocus = 1
+			if m.qrButtonFocus < 2 {
+				m.qrButtonFocus = 1
+			}
 		case "tab":
-			m.qrButtonFocus = (m.qrButtonFocus + 1) % 2
+			m.qrButtonFocus = (m.qrButtonFocus + 1) % 3
 		case "enter", " ":
-			return m, m.executeQRButton()
+			if m.qrButtonFocus == 2 {
+				m.toggleReadMode()
+			} else {
+				return m, m.executeQRButton()
+			}
 		}
 	}
 
@@ -446,13 +464,45 @@ func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 		m.focus = focusQRCode
 		if msg.Button == tea.MouseButtonLeft {
 			clickRow := msg.Y - layout.qr.y - 1
+			innerW := layout.qr.innerWidth()
+			col := msg.X - layout.qr.x - 1
+			if clickRow == m.qrModeRow {
+				m.qrButtonFocus = 2
+				scrollText := locale.GetString("tui_mode_scroll")
+				btn0Str := "[ " + scrollText + " ]"
+				if m.readMode == 0 {
+					btn0Str = "> " + scrollText + " <"
+				}
+				modeFull := btn0Str + "  "
+				modeFullW := runewidth.StringWidth(modeFull)
+				allText := modeFull
+				flipText := locale.GetString("tui_mode_flip")
+				if m.readMode == 1 {
+					allText += "> " + flipText + " <"
+				} else {
+					allText += "[ " + flipText + " ]"
+				}
+				allW := runewidth.StringWidth(allText)
+				offset := 0
+				if allW < innerW {
+					offset = (innerW - allW) / 2
+				}
+				if col < offset+modeFullW {
+					if m.readMode != 0 {
+						m.toggleReadMode()
+					}
+				} else {
+					if m.readMode != 1 {
+						m.toggleReadMode()
+					}
+				}
+				return m, nil
+			}
 			if clickRow == m.qrButtonRow {
-				col := msg.X - layout.qr.x - 1
 				btn0Text := "[ " + locale.GetString("tui_btn_open_browser") + " ]"
 				btn1Text := "[ " + locale.GetString("tui_btn_copy_url") + " ]"
 				btnLine := btn0Text + "  " + btn1Text
 				btnW := runewidth.StringWidth(btnLine)
-				innerW := layout.qr.innerWidth()
 				offset := 0
 				if btnW < innerW {
 					offset = (innerW - btnW) / 2
@@ -570,12 +620,12 @@ func (m *appModel) buildCurrentShelfItems() []shelfItem {
 	}
 
 	if len(m.stack) == 0 {
-		return buildTopShelfItems()
+		return buildTopShelfItems(m.readMode)
 	}
-	return buildChildShelfItems(m.stack[len(m.stack)-1])
+	return buildChildShelfItems(m.stack[len(m.stack)-1], m.readMode)
 }
 
-func buildTopShelfItems() []shelfItem {
+func buildTopShelfItems(readMode int) []shelfItem {
 	if modelpkg.IStore == nil {
 		return []shelfItem{{
 			Kind:       shelfItemHeader,
@@ -619,13 +669,13 @@ func buildTopShelfItems() []shelfItem {
 			Selectable: false,
 		})
 		for _, book := range topBooks {
-			items = append(items, convertBookInfo(book))
+			items = append(items, convertBookInfo(book, readMode))
 		}
 	}
 	return items
 }
 
-func buildChildShelfItems(level shelfLevel) []shelfItem {
+func buildChildShelfItems(level shelfLevel, readMode int) []shelfItem {
 	if modelpkg.IStore == nil {
 		return []shelfItem{{Kind: shelfItemHeader, Title: locale.GetString("tui_shelf_not_initialized"), Selectable: false}}
 	}
@@ -671,12 +721,12 @@ func buildChildShelfItems(level shelfLevel) []shelfItem {
 		Selectable: true,
 	}}
 	for _, book := range childBooks {
-		items = append(items, convertBookInfo(book))
+		items = append(items, convertBookInfo(book, readMode))
 	}
 	return items
 }
 
-func convertBookInfo(book modelpkg.BookInfo) shelfItem {
+func convertBookInfo(book modelpkg.BookInfo, readMode int) shelfItem {
 	kind := shelfItemBook
 	subtitle := buildBookSubtitle(book)
 	if book.Type == modelpkg.TypeBooksGroup {
@@ -687,7 +737,7 @@ func convertBookInfo(book modelpkg.BookInfo) shelfItem {
 		Title:      book.ShortName(),
 		Subtitle:   subtitle,
 		BookID:     book.BookID,
-		TargetURL:  buildBookTargetURL(book),
+		TargetURL:  buildBookTargetURL(book, readMode),
 		Selectable: true,
 	}
 }
@@ -716,18 +766,23 @@ func buildBookSubtitle(book modelpkg.BookInfo) string {
 	}
 }
 
-func buildBookTargetURL(book modelpkg.BookInfo) string {
+func buildBookTargetURL(book modelpkg.BookInfo, readMode int) string {
 	baseURL := buildBaseURL()
+	base := strings.TrimRight(baseURL, "/")
 	switch book.Type {
 	case modelpkg.TypeBooksGroup:
-		return strings.TrimRight(baseURL, "/") + "/shelf/" + book.BookID
+		return base + "/shelf/" + book.BookID
 	case modelpkg.TypeVideo, modelpkg.TypeAudio:
-		return strings.TrimRight(baseURL, "/") + "/player/" + book.BookID
+		return base + "/player/" + book.BookID
 	case modelpkg.TypeHTML, modelpkg.TypeUnknownFile:
-		return strings.TrimRight(baseURL, "/") + "/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title)
+		return base + "/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title)
 	default:
-		target := strings.TrimRight(baseURL, "/") + "/scroll/" + book.BookID
-		if modelpkg.IStore != nil {
+		prefix := "/scroll/"
+		if readMode == 1 {
+			prefix = "/flip/"
+		}
+		target := base + prefix + book.BookID
+		if readMode == 0 && modelpkg.IStore != nil {
 			if marks, err := modelpkg.IStore.GetBookMarks(book.BookID); err == nil && marks != nil {
 				if start := marks.GetLastReadPage(); start > 1 {
 					target += "?start=" + strconv.Itoa(start)
@@ -961,6 +1016,18 @@ func (m *appModel) executeQRButton() tea.Cmd {
 	}
 }
 
+// toggleReadMode 在卷轴阅读和翻页阅读之间切换，并刷新所有受影响的数据。
+func (m *appModel) toggleReadMode() {
+	if m.readMode == 0 {
+		m.readMode = 1
+	} else {
+		m.readMode = 0
+	}
+	m.refreshShelf()
+	m.refreshQRCode()
+	m.refreshStatus()
+}
+
 func (m *appModel) scrollLogs(delta int) {
 	visible := max(1, m.layout().log.innerHeight())
 	maxOffset := max(0, len(m.logs)-visible)
@@ -1073,6 +1140,8 @@ func (m *appModel) renderLogContent(rect panelRect) []string {
 }
 
 func (m *appModel) renderInfoContent(rect panelRect) []string {
+	w := rect.innerWidth()
+	h := rect.innerHeight()
 	lines := []string{
 		fmt.Sprintf(locale.GetString("tui_info_service_status"), m.status.StatusText),
 		fmt.Sprintf(locale.GetString("tui_info_cpu"), m.status.CPUPercent),
@@ -1087,7 +1156,20 @@ func (m *appModel) renderInfoContent(rect panelRect) []string {
 	if m.status.TargetURL != "" {
 		lines = append(lines, locale.GetString("tui_info_target_url"), m.status.TargetURL)
 	}
-	return fitLines(lines, rect.innerWidth(), rect.innerHeight())
+
+	// 底部右对齐：时间 + 版本
+	versionLine := time.Now().Format("2006-01-02 15:04:05") + "  Comigo " + config.GetVersion()
+	if h > len(lines)+1 {
+		for len(lines) < h-1 {
+			lines = append(lines, "")
+		}
+		vw := runewidth.StringWidth(versionLine)
+		if vw < w {
+			versionLine = strings.Repeat(" ", w-vw) + versionLine
+		}
+		lines = append(lines, versionLine)
+	}
+	return fitLines(lines, w, h)
 }
 
 func (m *appModel) renderQRCodeContent(rect panelRect) []string {
@@ -1107,18 +1189,27 @@ func (m *appModel) renderQRCodeContent(rect panelRect) []string {
 		}
 	}
 
+	// 模式切换行
+	lines = append(lines, "")
+	scrollText := locale.GetString("tui_mode_scroll")
+	flipText := locale.GetString("tui_mode_flip")
+	modeBtn0 := "[ " + scrollText + " ]"
+	modeBtn1 := "[ " + flipText + " ]"
+	if m.readMode == 0 {
+		modeBtn0 = "> " + scrollText + " <"
+	} else {
+		modeBtn1 = "> " + flipText + " <"
+	}
+	modeLine := modeBtn0 + "  " + modeBtn1
+	m.qrModeRow = len(lines)
+	lines = append(lines, centerText(modeLine, w))
+
+	// 操作按钮行
 	lines = append(lines, "")
 	btnOpenText := locale.GetString("tui_btn_open_browser")
 	btnCopyText := locale.GetString("tui_btn_copy_url")
 	btn0 := "[ " + btnOpenText + " ]"
 	btn1 := "[ " + btnCopyText + " ]"
-	if m.focus == focusQRCode {
-		if m.qrButtonFocus == 0 {
-			btn0 = "> " + btnOpenText + " <"
-		} else {
-			btn1 = "> " + btnCopyText + " <"
-		}
-	}
 	btnLine := btn0 + "  " + btn1
 	m.qrButtonRow = len(lines)
 	lines = append(lines, centerText(btnLine, w))
