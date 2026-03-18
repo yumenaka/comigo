@@ -42,7 +42,7 @@ func UpdateConfig(c echo.Context) error {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), err)
 	}
 	// 根据配置变化执行副作用：打开浏览器、重扫、自动扫描调度等。
-	service.ApplyConfigChange(&oldConfig, config.GetCfg(), nil)
+	service.ApplyConfigChange(oldConfig, config.GetCfg(), nil)
 	// 返回成功消息
 	return apiresp.Success(c, "ok", "Server settings updated successfully", nil)
 }

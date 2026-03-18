@@ -9,7 +9,7 @@
 *.test
 *wasm_exec.js
 *test_build
-
+*comi
 # Output of the go coverage tools, specifically when used with LiteIDE
 *.out
 
