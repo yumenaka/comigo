@@ -1071,11 +1071,9 @@
   "log_toml_marshal_error": "toml.Marshal エラー",
   "log_config_file_changed_detected": "Comigo 設定ファイルの変更を検出: %s Op: %s",
   "log_error_num_value": "エラー数値: %s",
-
   "tui_panel_shelf": "本棚",
   "tui_panel_log": "ログ",
   "tui_panel_info": "情報",
-
   "tui_starting_service": "ComiGo サービスを起動中...",
   "tui_service_started": "ComiGo サービスが起動しました。本棚とログは継続的に更新されます。",
   "tui_backend_failed": "バックエンドの起動に失敗しました。ログパネルを確認してください。",
@@ -1089,10 +1087,8 @@
   "tui_status_starting": "起動中",
   "tui_status_failed": "起動失敗",
   "tui_status_running": "実行中",
-
   "tui_terminal_too_small": "ターミナルが小さすぎます。%dx%d 以上に調整してください。",
   "tui_current_size": "現在のサイズ: %dx%d",
-
   "tui_shelf_waiting_init": "本棚の初期化を待っています...",
   "tui_shelf_waiting_hint": "スキャン完了後にトップ本棚が表示されます。",
   "tui_shelf_empty": "本棚は空です",
@@ -1103,10 +1099,9 @@
   "tui_sub_shelf_no_content": "現在のサブ本棚に表示できるコンテンツがありません",
   "tui_readable_books_count": "読める書籍 %d 冊",
   "tui_root_dir": "ルート",
-  "tui_controls_hint": "Enter: 開く, Backspace: 戻る, Tab: フォーカス切替",
+  "tui_controls_hint": "Enter: ローカルで開く, Backspace: 戻る, Tab: フォーカス切替",
   "tui_no_shelf_content": "本棚にコンテンツがありません",
   "tui_no_logs": "ログがありません",
-
   "tui_info_service_status": "サービス状態: %s",
   "tui_info_cpu": "CPU 使用率: %.1f%%",
   "tui_info_ram": "RAM 使用率: %.1f%%",
@@ -1117,26 +1112,24 @@
   "tui_info_selected": "選択中: %s",
   "tui_info_target_url": "ジャンプ先 URL:",
   "tui_info_none": "なし",
-
   "tui_qr_shelf_url": "本棚 URL:",
   "tui_qr_selected": "選択中: %s",
   "tui_qr_unavailable": "QRコードは利用できません",
   "tui_qr_gen_failed": "QRコード生成に失敗",
-  "tui_btn_open_browser": "ブラウザで開く",
+  "tui_btn_open_browser": "ローカルで開く",
   "tui_btn_copy_url": "URLをコピー",
-
+  "tui_mode_scroll": "スクロール",
+  "tui_mode_flip": "ページめくり",
   "tui_sub_shelf_items": "サブ本棚 | %d 個",
   "tui_type_video": "動画",
   "tui_type_audio": "音声",
   "tui_type_html": "HTML ファイル",
   "tui_type_raw": "生ファイル",
   "tui_page_count": "%d ページ",
-
   "tui_tag_store": "[書庫]",
   "tui_tag_back": "[戻る]",
   "tui_tag_group": "[サブ]",
   "tui_tag_book": "[書籍]",
-
   "tui_path_prefix": "パス: ",
   "tui_log_scrolling": "-- スクロール中 %d/%d --"
 }
