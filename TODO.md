@@ -72,6 +72,10 @@
 - [x] 下载文件到书库目录
 - [x] 网页端查看日志
 - [x] 注册为文件默认打开类型，简单托盘图标，gui界面。
+- [x] 支持smb、webdav文件系统
+- [x] cli 交互，tui支持
+- [x] 系统监控（CPU、内存）
+- [x] 自定义js与css代码块功能。
 
 ### 开发中
 - [ ] 画漫画，当作示例漫画
@@ -83,29 +87,47 @@
 - [ ] 支持 OPDS 协议，方便用户在各种设备（如Kindle、Kobo等）上访问电子书。https://specs.opds.io/opds-1.2
 - [ ] 可选的计算文件哈希值，查找重复文件。
 - [ ] SQLite 删除数据后不释放磁盘空间，只标记为空闲。建库时开启 auto_vacuum，可以防止文件持续膨胀
-- [ ] 侧栏加返回书架，切换全屏按钮，方便操作。或者让Header的显示层级大于侧栏。翻页模式 header 合并到下部进度条？
 - [ ] 自动更新，下载最新版本，替换当前程序。
 - [ ] 书架按照最近阅读时间排序，无阅读进度的书籍，以文件修改时间排序
 - [ ] 上传页面挪到设置页面-书库设置。改造上传功能，可选上传到下拉框指定的书库。没有默认书库则不可上传。
-- [ ] 支持smb、webdav文件系统
 - [ ] 手动或自动检测新版本提示，然后可以试着自动更新新版本（win与macos），最后是各种linux软件源
 - [ ] 网页端：自动化测试，修改后自动测试基本功能。
 - [ ] 网页端：卷轴模式页数同步体验优化。
-- [ ] cli 交互，tui支持
 - [ ] 访问权限控制
 - [ ] PWA 支持
-- [ ] 系统监控（CPU、内存）
 - [ ] wasm 模式，在线转换书籍？
 - [ ] 更新提示，自动更新(github.com/jpillora/overseer) 包管理支持。[self update 功能](https://github.com/minio/selfupdate)
 - [ ] 文件监控 https://github.com/sgtdi/fswatcher
 - [ ] 用户系统增强
-- [ ] Shell 交互
 - [ ] 文件管理
 - [ ] EPUB/PDF 阅读优化
 - [ ] 防剧透效果、回忆模式、特殊背景、背景音乐etc
 - [ ] 第三方登录 https://github.com/markbates/goth
 - [ ] 多语言：中文、英文、日文版toml配置文件注释
-  
+
+### 长期计划
+- [ ] 嵌入html，防剧透效果。回忆模式，特殊背景，音乐etc
+- [ ] 网页端：优化图片预加载，长图片支持。
+- [ ] 跨平台 GUI（Flutter + GoMobile或 Wails）PWA模式。wail debug https://github.com/wailsapp/wails/issues/3050
+- [ ] 文件夹监控(fsnotify)，https://github.com/helshabini/fsbroker/
+- [ ] 用户系统、访问密码，流量限制 comigo后台：有几台设备在线，阅读文件，阅读页数，当前用户状态、阅读书籍、阅读进度、阅读时间、服务器状态 注册，阅读记录，
+- [ ] 子命令，download rar2zip
+- [ ] 支持rar压缩包密码。处理损坏文件，扩展名错误的文件，固实压缩文件（7z）。更准确的文件类型判断。
+- [ ] 崩溃后恢复，恶意存档处理。
+- [ ] 调用第三方API处理图片压缩与转换（如AI图片放大等）。
+- [ ] 文件管理，删除。
+- [ ] Debian，RPM包（<https://github.com/goreleaser/nfpm）>
+- [ ] 优化epub与PDF阅读体验，支持图文混排（pdf.js与epub.js）
+- [ ] 显示服务器log：[web终端示例](https://zenn.dev/ikedam/articles/2e078bfc2a4cb6)
+- [ ] -start 参数，后台运行。-stop参数，停止后台运行的进程。
+- [ ] [使用 Go1.24 的 os.Root 类型](https://antonz.org/go-1-24/)，将[文件操作限制在特定目录](https://go.dev/blog/osroot)，以防止攻击者通过转义或相对路径非法访问文件
+- [ ] 自动发版功能 [goreleaser](https://goreleaser.com/)  [github-action](https://dev.to/hadlow/how-to-release-to-homebrew-with-goreleaser-github-actions-and-semantic-release-2gbb)
+- [ ] 添加[数据验证](https://dev.to/leapcell/validator-complex-structs-arrays-and-maps-validation-for-go-34ni)。
+- [ ] 同步翻页 -> 全局多端同步跟踪页面状态，除了不同id的书籍，其他页面状态都可以同步。
+- [ ] 后台运行功能：unix：https://github.com/sevlyar/go-daemon 支持Windows但是最近没更新：https://github.com/takama/daemon
+- [ ] 在终端显示图片 https://github.com/ploMP4/chafa-go
+- [ ]  OpenID Connect 登录 https://github.com/zitadel/oidc  https://tailscale.com/community/community-projects/tsidp
+
 ## 开发环境搭建
 
 ### 前置要求
@@ -133,6 +155,21 @@ curl -fsSL https://bun.sh/install | bash
 air
 ```
 
+```bash
+# 直接设置环境变量并启动
+LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 air
+
+## 英语
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+## 日语
+export LANG=ja_JP.UTF-8
+export LC_ALL=ja_JP.UTF-8
+## 中文
+export LANG=zh_CN.UTF-8
+export LC_ALL=zh_CN.UTF-8
+```
+
 ## 开发指南
 
 ### 后端开发
@@ -148,32 +185,6 @@ air
 ### 开发提示
 - 使用 Air 实现热重载
 - 使用 Templ 生成 HTML
-
-### 长期计划
-- [ ] 嵌入html，防剧透效果。回忆模式，特殊背景，音乐etc
-- [ ] 网页端：优化图片预加载，长图片支持。
-- [ ] 跨平台 GUI（Flutter + GoMobile或 Wails）PWA模式。wail debug https://github.com/wailsapp/wails/issues/3050
-- [ ] 文件夹监控(fsnotify)，https://github.com/helshabini/fsbroker/
-- [ ] 用户系统、访问密码，流量限制 comigo后台：有几台设备在线，阅读文件，阅读页数，当前用户状态、阅读书籍、阅读进度、阅读时间、服务器状态 注册，阅读记录，
-- [ ] shell 互动（<https://github.com/rivo/tview> ）
-- [ ] 子命令，download rar2zip
-- [ ] 支持rar压缩包密码。处理损坏文件，扩展名错误的文件，固实压缩文件（7z）。更准确的文件类型判断。
-- [ ] 崩溃后恢复，恶意存档处理。
-- [ ] 调用第三方API处理图片压缩与转换（如AI图片放大等）。
-- [ ] 文件管理，删除。
-- [ ] Debian，RPM包（<https://github.com/goreleaser/nfpm）>
-- [ ] 优化epub与PDF阅读体验，支持图文混排（pdf.js与epub.js）
-- [ ] 显示服务器log：[web终端示例](https://zenn.dev/ikedam/articles/2e078bfc2a4cb6)
-- [ ] -start 参数，后台运行。-stop参数，停止后台运行的进程。
-- [ ] 自定义js与css代码块功能。
-- [ ] [使用 Go1.24 的 os.Root 类型](https://antonz.org/go-1-24/)，将[文件操作限制在特定目录](https://go.dev/blog/osroot)，以防止攻击者通过转义或相对路径非法访问文件
-- [ ] 自动发版功能 [goreleaser](https://goreleaser.com/)  [github-action](https://dev.to/hadlow/how-to-release-to-homebrew-with-goreleaser-github-actions-and-semantic-release-2gbb)
-- [ ] 添加[数据验证](https://dev.to/leapcell/validator-complex-structs-arrays-and-maps-validation-for-go-34ni)。
-- [ ] 同步翻页 -> 全局多端同步跟踪页面状态，除了不同id的书籍，其他页面状态都可以同步。
-- [ ] 后台运行功能：unix：https://github.com/sevlyar/go-daemon 支持Windows但是最近没更新：https://github.com/takama/daemon
-- [ ] 在终端显示图片 https://github.com/ploMP4/chafa-go
-- [ ]  OpenID Connect 登录 https://github.com/zitadel/oidc  https://tailscale.com/community/community-projects/tsidp
-
 
 ## history
 - 2025-11-12: v1.1.0 发布，支持下载为单个网页文件，Tailscale远程连接，多书架优化
