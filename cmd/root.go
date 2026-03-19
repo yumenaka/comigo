@@ -64,6 +64,13 @@ var RootCmd = &cobra.Command{
 	},
 }
 
+func init() {
+	// 自定义 -v/--version 输出：软件版本、系统类型、Go 版本
+	RootCmd.SetVersionTemplate(`Comigo {{.Version}}
+OS/Arch: ` + runtime.GOOS + "/" + runtime.GOARCH + `
+Go: ` + runtime.Version() + "\n")
+}
+
 // Execute 将所有子命令添加到根命令并适当设置标志。 由 main.main() 调用。 rootCmd 只需要执行一次。
 func Execute() {
 	// 初始化命令行参数。必须在config包初始化之前调用，因为config包会用到命令行参数 --config 指定的配置文件路径

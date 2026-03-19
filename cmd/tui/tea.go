@@ -27,60 +27,69 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
+// TUI 全局常量
 const (
-	logBufferLimit   = 5000
-	tickInterval     = 500 * time.Millisecond
-	minTUIWidth      = 72
-	minTUIHeight     = 20
-	layoutGap        = 1
-	maxActionMessage = 120
+	logBufferLimit   = 5000                   // 日志缓冲区最大行数
+	tickInterval     = 500 * time.Millisecond // 定时刷新间隔
+	minTUIWidth      = 40                     // TUI 最小终端宽度
+	minTUIHeight     = 24                     // TUI 最小终端高度
+	narrowThreshold  = 100                    // 窄屏/宽屏布局切换阈值（宽度小于此值为窄屏单栏模式）
+	layoutGap        = 1                      // 面板之间的间距列数
+	maxActionMessage = 120                    // 操作消息最大显示宽度
 )
 
+// focusPanel 表示当前聚焦的面板类型
 type focusPanel int
 
 const (
-	focusShelf focusPanel = iota
-	focusLog
-	focusInfo
-	focusQRCode
+	focusShelf  focusPanel = iota // 书架面板
+	focusLog                      // 日志面板
+	focusInfo                     // 信息面板
+	focusQRCode                   // QRCode 面板
 )
 
+// shelfItemKind 书架列表条目类型
 type shelfItemKind int
 
 const (
-	shelfItemHeader shelfItemKind = iota
-	shelfItemBack
-	shelfItemGroup
-	shelfItemBook
+	shelfItemHeader shelfItemKind = iota // 标题行（书库名称等，不可选中）
+	shelfItemBack                        // 返回上一级
+	shelfItemGroup                       // 子书架（书籍分组）
+	shelfItemBook                        // 可阅读的书籍
 )
 
+// Bubble Tea 消息类型
 type (
-	tickMsg           time.Time
-	backendStartedMsg struct{}
-	backendErrorMsg   struct {
+	tickMsg           time.Time // 定时刷新消息
+	backendStartedMsg struct{}  // 后台服务启动成功
+	backendErrorMsg   struct {  // 后台服务启动失败
 		err error
 	}
 )
 
+// openURLResultMsg 浏览器打开 URL 的结果回调
 type openURLResultMsg struct {
 	url string
 	err error
 }
 
+// shelfItem 书架列表中的单个条目
 type shelfItem struct {
-	Kind       shelfItemKind
-	Title      string
-	Subtitle   string
-	BookID     string
-	TargetURL  string
-	Selectable bool
+	Kind       shelfItemKind // 条目类型
+	Title      string        // 显示标题
+	Subtitle   string        // 副标题（页数、子项数等）
+	BookID     string        // 书籍/书架 ID
+	TargetURL  string        // 点击后打开的 URL
+	Selectable bool          // 是否可被选中
 }
 
+// shelfLevel 书架导航栈的一层，用于记录进入子书架的路径
 type shelfLevel struct {
-	BookID string
-	Title  string
+	BookID string // 当前层对应的书架 ID
+	Title  string // 显示名称
 }
 
+// systemSnapshot 系统状态快照，用于信息面板展示
 type systemSnapshot struct {
 	CPUPercent   float64
 	RAMPercent   float64
@@ -93,13 +102,15 @@ type systemSnapshot struct {
 	StatusText   string
 }
 
+// panelRect 表示一个面板在终端中的矩形区域（含边框）
 type panelRect struct {
-	x int
-	y int
-	w int
-	h int
+	x int // 左上角列
+	y int // 左上角行
+	w int // 总宽度（含左右边框各 1 列）
+	h int // 总高度（含上下边框各 1 行）
 }
 
+// innerWidth 返回面板内容区宽度（去掉左右边框）
 func (r panelRect) innerWidth() int {
 	if r.w <= 2 {
 		return 0
@@ -107,6 +118,7 @@ func (r panelRect) innerWidth() int {
 	return r.w - 2
 }
 
+// innerHeight 返回面板内容区高度（去掉上下边框）
 func (r panelRect) innerHeight() int {
 	if r.h <= 2 {
 		return 0
@@ -114,41 +126,43 @@ func (r panelRect) innerHeight() int {
 	return r.h - 2
 }
 
+// layoutState 四个面板的布局位置
 type layoutState struct {
-	shelf panelRect
-	log   panelRect
-	info  panelRect
-	qr    panelRect
+	shelf panelRect // 书架面板
+	log   panelRect // 日志面板
+	info  panelRect // 信息面板（窄屏模式下隐藏，w=0 h=0）
+	qr    panelRect // QRCode 面板
 }
 
+// appModel 是 Bubble Tea 的核心模型，持有全部 TUI 状态。
 type appModel struct {
-	logBuffer *LogBuffer
+	logBuffer *LogBuffer // 日志缓冲区（由 logger 镜像写入）
 
-	width  int
-	height int
-	focus  focusPanel
+	width  int        // 终端当前宽度
+	height int        // 终端当前高度
+	focus  focusPanel // 当前聚焦的面板
 
-	logs           []string
-	logOffset      int
-	autoFollowLogs bool
+	logs           []string // 当前快照的日志行
+	logOffset      int      // 日志滚动偏移（首行索引）
+	autoFollowLogs bool     // 是否自动跟随最新日志
 
-	backendReady bool
-	backendError string
-	actionMsg    string
+	backendReady bool   // 后台服务是否已启动完成
+	backendError string // 后台启动错误信息（空表示无错误）
+	actionMsg    string // 最近一次操作的状态提示
 
-	stack        []shelfLevel
-	items        []shelfItem
-	selected     int
-	shelfOffset  int // 书架列表滚动偏移（首个可见的 item 索引）
-	shelfRowToID map[int]int
+	stack        []shelfLevel // 书架导航栈（从根到当前层级）
+	items        []shelfItem  // 当前层级的书架条目列表
+	selected     int          // 当前选中的条目索引
+	shelfOffset  int          // 书架列表滚动偏移（首个可见的 item 索引）
+	shelfRowToID map[int]int  // 面板内容行号 → items 索引的映射（用于鼠标点击定位）
 
-	currentShelfURL string
-	qrLines         []string
-	qrButtonFocus   int // 0 = 浏览器打开, 1 = 复制URL, 2 = 模式切换
-	qrButtonRow     int // 操作按钮在 QR 面板内容区的行号
-	qrModeRow       int // 模式切换行在 QR 面板内容区的行号
-	readMode        int // 0 = scroll（卷轴阅读）, 1 = flip（翻页阅读）
-	status          systemSnapshot
+	currentShelfURL string         // 当前书架层级对应的 Web URL
+	qrLines         []string       // QR 码的 Unicode 字符行
+	qrButtonFocus   int            // QR 面板按钮焦点：0=浏览器打开, 1=复制URL, 2=模式切换
+	qrButtonRow     int            // 操作按钮在 QR 面板内容区的行号
+	qrModeRow       int            // 模式切换行在 QR 面板内容区的行号
+	readMode        int            // 阅读模式：0=scroll（卷轴阅读）, 1=flip（翻页阅读）
+	status          systemSnapshot // 最新的系统状态快照
 }
 
 // LogBuffer 用来缓存 TUI 需要展示的实时日志。
@@ -158,10 +172,12 @@ type LogBuffer struct {
 	mu    sync.RWMutex
 }
 
+// NewLogBuffer 创建一个新的日志缓冲区实例。
 func NewLogBuffer() *LogBuffer {
 	return &LogBuffer{limit: logBufferLimit}
 }
 
+// Write 实现 io.Writer 接口，将日志按行追加到缓冲区，并在超出上限时自动淘汰旧行。
 func (lb *LogBuffer) Write(p []byte) (int, error) {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
@@ -190,6 +206,7 @@ func (lb *LogBuffer) GetLines() []string {
 	return result
 }
 
+// InitialModel 构建 TUI 初始模型，设定默认焦点和状态。
 func InitialModel(lb *LogBuffer) *appModel {
 	m := &appModel{
 		logBuffer:       lb,
@@ -245,6 +262,7 @@ func Run() error {
 	return nil
 }
 
+// runWithoutTUI 在非终端环境下（如管道、重定向）退回普通服务模式启动。
 func runWithoutTUI() {
 	cmd.Execute()
 	routers.StartWebServer()
@@ -259,12 +277,14 @@ func runWithoutTUI() {
 	cmd.SetShutdownHandler()
 }
 
+// tickCmd 返回一个定时 Cmd，每 tickInterval 触发一次数据刷新。
 func tickCmd() tea.Cmd {
 	return tea.Tick(tickInterval, func(t time.Time) tea.Msg {
 		return tickMsg(t)
 	})
 }
 
+// startBackendCmd 在后台协程中依次启动 Web 服务、扫描书籍等全部后端流程。
 func startBackendCmd() tea.Cmd {
 	return func() (msg tea.Msg) {
 		defer func() {
@@ -272,7 +292,7 @@ func startBackendCmd() tea.Cmd {
 				msg = backendErrorMsg{err: fmt.Errorf("tui 后台启动异常: %v", recovered)}
 			}
 		}()
-
+		// Comigo 后台服务启动
 		cmd.Execute()
 		routers.StartWebServer()
 		routers.StartTailscale()
@@ -288,6 +308,7 @@ func startBackendCmd() tea.Cmd {
 	}
 }
 
+// openURLCmd 调用系统默认浏览器打开指定 URL（异步执行，结果通过 openURLResultMsg 回传）。
 func openURLCmd(target string) tea.Cmd {
 	return func() tea.Msg {
 		err := tools.OpenURL(target)
@@ -295,15 +316,20 @@ func openURLCmd(target string) tea.Cmd {
 	}
 }
 
+// Init 实现 tea.Model 接口，启动定时器和后台服务。
 func (m *appModel) Init() tea.Cmd {
 	return tea.Batch(tickCmd(), startBackendCmd())
 }
 
+// Update 实现 tea.Model 接口，处理所有消息分发：窗口变化、定时刷新、后台事件、键盘/鼠标输入。
 func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		if m.isNarrow() && m.focus == focusInfo {
+			m.focus = focusShelf
+		}
 		m.refreshData()
 		return m, nil
 	case tickMsg:
@@ -336,18 +362,25 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// handleKey 处理键盘输入，包含全局快捷键（退出、Tab 切换面板）和各面板专属按键。
 func (m *appModel) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return m, tea.Quit
 	case "tab":
 		m.focus = (m.focus + 1) % 4
+		if m.isNarrow() && m.focus == focusInfo {
+			m.focus = (m.focus + 1) % 4
+		}
 		return m, nil
 	case "shift+tab":
 		if m.focus == focusShelf {
 			m.focus = focusQRCode
 		} else {
 			m.focus--
+			if m.isNarrow() && m.focus == focusInfo {
+				m.focus--
+			}
 		}
 		return m, nil
 	}
@@ -424,6 +457,7 @@ func (m *appModel) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// handleMouse 处理鼠标事件：点击切换面板焦点、书架选中项、QR 面板按钮及滚轮操作。
 func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	layout := m.layout()
 	if msg.Action != tea.MouseActionPress {
@@ -521,6 +555,7 @@ func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// View 实现 tea.Model 接口，根据当前终端尺寸渲染全部面板并拼接为最终输出字符串。
 func (m *appModel) View() string {
 	if m.width < minTUIWidth || m.height < minTUIHeight {
 		return fmt.Sprintf(locale.GetString("tui_terminal_too_small"), minTUIWidth, minTUIHeight) + "\n" +
@@ -528,6 +563,18 @@ func (m *appModel) View() string {
 	}
 
 	layout := m.layout()
+
+	if m.isNarrow() {
+		shelfLines := m.makePanel(locale.GetString("tui_panel_shelf"), m.renderShelfContent(layout.shelf), layout.shelf, m.focus == focusShelf)
+		qrLines := m.makePanel("QRCode", m.renderQRCodeContent(layout.qr), layout.qr, m.focus == focusQRCode)
+		logLines := m.makePanel(locale.GetString("tui_panel_log"), m.renderLogContent(layout.log), layout.log, m.focus == focusLog)
+		var all []string
+		all = append(all, shelfLines...)
+		all = append(all, qrLines...)
+		all = append(all, logLines...)
+		return strings.Join(all, "\n")
+	}
+
 	shelfLines := m.makePanel(locale.GetString("tui_panel_shelf"), m.renderShelfContent(layout.shelf), layout.shelf, m.focus == focusShelf)
 	logLines := m.makePanel(locale.GetString("tui_panel_log"), m.renderLogContent(layout.log), layout.log, m.focus == focusLog)
 	infoLines := m.makePanel(locale.GetString("tui_panel_info"), m.renderInfoContent(layout.info), layout.info, m.focus == focusInfo)
@@ -538,6 +585,7 @@ func (m *appModel) View() string {
 	return strings.Join(append(topRow, bottomRow...), "\n")
 }
 
+// refreshData 一次性刷新日志、书架、系统状态和二维码等全部数据。
 func (m *appModel) refreshData() {
 	m.logs = m.logBuffer.GetLines()
 	m.syncLogOffset()
@@ -546,12 +594,14 @@ func (m *appModel) refreshData() {
 	m.refreshQRCode()
 }
 
+// refreshShelf 重新构建当前层级的书架条目列表并更新选中项和书架 URL。
 func (m *appModel) refreshShelf() {
 	m.items = m.buildCurrentShelfItems()
 	m.ensureSelectedItem()
 	m.currentShelfURL = m.buildCurrentShelfURL()
 }
 
+// refreshStatus 更新系统状态快照（CPU、RAM、在线人数、书籍数等）。
 func (m *appModel) refreshStatus() {
 	selectedText := locale.GetString("tui_info_none")
 	targetURL := ""
@@ -600,6 +650,7 @@ func (m *appModel) selectedURL() string {
 	return m.currentShelfURL
 }
 
+// refreshQRCode 根据当前选中项的 URL 重新生成 QR 码字符行。
 func (m *appModel) refreshQRCode() {
 	lines, err := renderQRCodeLines(m.selectedURL())
 	if err != nil {
@@ -609,6 +660,7 @@ func (m *appModel) refreshQRCode() {
 	m.qrLines = lines
 }
 
+// buildCurrentShelfItems 根据导航栈层级构建当前应显示的书架条目列表。
 func (m *appModel) buildCurrentShelfItems() []shelfItem {
 	if modelpkg.IStore == nil {
 		return []shelfItem{{
@@ -625,6 +677,7 @@ func (m *appModel) buildCurrentShelfItems() []shelfItem {
 	return buildChildShelfItems(m.stack[len(m.stack)-1], m.readMode)
 }
 
+// buildTopShelfItems 构建顶层书架列表（按 StoreUrl 分组，depth=0 的书籍）。
 func buildTopShelfItems(readMode int) []shelfItem {
 	if modelpkg.IStore == nil {
 		return []shelfItem{{
@@ -675,6 +728,7 @@ func buildTopShelfItems(readMode int) []shelfItem {
 	return items
 }
 
+// buildChildShelfItems 构建子书架内容列表，包含返回按钮和该书架下的所有子项。
 func buildChildShelfItems(level shelfLevel, readMode int) []shelfItem {
 	if modelpkg.IStore == nil {
 		return []shelfItem{{Kind: shelfItemHeader, Title: locale.GetString("tui_shelf_not_initialized"), Selectable: false}}
@@ -726,6 +780,7 @@ func buildChildShelfItems(level shelfLevel, readMode int) []shelfItem {
 	return items
 }
 
+// convertBookInfo 将 BookInfo 转换为 shelfItem，自动判断类型（书籍/子书架）并生成目标 URL。
 func convertBookInfo(book modelpkg.BookInfo, readMode int) shelfItem {
 	kind := shelfItemBook
 	subtitle := buildBookSubtitle(book)
@@ -742,6 +797,7 @@ func convertBookInfo(book modelpkg.BookInfo, readMode int) shelfItem {
 	}
 }
 
+// buildBookSubtitle 根据书籍类型生成副标题文字（页数、子项数或媒体类型）。
 func buildBookSubtitle(book modelpkg.BookInfo) string {
 	switch book.Type {
 	case modelpkg.TypeBooksGroup:
@@ -766,6 +822,8 @@ func buildBookSubtitle(book modelpkg.BookInfo) string {
 	}
 }
 
+// buildBookTargetURL 根据书籍类型和阅读模式构建打开书籍的完整 URL。
+// 对普通图片类书籍，readMode=0 使用 /scroll/ 路径，readMode=1 使用 /flip/ 路径。
 func buildBookTargetURL(book modelpkg.BookInfo, readMode int) string {
 	baseURL := buildBaseURL()
 	base := strings.TrimRight(baseURL, "/")
@@ -793,6 +851,7 @@ func buildBookTargetURL(book modelpkg.BookInfo, readMode int) string {
 	}
 }
 
+// buildBaseURL 根据当前配置（Host、Port、TLS 等）构建 Web 服务的基础 URL。
 func buildBaseURL() string {
 	cfg := config.GetCfg()
 	protocol := "http://"
@@ -814,6 +873,7 @@ func buildBaseURL() string {
 	return fmt.Sprintf("%s%s:%d", protocol, host, cfg.Port)
 }
 
+// buildCurrentShelfURL 构建当前书架层级对应的 Web URL（顶层为根 URL，子层为 /shelf/{id}）。
 func (m *appModel) buildCurrentShelfURL() string {
 	baseURL := strings.TrimRight(buildBaseURL(), "/")
 	if len(m.stack) == 0 {
@@ -822,6 +882,7 @@ func (m *appModel) buildCurrentShelfURL() string {
 	return baseURL + "/shelf/" + m.stack[len(m.stack)-1].BookID
 }
 
+// displayStoreName 从 Store URL/路径中提取适合显示的简短名称。
 func displayStoreName(storeURL string) string {
 	if strings.Contains(storeURL, "://") {
 		return storeURL
@@ -833,6 +894,7 @@ func displayStoreName(storeURL string) string {
 	return base
 }
 
+// normalizeStoreID 将本地路径转为绝对路径作为 Store 的统一标识；远程 URL 保持原样。
 func normalizeStoreID(storeURL string) string {
 	if strings.Contains(storeURL, "://") {
 		return storeURL
@@ -844,6 +906,7 @@ func normalizeStoreID(storeURL string) string {
 	return storePathAbs
 }
 
+// currentItem 返回当前选中的可选条目指针；若索引越界或不可选则返回 nil。
 func (m *appModel) currentItem() *shelfItem {
 	if len(m.items) == 0 || m.selected < 0 || m.selected >= len(m.items) {
 		return nil
@@ -854,6 +917,7 @@ func (m *appModel) currentItem() *shelfItem {
 	return &m.items[m.selected]
 }
 
+// ensureSelectedItem 保证 selected 指向一个有效的可选条目；若当前不可选则搜索第一个可选项。
 func (m *appModel) ensureSelectedItem() {
 	if len(m.items) == 0 {
 		m.selected = 0
@@ -881,6 +945,7 @@ func (m *appModel) ensureSelectedItem() {
 	m.shelfOffset = 0
 }
 
+// selectFirst 选中列表中第一个可选条目。
 func (m *appModel) selectFirst() {
 	for i := range m.items {
 		if m.items[i].Selectable {
@@ -891,6 +956,7 @@ func (m *appModel) selectFirst() {
 	}
 }
 
+// selectLast 选中列表中最后一个可选条目。
 func (m *appModel) selectLast() {
 	for i := len(m.items) - 1; i >= 0; i-- {
 		if m.items[i].Selectable {
@@ -924,6 +990,7 @@ func (m *appModel) syncShelfOffset() {
 	}
 }
 
+// moveSelection 将选中项向上（delta<0）或向下（delta>0）移动指定步数，自动跳过不可选条目。
 func (m *appModel) moveSelection(delta int) {
 	if len(m.items) == 0 {
 		return
@@ -951,6 +1018,7 @@ func (m *appModel) moveSelection(delta int) {
 	m.syncShelfOffset()
 }
 
+// goBack 弹出导航栈顶层，返回上一级书架。
 func (m *appModel) goBack() {
 	if len(m.stack) == 0 {
 		return
@@ -961,6 +1029,7 @@ func (m *appModel) goBack() {
 	m.refreshData()
 }
 
+// activateSelectedItem 激活当前选中项：返回上级、进入子书架或打开书籍 URL。
 func (m *appModel) activateSelectedItem() tea.Cmd {
 	item := m.currentItem()
 	if item == nil {
@@ -1028,6 +1097,7 @@ func (m *appModel) toggleReadMode() {
 	m.refreshStatus()
 }
 
+// scrollLogs 滚动日志面板偏移量，正数向下、负数向上，自动限定边界。
 func (m *appModel) scrollLogs(delta int) {
 	visible := max(1, m.layout().log.innerHeight())
 	maxOffset := max(0, len(m.logs)-visible)
@@ -1041,6 +1111,7 @@ func (m *appModel) scrollLogs(delta int) {
 	m.autoFollowLogs = m.logOffset >= maxOffset
 }
 
+// syncLogOffset 同步日志滚动偏移，若开启自动跟随则始终定位到最新日志。
 func (m *appModel) syncLogOffset() {
 	visible := max(1, m.layout().log.innerHeight())
 	maxOffset := max(0, len(m.logs)-visible)
@@ -1053,9 +1124,31 @@ func (m *appModel) syncLogOffset() {
 	}
 }
 
+// isNarrow 判断当前终端宽度是否小于窄屏阈值。
+func (m *appModel) isNarrow() bool {
+	return m.width < narrowThreshold
+}
+
+// layout 计算四个面板的矩形布局。宽屏使用 2×2 网格，窄屏使用垂直单栏（隐藏信息面板）。
 func (m *appModel) layout() layoutState {
 	width := max(0, m.width)
 	height := max(0, m.height)
+
+	if m.isNarrow() {
+		// 窄屏单栏：书架(3) / QR(5) / 日志(2)，info 隐藏
+		logH := height * 2 / 10
+		shelfH := height * 3 / 10
+		qrH := height - shelfH - logH
+		qrY := shelfH
+		logY := shelfH + qrH
+		return layoutState{
+			shelf: panelRect{x: 0, y: 0, w: width, h: shelfH},
+			qr:    panelRect{x: 0, y: qrY, w: width, h: qrH},
+			log:   panelRect{x: 0, y: logY, w: width, h: logH},
+			info:  panelRect{},
+		}
+	}
+
 	leftWidth := (width - layoutGap) * 2 / 3
 	rightWidth := width - layoutGap - leftWidth
 	topHeight := (height - layoutGap) * 2 / 3
@@ -1069,6 +1162,7 @@ func (m *appModel) layout() layoutState {
 	}
 }
 
+// renderShelfContent 渲染书架面板内容：面包屑导航、操作提示和书架条目列表（支持滚动）。
 func (m *appModel) renderShelfContent(rect panelRect) []string {
 	lines := make([]string, 0, rect.innerHeight())
 	m.shelfRowToID = make(map[int]int)
@@ -1103,6 +1197,7 @@ func (m *appModel) renderShelfContent(rect panelRect) []string {
 	return fitLines(lines, rect.innerWidth(), rect.innerHeight())
 }
 
+// formatShelfLine 格式化单个书架条目为显示行，选中项以 "> " 前缀标记。
 func (m *appModel) formatShelfLine(item shelfItem, selected bool) string {
 	prefix := "  "
 	if selected {
@@ -1121,6 +1216,7 @@ func (m *appModel) formatShelfLine(item shelfItem, selected bool) string {
 	}
 }
 
+// renderLogContent 渲染日志面板内容，支持滚动和自动跟随最新日志。
 func (m *appModel) renderLogContent(rect panelRect) []string {
 	height := rect.innerHeight()
 	if height <= 0 {
@@ -1139,6 +1235,7 @@ func (m *appModel) renderLogContent(rect panelRect) []string {
 	return fitLines(lines, rect.innerWidth(), height)
 }
 
+// renderInfoContent 渲染信息面板内容：服务状态、CPU/RAM、在线人数、版本及时间。
 func (m *appModel) renderInfoContent(rect panelRect) []string {
 	w := rect.innerWidth()
 	h := rect.innerHeight()
@@ -1172,6 +1269,7 @@ func (m *appModel) renderInfoContent(rect panelRect) []string {
 	return fitLines(lines, w, h)
 }
 
+// renderQRCodeContent 渲染 QRCode 面板内容：选中项 URL、二维码、阅读模式切换和操作按钮。
 func (m *appModel) renderQRCodeContent(rect panelRect) []string {
 	w := rect.innerWidth()
 	selURL := m.selectedURL()
@@ -1217,6 +1315,7 @@ func (m *appModel) renderQRCodeContent(rect panelRect) []string {
 	return fitLines(lines, w, rect.innerHeight())
 }
 
+// makePanel 将内容行包装进带边框的面板，聚焦面板使用双线边框，非聚焦使用单线边框。
 func (m *appModel) makePanel(title string, content []string, rect panelRect, focused bool) []string {
 	if rect.w <= 1 || rect.h <= 1 {
 		return []string{""}
@@ -1239,6 +1338,7 @@ func (m *appModel) makePanel(title string, content []string, rect panelRect, foc
 	return lines
 }
 
+// boxBorder 面板边框字符集，支持单线和双线两种样式。
 type boxBorder struct {
 	leftTop     string
 	rightTop    string
@@ -1248,6 +1348,7 @@ type boxBorder struct {
 	vertical    string
 }
 
+// singleBorder 返回单线边框字符（┌─┐│└─┘）。
 func singleBorder() boxBorder {
 	return boxBorder{
 		leftTop:     "┌",
@@ -1259,6 +1360,7 @@ func singleBorder() boxBorder {
 	}
 }
 
+// doubleBorder 返回双线边框字符（╔═╗║╚═╝），用于聚焦面板。
 func doubleBorder() boxBorder {
 	return boxBorder{
 		leftTop:     "╔",
@@ -1270,22 +1372,26 @@ func doubleBorder() boxBorder {
 	}
 }
 
+// top 渲染面板顶部边框行，标题嵌入在水平线中。
 func (b boxBorder) top(title string, width int) string {
 	inner := max(0, width-2)
 	text := " " + title + " "
 	return b.leftTop + padRightWith(text, inner, b.horizontal) + b.rightTop
 }
 
+// middle 渲染面板中间内容行，左右各一个竖线边框。
 func (b boxBorder) middle(line string, width int) string {
 	inner := max(0, width-2)
 	return b.vertical + clipAndPad(line, inner) + b.vertical
 }
 
+// bottom 渲染面板底部边框行。
 func (b boxBorder) bottom(width int) string {
 	inner := max(0, width-2)
 	return b.leftBottom + strings.Repeat(b.horizontal, inner) + b.rightBottom
 }
 
+// fitLines 将内容行裁剪/填充到指定宽高，多余行截断，不足行补空行。
 func fitLines(lines []string, width int, height int) []string {
 	if height <= 0 {
 		return nil
@@ -1303,6 +1409,7 @@ func fitLines(lines []string, width int, height int) []string {
 	return result
 }
 
+// clipAndPad 将文本裁剪到指定显示宽度，不足部分用空格填充，确保每行等宽。
 func clipAndPad(text string, width int) string {
 	if width <= 0 {
 		return ""
@@ -1325,6 +1432,7 @@ func clipAndPad(text string, width int) string {
 	return builder.String() + strings.Repeat(" ", width-current)
 }
 
+// padRightWith 将文本用指定填充字符（如边框线 "─"）补齐到目标宽度。
 func padRightWith(text string, width int, pad string) string {
 	if width <= 0 {
 		return ""
@@ -1343,6 +1451,7 @@ func padRightWith(text string, width int, pad string) string {
 	return text + strings.Repeat(pad, count) + strings.Repeat(" ", extra)
 }
 
+// mergeRows 将左右两个面板的行按行拼接，中间加上间距，用于宽屏 2×2 布局。
 func mergeRows(left []string, leftWidth int, right []string) []string {
 	count := max(len(left), len(right))
 	rows := make([]string, 0, count)
@@ -1361,6 +1470,7 @@ func mergeRows(left []string, leftWidth int, right []string) []string {
 	return rows
 }
 
+// renderQRCodeLines 将文本编码为 QR 码，并转换为 Unicode 半高块字符行（▀▄█ ），适合终端显示。
 func renderQRCodeLines(text string) ([]string, error) {
 	if strings.TrimSpace(text) == "" {
 		return []string{locale.GetString("tui_qr_unavailable")}, nil
@@ -1388,6 +1498,7 @@ func renderQRCodeLines(text string) ([]string, error) {
 	return lines, nil
 }
 
+// qrBlock 根据上下两行像素组合返回对应的 Unicode 半高块字符。
 func qrBlock(top bool, bottom bool) rune {
 	switch {
 	case top && bottom:
@@ -1401,10 +1512,12 @@ func qrBlock(top bool, bottom bool) rune {
 	}
 }
 
+// contains 判断坐标 (x, y) 是否在面板矩形区域内。
 func contains(rect panelRect, x int, y int) bool {
 	return x >= rect.x && x < rect.x+rect.w && y >= rect.y && y < rect.y+rect.h
 }
 
+// centerText 在指定宽度内将文本水平居中（左侧补空格）。
 func centerText(text string, width int) string {
 	tw := runewidth.StringWidth(text)
 	if tw >= width {
@@ -1414,6 +1527,7 @@ func centerText(text string, width int) string {
 	return strings.Repeat(" ", pad) + text
 }
 
+// shortenText 将文本截断到 maxWidth 以内，超长部分以 "…" 替代。
 func shortenText(text string, maxWidth int) string {
 	if maxWidth <= 0 || runewidth.StringWidth(text) <= maxWidth {
 		return text
@@ -1424,6 +1538,7 @@ func shortenText(text string, maxWidth int) string {
 	return strings.TrimRight(clipWidth(text, maxWidth-1), " ") + "…"
 }
 
+// clipWidth 按显示宽度（考虑 CJK 全角字符）截取文本，不补空格。
 func clipWidth(text string, width int) string {
 	if width <= 0 {
 		return ""

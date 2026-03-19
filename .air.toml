@@ -2,6 +2,7 @@
 # git update-index --assume-unchanged .air.toml
 # Undo:
 # git update-index --no-assume-unchanged .air.toml
+
 root = "."
 #testdata_dir = "test/.temp"
 tmp_dir = "test/.temp"
@@ -21,7 +22,7 @@ post_cmd = []
 # dav://user:pass@host:port/path   (caddy2 with webdav plugin)            大量缓存文件，需要优化
 # s3://accessKey:secretKey@endpoint/bucket/prefix (minio, aws s3)         未测试
 # args_bin = ["https://test:test@localhost/dav/","sftp://test:test@192.168.1.1/path/to/books","smb://guest@192.168.1.1:445/some/path"，"--tailscale","--debug"]
-args_bin = ["./test","--debug"]
+args_bin = ["./test","--tailscale","--debug"]
 #二进制文件 Binary file yields from 'cmd', will be deprecated soon, recommend using entrypoint.
 # bin = "./test/.temp/comi"
 entrypoint = ["./test/.temp/comi"]
