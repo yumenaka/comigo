@@ -180,6 +180,9 @@ func InitFlags() {
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 	runtimeViper.BindPFlag("Debug", RootCmd.PersistentFlags().Lookup("debug"))
+
+	// 自升级（不绑定 viper，避免环境变量误触发）
+	RootCmd.PersistentFlags().BoolVarP(&cfg.SelfUpgrade, "upgrade", "u", false, locale.GetString("self_upgrade_flag"))
 }
 
 // SetByExecutableFilename 根据可执行文件名或软链接名自动设置部分配置项的默认值。
