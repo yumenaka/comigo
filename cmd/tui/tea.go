@@ -227,7 +227,8 @@ func Run() error {
 	runewidth.DefaultCondition.EastAsianWidth = false
 
 	for _, arg := range os.Args {
-		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" {
+		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" ||
+			arg == "-u" || arg == "--upgrade" {
 			cmd.Execute()
 			return nil
 		}

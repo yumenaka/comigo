@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -30,6 +31,14 @@ var RootCmd = &cobra.Command{
 		// 通过“可执行文件名”设置部分默认参数
 		SetByExecutableFilename()
 		cfg := config.GetCfg()
+		if cfg.SelfUpgrade {
+			locale.InitLanguageFromConfig(cfg.Language)
+			if err := runSelfUpgrade(); err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				os.Exit(1)
+			}
+			os.Exit(0)
+		}
 		// 默认启用几个内置插件
 		if cfg.EnablePlugin {
 			cfg.EnabledPluginList = append(cfg.EnabledPluginList, "auto_flip", "auto_scroll")

@@ -62,6 +62,7 @@ type Config struct {
 	ClearCacheExit            bool           `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	ClearDatabaseWhenExit     bool           `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
 	ConfigFile                string         `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
+	SelfUpgrade               bool           `json:"-" toml:"-" comment:"CLI：检测并下载新版本替换当前可执行文件（仅命令行使用，不写入配置文件）"`
 	ReadOnlyMode              bool           `json:"ReadOnlyMode" comment:"只读模式。禁止网页端更改配置或上传文件。"`
 	Debug                     bool           `json:"Debug" comment:"开启Debug模式"`
 	EnablePlugin              bool           `json:"EnablePlugin" comment:"启用插件系统"`
