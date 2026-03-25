@@ -113,7 +113,7 @@ func (ramStore *StoreInRam) SaveBooksToJson() error {
 			logger.Infof(locale.GetString("log_error_saving_book"), book.BookID, err)
 		}
 	}
-	logger.Infof(locale.GetString("log_successfully_saved_books"), len(allBooks), metaPath)
+	logger.Infof(locale.GetString("log_successfully_saved_books_metadata"), len(allBooks), metaPath)
 	return nil
 }
 

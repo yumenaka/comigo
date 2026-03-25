@@ -157,13 +157,15 @@ func OpenBrowserByURL(uri string) {
 		waiter.WithBackoffPolicy(waiter.BackoffPolicyExponential),
 	)
 	if err != nil {
-		log.Fatalf("API health check failed: %v", err)
+		logger.Infof(locale.GetString("log_api_health_check_failed"), err)
+		return
 	}
 	logger.Info(locale.GetString("log_api_healthy_ready"))
 
 	// 打开浏览器（Windows 使用 ShellExecute，避免闪黑框）
+	logger.Infof(locale.GetString("log_opening_browser"), uri)
 	if err := openURL(uri); err != nil {
-		logger.Infof(locale.GetString("open_browser_error")+"%s", err.Error())
+		logger.Infof(locale.GetString("open_browser_error")+" %s", err.Error())
 	}
 }
 
