@@ -14,7 +14,6 @@ import (
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mattn/go-runewidth"
-	"github.com/skip2/go-qrcode"
 	"golang.org/x/term"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -213,9 +212,9 @@ func InitialModel(lb *LogBuffer) *appModel {
 		focus:           focusShelf,
 		autoFollowLogs:  true,
 		shelfRowToID:    make(map[int]int),
-		actionMsg:       locale.GetString("tui_starting_service"),
 		currentShelfURL: "",
 	}
+	m.setActionMsg(locale.GetString("tui_starting_service"))
 	m.refreshData()
 	return m
 }
@@ -339,21 +338,23 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case backendStartedMsg:
 		m.backendReady = true
 		m.backendError = ""
-		m.actionMsg = locale.GetString("tui_service_started")
+		m.setActionMsg(locale.GetString("tui_service_started"))
 		m.refreshData()
 		return m, nil
 	case backendErrorMsg:
 		m.backendError = msg.err.Error()
-		m.actionMsg = locale.GetString("tui_backend_failed")
+		m.setActionMsg(locale.GetString("tui_backend_failed"))
 		m.refreshData()
 		return m, nil
 	case openURLResultMsg:
 		if msg.err != nil {
-			m.actionMsg = shortenText(fmt.Sprintf(locale.GetString("tui_open_browser_failed"), msg.err.Error()), maxActionMessage)
+			m.setActionMsg(shortenText(fmt.Sprintf(locale.GetString("tui_open_browser_failed"), msg.err.Error()), maxActionMessage))
+			logger.Infof(locale.GetString("tui_open_browser_failed"), msg.err.Error())
 		} else {
-			m.actionMsg = shortenText(fmt.Sprintf(locale.GetString("tui_opened_url"), msg.url), maxActionMessage)
+			m.setActionMsg(shortenText(fmt.Sprintf(locale.GetString("tui_opened_url"), msg.url), maxActionMessage))
+			logger.Infof(locale.GetString("log_opening_browser"), msg.url)
 		}
-		m.refreshStatus()
+		m.refreshData()
 		return m, nil
 	case tea.MouseMsg:
 		return m.handleMouse(msg)
@@ -583,7 +584,8 @@ func (m *appModel) View() string {
 
 	topRow := mergeRows(shelfLines, layout.shelf.w, qrLines)
 	bottomRow := mergeRows(logLines, layout.log.w, infoLines)
-	return strings.Join(append(topRow, bottomRow...), "\n")
+	gapLine := strings.Repeat(" ", m.width)
+	return strings.Join(append(append(topRow, gapLine), bottomRow...), "\n")
 }
 
 // refreshData 一次性刷新日志、书架、系统状态和二维码等全部数据。
@@ -641,6 +643,11 @@ func (m *appModel) refreshStatus() {
 	sys := tools.GetSystemStatus()
 	m.status.CPUPercent = sys.CPUUsedPercent
 	m.status.RAMPercent = sys.MemoryUsedPercent
+}
+
+// setActionMsg 统一设置操作提示消息，用于 QR 面板和信息面板展示。
+func (m *appModel) setActionMsg(msg string) {
+	m.actionMsg = msg
 }
 
 // selectedURL 返回当前选中项的 URL；若无可选项则回退到当前书架 URL。
@@ -779,6 +786,16 @@ func buildChildShelfItems(level shelfLevel, readMode int) []shelfItem {
 		items = append(items, convertBookInfo(book, readMode))
 	}
 	return items
+}
+
+// isShelfEffectivelyEmpty 判断当前层级是否无可展示书籍（忽略 header/back，仅 group/book 视为有内容）。
+func isShelfEffectivelyEmpty(items []shelfItem) bool {
+	for _, item := range items {
+		if item.Kind == shelfItemBook || item.Kind == shelfItemGroup {
+			return false
+		}
+	}
+	return true
 }
 
 // convertBookInfo 将 BookInfo 转换为 shelfItem，自动判断类型（书籍/子书架）并生成目标 URL。
@@ -971,7 +988,8 @@ func (m *appModel) selectLast() {
 // syncShelfOffset 调整滚动偏移，使当前选中项始终在可视区域内。
 func (m *appModel) syncShelfOffset() {
 	const headerLines = 2 // 面包屑 + 操作提示
-	visible := m.layout().shelf.innerHeight() - headerLines
+	const footerLines = 2 // 分隔线 + 底行服务状态（与 renderShelfContent 一致）
+	visible := m.layout().shelf.innerHeight() - headerLines - footerLines
 	if visible <= 0 {
 		m.shelfOffset = 0
 		return
@@ -1048,11 +1066,11 @@ func (m *appModel) activateSelectedItem() tea.Cmd {
 		})
 		m.selected = 0
 		m.shelfOffset = 0
-		m.actionMsg = fmt.Sprintf(locale.GetString("tui_entered_sub_shelf"), item.Title)
+		m.setActionMsg(fmt.Sprintf(locale.GetString("tui_entered_sub_shelf"), item.Title))
 		m.refreshData()
 		return nil
 	case shelfItemBook:
-		m.actionMsg = fmt.Sprintf(locale.GetString("tui_opening_url"), item.TargetURL)
+		m.setActionMsg(fmt.Sprintf(locale.GetString("tui_opening_url"), item.TargetURL))
 		m.refreshStatus()
 		return openURLCmd(item.TargetURL)
 	default:
@@ -1064,20 +1082,22 @@ func (m *appModel) activateSelectedItem() tea.Cmd {
 func (m *appModel) executeQRButton() tea.Cmd {
 	target := m.selectedURL()
 	if target == "" {
-		m.actionMsg = locale.GetString("tui_no_url_available")
+		m.setActionMsg(locale.GetString("tui_no_url_available"))
 		m.refreshStatus()
 		return nil
 	}
 	switch m.qrButtonFocus {
 	case 0:
-		m.actionMsg = fmt.Sprintf(locale.GetString("tui_opening_url"), shortenText(target, maxActionMessage-6))
+		m.setActionMsg(fmt.Sprintf(locale.GetString("tui_opening_url"), shortenText(target, maxActionMessage-6)))
 		m.refreshStatus()
 		return openURLCmd(target)
 	case 1:
 		if err := clipboard.WriteAll(target); err != nil {
-			m.actionMsg = fmt.Sprintf(locale.GetString("tui_copy_failed"), err.Error())
+			m.setActionMsg(fmt.Sprintf(locale.GetString("tui_copy_failed"), err.Error()))
+			logger.Infof(locale.GetString("tui_copy_failed"), err.Error())
 		} else {
-			m.actionMsg = fmt.Sprintf(locale.GetString("tui_url_copied"), shortenText(target, maxActionMessage-8))
+			m.setActionMsg(fmt.Sprintf(locale.GetString("tui_url_copied"), shortenText(target, maxActionMessage-8)))
+			logger.Infof(locale.GetString("log_copied_url_to_clipboard"), target)
 		}
 		m.refreshStatus()
 		return nil
@@ -1152,8 +1172,10 @@ func (m *appModel) layout() layoutState {
 
 	leftWidth := (width - layoutGap) * 2 / 3
 	rightWidth := width - layoutGap - leftWidth
-	topHeight := (height - layoutGap) * 2 / 3
-	bottomHeight := height - layoutGap - topHeight
+	// 宽屏上下两排面板之间留 layoutGap 行；总输出 = topHeight + layoutGap + bottomHeight = height
+	split := height - layoutGap
+	topHeight := (split * 2) / 3
+	bottomHeight := split - topHeight
 
 	return layoutState{
 		shelf: panelRect{x: 0, y: 0, w: leftWidth, h: topHeight},
@@ -1163,9 +1185,14 @@ func (m *appModel) layout() layoutState {
 	}
 }
 
-// renderShelfContent 渲染书架面板内容：面包屑导航、操作提示和书架条目列表（支持滚动）。
+// renderShelfContent 渲染书架面板内容：面包屑、操作提示、可滚动条目列表；底部以分隔线 + 服务状态固定展示。
 func (m *appModel) renderShelfContent(rect panelRect) []string {
-	lines := make([]string, 0, rect.innerHeight())
+	inner := rect.innerHeight()
+	if inner <= 0 {
+		return nil
+	}
+	w := rect.innerWidth()
+	lines := make([]string, 0, inner)
 	m.shelfRowToID = make(map[int]int)
 
 	rootDir := locale.GetString("tui_root_dir")
@@ -1180,22 +1207,30 @@ func (m *appModel) renderShelfContent(rect panelRect) []string {
 	lines = append(lines, locale.GetString("tui_path_prefix")+breadcrumb)
 	lines = append(lines, locale.GetString("tui_controls_hint"))
 
-	visibleItems := rect.innerHeight() - len(lines)
-	endIdx := min(len(m.items), m.shelfOffset+visibleItems)
-	for idx := m.shelfOffset; idx < endIdx; idx++ {
-		item := m.items[idx]
-		line := m.formatShelfLine(item, idx == m.selected)
-		m.shelfRowToID[len(lines)] = idx
-		if !item.Selectable {
-			delete(m.shelfRowToID, len(lines))
+	const footerLines = 2 // 分隔线 + 底部服务状态
+	visibleItems := max(0, inner-len(lines)-footerLines)
+	if isShelfEffectivelyEmpty(m.items) {
+		if visibleItems > 0 {
+			lines = append(lines, locale.GetString("tui_no_shelf_content"))
 		}
-		lines = append(lines, line)
+	} else {
+		endIdx := min(len(m.items), m.shelfOffset+visibleItems)
+		for idx := m.shelfOffset; idx < endIdx; idx++ {
+			item := m.items[idx]
+			line := m.formatShelfLine(item, idx == m.selected)
+			m.shelfRowToID[len(lines)] = idx
+			if !item.Selectable {
+				delete(m.shelfRowToID, len(lines))
+			}
+			lines = append(lines, line)
+		}
 	}
 
-	if len(lines) == 0 {
-		return []string{locale.GetString("tui_no_shelf_content")}
-	}
-	return fitLines(lines, rect.innerWidth(), rect.innerHeight())
+	lines = append(lines, padRightWith("", w, "─"))
+
+	lines = append(lines, clipAndPad(shortenText(m.status.StatusText, w), w))
+
+	return fitLines(lines, w, inner)
 }
 
 // formatShelfLine 格式化单个书架条目为显示行，选中项以 "> " 前缀标记。
@@ -1236,12 +1271,14 @@ func (m *appModel) renderLogContent(rect panelRect) []string {
 	return fitLines(lines, rect.innerWidth(), height)
 }
 
-// renderInfoContent 渲染信息面板内容：服务状态、CPU/RAM、在线人数、版本及时间。
+// renderInfoContent 渲染信息面板内容：CPU/RAM、在线人数、版本及时间等；服务状态在书架面板底部展示。
 func (m *appModel) renderInfoContent(rect panelRect) []string {
 	w := rect.innerWidth()
 	h := rect.innerHeight()
+	if h <= 0 {
+		return nil
+	}
 	lines := []string{
-		fmt.Sprintf(locale.GetString("tui_info_service_status"), m.status.StatusText),
 		fmt.Sprintf(locale.GetString("tui_info_cpu"), m.status.CPUPercent),
 		fmt.Sprintf(locale.GetString("tui_info_ram"), m.status.RAMPercent),
 		fmt.Sprintf(locale.GetString("tui_info_online_users"), m.status.OnlineUsers),
@@ -1255,19 +1292,16 @@ func (m *appModel) renderInfoContent(rect panelRect) []string {
 		lines = append(lines, locale.GetString("tui_info_target_url"), m.status.TargetURL)
 	}
 
-	// 底部右对齐：时间 + 版本
 	versionLine := time.Now().Format("2006-01-02 15:04:05") + "  Comigo " + config.GetVersion()
-	if h > len(lines)+1 {
-		for len(lines) < h-1 {
-			lines = append(lines, "")
-		}
-		vw := runewidth.StringWidth(versionLine)
-		if vw < w {
-			versionLine = strings.Repeat(" ", w-vw) + versionLine
-		}
-		lines = append(lines, versionLine)
+	vw := runewidth.StringWidth(versionLine)
+	if vw < w {
+		versionLine = strings.Repeat(" ", w-vw) + versionLine
 	}
-	return fitLines(lines, w, h)
+	if h == 1 {
+		return []string{clipAndPad(versionLine, w)}
+	}
+	body := fitLines(lines, w, h-1)
+	return append(body, clipAndPad(versionLine, w))
 }
 
 // renderQRCodeContent 渲染 QRCode 面板内容：选中项 URL、二维码、阅读模式切换和操作按钮。
@@ -1312,6 +1346,12 @@ func (m *appModel) renderQRCodeContent(rect panelRect) []string {
 	btnLine := btn0 + "  " + btn1
 	m.qrButtonRow = len(lines)
 	lines = append(lines, centerText(btnLine, w))
+
+	// 操作结果提示行（浏览器打开/URL复制等；加标记强调，不自动隐藏）
+	if m.actionMsg != "" {
+		lines = append(lines, "")
+		lines = append(lines, formatTUIActionHint(m.actionMsg, w))
+	}
 
 	return fitLines(lines, w, rect.innerHeight())
 }
@@ -1473,30 +1513,7 @@ func mergeRows(left []string, leftWidth int, right []string) []string {
 
 // renderQRCodeLines 将文本编码为 QR 码，并转换为 Unicode 半高块字符行（▀▄█ ），适合终端显示。
 func renderQRCodeLines(text string) ([]string, error) {
-	if strings.TrimSpace(text) == "" {
-		return []string{locale.GetString("tui_qr_unavailable")}, nil
-	}
-	qr, err := qrcode.New(text, qrcode.Low)
-	if err != nil {
-		return nil, err
-	}
-	bitmap := qr.Bitmap()
-	if len(bitmap)%2 != 0 {
-		padding := make([]bool, len(bitmap[0]))
-		bitmap = append(bitmap, padding)
-	}
-
-	lines := make([]string, 0, len(bitmap)/2)
-	for row := 0; row < len(bitmap); row += 2 {
-		var builder strings.Builder
-		for col := 0; col < len(bitmap[row]); col++ {
-			top := bitmap[row][col]
-			bottom := bitmap[row+1][col]
-			builder.WriteRune(qrBlock(top, bottom))
-		}
-		lines = append(lines, builder.String())
-	}
-	return lines, nil
+	return tools.RenderQRCodeLinesTerminal(text)
 }
 
 // qrBlock 根据上下两行像素组合返回对应的 Unicode 半高块字符。
@@ -1526,6 +1543,22 @@ func centerText(text string, width int) string {
 	}
 	pad := (width - tw) / 2
 	return strings.Repeat(" ", pad) + text
+}
+
+// formatTUIActionHint 为操作反馈加两侧标记并居中，便于在 QR 面板中一眼识别（不用 ANSI，避免与 clipAndPad 宽度不一致）。
+func formatTUIActionHint(msg string, width int) string {
+	if width <= 0 || msg == "" {
+		return ""
+	}
+	const deco = "▶ " // 与右侧 " ◀" 合计 4 列（均为半角符号）
+	const decoR = " ◀"
+	maxCore := width - runewidth.StringWidth(deco+decoR)
+	if maxCore < 1 {
+		maxCore = 1
+	}
+	core := shortenText(msg, maxCore)
+	line := deco + core + decoR
+	return centerText(line, width)
 }
 
 // shortenText 将文本截断到 maxWidth 以内，超长部分以 "…" 替代。
