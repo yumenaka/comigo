@@ -1106,7 +1106,7 @@
   "tui_info_service_status": "サービス状態: %s",
   "tui_info_cpu": "CPU 使用率: %.1f%%",
   "tui_info_ram": "RAM 使用率: %.1f%%",
-  "tui_info_online_users": "ページめくりモードのWebSocketオンラインユーザー: %d",
+  "tui_info_online_users": "めくりモードオンライン: %d",
   "tui_info_books_total": "書籍数: %d",
   "tui_info_server_port": "ポート: %d",
   "tui_info_shelf_url": "本棚 URL:",
