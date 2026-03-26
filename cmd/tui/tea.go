@@ -1226,8 +1226,12 @@ func (m *appModel) renderShelfContent(rect panelRect) []string {
 		}
 	}
 
-	lines = append(lines, padRightWith("", w, "─"))
+	// 用空行填充，使分隔线和状态提示始终固定在面板底部
+	for len(lines) < inner-footerLines {
+		lines = append(lines, "")
+	}
 
+	lines = append(lines, padRightWith("", w, "─"))
 	lines = append(lines, clipAndPad(shortenText(m.status.StatusText, w), w))
 
 	return fitLines(lines, w, inner)
