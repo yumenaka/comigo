@@ -172,6 +172,8 @@ func EmbedStaticFiles() {
 		logger.Infof("%s", err)
 	}
 	engine.StaticFS("/images/", assets.ImagesFS)
+	// 暴露 robots.txt，供搜索引擎按标准路径读取
+	engine.FileFS("/robots.txt", "robots.txt", assets.Robots)
 }
 
 // StartWebServer 启动web服务
