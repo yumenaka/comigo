@@ -177,13 +177,13 @@ func EmbedStaticFiles() {
 }
 
 // StartWebServer 启动web服务
-func StartWebServer() {
+func StartWebServer() error {
 	// 初始化web服务器
 	InitEcho()
 	// 设置网页端口
 	SetHttpPort()
 	// 监听并启动web服务
-	StartEcho(engine)
+	return StartEcho(engine)
 }
 
 // GetWebServer 获取echo.Echo (实现了 http.Handler 接口)
