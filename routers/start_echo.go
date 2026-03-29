@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"net"
 	"net/http"
 	"path"
 	"strconv"
@@ -20,11 +21,12 @@ import (
 )
 
 // StartEcho 启动网页服务
-func StartEcho(e *echo.Echo) {
+func StartEcho(e *echo.Echo) error {
 	// 是否仅监听本地回环地址
 	webHost := ":"
 	if config.GetCfg().DisableLAN {
-		webHost = "localhost:"
+		// 绑定到 127.0.0.1，避免 localhost 在不同平台解析到 IPv6 时导致 WebView 无法通过 127.0.0.1 访问。
+		webHost = "127.0.0.1:"
 	}
 	// 记录日志并启动服务器
 	logger.Infof(locale.GetString("log_starting_server_on_port"), config.GetCfg().Port)
@@ -41,7 +43,7 @@ func StartEcho(e *echo.Echo) {
 		configDir, err := config.GetConfigDir()
 		if err != nil {
 			logger.Errorf(locale.GetString("err_failed_to_get_config_dir"), err)
-			return
+			return err
 		}
 		autoTLSManager := autocert.Manager{
 			Prompt: autocert.AcceptTOS,
@@ -62,31 +64,36 @@ func StartEcho(e *echo.Echo) {
 			//ReadTimeout: 30 * time.Second, // use custom timeouts
 		}
 	}
+	listener, err := net.Listen("tcp", config.Server.Addr)
+	if err != nil {
+		return err
+	}
 	// 在 goroutine 中初始化 HTTP 服务器，这样它就不会阻塞关闭处理
 	go func() {
 		// 监听并启动服务(自定义TLS证书)
 		if config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != "" {
 			logger.Infof(locale.GetString("log_custom_tls_cert"), config.GetCfg().CertFile, config.GetCfg().KeyFile)
-			if err := config.Server.ListenAndServeTLS(config.GetCfg().CertFile, config.GetCfg().KeyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				time.Sleep(3 * time.Second)
-				logger.Fatalf("listen: %s\n", err)
+			if serveErr := config.Server.ServeTLS(listener, config.GetCfg().CertFile, config.GetCfg().KeyFile); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+				logger.Errorf("listen: %s", serveErr)
 			}
+			return
 		}
 		// 监听并启动服务(自动TLS)
 		if config.GetCfg().AutoTLSCertificate {
-			if err := config.Server.ListenAndServeTLS("", ""); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				time.Sleep(3 * time.Second)
-				logger.Fatalf("listen: %s\n", err)
+			tlsListener := tls.NewListener(listener, config.Server.TLSConfig)
+			if serveErr := config.Server.Serve(tlsListener); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+				logger.Errorf("listen: %s", serveErr)
 			}
+			return
 		}
 		// 监听并启动服务(无TLS,普通HTTP)
 		if !customCertTlS && !config.GetCfg().AutoTLSCertificate {
-			if err := config.Server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				time.Sleep(3 * time.Second)
-				logger.Fatalf("listen: %s\n", err)
+			if serveErr := config.Server.Serve(listener); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+				logger.Errorf("listen: %s", serveErr)
 			}
 		}
 	}()
+	return nil
 }
 
 // StopWebServer 停止当前的HTTP服务器

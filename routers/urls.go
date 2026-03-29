@@ -67,6 +67,7 @@ func BindURLs() {
 // bindPublicView 注册公共页面
 func bindPublicView(group *echo.Group) {
 	group.GET("/login", login_page.Handler)
+	group.GET("/healthz", data_api.Healthz)
 	// 简化路径：/get.sh -> https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh
 	group.GET("/get.sh", reverse_proxy.GetComigoScriptHandler)
 	group.HEAD("/get.sh", reverse_proxy.GetComigoScriptHandler)
