@@ -115,7 +115,7 @@
   "mobile_local_library_rescan_hint": "Saving will restart the local service and rescan the current library list",
   "mobile_pick_local_library": "Choose Folder",
   "mobile_pick_local_library_failed": "Failed to open the folder picker",
-  "mobile_pick_local_library_android_only": "Choosing a local folder is currently supported on Android only",
+  "mobile_pick_local_library_unsupported": "Choosing a local folder is not supported on this platform yet",
   "mobile_add_download_directory": "Add Downloads Folder",
   "mobile_edit_local_library_paths": "Edit Paths Manually",
   "mobile_manual_local_library_hint": "Enter one absolute path per line. They will be saved as the local library list",
