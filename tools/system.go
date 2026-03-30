@@ -210,7 +210,7 @@ func GetSystemStatus() SystemStatus {
 	CPUUsedPercent, err := cpu.Percent(0, false)
 	if err != nil {
 		logger.Infof("%s", err)
-	} else {
+	} else if len(CPUUsedPercent) > 0 {
 		// p := 0.0
 		// if len(CPUUsedPercent) > 1 {
 		//	for _, value := range CPUUsedPercent {
@@ -221,6 +221,8 @@ func GetSystemStatus() SystemStatus {
 		//	p = CPUUsedPercent[0]
 		// }
 		sys.CPUUsedPercent = CPUUsedPercent[0]
+	} else {
+		logger.Infof("cpu.Percent returned an empty result")
 	}
 	v, err := mem.VirtualMemory()
 	if err != nil {
