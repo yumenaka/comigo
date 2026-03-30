@@ -31,6 +31,7 @@
   "enable_file_upload": "启用文件上传功能",
   "enable_frpc": "启用frp反向代理",
   "enable_webp": "启用webp传输，需要webp-server",
+  "err_internal_server": "服务器内部错误",
   "epub_cannot_resort": "无法对epub文件重新排序：",
   "exceeds_maximum_depth": "超过最大搜索深度，MaxDepth=",
   "file_exit": "文件已存在：",
