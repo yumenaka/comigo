@@ -115,7 +115,7 @@
   "mobile_local_library_rescan_hint": "保存后会重启本地服务，并按当前书库列表重新扫描",
   "mobile_pick_local_library": "选择文件夹",
   "mobile_pick_local_library_failed": "打开文件夹选择器失败",
-  "mobile_pick_local_library_android_only": "当前仅支持 Android 设备选择本地文件夹",
+  "mobile_pick_local_library_unsupported": "当前平台暂不支持选择本地文件夹",
   "mobile_add_download_directory": "添加下载目录",
   "mobile_edit_local_library_paths": "手动编辑路径",
   "mobile_manual_local_library_hint": "每行填写一个绝对路径，保存后会作为本地书库列表写入设置",
