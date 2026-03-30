@@ -31,6 +31,7 @@
   "enable_file_upload": "ファイルのアップロードを有効にする",
   "enable_frpc": "frpcを有効にする",
   "enable_webp": "webp転送を有効にする（webp-serverが必要）",
+  "err_internal_server": "サーバー内部エラー",
   "epub_cannot_resort": "epubファイルの並べ替えができません：",
   "exceeds_maximum_depth": "最大検索深度を超えています。MaxDepth =",
   "file_exit": "ファイルは既に存在しています",

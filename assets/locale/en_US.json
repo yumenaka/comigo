@@ -31,6 +31,7 @@
   "enable_file_upload": "Enable file upload",
   "enable_frpc": "Enable frp reverse proxy",
   "enable_webp": "Enable webp transfer, requires webp-server",
+  "err_internal_server": "Internal server error",
   "epub_cannot_resort": "Cannot rearrange pages in EPUB files:",
   "exceeds_maximum_depth": "Exceeds maximum depth, MaxDepth =",
   "file_exit": "File already exists",
