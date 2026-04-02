@@ -114,6 +114,9 @@
     --color-orange-800: #9f2d00;
     --color-orange-900: #7e2a0c;
     --color-orange-950: #441306;
+    --color-amber-50: #fffbeb;
+    --color-amber-300: #ffd236;
+    --color-amber-900: #7b3306;
     --color-yellow-50: #fefce8;
     --color-yellow-100: #fef9c2;
     --color-yellow-200: #fff085;
@@ -170,10 +173,12 @@
     --color-cyan-800: #005f78;
     --color-cyan-900: #104e64;
     --color-cyan-950: #053345;
+    --color-sky-50: #f0f9ff;
     --color-sky-300: #77d4ff;
     --color-sky-400: #00bcfe;
     --color-sky-500: #00a5ef;
     --color-sky-600: #0084cc;
+    --color-sky-900: #024a70;
     --color-blue-50: #eff6ff;
     --color-blue-100: #dbeafe;
     --color-blue-200: #bedbff;
@@ -387,6 +392,9 @@
       --color-orange-800: lab(37.1566% 46.6433 50.5562);
       --color-orange-900: lab(30.2951% 36.0434 37.671);
       --color-orange-950: lab(14.1747% 23.4515 19.4461);
+      --color-amber-50: lab(98.6252% -.635922 8.42309);
+      --color-amber-300: lab(86.4156% 6.13147 78.3961);
+      --color-amber-900: lab(31.2288% 30.2627 40.0378);
       --color-yellow-50: lab(98.6846% -1.79055 9.7766);
       --color-yellow-100: lab(97.3564% -4.51407 27.344);
       --color-yellow-200: lab(94.3433% -5.00429 52.9663);
@@ -443,10 +451,12 @@
       --color-cyan-800: lab(36.5114% -17.1989 -21.6292);
       --color-cyan-900: lab(30.372% -13.1853 -18.7887);
       --color-cyan-950: lab(19.1528% -9.68757 -15.5267);
+      --color-sky-50: lab(97.3623% -2.33802 -4.13098);
       --color-sky-300: lab(80.3307% -20.2945 -31.385);
       --color-sky-400: lab(70.687% -23.6078 -45.9483);
       --color-sky-500: lab(63.3038% -18.433 -51.0407);
       --color-sky-600: lab(51.7754% -11.4712 -49.8349);
+      --color-sky-900: lab(29.1959% -8.34689 -28.2453);
       --color-blue-50: lab(96.492% -1.14644 -5.11479);
       --color-blue-100: lab(92.0301% -2.24757 -11.6453);
       --color-blue-200: lab(86.15% -4.04379 -21.0797);
@@ -2626,6 +2636,10 @@
     margin-block: calc(var(--spacing) * 2.5);
   }
 
+  .my-6 {
+    margin-block: calc(var(--spacing) * 6);
+  }
+
   .ms-0 {
     margin-inline-start: calc(var(--spacing) * 0);
   }
@@ -4461,6 +4475,10 @@
     stroke: var(--color-default) !important;
   }
 
+  .border-amber-300 {
+    border-color: var(--color-amber-300);
+  }
+
   .border-black {
     border-color: var(--color-black);
   }
@@ -4511,12 +4529,12 @@
     border-color: var(--color-red-400);
   }
 
-  .border-red-500 {
-    border-color: var(--color-red-500);
-  }
-
   .border-red-600 {
     border-color: var(--color-red-600);
+  }
+
+  .border-sky-300 {
+    border-color: var(--color-sky-300);
   }
 
   .border-slate-300 {
@@ -4579,6 +4597,10 @@
 
   .bg-\[var\(--my_variable\)\] {
     background-color: var(--my_variable);
+  }
+
+  .bg-amber-50 {
+    background-color: var(--color-amber-50);
   }
 
   .bg-black {
@@ -4799,6 +4821,10 @@
 
   .bg-red-600 {
     background-color: var(--color-red-600);
+  }
+
+  .bg-sky-50 {
+    background-color: var(--color-sky-50);
   }
 
   .bg-sky-300 {
@@ -5893,6 +5919,10 @@
     color: var(--color-heading);
   }
 
+  .text-amber-900 {
+    color: var(--color-amber-900);
+  }
+
   .text-black {
     color: var(--color-black);
   }
@@ -5973,6 +6003,10 @@
 
   .text-red-700 {
     color: var(--color-red-700);
+  }
+
+  .text-sky-900 {
+    color: var(--color-sky-900);
   }
 
   .text-white {
@@ -6756,6 +6790,10 @@
       .hover\:bg-blue-800\/80:hover {
         background-color: color-mix(in oklab, var(--color-blue-800) 80%, transparent);
       }
+    }
+
+    .hover\:bg-gray-50:hover {
+      background-color: var(--color-gray-50);
     }
 
     .hover\:bg-gray-100:hover {

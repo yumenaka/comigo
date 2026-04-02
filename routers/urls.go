@@ -82,6 +82,8 @@ func bindPublicAPI(group *echo.Group) {
 	group.GET("/qrcode.png", data_api.GetQrcode)
 	group.POST("/login", login.Login)
 	group.POST("/logout", login.Logout)
+	group.GET("/oauth/login", login.StartOAuthLogin)
+	group.GET("/oauth/callback", login.OAuthCallback)
 }
 
 // bindProtectedView 注册需要登录的页面
