@@ -67,7 +67,7 @@ var (
 func defaultStartConfig() StartConfig {
 	return StartConfig{
 		Port:                    1234,
-		DisableLAN:              true,
+		DisableLAN:              false,
 		EnableUpload:            false,
 		ReadOnlyMode:            false,
 		EnableDatabase:          false,

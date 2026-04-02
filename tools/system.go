@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 	httpChecker "wait4x.dev/v3/checker/http"
@@ -194,42 +192,7 @@ func GetSystemStatus() SystemStatus {
 		MemoryFree:        0.0,
 		MemoryUsedPercent: 0,
 	}
-	// 获取物理和逻辑核数,以及CPU、内存整体使用率
-	CPUNumLogical, err := cpu.Counts(true)
-	if err != nil {
-		logger.Infof("%s", err)
-	} else {
-		sys.CPUNumLogical = CPUNumLogical
-	}
-	CPUNumPhysical, err := cpu.Counts(false)
-	if err != nil {
-		logger.Infof("%s", err)
-	} else {
-		sys.CPUNumPhysical = CPUNumPhysical
-	}
-	CPUUsedPercent, err := cpu.Percent(0, false)
-	if err != nil {
-		logger.Infof("%s", err)
-	} else {
-		// p := 0.0
-		// if len(CPUUsedPercent) > 1 {
-		//	for _, value := range CPUUsedPercent {
-		//		p += value
-		//	}
-		//	p = p / float64(len(CPUUsedPercent))
-		// } else if len(CPUUsedPercent) == 1 {
-		//	p = CPUUsedPercent[0]
-		// }
-		sys.CPUUsedPercent = CPUUsedPercent[0]
-	}
-	v, err := mem.VirtualMemory()
-	if err != nil {
-		logger.Infof("%s", err)
-	} else {
-		sys.MemoryTotal = v.Total
-		sys.MemoryFree = v.Free
-		sys.MemoryUsedPercent = v.UsedPercent
-	}
+	populateSystemMetrics(&sys)
 	// // almost every return value is a struct
 	// logger.Infof("Total: %v, Free:%v, UsedPercent:%f%%\n", v.Total, v.Free, v.UsedPercent)
 	// // convert to JSON. String() is also implemented
