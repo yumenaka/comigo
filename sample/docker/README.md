@@ -379,8 +379,9 @@ This compose example mounts:
 | Variable | Description | Default         |
 |----------|-------------|-----------------|
 | `COMIGO_PORT` | Service port | `1234`          |
-| `COMIGO_USERNAME` | Login username | Empty (no auth) |
-| `COMIGO_PASSWORD` | Login password | Empty (no auth) |
+| `COMIGO_LOGIN_PROTECTION` | Enable login protection | `false` |
+| `COMIGO_USERNAME` | Login username | Empty          |
+| `COMIGO_PASSWORD` | Login password | Empty          |
 | `COMIGO_ENABLE_UPLOAD` | Enable upload | `true`          |
 | `COMIGO_LANGUAGE` | UI language | `auto`          |
 | `COMIGO_DEBUG` | Debug mode | `false`         |
@@ -413,6 +414,7 @@ docker run -d \
   --name comigo \
   -p 1234:1234 \
   -v /home/user/manga:/data \
+  -e COMIGO_LOGIN_PROTECTION=true \
   -e COMIGO_USERNAME=admin \
   -e COMIGO_PASSWORD=your_secure_password \
   yumenaka/comigo:latest

@@ -81,7 +81,13 @@ func AutoSetCacheDir() {
 
 // GetJwtSigningKey JWT令牌签名key，目前是用户名+密码(如果两者都设置了的话)
 func GetJwtSigningKey() string {
-	if cfg.Username == "" || cfg.Password == "" {
+	if cfg.HasPasswordLoginConfigured() {
+		return cfg.Username + cfg.Password
+	}
+	if cfg.HasOAuthLoginConfigured() {
+		return cfg.OAuthClientID + cfg.OAuthClientSecret
+	}
+	{
 		logger.Infof(locale.GetString("log_username_or_password_empty"))
 		tempStr := cfg.Username + cfg.Password + GetVersion()
 		for _, store := range cfg.StoreUrls {
@@ -90,7 +96,6 @@ func GetJwtSigningKey() string {
 		// 未配置账号密码时，回退到可复现但不为空的签名 key。
 		return base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(tempStr))))
 	}
-	return cfg.Username + cfg.Password
 }
 
 func SetPort(port int) {

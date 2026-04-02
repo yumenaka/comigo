@@ -28,8 +28,18 @@ type StartConfig struct {
 	EnablePlugin              bool     `json:"enablePlugin"`
 	Debug                     bool     `json:"debug"`
 	Language                  string   `json:"language"`
+	LoginProtection           bool     `json:"loginProtection"`
 	Username                  string   `json:"username"`
 	Password                  string   `json:"password"`
+	EnableOAuthLogin          bool     `json:"enableOAuthLogin"`
+	OAuthProviderName         string   `json:"oauthProviderName"`
+	OAuthClientID             string   `json:"oauthClientID"`
+	OAuthClientSecret         string   `json:"oauthClientSecret"`
+	OAuthAuthURL              string   `json:"oauthAuthURL"`
+	OAuthTokenURL             string   `json:"oauthTokenURL"`
+	OAuthUserInfoURL          string   `json:"oauthUserInfoURL"`
+	OAuthRedirectURL          string   `json:"oauthRedirectURL"`
+	OAuthScopes               []string `json:"oauthScopes"`
 	Host                      string   `json:"host"`
 	CacheDir                  string   `json:"cacheDir"`
 	ConfigDir                 string   `json:"configDir"`
@@ -185,8 +195,18 @@ func configureRuntime(startCfg StartConfig) error {
 	cfg.EnablePlugin = startCfg.EnablePlugin
 	cfg.Debug = startCfg.Debug
 	cfg.Language = fallbackString(startCfg.Language, cfg.Language)
+	cfg.LoginProtection = startCfg.LoginProtection
 	cfg.Username = strings.TrimSpace(startCfg.Username)
 	cfg.Password = strings.TrimSpace(startCfg.Password)
+	cfg.EnableOAuthLogin = startCfg.EnableOAuthLogin
+	cfg.OAuthProviderName = strings.TrimSpace(startCfg.OAuthProviderName)
+	cfg.OAuthClientID = strings.TrimSpace(startCfg.OAuthClientID)
+	cfg.OAuthClientSecret = strings.TrimSpace(startCfg.OAuthClientSecret)
+	cfg.OAuthAuthURL = strings.TrimSpace(startCfg.OAuthAuthURL)
+	cfg.OAuthTokenURL = strings.TrimSpace(startCfg.OAuthTokenURL)
+	cfg.OAuthUserInfoURL = strings.TrimSpace(startCfg.OAuthUserInfoURL)
+	cfg.OAuthRedirectURL = strings.TrimSpace(startCfg.OAuthRedirectURL)
+	cfg.OAuthScopes = append([]string{}, startCfg.OAuthScopes...)
 	cfg.Host = strings.TrimSpace(startCfg.Host)
 	cfg.AutoRescanIntervalMinutes = startCfg.AutoRescanIntervalMinutes
 

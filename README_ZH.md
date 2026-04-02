@@ -118,7 +118,8 @@ comi [flags] file_or_dir
 | `--open-browser` | `-o` | false | 启动后自动打开浏览器           |
 | `--enable-upload` | - | true | 启用文件上传功能             |
 | `--read-only` | - | false | 只读模式，禁止网页端修改配置       |
-| `--username` | - | - | 登录用户名（设置后启用登录保护）     |
+| `--login-protection` | - | false | 显式启用登录保护           |
+| `--username` | - | - | 登录用户名                |
 | `--password` | - | - | 登录密码                 |
 | `--lang` | - | auto | CLI语言（auto/zh/en/ja） |
 | `--debug` | - | false | 启用调试模式               |
@@ -158,8 +159,8 @@ comi .
 # 指定端口和书库路径
 comi -p 8080 /path/to/manga
 
-# 仅本地访问，启用登录保护
-comi --local --username admin --password 123456 /path/to/manga
+# 仅本地访问，启用账号密码登录保护
+comi --local --login-protection --username admin --password 123456 /path/to/manga
 
 # 使用配置文件
 comi -c /path/to/comigo.toml
@@ -203,8 +204,10 @@ MinImageNum = 1                # 最少图片数量
 AutoRescanIntervalMinutes = 0  # 自动扫描间隔（0为禁用）
 
 # 登录保护
-Username = ""                  # 用户名（留空禁用登录）
+LoginProtection = false        # 显式启用登录保护
+Username = ""                  # 本地账号密码登录的用户名
 Password = ""                  # 密码
+EnableOAuthLogin = false       # 启用 OAuth 登录
 Timeout = 43200                # Cookie过期时间（分钟）
 
 # 功能开关

@@ -76,7 +76,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<!-- 阅读历史 -->
 			@ReadingHistoryPanel()
 			<!-- 管理账号密码 -->
-			@UserInfoConfig(config.GetCfg().Username, config.GetCfg().Password)
+			@UserInfoConfig()
 			<!-- Tailscale 远程连接 -->
 			@TailscaleConfig(tsStatus)
 			<!-- 网络设置 -->
