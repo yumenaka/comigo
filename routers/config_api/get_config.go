@@ -27,14 +27,15 @@ func GetConfigToml(c echo.Context) error {
 	tempConfig.Username = "You_can_change_this_username"
 	tempConfig.Password = "Some_Secret-.Password密码"
 	tempConfig.EnableOAuthLogin = false
+	tempConfig.OAuthProviderType = config.OAuthProviderTypeGitHub
 	tempConfig.OAuthProviderName = "GitHub"
 	tempConfig.OAuthClientID = "your-client-id"
 	tempConfig.OAuthClientSecret = "your-client-secret"
-	tempConfig.OAuthAuthURL = "https://example.com/oauth/authorize"
-	tempConfig.OAuthTokenURL = "https://example.com/oauth/token"
-	tempConfig.OAuthUserInfoURL = "https://example.com/oauth/userinfo"
+	tempConfig.OAuthAuthURL = ""
+	tempConfig.OAuthTokenURL = ""
+	tempConfig.OAuthUserInfoURL = ""
 	tempConfig.OAuthRedirectURL = "https://your-host.example.com/api/oauth/callback"
-	tempConfig.OAuthScopes = []string{"openid", "profile", "email"}
+	tempConfig.OAuthScopes = []string{}
 
 	bytes, err := toml.Marshal(tempConfig)
 	if err != nil {

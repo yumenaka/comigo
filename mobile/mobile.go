@@ -32,6 +32,7 @@ type StartConfig struct {
 	Username                  string   `json:"username"`
 	Password                  string   `json:"password"`
 	EnableOAuthLogin          bool     `json:"enableOAuthLogin"`
+	OAuthProviderType         string   `json:"oauthProviderType"`
 	OAuthProviderName         string   `json:"oauthProviderName"`
 	OAuthClientID             string   `json:"oauthClientID"`
 	OAuthClientSecret         string   `json:"oauthClientSecret"`
@@ -199,6 +200,7 @@ func configureRuntime(startCfg StartConfig) error {
 	cfg.Username = strings.TrimSpace(startCfg.Username)
 	cfg.Password = strings.TrimSpace(startCfg.Password)
 	cfg.EnableOAuthLogin = startCfg.EnableOAuthLogin
+	cfg.OAuthProviderType = config.NormalizeOAuthProviderType(startCfg.OAuthProviderType)
 	cfg.OAuthProviderName = strings.TrimSpace(startCfg.OAuthProviderName)
 	cfg.OAuthClientID = strings.TrimSpace(startCfg.OAuthClientID)
 	cfg.OAuthClientSecret = strings.TrimSpace(startCfg.OAuthClientSecret)

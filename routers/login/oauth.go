@@ -21,23 +21,95 @@ const (
 	OAuthStateCookieName = "oauth_state"
 )
 
+type oauthProviderPreset struct {
+	DisplayName   string
+	AuthURL       string
+	TokenURL      string
+	UserInfoURL   string
+	DefaultScopes []string
+}
+
+// resolveOAuthProviderPreset 根据配置返回最终要使用的 provider 预设。
+func resolveOAuthProviderPreset(cfg *config.Config) oauthProviderPreset {
+	switch cfg.OAuthProviderTypeNormalized() {
+	case config.OAuthProviderTypeGitHub:
+		return oauthProviderPreset{
+			DisplayName:   "GitHub",
+			AuthURL:       "https://github.com/login/oauth/authorize",
+			TokenURL:      "https://github.com/login/oauth/access_token",
+			UserInfoURL:   "https://api.github.com/user",
+			DefaultScopes: []string{},
+		}
+	case config.OAuthProviderTypeGoogle:
+		return oauthProviderPreset{
+			DisplayName:   "Google",
+			AuthURL:       "https://accounts.google.com/o/oauth2/v2/auth",
+			TokenURL:      "https://oauth2.googleapis.com/token",
+			UserInfoURL:   "https://openidconnect.googleapis.com/v1/userinfo",
+			DefaultScopes: []string{"openid", "profile", "email"},
+		}
+	case config.OAuthProviderTypeFacebook:
+		return oauthProviderPreset{
+			DisplayName:   "Facebook",
+			AuthURL:       "https://www.facebook.com/v25.0/dialog/oauth",
+			TokenURL:      "https://graph.facebook.com/v25.0/oauth/access_token",
+			UserInfoURL:   "https://graph.facebook.com/v25.0/me?fields=id,name,email",
+			DefaultScopes: []string{"public_profile", "email"},
+		}
+	default:
+		displayName := cfg.OAuthProviderDisplayName()
+		if displayName == "" {
+			displayName = "OAuth"
+		}
+		return oauthProviderPreset{
+			DisplayName:   displayName,
+			AuthURL:       strings.TrimSpace(cfg.OAuthAuthURL),
+			TokenURL:      strings.TrimSpace(cfg.OAuthTokenURL),
+			UserInfoURL:   strings.TrimSpace(cfg.OAuthUserInfoURL),
+			DefaultScopes: []string{"openid", "profile", "email"},
+		}
+	}
+}
+
+func oauthScopes(cfg *config.Config, preset oauthProviderPreset) []string {
+	if len(cfg.OAuthScopes) > 0 {
+		return append([]string{}, cfg.OAuthScopes...)
+	}
+	return append([]string{}, preset.DefaultScopes...)
+}
+
 // buildOAuthConfig 根据当前配置构造 OAuth2 配置。
 func buildOAuthConfig(c echo.Context) *oauth2.Config {
 	cfg := config.GetCfg()
-	scopes := append([]string{}, cfg.OAuthScopes...)
-	if len(scopes) == 0 {
-		scopes = []string{"openid", "profile", "email"}
-	}
+	preset := resolveOAuthProviderPreset(cfg)
 	return &oauth2.Config{
 		ClientID:     strings.TrimSpace(cfg.OAuthClientID),
 		ClientSecret: strings.TrimSpace(cfg.OAuthClientSecret),
 		RedirectURL:  oauthRedirectURL(c),
-		Scopes:       scopes,
+		Scopes:       oauthScopes(cfg, preset),
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  strings.TrimSpace(cfg.OAuthAuthURL),
-			TokenURL: strings.TrimSpace(cfg.OAuthTokenURL),
+			AuthURL:  preset.AuthURL,
+			TokenURL: preset.TokenURL,
 		},
 	}
+}
+
+func buildOAuthUserInfoRequest(c echo.Context) (*http.Request, error) {
+	cfg := config.GetCfg()
+	preset := resolveOAuthProviderPreset(cfg)
+	req, err := http.NewRequestWithContext(c.Request().Context(), http.MethodGet, preset.UserInfoURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	switch cfg.OAuthProviderTypeNormalized() {
+	case config.OAuthProviderTypeGitHub:
+		req.Header.Set("Accept", "application/vnd.github+json")
+		req.Header.Set("User-Agent", "ComiGo OAuth")
+	case config.OAuthProviderTypeFacebook:
+		req.Header.Set("Accept", "application/json")
+	}
+	return req, nil
 }
 
 // oauthRedirectURL 解析 OAuth 回调地址。
@@ -135,7 +207,7 @@ func OAuthCallback(c echo.Context) error {
 	}
 
 	client := buildOAuthConfig(c).Client(c.Request().Context(), token)
-	req, err := http.NewRequestWithContext(c.Request().Context(), http.MethodGet, strings.TrimSpace(config.GetCfg().OAuthUserInfoURL), nil)
+	req, err := buildOAuthUserInfoRequest(c)
 	if err != nil {
 		return loginRedirectWithError(c, "oauth_login_failed")
 	}

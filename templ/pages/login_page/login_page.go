@@ -3,7 +3,6 @@ package login_page
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
@@ -12,7 +11,7 @@ import (
 )
 
 func getOAuthLoginButtonText() string {
-	providerName := strings.TrimSpace(config.GetCfg().OAuthProviderName)
+	providerName := config.GetCfg().OAuthProviderDisplayName()
 	if providerName == "" {
 		return "i18next.t('login_with_oauth')"
 	}
