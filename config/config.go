@@ -16,6 +16,13 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
+const (
+	OAuthProviderTypeOther    = "other"
+	OAuthProviderTypeGitHub   = "github"
+	OAuthProviderTypeGoogle   = "google"
+	OAuthProviderTypeFacebook = "facebook"
+)
+
 // isRemoteStoreURL 判断是否为远程存储 URL（WebDAV、SMB、SFTP等）
 // 这是一个简单的检查，避免循环导入 store 包
 func isRemoteStoreURL(storeURL string) bool {
@@ -91,6 +98,7 @@ type Config struct {
 	LoginProtection           bool           `json:"LoginProtection" comment:"显式启用登录保护。默认 false，仅在至少配置一种登录方式时生效。"`
 	Password                  string         `json:"Password" comment:"登录界面需要的密码。"`
 	EnableOAuthLogin          bool           `json:"EnableOAuthLogin" comment:"启用 OAuth 登录。"`
+	OAuthProviderType         string         `json:"OAuthProviderType" comment:"OAuth 提供方类型。支持 github、google、facebook、other。"`
 	OAuthProviderName         string         `json:"OAuthProviderName" comment:"OAuth 提供方名称，用于登录按钮展示。"`
 	OAuthClientID             string         `json:"OAuthClientID" comment:"OAuth Client ID。"`
 	OAuthClientSecret         string         `json:"OAuthClientSecret" comment:"OAuth Client Secret。"`
@@ -357,14 +365,59 @@ func (c *Config) HasPasswordLoginConfigured() bool {
 	return strings.TrimSpace(c.Username) != "" && c.Password != ""
 }
 
+// NormalizeOAuthProviderType 规范化 OAuth 提供商类型。
+func NormalizeOAuthProviderType(providerType string) string {
+	switch strings.ToLower(strings.TrimSpace(providerType)) {
+	case OAuthProviderTypeGitHub:
+		return OAuthProviderTypeGitHub
+	case OAuthProviderTypeGoogle:
+		return OAuthProviderTypeGoogle
+	case OAuthProviderTypeFacebook:
+		return OAuthProviderTypeFacebook
+	default:
+		return OAuthProviderTypeOther
+	}
+}
+
+// OAuthProviderTypeNormalized 返回兼容旧配置后的提供商类型。
+func (c *Config) OAuthProviderTypeNormalized() string {
+	return NormalizeOAuthProviderType(c.OAuthProviderType)
+}
+
+// OAuthUsesPreset 判断当前是否使用内置提供商预设。
+func (c *Config) OAuthUsesPreset() bool {
+	return c.OAuthProviderTypeNormalized() != OAuthProviderTypeOther
+}
+
+// OAuthProviderDisplayName 返回用于展示的 OAuth 提供商名称。
+func (c *Config) OAuthProviderDisplayName() string {
+	switch c.OAuthProviderTypeNormalized() {
+	case OAuthProviderTypeGitHub:
+		return "GitHub"
+	case OAuthProviderTypeGoogle:
+		return "Google"
+	case OAuthProviderTypeFacebook:
+		return "Facebook"
+	default:
+		if providerName := strings.TrimSpace(c.OAuthProviderName); providerName != "" {
+			return providerName
+		}
+		return ""
+	}
+}
+
 // HasOAuthLoginConfigured 是否已配置可用的 OAuth 登录。
 func (c *Config) HasOAuthLoginConfigured() bool {
 	if !c.EnableOAuthLogin {
 		return false
 	}
-	return strings.TrimSpace(c.OAuthClientID) != "" &&
-		strings.TrimSpace(c.OAuthClientSecret) != "" &&
-		strings.TrimSpace(c.OAuthAuthURL) != "" &&
+	if strings.TrimSpace(c.OAuthClientID) == "" || strings.TrimSpace(c.OAuthClientSecret) == "" {
+		return false
+	}
+	if c.OAuthUsesPreset() {
+		return true
+	}
+	return strings.TrimSpace(c.OAuthAuthURL) != "" &&
 		strings.TrimSpace(c.OAuthTokenURL) != "" &&
 		strings.TrimSpace(c.OAuthUserInfoURL) != ""
 }

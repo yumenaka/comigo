@@ -19,11 +19,6 @@ func getTranslations(value string) string {
 	return "i18next.t(\"" + value + "\")"
 }
 
-// getTranslationsGO 返回 Go 语言的翻译字符串  not working
-func getTranslationsGO(value string, lang string) string {
-	return locale.GetStringByLocal(value, lang)
-}
-
 // GetStoreBookCounts 获取每个书库的书籍数量
 // 返回 map[storeUrl]bookCount
 func GetStoreBookCounts() map[string]int {

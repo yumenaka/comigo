@@ -299,6 +299,7 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 		Password            string   `json:"password"`
 		ReEnterPassword     string   `json:"reEnterPassword"`
 		EnableOAuthLogin    bool     `json:"enableOAuthLogin"`
+		OAuthProviderType   string   `json:"oauthProviderType"`
 		OAuthProviderName   string   `json:"oauthProviderName"`
 		OAuthClientID       string   `json:"oauthClientID"`
 		OAuthClientSecret   string   `json:"oauthClientSecret"`
@@ -314,6 +315,7 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 
 	request.Username = strings.TrimSpace(request.Username)
 	request.CurrentPassword = strings.TrimSpace(request.CurrentPassword)
+	request.OAuthProviderType = config.NormalizeOAuthProviderType(request.OAuthProviderType)
 	request.OAuthProviderName = strings.TrimSpace(request.OAuthProviderName)
 	request.OAuthClientID = strings.TrimSpace(request.OAuthClientID)
 	request.OAuthClientSecret = strings.TrimSpace(request.OAuthClientSecret)
@@ -365,11 +367,11 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	}
 
 	if request.EnableOAuthLogin {
-		if request.OAuthClientID == "" ||
-			request.OAuthClientSecret == "" ||
-			request.OAuthAuthURL == "" ||
-			request.OAuthTokenURL == "" ||
-			request.OAuthUserInfoURL == "" {
+		if request.OAuthClientID == "" || request.OAuthClientSecret == "" {
+			return errors.New("OAuth configuration is incomplete")
+		}
+		if request.OAuthProviderType == config.OAuthProviderTypeOther &&
+			(request.OAuthAuthURL == "" || request.OAuthTokenURL == "" || request.OAuthUserInfoURL == "") {
 			return errors.New("OAuth configuration is incomplete")
 		}
 	}
@@ -378,12 +380,11 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	hasOAuthLogin := request.EnableOAuthLogin &&
 		request.OAuthClientID != "" &&
 		request.OAuthClientSecret != "" &&
-		request.OAuthAuthURL != "" &&
-		request.OAuthTokenURL != "" &&
-		request.OAuthUserInfoURL != ""
+		(request.OAuthProviderType != config.OAuthProviderTypeOther ||
+			(request.OAuthAuthURL != "" && request.OAuthTokenURL != "" && request.OAuthUserInfoURL != ""))
 
 	if request.LoginProtection && !hasPasswordLogin && !hasOAuthLogin {
-		return errors.New("At least one login method must be configured when login protection is enabled")
+		return errors.New(locale.GetString("PromptConfigureLoginMethod"))
 	}
 
 	// 更新前先保存旧配置，后续用于比较并触发副作用。
@@ -392,6 +393,7 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	cfg.Username = effectiveUsername
 	cfg.Password = effectivePassword
 	cfg.EnableOAuthLogin = request.EnableOAuthLogin
+	cfg.OAuthProviderType = request.OAuthProviderType
 	cfg.OAuthProviderName = request.OAuthProviderName
 	cfg.OAuthClientID = request.OAuthClientID
 	cfg.OAuthClientSecret = request.OAuthClientSecret
