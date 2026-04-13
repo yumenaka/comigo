@@ -114,9 +114,6 @@
     --color-orange-800: #9f2d00;
     --color-orange-900: #7e2a0c;
     --color-orange-950: #441306;
-    --color-amber-50: #fffbeb;
-    --color-amber-300: #ffd236;
-    --color-amber-900: #7b3306;
     --color-yellow-50: #fefce8;
     --color-yellow-100: #fef9c2;
     --color-yellow-200: #fff085;
@@ -393,9 +390,6 @@
       --color-orange-800: lab(37.1566% 46.6433 50.5562);
       --color-orange-900: lab(30.2951% 36.0434 37.671);
       --color-orange-950: lab(14.1747% 23.4515 19.4461);
-      --color-amber-50: lab(98.6252% -.635922 8.42309);
-      --color-amber-300: lab(86.4156% 6.13147 78.3961);
-      --color-amber-900: lab(31.2288% 30.2627 40.0378);
       --color-yellow-50: lab(98.6846% -1.79055 9.7766);
       --color-yellow-100: lab(97.3564% -4.51407 27.344);
       --color-yellow-200: lab(94.3433% -5.00429 52.9663);
@@ -4481,10 +4475,6 @@
     stroke: var(--color-default) !important;
   }
 
-  .border-amber-300 {
-    border-color: var(--color-amber-300);
-  }
-
   .border-black {
     border-color: var(--color-black);
   }
@@ -4607,10 +4597,6 @@
 
   .bg-\[var\(--my_variable\)\] {
     background-color: var(--my_variable);
-  }
-
-  .bg-amber-50 {
-    background-color: var(--color-amber-50);
   }
 
   .bg-black {
@@ -5927,10 +5913,6 @@
 
   .datatable-wrapper .datatable-table thead th.datatable-ascending .datatable-sorter, .datatable-wrapper .datatable-table thead th.datatable-descending .datatable-sorter {
     color: var(--color-heading);
-  }
-
-  .text-amber-900 {
-    color: var(--color-amber-900);
   }
 
   .text-black {

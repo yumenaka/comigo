@@ -292,22 +292,21 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 func updateLoginSettingsFromJSON(c echo.Context) error {
 	// 解析 JSON 请求体
 	var request struct {
-		LoginProtection     bool     `json:"loginProtection"`
-		EnablePasswordLogin bool     `json:"enablePasswordLogin"`
-		Username            string   `json:"username"`
-		CurrentPassword     string   `json:"currentPassword"`
-		Password            string   `json:"password"`
-		ReEnterPassword     string   `json:"reEnterPassword"`
-		EnableOAuthLogin    bool     `json:"enableOAuthLogin"`
-		OAuthProviderType   string   `json:"oauthProviderType"`
-		OAuthProviderName   string   `json:"oauthProviderName"`
-		OAuthClientID       string   `json:"oauthClientID"`
-		OAuthClientSecret   string   `json:"oauthClientSecret"`
-		OAuthAuthURL        string   `json:"oauthAuthURL"`
-		OAuthTokenURL       string   `json:"oauthTokenURL"`
-		OAuthUserInfoURL    string   `json:"oauthUserInfoURL"`
-		OAuthRedirectURL    string   `json:"oauthRedirectURL"`
-		OAuthScopes         []string `json:"oauthScopes"`
+		LoginProtection   bool     `json:"loginProtection"`
+		Username          string   `json:"username"`
+		CurrentPassword   string   `json:"currentPassword"`
+		Password          string   `json:"password"`
+		ReEnterPassword   string   `json:"reEnterPassword"`
+		EnableOAuthLogin  bool     `json:"enableOAuthLogin"`
+		OAuthProviderType string   `json:"oauthProviderType"`
+		OAuthProviderName string   `json:"oauthProviderName"`
+		OAuthClientID     string   `json:"oauthClientID"`
+		OAuthClientSecret string   `json:"oauthClientSecret"`
+		OAuthAuthURL      string   `json:"oauthAuthURL"`
+		OAuthTokenURL     string   `json:"oauthTokenURL"`
+		OAuthUserInfoURL  string   `json:"oauthUserInfoURL"`
+		OAuthRedirectURL  string   `json:"oauthRedirectURL"`
+		OAuthScopes       []string `json:"oauthScopes"`
 	}
 	if err := c.Bind(&request); err != nil {
 		return fmt.Errorf("invalid JSON request: %v", err)
@@ -335,8 +334,7 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 
 	cfg := config.GetCfg()
 	existingPasswordLogin := cfg.HasPasswordLoginConfigured()
-	passwordLoginChanged := request.EnablePasswordLogin != existingPasswordLogin ||
-		request.Username != cfg.Username ||
+	passwordLoginChanged := request.Username != cfg.Username ||
 		request.Password != "" ||
 		request.ReEnterPassword != ""
 
@@ -345,9 +343,9 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 		return errors.New("Current Password is incorrect")
 	}
 
-	effectiveUsername := ""
-	effectivePassword := ""
-	if request.EnablePasswordLogin {
+	effectiveUsername := cfg.Username
+	effectivePassword := cfg.Password
+	if request.Username != "" || request.Password != "" || request.ReEnterPassword != "" || request.LoginProtection {
 		if request.Username == "" {
 			return errors.New("Username cannot be empty")
 		}
@@ -377,14 +375,8 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	}
 
 	hasPasswordLogin := effectiveUsername != "" && effectivePassword != ""
-	hasOAuthLogin := request.EnableOAuthLogin &&
-		request.OAuthClientID != "" &&
-		request.OAuthClientSecret != "" &&
-		(request.OAuthProviderType != config.OAuthProviderTypeOther ||
-			(request.OAuthAuthURL != "" && request.OAuthTokenURL != "" && request.OAuthUserInfoURL != ""))
-
-	if request.LoginProtection && !hasPasswordLogin && !hasOAuthLogin {
-		return errors.New(locale.GetString("PromptConfigureLoginMethod"))
+	if request.LoginProtection && !hasPasswordLogin {
+		return errors.New(locale.GetString("PromptSetPassword"))
 	}
 
 	// 更新前先保存旧配置，后续用于比较并触发副作用。

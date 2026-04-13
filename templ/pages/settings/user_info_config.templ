@@ -64,27 +64,11 @@ templ UserInfoConfig() {
 				</div>
 				<div x-show="loginProtection" x-transition class="flex flex-col gap-0">
 					<div class="flex flex-col w-full p-3 m-1 border rounded shadow-sm bg-base-100 text-base-content border-slate-300 gap-3">
-						<div class="flex items-center justify-between gap-2">
-							<div class="flex-1">
-								<div x-text={ getTranslations("EnablePasswordLogin") } class="text-left"></div>
-								<div x-text={ getTranslations("EnablePasswordLoginDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
-							</div>
-							<label for="EnablePasswordLogin" class="relative h-8 cursor-pointer w-14">
-								<input
-									type="checkbox"
-									id="EnablePasswordLogin"
-									name="EnablePasswordLogin"
-									value="true"
-									checked?={ config.GetCfg().HasPasswordLoginConfigured() }
-									:checked="enablePasswordLogin"
-									@change="handlePasswordLoginChange($event)"
-									class="sr-only peer"
-								/>
-								<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
-								<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
-							</label>
+						<div>
+							<div x-text={ getTranslations("PasswordLoginAlwaysEnabled") } class="text-left"></div>
+							<div x-text={ getTranslations("PasswordLoginAlwaysEnabledDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
 						</div>
-						<div x-show="enablePasswordLogin" x-transition class="grid grid-cols-1 gap-3">
+						<div class="grid grid-cols-1 gap-3">
 							<div>
 								<label x-text={ getTranslations("Username") } for="Username" class="w-64"></label>
 								<input
@@ -148,7 +132,6 @@ templ UserInfoConfig() {
 										</svg>
 									</button>
 								</div>
-								<div x-text={ getTranslations("PasswordOptionalKeepCurrent") } class="w-full py-1 text-left text-xs text-base-content"></div>
 							</div>
 							<div class="relative">
 								<label x-text={ getTranslations("ReEnterPassword") } for="ReEnterPassword" class="w-64"></label>
@@ -179,153 +162,155 @@ templ UserInfoConfig() {
 							</div>
 						</div>
 					</div>
-					<div class="flex flex-col w-full p-3 m-1 border rounded shadow-sm bg-base-100 text-base-content border-slate-300 gap-3">
-						<div class="flex items-center justify-between gap-2">
-							<div class="flex-1">
-								<div x-text={ getTranslations("EnableOAuthLogin") } class="text-left"></div>
-								<div x-text={ getTranslations("EnableOAuthLoginDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
+					if config.GetCfg().Debug {
+						<div x-show="debug_mode" x-transition class="flex flex-col w-full p-3 m-1 border rounded shadow-sm bg-base-100 text-base-content border-slate-300 gap-3">
+							<div class="flex items-center justify-between gap-2">
+								<div class="flex-1">
+									<div x-text={ getTranslations("EnableOAuthLogin") } class="text-left"></div>
+									<div x-text={ getTranslations("EnableOAuthLoginDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
+								</div>
+								<label for="EnableOAuthLogin" class="relative h-8 cursor-pointer w-14">
+									<input
+										type="checkbox"
+										id="EnableOAuthLogin"
+										name="EnableOAuthLogin"
+										value="true"
+										checked?={ config.GetCfg().EnableOAuthLogin }
+										x-model="enableOAuthLogin"
+										@change="handleOAuthLoginChange($event)"
+										class="sr-only peer"
+									/>
+									<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
+									<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
+								</label>
 							</div>
-							<label for="EnableOAuthLogin" class="relative h-8 cursor-pointer w-14">
-								<input
-									type="checkbox"
-									id="EnableOAuthLogin"
-									name="EnableOAuthLogin"
-									value="true"
-									checked?={ config.GetCfg().EnableOAuthLogin }
-									:checked="enableOAuthLogin"
-									@change="handleOAuthLoginChange($event)"
-									class="sr-only peer"
-								/>
-								<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
-								<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
-							</label>
+							<div x-show="enableOAuthLogin" x-transition class="grid grid-cols-1 gap-3">
+								<div>
+									<label x-text={ getTranslations("OAuthProviderType") } for="OAuthProviderType" class="w-64"></label>
+									<select
+										id="OAuthProviderType"
+										name="OAuthProviderType"
+										x-model="oauthProviderType"
+										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black"
+									>
+										<option value={ config.OAuthProviderTypeGitHub } selected?={ config.GetCfg().OAuthProviderTypeNormalized() == config.OAuthProviderTypeGitHub } x-text={ getTranslations("OAuthProviderTypeGitHub") }></option>
+										<option value={ config.OAuthProviderTypeGoogle } selected?={ config.GetCfg().OAuthProviderTypeNormalized() == config.OAuthProviderTypeGoogle } x-text={ getTranslations("OAuthProviderTypeGoogle") }></option>
+										<option value={ config.OAuthProviderTypeFacebook } selected?={ config.GetCfg().OAuthProviderTypeNormalized() == config.OAuthProviderTypeFacebook } x-text={ getTranslations("OAuthProviderTypeFacebook") }></option>
+										<option value={ config.OAuthProviderTypeOther } selected?={ config.GetCfg().OAuthProviderTypeNormalized() == config.OAuthProviderTypeOther } x-text={ getTranslations("OAuthProviderTypeOther") }></option>
+									</select>
+									<div x-text={ getTranslations("OAuthProviderTypeDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
+								</div>
+								<div class="rounded border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900">
+									<div
+										x-show="!isCustomOAuthProvider()"
+										x-text="i18next.t('OAuthBuiltInProviderDescription', { provider: i18next.t(providerTranslationKey()) })"
+									></div>
+									<div
+										x-show="isCustomOAuthProvider()"
+										x-text="i18next.t('OAuthCustomProviderDescription')"
+									></div>
+								</div>
+								<div x-show="isCustomOAuthProvider()" x-transition>
+									<label x-text={ getTranslations("OAuthProviderName") } for="OAuthProviderName" class="w-64"></label>
+									<input
+										id="OAuthProviderName"
+										name="OAuthProviderName"
+										type="text"
+										:placeholder={ getTranslations("OAuthProviderName") }
+										value={ config.GetCfg().OAuthProviderName }
+										x-model="oauthProviderName"
+										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+									/>
+								</div>
+								<div>
+									<label x-text={ getTranslations("OAuthClientID") } for="OAuthClientID" class="w-64"></label>
+									<input
+										id="OAuthClientID"
+										name="OAuthClientID"
+										type="text"
+										:placeholder={ getTranslations("OAuthClientID") }
+										value={ config.GetCfg().OAuthClientID }
+										x-model="oauthClientID"
+										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+									/>
+								</div>
+								<div>
+									<label x-text={ getTranslations("OAuthClientSecret") } for="OAuthClientSecret" class="w-64"></label>
+									<input
+										id="OAuthClientSecret"
+										name="OAuthClientSecret"
+										type="password"
+										:placeholder={ getTranslations("OAuthClientSecret") }
+										value={ config.GetCfg().OAuthClientSecret }
+										x-model="oauthClientSecret"
+										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+									/>
+								</div>
+								<div x-show="isCustomOAuthProvider()" x-transition>
+									<label x-text={ getTranslations("OAuthAuthURL") } for="OAuthAuthURL" class="w-64"></label>
+									<input
+										id="OAuthAuthURL"
+										name="OAuthAuthURL"
+										type="url"
+										:placeholder={ getTranslations("OAuthAuthURL") }
+										value={ config.GetCfg().OAuthAuthURL }
+										x-model="oauthAuthURL"
+										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+									/>
+								</div>
+								<div x-show="isCustomOAuthProvider()" x-transition>
+									<label x-text={ getTranslations("OAuthTokenURL") } for="OAuthTokenURL" class="w-64"></label>
+									<input
+										id="OAuthTokenURL"
+										name="OAuthTokenURL"
+										type="url"
+										:placeholder={ getTranslations("OAuthTokenURL") }
+										value={ config.GetCfg().OAuthTokenURL }
+										x-model="oauthTokenURL"
+										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+									/>
+								</div>
+								<div x-show="isCustomOAuthProvider()" x-transition>
+									<label x-text={ getTranslations("OAuthUserInfoURL") } for="OAuthUserInfoURL" class="w-64"></label>
+									<input
+										id="OAuthUserInfoURL"
+										name="OAuthUserInfoURL"
+										type="url"
+										:placeholder={ getTranslations("OAuthUserInfoURL") }
+										value={ config.GetCfg().OAuthUserInfoURL }
+										x-model="oauthUserInfoURL"
+										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+									/>
+								</div>
+								<div>
+									<label x-text={ getTranslations("OAuthRedirectURL") } for="OAuthRedirectURL" class="w-64"></label>
+									<input
+										id="OAuthRedirectURL"
+										name="OAuthRedirectURL"
+										type="url"
+										:placeholder={ getTranslations("OAuthRedirectURL") }
+										value={ config.GetCfg().OAuthRedirectURL }
+										x-model="oauthRedirectURL"
+										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+									/>
+									<div x-text={ getTranslations("OAuthRedirectURLDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
+								</div>
+								<div x-show="isCustomOAuthProvider()" x-transition>
+									<label x-text={ getTranslations("OAuthScopes") } for="OAuthScopes" class="w-64"></label>
+									<input
+										id="OAuthScopes"
+										name="OAuthScopes"
+										type="text"
+										:placeholder={ getTranslations("OAuthScopes") }
+										value={ strings.Join(config.GetCfg().OAuthScopes, " ") }
+										x-model="oauthScopesText"
+										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+									/>
+									<div x-text={ getTranslations("OAuthScopesDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
+								</div>
+							</div>
 						</div>
-						<div x-show="enableOAuthLogin" x-transition class="grid grid-cols-1 gap-3">
-							<div>
-								<label x-text={ getTranslations("OAuthProviderType") } for="OAuthProviderType" class="w-64"></label>
-								<select
-									id="OAuthProviderType"
-									name="OAuthProviderType"
-									x-model="oauthProviderType"
-									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black"
-								>
-									<option value={ config.OAuthProviderTypeGitHub } selected?={ config.GetCfg().OAuthProviderTypeNormalized() == config.OAuthProviderTypeGitHub } x-text={ getTranslations("OAuthProviderTypeGitHub") }></option>
-									<option value={ config.OAuthProviderTypeGoogle } selected?={ config.GetCfg().OAuthProviderTypeNormalized() == config.OAuthProviderTypeGoogle } x-text={ getTranslations("OAuthProviderTypeGoogle") }></option>
-									<option value={ config.OAuthProviderTypeFacebook } selected?={ config.GetCfg().OAuthProviderTypeNormalized() == config.OAuthProviderTypeFacebook } x-text={ getTranslations("OAuthProviderTypeFacebook") }></option>
-									<option value={ config.OAuthProviderTypeOther } selected?={ config.GetCfg().OAuthProviderTypeNormalized() == config.OAuthProviderTypeOther } x-text={ getTranslations("OAuthProviderTypeOther") }></option>
-								</select>
-								<div x-text={ getTranslations("OAuthProviderTypeDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
-							</div>
-							<div class="rounded border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900">
-								<div
-									x-show="!isCustomOAuthProvider()"
-									x-text="i18next.t('OAuthBuiltInProviderDescription', { provider: i18next.t(providerTranslationKey()) })"
-								></div>
-								<div
-									x-show="isCustomOAuthProvider()"
-									x-text="i18next.t('OAuthCustomProviderDescription')"
-								></div>
-							</div>
-							<div x-show="isCustomOAuthProvider()" x-transition>
-								<label x-text={ getTranslations("OAuthProviderName") } for="OAuthProviderName" class="w-64"></label>
-								<input
-									id="OAuthProviderName"
-									name="OAuthProviderName"
-									type="text"
-									:placeholder={ getTranslations("OAuthProviderName") }
-									value={ config.GetCfg().OAuthProviderName }
-									x-model="oauthProviderName"
-									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
-								/>
-							</div>
-							<div>
-								<label x-text={ getTranslations("OAuthClientID") } for="OAuthClientID" class="w-64"></label>
-								<input
-									id="OAuthClientID"
-									name="OAuthClientID"
-									type="text"
-									:placeholder={ getTranslations("OAuthClientID") }
-									value={ config.GetCfg().OAuthClientID }
-									x-model="oauthClientID"
-									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
-								/>
-							</div>
-							<div>
-								<label x-text={ getTranslations("OAuthClientSecret") } for="OAuthClientSecret" class="w-64"></label>
-								<input
-									id="OAuthClientSecret"
-									name="OAuthClientSecret"
-									type="password"
-									:placeholder={ getTranslations("OAuthClientSecret") }
-									value={ config.GetCfg().OAuthClientSecret }
-									x-model="oauthClientSecret"
-									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
-								/>
-							</div>
-							<div x-show="isCustomOAuthProvider()" x-transition>
-								<label x-text={ getTranslations("OAuthAuthURL") } for="OAuthAuthURL" class="w-64"></label>
-								<input
-									id="OAuthAuthURL"
-									name="OAuthAuthURL"
-									type="url"
-									:placeholder={ getTranslations("OAuthAuthURL") }
-									value={ config.GetCfg().OAuthAuthURL }
-									x-model="oauthAuthURL"
-									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
-								/>
-							</div>
-							<div x-show="isCustomOAuthProvider()" x-transition>
-								<label x-text={ getTranslations("OAuthTokenURL") } for="OAuthTokenURL" class="w-64"></label>
-								<input
-									id="OAuthTokenURL"
-									name="OAuthTokenURL"
-									type="url"
-									:placeholder={ getTranslations("OAuthTokenURL") }
-									value={ config.GetCfg().OAuthTokenURL }
-									x-model="oauthTokenURL"
-									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
-								/>
-							</div>
-							<div x-show="isCustomOAuthProvider()" x-transition>
-								<label x-text={ getTranslations("OAuthUserInfoURL") } for="OAuthUserInfoURL" class="w-64"></label>
-								<input
-									id="OAuthUserInfoURL"
-									name="OAuthUserInfoURL"
-									type="url"
-									:placeholder={ getTranslations("OAuthUserInfoURL") }
-									value={ config.GetCfg().OAuthUserInfoURL }
-									x-model="oauthUserInfoURL"
-									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
-								/>
-							</div>
-							<div>
-								<label x-text={ getTranslations("OAuthRedirectURL") } for="OAuthRedirectURL" class="w-64"></label>
-								<input
-									id="OAuthRedirectURL"
-									name="OAuthRedirectURL"
-									type="url"
-									:placeholder={ getTranslations("OAuthRedirectURL") }
-									value={ config.GetCfg().OAuthRedirectURL }
-									x-model="oauthRedirectURL"
-									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
-								/>
-								<div x-text={ getTranslations("OAuthRedirectURLDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
-							</div>
-							<div x-show="isCustomOAuthProvider()" x-transition>
-								<label x-text={ getTranslations("OAuthScopes") } for="OAuthScopes" class="w-64"></label>
-								<input
-									id="OAuthScopes"
-									name="OAuthScopes"
-									type="text"
-									:placeholder={ getTranslations("OAuthScopes") }
-									value={ strings.Join(config.GetCfg().OAuthScopes, " ") }
-									x-model="oauthScopesText"
-									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
-								/>
-								<div x-text={ getTranslations("OAuthScopesDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
-							</div>
-						</div>
-					</div>
+					}
 				</div>
 				<div class="flex justify-center items-center w-full my-2">
 					<button
@@ -333,7 +318,7 @@ templ UserInfoConfig() {
 						class="min-w-28 px-3 h-10 mx-2 my-0 text-center text-black transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
 						:class="{ 'opacity-50 cursor-not-allowed': isFormChanged === false || saving }"
 						:disabled="isFormChanged === false || saving"
-						x-on:click={ "if (checkFormData()) { updateLoginSettings({ loginProtection, enablePasswordLogin, username, currentPassword: current_password, password, reEnterPassword: ReEnterPassword, enableOAuthLogin, oauthProviderType, oauthProviderName, oauthClientID, oauthClientSecret, oauthAuthURL, oauthTokenURL, oauthUserInfoURL, oauthRedirectURL, oauthScopesText }); }" }
+						x-on:click={ "if (checkFormData()) { updateLoginSettings({ loginProtection, username, currentPassword: current_password, password, reEnterPassword: ReEnterPassword, enableOAuthLogin, oauthProviderType, oauthProviderName, oauthClientID, oauthClientSecret, oauthAuthURL, oauthTokenURL, oauthUserInfoURL, oauthRedirectURL, oauthScopesText }); }" }
 						x-text="saving ? i18next.t('saving') : i18next.t('save')"
 					>SAVE</button>
 				</div>
@@ -366,7 +351,6 @@ templ UserInfoConfig() {
 						},
 						body: JSON.stringify({
 							loginProtection: payload.loginProtection,
-							enablePasswordLogin: payload.enablePasswordLogin,
 							username: payload.username,
 							currentPassword: payload.currentPassword,
 							password: payload.password,

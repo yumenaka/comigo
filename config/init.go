@@ -26,7 +26,7 @@ func newDefaultConfig() Config {
 		MinImageNum:           3,
 		EnableOAuthLogin:      false,
 		OpenBrowser:           true,
-		OAuthProviderType:     OAuthProviderTypeOther,
+		OAuthProviderType:     OAuthProviderTypeGitHub,
 		OAuthProviderName:     "",
 		OAuthClientID:         "",
 		OAuthClientSecret:     "",
