@@ -52,6 +52,13 @@ templ BoolConfigJavaScript() {
 						return;
 					}
 					const data = await response.json();
+					if (name === "Debug") {
+						const settingsMainArea =
+							document.getElementById("settingsMainArea");
+						if (settingsMainArea?.__x?.$data) {
+							settingsMainArea.__x.$data.debug_mode = value;
+						}
+					}
 					// 显示成功提示
 					if (data.saveSuccessHint) {
 						showToast(i18next.t("saveSuccessHint"), "info");

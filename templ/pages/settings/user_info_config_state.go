@@ -12,26 +12,24 @@ import (
 func userInfoConfigXData() string {
 	cfg := config.GetCfg()
 	initialState := map[string]any{
-		"loginProtection":     cfg.LoginProtection,
-		"hadPasswordLogin":    cfg.HasPasswordLoginConfigured(),
-		"enablePasswordLogin": cfg.HasPasswordLoginConfigured(),
-		"username":            cfg.Username,
-		"current_password":    "",
-		"password":            "",
-		"ReEnterPassword":     "",
-		"showPassword":        false,
-		"enableOAuthLogin":    cfg.EnableOAuthLogin,
-		"oauthProviderType":   cfg.OAuthProviderTypeNormalized(),
-		"oauthProviderName":   cfg.OAuthProviderName,
-		"oauthClientID":       cfg.OAuthClientID,
-		"oauthClientSecret":   cfg.OAuthClientSecret,
-		"oauthAuthURL":        cfg.OAuthAuthURL,
-		"oauthTokenURL":       cfg.OAuthTokenURL,
-		"oauthUserInfoURL":    cfg.OAuthUserInfoURL,
-		"oauthRedirectURL":    cfg.OAuthRedirectURL,
-		"oauthScopesText":     strings.Join(cfg.OAuthScopes, " "),
-		"isFormChanged":       false,
-		"saving":              false,
+		"loginProtection":   cfg.LoginProtection,
+		"username":          cfg.Username,
+		"current_password":  "",
+		"password":          "",
+		"ReEnterPassword":   "",
+		"showPassword":      false,
+		"enableOAuthLogin":  cfg.EnableOAuthLogin,
+		"oauthProviderType": cfg.OAuthProviderTypeNormalized(),
+		"oauthProviderName": cfg.OAuthProviderName,
+		"oauthClientID":     cfg.OAuthClientID,
+		"oauthClientSecret": cfg.OAuthClientSecret,
+		"oauthAuthURL":      cfg.OAuthAuthURL,
+		"oauthTokenURL":     cfg.OAuthTokenURL,
+		"oauthUserInfoURL":  cfg.OAuthUserInfoURL,
+		"oauthRedirectURL":  cfg.OAuthRedirectURL,
+		"oauthScopesText":   strings.Join(cfg.OAuthScopes, " "),
+		"isFormChanged":     false,
+		"saving":            false,
 	}
 	payload, err := json.Marshal(initialState)
 	if err != nil {
@@ -56,33 +54,13 @@ func userInfoConfigXData() string {
 		},
 		handleLoginProtectionChange(event) {
 			this.loginProtection = event.target.checked;
-			if (this.loginProtection && !this.enablePasswordLogin && !this.enableOAuthLogin) {
-				this.enablePasswordLogin = true;
-				this.enableOAuthLogin = false;
-			}
-		},
-		handlePasswordLoginChange(event) {
-			if (!event.target.checked && this.loginProtection && !this.enableOAuthLogin) {
-				this.enablePasswordLogin = true;
-				event.target.checked = true;
-				showToast(i18next.t('PromptConfigureLoginMethod'), 'error');
-				return;
-			}
-			this.enablePasswordLogin = event.target.checked;
 		},
 		handleOAuthLoginChange(event) {
-			if (!event.target.checked && this.loginProtection && !this.enablePasswordLogin) {
-				this.enableOAuthLogin = true;
-				event.target.checked = true;
-				showToast(i18next.t('PromptConfigureLoginMethod'), 'error');
-				return;
-			}
 			this.enableOAuthLogin = event.target.checked;
 		},
 		init() {
 			[
 				'loginProtection',
-				'enablePasswordLogin',
 				'username',
 				'current_password',
 				'password',
@@ -107,17 +85,13 @@ func userInfoConfigXData() string {
 			if (!this.isFormChanged) {
 				return false;
 			}
-			if (this.enablePasswordLogin) {
+			if (this.loginProtection) {
 				if (this.username.trim() === '') {
 					showToast(i18next.t('PromptSetUsername'), 'error');
 					return false;
 				}
 				if (this.password !== this.ReEnterPassword) {
 					showToast(i18next.t('ErrPasswordMismatch'), 'error');
-					return false;
-				}
-				if (!this.hadPasswordLogin && this.password === '') {
-					showToast(i18next.t('PromptSetPasswordForPasswordLogin'), 'error');
 					return false;
 				}
 			}
@@ -138,10 +112,6 @@ func userInfoConfigXData() string {
 						return false;
 					}
 				}
-			}
-			if (this.loginProtection && !this.enablePasswordLogin && !this.enableOAuthLogin) {
-				showToast(i18next.t('PromptConfigureLoginMethod'), 'error');
-				return false;
 			}
 			return true;
 		},

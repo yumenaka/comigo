@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	OAuthProviderTypeOther    = "other"
 	OAuthProviderTypeGitHub   = "github"
 	OAuthProviderTypeGoogle   = "google"
 	OAuthProviderTypeFacebook = "facebook"
+	OAuthProviderTypeOther    = "other"
 )
 
 // isRemoteStoreURL 判断是否为远程存储 URL（WebDAV、SMB、SFTP等）
@@ -384,8 +384,8 @@ func (c *Config) OAuthProviderTypeNormalized() string {
 	return NormalizeOAuthProviderType(c.OAuthProviderType)
 }
 
-// OAuthUsesPreset 判断当前是否使用内置提供商预设。
-func (c *Config) OAuthUsesPreset() bool {
+// OAuthProviderTypeOther 判断当前是否使用内置提供商预设。
+func (c *Config) OAuthProviderTypeOther() bool {
 	return c.OAuthProviderTypeNormalized() != OAuthProviderTypeOther
 }
 
@@ -414,7 +414,7 @@ func (c *Config) HasOAuthLoginConfigured() bool {
 	if strings.TrimSpace(c.OAuthClientID) == "" || strings.TrimSpace(c.OAuthClientSecret) == "" {
 		return false
 	}
-	if c.OAuthUsesPreset() {
+	if c.OAuthProviderTypeOther() {
 		return true
 	}
 	return strings.TrimSpace(c.OAuthAuthURL) != "" &&
