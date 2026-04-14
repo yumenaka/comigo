@@ -203,11 +203,9 @@ MaxScanDepth = 5               # 扫描深度
 MinImageNum = 1                # 最少图片数量
 AutoRescanIntervalMinutes = 0  # 自动扫描间隔（0为禁用）
 
-# 登录保护
-LoginProtection = false        # 显式启用登录保护
-Username = ""                  # 本地账号密码登录的用户名
+# 登录
+Username = ""                  # 本地账号密码登录的用户名；用户名和密码都非空时自动启用登录
 Password = ""                  # 密码
-EnableOAuthLogin = false       # 启用 OAuth 登录
 Timeout = 43200                # Cookie过期时间（分钟）
 
 # 功能开关

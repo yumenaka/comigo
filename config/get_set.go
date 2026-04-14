@@ -84,9 +84,6 @@ func GetJwtSigningKey() string {
 	if cfg.HasPasswordLoginConfigured() {
 		return cfg.Username + cfg.Password
 	}
-	if cfg.HasOAuthLoginConfigured() {
-		return cfg.OAuthClientID + cfg.OAuthClientSecret
-	}
 	{
 		logger.Infof(locale.GetString("log_username_or_password_empty"))
 		tempStr := cfg.Username + cfg.Password + GetVersion()

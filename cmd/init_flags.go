@@ -38,10 +38,6 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVarP(&cfg.ConfigFile, "config", "c", "", locale.GetString("config"))
 	runtimeViper.BindPFlag("ConfigFile", RootCmd.PersistentFlags().Lookup("config"))
 
-	// 显式启用登录保护
-	RootCmd.PersistentFlags().BoolVar(&cfg.LoginProtection, "login-protection", false, locale.GetString("requires_login"))
-	runtimeViper.BindPFlag("LoginProtection", RootCmd.PersistentFlags().Lookup("login-protection"))
-
 	RootCmd.PersistentFlags().StringVar(&cfg.Username, "username", "", locale.GetString("username"))
 	runtimeViper.BindPFlag("Username", RootCmd.PersistentFlags().Lookup("username"))
 
