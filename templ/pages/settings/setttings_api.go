@@ -292,21 +292,10 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 func updateLoginSettingsFromJSON(c echo.Context) error {
 	// 解析 JSON 请求体
 	var request struct {
-		LoginProtection   bool     `json:"loginProtection"`
-		Username          string   `json:"username"`
-		CurrentPassword   string   `json:"currentPassword"`
-		Password          string   `json:"password"`
-		ReEnterPassword   string   `json:"reEnterPassword"`
-		EnableOAuthLogin  bool     `json:"enableOAuthLogin"`
-		OAuthProviderType string   `json:"oauthProviderType"`
-		OAuthProviderName string   `json:"oauthProviderName"`
-		OAuthClientID     string   `json:"oauthClientID"`
-		OAuthClientSecret string   `json:"oauthClientSecret"`
-		OAuthAuthURL      string   `json:"oauthAuthURL"`
-		OAuthTokenURL     string   `json:"oauthTokenURL"`
-		OAuthUserInfoURL  string   `json:"oauthUserInfoURL"`
-		OAuthRedirectURL  string   `json:"oauthRedirectURL"`
-		OAuthScopes       []string `json:"oauthScopes"`
+		Username        string `json:"username"`
+		CurrentPassword string `json:"currentPassword"`
+		Password        string `json:"password"`
+		ReEnterPassword string `json:"reEnterPassword"`
 	}
 	if err := c.Bind(&request); err != nil {
 		return fmt.Errorf("invalid JSON request: %v", err)
@@ -314,15 +303,6 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 
 	request.Username = strings.TrimSpace(request.Username)
 	request.CurrentPassword = strings.TrimSpace(request.CurrentPassword)
-	request.OAuthProviderType = config.NormalizeOAuthProviderType(request.OAuthProviderType)
-	request.OAuthProviderName = strings.TrimSpace(request.OAuthProviderName)
-	request.OAuthClientID = strings.TrimSpace(request.OAuthClientID)
-	request.OAuthClientSecret = strings.TrimSpace(request.OAuthClientSecret)
-	request.OAuthAuthURL = strings.TrimSpace(request.OAuthAuthURL)
-	request.OAuthTokenURL = strings.TrimSpace(request.OAuthTokenURL)
-	request.OAuthUserInfoURL = strings.TrimSpace(request.OAuthUserInfoURL)
-	request.OAuthRedirectURL = strings.TrimSpace(request.OAuthRedirectURL)
-	request.OAuthScopes = normalizeOAuthScopes(request.OAuthScopes)
 
 	// 除非是调试模式, 密码不明文记录到日志
 	if config.GetCfg().Debug {
@@ -345,55 +325,31 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 
 	effectiveUsername := cfg.Username
 	effectivePassword := cfg.Password
-	if request.Username != "" || request.Password != "" || request.ReEnterPassword != "" || request.LoginProtection {
-		if request.Username == "" {
-			return errors.New("Username cannot be empty")
+	if request.Password != request.ReEnterPassword {
+		return errors.New("Password do not match")
+	}
+	if request.Username == "" {
+		if request.Password != "" || request.ReEnterPassword != "" {
+			return errors.New(locale.GetString("PromptSetUsername"))
 		}
-		if request.Password != request.ReEnterPassword {
-			return errors.New("Password do not match")
-		}
+		effectiveUsername = ""
+		effectivePassword = ""
+	} else {
 		effectiveUsername = request.Username
-
 		switch {
 		case request.Password != "":
 			effectivePassword = request.Password
 		case existingPasswordLogin:
 			effectivePassword = cfg.Password
 		default:
-			return errors.New("Password cannot be empty")
+			return errors.New(locale.GetString("PromptSetPassword"))
 		}
-	}
-
-	if request.EnableOAuthLogin {
-		if request.OAuthClientID == "" || request.OAuthClientSecret == "" {
-			return errors.New("OAuth configuration is incomplete")
-		}
-		if request.OAuthProviderType == config.OAuthProviderTypeOther &&
-			(request.OAuthAuthURL == "" || request.OAuthTokenURL == "" || request.OAuthUserInfoURL == "") {
-			return errors.New("OAuth configuration is incomplete")
-		}
-	}
-
-	hasPasswordLogin := effectiveUsername != "" && effectivePassword != ""
-	if request.LoginProtection && !hasPasswordLogin {
-		return errors.New(locale.GetString("PromptSetPassword"))
 	}
 
 	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-	cfg.LoginProtection = request.LoginProtection
 	cfg.Username = effectiveUsername
 	cfg.Password = effectivePassword
-	cfg.EnableOAuthLogin = request.EnableOAuthLogin
-	cfg.OAuthProviderType = request.OAuthProviderType
-	cfg.OAuthProviderName = request.OAuthProviderName
-	cfg.OAuthClientID = request.OAuthClientID
-	cfg.OAuthClientSecret = request.OAuthClientSecret
-	cfg.OAuthAuthURL = request.OAuthAuthURL
-	cfg.OAuthTokenURL = request.OAuthTokenURL
-	cfg.OAuthUserInfoURL = request.OAuthUserInfoURL
-	cfg.OAuthRedirectURL = request.OAuthRedirectURL
-	cfg.OAuthScopes = request.OAuthScopes
 
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
@@ -404,27 +360,6 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	return nil
-}
-
-// normalizeOAuthScopes 规范化 OAuth scope 列表，去掉空白项与重复项。
-func normalizeOAuthScopes(scopes []string) []string {
-	if len(scopes) == 0 {
-		return []string{}
-	}
-	result := make([]string, 0, len(scopes))
-	seen := make(map[string]struct{}, len(scopes))
-	for _, scope := range scopes {
-		scope = strings.TrimSpace(scope)
-		if scope == "" {
-			continue
-		}
-		if _, ok := seen[scope]; ok {
-			continue
-		}
-		seen[scope] = struct{}{}
-		result = append(result, scope)
-	}
-	return result
 }
 
 // UpdateLoginSettingsHandler 处理登录设置的 JSON API

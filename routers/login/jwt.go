@@ -66,13 +66,9 @@ func issueLoginCookie(c echo.Context, username string) error {
 func Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
-	// 检查是否启用了登录保护
-	if !config.GetCfg().LoginProtection {
-		return echo.ErrTeapot
-	}
 	// 如果未配置密码登录，则不接受表单登录
 	if !config.GetCfg().HasPasswordLoginConfigured() {
-		return echo.NewHTTPError(http.StatusBadRequest, "password login is not configured")
+		return echo.ErrTeapot
 	}
 	// 如果密码错误，则不生成 JWT
 	if username != config.GetCfg().Username || password != config.GetCfg().Password {

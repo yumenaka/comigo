@@ -23,19 +23,8 @@ func GetConfigToml(c echo.Context) error {
 	tempConfig.OpenBrowser = false
 	tempConfig.EnableDatabase = true
 	tempConfig.StoreUrls = []string{"C:\\test\\Comic", "D:\\some_path\\book", "/home/user/download"}
-	tempConfig.LoginProtection = false
 	tempConfig.Username = "You_can_change_this_username"
 	tempConfig.Password = "Some_Secret-.Password密码"
-	tempConfig.EnableOAuthLogin = false
-	tempConfig.OAuthProviderType = config.OAuthProviderTypeGitHub
-	tempConfig.OAuthProviderName = "GitHub"
-	tempConfig.OAuthClientID = "your-client-id"
-	tempConfig.OAuthClientSecret = "your-client-secret"
-	tempConfig.OAuthAuthURL = ""
-	tempConfig.OAuthTokenURL = ""
-	tempConfig.OAuthUserInfoURL = ""
-	tempConfig.OAuthRedirectURL = "https://your-host.example.com/api/oauth/callback"
-	tempConfig.OAuthScopes = []string{}
 
 	bytes, err := toml.Marshal(tempConfig)
 	if err != nil {
