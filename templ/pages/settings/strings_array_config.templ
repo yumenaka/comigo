@@ -132,13 +132,9 @@ templ StringArrayConfigJavaScript() {
 					}
 					// 解析响应数据
 					const data = await response.json();
-					// 显示成功提示
+					// 显示成功提示（可能触发书库重扫，完成后由 SSE 提示刷新）
 					if (data.saveSuccessHint) {
 						showToast(i18next.t("saveSuccessHint"), "info");
-						// 2秒后刷新页面
-						setTimeout(() => {
-							window.location.reload();
-						}, 2000);
 					} else {
 						showToast(i18next.t("saveSuccessHint"), "success");
 					}

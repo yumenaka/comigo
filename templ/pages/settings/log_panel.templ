@@ -137,45 +137,30 @@ templ LogPanel() {
 			if (logFlushTimer) return;
 			logFlushTimer = setTimeout(flushLogs, LOG_FLUSH_INTERVAL_MS);
 		};
-		// 创建 EventSource 连接到后端 SSE API,withCredentials:true 允许携带cookie
-		// https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource
-		const es = new EventSource("/api/sse", { withCredentials: true });
-		es.onopen = (e) =>
-			log(
-				`<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> ` +
-					i18next.t("settings_log_sse_connected"),
-			);
-		es.onerror = (e) =>
-			log(
-				`<span style="color:oklch(57.7% 0.245 27.325)">[error]</span> ` +
-					(es.readyState === EventSource.CLOSED
-						? i18next.t("settings_log_sse_closed")
-						: i18next.t("settings_log_sse_retrying")),
-			);
-		// 全局消息事件
-		es.onmessage = (e) => {
-			showToast(e.data, "info");
-			log(
-				`<span style="color:oklch(62.7% 0.194 149.214)">[message]</span>` +
-					e.data,
-			);
+		// 将日志输出挂到全局，由 assets/plugins/comigo_sse.js 中的共享 EventSource 转发 log 事件
+		const ensureSharedSSE = () => {
+			if (typeof window.__comigoSSEInit === "function") {
+				window.__comigoSSEInit();
+			}
 		};
-		// 监听自定义事件名：tick
-		es.addEventListener("tick", (e) => log("[tick] " + e.data));
-		// 监听后端日志事件：log（Echo 日志中间件通过 SSE 使用 event: log 推送）
-		es.addEventListener("log", (e) => log(e.data));
+		window.__comigoLogAppend = log;
+		ensureSharedSSE();
+		window.addEventListener("comigo:sse-ready", ensureSharedSSE);
 
 		// 发送消息按钮的点击事件
-		document.getElementById("send").onclick = async () => {
-			const message =
-				document.getElementById("msg").value ||
-				t("settings_log_broadcast_default_message", "Hello ~");
-			await fetch("/api/push", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ message }),
-			});
-			console.log("[send] " + message);
-		};
+		const sendButton = document.getElementById("send");
+		if (sendButton) {
+			sendButton.onclick = async () => {
+				const message =
+					document.getElementById("msg").value ||
+					i18next.t("settings_log_broadcast_default_message");
+				await fetch("/api/push", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ message }),
+				});
+				console.log("[send] " + message);
+			};
+		}
 	</script>
 }

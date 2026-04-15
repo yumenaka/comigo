@@ -64,13 +64,9 @@ templ StringConfigJavascript() {
 					if (input) {
 						input.setAttribute("data-original-value", value);
 					}
-					// 显示成功提示
+					// 显示成功提示（需整页刷新时由服务端 SSE 推送确认）
 					if (data.saveSuccessHint) {
 						showToast(i18next.t("saveSuccessHint"), "info");
-						// 2秒后刷新页面
-						setTimeout(() => {
-							window.location.reload();
-						}, 2000);
 					} else {
 						showToast(i18next.t("saveSuccessHint"), "success");
 					}

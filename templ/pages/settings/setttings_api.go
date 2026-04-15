@@ -20,6 +20,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
+	"github.com/yumenaka/comigo/tools/sse_hub"
 )
 
 // decodeBase64URLStrict 将 base64url（RawURLEncoding，无 padding）解码为原始字符串。
@@ -33,6 +34,50 @@ func decodeBase64URLStrict(s string) (string, error) {
 		return "", err
 	}
 	return string(b), nil
+}
+
+func reloadHintForStringConfig(name string) (saveSuccessHint bool, reason string) {
+	switch name {
+	case "Host":
+		return true, sse_hub.UISuggestReasonServerConfig
+	default:
+		return false, ""
+	}
+}
+
+func reloadHintForBoolConfig(name string) (saveSuccessHint bool, reason string) {
+	switch name {
+	case "DisableLAN":
+		return true, sse_hub.UISuggestReasonServerConfig
+	case "Debug":
+		return true, sse_hub.UISuggestReasonDebugToggle
+	case "EnablePlugin":
+		return true, sse_hub.UISuggestReasonPluginsChanged
+	default:
+		return false, ""
+	}
+}
+
+func reloadHintForNumberConfig(name string) (saveSuccessHint bool, reason string) {
+	switch name {
+	case "Port":
+		// 端口变更由前端自行跳转，不再弹刷新确认。
+		return true, ""
+	case "Timeout":
+		return true, sse_hub.UISuggestReasonServerConfig
+	case "AutoRescanIntervalMinutes":
+		// 自动重扫仅调整调度器，不需要整页刷新。
+		return true, ""
+	default:
+		return false, ""
+	}
+}
+
+func renderArrayConfigComponent(configName string, values []string) templ.Component {
+	if configName == "StoreUrls" {
+		return StoreConfig(configName, values, configName+"_Description", GetStoreBookCounts())
+	}
+	return StringArrayConfig(configName, values, configName+"_Description")
 }
 
 // -------------------------
@@ -143,9 +188,9 @@ func UpdateStringConfigHandler(c echo.Context) error {
 	}
 
 	// 判断是否需要显示保存成功提示并刷新页面
-	saveSuccessHint := false
-	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
-		saveSuccessHint = true
+	saveSuccessHint, reloadReason := reloadHintForStringConfig(name)
+	if reloadReason != "" {
+		sse_hub.BroadcastUISuggestReload(reloadReason)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -206,9 +251,9 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 	}
 
 	// 判断是否需要显示保存成功提示并刷新页面
-	saveSuccessHint := false
-	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" || name == "Debug" {
-		saveSuccessHint = true
+	saveSuccessHint, reloadReason := reloadHintForBoolConfig(name)
+	if reloadReason != "" {
+		sse_hub.BroadcastUISuggestReload(reloadReason)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -275,9 +320,9 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 	}
 
 	// 判断是否需要显示保存成功提示并刷新页面
-	saveSuccessHint := false
-	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" || name == "AutoRescanIntervalMinutes" {
-		saveSuccessHint = true
+	saveSuccessHint, reloadReason := reloadHintForNumberConfig(name)
+	if reloadReason != "" {
+		sse_hub.BroadcastUISuggestReload(reloadReason)
 	}
 
 	// 构建响应
@@ -373,6 +418,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonLoginSettings)
 	return c.NoContent(http.StatusOK)
 }
 
@@ -473,8 +519,8 @@ func AddArrayConfigHandler(c echo.Context) error {
 		saveSuccessHint = true
 	}
 
-	// 渲染更新后的 HTML
-	updatedHTML := StringArrayConfig(decodedConfigName, values, decodedConfigName+"_Description")
+	// 渲染更新后的 HTML。StoreUrls 需要回传专用组件，保证空书架/设置页都能即时更新列表。
+	updatedHTML := renderArrayConfigComponent(decodedConfigName, values)
 	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
 	if renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
@@ -547,6 +593,7 @@ func EnablePluginHandler(c echo.Context) error {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonPluginsChanged)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success":         true,
 		"message":         "插件已启用",
@@ -586,6 +633,7 @@ func DisablePluginHandler(c echo.Context) error {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonPluginsChanged)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"message": "插件已禁用",
@@ -802,6 +850,7 @@ func RescanStoreHandler(c echo.Context) error {
 
 	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount)
 
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonSingleStoreRescan)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success":       true,
 		"newBooksCount": newBooksCount,

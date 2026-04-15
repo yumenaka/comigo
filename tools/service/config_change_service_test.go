@@ -20,7 +20,7 @@ func TestBuildConfigChangeAction(t *testing.T) {
 		AutoRescanIntervalMinutes: 10,
 	}
 
-	action := BuildConfigChangeAction(oldCfg, newCfg)
+	action := BuildConfigChangeAction(*oldCfg, newCfg)
 	if !action.ReScanStores {
 		t.Fatalf("expected ReScanStores=true")
 	}
@@ -47,7 +47,7 @@ func TestBuildConfigChangeActionStartTailscale(t *testing.T) {
 		TailscalePort:     443,
 	}
 
-	action := BuildConfigChangeAction(oldCfg, newCfg)
+	action := BuildConfigChangeAction(*oldCfg, newCfg)
 	if !action.StartTailscale {
 		t.Fatalf("expected StartTailscale=true")
 	}
@@ -71,7 +71,7 @@ func TestBuildConfigChangeActionStopTailscale(t *testing.T) {
 		TailscalePort:     443,
 	}
 
-	action := BuildConfigChangeAction(oldCfg, newCfg)
+	action := BuildConfigChangeAction(*oldCfg, newCfg)
 	if !action.StopTailscale {
 		t.Fatalf("expected StopTailscale=true")
 	}
@@ -140,7 +140,7 @@ func TestBuildConfigChangeActionRestartTailscaleWhenConfigChanges(t *testing.T) 
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			action := BuildConfigChangeAction(oldCfg, tc.newCfg)
+			action := BuildConfigChangeAction(*oldCfg, tc.newCfg)
 			if !action.ReStartTailscale {
 				t.Fatalf("expected ReStartTailscale=true")
 			}

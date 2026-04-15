@@ -10,6 +10,7 @@ import (
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
+	"github.com/yumenaka/comigo/tools/sse_hub"
 )
 
 type ConfigChangeAction struct {
@@ -122,12 +123,14 @@ func ApplyConfigChange(oldConfig config.Config, newConfig *config.Config, restar
 func StartReScan() {
 	if err := scan.InitAllStore(config.GetCfg()); err != nil {
 		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
+		return
 	}
 	if config.GetCfg().EnableDatabase {
 		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
 			logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
 		}
 	}
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonLibraryRescan)
 }
 
 func logAction(action ConfigChangeAction) {
