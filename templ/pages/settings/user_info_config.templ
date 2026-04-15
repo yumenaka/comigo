@@ -195,9 +195,6 @@ templ UserInfoConfig() {
 						return;
 					}
 					showToast(i18next.t("MsgLoginSettingsUpdated"), "success");
-					setTimeout(() => {
-						window.location.reload();
-					}, 1500);
 				} catch (error) {
 					console.error("更新登录设置失败:", error);
 					showToast(i18next.t("err_network_error"), "error");

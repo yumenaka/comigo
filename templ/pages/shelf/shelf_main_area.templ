@@ -113,9 +113,7 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 				<div
 					x-text="i18next.t('no_books_library_path_notice')"
 					class="flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
-				>
-					没有可读书籍，请设置书库路径。设置完成后，网页会自动刷新。
-				</div>
+				></div>
 				@settings.StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", settings.GetStoreBookCounts())
 				<!-- 服务器日志 -->
 				@settings.LogPanel()

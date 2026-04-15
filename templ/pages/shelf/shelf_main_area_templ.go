@@ -238,7 +238,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 			return templ_7745c5c3_Err
 		}
 		if nowBookNum == 0 && c.Param("id") == "" && !isShelfSearchPage(c) {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div id=\"tab-contents\" role=\"tabpanel\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\" :class=\"$store.global.getMainAreaBgClass()\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem]\"><div x-text=\"i18next.t('no_books_library_path_notice')\" class=\"flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\">没有可读书籍，请设置书库路径。设置完成后，网页会自动刷新。</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div id=\"tab-contents\" role=\"tabpanel\" class=\"flex flex-col justify-start items-center flex-1 w-full h-full font-semibold text-lg text-base-content\" :class=\"$store.global.getMainAreaBgClass()\"><div class=\"flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem]\"><div x-text=\"i18next.t('no_books_library_path_notice')\" class=\"flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

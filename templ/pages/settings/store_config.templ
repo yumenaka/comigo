@@ -161,13 +161,9 @@ templ StoreConfigJavaScript() {
 					// 解析响应数据
 					const data = await response.json();
 
-					// 显示成功提示
+					// 显示成功提示（书库扫描完成后由 SSE 提示是否刷新）
 					if (data.saveSuccessHint) {
 						showToast(i18next.t("saveSuccessHint"), "info");
-						// 2秒后刷新页面
-						setTimeout(() => {
-							window.location.reload();
-						}, 2000);
 					} else {
 						showToast(i18next.t("saveSuccessHint"), "success");
 					}
@@ -251,11 +247,6 @@ templ StoreConfigJavaScript() {
 						.t("rescan_store_success")
 						.replace("{0}", data.newBooksCount || 0);
 					showToast(message, "success");
-
-					// 2秒后刷新页面
-					setTimeout(() => {
-						window.location.reload();
-					}, 2000);
 				} catch (error) {
 					console.error("重新扫描书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");

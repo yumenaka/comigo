@@ -7,6 +7,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
+	"github.com/yumenaka/comigo/tools/sse_hub"
 )
 
 func init() {
@@ -22,6 +23,7 @@ func init() {
 				return err
 			}
 		}
+		sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonAutoLibraryRescan)
 		return nil
 	})
 }

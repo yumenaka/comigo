@@ -59,28 +59,11 @@ templ BoolConfigJavaScript() {
 							settingsMainArea.__x.$data.debug_mode = value;
 						}
 					}
-					// 显示成功提示
-					if (data.saveSuccessHint) {
-						showToast(i18next.t("saveSuccessHint"), "info");
-						if (name == "Port") {
-							// 2秒后跳转到新端口
-							setTimeout(() => {
-								window.location.href =
-									window.location.protocol +
-									"//" +
-									window.location.hostname +
-									":" +
-									value;
-							}, 2000);
-							return;
-						}
-						// 2秒后刷新页面
-						setTimeout(() => {
-							window.location.reload();
-						}, 2000);
-					} else {
-						showToast(i18next.t("saveSuccessHint"), "info");
-					}
+					// 显示成功提示（需整页刷新时由服务端 SSE 推送确认）
+					showToast(
+						i18next.t("saveSuccessHint"),
+						data.saveSuccessHint ? "info" : "success",
+					);
 				} catch (error) {
 					console.error("更新配置失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
