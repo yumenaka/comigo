@@ -183,96 +183,122 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 				}
 				if !strings.Contains(image.Url, "hidden.") && !strings.Contains(image.Url, ".html") {
 					if c != nil && c.QueryParam("static") == "" {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<img x-data=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<img data-scroll-page-num=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var7 string
-						templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(ImageXData(image.Url))
+						templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", key+1))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 106, Col: 38}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 106, Col: 55}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"w-full manga_image min-h-16 text-center select-none\" draggable=\"false\" :src=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" x-data=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var8 string
-						templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(ImageSrc(image.Url))
+						templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(ImageXData(image.Url))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 109, Col: 34}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 107, Col: 38}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" @load=\"isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;loaded = true;\" @error=\"loaded = false\" x-intersect:leave=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"w-full manga_image min-h-16 text-center select-none\" draggable=\"false\" :src=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var9 string
-						templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(intersectScript(key + 1))
+						templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(ImageSrc(image.Url))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 112, Col: 52}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 110, Col: 34}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" :style=\"{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}\">")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					} else {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<img x-data=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" @load=\"isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;loaded = true;\" @error=\"loaded = false\" x-intersect:leave=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var10 string
-						templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(ImageXData(image.Url))
+						templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(intersectScript(key + 1))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 117, Col: 38}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 113, Col: 52}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" class=\"w-full manga_image min-h-16 text-center select-none\" draggable=\"false\" src=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" :style=\"{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}\">")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					} else {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<img data-scroll-page-num=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var11 string
-						templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(common.GetFileBase64Text(book.BookInfo.BookID, image.Name))
+						templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", key+1))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 120, Col: 72}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 118, Col: 55}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" @load=\"isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;\" :style=\"{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" x-data=\"")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var12 string
+						templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(ImageXData(image.Url))
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 119, Col: 38}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"w-full manga_image min-h-16 text-center select-none\" draggable=\"false\" src=\"")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var13 string
+						templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(common.GetFileBase64Text(book.BookInfo.BookID, image.Name))
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 122, Col: 72}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" @load=\"isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;\" :style=\"{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<template x-if=\"$store.scroll.showPageNum\"><div class=\"w-full mt-0 mb-1 text-sm font-semibold text-center page_hint\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<template x-if=\"$store.scroll.showPageNum\"><div class=\"w-full mt-0 mb-1 text-sm font-semibold text-center page_hint\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var12 string
-				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d", key+1, book.BookInfo.PageCount))
+				var templ_7745c5c3_Var14 string
+				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d", key+1, book.BookInfo.PageCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 127, Col: 136}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/scroll/scroll_main_area.templ`, Line: 129, Col: 136}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div></template></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</div></template></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -284,7 +310,7 @@ func MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int,
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button><style>\n\t\t/* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */\n\t\t.manga_image {\n\t\t\tmargin: auto;\n\t\t\tbox-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);\n\t\t}\n\n\t\t.page_hint {\n\t\t\t/* 文字颜色 */\n\t\t\tcolor: #413d3d;\n\t\t\t/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/\n\t\t\ttext-shadow:\n\t\t\t\t-1px 0 rgb(240, 229, 229),\n\t\t\t\t0 1px rgb(253, 242, 242),\n\t\t\t\t1px 0 rgb(206, 183, 183),\n\t\t\t\t0 -1px rgb(196, 175, 175);\n\t\t}\n\n\t\t.LoadingImage {\n\t\t\twidth: 90vw;\n\t\t\tmax-width: 90vw;\n\t\t}\n\n\t\t.ErrorImage {\n\t\t\twidth: 90vw;\n\t\t\tmax-width: 90vw;\n\t\t}\n\n\t\t/* 横屏（显示区域）时的CSS样式,IE无效 */\n\t\t@media screen and (min-aspect-ratio: 19/19) {\n\t\t\t.SinglePageImage {\n\t\t\t\twidth: v-bind(sPWL);\n\t\t\t\tmax-width: 100%;\n\t\t\t}\n\n\t\t\t.DoublePageImage {\n\t\t\t\twidth: v-bind(dPWL);\n\t\t\t\tmax-width: 100%;\n\t\t\t}\n\t\t}\n\n\t\t/* 竖屏(显示区域)CSS样式,IE无效 */\n\t\t@media screen and (max-aspect-ratio: 19/19) {\n\t\t\t.SinglePageImage {\n\t\t\t\twidth: v-bind(sPWP);\n\t\t\t\tmax-width: 100%;\n\t\t\t}\n\n\t\t\t.DoublePageImage {\n\t\t\t\t/* width: 100%; */\n\t\t\t\twidth: v-bind(dPWP);\n\t\t\t\tmax-width: 100%;\n\t\t\t}\n\t\t}\n\t</style>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</div><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button><style>\n\t\t/* https://developer.mozilla.org/zh-CN/docs/Web/CSS/object-fit */\n\t\t.manga_image {\n\t\t\tmargin: auto;\n\t\t\tbox-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);\n\t\t}\n\n\t\t.page_hint {\n\t\t\t/* 文字颜色 */\n\t\t\tcolor: #413d3d;\n\t\t\t/* 文字阴影：https://www.w3school.com.cn/css/css3_shadows.asp*/\n\t\t\ttext-shadow:\n\t\t\t\t-1px 0 rgb(240, 229, 229),\n\t\t\t\t0 1px rgb(253, 242, 242),\n\t\t\t\t1px 0 rgb(206, 183, 183),\n\t\t\t\t0 -1px rgb(196, 175, 175);\n\t\t}\n\n\t\t.LoadingImage {\n\t\t\twidth: 90vw;\n\t\t\tmax-width: 90vw;\n\t\t}\n\n\t\t.ErrorImage {\n\t\t\twidth: 90vw;\n\t\t\tmax-width: 90vw;\n\t\t}\n\n\t\t/* 横屏（显示区域）时的CSS样式,IE无效 */\n\t\t@media screen and (min-aspect-ratio: 19/19) {\n\t\t\t.SinglePageImage {\n\t\t\t\twidth: v-bind(sPWL);\n\t\t\t\tmax-width: 100%;\n\t\t\t}\n\n\t\t\t.DoublePageImage {\n\t\t\t\twidth: v-bind(dPWL);\n\t\t\t\tmax-width: 100%;\n\t\t\t}\n\t\t}\n\n\t\t/* 竖屏(显示区域)CSS样式,IE无效 */\n\t\t@media screen and (max-aspect-ratio: 19/19) {\n\t\t\t.SinglePageImage {\n\t\t\t\twidth: v-bind(sPWP);\n\t\t\t\tmax-width: 100%;\n\t\t\t}\n\n\t\t\t.DoublePageImage {\n\t\t\t\t/* width: 100%; */\n\t\t\t\twidth: v-bind(dPWP);\n\t\t\t\tmax-width: 100%;\n\t\t\t}\n\t\t}\n\t</style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

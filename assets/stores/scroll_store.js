@@ -34,6 +34,4 @@ Alpine.store("scroll", {
 	showHeaderFlag: true,
 	//是否显示页数
 	showPageNum: Alpine.$persist(false).as("scroll.showPageNum"),
-	//ws翻页相关
-	syncPageByWS: Alpine.$persist(false).as("scroll.syncPageByWS"), //是否通过websocket同步翻页
 });
