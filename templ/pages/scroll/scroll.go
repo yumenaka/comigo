@@ -67,7 +67,7 @@ func ScrollModeHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		scrollPage, // define body content
-		[]string{"script/scroll.js"},
+		[]string{"script/ws_sync.js", "script/scroll.js"},
 	)
 	// 渲染页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
@@ -94,6 +94,9 @@ func getScrollPaginationURL(book *model.Book, page int) string {
 func intersectScript(pageIndex int) string {
 	return fmt.Sprintf(`
     $nextTick(() => {
+	if ($store.global.readMode === 'infinite_scroll') {
+		return;
+	}
 	if(!loaded || counter < 1){
         return;
     }

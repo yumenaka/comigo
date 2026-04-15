@@ -103,6 +103,7 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 					if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
 						if c != nil && c.QueryParam("static") == "" {
 							<img
+								data-scroll-page-num={ fmt.Sprintf("%d", key+1) }
 								x-data={ ImageXData(image.Url) }
 								class="w-full manga_image min-h-16 text-center select-none"
 								draggable="false"
@@ -114,6 +115,7 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 							/>
 						} else {
 							<img
+								data-scroll-page-num={ fmt.Sprintf("%d", key+1) }
 								x-data={ ImageXData(image.Url) }
 								class="w-full manga_image min-h-16 text-center select-none"
 								draggable="false"

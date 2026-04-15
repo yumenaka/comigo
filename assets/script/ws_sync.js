@@ -13,7 +13,7 @@
     let reconnectAttempts = 0
     let reconnectTimer = null
     let isIntentionallyClosed = false
-    let options = null // { pageType, getBookId, getWsConfig, isDebug, onMessage }
+    let options = null // { pageType, getBookId, getWsConfig, isDebug, onMessage, onConnect? }
 
     function getConfig() {
         if (!options || !options.getWsConfig) return { maxReconnectAttempts: 200, reconnectInterval: 3000 }
@@ -28,6 +28,13 @@
         console.log('WebSocket连接已建立')
         reconnectAttempts = 0
         isIntentionallyClosed = false
+        if (options && typeof options.onConnect === 'function') {
+            try {
+                options.onConnect()
+            } catch (e) {
+                console.error('onConnect 回调执行失败:', e)
+            }
+        }
     }
 
     function handleMessage(event) {
@@ -73,7 +80,7 @@
     const ComiGoWS = {
         /**
          * 初始化（仅允许调用一次，或先 disconnect 后再 init）
-         * @param {Object} opts - pageType: 'flip'|'scroll'|'shelf', getBookId?: ()=>string|undefined, getWsConfig: ()=>({maxReconnectAttempts, reconnectInterval}), isDebug?: ()=>boolean, onMessage: (message)=>void
+         * @param {Object} opts - pageType: 'flip'|'scroll'|'shelf', getBookId?: ()=>string|undefined, getWsConfig: ()=>({maxReconnectAttempts, reconnectInterval}), isDebug?: ()=>boolean, onMessage: (message)=>void, onConnect?: ()=>void
          */
         init(opts) {
             if (!opts || !opts.pageType || !opts.getWsConfig || !opts.onMessage) {
