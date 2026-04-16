@@ -5,6 +5,7 @@ import (
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
 	"github.com/yumenaka/comigo/tools/sse_hub"
@@ -13,6 +14,7 @@ import (
 func init() {
 	// 设置扫描任务函数，用于自动扫描
 	config.SetScanTaskFunc(func() error {
+		booksBefore := model.GetAllBooksNumber()
 		if err := scan.InitAllStore(config.GetCfg()); err != nil {
 			logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 			return err
@@ -23,7 +25,12 @@ func init() {
 				return err
 			}
 		}
-		sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonAutoLibraryRescan)
+		// 仅在有新增书籍时提示刷新；无新书则不打扰用户（与手动全量重扫区分）
+		if model.GetAllBooksNumber() > booksBefore {
+			sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonAutoLibraryRescan)
+		} else {
+			logger.Info(locale.GetString("log_auto_rescan_no_new_books_skip_reload_prompt"))
+		}
 		return nil
 	})
 }

@@ -954,6 +954,7 @@
   "log_scheduler_task_still_running_skip": "Previous scan task is still running, skipping this scan",
   "log_scheduler_task_execution_failed": "Scheduled scan task execution failed: %v",
   "log_scheduler_task_execution_completed": "Scheduled scan task execution completed",
+  "log_auto_rescan_no_new_books_skip_reload_prompt": "Scheduled library scan found no new books; skipped the reload suggestion.",
   "log_scheduler_interval_zero_no_scheduled_scan": "Scan interval is 0, no scheduled scanning",
   "log_scheduler_stop_task_failed": "Failed to stop scheduled task: %v",
   "log_scheduler_stop_old_task_failed": "Failed to stop old scheduled task: %v",
