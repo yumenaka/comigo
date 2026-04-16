@@ -9,6 +9,21 @@ function shouldEnableComigoSSE() {
     return window.location.pathname !== '/login'
 }
 
+// 仅在书架与设置页弹出「建议刷新」；阅读页（flip/scroll 等）不打断
+function shouldShowUISuggestReloadPrompt() {
+    const p = window.location.pathname
+    if (p === '/settings') {
+        return true
+    }
+    if (p === '/' || p === '/index.html' || p === '/search') {
+        return true
+    }
+    if (p.startsWith('/shelf/')) {
+        return true
+    }
+    return false
+}
+
 function getReloadPromptMessage(reason) {
     const key = 'ui_suggest_reload_reason_' + reason
     const translated =
@@ -22,6 +37,9 @@ function getReloadPromptMessage(reason) {
 }
 
 function showReloadPrompt(reason) {
+    if (!shouldShowUISuggestReloadPrompt()) {
+        return
+    }
     if (typeof showMessage !== 'function' || window.__comigoReloadPromptOpen) {
         return
     }

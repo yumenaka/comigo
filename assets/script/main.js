@@ -13820,6 +13820,14 @@ if ($bbe0293ef6bc5e52$export$52550a8b6a1f2afe !== "") {
     // 登录页没有 JWT，会导致 /api/sse 持续 401 重连
     return window.location.pathname !== '/login';
 }
+// 仅在书架与设置页弹出「建议刷新」；阅读页（flip/scroll 等）不打断
+function $fdee9bb4d54e06d0$var$shouldShowUISuggestReloadPrompt() {
+    const p = window.location.pathname;
+    if (p === '/settings') return true;
+    if (p === '/' || p === '/index.html' || p === '/search') return true;
+    if (p.startsWith('/shelf/')) return true;
+    return false;
+}
 function $fdee9bb4d54e06d0$var$getReloadPromptMessage(reason) {
     const key = 'ui_suggest_reload_reason_' + reason;
     const translated = typeof i18next !== 'undefined' && i18next.t ? i18next.t(key) : key;
@@ -13827,6 +13835,7 @@ function $fdee9bb4d54e06d0$var$getReloadPromptMessage(reason) {
     return typeof i18next !== 'undefined' && i18next.t ? i18next.t('ui_suggest_reload_default') : 'Data was updated on the server. Reload the page to see the latest UI?';
 }
 function $fdee9bb4d54e06d0$var$showReloadPrompt(reason) {
+    if (!$fdee9bb4d54e06d0$var$shouldShowUISuggestReloadPrompt()) return;
     if (typeof showMessage !== 'function' || window.__comigoReloadPromptOpen) return;
     window.__comigoReloadPromptOpen = true;
     showMessage({
