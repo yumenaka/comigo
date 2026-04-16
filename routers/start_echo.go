@@ -20,6 +20,13 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
+// autoTLSNextProtos 返回自动 TLS 模式需要声明的 ALPN 协议。
+// 需要同时保留 ACME 的 tls-alpn-01，以及常规 HTTPS 使用的 h2 / http/1.1，
+// 否则普通浏览器或 curl 在 TLS 握手阶段会收到 "no application protocol"。
+func autoTLSNextProtos() []string {
+	return []string{acme.ALPNProto, "h2", "http/1.1"}
+}
+
 // StartEcho 启动网页服务
 func StartEcho(e *echo.Echo) error {
 	// 是否仅监听本地回环地址
@@ -59,7 +66,7 @@ func StartEcho(e *echo.Echo) error {
 			TLSConfig: &tls.Config{
 				//Certificates: nil, // <-- s.ListenAndServeTLS will populate this field
 				GetCertificate: autoTLSManager.GetCertificate,
-				NextProtos:     []string{acme.ALPNProto},
+				NextProtos:     autoTLSNextProtos(),
 			},
 			//ReadTimeout: 30 * time.Second, // use custom timeouts
 		}
