@@ -946,6 +946,7 @@
   "log_scheduler_task_still_running_skip": "前のスキャンタスクがまだ実行中です。このスキャンをスキップします",
   "log_scheduler_task_execution_failed": "スケジュールされたスキャンタスクの実行に失敗しました: %v",
   "log_scheduler_task_execution_completed": "スケジュールされたスキャンタスクの実行が完了しました",
+  "log_auto_rescan_no_new_books_skip_reload_prompt": "定期スキャンで新規書籍は見つかりませんでした。再読み込みの案内はスキップしました。",
   "log_scheduler_interval_zero_no_scheduled_scan": "スキャン間隔が0のため、スケジュールされたスキャンは実行しません",
   "log_scheduler_stop_task_failed": "スケジュールされたタスクの停止に失敗しました: %v",
   "log_scheduler_stop_old_task_failed": "古いスケジュールされたタスクの停止に失敗しました: %v",
