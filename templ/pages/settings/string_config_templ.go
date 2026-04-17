@@ -141,14 +141,14 @@ func StringConfig(name string, value string, description string) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50\" x-on:change=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50\" @change=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("updateStringConfig('" + name + "', $event.target.value)")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 24, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 24, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {

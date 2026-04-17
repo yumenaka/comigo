@@ -12,7 +12,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.global.autoPlayNext"
-			x-on:click="$store.global.autoPlayNext = !$store.global.autoPlayNext;"
+			@click="$store.global.autoPlayNext = !$store.global.autoPlayNext;"
 			class="sr-only peer"
 		/>
 		<div
@@ -25,7 +25,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.global.loopPlaylist"
-			x-on:click="$store.global.loopPlaylist = !$store.global.loopPlaylist;"
+			@click="$store.global.loopPlaylist = !$store.global.loopPlaylist;"
 			class="sr-only peer"
 		/>
 		<div

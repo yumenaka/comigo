@@ -12,7 +12,6 @@
 
 ![Windows Sample](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows Sample")
 
-
 ## Features
 
 - 📚 **Multiple Format Support**: Supports image folders and compressed files like `.rar`, `.zip`, `.tar`, `.cbz`, `.cbr`, `.epub`
@@ -108,7 +107,6 @@ docker-compose up -d
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `COMIGO_PORT` | Service port | `1234` |
-| `COMIGO_LOGIN_PROTECTION` | Enable login protection | `false` |
 | `COMIGO_USERNAME` | Login username (optional) | - |
 | `COMIGO_PASSWORD` | Login password (optional) | - |
 | `COMIGO_ENABLE_UPLOAD` | Enable file upload | `true` |
@@ -133,7 +131,6 @@ comi [flags] file_or_dir
 | `--open-browser` | `-o` | false | Open browser on start |
 | `--enable-upload` | - | true | Enable file upload |
 | `--read-only` | - | false | Read-only mode |
-| `--login-protection` | - | false | Enable login protection |
 | `--username` | - | - | Login username |
 | `--password` | - | - | Login password |
 | `--debug` | - | false | Debug mode |
@@ -147,8 +144,6 @@ comi .
 # Specify port and path
 comi -p 8080 /path/to/manga
 
-# Local only with password login protection
-comi --local --login-protection --username admin --password 123456 /path/to/manga
 ```
 
 ## Configuration File

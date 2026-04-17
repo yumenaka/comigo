@@ -21,7 +21,7 @@ templ StringConfig(name string, value string, description string) {
 			value={ value }
 			data-original-value={ value }
 			class="px-2.5  w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
-			x-on:change={ "updateStringConfig('" + name + "', $event.target.value)" }
+			@change={ "updateStringConfig('" + name + "', $event.target.value)" }
 		/>
 		<div
 			class="w-full py-1 text-xs text-base-content"

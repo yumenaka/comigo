@@ -109,21 +109,21 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component, showReturnI
 				id="reset_local_settings_button"
 				x-data="{ buttonText: i18next.t('reset_local_settings') }"
 				x-text="buttonText"
-				x-on:click="if(window.confirm(i18next.t('confirm_reset_settings'))) { localStorage.clear(); location.reload(); }"
+				@click="if(window.confirm(i18next.t('confirm_reset_settings'))) { localStorage.clear(); location.reload(); }"
 				class="mb-2 text-sm text-center inline-flex items-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
 			>
 				重置本地设置
 			</button>
 			<!-- 切换【debug mode】-->
 			<!-- <label class="inline-flex items-center w-full my-2.5 cursor-pointer outline-offset-4 outline-double outline-2 hover:outline-3 rounded-sm">
-				<input type="checkbox" :value="$store.global.debugMode" x-on:click="$store.global.debugMode =!$store.global.debugMode" class="sr-only peer"/>
+				<input type="checkbox" :value="$store.global.debugMode" @click="$store.global.debugMode =!$store.global.debugMode" class="sr-only peer"/>
 				<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 				<span class="font-medium ms-3" x-text="i18next.t('debug_mode')"></span>
 			</label> -->
 			<!-- 选择主题的select -->
 			<select
 				x-model="$store.global.theme"
-				x-on:change="$store.global.theme = $event.target.value;console.log($store.global.theme);"
+				@change="$store.global.theme = $event.target.value;console.log($store.global.theme);"
 				class="w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="retro" x-text="i18next.t('theme_option_retro')">Retro</option>
@@ -145,7 +145,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component, showReturnI
 			<select
 				x-transition
 				x-model="$store.global.bgPattern"
-				x-on:change="$store.global.bgPattern = $event.target.value;console.log($store.global.bgPattern);"
+				@change="$store.global.bgPattern = $event.target.value;console.log($store.global.bgPattern);"
 				class="w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="none" x-text="i18next.t('no_pattern')">无花纹</option>
@@ -156,7 +156,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component, showReturnI
 			<!-- 选择语言的select 此处需要与自动探测到的结果一致，所以才是 "en-US" "zh-CN" "ja"这种不统一的形式"-->
 			<select
 				x-model="i18next.language"
-				x-on:change="i18next.changeLanguage($event.target.value).then(location.reload())"
+				@change="i18next.changeLanguage($event.target.value).then(location.reload())"
 				class="w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="en-US">English</option>

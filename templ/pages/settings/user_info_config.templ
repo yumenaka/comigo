@@ -150,7 +150,7 @@ templ UserInfoConfig() {
 						class="min-w-28 px-3 h-10 mx-2 my-0 text-center text-black transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
 						:class="{ 'opacity-50 cursor-not-allowed': isFormChanged === false || saving }"
 						:disabled="isFormChanged === false || saving"
-						x-on:click={ "if (checkFormData()) { updateLoginSettings({ username, currentPassword: current_password, password, reEnterPassword: ReEnterPassword }); }" }
+						@click={ "if (checkFormData()) { updateLoginSettings({ username, currentPassword: current_password, password, reEnterPassword: ReEnterPassword }); }" }
 						x-text="saving ? i18next.t('saving') : i18next.t('save')"
 					>SAVE</button>
 				</div>

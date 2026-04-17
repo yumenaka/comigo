@@ -132,7 +132,6 @@ comi [flags] file_or_dir
 | `--open-browser` | `-o` | false | 起動時にブラウザを開く |
 | `--enable-upload` | - | true | アップロード機能を有効化 |
 | `--read-only` | - | false | 読み取り専用モード |
-| `--login-protection` | - | false | ログイン保護を有効化 |
 | `--username` | - | - | ログインユーザー名 |
 | `--password` | - | - | ログインパスワード |
 | `--lang` | - | auto | 言語設定（auto/zh/en/ja） |
@@ -146,9 +145,6 @@ comi .
 
 # ポートとパスを指定
 comi -p 8080 /path/to/manga
-
-# ローカルのみ、パスワード付きログイン保護
-comi --local --login-protection --username admin --password 123456 /path/to/manga
 ```
 
 ## 設定ファイルについて

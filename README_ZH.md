@@ -118,7 +118,6 @@ comi [flags] file_or_dir
 | `--open-browser` | `-o` | false | 启动后自动打开浏览器           |
 | `--enable-upload` | - | true | 启用文件上传功能             |
 | `--read-only` | - | false | 只读模式，禁止网页端修改配置       |
-| `--login-protection` | - | false | 显式启用登录保护           |
 | `--username` | - | - | 登录用户名                |
 | `--password` | - | - | 登录密码                 |
 | `--lang` | - | auto | CLI语言（auto/zh/en/ja） |
@@ -158,9 +157,6 @@ comi .
 
 # 指定端口和书库路径
 comi -p 8080 /path/to/manga
-
-# 仅本地访问，启用账号密码登录保护
-comi --local --login-protection --username admin --password 123456 /path/to/manga
 
 # 使用配置文件
 comi -c /path/to/comigo.toml

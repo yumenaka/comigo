@@ -55,7 +55,7 @@ templ PluginsConfig() {
 										data-plugin-name={ pluginName }
 										checked?={ config.GetCfg().IsPluginEnabled(pluginName) }
 										class="sr-only peer"
-										x-on:change={ "togglePlugin('" + pluginName + "', $event.target.checked)" }
+										@change={ "togglePlugin('" + pluginName + "', $event.target.checked)" }
 									/>
 									<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 									<span class="absolute inset-y-0 w-4 h-4 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-5"></span>
