@@ -129,7 +129,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 					type="button"
 					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
 					x-text={ getTranslations("save") }
-					x-on:click={ "saveConfig(selectedDir)" }
+					@click={ "saveConfig(selectedDir)" }
 				>
 					SAVE
 				</button>
@@ -138,7 +138,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 					type="button"
 					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-red-200 transition delay-150 duration-300 ease-in-out  hover:bg-red-400"
 					x-text={ getTranslations("delete") }
-					x-on:click={ "deleteConfig(selectedDir)" }
+					@click={ "deleteConfig(selectedDir)" }
 				>
 					DELETE
 				</button>

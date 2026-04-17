@@ -65,7 +65,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.global.syncPageByWS"
-			x-on:click="$store.global.syncPageByWS =!$store.global.syncPageByWS"
+			@click="$store.global.syncPageByWS =!$store.global.syncPageByWS"
 			class="sr-only peer"
 		/>
 		<div
@@ -78,7 +78,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			x-model="$store.flip.swipeTurn"
-			x-on:click="$store.flip.swipeTurn =!$store.flip.swipeTurn"
+			@click="$store.flip.swipeTurn =!$store.flip.swipeTurn"
 			class="sr-only peer"
 			checked
 		/>
@@ -92,7 +92,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			x-model="$store.flip.wheelFlip"
-			x-on:click="$store.flip.wheelFlip =!$store.flip.wheelFlip"
+			@click="$store.flip.wheelFlip =!$store.flip.wheelFlip"
 			class="sr-only peer"
 			checked
 		/>
@@ -108,7 +108,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.flip.mangaMode"
-			x-on:click="$store.flip.mangaMode =!$store.flip.mangaMode"
+			@click="$store.flip.mangaMode =!$store.flip.mangaMode"
 			x-init="$watch('$store.flip.mangaMode', _ => setImageSrc())"
 			class="sr-only peer"
 		/>
@@ -127,7 +127,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.flip.doublePageMode"
-			x-on:click="$store.flip.doublePageMode =!$store.flip.doublePageMode"
+			@click="$store.flip.doublePageMode =!$store.flip.doublePageMode"
 			x-init="$watch('$store.flip.doublePageMode', _ => setImageSrc())"
 			class="sr-only peer"
 		/>
@@ -146,7 +146,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.flip.showPageNum"
-			x-on:click="$store.flip.showPageNum =!$store.flip.showPageNum"
+			@click="$store.flip.showPageNum =!$store.flip.showPageNum"
 			class="sr-only peer"
 		/>
 		<div
@@ -162,7 +162,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.global.autoResize"
-			x-on:click="$store.global.autoResize =!$store.global.autoResize;"
+			@click="$store.global.autoResize =!$store.global.autoResize;"
 			x-init="$watch('$store.global.autoResize', _ => setImageSrc())"
 			class="sr-only peer"
 		/>
@@ -197,7 +197,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.global.autoCrop"
-			x-on:click="$store.global.autoCrop =!$store.global.autoCrop;"
+			@click="$store.global.autoCrop =!$store.global.autoCrop;"
 			x-init="$watch('$store.global.autoCrop', _ => setImageSrc())"
 			class="sr-only peer"
 		/>
@@ -232,7 +232,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.flip.autoHideToolbar"
-			x-on:click="$store.flip.autoHideToolbar =!$store.flip.autoHideToolbar;showToolbar();"
+			@click="$store.flip.autoHideToolbar =!$store.flip.autoHideToolbar;showToolbar();"
 			class="sr-only peer"
 		/>
 		<div
@@ -248,7 +248,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.flip.autoAlign"
-			x-on:click="$store.flip.autoAlign =!$store.flip.autoAlign;"
+			@click="$store.flip.autoAlign =!$store.flip.autoAlign;"
 			class="sr-only peer"
 		/>
 		<div
