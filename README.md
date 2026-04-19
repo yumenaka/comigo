@@ -27,7 +27,7 @@
 - 📥 **Flexible Download**: Batch download image folders, convert and download as EPUB format
 - 📜 **Reading History**: Automatic reading history tracking for easy continuation
 
-PC/Mobile Sync: 
+PC/Mobile Sync:   
 ![Mobile Sync Sample](https://www.yumenaka.net/wp-content/uploads/2026/04/scroll.gif "Mobile Sync Sample")
 
 ## Installation Guide
