@@ -144,6 +144,11 @@ templ ComigoXYZPlugin(c echo.Context) {
 						type: "cli",
 						label: "Linux armv7 (命令行)",
 					},
+					// Android APK：固定为列表最后一项，需用户手动选择，不参与默认平台检测
+					{
+						type: "apk",
+						label: i18next.t("comigo_xyz_platform_android_apk"),
+					},
 				];
 
 				// 检测当前系统并选择默认平台
@@ -192,6 +197,9 @@ templ ComigoXYZPlugin(c echo.Context) {
 					},
 					getDownloadUrl() {
 						const platform = this.selectedPlatform;
+						if (platform.type === "apk") {
+							return \`\${this.proxyBase}/yumenaka/comigo/releases/download/\${this.version}/app-release.apk\`;
+						}
 						let filename = "";
 
 						if (platform.type === "tray") {
