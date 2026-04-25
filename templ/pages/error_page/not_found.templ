@@ -10,11 +10,10 @@ import (
 // 404 NotFound页面
 templ NotFound404(c echo.Context) {
 	@common.Header(
-		common.HeaderProps{
-			TitleText:      locale.GetString("404notfound"),
-			ShowReturnIcon: true,
-			ReturnUrl:      "/",
-		})
+		common.HeaderBackLeft("/"),
+		common.HeaderTextTitle(locale.GetString("404notfound")),
+		common.HeaderDefaultRight(),
+	)
 	<div
 		class="flex flex-col items-center justify-center flex-1 w-full p-8 text-center text-base-content"
 	>

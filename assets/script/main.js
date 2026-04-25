@@ -13672,7 +13672,7 @@ document.addEventListener('alpine:initialized', ()=>{
     Alpine.store('global').init();
 });
 const $44c4cdff956056b5$var$url = new URL(window.location.href);
-if (window.ComiGoReaderMode || $44c4cdff956056b5$var$url.pathname.startsWith('/reader')) Alpine.store('global').onlineBook = false;
+if (window.ComiGoReaderMode || $44c4cdff956056b5$var$url.pathname.includes('/reader')) Alpine.store('global').onlineBook = true;
 else if (($44c4cdff956056b5$var$url.protocol === 'http:' || $44c4cdff956056b5$var$url.protocol === 'https:') && !window.location.toString().endsWith('.html')) Alpine.store('global').onlineBook = true;
 else Alpine.store('global').onlineBook = false;
 

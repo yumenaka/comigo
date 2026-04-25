@@ -10,11 +10,10 @@ import (
 templ UploadPage(c echo.Context) {
 	@common.Toast()
 	@common.Header(
-		common.HeaderProps{
-			TitleText:      "i18next.t('upload_page')",
-			ShowReturnIcon: true,
-			ReturnUrl:      "/settings",
-		})
+		common.HeaderBackLeft("/settings"),
+		common.HeaderTextTitle("i18next.t('upload_page')"),
+		common.HeaderDefaultRight(),
+	)
 	@UploadArea()
 	@common.Footer(config.GetVersion())
 	@common.Drawer(c, nil, nil, true, "/settings")

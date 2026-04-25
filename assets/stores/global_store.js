@@ -347,8 +347,8 @@ document.addEventListener('alpine:initialized', () => {
 
 const url = new URL(window.location.href);
 
-if (window.ComiGoReaderMode || url.pathname.startsWith('/reader')) {
-    Alpine.store('global').onlineBook = false;
+if (window.ComiGoReaderMode || url.pathname.includes('/reader')) {
+    Alpine.store('global').onlineBook = true;
 } else if ((url.protocol === 'http:' || url.protocol === 'https:') && !window.location.toString().endsWith('.html')) {
     Alpine.store('global').onlineBook = true;
 } else {

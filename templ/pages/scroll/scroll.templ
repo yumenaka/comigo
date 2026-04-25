@@ -20,13 +20,10 @@ templ ScrollPage(c echo.Context, book *model.Book, readMode string, pagedIndex i
 	@common.Toast()
 	if book != nil {
 		@common.Header(
-			common.HeaderProps{
-				TitleText:         common.GetBookTitle(book.BookInfo.BookID),
-				ShowReturnIcon:    true,
-				ShowReSortIcon:    true,
-				ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
-				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
-			})
+			common.HeaderBackSortLeft(common.GetReturnUrl(book.BookInfo.BookID)),
+			common.HeaderQuickJumpTitle(common.GetBookTitle(book.BookInfo.BookID), common.QuickJumpBarBooks(book)),
+			common.HeaderDefaultRight(),
+		)
 		@MainArea(c, book, readMode, pagedIndex, startIndex)
 	}
 	@common.Footer(config.GetVersion())
