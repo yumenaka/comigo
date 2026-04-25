@@ -149,6 +149,7 @@
   "reader_title": "ローカル読書",
   "reader_select_archive": "ローカル圧縮ファイルを選択",
   "reader_select_archive_hint": "ZIP/CBZ/RAR/CBR をブラウザ内だけで展開します",
+  "reader_choose_another_file": "別のファイルを選択",
   "reader_loading_wasm": "ローカル展開コアを読み込み中...",
   "reader_reading_archive": "圧縮ファイルを読み込み中...",
   "reader_no_images_found": "読める画像が見つかりません",

@@ -149,6 +149,7 @@
   "reader_title": "Local Reader",
   "reader_select_archive": "Select Local Archive",
   "reader_select_archive_hint": "ZIP/CBZ/RAR/CBR are decompressed only in your browser",
+  "reader_choose_another_file": "Choose Another File",
   "reader_loading_wasm": "Loading local archive core...",
   "reader_reading_archive": "Reading archive...",
   "reader_no_images_found": "No readable images found in this archive",

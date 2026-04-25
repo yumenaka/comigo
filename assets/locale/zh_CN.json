@@ -149,6 +149,7 @@
   "reader_title": "本地阅读",
   "reader_select_archive": "选择本地压缩包",
   "reader_select_archive_hint": "支持 ZIP/CBZ/RAR/CBR，文件只在浏览器中解压",
+  "reader_choose_another_file": "选择另一个文件",
   "reader_loading_wasm": "正在加载本地解压核心...",
   "reader_reading_archive": "正在读取压缩包...",
   "reader_no_images_found": "压缩包中没有找到可阅读图片",

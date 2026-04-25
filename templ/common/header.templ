@@ -65,6 +65,10 @@ templ Header(prop HeaderProps) {
 				<a x-show="$store.global.onlineBook" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
 					@svg.Upload()
 				</a>
+				<!-- 本地解析工具按钮，点击本地解析阅读页面 -->
+				<a x-show="$store.global.onlineBook" href="/reader" class="w-10 mx-1 my-0 rounded hover:ring ">
+					@svg.CloudOffline()
+				</a>
 			}
 			if (!prop.ShowServerSetting && prop.ShowUploadIcon) {
 				<!-- 使标题居中的占位符 -->

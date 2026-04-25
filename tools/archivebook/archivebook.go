@@ -40,7 +40,6 @@ type Options struct {
 // DefaultMediaTypes 是 Comigo 默认展示的压缩包内媒体类型。
 var DefaultMediaTypes = []string{
 	".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg", ".avif",
-	".html", ".htm",
 }
 
 // ListPages 从压缩包流中扫描可阅读页面。

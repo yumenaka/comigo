@@ -110,6 +110,11 @@ func GetData(filePath string) []byte {
 	return data
 }
 
+// GetDataBase64 从 Static 获取 Base64 字符串，便于把 wasm 等二进制资源内联到静态 HTML。
+func GetDataBase64(filePath string) string {
+	return base64.StdEncoding.EncodeToString(GetData(filePath))
+}
+
 // GetImageData 从Images embed.FS获取图片字节数据
 func GetImageData(imageName string) []byte {
 	filePath := "images/" + imageName
