@@ -10,7 +10,8 @@
     "fmt": "prettier --write .",
     "build": "parcel build ./assets/main.js ./assets/styles.css --dist-dir assets/script",
     "dev": "parcel build ./assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize",
-    "watch": "parcel watch ./assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize"
+    "watch": "parcel watch ./assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize",
+    "build:wasm": "GOOS=js GOARCH=wasm go build -o assets/script/wasm/archive.wasm ./cmd/archivewasm"
   },
   "dependencies": {
     "@alpinejs/intersect": "3.15.11",
@@ -21,12 +22,12 @@
     "i18next": "26.0.6",
     "i18next-browser-languagedetector": "8.2.1",
     "screenfull": "latest",
-    "tailwindcss": "4.2.2"
+    "tailwindcss": "4.2.4"
   },
   "devDependencies": {
     "@parcel/transformer-css": "latest",
     "@tailwindcss/forms": "latest",
-    "@tailwindcss/postcss": "4.2.2",
+    "@tailwindcss/postcss": "4.2.4",
     "@tailwindcss/typography": "latest",
     "parcel": "latest",
     "postcss": "8.5.10",

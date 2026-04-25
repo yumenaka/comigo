@@ -16,6 +16,7 @@ import (
 	"github.com/yumenaka/comigo/templ/pages/flip"
 	"github.com/yumenaka/comigo/templ/pages/login_page"
 	"github.com/yumenaka/comigo/templ/pages/player"
+	"github.com/yumenaka/comigo/templ/pages/reader"
 	"github.com/yumenaka/comigo/templ/pages/scroll"
 	"github.com/yumenaka/comigo/templ/pages/settings"
 	"github.com/yumenaka/comigo/templ/pages/shelf"
@@ -99,6 +100,8 @@ func bindProtectedView(group *echo.Group) {
 	group.GET("/player/:id", player.PlayerModeHandler)
 	// 上传页面
 	group.GET("/upload", upload_page.PageHandler)
+	// 本地压缩包阅读页面（文件不上传服务器）
+	group.GET("/reader", reader.PageHandler)
 	// 设置页面
 	group.GET("/settings", settings.PageHandler)
 }
