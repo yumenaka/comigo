@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/common"
 )
@@ -38,7 +39,7 @@ func NotFound404(c echo.Context) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderProps{
-				TitleText:      "i18next.t('404notfound')",
+				TitleText:      locale.GetString("404notfound"),
 				ShowReturnIcon: true,
 				ReturnUrl:      "/",
 			}).Render(ctx, templ_7745c5c3_Buffer)
