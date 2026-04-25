@@ -8,139 +8,211 @@ import (
 	"strings"
 )
 
-type HeaderProps struct {
-	// 标题
-	TitleText string
-	// 是否显示返回图标
-	ShowReturnIcon bool
-	// 返回链接
-	ReturnUrl string
-	// 是否显示设置图标
-	ShowServerSetting bool
-	//是否显示上传图标
-	ShowUploadIcon bool
-	// 是否显示重排序图标
-	ShowReSortIcon bool
-	// 下载链接
-	DownLoadLink string
-	// 快速跳转，设置之后标题变为快速跳转栏
-	QuickJumpBarBooks *model.BookInfos
-}
-
-// bg-base-100/50 透明背景
-// backdrop-blur-sm 模糊背景 暂时没加上，因为现在不生效
-// 可能是因为父元素或祖先元素上存在一些会创建新的层叠上下文或隔离背景的属性（例如 overflow: hidden、opacity<1、transform、filter、isolation 等）造成的
-templ Header(prop HeaderProps) {
+// Header 是通用顶部栏外壳，只负责布局。具体按钮、标题、工具区由调用方以组件形式传入。
+templ Header(left templ.Component, center templ.Component, right templ.Component) {
 	<header
 		id="header"
 		class="z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400"
 		:class="{ 'absolute top-0 ': window.location.pathname.startsWith(`/flip`) && $store.flip.autoHideToolbar && $store.global.readMode === 'page_flip','mx-auto bg-base-100/50': window.location.pathname.startsWith(`/flip`) && $store.global.readMode === 'page_flip'}"
 	>
 		<div class="flex flex-row">
-			if prop.ShowReturnIcon {
-				<!-- 返回箭头,点击返回上一页 -->
-				<a x-show="!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')" href={ templ.SafeURL(prop.ReturnUrl) }>
-					<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
-						@svg.Return()
-					</div>
-				</a>
-			}
-			<!-- 全屏按钮 offlineBook-->
-			<div
-				id="FullScreenIcon"
-				x-show="window.location.href.startsWith('file://') || window.location.href.startsWith('content://')"
-				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
-				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
-			>
-				@svg.FullScreen()
-			</div>
-			if (prop.ShowServerSetting) {
-				<!-- 新服务器设置 -->
-				<a x-show="$store.global.onlineBook" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
-					@svg.ServerDisk()
-				</a>
-			}
-			if (prop.ShowUploadIcon) {
-				<!-- 上传按钮，点击进入上传页面 -->
-				<a x-show="$store.global.onlineBook" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
-					@svg.Upload()
-				</a>
-				<!-- 本地解析工具按钮，点击本地解析阅读页面 -->
-				<a x-show="$store.global.onlineBook" href="/reader" class="w-10 mx-1 my-0 rounded hover:ring ">
-					@svg.CloudOffline()
-				</a>
-			}
-			if (!prop.ShowServerSetting && prop.ShowUploadIcon) {
-				<!-- 使标题居中的占位符 -->
-				<div class="place_holder w-10 h-10 mx-1 hidden md:flex" x-show="$store.global.onlineBook"></div>
-			}
-			if (prop.ShowReSortIcon) {
-				@ReSortIcon()
+			if left != nil {
+				@left
 			}
 		</div>
-		<!-- 标题-->
-		@HeaderTitle(prop)
-		<!-- 溢出 overflow-x-auto :https://www.tailwindcss.cn/docs/overflow -->
+		if center != nil {
+			@center
+		} else {
+			@HeaderEmptyTitle()
+		}
 		<div class="flex justify-between p-0 m-0 max-w-64">
-			<!-- 图标：点击显示二维码 -->
-			<div
-				data-modal-target="qrcode-modal"
-				data-modal-toggle="qrcode-modal"
-				x-show="$store.global.onlineBook"
-				class="hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
-			>
-				@svg.QRCode()
-			</div>
-			<!-- 全屏按钮 onlineBook-->
-			<div
-				id="FullScreenIcon"
-				x-show="$store.global.onlineBook"
-				onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
-				class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
-			>
-				@svg.FullScreen()
-			</div>
-			<!-- 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
-			<!-- data-drawer-body-scrolling="true"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 -->
-			<!-- https://flowbite.com/docs/components/drawer/#body-scrolling -->
-			<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring" id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true">
-				@svg.Setting()
-			</div>
+			if right != nil {
+				@right
+			}
 		</div>
 	</header>
 }
 
-// 根据阅读模式生成书籍链接，如果是“{}”，templ 可能会把 { something } 解析成模板语法，而不是输出字面量。用 `` 来包裹就不会报错了
-func BookURL(bookID string) string {
-	return fmt.Sprintf(`{BookURL: $store.global.readMode === 'page_flip' ? "/flip/%s" : "/scroll/%s"}`, bookID, bookID)
+// HeaderDefaultRight 是原 Header 右侧默认工具区：二维码、在线全屏、阅读器设置。
+templ HeaderDefaultRight() {
+	@QRCodeButton()
+	@FullScreenOnlineButton()
+	@SettingDrawerButton()
 }
 
-//	<!-- 标题-->
-templ HeaderTitle(prop HeaderProps) {
+// HeaderBackLeft 是常见左侧区域：返回按钮 + 离线全屏。
+templ HeaderBackLeft(returnUrl string) {
+	@ReturnButton(returnUrl)
+	@FullScreenOfflineButton()
+}
+
+// HeaderBackSortLeft 是阅读页左侧区域：返回按钮 + 离线全屏 + 排序。
+templ HeaderBackSortLeft(returnUrl string) {
+	@ReturnButton(returnUrl)
+	@FullScreenOfflineButton()
+	@ReSortIcon()
+}
+
+// HeaderSettingsLeft 是设置页左侧区域：返回 + 离线全屏 + 上传/本地阅读入口 + 占位。
+templ HeaderSettingsLeft(returnUrl string) {
+	@ReturnButton(returnUrl)
+	@FullScreenOfflineButton()
+	@UploadButton()
+	@ReaderButton()
+	@HeaderPlaceholder()
+}
+
+//  返回箭头,点击返回上一页
+templ ReturnButton(returnUrl string) {
+	<a x-show="!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')" href={ templ.SafeURL(returnUrl) }>
+		<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+			@svg.Return()
+		</div>
+	</a>
+}
+
+// 全屏按钮 offlineBook
+templ FullScreenOfflineButton() {
+	<div
+		id="FullScreenIcon"
+		x-show="window.location.href.startsWith('file://') || window.location.href.startsWith('content://')"
+		onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+		class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+	>
+		@svg.FullScreen()
+	</div>
+}
+
+// 服务器设置按钮，点击进入Comigo设置页面
+templ ServerSettingsButton() {
+	<a x-show="$store.global.onlineBook" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+		@svg.ServerDisk()
+	</a>
+}
+
+// 上传按钮，点击进入上传页面
+templ UploadButton() {
+	<a x-show="$store.global.onlineBook" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
+		@svg.Upload()
+	</a>
+}
+
+// 本地解析工具按钮，点击本地解析阅读页面
+templ ReaderButton() {
+	<a x-show="$store.global.onlineBook" href="/reader" class="w-10 mx-1 my-0 rounded hover:ring ">
+		@svg.CloudOffline()
+	</a>
+}
+
+// 使标题居中的占位符
+templ HeaderPlaceholder() {
+	<div class="place_holder w-10 h-10 mx-1 hidden md:flex" x-show="$store.global.onlineBook"></div>
+}
+
+// QRCodeButton
+templ QRCodeButton() {
+	<!-- 图标：点击显示二维码 -->
+	<div
+		data-modal-target="qrcode-modal"
+		data-modal-toggle="qrcode-modal"
+		x-show="$store.global.onlineBook"
+		class="hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+	>
+		@svg.QRCode()
+	</div>
+}
+
+// 全屏按钮 onlineBook
+templ FullScreenOnlineButton() {
+	<div
+		id="FullScreenIcon"
+		x-show="$store.global.onlineBook"
+		onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+		class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
+	>
+		@svg.FullScreen()
+	</div>
+}
+
+// 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
+// data-drawer-body-scrolling="true"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 -->
+// https://flowbite.com/docs/components/drawer/#body-scrolling -->
+templ SettingDrawerButton() {
+	<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring" id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true">
+		@svg.Setting()
+	</div>
+}
+
+// HeaderEmptyTitle 定义了一个空标题组件，用于占位，使得标题区域保持居中对齐。这个组件不显示任何文本，也没有链接，纯粹作为布局占位符使用。
+templ HeaderEmptyTitle() {
+	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate"></div>
+}
+
+templ HeaderTextTitle(title string) {
+	@HeaderTitle(title, "")
+}
+
+// HeaderTitle 保留原普通标题行为：离线文件显示标题，在线模式同步 document.title。
+templ HeaderTitle(title string, downloadLink string) {
 	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
-		<!-- 标题，快速跳转 or 可下载压缩包 or 只显示 -->
-		<span x-show="!$store.global.onlineBook" class="text-lg font-semibold">{ prop.TitleText }</span>
-		if (prop.QuickJumpBarBooks != nil) {
-			<button
-				id="quickJumpBarDropdownButton"
-				title={ prop.TitleText }
-				x-show="$store.global.onlineBook"
-				data-dropdown-toggle="QuickJumpDropdown"
-				data-dropdown-trigger="click"
-				class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
-				type="button"
+		<span x-show="window.location.toString().endsWith('.html')" class="text-lg font-semibold">{ title }</span>
+		if (downloadLink!="") {
+			<span
+				title={ title }
+				id="headerTitle"
+				class="text-lg font-semibold text-blue-700/90 hover:underline"
+				x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
+				x-init="$nextTick(() => {document.title = $el.innerText + version});"
 			>
-				{ prop.TitleText }
-				@svg.ArrowDown()
-			</button>
-			<!-- 下拉菜单，同一阶层的其他书籍 -->
-			<div
-				id="QuickJumpDropdown"
-				x-show="$store.global.onlineBook"
-				class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700"
-			>
-				<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
-					for _, book := range *prop.QuickJumpBarBooks {
+				<a
+					href={ templ.URL(downloadLink) }
+					if strings.HasPrefix(title,"i18next") {
+						x-text={ title }
+					}
+				>{ title }</a>
+			</span>
+		} else {
+			<span
+				title={ title }
+				id="headerTitle"
+				x-show="!window.location.toString().endsWith('.html')"
+				class="text-lg font-semibold"
+				x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
+				x-init="$nextTick(() => {document.title = $el.innerText + version});"
+				if strings.HasPrefix(title,"i18next") {
+					x-text={ title }
+				}
+			>{ title }</span>
+		}
+	</div>
+}
+
+// HeaderQuickJumpTitle 定义了一个标题组件，显示当前书籍的标题，并在在线模式下提供一个下拉菜单，允许用户快速跳转到同一层级的其他书籍。
+// 下拉菜单的内容根据传入的 books 参数动态生成，点击不同的书籍链接会跳转到相应的页面。
+templ HeaderQuickJumpTitle(title string, books *model.BookInfos) {
+	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
+		<span x-show="!$store.global.onlineBook" class="text-lg font-semibold">{ title }</span>
+		<button
+			id="quickJumpBarDropdownButton"
+			title={ title }
+			x-show="$store.global.onlineBook"
+			data-dropdown-toggle="QuickJumpDropdown"
+			data-dropdown-trigger="click"
+			class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
+			type="button"
+		>
+			{ title }
+			@svg.ArrowDown()
+		</button>
+		<!-- 下拉菜单，同一阶层的其他书籍 -->
+		<div
+			id="QuickJumpDropdown"
+			x-show="$store.global.onlineBook"
+			class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700"
+		>
+			<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
+				if books != nil {
+					for _, book := range *books {
 						if book.Type == model.TypeBooksGroup {
 							<li>
 								<a href={ templ.SafeURL("/shelf/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
@@ -152,40 +224,18 @@ templ HeaderTitle(prop HeaderProps) {
 							</li>
 						}
 					}
-				</ul>
-			</div>
-		} else {
-			if (prop.DownLoadLink != "") {
-				<span
-					title={ prop.TitleText }
-					id="headerTitle"
-					class="text-lg font-semibold text-blue-700/90 hover:underline"
-					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
-					x-init="$nextTick(() => {document.title = $el.innerText + version});"
-				>
-					<a
-						href={ templ.URL(prop.DownLoadLink) }
-						if strings.HasPrefix(prop.TitleText,"i18next") {
-							x-text={ prop.TitleText }
-						}
-					>{ prop.TitleText }</a>
-				</span>
-			} else {
-				<span
-					title={ prop.TitleText }
-					id="headerTitle"
-					class="text-lg font-semibold"
-					x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
-					x-init="$nextTick(() => {document.title = $el.innerText + version});"
-					if strings.HasPrefix(prop.TitleText,"i18next") {
-						x-text={ prop.TitleText }
-					}
-				>{ prop.TitleText }</span>
-			}
-		}
+				}
+			</ul>
+		</div>
 	</div>
 }
 
+// 根据阅读模式生成书籍链接，如果是“{}”，templ 可能会把 { something } 解析成模板语法，而不是输出字面量。用 `` 来包裹就不会报错了
+func BookURL(bookID string) string {
+	return fmt.Sprintf(`{BookURL: $store.global.readMode === 'page_flip' ? "/flip/%s" : "/scroll/%s"}`, bookID, bookID)
+}
+
+// ReSortIcon 定义了一个排序图标，点击后会显示一个下拉菜单，允许用户选择不同的排序方式。根据当前URL路径，菜单会设置不同的cookie参数名来保存用户的选择，并在页面加载时读取该cookie以确定当前的排序方式。
 templ ReSortIcon() {
 	<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
 	<!-- data-dropdown-trigger="{hover|click}"  二选一-->

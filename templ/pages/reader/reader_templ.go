@@ -53,11 +53,10 @@ func ReaderPage(c echo.Context) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = common.Header(
-			common.HeaderProps{
-				TitleText:      locale.GetString("reader_title"),
-				ShowReturnIcon: true,
-				ReturnUrl:      "/",
-			}).Render(ctx, templ_7745c5c3_Buffer)
+			common.HeaderBackLeft("/"),
+			common.HeaderTextTitle(locale.GetString("reader_title")),
+			common.HeaderDefaultRight(),
+		).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

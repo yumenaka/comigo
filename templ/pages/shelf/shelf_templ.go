@@ -42,13 +42,10 @@ func ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = common.Header(
-			common.HeaderProps{
-				TitleText:         getShelfHeaderTitle(c, nowBookNum, storeBookInfos, childBookInfos),
-				ShowReturnIcon:    shouldShowShelfReturnIcon(c),
-				ShowReSortIcon:    true,
-				ShowServerSetting: true,
-				ReturnUrl:         getShelfReturnURL(c),
-			}).Render(ctx, templ_7745c5c3_Buffer)
+			ShelfHeaderLeft(c),
+			common.HeaderTextTitle(getShelfHeaderTitle(c, nowBookNum, storeBookInfos, childBookInfos)),
+			common.HeaderDefaultRight(),
+		).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -65,6 +62,50 @@ func ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = common.QRCode().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// ShelfHeaderLeft 书架页左侧工具区。作为组件传给 common.Header，而不是让 Header 自己判断行为。
+func ShelfHeaderLeft(c echo.Context) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		if shouldShowShelfReturnIcon(c) {
+			templ_7745c5c3_Err = common.ReturnButton(getShelfReturnURL(c)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = common.FullScreenOfflineButton().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = common.ServerSettingsButton().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = common.ReSortIcon().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

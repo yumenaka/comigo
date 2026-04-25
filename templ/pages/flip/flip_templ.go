@@ -54,13 +54,10 @@ func FlipPage(c echo.Context, book *model.Book) templ.Component {
 		}
 		if book != nil {
 			templ_7745c5c3_Err = common.Header(
-				common.HeaderProps{
-					TitleText:         common.GetBookTitle(book.BookInfo.BookID),
-					ShowReturnIcon:    true,
-					ShowReSortIcon:    true,
-					ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
-					QuickJumpBarBooks: common.QuickJumpBarBooks(book),
-				}).Render(ctx, templ_7745c5c3_Buffer)
+				common.HeaderBackSortLeft(common.GetReturnUrl(book.BookInfo.BookID)),
+				common.HeaderQuickJumpTitle(common.GetBookTitle(book.BookInfo.BookID), common.QuickJumpBarBooks(book)),
+				common.HeaderDefaultRight(),
+			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

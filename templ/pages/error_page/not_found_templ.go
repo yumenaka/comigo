@@ -38,11 +38,10 @@ func NotFound404(c echo.Context) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = common.Header(
-			common.HeaderProps{
-				TitleText:      locale.GetString("404notfound"),
-				ShowReturnIcon: true,
-				ReturnUrl:      "/",
-			}).Render(ctx, templ_7745c5c3_Buffer)
+			common.HeaderBackLeft("/"),
+			common.HeaderTextTitle(locale.GetString("404notfound")),
+			common.HeaderDefaultRight(),
+		).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

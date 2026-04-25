@@ -38,12 +38,10 @@ func SettingsPage(c echo.Context, tsStatus *tailscale_plugin.TailscaleStatus) te
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = common.Header(
-			common.HeaderProps{
-				TitleText:      "i18next.t('settings_page')",
-				ShowReturnIcon: true,
-				ShowUploadIcon: true,
-				ReturnUrl:      "/",
-			}).Render(ctx, templ_7745c5c3_Buffer)
+			common.HeaderSettingsLeft("/"),
+			common.HeaderTextTitle("i18next.t('settings_page')"),
+			common.HeaderDefaultRight(),
+		).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

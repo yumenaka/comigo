@@ -18,11 +18,10 @@ templ ReaderPage(c echo.Context) {
 	}
 	@common.Toast()
 	@common.Header(
-		common.HeaderProps{
-			TitleText:      locale.GetString("reader_title"),
-			ShowReturnIcon: true,
-			ReturnUrl:      "/",
-		})
+		common.HeaderBackLeft("/"),
+		common.HeaderTextTitle(locale.GetString("reader_title")),
+		common.HeaderDefaultRight(),
+	)
 	@MainArea()
 	@common.Footer(config.GetVersion())
 	@common.Drawer(c, nil, DrawerSlot(c), true, "/")
