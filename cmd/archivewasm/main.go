@@ -13,7 +13,7 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/yumenaka/comigo/internal/archivebook"
+	"github.com/yumenaka/comigo/tools/archivebook"
 )
 
 type archiveState struct {

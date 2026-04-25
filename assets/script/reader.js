@@ -37,18 +37,35 @@ async function loadArchiveWasm() {
             await loadScript('/script/wasm/wasm_exec.js')
         }
         const go = new Go()
-        const wasmResponse = await fetch('/script/wasm/archive.wasm')
-        let result
-        try {
-            result = await WebAssembly.instantiateStreaming(wasmResponse.clone(), go.importObject)
-        } catch (_) {
-            // 某些嵌入式环境不会给 .wasm 返回 application/wasm，退回 ArrayBuffer 加载。
-            result = await WebAssembly.instantiate(await wasmResponse.arrayBuffer(), go.importObject)
-        }
+        const result = await instantiateArchiveWasm(go.importObject)
         go.run(result.instance)
         return window.ComiGoArchive
     })()
     return readerState.wasmReady
+}
+
+async function instantiateArchiveWasm(importObject) {
+    if (window.ComiGoReaderStaticWasmBase64) {
+        const wasmBytes = base64ToUint8Array(window.ComiGoReaderStaticWasmBase64)
+        return WebAssembly.instantiate(wasmBytes, importObject)
+    }
+
+    const wasmResponse = await fetch('/script/wasm/archive.wasm')
+    try {
+        return await WebAssembly.instantiateStreaming(wasmResponse.clone(), importObject)
+    } catch (_) {
+        // 某些嵌入式环境不会给 .wasm 返回 application/wasm，退回 ArrayBuffer 加载。
+        return WebAssembly.instantiate(await wasmResponse.arrayBuffer(), importObject)
+    }
+}
+
+function base64ToUint8Array(base64) {
+    const binary = atob(base64)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i)
+    }
+    return bytes
 }
 
 function loadScript(src) {
@@ -121,7 +138,6 @@ function renderReaderBook(book) {
     const picker = document.getElementById('ReaderFilePicker')
     const shell = document.getElementById('ReaderShell')
     const title = document.getElementById('ReaderBookTitle')
-    const headerTitle = document.getElementById('headerTitle')
     const mainArea = document.getElementById('ScrollMainArea')
     if (!mainArea || !shell) return
 
@@ -129,10 +145,7 @@ function renderReaderBook(book) {
     shell.classList.remove('hidden')
     shell.classList.add('flex')
     if (title) title.textContent = `${book.title} (${book.PageInfos.length})`
-    if (headerTitle) {
-        headerTitle.textContent = book.title
-        document.title = `${book.title} - Comigo`
-    }
+    document.title = `${book.title} - Comigo`
 
     mainArea.innerHTML = ''
     const fragment = document.createDocumentFragment()
@@ -359,9 +372,16 @@ function getReaderBackTopButton() {
 function initReaderInput() {
     const input = document.getElementById('ReaderArchiveInput')
     const dropArea = document.getElementById('ReaderDropArea')
+    const chooseAnotherButton = document.getElementById('ReaderChooseAnotherButton')
     if (!input || !dropArea) return
 
     input.addEventListener('change', () => openReaderArchive(input.files?.[0]))
+    if (chooseAnotherButton) {
+        chooseAnotherButton.addEventListener('click', () => {
+            input.value = ''
+            input.click()
+        })
+    }
     for (const eventName of ['dragenter', 'dragover']) {
         dropArea.addEventListener(eventName, (event) => {
             event.preventDefault()
@@ -409,6 +429,10 @@ function initReaderResize() {
 document.addEventListener('DOMContentLoaded', () => {
     Alpine.store('global').onlineBook = false
     Alpine.store('global').readMode = 'infinite_scroll'
+    loadArchiveWasm().catch((error) => {
+        console.error('[reader] preload wasm failed:', error)
+        setReaderStatus(String(error?.message || error), 'error')
+    })
     initReaderInput()
     initReaderBackTop()
     initReaderResize()

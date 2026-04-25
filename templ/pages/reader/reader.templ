@@ -2,6 +2,7 @@ package reader
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/common"
@@ -12,6 +13,9 @@ templ ReaderPage(c echo.Context) {
 	<script>
 		window.ComiGoReaderMode = true;
 	</script>
+	if c.QueryParam("static") != "" {
+		@templ.Raw("<script>window.ComiGoReaderStaticWasmBase64=\"" + assets.GetDataBase64("script/wasm/archive.wasm") + "\";</script>")
+	}
 	@common.Toast()
 	@common.Header(
 		common.HeaderProps{
@@ -21,7 +25,7 @@ templ ReaderPage(c echo.Context) {
 		})
 	@MainArea()
 	@common.Footer(config.GetVersion())
-	@common.Drawer(c, nil, DrawerSlot(), true, "/")
+	@common.Drawer(c, nil, DrawerSlot(c), true, "/")
 	@common.QRCode()
 }
 
@@ -54,7 +58,17 @@ templ MainArea() {
 			id="ReaderShell"
 			class="hidden flex-col items-center justify-start flex-1 w-full max-w-full pt-0"
 		>
-			<div id="ReaderBookTitle" class="w-full px-4 py-2 text-sm font-semibold text-center bg-base-100/70"></div>
+			<div class="flex flex-col items-center justify-center w-full gap-2 px-3 py-2 bg-base-100/70">
+				<div id="ReaderBookTitle" class="flex-1 min-w-48 text-sm font-semibold text-center"></div>
+				<button
+					id="ReaderChooseAnotherButton"
+					type="button"
+					class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300"
+					x-text="i18next.t('reader_choose_another_file')"
+				>
+					选择另一个文件
+				</button>
+			</div>
 			<div
 				id="ScrollMainArea"
 				class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content"
@@ -81,7 +95,28 @@ templ MainArea() {
 	</main>
 }
 
-templ DrawerSlot() {
+templ DrawerSlot(c echo.Context) {
+	if c.QueryParam("static") == "" {
+		<div
+			class="w-full mt-2 mb-2 pb-1 flex flex-row flex-wrap justify-center items-center border-2 border-gray-500 dark:border-gray-200 rounded relative"
+		>
+			<span
+				class="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content"
+				x-text="i18next.t('download')"
+			>
+				下载
+			</span>
+			<a
+				href="/reader?static=reader.html"
+				download="comigo-reader.html"
+				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
+				:title="i18next.t('download_portable_web_file')"
+				x-text="i18next.t('download_portable_web_file')"
+			>
+				便携网页
+			</a>
+		</div>
+	}
 	<!-- 自动滚动插件可以直接复用卷轴页面滚动行为 -->
 	<div
 		class="w-full"
