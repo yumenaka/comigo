@@ -42,11 +42,11 @@ func userInfoConfigXData() string {
 				return false;
 			}
 			if (this.password !== this.ReEnterPassword) {
-				showToast(i18next.t('ErrPasswordMismatch'), 'error');
+				showToast(i18next.t('err_password_mismatch'), 'error');
 				return false;
 			}
 			if (this.username.trim() === '' && (this.password !== '' || this.ReEnterPassword !== '')) {
-				showToast(i18next.t('PromptSetUsername'), 'error');
+				showToast(i18next.t('prompt_set_username'), 'error');
 				return false;
 			}
 			return true;

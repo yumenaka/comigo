@@ -37,7 +37,7 @@ func SetAutoTLS(e *echo.Echo) {
 	}
 	if config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != "" {
 		// 已设置自定义证书，已禁用自动 TLS。
-		logger.Infof(locale.GetString("custom_cert_detected_disable_auto_tls"))
+		logger.Infof(locale.GetString("auto_tls_disabled_custom_cert_set"))
 		config.GetCfg().AutoTLSCertificate = false
 		return
 	}

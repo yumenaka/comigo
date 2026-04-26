@@ -87,7 +87,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 			>
 				<!-- 启用Tailscale -->
 				<div id={ "boolConfig_EnableTailscale" } class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
-					<div x-text={ getTranslations("EnableTailscale") } class="wrap-break-word"></div>
+					<div x-text={ getTranslations("enable_tailscale") } class="wrap-break-word"></div>
 					<!--  如果一个复选框在其表单被提交时没有被选中，就不会有任何代表其未被选中的状态（例如 value=unchecked）的值被提交给服务器——该值根本就没有被提交给服务器！-->
 					<!-- 如果你想在复选框未被选中时提交一个默认值，你可以在表单中加入一个具有相同的 name 和 value 的 <input type="hidden"> 字段，它可以由 JavaScript 生成。 -->
 					<!-- https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Elements/input/checkbox -->
@@ -115,7 +115,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 						<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
 					</label>
-					<div x-text={ getTranslations("EnableTailscale_Description") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
+					<div x-text={ getTranslations("enable_tailscale_description") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
 				</div>
 				<!-- Tailscale服务主机名-->
 				<div
@@ -123,18 +123,18 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					x-show="enable_tailscale"
 					class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 				>
-					<label x-text={ getTranslations("TailscaleHostname") } for={ "TailscaleHostname" } class="wrap-break-word"></label>
+					<label x-text={ getTranslations("tailscale_hostname") } for={ "TailscaleHostname" } class="wrap-break-word"></label>
 					<input
 						id={ "TailscaleHostname" }
 						name={ "TailscaleHostname" }
 						type="text"
-						:placeholder={ getTranslations("TailscaleHostname") }
+						:placeholder={ getTranslations("tailscale_hostname") }
 						value={ config.GetCfg().TailscaleHostname }
 						class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 					/>
 					<div
 						class="w-full py-1 text-xs text-base-content wrap-break-word"
-						x-text={ getTranslations("TailscaleHostname_Description") }
+						x-text={ getTranslations("tailscale_hostname_description") }
 					></div>
 					<div class="bg-red-600"></div>
 				</div>
@@ -144,18 +144,18 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 					x-show="enable_tailscale"
 				>
-					<label for={ "TailscalePort" } x-text={ getTranslations("TailscalePort") } class="wrap-break-word"></label>
+					<label for={ "TailscalePort" } x-text={ getTranslations("tailscale_port") } class="wrap-break-word"></label>
 					<input
 						class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black  placeholder-gray-500 placeholder-opacity-50"
 						id={ "TailscalePort" }
 						name={ "TailscalePort" }
 						type="number"
-						:placeholder={ getTranslations("TailscalePort") }
+						:placeholder={ getTranslations("tailscale_port") }
 						value={ strconv.Itoa(config.GetCfg().TailscalePort) }
 						max={ strconv.Itoa(65535) }
 						min={ strconv.Itoa(0) }
 					/>
-					<div class="w-full py-1 text-xs text-base-content wrap-break-word" x-text={ getTranslations("TailscalePort_Description") }></div>
+					<div class="w-full py-1 text-xs text-base-content wrap-break-word" x-text={ getTranslations("tailscale_port_description") }></div>
 					<div class="bg-red-600"></div>
 				</div>
 				<!-- Tailscale预授权密钥 -->
@@ -164,18 +164,18 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					x-show="enable_tailscale"
 					class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 				>
-					<label x-text={ getTranslations("TailscaleAuthKey") } for={ "TailscaleAuthKey" } class="wrap-break-word"></label>
+					<label x-text={ getTranslations("tailscale_auth_key") } for={ "TailscaleAuthKey" } class="wrap-break-word"></label>
 					<input
 						id={ "TailscaleAuthKey" }
 						name={ "TailscaleAuthKey" }
 						type="text"
-						:placeholder={ getTranslations("TailscaleAuthKey") }
+						:placeholder={ getTranslations("tailscale_auth_key") }
 						value={ config.GetCfg().TailscaleAuthKey }
 						class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 					/>
 					<div
 						class="w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline wrap-break-word"
-					><a href="https://login.tailscale.com/admin/settings/keys" target="_blank" x-text={ getTranslations("TailscaleAuthKeyDescription") } class="wrap-break-word"></a></div>
+					><a href="https://login.tailscale.com/admin/settings/keys" target="_blank" x-text={ getTranslations("tailscale_auth_key_description") } class="wrap-break-word"></a></div>
 					<div class="bg-red-600"></div>
 				</div>
 				<!-- Funnel密码保护检查 -->
@@ -199,7 +199,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 							style="display:none;"
 						}
 					></div>
-					<div x-text={ getTranslations("FunnelLoginCheck") } class="wrap-break-word"></div>
+					<div x-text={ getTranslations("funnel_login_check") } class="wrap-break-word"></div>
 					<!-- 隐藏input -->
 					<input type="hidden" name={ "FunnelLoginCheck" } value="true" x-bind:disabled="funnel_password_protection"/>
 					<label for={ "FunnelLoginCheck" } class="relative h-8 cursor-pointer w-14">
@@ -217,7 +217,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 						<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
 					</label>
-					<div x-text={ getTranslations("FunnelLoginCheckDescription") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
+					<div x-text={ getTranslations("funnel_login_check_description") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
 				</div>
 				<!-- Funnel模式（公网访问） -->
 				<div
@@ -240,7 +240,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 							style="display:none;"
 						}
 					></div>
-					<div x-text={ getTranslations("FunnelTunnel") } class="wrap-break-word"></div>
+					<div x-text={ getTranslations("funnel_tunnel_label") } class="wrap-break-word"></div>
 					<!-- 隐藏input -->
 					<input type="hidden" name={ "FunnelTunnel" } value="false" x-bind:disabled="tailscale_enable_funnel"/>
 					<label for={ "FunnelTunnel" } class="relative h-8 cursor-pointer w-14">
@@ -257,7 +257,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 						<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
 					</label>
-					<div x-text={ getTranslations("FunnelTunnel_Description") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
+					<div x-text={ getTranslations("funnel_tunnel_description") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
 				</div>
 				<!-- 帮助面板：如何设置Funnel ACL 权限 -->
 				<div

@@ -66,9 +66,9 @@ templ StringConfigJavascript() {
 					}
 					// 显示成功提示（需整页刷新时由服务端 SSE 推送确认）
 					if (data.saveSuccessHint) {
-						showToast(i18next.t("saveSuccessHint"), "info");
+						showToast(i18next.t("save_success_hint"), "info");
 					} else {
-						showToast(i18next.t("saveSuccessHint"), "success");
+						showToast(i18next.t("save_success_hint"), "success");
 					}
 				} catch (error) {
 					console.error("更新配置失败:", error);

@@ -128,27 +128,27 @@ func InitFlags() {
 	runtimeViper.BindPFlag("ZipFileTextEncoding", RootCmd.PersistentFlags().Lookup("zip-encode"))
 
 	// 启用Tailscale服务
-	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale", false, locale.GetString("EnableTailscale"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale", false, locale.GetString("enable_tailscale"))
 	runtimeViper.BindPFlag("EnableTailscale", RootCmd.PersistentFlags().Lookup("tailscale"))
 
 	// Tailscale服务 启用Funnel模式
-	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelTunnel, "tailscale-funnel", false, locale.GetString("FunnelTunnel"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelTunnel, "tailscale-funnel", false, locale.GetString("funnel_tunnel_label"))
 	runtimeViper.BindPFlag("FunnelTunnel", RootCmd.PersistentFlags().Lookup("tailscale-funnel"))
 
 	// FunnelLoginCheck Funnel密码保护检查
-	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelLoginCheck, "funnel-password-check", true, locale.GetString("FunnelLoginCheck"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelLoginCheck, "funnel-password-check", true, locale.GetString("funnel_login_check"))
 	runtimeViper.BindPFlag("FunnelLoginCheck", RootCmd.PersistentFlags().Lookup("funnel-password-check"))
 
 	// Tailscale服务主机名,用于 Tailscale 网络中的标识节点
-	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale-hostname", "comigo", locale.GetString("TailscaleHostname"))
+	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale-hostname", "comigo", locale.GetString("tailscale_hostname"))
 	runtimeViper.BindPFlag("TailscaleHostname", RootCmd.PersistentFlags().Lookup("tailscale-hostname"))
 
 	// Tailscale服务端口号
-	RootCmd.PersistentFlags().IntVar(&cfg.TailscalePort, "tailscale-port", 443, locale.GetString("TailscalePort"))
+	RootCmd.PersistentFlags().IntVar(&cfg.TailscalePort, "tailscale-port", 443, locale.GetString("tailscale_port"))
 	runtimeViper.BindPFlag("TailscalePort", RootCmd.PersistentFlags().Lookup("tailscale-port"))
 
 	// Tailscale AuthKey
-	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleAuthKey, "tailscale-authKey", "", locale.GetString("TailscaleAuthKey"))
+	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleAuthKey, "tailscale-authKey", "", locale.GetString("tailscale_auth_key"))
 	runtimeViper.BindPFlag("TailscaleAuthKey", RootCmd.PersistentFlags().Lookup("tailscale-authKey"))
 
 	// ReadOnlyMode 只读模式，禁止网页端修改配置或上传文件

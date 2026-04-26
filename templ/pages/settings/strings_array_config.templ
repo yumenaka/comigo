@@ -134,9 +134,9 @@ templ StringArrayConfigJavaScript() {
 					const data = await response.json();
 					// 显示成功提示（可能触发书库重扫，完成后由 SSE 提示刷新）
 					if (data.saveSuccessHint) {
-						showToast(i18next.t("saveSuccessHint"), "info");
+						showToast(i18next.t("save_success_hint"), "info");
 					} else {
-						showToast(i18next.t("saveSuccessHint"), "success");
+						showToast(i18next.t("save_success_hint"), "success");
 					}
 
 					// 更新 UI：替换整个容器
@@ -195,7 +195,7 @@ templ StringArrayConfigJavaScript() {
 					// 解析响应数据
 					const data = await response.json();
 					// 显示成功提示
-					showToast(i18next.t("saveSuccessHint"), "success");
+					showToast(i18next.t("save_success_hint"), "success");
 					// 更新 UI：替换整个容器
 					if (data.html) {
 						const container = document.getElementById(
