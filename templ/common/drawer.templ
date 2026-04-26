@@ -78,20 +78,22 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component, showReturnI
 			<div class="flex-1 w-full place-holder"></div>
 			<!-- 二维码 -->
 			<div
-				x-show="$store.global.onlineBook"
+				x-show="$store.global.onlineBook || (window.ComiGoReaderMode && (window.location.protocol === 'http:' || window.location.protocol === 'https:'))"
 				class="w-32 h-32 p-0 mt-2 mb-2"
 				x-data="{ qrcodeSrc: '', qrcodeImageSrc: '' }"
 				x-init="
-					qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
-					// 使用 fetch 加载二维码
-					fetch(qrcodeSrc)
-						.then(response => response.text())
-						.then(data => {
-							qrcodeImageSrc = data;
-						})
-						.catch(error => {
-							console.error('加载二维码失败:', error);
-						});
+					if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+						qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
+						// 使用 fetch 加载二维码
+						fetch(qrcodeSrc)
+							.then(response => response.text())
+							.then(data => {
+								qrcodeImageSrc = data;
+							})
+							.catch(error => {
+								console.error('加载二维码失败:', error);
+							});
+					}
 				"
 			>
 				<img

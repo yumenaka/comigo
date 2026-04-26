@@ -24,6 +24,9 @@ var ImagesFS fs.FS
 //go:embed epub/*
 var Epub embed.FS
 
+//go:embed pwa/*
+var Pwa embed.FS
+
 //go:embed robots.txt
 var Robots embed.FS
 
@@ -113,6 +116,20 @@ func GetData(filePath string) []byte {
 // GetDataBase64 从 Static 获取 Base64 字符串，便于把 wasm 等二进制资源内联到静态 HTML。
 func GetDataBase64(filePath string) string {
 	return base64.StdEncoding.EncodeToString(GetData(filePath))
+}
+
+// GetImageDataSrc 从 Images embed.FS 获取图片并返回 data URL，便于静态 HTML 内联图片资源。
+func GetImageDataSrc(imageName string) string {
+	data := GetImageData(imageName)
+	if len(data) == 0 {
+		return ""
+	}
+	ext := filepath.Ext(imageName)
+	mimeType := mime.TypeByExtension(ext)
+	if mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
+	return fmt.Sprintf("data:%s;base64,%s", mimeType, base64.StdEncoding.EncodeToString(data))
 }
 
 // GetImageData 从Images embed.FS获取图片字节数据

@@ -12,6 +12,12 @@ import (
 templ ReaderPage(c echo.Context) {
 	<script>
 		window.ComiGoReaderMode = true;
+		window.ComiGoReaderCursorImages = {
+			settings: "{{ assets.GetImageDataSrc("SettingsOutline.png") }}",
+			prohibited: "{{ assets.GetImageDataSrc("Prohibited28Filled.png") }}",
+			left: "{{ assets.GetImageDataSrc("ArrowLeft.png") }}",
+			right: "{{ assets.GetImageDataSrc("ArrowRight.png") }}",
+		};
 	</script>
 	if c.QueryParam("static") != "" {
 		@templ.Raw("<script>window.ComiGoReaderStaticWasmBase64=\"" + assets.GetDataBase64("script/wasm/archive.wasm") + "\";</script>")
@@ -19,16 +25,31 @@ templ ReaderPage(c echo.Context) {
 	@common.Toast()
 	@common.Header(
 		common.HeaderBackLeft("/"),
-		common.HeaderTextTitle(locale.GetString("reader_title")),
+		ReaderHeaderTitle(locale.GetString("reader_title")),
 		common.HeaderDefaultRight(),
 	)
-	@MainArea()
-	@common.Footer(config.GetVersion())
+	@MainArea(c)
+	<div id="ReaderFooter" class="w-full" x-show="$store.global.readMode !== 'page_flip'">
+		@common.Footer(config.GetVersion())
+	</div>
 	@common.Drawer(c, nil, DrawerSlot(c), true, "/")
 	@common.QRCode()
 }
 
-templ MainArea() {
+// ReaderHeaderTitle 是 reader 页专用标题。加载本地书后由 reader.js 改成书名，并可点击重新选择压缩包。
+templ ReaderHeaderTitle(title string) {
+	<div class="flex flex-col items-center justify-center flex-1 min-w-0 p-0 m-0 font-semibold text-center truncate">
+		<span
+			title={ title }
+			id="headerTitle"
+			class="text-lg font-semibold truncate"
+			data-reader-default-title={ title }
+			data-reader-version={ " - Comigo " + config.GetVersion() }
+		>{ title }</span>
+	</div>
+}
+
+templ MainArea(c echo.Context) {
 	<main
 		id="ReaderRoot"
 		class="flex flex-col items-center justify-start flex-1 w-full max-w-full text-base-content"
@@ -51,32 +72,304 @@ templ MainArea() {
 					class="hidden"
 				/>
 			</label>
+			if c.QueryParam("static") == "" {
+				<div class="flex flex-row flex-wrap items-center justify-center w-full gap-2 mt-4">
+					<button
+						id="ReaderInstallPWAButton"
+						type="button"
+						class="hidden h-10 px-3 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-50"
+						x-text="i18next.t('reader_install_pwa_app')"
+					>
+						添加为PWA应用
+					</button>
+					<a
+						href="/reader?static=comigo-reader.html"
+						download={ "comigo-" + config.GetVersion() + ".html" }
+						class="inline-flex items-center justify-center h-10 px-3 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300"
+						:title="i18next.t('download_portable_web_file')"
+						x-text="i18next.t('download_portable_web_file')"
+					>
+						便携网页
+					</a>
+				</div>
+			}
 			<div id="ReaderStatus" class="w-full mt-4 text-sm text-center opacity-80"></div>
 		</section>
 		<section
 			id="ReaderShell"
 			class="hidden flex-col items-center justify-start flex-1 w-full max-w-full pt-0"
 		>
-			<div class="flex flex-col items-center justify-center w-full gap-2 px-3 py-2 bg-base-100/70">
-				<div id="ReaderBookTitle" class="flex-1 min-w-48 text-sm font-semibold text-center"></div>
-				<button
-					id="ReaderChooseAnotherButton"
-					type="button"
-					class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300"
-					x-text="i18next.t('reader_choose_another_file')"
-				>
-					选择另一个文件
-				</button>
-			</div>
 			<div
 				id="ScrollMainArea"
 				class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content"
+			></div>
+			<div
+				id="ReaderFlipArea"
+				class="hidden flex-col items-start justify-start flex-1 w-full h-[calc(100vh-7rem)] min-h-[60vh] m-0 p-0 text-base-content"
+			>
+				<div id="reader-flip-slider-container" class="slider_container w-full h-full flex justify-center item-start overflow-hidden flex-row m-0 p-0">
+					<div id="reader-flip-slider" class="flex transition-transform duration-300 ease-out w-full h-full justify-center item-start">
+						<div id="reader-flip-left-slide" draggable="false" class="slide w-full h-full flex justify-center item-start absolute"></div>
+						<div id="reader-flip-middle-slide" class="slide w-full h-full flex justify-center item-start">
+							<img
+								id="ReaderFlipSingleImage"
+								x-show="!$store.flip.doublePageMode"
+								draggable="false"
+								:class="$store.global.isPortrait? 'object-contain w-auto max-w-full h-screen':'object-contain h-screen w-auto max-w-full'"
+							/>
+							<div x-show="$store.flip.doublePageMode" class="slider_container flex flex-row w-full h-screen m-0 p-0 justify-center-safe item-start">
+								<img
+									id="ReaderFlipDoubleImageLeft"
+									draggable="false"
+									x-show="$store.global.nowPageNum < $store.global.allPageNum"
+									class="select-none object-contain m-0 max-w-1/2 w-auto h-auto max-h-screen grow-0"
+								/>
+								<img
+									id="ReaderFlipDoubleImageRight"
+									draggable="false"
+									class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
+								/>
+							</div>
+						</div>
+						<div id="reader-flip-right-slide" draggable="false" class="slide w-full h-full flex justify-center item-start absolute"></div>
+					</div>
+				</div>
+			</div>
+			<div
+				id="ReaderFlipStepsRangeArea"
+				@click.stop=""
+				x-show="$store.global.readMode === 'page_flip' && $store.global.allPageNum > 0"
+				class="hidden w-5/6 h-12 px-4 md:px-8 overflow-visible font-semibold StepsRangeArea rounded-xl drop-shadow-lg self-center-safe bg-base-100 text-base-content toolbar backdrop-blur-3xl"
+				:class="($store.flip.autoHideToolbar? 'fixed bottom-0 flex flex-col justify-center':'flex flex-col justify-center bg-base-100/50')+($store.flip.mangaMode?' manga-mode': '')"
+			>
+				<div class="relative w-full mt-0 self-center-safe">
+					<input
+						id="ReaderFlipStepsRange"
+						class="slider-base w-full"
+						type="range"
+						min="1"
+						x-data="{
+							initPageNum: $store.flip.mangaMode ? ($store.global.allPageNum - $store.global.nowPageNum + 1) : $store.global.nowPageNum,
+							updateProgress() {
+								const allPageNum = $store.global.allPageNum;
+								const nowPageNum = $store.global.nowPageNum;
+								this.initPageNum = $store.flip.mangaMode ? (allPageNum - nowPageNum + 1) : nowPageNum;
+								const percent = allPageNum <= 1 ? 0 : ((this.initPageNum - 1) / (allPageNum - 1)) * 100;
+								$el.style.setProperty('--value-percent', percent + '%');
+							}
+						}"
+						x-init="
+							$watch('$store.global.nowPageNum', () => updateProgress());
+							$watch('$store.global.allPageNum', () => updateProgress());
+							$watch('$store.flip.mangaMode', () => updateProgress());
+							updateProgress();
+						"
+						step="1"
+						:max="$store.global.allPageNum"
+						x-model="initPageNum"
+						@input="initPageNum = $event.target.value; window.ComiGoReader?.inputFlipPage($event); updateProgress();"
+						@change="initPageNum = $event.target.value; window.ComiGoReader?.inputFlipPage($event); updateProgress();"
+					/>
+					<div class="absolute w-full h-2 pointer-events-none" style="bottom: 2px;">
+						<template x-for="i in $store.global.allPageNum" :key="i">
+							<div
+								class="absolute"
+								x-data="{
+									getTickStyle(i, allPageNum, mangaMode) {
+										const position = allPageNum <= 1 ? 0 : (mangaMode
+											? (allPageNum - i) / (allPageNum - 1) * 100
+											: (i - 1) / (allPageNum - 1) * 100);
+										return `left: ${position}%; transform: translateX(-50%);`;
+									},
+									getTickClass(i, allPageNum) {
+										if (i === 1 || i === allPageNum) {
+											return 'h-2.5 w-[1.5px] bg-gray-900 rounded-xs';
+										}
+										const interval = allPageNum < 50 ? 5 : 10;
+										if (i % interval === 0) {
+											return 'h-1 w-[1.5px] bg-gray-900 rounded-xs';
+										}
+										return 'h-1 w-[0.5px] bg-gray-600';
+									},
+									shouldShowLabel(i, allPageNum) {
+										if (i === 1 || i === allPageNum) return true;
+										const minMargin = allPageNum >= 100 ? 9 : allPageNum >= 50 ? 5 : 3;
+										if (i >= allPageNum - minMargin) return false;
+										const interval = allPageNum < 50 ? 5 : allPageNum < 100 ? 10 : 20;
+										return i % interval === 0;
+									}
+								}"
+								:style="getTickStyle(i, $store.global.allPageNum, $store.flip.mangaMode)"
+							>
+								<div
+									:id="i"
+									:class="getTickClass(i, $store.global.allPageNum)"
+								></div>
+								<template x-if="shouldShowLabel(i, $store.global.allPageNum)">
+									<div
+										class="text-xs text-center mb-0"
+										style="position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);"
+										x-text="i"
+									></div>
+								</template>
+							</div>
+						</template>
+					</div>
+				</div>
+			</div>
+			<div
+				x-show="$store.flip.showPageNum && $store.global.readMode === 'page_flip'"
+				class="fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10"
+				x-text="$store.global.nowPageNum+'/'+$store.global.allPageNum"
 			></div>
 		</section>
 		<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
 		</button>
 		<style>
+			#header,
+			#ReaderFlipStepsRangeArea {
+				opacity: 1;
+				transition:
+					opacity 0.3s ease-in-out,
+					transform 0.3s ease-in-out;
+			}
+
+			.slider-base {
+				-webkit-appearance: none;
+				appearance: none;
+				height: 16px;
+				outline: none;
+				border-radius: 2px;
+				background: transparent;
+			}
+
+			.slider-base::-webkit-slider-runnable-track {
+				background: linear-gradient(
+					to right,
+					#3b82f6 0%,
+					#3b82f6 var(--value-percent, 0%),
+					white var(--value-percent, 0%),
+					white 100%
+				);
+				height: 16px;
+				border-radius: 2px;
+			}
+
+			.slider-base::-moz-range-track {
+				background: linear-gradient(
+					to right,
+					#3b82f6 0%,
+					#3b82f6 var(--value-percent, 0%),
+					white var(--value-percent, 0%),
+					white 100%
+				);
+				height: 16px;
+				border-radius: 2px;
+			}
+
+			.manga-mode .slider-base::-webkit-slider-runnable-track {
+				background: linear-gradient(
+					to right,
+					white 0%,
+					white var(--value-percent, 0%),
+					#3b82f6 var(--value-percent, 0%),
+					#3b82f6 100%
+				);
+			}
+
+			.manga-mode .slider-base::-moz-range-track {
+				background: linear-gradient(
+					to right,
+					white 0%,
+					white var(--value-percent, 0%),
+					#3b82f6 var(--value-percent, 0%),
+					#3b82f6 100%
+				) !important;
+				height: 16px;
+				border-radius: 2px;
+			}
+
+			@supports (-moz-appearance: none) {
+				.slider-base {
+					background: transparent !important;
+				}
+
+				.slider-base::-moz-range-progress {
+					background: #3b82f6 !important;
+					height: 16px;
+					border-radius: 2px;
+				}
+
+				.slider-base::-moz-range-track {
+					background: white !important;
+					height: 16px;
+					border-radius: 2px;
+				}
+
+				.manga-mode .slider-base {
+					background: transparent !important;
+				}
+
+				.manga-mode .slider-base::-moz-range-progress {
+					background: white !important;
+					height: 16px;
+					border-radius: 2px;
+				}
+
+				.manga-mode .slider-base::-moz-range-track {
+					background: #3b82f6 !important;
+					height: 16px;
+					border-radius: 2px;
+				}
+			}
+
+			.slider-base::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 18px;
+				height: 18px;
+				background: white;
+				border: 1.5px solid #3b82f6;
+				border-radius: 10%;
+				cursor: pointer;
+			}
+
+			.slider-base::-moz-range-thumb {
+				width: 18px;
+				height: 18px;
+				background: white;
+				border: 1.5px solid #3b82f6;
+				border-radius: 10%;
+				cursor: pointer;
+			}
+
+			#reader-flip-slider-container {
+				will-change: transform;
+				touch-action: pan-y;
+			}
+
+			#reader-flip-slider {
+				user-select: none;
+			}
+
+			.slide {
+				flex-shrink: 0;
+				transform: translateX(0);
+			}
+
+			#reader-flip-left-slide {
+				transform: translateX(-100%);
+			}
+
+			#reader-flip-middle-slide {
+				transform: translateX(0);
+			}
+
+			#reader-flip-right-slide {
+				transform: translateX(100%);
+			}
+
 			.manga_image {
 				margin: auto;
 				box-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);
@@ -94,30 +387,44 @@ templ MainArea() {
 	</main>
 }
 
-templ DrawerSlot(c echo.Context) {
-	if c.QueryParam("static") == "" {
-		<div
-			class="w-full mt-2 mb-2 pb-1 flex flex-row flex-wrap justify-center items-center border-2 border-gray-500 dark:border-gray-200 rounded relative"
+// ReaderReadModeSwitchButton 切换 reader 页本地阅读模式，只保留无限卷轴与翻页两个候选项。
+templ ReaderReadModeSwitchButton() {
+	<div
+		x-data="{
+			readModeSwitchOptions: {
+				infinite_scroll: ['page_flip'],
+				paged_scroll: ['infinite_scroll', 'page_flip'],
+				page_flip: ['infinite_scroll'],
+			}
+		}"
+		class="flex flex-row justify-center items-center w-full mt-2 mb-2 pb-1 gap-2 border-2 border-gray-500 dark:border-gray-200 rounded relative"
+	>
+		<span
+			class="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content"
+			x-text="i18next.t('switch')"
 		>
-			<span
-				class="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content"
-				x-text="i18next.t('download')"
-			>
-				下载
-			</span>
-			<a
-				href="/reader?static=reader.html"
-				download="comigo-reader.html"
+			切换
+		</span>
+		<template
+			x-for="mode in readModeSwitchOptions[$store.global.readMode] ?? ['infinite_scroll', 'page_flip']"
+			:key="mode"
+		>
+			<button
+				type="button"
 				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
-				:title="i18next.t('download_portable_web_file')"
-				x-text="i18next.t('download_portable_web_file')"
-			>
-				便携网页
-			</a>
-		</div>
-	}
+				@click="window.ComiGoReader?.setReadMode(mode)"
+				x-text="i18next.t(mode+'_button')"
+				x-bind:aria-label="i18next.t(mode+'_button')"
+			></button>
+		</template>
+	</div>
+}
+
+templ DrawerSlot(c echo.Context) {
+	@ReaderReadModeSwitchButton()
 	<!-- 自动滚动插件可以直接复用卷轴页面滚动行为 -->
 	<div
+		x-show="$store.global.readMode === 'infinite_scroll'"
 		class="w-full"
 		x-data="{ 
 		autoScrollEnabled: false,
@@ -160,37 +467,75 @@ templ DrawerSlot(c echo.Context) {
 			<input type="range" min="50" max="150" x-model.number="scrollPercent" step="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 		</div>
 	</div>
-	<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'page_flip'" class="w-full">
+		<!-- reader 翻页模式复用 flip store 参数，但不启用在线 WS 同步。 -->
+		<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+			<input type="checkbox" x-model="$store.flip.swipeTurn" class="sr-only peer" checked/>
+			<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+			<span class="font-medium ms-3" x-text="i18next.t('swipe_turn')"></span>
+		</label>
+		<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+			<input type="checkbox" x-model="$store.flip.wheelFlip" class="sr-only peer" checked/>
+			<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+			<span class="font-medium ms-3" x-text="i18next.t('scroll_wheel_flip')"></span>
+		</label>
+		<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+			<input type="checkbox" x-model="$store.flip.mangaMode" @change="window.ComiGoReader?.refreshFlip()" class="sr-only peer"/>
+			<div class="relative w-11 min-w-[44px] h-6 bg-green-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+			<span class="font-medium ms-3" x-text="$store.flip.mangaMode?i18next.t('manga_mode'):i18next.t('comic_mode')"></span>
+		</label>
+		<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+			<input type="checkbox" x-model="$store.flip.doublePageMode" @change="window.ComiGoReader?.refreshFlip()" class="sr-only peer"/>
+			<div class="relative w-11 min-w-[44px] h-6 bg-green-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+			<span class="font-medium ms-3" x-text="$store.flip.doublePageMode?i18next.t('double_page_mode'):i18next.t('single_page_mode')"></span>
+		</label>
+		<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+			<input type="checkbox" x-model="$store.flip.showPageNum" class="sr-only peer"/>
+			<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+			<span class="font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
+		</label>
+		<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+			<input type="checkbox" x-model="$store.flip.autoHideToolbar" @change="window.ComiGoReader?.showFlipToolbar()" class="sr-only peer"/>
+			<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+			<span class="font-medium ms-3" x-text="i18next.t('auto_hide_toolbar')"></span>
+		</label>
+		<label x-show="!$store.flip.autoHideToolbar" class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+			<input type="checkbox" x-model="$store.flip.autoAlign" class="sr-only peer"/>
+			<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+			<span class="font-medium ms-3" x-text="i18next.t('auto_align')"></span>
+		</label>
+	</div>
+	<label x-show="$store.global.readMode === 'infinite_scroll'" class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
 		<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 		<span class="font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
 	</label>
-	<div class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'infinite_scroll'" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('margin_bottom_on_scroll_mode') + $store.scroll.marginBottomOnScrollMode+'px'"></label>
 		<input type="range" min="0" max="100" x-model="$store.scroll.marginBottomOnScrollMode" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 range-lg"/>
 	</div>
-	<div x-show="$store.global.isPortrait" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isPortrait" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('portrait_width_percent') + $store.scroll.portraitWidthPercent+'%'"></label>
 		<input type="range" min="10" max="100" x-model="$store.scroll.portraitWidthPercent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
-	<label x-show="$store.global.isLandscape" class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<label x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape" class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input type="checkbox" x-model="$store.scroll.widthUseFixedValue" class="sr-only peer" checked/>
 		<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 		<span class="font-medium ms-3" x-text="$store.scroll.widthUseFixedValue?i18next.t('width_use_fixed_value'):i18next.t('width_use_percent')"></span>
 	</label>
-	<div x-show="$store.global.isLandscape && !$store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && !$store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('single_page_width') + $store.scroll.singlePageWidth_Percent+'%'"></label>
 		<input type="range" min="10" max="100" x-model="$store.scroll.singlePageWidth_Percent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
-	<div x-show="$store.global.isLandscape && !$store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && !$store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('double_page_width') + $store.scroll.doublePageWidth_Percent+'%'"></label>
 		<input type="range" min="10" max="100" x-model="$store.scroll.doublePageWidth_Percent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
-	<div x-show="$store.global.isLandscape && $store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && $store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('single_page_width') + $store.scroll.singlePageWidth_PX+' px'"></label>
 		<input type="range" min="100" max="1600" x-model="$store.scroll.singlePageWidth_PX" step="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
-	<div x-show="$store.global.isLandscape && $store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && $store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('double_page_width') + $store.scroll.doublePageWidth_PX+' px'"></label>
 		<input type="range" min="100" max="1600" x-model="$store.scroll.doublePageWidth_PX" step="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
