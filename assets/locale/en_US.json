@@ -1029,7 +1029,7 @@
   "comigo_xyz_cli_install_cn_desc": "Recommended for Mainland China users:",
   "comigo_xyz_docker_deploy_title": "Deploy with Docker:",
   "comigo_xyz_no_install_title": "You do not even have to install it:",
-  "comigo_xyz_try_offline_or_add_pwa": "Try Pure Offline Mode or Add as PWA App",
+  "comigo_xyz_try_offline_or_add_pwa": "📴 Try Pure Offline Mode or Add as PWA App",
   "rescan_store": "Scan",
   "delete_store": "Delete",
   "select_store_to_operate": "Please select a store to operate",
