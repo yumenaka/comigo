@@ -305,8 +305,18 @@ templ ComigoXYZPlugin(c echo.Context) {
 							</div>
 							<!-- 一键安装命令行版 -->
 							<div class="mt-8">
-								<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_title')">一键安装命令行版：</p>
 								<div class="space-y-3">
+									<!-- 纯离线 reader / PWA 入口。主页不能直接安装 /reader 的 PWA，跳转后由 reader 页面处理添加。 -->
+									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_no_install_title')">你甚至不用安装：</p>
+									<div class="bg-base-100 relative border border-gray-500 dark:border-gray-200 rounded-lg p-4 flex justify-center">
+										<a
+											href="/reader"
+											class="inline-flex items-center justify-center px-6 py-3 border bg-green-500 text-black dark:text-white rounded-lg font-semibold"
+										>
+											<span x-text="i18next.t('comigo_xyz_try_offline_or_add_pwa')">尝试纯离线模式 或 添加为PWA应用</span>
+										</a>
+									</div>
+									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_title')">一键安装命令行版：</p>
 									<!-- 第一个代码块 -->
 									<div class="bg-black relative border border-gray-500 dark:border-gray-200  rounded-lg p-4">
 										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code class="w-full h-full text-center">bash &lt;(curl -s https://comigo.xyz/get.sh)</code></pre>
@@ -356,16 +366,6 @@ templ ComigoXYZPlugin(c echo.Context) {
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
 											</svg>
 										</button>
-									</div>
-									<!-- 纯离线 reader / PWA 入口。主页不能直接安装 /reader 的 PWA，跳转后由 reader 页面处理添加。 -->
-									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_no_install_title')">你甚至不用安装：</p>
-									<div class="bg-base-100 relative border border-gray-500 dark:border-gray-200 rounded-lg p-4 flex justify-center">
-										<a
-											href="/reader"
-											class="inline-flex items-center justify-center px-6 py-3 border bg-green-500 text-black dark:text-white rounded-lg font-semibold"
-										>
-											<span x-text="i18next.t('comigo_xyz_try_offline_or_add_pwa')">尝试纯离线模式 或 添加为PWA应用</span>
-										</a>
 									</div>
 								</div>
 							</div>
