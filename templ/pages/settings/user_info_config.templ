@@ -25,7 +25,7 @@ templ UserInfoConfig() {
 			>
 				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
 			</svg>
-			<span x-text={ getTranslations("AdminAccountSetup") } class="flex-1 text-center font-semibold"></span>
+			<span x-text={ getTranslations("admin_account_setup") } class="flex-1 text-center font-semibold"></span>
 			<svg
 				class="w-5 h-5 transition-transform"
 				:class="{ 'rotate-90': collapsed }"
@@ -46,30 +46,30 @@ templ UserInfoConfig() {
 				<div class="flex flex-col gap-0">
 					<div class="flex flex-col w-full p-3 m-1 border rounded shadow-sm bg-base-100 text-base-content border-slate-300 gap-3">
 						<div>
-							<div x-text={ getTranslations("PasswordLoginAlwaysEnabled") } class="text-left"></div>
-							<div x-text={ getTranslations("PasswordLoginAlwaysEnabledDescription") } class="w-full py-1 text-left text-xs text-base-content"></div>
+							<div x-text={ getTranslations("password_login_always_enabled") } class="text-left"></div>
+							<div x-text={ getTranslations("password_login_always_enabled_description") } class="w-full py-1 text-left text-xs text-base-content"></div>
 						</div>
 						<div class="grid grid-cols-1 gap-3">
 							<div>
-								<label x-text={ getTranslations("Username") } for="Username" class="w-64"></label>
+								<label x-text={ getTranslations("username") } for="Username" class="w-64"></label>
 								<input
 									id="Username"
 									name="Username"
 									type="text"
-									:placeholder={ getTranslations("Username") }
+									:placeholder={ getTranslations("username") }
 									value={ config.GetCfg().Username }
 									x-model="username"
 									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 								/>
 							</div>
 							<div class="relative" hidden?={ !config.GetCfg().HasPasswordLoginConfigured() }>
-								<label x-text={ getTranslations("CurrentPassword") } for="CurrentPassword" class="w-64"></label>
+								<label x-text={ getTranslations("current_password") } for="CurrentPassword" class="w-64"></label>
 								<div class="relative">
 									<input
 										id="CurrentPassword"
 										name="CurrentPassword"
 										:type="showPassword ? 'text' : 'password'"
-										:placeholder={ getTranslations("CurrentPassword") }
+										:placeholder={ getTranslations("current_password") }
 										x-model="current_password"
 										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 									/>
@@ -89,13 +89,13 @@ templ UserInfoConfig() {
 								</div>
 							</div>
 							<div class="relative">
-								<label x-text={ getTranslations("Password") } for="Password" class="w-64"></label>
+								<label x-text={ getTranslations("password") } for="Password" class="w-64"></label>
 								<div class="relative">
 									<input
 										id="Password"
 										name="Password"
 										:type="showPassword ? 'text' : 'password'"
-										:placeholder={ getTranslations("Password") }
+										:placeholder={ getTranslations("password") }
 										x-model="password"
 										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 									/>
@@ -115,13 +115,13 @@ templ UserInfoConfig() {
 								</div>
 							</div>
 							<div class="relative">
-								<label x-text={ getTranslations("ReEnterPassword") } for="ReEnterPassword" class="w-64"></label>
+								<label x-text={ getTranslations("re_enter_password_label") } for="ReEnterPassword" class="w-64"></label>
 								<div class="relative">
 									<input
 										id="ReEnterPassword"
 										name="ReEnterPassword"
 										:type="showPassword ? 'text' : 'password'"
-										:placeholder={ getTranslations("ReEnterPassword") }
+										:placeholder={ getTranslations("re_enter_password_label") }
 										x-model="ReEnterPassword"
 										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 									/>
@@ -154,7 +154,7 @@ templ UserInfoConfig() {
 						x-text="saving ? i18next.t('saving') : i18next.t('save')"
 					>SAVE</button>
 				</div>
-				<div class="w-full py-1 text-xs text-base-content" x-text={ getTranslations("AdminAccountSetupDescription") }></div>
+				<div class="w-full py-1 text-xs text-base-content" x-text={ getTranslations("admin_account_setup_description") }></div>
 			</form>
 		</div>
 	</div>
@@ -194,7 +194,7 @@ templ UserInfoConfig() {
 						);
 						return;
 					}
-					showToast(i18next.t("MsgLoginSettingsUpdated"), "success");
+					showToast(i18next.t("msg_login_settings_updated"), "success");
 				} catch (error) {
 					console.error("更新登录设置失败:", error);
 					showToast(i18next.t("err_network_error"), "error");

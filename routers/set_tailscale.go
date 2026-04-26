@@ -15,7 +15,7 @@ func StartTailscale() {
 	}
 	// 如果启用了 Tailscale Funnel 模式且要求身份验证，但未设置用户名或密码，则记录错误并返回
 	if config.GetCfg().EnableTailscale && config.GetCfg().FunnelTunnel && config.GetCfg().FunnelLoginCheck && !config.GetCfg().RequiresAuth() {
-		logger.Errorf(locale.GetString("FunnelLoginCheckDescription"))
+		logger.Errorf(locale.GetString("funnel_login_check_description"))
 		return
 	}
 	// 启动或重启 Tailscale 服务

@@ -693,7 +693,7 @@ function jumpPageNum(jumpNum, sync = true) {
     const allPageNum = Alpine.store('global').allPageNum
 
     if (num <= 0 || num > allPageNum) {
-        alert(i18next.t('hintPageNumOutOfRange'))
+        alert(i18next.t('hint_page_num_out_of_range'))
         return
     }
     

@@ -375,7 +375,7 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	}
 	if request.Username == "" {
 		if request.Password != "" || request.ReEnterPassword != "" {
-			return errors.New(locale.GetString("PromptSetUsername"))
+			return errors.New(locale.GetString("prompt_set_username"))
 		}
 		effectiveUsername = ""
 		effectivePassword = ""
@@ -387,7 +387,7 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 		case existingPasswordLogin:
 			effectivePassword = cfg.Password
 		default:
-			return errors.New(locale.GetString("PromptSetPassword"))
+			return errors.New(locale.GetString("prompt_set_password"))
 		}
 	}
 

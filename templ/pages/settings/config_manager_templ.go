@@ -52,9 +52,9 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigManager"))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("config_manager"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 25, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 25, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -65,9 +65,9 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigStorageLocationPrompt"))
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("config_storage_location_prompt"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 39, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 39, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -78,9 +78,9 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("WorkingDirectory"))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("working_directory"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 50, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 50, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -132,9 +132,9 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("HomeDirectory"))
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("home_directory"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 75, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 75, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -186,9 +186,9 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ProgramDirectory"))
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("program_directory"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 100, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 100, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -292,9 +292,9 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ConfigManagerDescription"))
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("config_manager_description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 147, Col: 106}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/config_manager.templ`, Line: 147, Col: 108}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {

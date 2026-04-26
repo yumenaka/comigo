@@ -3,6 +3,8 @@ package settings
 import (
 	"net/http"
 	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
@@ -15,8 +17,34 @@ import (
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
+var localeKeyCollisionLabels = map[string]string{
+	"EnableDatabase":  "enable_database_label",
+	"FunnelTunnel":    "funnel_tunnel_label",
+	"OpenBrowser":     "open_browser_label",
+	"ReEnterPassword": "re_enter_password_label",
+	"Timeout":         "timeout_label",
+}
+
+var (
+	localeKeyUpperWordRegexp = regexp.MustCompile(`([A-Z]+)([A-Z][a-z])`)
+	localeKeyCamelRegexp     = regexp.MustCompile(`([a-z0-9])([A-Z])`)
+	localeKeySeparatorRegexp = regexp.MustCompile(`[^A-Za-z0-9]+`)
+	localeKeyRepeatsRegexp   = regexp.MustCompile(`_+`)
+)
+
+func toLocaleKey(value string) string {
+	if key, ok := localeKeyCollisionLabels[value]; ok {
+		return key
+	}
+	key := localeKeyUpperWordRegexp.ReplaceAllString(value, `${1}_${2}`)
+	key = localeKeyCamelRegexp.ReplaceAllString(key, `${1}_${2}`)
+	key = localeKeySeparatorRegexp.ReplaceAllString(key, "_")
+	key = localeKeyRepeatsRegexp.ReplaceAllString(key, "_")
+	return strings.ToLower(strings.Trim(key, "_"))
+}
+
 func getTranslations(value string) string {
-	return "i18next.t(\"" + value + "\")"
+	return "i18next.t(\"" + toLocaleKey(value) + "\")"
 }
 
 // GetStoreBookCounts 获取每个书库的书籍数量

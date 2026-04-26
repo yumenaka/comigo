@@ -22,7 +22,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 			>
 				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
 			</svg>
-			<span x-text={ getTranslations("ConfigManager") } class="flex-1 text-center font-semibold"></span>
+			<span x-text={ getTranslations("config_manager") } class="flex-1 text-center font-semibold"></span>
 			<svg
 				class="w-5 h-5 transition-transform"
 				:class="{ 'rotate-90': collapsed }"
@@ -36,7 +36,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 		<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<!-- 可折叠内容 -->
 		<div x-show="!collapsed" x-transition>
-			<label x-text={ getTranslations("ConfigStorageLocationPrompt") } class="w-full"></label>
+			<label x-text={ getTranslations("config_storage_location_prompt") } class="w-full"></label>
 			<!-- 配置选项区域：点击一个卡片，就设置隐藏字段的值。 -->
 			<div class="flex flex-col w-full mx-0 text-black">
 				<div
@@ -47,7 +47,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				>
 					<div class="w-1/3 flex flex-col items-center justify-center p-1 m-1 bg-blue-300 rounded min-h-15">
 						<img class="h-7 w-7" src="/images/working_directory.png"/>
-						<div class="mt-1" x-text={ getTranslations("WorkingDirectory") }>当前工作目录</div>
+						<div class="mt-1" x-text={ getTranslations("working_directory") }>当前工作目录</div>
 					</div>
 					if WorkingDirectoryConfig != "" {
 						<div
@@ -72,7 +72,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				>
 					<div class="w-1/3 flex flex-col items-center justify-center p-1 m-1 bg-blue-300 rounded min-h-15">
 						<img class="h-7 w-7" src="/images/home_directory.png"/>
-						<div class="mt-1" x-text={ getTranslations("HomeDirectory") }>用户主目录</div>
+						<div class="mt-1" x-text={ getTranslations("home_directory") }>用户主目录</div>
 					</div>
 					if HomeDirectoryConfig != "" {
 						<div
@@ -97,7 +97,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				>
 					<div class="w-1/3 flex flex-col items-center justify-center  p-1 m-1 bg-blue-300 rounded min-h-15">
 						<img class="h-7 w-7" src="/images/program_directory.png"/>
-						<div class="mt-1" x-text={ getTranslations("ProgramDirectory") }>程序所在目录</div>
+						<div class="mt-1" x-text={ getTranslations("program_directory") }>程序所在目录</div>
 					</div>
 					if ProgramDirectoryConfig != "" {
 						<div
@@ -144,7 +144,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				</button>
 			</div>
 			<!-- 设置管理功能的说明 -->
-			<div class="w-full py-1 text-xs text-base-content" x-text={ getTranslations("ConfigManagerDescription") }>
+			<div class="w-full py-1 text-xs text-base-content" x-text={ getTranslations("config_manager_description") }>
 				点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。
 			</div>
 		</div>

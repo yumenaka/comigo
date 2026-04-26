@@ -53,9 +53,9 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("AdminAccountSetup"))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("admin_account_setup"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 28, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 28, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -79,9 +79,9 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("PasswordLoginAlwaysEnabled"))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("password_login_always_enabled"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 49, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 49, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -92,9 +92,9 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("PasswordLoginAlwaysEnabledDescription"))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("password_login_always_enabled_description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 50, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 50, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -105,7 +105,7 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Username"))
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("username"))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 54, Col: 51}
 		}
@@ -118,7 +118,7 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Username"))
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("username"))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 59, Col: 51}
 		}
@@ -154,9 +154,9 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("CurrentPassword"))
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("current_password"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 66, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 66, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -167,9 +167,9 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("CurrentPassword"))
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("current_password"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 72, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 72, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -180,7 +180,7 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Password"))
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("password"))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 92, Col: 51}
 		}
@@ -193,7 +193,7 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("Password"))
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("password"))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 98, Col: 52}
 		}
@@ -206,9 +206,9 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ReEnterPassword"))
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("re_enter_password_label"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 118, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 118, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -219,9 +219,9 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("ReEnterPassword"))
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("re_enter_password_label"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 124, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 124, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -245,9 +245,9 @@ func UserInfoConfig() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("AdminAccountSetupDescription"))
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("admin_account_setup_description"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 157, Col: 111}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/user_info_config.templ`, Line: 157, Col: 114}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -269,7 +269,7 @@ func UserInfoConfig() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<script>\n\t\t\tasync function updateLoginSettings(payload) {\n\t\t\t\tconst form = document.getElementById(\"user_config_form\");\n\t\t\t\tif (!form) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\ttry {\n\t\t\t\t\tif (form.__x) {\n\t\t\t\t\t\tform.__x.$data.saving = true;\n\t\t\t\t\t}\n\t\t\t\t\tconst response = await fetch(\"/api/update-login-settings\", {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tusername: payload.username,\n\t\t\t\t\t\t\tcurrentPassword: payload.currentPassword,\n\t\t\t\t\t\t\tpassword: payload.password,\n\t\t\t\t\t\t\treEnterPassword: payload.reEnterPassword,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tconst responseText = (await response.text()).trim();\n\t\t\t\t\t\tlet message = responseText;\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tconst parsed = JSON.parse(responseText);\n\t\t\t\t\t\t\tmessage = parsed.message || parsed.error || responseText;\n\t\t\t\t\t\t} catch (_) {}\n\t\t\t\t\t\tshowToast(\n\t\t\t\t\t\t\tmessage || i18next.t(\"err_update_login_settings_failed\"),\n\t\t\t\t\t\t\t\"error\",\n\t\t\t\t\t\t);\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tshowToast(i18next.t(\"MsgLoginSettingsUpdated\"), \"success\");\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"更新登录设置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t} finally {\n\t\t\t\t\tif (form.__x) {\n\t\t\t\t\t\tform.__x.$data.saving = false;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<script>\n\t\t\tasync function updateLoginSettings(payload) {\n\t\t\t\tconst form = document.getElementById(\"user_config_form\");\n\t\t\t\tif (!form) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\ttry {\n\t\t\t\t\tif (form.__x) {\n\t\t\t\t\t\tform.__x.$data.saving = true;\n\t\t\t\t\t}\n\t\t\t\t\tconst response = await fetch(\"/api/update-login-settings\", {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tusername: payload.username,\n\t\t\t\t\t\t\tcurrentPassword: payload.currentPassword,\n\t\t\t\t\t\t\tpassword: payload.password,\n\t\t\t\t\t\t\treEnterPassword: payload.reEnterPassword,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tconst responseText = (await response.text()).trim();\n\t\t\t\t\t\tlet message = responseText;\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tconst parsed = JSON.parse(responseText);\n\t\t\t\t\t\t\tmessage = parsed.message || parsed.error || responseText;\n\t\t\t\t\t\t} catch (_) {}\n\t\t\t\t\t\tshowToast(\n\t\t\t\t\t\t\tmessage || i18next.t(\"err_update_login_settings_failed\"),\n\t\t\t\t\t\t\t\"error\",\n\t\t\t\t\t\t);\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tshowToast(i18next.t(\"msg_login_settings_updated\"), \"success\");\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"更新登录设置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t} finally {\n\t\t\t\t\tif (form.__x) {\n\t\t\t\t\t\tform.__x.$data.saving = false;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

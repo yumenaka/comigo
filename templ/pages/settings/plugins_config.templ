@@ -103,7 +103,7 @@ templ PluginsConfigJavaScript() {
 					}
 
 					await response.json();
-					showToast(i18next.t("saveSuccessHint"), "success");
+					showToast(i18next.t("save_success_hint"), "success");
 				} catch (error) {
 					console.error("切换插件状态失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
