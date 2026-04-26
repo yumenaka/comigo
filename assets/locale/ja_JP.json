@@ -1021,7 +1021,7 @@
   "comigo_xyz_cli_install_cn_desc": "中国大陸ユーザーにおすすめ：",
   "comigo_xyz_docker_deploy_title": "Dockerでデプロイ：",
   "comigo_xyz_no_install_title": "インストールすら不要です：",
-  "comigo_xyz_try_offline_or_add_pwa": "完全オフラインモードを試す、またはPWAアプリとして追加",
+  "comigo_xyz_try_offline_or_add_pwa": "📴 完全オフラインモードを試す、またはPWAアプリとして追加",
   "rescan_store": "書庫スキャン",
   "delete_store": "書庫削除",
   "select_store_to_operate": "操作する書庫を選択してください",
