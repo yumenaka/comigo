@@ -53,6 +53,12 @@ COPY . .
 # 从前端构建阶段复制构建产物
 COPY --from=frontend-builder /build/assets/ ./assets/
 
+# 构建本地阅读器 wasm，并复制与当前 Go 版本匹配的 wasm_exec.js。
+# 这两个文件会通过 go:embed 打包进最终二进制，必须在 go build 前生成。
+RUN mkdir -p assets/script/wasm && \
+    CGO_ENABLED=0 GOOS=js GOARCH=wasm go build -trimpath -ldflags "-s -w" -o assets/script/wasm/archive.wasm ./cmd/archivewasm && \
+    cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" assets/script/wasm/wasm_exec.js
+
 # 生成 templ 模板文件
 RUN go run github.com/a-h/templ/cmd/templ@latest generate
 
