@@ -509,11 +509,11 @@ function applyTrackedPage(tracked) {
             scrollSyncState.lastSentAtEdge = atEdge
             sendScrollSyncData(tracked)
         } else if (debugMode) {
-            console.log('[scroll-sync] applyTrackedPage: 未满足发送条件 (pageChanged=%s, percentDelta=%.3f, timeDelta=%dms)',
+            //console.log('[scroll-sync] applyTrackedPage: 未满足发送条件 (pageChanged=%s, percentDelta=%.3f, timeDelta=%dms)',
                 pageChanged, percentDelta, now - scrollSyncState.lastSyncSendTime)
         }
     } else if (debugMode) {
-        console.log('[scroll-sync] applyTrackedPage: 同步未启用或处于抑制期 (syncEnabled=%s, suppressing=%s)',
+        //console.log('[scroll-sync] applyTrackedPage: 同步未启用或处于抑制期 (syncEnabled=%s, suppressing=%s)',
             isScrollSyncEnabled(), isSuppressingRemoteBroadcast())
     }
 }
