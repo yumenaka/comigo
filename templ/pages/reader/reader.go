@@ -13,7 +13,13 @@ func PageHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		ReaderPage(c),
-		[]string{"script/wasm/wasm_exec.js", "script/reader.js"},
+		[]string{
+			"script/wasm/wasm_exec.js",
+			"script/flip_modules/pagination_utils.js",
+			"script/flip_modules/interaction_utils.js",
+			"script/reader.js",
+			"script/reader_pwa.js",
+		},
 	)
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 		return c.NoContent(http.StatusInternalServerError)

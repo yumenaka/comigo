@@ -4,6 +4,7 @@
 const readerState = {
     wasmReady: null,
     book: null,
+    fileName: '',
     objectURLs: new Map(),
     observer: null,
     centerUpdateRaf: null,
@@ -12,6 +13,17 @@ const readerState = {
     scrollDownFlag: false,
     showBackTopFlag: false,
     backTopButton: null,
+    flip: {
+        initialized: false,
+        touchStartX: 0,
+        touchEndX: 0,
+        isSwiping: false,
+        currentTranslate: 0,
+        startTime: 0,
+        animationID: 0,
+        wheelThrottleTimer: null,
+        toolbarHideTimer: null,
+    },
 }
 
 function readerText(key, fallback) {
@@ -21,11 +33,68 @@ function readerText(key, fallback) {
     return fallback
 }
 
+function getReaderCursorStyle(name) {
+    const src = window.ComiGoReaderCursorImages?.[name]
+    return src ? `url("${src}") 12 12, pointer` : 'pointer'
+}
+
 function setReaderStatus(message, type = 'info') {
     const status = document.getElementById('ReaderStatus')
     if (!status) return
     status.textContent = message
     status.className = `w-full mt-4 text-sm text-center ${type === 'error' ? 'text-red-600' : 'opacity-80'}`
+}
+
+function getReaderHeaderTitle() {
+    return document.getElementById('headerTitle')
+}
+
+function chooseReaderArchiveAgain() {
+    const input = document.getElementById('ReaderArchiveInput')
+    if (!input) return
+    input.value = ''
+    input.click()
+}
+
+function setReaderDefaultHeaderTitle() {
+    const title = getReaderHeaderTitle()
+    if (!title) return
+    const defaultTitle = title.dataset.readerDefaultTitle || readerText('reader_title', 'Local Reader')
+    const version = title.dataset.readerVersion || ' - Comigo'
+    title.title = defaultTitle
+    title.className = 'text-lg font-semibold truncate'
+    title.textContent = defaultTitle
+    title.onclick = null
+    document.title = `${defaultTitle}${version}`
+}
+
+function setReaderHeaderTitle(fileName, book) {
+    const title = getReaderHeaderTitle()
+    if (!title) return
+    const version = title.dataset.readerVersion || ' - Comigo'
+    const pageCount = book?.PageInfos?.length || book?.page_count || 0
+    const displayName = fileName || book?.title || readerText('reader_title', 'Local Reader')
+    const titleText = pageCount > 0 ? `${displayName} (${pageCount})` : displayName
+    title.title = `${titleText} ${readerText('reader_choose_another_file', '点击重选')}`
+    title.className = 'inline-flex items-center justify-center gap-1 max-w-full min-w-0 text-lg font-semibold text-center cursor-pointer'
+    title.innerHTML = ''
+
+    const name = document.createElement('span')
+    name.className = 'truncate'
+    name.textContent = titleText
+    title.appendChild(name)
+
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.className = 'shrink-0 px-1.5 py-0.5 text-xs font-normal text-blue-700/90 rounded hover:underline hover:bg-base-200'
+    button.textContent = readerText('reader_choose_another_file', '点击重选')
+    title.appendChild(button)
+
+    title.onclick = (event) => {
+        event.preventDefault()
+        chooseReaderArchiveAgain()
+    }
+    document.title = `${displayName}${version}`
 }
 
 async function loadArchiveWasm() {
@@ -81,6 +150,7 @@ function loadScript(src) {
 async function openReaderArchive(file) {
     if (!file) return
     cleanupReaderBook()
+    readerState.fileName = file.name || ''
     setReaderStatus(readerText('reader_loading_wasm', 'Loading reader core...'))
     try {
         const archive = await loadArchiveWasm()
@@ -92,6 +162,7 @@ async function openReaderArchive(file) {
             throw new Error(readerText('reader_no_images_found', 'No readable images found in this archive'))
         }
         readerState.book = book
+        readerState.fileName = file.name || book.title || ''
         renderReaderBook(book)
         setReaderStatus('')
         if (typeof showToast === 'function') {
@@ -111,6 +182,15 @@ function cleanupReaderBook() {
         URL.revokeObjectURL(url)
     }
     readerState.objectURLs.clear()
+    cleanupReaderView()
+    readerState.book = null
+    readerState.fileName = ''
+    if (window.ComiGoArchive && typeof window.ComiGoArchive.close === 'function') {
+        window.ComiGoArchive.close()
+    }
+}
+
+function cleanupReaderView() {
     if (readerState.observer) {
         readerState.observer.disconnect()
         readerState.observer = null
@@ -123,29 +203,65 @@ function cleanupReaderBook() {
     readerState.scrollTopSave = 0
     readerState.scrollDownFlag = false
     readerState.showBackTopFlag = false
-    if (window.ComiGoArchive && typeof window.ComiGoArchive.close === 'function') {
-        window.ComiGoArchive.close()
+    const flipArea = document.getElementById('ReaderFlipArea')
+    if (flipArea) {
+        resetReaderFlipSlider()
     }
+    restoreReaderPageLayout()
+    restoreReaderHeaderToolbar()
 }
 
 function renderReaderBook(book) {
     Alpine.store('global').onlineBook = false
-    Alpine.store('global').readMode = 'infinite_scroll'
+    normalizeReaderReadMode()
     Alpine.store('global').nowPageNum = 1
     Alpine.store('global').allPageNum = book.page_count || book.PageInfos.length
     Alpine.store('scroll').allPageNum = Alpine.store('global').allPageNum
 
     const picker = document.getElementById('ReaderFilePicker')
     const shell = document.getElementById('ReaderShell')
-    const title = document.getElementById('ReaderBookTitle')
     const mainArea = document.getElementById('ScrollMainArea')
     if (!mainArea || !shell) return
 
     if (picker) picker.classList.add('hidden')
     shell.classList.remove('hidden')
     shell.classList.add('flex')
-    if (title) title.textContent = `${book.title} (${book.PageInfos.length})`
-    document.title = `${book.title} - Comigo`
+    setReaderHeaderTitle(readerState.fileName, book)
+
+    renderReaderCurrentMode(book)
+}
+
+function renderReaderCurrentMode(book = readerState.book) {
+    if (!book) return
+    cleanupReaderView()
+    normalizeReaderReadMode()
+    if (Alpine.store('global').readMode === 'page_flip') {
+        renderReaderFlipBook(book)
+        return
+    }
+    renderReaderScrollBook(book)
+}
+
+function renderReaderScrollBook(book) {
+    const mainArea = document.getElementById('ScrollMainArea')
+    const flipArea = document.getElementById('ReaderFlipArea')
+    const flipSteps = document.getElementById('ReaderFlipStepsRangeArea')
+    const backTop = getReaderBackTopButton()
+    if (!mainArea) return
+    restoreReaderPageLayout()
+    mainArea.classList.remove('hidden')
+    mainArea.classList.add('flex')
+    if (flipArea) {
+        flipArea.classList.add('hidden')
+        flipArea.classList.remove('flex')
+    }
+    if (flipSteps) {
+        flipSteps.classList.add('hidden')
+    }
+    if (backTop) {
+        backTop.style.display = 'none'
+    }
+    restoreReaderHeaderToolbar()
 
     mainArea.innerHTML = ''
     const fragment = document.createDocumentFragment()
@@ -208,9 +324,15 @@ function initReaderLazyLoading() {
 async function loadReaderImage(img) {
     const index = parseInt(img.dataset.readerPageIndex, 10)
     if (!Number.isInteger(index) || img.src) return
+    img.src = await getReaderPageObjectURL(index)
+}
+
+async function getReaderPageObjectURL(index) {
+    if (!Number.isInteger(index) || index < 0 || index >= (readerState.book?.PageInfos?.length || 0)) {
+        return ''
+    }
     if (readerState.objectURLs.has(index)) {
-        img.src = readerState.objectURLs.get(index)
-        return
+        return readerState.objectURLs.get(index)
     }
     try {
         const bytes = await window.ComiGoArchive.readPage(index)
@@ -218,10 +340,10 @@ async function loadReaderImage(img) {
         const blob = new Blob([bytes], { type: guessMimeType(page?.name || '') })
         const objectURL = URL.createObjectURL(blob)
         readerState.objectURLs.set(index, objectURL)
-        img.src = objectURL
+        return objectURL
     } catch (error) {
         console.error('[reader] load image failed:', error)
-        img.alt = readerText('reader_page_load_failed', 'Failed to load page')
+        return ''
     }
 }
 
@@ -278,6 +400,10 @@ function scheduleReaderCenterUpdate() {
 // 暴露给抽屉插件和内联 Alpine 表达式使用，保持与 scroll.js 的全局入口类似。
 window.ComiGoReader = {
     scheduleCenterUpdate: scheduleReaderCenterUpdate,
+    setReadMode: setReaderReadMode,
+    refreshFlip: updateReaderFlipImages,
+    inputFlipPage: inputReaderFlipPage,
+    showFlipToolbar: syncReaderFlipToolbar,
 }
 
 function saveReaderProgress(pageNum) {
@@ -296,6 +422,562 @@ function restoreReaderProgress(book) {
             target.scrollIntoView({ block: 'center' })
             scheduleReaderCenterUpdate()
         })
+    }
+}
+
+function normalizeReaderReadMode() {
+    const mode = Alpine.store('global').readMode
+    if (mode === 'flip_page') {
+        Alpine.store('global').readMode = 'page_flip'
+        return
+    }
+    if (mode !== 'page_flip' && mode !== 'infinite_scroll') {
+        Alpine.store('global').readMode = 'infinite_scroll'
+    }
+}
+
+function setReaderReadMode(mode) {
+    Alpine.store('global').readMode = mode === 'page_flip' || mode === 'flip_page' ? 'page_flip' : 'infinite_scroll'
+    if (readerState.book) {
+        renderReaderCurrentMode(readerState.book)
+    } else if (Alpine.store('global').readMode !== 'page_flip') {
+        restoreReaderPageLayout()
+        restoreReaderHeaderToolbar()
+    }
+}
+
+function getReaderStoredPage(book) {
+    if (!book?.id || !Alpine.store('global').saveReadingProgress) return 1
+    const raw = localStorage.getItem(`reader.pageNum.${book.id}`)
+    const pageNum = parseInt(raw, 10)
+    if (!Number.isInteger(pageNum) || pageNum < 1 || pageNum > book.PageInfos.length) return 1
+    return pageNum
+}
+
+function renderReaderFlipBook(book) {
+    const mainArea = document.getElementById('ScrollMainArea')
+    const flipArea = document.getElementById('ReaderFlipArea')
+    const flipSteps = document.getElementById('ReaderFlipStepsRangeArea')
+    const backTop = getReaderBackTopButton()
+    if (!flipArea) return
+    applyReaderFlipLayout()
+
+    if (mainArea) {
+        mainArea.classList.add('hidden')
+        mainArea.classList.remove('flex')
+    }
+    flipArea.classList.remove('hidden')
+    flipArea.classList.add('flex')
+    if (flipSteps) {
+        flipSteps.classList.remove('hidden')
+        flipSteps.classList.add('flex', 'flex-col', 'justify-center')
+    }
+    if (backTop) {
+        backTop.style.display = 'none'
+    }
+
+    Alpine.store('global').nowPageNum = getReaderStoredPage(book)
+    initReaderFlipListeners()
+    syncReaderFlipToolbar()
+    updateReaderFlipImages()
+    updateReaderFlipProgress()
+}
+
+function getReaderFlipElements() {
+    return {
+        area: document.getElementById('ReaderFlipArea'),
+        steps: document.getElementById('ReaderFlipStepsRangeArea'),
+        range: document.getElementById('ReaderFlipStepsRange'),
+        sliderContainer: document.getElementById('reader-flip-slider-container'),
+        slider: document.getElementById('reader-flip-slider'),
+        leftSlide: document.getElementById('reader-flip-left-slide'),
+        rightSlide: document.getElementById('reader-flip-right-slide'),
+        singleImage: document.getElementById('ReaderFlipSingleImage'),
+        doubleLeft: document.getElementById('ReaderFlipDoubleImageLeft'),
+        doubleRight: document.getElementById('ReaderFlipDoubleImageRight'),
+    }
+}
+
+function getReaderFlipPaginationUtils() {
+    return window.ComiGoFlip?.pagination
+}
+
+function getReaderFlipInteractionUtils() {
+    return window.ComiGoFlip?.interaction
+}
+
+function createReaderFlipImage(className) {
+    const img = document.createElement('img')
+    img.className = className
+    img.draggable = false
+    return img
+}
+
+async function setImageElementSrc(img, index) {
+    if (!img) return
+    if (index < 0 || index >= readerState.book.PageInfos.length) {
+        img.removeAttribute('src')
+        return
+    }
+    const url = await getReaderPageObjectURL(index)
+    if (url) {
+        img.src = url
+        img.alt = readerState.book.PageInfos[index]?.name || `Page ${index + 1}`
+    }
+}
+
+function getReaderFlipStepNext() {
+    const util = getReaderFlipPaginationUtils()
+    const nowPageNum = parseInt(Alpine.store('global').nowPageNum, 10)
+    const allPageNum = Alpine.store('global').allPageNum
+    const doublePageMode = Alpine.store('flip').doublePageMode === true
+    return util?.getNextPageStep ? util.getNextPageStep(doublePageMode, nowPageNum, allPageNum) : 1
+}
+
+function getReaderFlipStepPrevious() {
+    const util = getReaderFlipPaginationUtils()
+    const nowPageNum = parseInt(Alpine.store('global').nowPageNum, 10)
+    const doublePageMode = Alpine.store('flip').doublePageMode === true
+    return util?.getPreviousPageStep ? util.getPreviousPageStep(doublePageMode, nowPageNum) : -1
+}
+
+async function updateReaderFlipImages() {
+    if (!readerState.book || Alpine.store('global').readMode !== 'page_flip') return
+    const elements = getReaderFlipElements()
+    const nowPageNum = parseInt(Alpine.store('global').nowPageNum, 10)
+    const allPageNum = Alpine.store('global').allPageNum
+    const mangaMode = Alpine.store('flip').mangaMode
+    const doublePageMode = Alpine.store('flip').doublePageMode
+    const isPortrait = Alpine.store('global').isPortrait
+
+    if (mangaMode) {
+        elements.leftSlide.style.transform = 'translateX(100%)'
+        elements.rightSlide.style.transform = 'translateX(-100%)'
+    } else {
+        elements.leftSlide.style.transform = 'translateX(-100%)'
+        elements.rightSlide.style.transform = 'translateX(100%)'
+    }
+
+    const singlePageClass = isPortrait
+        ? 'object-contain w-auto max-w-full h-screen'
+        : 'h-screen w-auto max-w-full object-contain'
+    const doublePageClass = 'object-contain w-auto max-h-screen m-0 select-none max-w-1/2 grow-0'
+    const singleImgClass = 'object-contain h-screen max-w-full max-h-screen m-0'
+
+    if (!doublePageMode) {
+        await setImageElementSrc(elements.singleImage, nowPageNum - 1)
+        elements.leftSlide.innerHTML = ''
+        if (nowPageNum > 1) {
+            const prev = createReaderFlipImage(singlePageClass)
+            elements.leftSlide.appendChild(prev)
+            setImageElementSrc(prev, nowPageNum - 2)
+        }
+        elements.rightSlide.innerHTML = ''
+        if (nowPageNum < allPageNum) {
+            const next = createReaderFlipImage(singlePageClass)
+            elements.rightSlide.appendChild(next)
+            setImageElementSrc(next, nowPageNum)
+        }
+    } else {
+        const leftIndex = mangaMode ? nowPageNum : nowPageNum - 1
+        const rightIndex = mangaMode ? nowPageNum - 1 : nowPageNum
+        await setImageElementSrc(elements.doubleLeft, leftIndex)
+        await setImageElementSrc(elements.doubleRight, rightIndex)
+        elements.leftSlide.innerHTML = ''
+        elements.rightSlide.innerHTML = ''
+        const prevStart = Math.max(0, nowPageNum + getReaderFlipStepPrevious() - 1)
+        if (nowPageNum > 1) {
+            const useSinglePrev = nowPageNum === 2
+            const prevA = createReaderFlipImage(useSinglePrev ? singleImgClass : doublePageClass)
+            elements.leftSlide.appendChild(prevA)
+            setImageElementSrc(prevA, useSinglePrev ? nowPageNum - 2 : (mangaMode ? prevStart + 1 : prevStart))
+            if (!useSinglePrev) {
+                const prevB = createReaderFlipImage(doublePageClass)
+                elements.leftSlide.appendChild(prevB)
+                setImageElementSrc(prevB, mangaMode ? prevStart : prevStart + 1)
+            }
+        }
+        const nextStart = nowPageNum + getReaderFlipStepNext() - 1
+        if (nextStart < allPageNum) {
+            const useSingleNext = nextStart === allPageNum - 1
+            const nextA = createReaderFlipImage(useSingleNext ? singleImgClass : doublePageClass)
+            elements.rightSlide.appendChild(nextA)
+            setImageElementSrc(nextA, useSingleNext ? nextStart : (mangaMode ? nextStart + 1 : nextStart))
+            if (!useSingleNext) {
+                const nextB = createReaderFlipImage(doublePageClass)
+                elements.rightSlide.appendChild(nextB)
+                setImageElementSrc(nextB, mangaMode ? nextStart : nextStart + 1)
+            }
+        }
+    }
+
+    resetReaderFlipSlider()
+    updateReaderFlipProgress()
+}
+
+function updateReaderFlipProgress() {
+    const range = document.getElementById('ReaderFlipStepsRange')
+    if (!range) return
+    const allPageNum = Alpine.store('global').allPageNum || 1
+    const nowPageNum = Alpine.store('global').nowPageNum || 1
+    const value = Alpine.store('flip').mangaMode ? allPageNum - nowPageNum + 1 : nowPageNum
+    range.value = value
+    const percent = allPageNum <= 1 ? 0 : ((value - 1) / (allPageNum - 1)) * 100
+    range.style.setProperty('--value-percent', `${percent}%`)
+}
+
+function inputReaderFlipPage(event) {
+    const inputValue = parseInt(event.target.value, 10)
+    const target = Alpine.store('flip').mangaMode
+        ? Alpine.store('global').allPageNum - inputValue + 1
+        : inputValue
+    jumpReaderFlipPage(target)
+}
+
+function jumpReaderFlipPage(pageNum) {
+    const allPageNum = Alpine.store('global').allPageNum
+    const target = Math.min(Math.max(parseInt(pageNum, 10) || 1, 1), allPageNum)
+    Alpine.store('global').nowPageNum = target
+    saveReaderProgress(target)
+    updateReaderFlipImages()
+}
+
+function addReaderFlipPage(step) {
+    const nowPageNum = parseInt(Alpine.store('global').nowPageNum, 10)
+    const allPageNum = Alpine.store('global').allPageNum
+    const target = nowPageNum + step
+    if (target > allPageNum) {
+        if (typeof showToast === 'function') showToast(i18next.t('hint_last_page'), 'warning')
+        return
+    }
+    if (target < 1) {
+        if (typeof showToast === 'function') showToast(i18next.t('hint_first_page'), 'warning')
+        return
+    }
+    jumpReaderFlipPage(target)
+}
+
+function toNextReaderFlipPage() {
+    const step = getReaderFlipStepNext()
+    if (step !== 0) addReaderFlipPage(step)
+}
+
+function toPreviousReaderFlipPage() {
+    const step = getReaderFlipStepPrevious()
+    if (step !== 0) addReaderFlipPage(step)
+}
+
+function resetReaderFlipSlider() {
+    const elements = getReaderFlipElements()
+    cancelAnimationFrame(readerState.flip.animationID)
+    readerState.flip.currentTranslate = 0
+    if (elements.slider) {
+        elements.slider.style.transition = 'none'
+        elements.slider.style.transform = 'translateX(0)'
+        elements.slider.offsetHeight
+        elements.slider.style.transition = ''
+    }
+}
+
+function readerFlipShouldBlock(diffX) {
+    const util = getReaderFlipPaginationUtils()
+    if (util?.shouldBlockScrollBoundary) {
+        return util.shouldBlockScrollBoundary(
+            diffX,
+            Alpine.store('flip').mangaMode,
+            Alpine.store('global').nowPageNum,
+            Alpine.store('global').allPageNum,
+        )
+    }
+    return false
+}
+
+function readerFlipTouchStart(event) {
+    if (Alpine.store('global').readMode !== 'page_flip' || !Alpine.store('flip').swipeTurn) return
+    readerState.flip.startTime = Date.now()
+    readerState.flip.isSwiping = true
+    readerState.flip.touchStartX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX
+    cancelAnimationFrame(readerState.flip.animationID)
+}
+
+function readerFlipTouchMove(event) {
+    const elements = getReaderFlipElements()
+    if (!readerState.flip.isSwiping || !Alpine.store('flip').swipeTurn || !elements.slider) return
+    const currentX = event.type === 'touchmove' ? event.touches[0].clientX : event.clientX
+    const diffX = currentX - readerState.flip.touchStartX
+    readerState.flip.currentTranslate = readerFlipShouldBlock(diffX) ? (diffX < 0 ? -30 : 30) : diffX
+    elements.slider.style.transform = `translateX(${readerState.flip.currentTranslate}px)`
+    if (Math.abs(diffX) > 10) event.preventDefault()
+}
+
+function readerFlipTouchEnd(event) {
+    if (!readerState.flip.isSwiping || !Alpine.store('flip').swipeTurn) return
+    readerState.flip.isSwiping = false
+    const endX = event.type === 'touchend' ? event.changedTouches[0].clientX : event.clientX
+    const diffX = endX - readerState.flip.touchStartX
+    const quick = Date.now() - readerState.flip.startTime < 300 && Math.abs(diffX) > 50
+    const threshold = Alpine.store('flip').swipeThreshold || 100
+    let direction = null
+    if (diffX < -threshold || (quick && diffX < 0)) direction = 'left'
+    if (diffX > threshold || (quick && diffX > 0)) direction = 'right'
+    if (readerFlipShouldBlock(diffX) || !direction) {
+        resetReaderFlipSlider()
+        return
+    }
+    const mangaMode = Alpine.store('flip').mangaMode
+    if ((direction === 'left' && !mangaMode) || (direction === 'right' && mangaMode)) {
+        toNextReaderFlipPage()
+    } else {
+        toPreviousReaderFlipPage()
+    }
+}
+
+function onReaderFlipClick(event) {
+    if (readerState.flip.isSwiping || Math.abs(readerState.flip.currentTranslate) > 10) return
+    if (getInReaderSettingArea(event)) {
+        if (Alpine.store('flip').autoAlign) {
+            document.getElementById('reader-flip-slider-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+        showReaderFlipToolbar()
+        openReaderSettings()
+        return
+    }
+    const leftSide = event.clientX < window.innerWidth * 0.5
+    if ((leftSide && !Alpine.store('flip').mangaMode) || (!leftSide && Alpine.store('flip').mangaMode)) {
+        toPreviousReaderFlipPage()
+    } else {
+        toNextReaderFlipPage()
+    }
+}
+
+function onReaderFlipWheel(event) {
+    if (!Alpine.store('flip').wheelFlip || Alpine.store('global').readMode !== 'page_flip') return
+    if (event.deltaY === 0 || readerState.flip.wheelThrottleTimer) return
+    event.preventDefault()
+    readerState.flip.wheelThrottleTimer = setTimeout(() => {
+        readerState.flip.wheelThrottleTimer = null
+    }, Alpine.store('flip').wheelThrottleDelay || 250)
+    if (event.deltaY > 0) {
+        toNextReaderFlipPage()
+    } else {
+        toPreviousReaderFlipPage()
+    }
+}
+
+function onReaderFlipMouseMove(event) {
+    if (Alpine.store('global').readMode !== 'page_flip') return
+    const elements = getReaderFlipElements()
+    const x = event.clientX
+    const y = event.clientY
+    const inSetArea = getInReaderSettingArea(event)
+    if (inSetArea) {
+        event.currentTarget.style.cursor = getReaderCursorStyle('settings')
+        showReaderFlipToolbar()
+        return
+    }
+
+    const stepsRect = elements.steps?.getBoundingClientRect()
+    if (readerFlipPointInRect(stepsRect, x, y)) {
+        event.currentTarget.style.cursor = 'default'
+        return
+    }
+
+    const leftSide = x < window.innerWidth * 0.5
+    const mangaMode = Alpine.store('flip').mangaMode
+    const nowPageNum = Alpine.store('global').nowPageNum
+    const allPageNum = Alpine.store('global').allPageNum
+    if (leftSide) {
+        if ((!mangaMode && nowPageNum === 1) || (mangaMode && nowPageNum === allPageNum)) {
+            event.currentTarget.style.cursor = getReaderCursorStyle('prohibited')
+            return
+        }
+        event.currentTarget.style.cursor = getReaderCursorStyle('left')
+        return
+    }
+    if ((!mangaMode && nowPageNum === allPageNum) || (mangaMode && nowPageNum === 1)) {
+        event.currentTarget.style.cursor = getReaderCursorStyle('prohibited')
+        return
+    }
+    event.currentTarget.style.cursor = getReaderCursorStyle('right')
+}
+
+function onReaderFlipMouseLeave(event) {
+    event.currentTarget.style.cursor = ''
+}
+
+function initReaderFlipListeners() {
+    const elements = getReaderFlipElements()
+    if (!elements.sliderContainer || readerState.flip.initialized) return
+    readerState.flip.initialized = true
+    elements.sliderContainer.addEventListener('touchstart', readerFlipTouchStart)
+    elements.sliderContainer.addEventListener('touchmove', readerFlipTouchMove, { passive: false })
+    elements.sliderContainer.addEventListener('touchend', readerFlipTouchEnd)
+    elements.sliderContainer.addEventListener('mousedown', readerFlipTouchStart)
+    elements.sliderContainer.addEventListener('mousemove', readerFlipTouchMove)
+    elements.sliderContainer.addEventListener('mouseup', readerFlipTouchEnd)
+    elements.sliderContainer.addEventListener('mouseleave', readerFlipTouchEnd)
+    elements.area.addEventListener('click', onReaderFlipClick)
+    elements.area.addEventListener('wheel', onReaderFlipWheel, { passive: false })
+    elements.area.addEventListener('mousemove', onReaderFlipMouseMove)
+    elements.area.addEventListener('mouseleave', onReaderFlipMouseLeave)
+    document.addEventListener('mousemove', onReaderFlipDocumentMouseMove)
+}
+
+function getReaderFlipToolbarElements() {
+    return {
+        header: document.getElementById('header'),
+        steps: document.getElementById('ReaderFlipStepsRangeArea'),
+    }
+}
+
+function getReaderLayoutElements() {
+    return {
+        header: document.getElementById('header'),
+        footer: document.getElementById('ReaderFooter') || document.querySelector('footer.footer'),
+        root: document.getElementById('ReaderRoot'),
+        shell: document.getElementById('ReaderShell'),
+        flipArea: document.getElementById('ReaderFlipArea'),
+    }
+}
+
+function isReaderFlipModeActive() {
+    return Alpine.store('global').readMode === 'page_flip'
+}
+
+function clearReaderFlipToolbarTimer() {
+    if (readerState.flip.toolbarHideTimer) {
+        clearTimeout(readerState.flip.toolbarHideTimer)
+        readerState.flip.toolbarHideTimer = null
+    }
+}
+
+function restoreReaderHeaderToolbar() {
+    clearReaderFlipToolbarTimer()
+    const { header, steps } = getReaderFlipToolbarElements()
+    if (header) {
+        header.style.opacity = '1'
+        header.style.transform = 'translateY(0)'
+    }
+    if (steps) {
+        steps.style.opacity = '1'
+        steps.style.transform = 'translateY(0)'
+    }
+}
+
+function applyReaderFlipLayout() {
+    const { header, footer, root, shell, flipArea } = getReaderLayoutElements()
+    if (footer) {
+        footer.style.setProperty('display', 'none', 'important')
+    }
+    if (root) {
+        root.style.minHeight = '100vh'
+    }
+    if (shell) {
+        shell.style.minHeight = '100vh'
+    }
+    if (flipArea) {
+        flipArea.style.height = Alpine.store('flip').autoHideToolbar ? '100vh' : 'calc(100vh - 3rem)'
+        flipArea.style.minHeight = Alpine.store('flip').autoHideToolbar ? '100vh' : 'calc(100vh - 3rem)'
+    }
+    if (!header) return
+    if (Alpine.store('flip').autoHideToolbar) {
+        header.style.position = 'fixed'
+        header.style.top = '0'
+        header.style.left = '0'
+        header.style.right = '0'
+        header.style.width = '100%'
+        header.style.zIndex = '30'
+        header.style.backdropFilter = 'blur(16px)'
+        return
+    }
+    header.style.position = ''
+    header.style.top = ''
+    header.style.left = ''
+    header.style.right = ''
+    header.style.width = ''
+    header.style.zIndex = ''
+    header.style.backdropFilter = ''
+}
+
+function restoreReaderPageLayout() {
+    const { header, footer, root, shell, flipArea } = getReaderLayoutElements()
+    if (footer) {
+        footer.style.removeProperty('display')
+    }
+    if (root) {
+        root.style.minHeight = ''
+    }
+    if (shell) {
+        shell.style.minHeight = ''
+    }
+    if (flipArea) {
+        flipArea.style.height = ''
+        flipArea.style.minHeight = ''
+    }
+    if (header) {
+        header.style.position = ''
+        header.style.top = ''
+        header.style.left = ''
+        header.style.right = ''
+        header.style.width = ''
+        header.style.zIndex = ''
+        header.style.backdropFilter = ''
+    }
+}
+
+function showReaderFlipToolbar() {
+    const { header, steps } = getReaderFlipToolbarElements()
+    if (!header || !steps) return
+    clearReaderFlipToolbarTimer()
+    if (!isReaderFlipModeActive()) {
+        restoreReaderHeaderToolbar()
+        return
+    }
+    header.style.opacity = Alpine.store('flip').autoHideToolbar ? '0.9' : '1'
+    steps.style.opacity = Alpine.store('flip').autoHideToolbar ? '0.9' : '1'
+    header.style.transform = 'translateY(0)'
+    steps.style.transform = 'translateY(0)'
+}
+
+function hideReaderFlipToolbar() {
+    const { header, steps } = getReaderFlipToolbarElements()
+    if (!header || !steps || !isReaderFlipModeActive() || !Alpine.store('flip').autoHideToolbar) return
+    header.style.opacity = '0'
+    steps.style.opacity = '0'
+    header.style.transform = 'translateY(-100%)'
+    steps.style.transform = 'translateY(100%)'
+}
+
+function syncReaderFlipToolbar() {
+    clearReaderFlipToolbarTimer()
+    if (!isReaderFlipModeActive()) {
+        restoreReaderPageLayout()
+        restoreReaderHeaderToolbar()
+        return
+    }
+    applyReaderFlipLayout()
+    showReaderFlipToolbar()
+    if (Alpine.store('flip').autoHideToolbar) {
+        readerState.flip.toolbarHideTimer = setTimeout(hideReaderFlipToolbar, 1000)
+    }
+}
+
+function readerFlipPointInRect(rect, x, y) {
+    const util = getReaderFlipInteractionUtils()
+    return util?.isPointInRect ? util.isPointInRect(rect, x, y) : Boolean(rect && x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
+}
+
+function onReaderFlipDocumentMouseMove(event) {
+    if (!isReaderFlipModeActive()) return
+    const { header, steps } = getReaderFlipToolbarElements()
+    const x = event.clientX
+    const y = event.clientY
+    const nearHeader = Alpine.store('flip').autoHideToolbar ? y <= 80 : readerFlipPointInRect(header?.getBoundingClientRect(), x, y)
+    const nearSteps = Alpine.store('flip').autoHideToolbar ? y >= window.innerHeight - 80 : readerFlipPointInRect(steps?.getBoundingClientRect(), x, y)
+    if (getInReaderSettingArea(event) || nearHeader || nearSteps) {
+        showReaderFlipToolbar()
+    } else {
+        hideReaderFlipToolbar()
     }
 }
 
@@ -337,7 +1019,7 @@ function onReaderClick(event) {
 }
 
 function onReaderMouseMove(event) {
-    event.currentTarget.style.cursor = getInReaderSettingArea(event) ? 'pointer' : ''
+    event.currentTarget.style.cursor = getInReaderSettingArea(event) ? getReaderCursorStyle('settings') : ''
 }
 
 function initReaderGestures() {
@@ -372,14 +1054,15 @@ function getReaderBackTopButton() {
 function initReaderInput() {
     const input = document.getElementById('ReaderArchiveInput')
     const dropArea = document.getElementById('ReaderDropArea')
-    const chooseAnotherButton = document.getElementById('ReaderChooseAnotherButton')
     if (!input || !dropArea) return
 
     input.addEventListener('change', () => openReaderArchive(input.files?.[0]))
-    if (chooseAnotherButton) {
-        chooseAnotherButton.addEventListener('click', () => {
-            input.value = ''
-            input.click()
+    const headerTitle = getReaderHeaderTitle()
+    if (headerTitle) {
+        headerTitle.addEventListener('click', () => {
+            if (readerState.book) {
+                chooseReaderArchiveAgain()
+            }
         })
     }
     for (const eventName of ['dragenter', 'dragover']) {
@@ -421,6 +1104,7 @@ function initReaderResize() {
         Alpine.store('scroll').imageMaxWidth = window.innerWidth
         Alpine.store('global').checkOrientation()
         scheduleReaderCenterUpdate()
+        updateReaderFlipImages()
     }
     onResize()
     window.addEventListener('resize', onResize)
@@ -428,7 +1112,8 @@ function initReaderResize() {
 
 document.addEventListener('DOMContentLoaded', () => {
     Alpine.store('global').onlineBook = false
-    Alpine.store('global').readMode = 'infinite_scroll'
+    setReaderDefaultHeaderTitle()
+    normalizeReaderReadMode()
     loadArchiveWasm().catch((error) => {
         console.error('[reader] preload wasm failed:', error)
         setReaderStatus(String(error?.message || error), 'error')
@@ -437,4 +1122,31 @@ document.addEventListener('DOMContentLoaded', () => {
     initReaderBackTop()
     initReaderResize()
     initReaderGestures()
+})
+
+window.addEventListener('keydown', (event) => {
+    if (Alpine.store('global').readMode !== 'page_flip' || !readerState.book) return
+    const key = event.key.toLowerCase()
+    if (key === 'arrowleft' || key === 'h' || key === ',' || key === '<' || key === 'pageup') {
+        event.preventDefault()
+        if (Alpine.store('flip').mangaMode) {
+            toNextReaderFlipPage()
+        } else {
+            toPreviousReaderFlipPage()
+        }
+    }
+    if (key === 'arrowright' || key === 'l' || key === '.' || key === '>' || key === 'pagedown' || key === ' ') {
+        event.preventDefault()
+        if (Alpine.store('flip').mangaMode) {
+            toPreviousReaderFlipPage()
+        } else {
+            toNextReaderFlipPage()
+        }
+    }
+    if (key === 'home') {
+        jumpReaderFlipPage(1)
+    }
+    if (key === 'end') {
+        jumpReaderFlipPage(Alpine.store('global').allPageNum)
+    }
 })

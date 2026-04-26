@@ -49,7 +49,17 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"keywords\" content=\"Comigo:Manga Reader Online 在线漫画阅读器\"><meta name=\"description\" content=\"Simple Manga Reader in Linux，Windows，Mac OS\"><!--TODO:PWA模式  <link rel=\"manifest\" href=\"/images/manifest.webmanifest\"/>  --><link rel=\"apple-touch-icon\" href=\"/images/favicon.png\"><link rel=\"shortcut icon\" href=\"/images/favicon.ico\" type=\"image/x-icon\"><link rel=\"icon\" href=\"/images/favicon.png\" sizes=\"any\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"keywords\" content=\"Comigo:Manga Reader Online 在线漫画阅读器\"><meta name=\"description\" content=\"Simple Manga Reader in Linux，Windows，Mac OS\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if c != nil && c.Request().URL.Path == "/reader" && c.QueryParam("static") == "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<link rel=\"manifest\" href=\"/images/manifest.webmanifest\"><meta name=\"theme-color\" content=\"#076c0a\"><meta name=\"mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-title\" content=\"Comigo Reader\"><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"default\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<link rel=\"apple-touch-icon\" href=\"/images/favicon.png\"><link rel=\"shortcut icon\" href=\"/images/favicon.ico\" type=\"image/x-icon\"><link rel=\"icon\" href=\"/images/favicon.png\" sizes=\"any\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -57,7 +67,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</head><!-- x-bind: Alpine.js的语法，全局主题从 $store.global.theme 读取 --><!-- 主题值通过 Alpine Persist 持久化到 localStorage，key 为 global.theme --><body x-data=\"{}\" x-bind:data-theme=\"$store.global.theme\" x-bind:style=\"'--custom-base-100:' + $store.global.customBase100 + ';--custom-base-300:' + $store.global.customBase300 + ';--custom-base-content:' + $store.global.customBaseContent + ';'\" class=\"text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between h-full min-h-screen w-full max-w-full p-0 m-0 font-sans\" :class=\"$store.global.getMainAreaBgClass()\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</head><!-- x-bind: Alpine.js的语法，全局主题从 $store.global.theme 读取 --><!-- 主题值通过 Alpine Persist 持久化到 localStorage，key 为 global.theme --><body x-data=\"{}\" x-bind:data-theme=\"$store.global.theme\" x-bind:style=\"'--custom-base-100:' + $store.global.customBase100 + ';--custom-base-300:' + $store.global.customBase300 + ';--custom-base-content:' + $store.global.customBaseContent + ';'\" class=\"text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between h-full min-h-screen w-full max-w-full p-0 m-0 font-sans\" :class=\"$store.global.getMainAreaBgClass()\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,7 +79,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</body><!-- 导入js代码,包含htmx、Alpine等第三方库  -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</body><!-- 导入js代码,包含htmx、Alpine等第三方库  -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -77,7 +87,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- 导入 Plugins  -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<!-- 导入 Plugins  -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -85,7 +95,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

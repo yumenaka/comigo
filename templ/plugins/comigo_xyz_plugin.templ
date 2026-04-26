@@ -357,6 +357,16 @@ templ ComigoXYZPlugin(c echo.Context) {
 											</svg>
 										</button>
 									</div>
+									<!-- 纯离线 reader / PWA 入口。主页不能直接安装 /reader 的 PWA，跳转后由 reader 页面处理添加。 -->
+									<div class="mt-6 p-4 border border-blue-300 dark:border-blue-600 rounded-lg bg-blue-50 dark:bg-blue-950/30">
+										<p class="w-full text-base-content dark:text-white text-left mb-3 font-semibold" x-text="i18next.t('comigo_xyz_no_install_title')">你甚至不用安装：</p>
+										<a
+											href="/reader"
+											class="inline-flex items-center justify-center px-5 py-3 border bg-blue-500 text-black dark:text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+										>
+											<span x-text="i18next.t('comigo_xyz_try_offline_or_add_pwa')">尝试纯离线模式 或 添加为PWA应用</span>
+										</a>
+									</div>
 								</div>
 							</div>
 							<!-- 功能特性 - 使用数据驱动方式生成 -->

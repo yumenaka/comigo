@@ -172,6 +172,16 @@ func EmbedStaticFiles() {
 		logger.Infof("%s", err)
 	}
 	engine.StaticFS("/images/", assets.ImagesFS)
+	// PWA manifest 使用标准 MIME，避免部分浏览器拒绝识别安装信息。
+	engine.GET("/images/manifest.webmanifest", func(c echo.Context) error {
+		data, err := fs.ReadFile(assets.Images, "images/manifest.webmanifest")
+		if err != nil {
+			return err
+		}
+		return c.Blob(http.StatusOK, "application/manifest+json", data)
+	})
+	// PWA Service Worker 必须挂在根路径，才能覆盖 /reader 页面。
+	engine.FileFS("/reader-sw.js", "pwa/reader-sw.js", assets.Pwa)
 	// 暴露 robots.txt，供搜索引擎按标准路径读取
 	engine.FileFS("/robots.txt", "robots.txt", assets.Robots)
 }

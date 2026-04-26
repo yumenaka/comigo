@@ -26,6 +26,7 @@ templ ShelfHeaderLeft(c echo.Context) {
 	if shouldShowShelfReturnIcon(c) {
 		@common.ReturnButton(getShelfReturnURL(c))
 	}
+	@common.ReaderButton()
 	@common.FullScreenOfflineButton()
 	@common.ServerSettingsButton()
 	@common.ReSortIcon()

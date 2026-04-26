@@ -13,7 +13,7 @@ templ Header(left templ.Component, center templ.Component, right templ.Component
 	<header
 		id="header"
 		class="z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400"
-		:class="{ 'absolute top-0 ': window.location.pathname.startsWith(`/flip`) && $store.flip.autoHideToolbar && $store.global.readMode === 'page_flip','mx-auto bg-base-100/50': window.location.pathname.startsWith(`/flip`) && $store.global.readMode === 'page_flip'}"
+		:class="{ 'absolute top-0 ': (window.location.pathname.startsWith(`/flip`) || window.ComiGoReaderMode) && $store.flip.autoHideToolbar && $store.global.readMode === 'page_flip','mx-auto bg-base-100/50': (window.location.pathname.startsWith(`/flip`) || window.ComiGoReaderMode) && $store.global.readMode === 'page_flip'}"
 	>
 		<div class="flex flex-row">
 			if left != nil {
@@ -57,8 +57,8 @@ templ HeaderBackSortLeft(returnUrl string) {
 templ HeaderSettingsLeft(returnUrl string) {
 	@ReturnButton(returnUrl)
 	@FullScreenOfflineButton()
-	@UploadButton()
 	@ReaderButton()
+	@UploadButton()
 	@HeaderPlaceholder()
 }
 
@@ -115,7 +115,7 @@ templ QRCodeButton() {
 	<div
 		data-modal-target="qrcode-modal"
 		data-modal-toggle="qrcode-modal"
-		x-show="$store.global.onlineBook"
+		x-show="$store.global.onlineBook || (window.ComiGoReaderMode && (window.location.protocol === 'http:' || window.location.protocol === 'https:'))"
 		class="hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 	>
 		@svg.QRCode()
@@ -126,7 +126,7 @@ templ QRCodeButton() {
 templ FullScreenOnlineButton() {
 	<div
 		id="FullScreenIcon"
-		x-show="$store.global.onlineBook"
+		x-show="$store.global.onlineBook || (window.ComiGoReaderMode && !window.location.href.startsWith('file://') && !window.location.href.startsWith('content://'))"
 		onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
 		class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 	>

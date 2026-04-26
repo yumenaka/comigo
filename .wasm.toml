@@ -18,7 +18,7 @@ cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github
 post_cmd = []
 
 # 默认启动示例书库，使用 1235 端口以便和普通 .air.toml 的 1234 端口并存。
-args_bin = ["./test", "--port", "1235", "--debug"]
+args_bin = ["./test", "--port", "1235", "--tailscale", "--debug"]
 entrypoint = ["./test/.temp/comi-wasm"]
 
 delay = 3000

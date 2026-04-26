@@ -38,7 +38,55 @@ func ReaderPage(c echo.Context) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\twindow.ComiGoReaderMode = true;\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\twindow.ComiGoReaderMode = true;\n\t\twindow.ComiGoReaderCursorImages = {\n\t\t\tsettings: \"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var2, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(assets.GetImageDataSrc("SettingsOutline.png"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 16, Col: 62}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\",\n\t\t\tprohibited: \"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var3, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(assets.GetImageDataSrc("Prohibited28Filled.png"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 17, Col: 67}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\",\n\t\t\tleft: \"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var4, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(assets.GetImageDataSrc("ArrowLeft.png"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 18, Col: 52}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\",\n\t\t\tright: \"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var5, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(assets.GetImageDataSrc("ArrowRight.png"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 19, Col: 54}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\",\n\t\t};\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -54,17 +102,25 @@ func ReaderPage(c echo.Context) templ.Component {
 		}
 		templ_7745c5c3_Err = common.Header(
 			common.HeaderBackLeft("/"),
-			common.HeaderTextTitle(locale.GetString("reader_title")),
+			ReaderHeaderTitle(locale.GetString("reader_title")),
 			common.HeaderDefaultRight(),
 		).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = MainArea().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = MainArea(c).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div id=\"ReaderFooter\" class=\"w-full\" x-show=\"$store.global.readMode !== 'page_flip'\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = common.Footer(config.GetVersion()).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -80,7 +136,8 @@ func ReaderPage(c echo.Context) templ.Component {
 	})
 }
 
-func MainArea() templ.Component {
+// ReaderHeaderTitle 是 reader 页专用标题。加载本地书后由 reader.js 改成书名，并可点击重新选择压缩包。
+func ReaderHeaderTitle(title string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -96,12 +153,146 @@ func MainArea() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var2 == nil {
-			templ_7745c5c3_Var2 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<main id=\"ReaderRoot\" class=\"flex flex-col items-center justify-start flex-1 w-full max-w-full text-base-content\"><section id=\"ReaderFilePicker\" class=\"flex flex-col items-center justify-center w-full max-w-3xl min-h-[60vh] px-4\"><label id=\"ReaderDropArea\" for=\"ReaderArchiveInput\" class=\"flex flex-col items-center justify-center w-full min-h-72 px-6 py-12 text-center border-4 border-dashed rounded cursor-pointer bg-base-100/70 border-gray-400 hover:border-blue-500\"><span class=\"text-xl font-semibold\" x-text=\"i18next.t('reader_select_archive')\">Select archive</span> <span class=\"mt-3 text-sm opacity-80\" x-text=\"i18next.t('reader_select_archive_hint')\">ZIP/CBZ/RAR/CBR, kept in browser</span> <input id=\"ReaderArchiveInput\" type=\"file\" accept=\".zip,.cbz,.rar,.cbr\" class=\"hidden\"></label><div id=\"ReaderStatus\" class=\"w-full mt-4 text-sm text-center opacity-80\"></div></section><section id=\"ReaderShell\" class=\"hidden flex-col items-center justify-start flex-1 w-full max-w-full pt-0\"><div class=\"flex flex-col items-center justify-center w-full gap-2 px-3 py-2 bg-base-100/70\"><div id=\"ReaderBookTitle\" class=\"flex-1 min-w-48 text-sm font-semibold text-center\"></div><button id=\"ReaderChooseAnotherButton\" type=\"button\" class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300\" x-text=\"i18next.t('reader_choose_another_file')\">选择另一个文件</button></div><div id=\"ScrollMainArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content\"></div></section><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button><style>\n\t\t\t.manga_image {\n\t\t\t\tmargin: auto;\n\t\t\t\tbox-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);\n\t\t\t}\n\n\t\t\t.page_hint {\n\t\t\t\tcolor: #413d3d;\n\t\t\t\ttext-shadow:\n\t\t\t\t\t-1px 0 rgb(240, 229, 229),\n\t\t\t\t\t0 1px rgb(253, 242, 242),\n\t\t\t\t\t1px 0 rgb(206, 183, 183),\n\t\t\t\t\t0 -1px rgb(196, 175, 175);\n\t\t\t}\n\t\t</style></main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"flex flex-col items-center justify-center flex-1 min-w-0 p-0 m-0 font-semibold text-center truncate\"><span title=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 43, Col: 16}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" id=\"headerTitle\" class=\"text-lg font-semibold truncate\" data-reader-default-title=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 46, Col: 36}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" data-reader-version=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(" - Comigo " + config.GetVersion())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 47, Col: 59}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 48, Col: 10}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func MainArea(c echo.Context) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<main id=\"ReaderRoot\" class=\"flex flex-col items-center justify-start flex-1 w-full max-w-full text-base-content\"><section id=\"ReaderFilePicker\" class=\"flex flex-col items-center justify-center w-full max-w-3xl min-h-[60vh] px-4\"><label id=\"ReaderDropArea\" for=\"ReaderArchiveInput\" class=\"flex flex-col items-center justify-center w-full min-h-72 px-6 py-12 text-center border-4 border-dashed rounded cursor-pointer bg-base-100/70 border-gray-400 hover:border-blue-500\"><span class=\"text-xl font-semibold\" x-text=\"i18next.t('reader_select_archive')\">Select archive</span> <span class=\"mt-3 text-sm opacity-80\" x-text=\"i18next.t('reader_select_archive_hint')\">ZIP/CBZ/RAR/CBR, kept in browser</span> <input id=\"ReaderArchiveInput\" type=\"file\" accept=\".zip,.cbz,.rar,.cbr\" class=\"hidden\"></label> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if c.QueryParam("static") == "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"flex flex-row flex-wrap items-center justify-center w-full gap-2 mt-4\"><button id=\"ReaderInstallPWAButton\" type=\"button\" class=\"hidden h-10 px-3 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-50\" x-text=\"i18next.t('reader_install_pwa_app')\">添加为PWA应用</button> <a href=\"/reader?static=comigo-reader.html\" download=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("comigo-" + config.GetVersion() + ".html")
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 87, Col: 58}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"inline-flex items-center justify-center h-10 px-3 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\">便携网页</a></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div id=\"ReaderStatus\" class=\"w-full mt-4 text-sm text-center opacity-80\"></div></section><section id=\"ReaderShell\" class=\"hidden flex-col items-center justify-start flex-1 w-full max-w-full pt-0\"><div id=\"ScrollMainArea\" class=\"flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content\"></div><div id=\"ReaderFlipArea\" class=\"hidden flex-col items-start justify-start flex-1 w-full h-[calc(100vh-7rem)] min-h-[60vh] m-0 p-0 text-base-content\"><div id=\"reader-flip-slider-container\" class=\"slider_container w-full h-full flex justify-center item-start overflow-hidden flex-row m-0 p-0\"><div id=\"reader-flip-slider\" class=\"flex transition-transform duration-300 ease-out w-full h-full justify-center item-start\"><div id=\"reader-flip-left-slide\" draggable=\"false\" class=\"slide w-full h-full flex justify-center item-start absolute\"></div><div id=\"reader-flip-middle-slide\" class=\"slide w-full h-full flex justify-center item-start\"><img id=\"ReaderFlipSingleImage\" x-show=\"!$store.flip.doublePageMode\" draggable=\"false\" :class=\"$store.global.isPortrait? 'object-contain w-auto max-w-full h-screen':'object-contain h-screen w-auto max-w-full'\"><div x-show=\"$store.flip.doublePageMode\" class=\"slider_container flex flex-row w-full h-screen m-0 p-0 justify-center-safe item-start\"><img id=\"ReaderFlipDoubleImageLeft\" draggable=\"false\" x-show=\"$store.global.nowPageNum < $store.global.allPageNum\" class=\"select-none object-contain m-0 max-w-1/2 w-auto h-auto max-h-screen grow-0\"> <img id=\"ReaderFlipDoubleImageRight\" draggable=\"false\" class=\"select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0\"></div></div><div id=\"reader-flip-right-slide\" draggable=\"false\" class=\"slide w-full h-full flex justify-center item-start absolute\"></div></div></div></div><div id=\"ReaderFlipStepsRangeArea\" @click.stop=\"\" x-show=\"$store.global.readMode === 'page_flip' && $store.global.allPageNum > 0\" class=\"hidden w-5/6 h-12 px-4 md:px-8 overflow-visible font-semibold StepsRangeArea rounded-xl drop-shadow-lg self-center-safe bg-base-100 text-base-content toolbar backdrop-blur-3xl\" :class=\"($store.flip.autoHideToolbar? 'fixed bottom-0 flex flex-col justify-center':'flex flex-col justify-center bg-base-100/50')+($store.flip.mangaMode?' manga-mode': '')\"><div class=\"relative w-full mt-0 self-center-safe\"><input id=\"ReaderFlipStepsRange\" class=\"slider-base w-full\" type=\"range\" min=\"1\" x-data=\"{\n\t\t\t\t\t\t\tinitPageNum: $store.flip.mangaMode ? ($store.global.allPageNum - $store.global.nowPageNum + 1) : $store.global.nowPageNum,\n\t\t\t\t\t\t\tupdateProgress() {\n\t\t\t\t\t\t\t\tconst allPageNum = $store.global.allPageNum;\n\t\t\t\t\t\t\t\tconst nowPageNum = $store.global.nowPageNum;\n\t\t\t\t\t\t\t\tthis.initPageNum = $store.flip.mangaMode ? (allPageNum - nowPageNum + 1) : nowPageNum;\n\t\t\t\t\t\t\t\tconst percent = allPageNum <= 1 ? 0 : ((this.initPageNum - 1) / (allPageNum - 1)) * 100;\n\t\t\t\t\t\t\t\t$el.style.setProperty('--value-percent', percent + '%');\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\" x-init=\"\n\t\t\t\t\t\t\t$watch('$store.global.nowPageNum', () => updateProgress());\n\t\t\t\t\t\t\t$watch('$store.global.allPageNum', () => updateProgress());\n\t\t\t\t\t\t\t$watch('$store.flip.mangaMode', () => updateProgress());\n\t\t\t\t\t\t\tupdateProgress();\n\t\t\t\t\t\t\" step=\"1\" :max=\"$store.global.allPageNum\" x-model=\"initPageNum\" @input=\"initPageNum = $event.target.value; window.ComiGoReader?.inputFlipPage($event); updateProgress();\" @change=\"initPageNum = $event.target.value; window.ComiGoReader?.inputFlipPage($event); updateProgress();\"><div class=\"absolute w-full h-2 pointer-events-none\" style=\"bottom: 2px;\"><template x-for=\"i in $store.global.allPageNum\" :key=\"i\"><div class=\"absolute\" x-data=\"{\n\t\t\t\t\t\t\t\t\tgetTickStyle(i, allPageNum, mangaMode) {\n\t\t\t\t\t\t\t\t\t\tconst position = allPageNum <= 1 ? 0 : (mangaMode\n\t\t\t\t\t\t\t\t\t\t\t? (allPageNum - i) / (allPageNum - 1) * 100\n\t\t\t\t\t\t\t\t\t\t\t: (i - 1) / (allPageNum - 1) * 100);\n\t\t\t\t\t\t\t\t\t\treturn `left: ${position}%; transform: translateX(-50%);`;\n\t\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\t\tgetTickClass(i, allPageNum) {\n\t\t\t\t\t\t\t\t\t\tif (i === 1 || i === allPageNum) {\n\t\t\t\t\t\t\t\t\t\t\treturn 'h-2.5 w-[1.5px] bg-gray-900 rounded-xs';\n\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\tconst interval = allPageNum < 50 ? 5 : 10;\n\t\t\t\t\t\t\t\t\t\tif (i % interval === 0) {\n\t\t\t\t\t\t\t\t\t\t\treturn 'h-1 w-[1.5px] bg-gray-900 rounded-xs';\n\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\treturn 'h-1 w-[0.5px] bg-gray-600';\n\t\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\t\tshouldShowLabel(i, allPageNum) {\n\t\t\t\t\t\t\t\t\t\tif (i === 1 || i === allPageNum) return true;\n\t\t\t\t\t\t\t\t\t\tconst minMargin = allPageNum >= 100 ? 9 : allPageNum >= 50 ? 5 : 3;\n\t\t\t\t\t\t\t\t\t\tif (i >= allPageNum - minMargin) return false;\n\t\t\t\t\t\t\t\t\t\tconst interval = allPageNum < 50 ? 5 : allPageNum < 100 ? 10 : 20;\n\t\t\t\t\t\t\t\t\t\treturn i % interval === 0;\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t}\" :style=\"getTickStyle(i, $store.global.allPageNum, $store.flip.mangaMode)\"><div :id=\"i\" :class=\"getTickClass(i, $store.global.allPageNum)\"></div><template x-if=\"shouldShowLabel(i, $store.global.allPageNum)\"><div class=\"text-xs text-center mb-0\" style=\"position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);\" x-text=\"i\"></div></template></div></template></div></div></div><div x-show=\"$store.flip.showPageNum && $store.global.readMode === 'page_flip'\" class=\"fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10\" x-text=\"$store.global.nowPageNum+'/'+$store.global.allPageNum\"></div></section><button id=\"BackTopButton\" style=\"display: none\" class=\"fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\"><path d=\"M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z\" fill=\"currentColor\"></path></svg></button><style>\n\t\t\t#header,\n\t\t\t#ReaderFlipStepsRangeArea {\n\t\t\t\topacity: 1;\n\t\t\t\ttransition:\n\t\t\t\t\topacity 0.3s ease-in-out,\n\t\t\t\t\ttransform 0.3s ease-in-out;\n\t\t\t}\n\n\t\t\t.slider-base {\n\t\t\t\t-webkit-appearance: none;\n\t\t\t\tappearance: none;\n\t\t\t\theight: 16px;\n\t\t\t\toutline: none;\n\t\t\t\tborder-radius: 2px;\n\t\t\t\tbackground: transparent;\n\t\t\t}\n\n\t\t\t.slider-base::-webkit-slider-runnable-track {\n\t\t\t\tbackground: linear-gradient(\n\t\t\t\t\tto right,\n\t\t\t\t\t#3b82f6 0%,\n\t\t\t\t\t#3b82f6 var(--value-percent, 0%),\n\t\t\t\t\twhite var(--value-percent, 0%),\n\t\t\t\t\twhite 100%\n\t\t\t\t);\n\t\t\t\theight: 16px;\n\t\t\t\tborder-radius: 2px;\n\t\t\t}\n\n\t\t\t.slider-base::-moz-range-track {\n\t\t\t\tbackground: linear-gradient(\n\t\t\t\t\tto right,\n\t\t\t\t\t#3b82f6 0%,\n\t\t\t\t\t#3b82f6 var(--value-percent, 0%),\n\t\t\t\t\twhite var(--value-percent, 0%),\n\t\t\t\t\twhite 100%\n\t\t\t\t);\n\t\t\t\theight: 16px;\n\t\t\t\tborder-radius: 2px;\n\t\t\t}\n\n\t\t\t.manga-mode .slider-base::-webkit-slider-runnable-track {\n\t\t\t\tbackground: linear-gradient(\n\t\t\t\t\tto right,\n\t\t\t\t\twhite 0%,\n\t\t\t\t\twhite var(--value-percent, 0%),\n\t\t\t\t\t#3b82f6 var(--value-percent, 0%),\n\t\t\t\t\t#3b82f6 100%\n\t\t\t\t);\n\t\t\t}\n\n\t\t\t.manga-mode .slider-base::-moz-range-track {\n\t\t\t\tbackground: linear-gradient(\n\t\t\t\t\tto right,\n\t\t\t\t\twhite 0%,\n\t\t\t\t\twhite var(--value-percent, 0%),\n\t\t\t\t\t#3b82f6 var(--value-percent, 0%),\n\t\t\t\t\t#3b82f6 100%\n\t\t\t\t) !important;\n\t\t\t\theight: 16px;\n\t\t\t\tborder-radius: 2px;\n\t\t\t}\n\n\t\t\t@supports (-moz-appearance: none) {\n\t\t\t\t.slider-base {\n\t\t\t\t\tbackground: transparent !important;\n\t\t\t\t}\n\n\t\t\t\t.slider-base::-moz-range-progress {\n\t\t\t\t\tbackground: #3b82f6 !important;\n\t\t\t\t\theight: 16px;\n\t\t\t\t\tborder-radius: 2px;\n\t\t\t\t}\n\n\t\t\t\t.slider-base::-moz-range-track {\n\t\t\t\t\tbackground: white !important;\n\t\t\t\t\theight: 16px;\n\t\t\t\t\tborder-radius: 2px;\n\t\t\t\t}\n\n\t\t\t\t.manga-mode .slider-base {\n\t\t\t\t\tbackground: transparent !important;\n\t\t\t\t}\n\n\t\t\t\t.manga-mode .slider-base::-moz-range-progress {\n\t\t\t\t\tbackground: white !important;\n\t\t\t\t\theight: 16px;\n\t\t\t\t\tborder-radius: 2px;\n\t\t\t\t}\n\n\t\t\t\t.manga-mode .slider-base::-moz-range-track {\n\t\t\t\t\tbackground: #3b82f6 !important;\n\t\t\t\t\theight: 16px;\n\t\t\t\t\tborder-radius: 2px;\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t.slider-base::-webkit-slider-thumb {\n\t\t\t\t-webkit-appearance: none;\n\t\t\t\tappearance: none;\n\t\t\t\twidth: 18px;\n\t\t\t\theight: 18px;\n\t\t\t\tbackground: white;\n\t\t\t\tborder: 1.5px solid #3b82f6;\n\t\t\t\tborder-radius: 10%;\n\t\t\t\tcursor: pointer;\n\t\t\t}\n\n\t\t\t.slider-base::-moz-range-thumb {\n\t\t\t\twidth: 18px;\n\t\t\t\theight: 18px;\n\t\t\t\tbackground: white;\n\t\t\t\tborder: 1.5px solid #3b82f6;\n\t\t\t\tborder-radius: 10%;\n\t\t\t\tcursor: pointer;\n\t\t\t}\n\n\t\t\t#reader-flip-slider-container {\n\t\t\t\twill-change: transform;\n\t\t\t\ttouch-action: pan-y;\n\t\t\t}\n\n\t\t\t#reader-flip-slider {\n\t\t\t\tuser-select: none;\n\t\t\t}\n\n\t\t\t.slide {\n\t\t\t\tflex-shrink: 0;\n\t\t\t\ttransform: translateX(0);\n\t\t\t}\n\n\t\t\t#reader-flip-left-slide {\n\t\t\t\ttransform: translateX(-100%);\n\t\t\t}\n\n\t\t\t#reader-flip-middle-slide {\n\t\t\t\ttransform: translateX(0);\n\t\t\t}\n\n\t\t\t#reader-flip-right-slide {\n\t\t\t\ttransform: translateX(100%);\n\t\t\t}\n\n\t\t\t.manga_image {\n\t\t\t\tmargin: auto;\n\t\t\t\tbox-shadow: 0px 6px 3px 0px rgba(0, 0, 0, 0.19);\n\t\t\t}\n\n\t\t\t.page_hint {\n\t\t\t\tcolor: #413d3d;\n\t\t\t\ttext-shadow:\n\t\t\t\t\t-1px 0 rgb(240, 229, 229),\n\t\t\t\t\t0 1px rgb(253, 242, 242),\n\t\t\t\t\t1px 0 rgb(206, 183, 183),\n\t\t\t\t\t0 -1px rgb(196, 175, 175);\n\t\t\t}\n\t\t</style></main>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// ReaderReadModeSwitchButton 切换 reader 页本地阅读模式，只保留无限卷轴与翻页两个候选项。
+func ReaderReadModeSwitchButton() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var13 == nil {
+			templ_7745c5c3_Var13 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div x-data=\"{\n\t\t\treadModeSwitchOptions: {\n\t\t\t\tinfinite_scroll: ['page_flip'],\n\t\t\t\tpaged_scroll: ['infinite_scroll', 'page_flip'],\n\t\t\t\tpage_flip: ['infinite_scroll'],\n\t\t\t}\n\t\t}\" class=\"flex flex-row justify-center items-center w-full mt-2 mb-2 pb-1 gap-2 border-2 border-gray-500 dark:border-gray-200 rounded relative\"><span class=\"absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content\" x-text=\"i18next.t('switch')\">切换</span><template x-for=\"mode in readModeSwitchOptions[$store.global.readMode] ?? ['infinite_scroll', 'page_flip']\" :key=\"mode\"><button type=\"button\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300\" @click=\"window.ComiGoReader?.setReadMode(mode)\" x-text=\"i18next.t(mode+'_button')\" x-bind:aria-label=\"i18next.t(mode+'_button')\"></button></template></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -125,18 +316,16 @@ func DrawerSlot(c echo.Context) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if c.QueryParam("static") == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"w-full mt-2 mb-2 pb-1 flex flex-row flex-wrap justify-center items-center border-2 border-gray-500 dark:border-gray-200 rounded relative\"><span class=\"absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content\" x-text=\"i18next.t('download')\">下载</span> <a href=\"/reader?static=reader.html\" download=\"comigo-reader.html\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\">便携网页</a></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		templ_7745c5c3_Err = ReaderReadModeSwitchButton().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- 自动滚动插件可以直接复用卷轴页面滚动行为 --><div class=\"w-full\" x-data=\"{ \n\t\tautoScrollEnabled: false,\n\t\tautoScrollInterval: null,\n\t\tintervalSeconds: $persist(3).as('reader.autoScrollIntervalSeconds'),\n\t\tscrollPercent: $persist(95).as('reader.autoScrollPercent'),\n\t\tstartAutoScroll() {\n\t\t\tif (this.autoScrollInterval) clearInterval(this.autoScrollInterval);\n\t\t\tconst seconds = parseInt(this.intervalSeconds) || 3;\n\t\t\tconst percent = parseInt(this.scrollPercent) || 95;\n\t\t\tthis.autoScrollInterval = setInterval(() => {\n\t\t\t\tconst scrollHeight = document.documentElement.scrollHeight;\n\t\t\t\tconst scrollTop = window.scrollY || document.documentElement.scrollTop;\n\t\t\t\tconst clientHeight = window.innerHeight;\n\t\t\t\tif (scrollTop + clientHeight >= scrollHeight - 10) {\n\t\t\t\t\tclearInterval(this.autoScrollInterval);\n\t\t\t\t\tthis.autoScrollInterval = null;\n\t\t\t\t\tthis.autoScrollEnabled = false;\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\twindow.scrollBy({ top: window.innerHeight * percent / 100, behavior: 'smooth' });\n\t\t\t}, seconds * 1000);\n\t\t}\n\t}\"><button type=\"button\" @click=\"autoScrollEnabled = !autoScrollEnabled; autoScrollEnabled ? startAutoScroll() : (clearInterval(autoScrollInterval), autoScrollInterval = null)\" :class=\"autoScrollEnabled ? 'bg-green-300 hover:bg-green-400' : 'bg-blue-200 hover:bg-indigo-300'\" class=\"w-full mb-2 text-sm text-center inline-flex items-center justify-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out\"><span x-text=\"autoScrollEnabled ? i18next.t('auto_flip_pause_scroll') : i18next.t('auto_flip_start_scroll')\"></span></button><div class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('auto_flip_interval') + ' ' + intervalSeconds + ' ' + i18next.t('auto_flip_seconds')\"></label> <input type=\"range\" min=\"1\" max=\"60\" x-model.number=\"intervalSeconds\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><div class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('auto_scroll_distance') + ' ' + scrollPercent + '%'\"></label> <input type=\"range\" min=\"50\" max=\"150\" x-model.number=\"scrollPercent\" step=\"5\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div></div><label class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.scroll.showPageNum\" class=\"sr-only peer\" checked><div class=\"relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"i18next.t('showPageNum')\"></span></label><div class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('margin_bottom_on_scroll_mode') + $store.scroll.marginBottomOnScrollMode+'px'\"></label> <input type=\"range\" min=\"0\" max=\"100\" x-model=\"$store.scroll.marginBottomOnScrollMode\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 range-lg\"></div><div x-show=\"$store.global.isPortrait\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('portrait_width_percent') + $store.scroll.portraitWidthPercent+'%'\"></label> <input type=\"range\" min=\"10\" max=\"100\" x-model=\"$store.scroll.portraitWidthPercent\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><label x-show=\"$store.global.isLandscape\" class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.scroll.widthUseFixedValue\" class=\"sr-only peer\" checked><div class=\"relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"$store.scroll.widthUseFixedValue?i18next.t('width_use_fixed_value'):i18next.t('width_use_percent')\"></span></label><div x-show=\"$store.global.isLandscape && !$store.scroll.widthUseFixedValue\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('single_page_width') + $store.scroll.singlePageWidth_Percent+'%'\"></label> <input type=\"range\" min=\"10\" max=\"100\" x-model=\"$store.scroll.singlePageWidth_Percent\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><div x-show=\"$store.global.isLandscape && !$store.scroll.widthUseFixedValue\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('double_page_width') + $store.scroll.doublePageWidth_Percent+'%'\"></label> <input type=\"range\" min=\"10\" max=\"100\" x-model=\"$store.scroll.doublePageWidth_Percent\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><div x-show=\"$store.global.isLandscape && $store.scroll.widthUseFixedValue\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('single_page_width') + $store.scroll.singlePageWidth_PX+' px'\"></label> <input type=\"range\" min=\"100\" max=\"1600\" x-model=\"$store.scroll.singlePageWidth_PX\" step=\"20\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><div x-show=\"$store.global.isLandscape && $store.scroll.widthUseFixedValue\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('double_page_width') + $store.scroll.doublePageWidth_PX+' px'\"></label> <input type=\"range\" min=\"100\" max=\"1600\" x-model=\"$store.scroll.doublePageWidth_PX\" step=\"20\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<!-- 自动滚动插件可以直接复用卷轴页面滚动行为 --><div x-show=\"$store.global.readMode === 'infinite_scroll'\" class=\"w-full\" x-data=\"{ \n\t\tautoScrollEnabled: false,\n\t\tautoScrollInterval: null,\n\t\tintervalSeconds: $persist(3).as('reader.autoScrollIntervalSeconds'),\n\t\tscrollPercent: $persist(95).as('reader.autoScrollPercent'),\n\t\tstartAutoScroll() {\n\t\t\tif (this.autoScrollInterval) clearInterval(this.autoScrollInterval);\n\t\t\tconst seconds = parseInt(this.intervalSeconds) || 3;\n\t\t\tconst percent = parseInt(this.scrollPercent) || 95;\n\t\t\tthis.autoScrollInterval = setInterval(() => {\n\t\t\t\tconst scrollHeight = document.documentElement.scrollHeight;\n\t\t\t\tconst scrollTop = window.scrollY || document.documentElement.scrollTop;\n\t\t\t\tconst clientHeight = window.innerHeight;\n\t\t\t\tif (scrollTop + clientHeight >= scrollHeight - 10) {\n\t\t\t\t\tclearInterval(this.autoScrollInterval);\n\t\t\t\t\tthis.autoScrollInterval = null;\n\t\t\t\t\tthis.autoScrollEnabled = false;\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\twindow.scrollBy({ top: window.innerHeight * percent / 100, behavior: 'smooth' });\n\t\t\t}, seconds * 1000);\n\t\t}\n\t}\"><button type=\"button\" @click=\"autoScrollEnabled = !autoScrollEnabled; autoScrollEnabled ? startAutoScroll() : (clearInterval(autoScrollInterval), autoScrollInterval = null)\" :class=\"autoScrollEnabled ? 'bg-green-300 hover:bg-green-400' : 'bg-blue-200 hover:bg-indigo-300'\" class=\"w-full mb-2 text-sm text-center inline-flex items-center justify-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out\"><span x-text=\"autoScrollEnabled ? i18next.t('auto_flip_pause_scroll') : i18next.t('auto_flip_start_scroll')\"></span></button><div class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('auto_flip_interval') + ' ' + intervalSeconds + ' ' + i18next.t('auto_flip_seconds')\"></label> <input type=\"range\" min=\"1\" max=\"60\" x-model.number=\"intervalSeconds\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><div class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('auto_scroll_distance') + ' ' + scrollPercent + '%'\"></label> <input type=\"range\" min=\"50\" max=\"150\" x-model.number=\"scrollPercent\" step=\"5\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div></div><div x-show=\"$store.global.readMode === 'page_flip'\" class=\"w-full\"><!-- reader 翻页模式复用 flip store 参数，但不启用在线 WS 同步。 --><label class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.flip.swipeTurn\" class=\"sr-only peer\" checked><div class=\"relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"i18next.t('swipe_turn')\"></span></label> <label class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.flip.wheelFlip\" class=\"sr-only peer\" checked><div class=\"relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"i18next.t('scroll_wheel_flip')\"></span></label> <label class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.flip.mangaMode\" @change=\"window.ComiGoReader?.refreshFlip()\" class=\"sr-only peer\"><div class=\"relative w-11 min-w-[44px] h-6 bg-green-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"$store.flip.mangaMode?i18next.t('manga_mode'):i18next.t('comic_mode')\"></span></label> <label class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.flip.doublePageMode\" @change=\"window.ComiGoReader?.refreshFlip()\" class=\"sr-only peer\"><div class=\"relative w-11 min-w-[44px] h-6 bg-green-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"$store.flip.doublePageMode?i18next.t('double_page_mode'):i18next.t('single_page_mode')\"></span></label> <label class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.flip.showPageNum\" class=\"sr-only peer\"><div class=\"relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"i18next.t('showPageNum')\"></span></label> <label class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.flip.autoHideToolbar\" @change=\"window.ComiGoReader?.showFlipToolbar()\" class=\"sr-only peer\"><div class=\"relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"i18next.t('auto_hide_toolbar')\"></span></label> <label x-show=\"!$store.flip.autoHideToolbar\" class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.flip.autoAlign\" class=\"sr-only peer\"><div class=\"relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"i18next.t('auto_align')\"></span></label></div><label x-show=\"$store.global.readMode === 'infinite_scroll'\" class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.scroll.showPageNum\" class=\"sr-only peer\" checked><div class=\"relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"i18next.t('showPageNum')\"></span></label><div x-show=\"$store.global.readMode === 'infinite_scroll'\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('margin_bottom_on_scroll_mode') + $store.scroll.marginBottomOnScrollMode+'px'\"></label> <input type=\"range\" min=\"0\" max=\"100\" x-model=\"$store.scroll.marginBottomOnScrollMode\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 range-lg\"></div><div x-show=\"$store.global.readMode === 'infinite_scroll' && $store.global.isPortrait\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('portrait_width_percent') + $store.scroll.portraitWidthPercent+'%'\"></label> <input type=\"range\" min=\"10\" max=\"100\" x-model=\"$store.scroll.portraitWidthPercent\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><label x-show=\"$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape\" class=\"inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><input type=\"checkbox\" x-model=\"$store.scroll.widthUseFixedValue\" class=\"sr-only peer\" checked><div class=\"relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600\"></div><span class=\"font-medium ms-3\" x-text=\"$store.scroll.widthUseFixedValue?i18next.t('width_use_fixed_value'):i18next.t('width_use_percent')\"></span></label><div x-show=\"$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && !$store.scroll.widthUseFixedValue\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('single_page_width') + $store.scroll.singlePageWidth_Percent+'%'\"></label> <input type=\"range\" min=\"10\" max=\"100\" x-model=\"$store.scroll.singlePageWidth_Percent\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><div x-show=\"$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && !$store.scroll.widthUseFixedValue\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('double_page_width') + $store.scroll.doublePageWidth_Percent+'%'\"></label> <input type=\"range\" min=\"10\" max=\"100\" x-model=\"$store.scroll.doublePageWidth_Percent\" step=\"1\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><div x-show=\"$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && $store.scroll.widthUseFixedValue\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('single_page_width') + $store.scroll.singlePageWidth_PX+' px'\"></label> <input type=\"range\" min=\"100\" max=\"1600\" x-model=\"$store.scroll.singlePageWidth_PX\" step=\"20\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div><div x-show=\"$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && $store.scroll.widthUseFixedValue\" class=\"relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5\"><label class=\"block w-full mb-0 font-medium\" x-text=\"i18next.t('double_page_width') + $store.scroll.doublePageWidth_PX+' px'\"></label> <input type=\"range\" min=\"100\" max=\"1600\" x-model=\"$store.scroll.doublePageWidth_PX\" step=\"20\" class=\"w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
