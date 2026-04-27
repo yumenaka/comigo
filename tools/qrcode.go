@@ -17,10 +17,10 @@ func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bo
 		protocol = "https://"
 	}
 	localURL := protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr
-	logger.Info(locale.GetString("local_reading") + localURL + etcStr)
+	logger.Info(locale.GetString("local_reading") + localURL)
 	// 打开浏览器
 	if OpenBrowserFlag {
-		go OpenBrowserByURL(protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr)
+		go OpenBrowserByURL(localURL)
 	}
 	if !DisableLAN {
 		printURLAndQRCode(Port, PrintAllPossibleQRCode, ServerHost, protocol, customTLS, autoTLS, etcStr)

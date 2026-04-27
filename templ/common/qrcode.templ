@@ -10,7 +10,7 @@ templ QRCode() {
 			x-data="{ qrcodeSrc: '', qrcodeImageSrc: '' }"
 			x-init="
 			if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-				qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
+				qrcodeSrc = window.location.origin + window.ComiGoPath('/api/qrcode.png') + '?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
 				// 使用 fetch 加载二维码
 				fetch(qrcodeSrc)
 					.then(response => response.text())

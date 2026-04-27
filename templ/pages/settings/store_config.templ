@@ -141,16 +141,19 @@ templ StoreConfigJavaScript() {
 				// 发送添加请求到服务器
 				try {
 					const addValueB64 = window.base64UrlEncodeUtf8(addValue);
-					const response = await fetch("/api/add-array-config", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath("/api/add-array-config"),
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								configName: configName,
+								addValue: addValueB64,
+							}),
 						},
-						body: JSON.stringify({
-							configName: configName,
-							addValue: addValueB64,
-						}),
-					});
+					);
 
 					// 检查响应状态
 					if (!response.ok) {
@@ -223,7 +226,7 @@ templ StoreConfigJavaScript() {
 				showToast(i18next.t("rescan_store_in_progress"), "info");
 
 				try {
-					const response = await fetch("/api/rescan-store", {
+					const response = await fetch(window.ComiGoPath("/api/rescan-store"), {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
@@ -285,7 +288,7 @@ templ StoreConfigJavaScript() {
 				}
 
 				try {
-					const response = await fetch("/api/delete-store", {
+					const response = await fetch(window.ComiGoPath("/api/delete-store"), {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",

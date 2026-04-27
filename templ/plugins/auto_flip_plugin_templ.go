@@ -9,9 +9,10 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"strings"
+
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
-	"strings"
 )
 
 // AutoFlipPlugin 自动翻页插件（仅支持翻页模式）
@@ -36,7 +37,7 @@ func AutoFlipPlugin(c echo.Context) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_flip") && strings.HasPrefix(c.Request().URL.Path, "/flip/") {
+		if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_flip") && strings.HasPrefix(config.StripBasePath(c.Request().URL.Path), "/flip/") {
 			if config.GetCfg().Debug {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\t\tconsole.log(\"Auto flip plugin enabled\");\n\t\t\t</script>")
 				if templ_7745c5c3_Err != nil {

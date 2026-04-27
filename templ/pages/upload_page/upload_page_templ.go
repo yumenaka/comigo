@@ -41,7 +41,7 @@ func UploadPage(c echo.Context) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = common.Header(
-			common.HeaderBackLeft("/settings"),
+			common.HeaderBackLeft(config.PrefixPath("/settings")),
 			common.HeaderTextTitle("i18next.t('upload_page')"),
 			common.HeaderDefaultRight(),
 		).Render(ctx, templ_7745c5c3_Buffer)
@@ -56,7 +56,7 @@ func UploadPage(c echo.Context) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(c, nil, nil, true, "/settings").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(c, nil, nil, true, config.PrefixPath("/settings")).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

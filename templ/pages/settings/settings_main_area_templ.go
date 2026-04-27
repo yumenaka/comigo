@@ -144,6 +144,10 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = StringConfig("BasePath", config.GetCfg().BasePath, "BasePath_Description").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = BoolConfig("DisableLAN", config.GetCfg().DisableLAN, "DisableLAN_Description").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -167,7 +171,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("other_settings"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 144, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 145, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -212,7 +216,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("settings_extra"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 187, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 188, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

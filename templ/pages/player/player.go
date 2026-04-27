@@ -52,7 +52,7 @@ func PlayerModeHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		playerPage, // define body content
-		[]string{"script/player.js"},
+		[]string{"static/js/player.js"},
 	)
 	// 渲染页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {

@@ -28,6 +28,7 @@ function isReaderPWAStandalone() {
 }
 
 function isReaderPWAInstallProtocolAllowed() {
+    // beforeinstallprompt 只会在安全上下文中可靠触发；这里保持按钮策略和 SW 注册一致。
     return window.location.protocol === 'https:'
 }
 
@@ -80,7 +81,10 @@ function registerReaderServiceWorker() {
     if (!window.isSecureContext) return
 
     const register = () => {
-        navigator.serviceWorker.register('/reader-sw.js', { scope: '/reader' }).catch((error) => {
+        // scope 固定在 reader 页面下，避免离线缓存影响普通书架、在线阅读等页面。
+        const swPath = window.ComiGoPath ? window.ComiGoPath('/reader-sw.js') : '/reader-sw.js'
+        const swScope = window.ComiGoPath ? window.ComiGoPath('/reader') : '/reader'
+        navigator.serviceWorker.register(swPath, { scope: swScope }).catch((error) => {
             console.error('[reader-pwa] register service worker failed:', error)
         })
     }

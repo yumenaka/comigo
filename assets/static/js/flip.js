@@ -221,7 +221,7 @@ function GetImageSrc(index) {
         return
     }
     
-    const url = images[index].url
+    const url = window.ComiGoPath ? window.ComiGoPath(images[index].url) : images[index].url
     if (!Alpine.store('global').onlineBook) {
         return url
     }

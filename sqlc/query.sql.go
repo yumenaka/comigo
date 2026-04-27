@@ -186,16 +186,19 @@ func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, e
 }
 
 const createBookmark = `-- name: CreateBookmark :one
-INSERT INTO bookmarks (type, book_id, page_index, description, created_at, updated_at)
-VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-RETURNING id, type, book_id, page_index, description, created_at, updated_at
+INSERT INTO bookmarks (type, book_id, book_store_id, page_index, description, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+RETURNING id, type, book_id, book_store_id, page_index, description, created_at, updated_at
 `
 
 type CreateBookmarkParams struct {
 	Type        string
 	BookID      string
+	BookStoreID sql.NullString
 	PageIndex   int64
 	Description sql.NullString
+	CreatedAt   sql.NullTime
+	UpdatedAt   sql.NullTime
 }
 
 // Create a bookmark
@@ -203,14 +206,18 @@ func (q *Queries) CreateBookmark(ctx context.Context, arg CreateBookmarkParams) 
 	row := q.db.QueryRowContext(ctx, createBookmark,
 		arg.Type,
 		arg.BookID,
+		arg.BookStoreID,
 		arg.PageIndex,
 		arg.Description,
+		arg.CreatedAt,
+		arg.UpdatedAt,
 	)
 	var i Bookmark
 	err := row.Scan(
 		&i.ID,
 		&i.Type,
 		&i.BookID,
+		&i.BookStoreID,
 		&i.PageIndex,
 		&i.Description,
 		&i.CreatedAt,
@@ -635,6 +642,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 const listAllBookStoreURLs = `-- name: ListAllBookStoreURLs :many
 SELECT DISTINCT store_url
 FROM books
+WHERE deleted = FALSE
 `
 
 // get all store_url for books
@@ -663,7 +671,7 @@ func (q *Queries) ListAllBookStoreURLs(ctx context.Context) ([]string, error) {
 
 const listBookmarksByBookID = `-- name: ListBookmarksByBookID :many
 
-SELECT id, type, book_id, page_index, description, created_at, updated_at
+SELECT id, type, book_id, book_store_id, page_index, description, created_at, updated_at
 FROM bookmarks
 WHERE book_id = ?
 ORDER BY created_at DESC
@@ -684,6 +692,7 @@ func (q *Queries) ListBookmarksByBookID(ctx context.Context, bookID string) ([]B
 			&i.ID,
 			&i.Type,
 			&i.BookID,
+			&i.BookStoreID,
 			&i.PageIndex,
 			&i.Description,
 			&i.CreatedAt,
@@ -705,6 +714,7 @@ func (q *Queries) ListBookmarksByBookID(ctx context.Context, bookID string) ([]B
 const listBooks = `-- name: ListBooks :many
 SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
+WHERE deleted = FALSE
 ORDER BY modified_time DESC
 `
 
@@ -766,6 +776,7 @@ const listBooksByStorePath = `-- name: ListBooksByStorePath :many
 SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
 WHERE store_url = ?
+  AND deleted = FALSE
 ORDER BY modified_time DESC
 `
 
@@ -827,6 +838,7 @@ const listBooksByType = `-- name: ListBooksByType :many
 SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
 WHERE type = ?
+  AND deleted = FALSE
 ORDER BY modified_time DESC
 `
 
@@ -941,6 +953,7 @@ const searchBooksByTitle = `-- name: SearchBooksByTitle :many
 SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
 WHERE title LIKE '%' || ? || '%'
+  AND deleted = FALSE
 ORDER BY modified_time DESC
 `
 
@@ -1022,6 +1035,7 @@ SET title             = ?,
     init_complete     = ?,
     non_utf8zip       = ?,
     zip_text_encoding = ?,
+    created_by_version = ?,
     is_remote         = ?,
     remote_url        = ?,
     modified_time     = CURRENT_TIMESTAMP
@@ -1029,31 +1043,32 @@ WHERE book_id = ?
 `
 
 type UpdateBookParams struct {
-	Title           string
-	Owner           sql.NullString
-	BookPath        string
-	StoreUrl        string
-	Type            string
-	ChildBooksNum   sql.NullInt64
-	ChildBooksID    sql.NullString
-	Depth           sql.NullInt64
-	ParentFolder    sql.NullString
-	PageCount       sql.NullInt64
-	LastReadPage    sql.NullInt64
-	FileSize        sql.NullInt64
-	Author          sql.NullString
-	Isbn            sql.NullString
-	Press           sql.NullString
-	PublishedAt     sql.NullString
-	ExtractPath     sql.NullString
-	ExtractNum      sql.NullInt64
-	BookComplete    sql.NullBool
-	InitComplete    sql.NullBool
-	NonUtf8zip      sql.NullBool
-	ZipTextEncoding sql.NullString
-	IsRemote        sql.NullBool
-	RemoteUrl       sql.NullString
-	BookID          string
+	Title            string
+	Owner            sql.NullString
+	BookPath         string
+	StoreUrl         string
+	Type             string
+	ChildBooksNum    sql.NullInt64
+	ChildBooksID     sql.NullString
+	Depth            sql.NullInt64
+	ParentFolder     sql.NullString
+	PageCount        sql.NullInt64
+	LastReadPage     sql.NullInt64
+	FileSize         sql.NullInt64
+	Author           sql.NullString
+	Isbn             sql.NullString
+	Press            sql.NullString
+	PublishedAt      sql.NullString
+	ExtractPath      sql.NullString
+	ExtractNum       sql.NullInt64
+	BookComplete     sql.NullBool
+	InitComplete     sql.NullBool
+	NonUtf8zip       sql.NullBool
+	ZipTextEncoding  sql.NullString
+	CreatedByVersion sql.NullString
+	IsRemote         sql.NullBool
+	RemoteUrl        sql.NullString
+	BookID           string
 }
 
 // Update book information
@@ -1081,6 +1096,7 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 		arg.InitComplete,
 		arg.NonUtf8zip,
 		arg.ZipTextEncoding,
+		arg.CreatedByVersion,
 		arg.IsRemote,
 		arg.RemoteUrl,
 		arg.BookID,

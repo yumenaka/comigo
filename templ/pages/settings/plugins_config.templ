@@ -80,8 +80,8 @@ templ PluginsConfigJavaScript() {
 			async function togglePlugin(pluginName, enabled) {
 				try {
 					const endpoint = enabled
-						? "/api/enable-plugin"
-						: "/api/disable-plugin";
+						? window.ComiGoPath("/api/enable-plugin")
+						: window.ComiGoPath("/api/disable-plugin");
 					const response = await fetch(endpoint, {
 						method: "POST",
 						headers: {

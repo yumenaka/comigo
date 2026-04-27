@@ -3,6 +3,7 @@ package common
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/plugins"
 )
 
@@ -17,17 +18,17 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScripts []string) 
 			<title>{ GetBookTitle(c.Param("id")) }</title>
 			<meta name="keywords" content="Comigo:Manga Reader Online 在线漫画阅读器"/>
 			<meta name="description" content="Simple Manga Reader in Linux，Windows，Mac OS"/>
-			if c != nil && c.Request().URL.Path == "/reader" && c.QueryParam("static") == "" {
-				<link rel="manifest" href="/images/manifest.webmanifest"/>
+			if c != nil && config.StripBasePath(c.Request().URL.Path) == "/reader" && c.QueryParam("static") == "" {
+				<link rel="manifest" href={ templ.SafeURL(config.PrefixPath("/images/manifest.webmanifest")) }/>
 				<meta name="theme-color" content="#076c0a"/>
 				<meta name="mobile-web-app-capable" content="yes"/>
 				<meta name="apple-mobile-web-app-capable" content="yes"/>
 				<meta name="apple-mobile-web-app-title" content="Comigo Reader"/>
 				<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 			}
-			<link rel="apple-touch-icon" href="/images/favicon.png"/>
-			<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"/>
-			<link rel="icon" href="/images/favicon.png" sizes="any"/>
+			<link rel="apple-touch-icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) }/>
+			<link rel="shortcut icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.ico")) } type="image/x-icon"/>
+			<link rel="icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) } sizes="any"/>
 			@templ.Raw(assets.GetCSS(c.QueryParam("static") != ""))
 		</head>
 		<!-- x-bind: Alpine.js的语法，全局主题从 $store.global.theme 读取 -->

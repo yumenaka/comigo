@@ -8,10 +8,10 @@
   ],
   "scripts": {
     "fmt": "prettier --write .",
-    "build": "parcel build ./assets/main.js ./assets/styles.css --dist-dir assets/script",
-    "dev": "parcel build ./assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize",
-    "watch": "parcel watch ./assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize",
-    "build:wasm": "GOOS=js GOARCH=wasm go build -o assets/script/wasm/archive.wasm ./cmd/archivewasm"
+    "build": "parcel build ./assets/frontend/main.js ./assets/frontend/styles.css --dist-dir assets/dist",
+    "dev": "parcel build ./assets/frontend/main.js ./assets/frontend/styles.css --dist-dir assets/dist --no-optimize",
+    "watch": "parcel watch ./assets/frontend/main.js ./assets/frontend/styles.css --dist-dir assets/dist --no-optimize",
+    "build:wasm": "GOOS=js GOARCH=wasm go build -o assets/static/wasm/archive.wasm ./cmd/archivewasm"
   },
   "dependencies": {
     "@alpinejs/intersect": "3.15.11",

@@ -1,14 +1,15 @@
 package plugins
 
 import (
+	"strings"
+
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
-	"strings"
 )
 
 // AutoFlipPlugin 自动翻页插件（仅支持翻页模式）
 templ AutoFlipPlugin(c echo.Context) {
-	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_flip") && strings.HasPrefix(c.Request().URL.Path, "/flip/") {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_flip") && strings.HasPrefix(config.StripBasePath(c.Request().URL.Path), "/flip/") {
 		if config.GetCfg().Debug {
 			<script>
 				console.log("Auto flip plugin enabled");

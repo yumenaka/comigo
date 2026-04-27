@@ -291,16 +291,20 @@ func GetQrcodeURL() string {
 	if enableTLS {
 		protocol = "https://"
 	}
+	if cfg.Host != "" {
+		return protocol + cfg.Host + ":" + strconv.Itoa(int(cfg.Port)) + PrefixPath("/")
+	}
 	// 取得本机的首选出站IP
 	OutIP := tools.GetOutboundIP().String()
-	if cfg.Host == "" {
-		return protocol + OutIP + ":" + strconv.Itoa(int(cfg.Port))
-	}
-	return protocol + cfg.Host + ":" + strconv.Itoa(int(cfg.Port))
+	return protocol + OutIP + ":" + strconv.Itoa(int(cfg.Port)) + PrefixPath("/")
 }
 
 func OpenBrowserIfNeeded() {
 	if cfg.OpenBrowser == true {
-		go tools.OpenBrowser(cfg.EnableTLS, "127.0.0.1", cfg.Port)
+		protocol := "http://"
+		if cfg.EnableTLS {
+			protocol = "https://"
+		}
+		go tools.OpenBrowserByURL(protocol + "127.0.0.1:" + strconv.Itoa(cfg.Port) + PrefixPath("/"))
 	}
 }

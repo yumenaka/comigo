@@ -19,6 +19,7 @@ func newDefaultConfig() Config {
 		EnableTLS:             false,
 		EnablePlugin:          false,
 		ExcludePath:           []string{"$RECYCLE.BIN", "System Volume Information", "node_modules"},
+		BasePath:              "",
 		Host:                  "",
 		LogToFile:             false,
 		MaxScanDepth:          4,

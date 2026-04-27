@@ -64,16 +64,19 @@ templ NumberConfigJavaScript() {
 					return;
 				}
 				try {
-					const response = await fetch("/api/update-number-config", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath("/api/update-number-config"),
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								name: name,
+								value: numValue,
+							}),
 						},
-						body: JSON.stringify({
-							name: name,
-							value: numValue,
-						}),
-					});
+					);
 					// 检查响应状态
 					if (!response.ok) {
 						showToast(i18next.t("err_update_config_failed"), "error");

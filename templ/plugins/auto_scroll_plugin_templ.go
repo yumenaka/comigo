@@ -9,9 +9,10 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"strings"
+
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
-	"strings"
 )
 
 // AutoScrollPlugin 自动滚动插件（仅支持滚动模式）
@@ -36,7 +37,7 @@ func AutoScrollPlugin(c echo.Context) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_scroll") && strings.HasPrefix(c.Request().URL.Path, "/scroll/") {
+		if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_scroll") && strings.HasPrefix(config.StripBasePath(c.Request().URL.Path), "/scroll/") {
 			if config.GetCfg().Debug {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t\t\tconsole.log(\"Auto scroll plugin enabled\");\n\t\t\t</script>")
 				if templ_7745c5c3_Err != nil {

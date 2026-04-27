@@ -3,6 +3,7 @@ package player
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"net/url"
 )
@@ -11,7 +12,7 @@ import (
 templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 	<!--
 		说明：
-		- 项目资源加载顺序是：先执行 /script/main.js（内部会 Alpine.start()），再执行页面级脚本（如 /script/player.js）
+		- 项目资源加载顺序是：先执行 /assets/dist/main.js（内部会 Alpine.start()），再执行页面级脚本（如 /assets/static/js/player.js）
 		- 因此不能依赖 document.addEventListener('alpine:init', ...) 去注册 Alpine.data，否则会错过事件
 		- 这里把 playerData 提前注入到 body 中，确保 Alpine.start() 时已存在，避免 playerData/currentIndex 等未定义报错
 	-->
@@ -79,7 +80,9 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 				}
 
 				const playlistData = playlistArr.map((item) => {
-					const url = `/api/raw/${item.id}/${encodeURIComponent(item.title)}`;
+					const url = window.ComiGoPath(
+						`/api/raw/${item.id}/${encodeURIComponent(item.title)}`,
+					);
 					return {
 						id: item.id,
 						title: item.title,
@@ -96,7 +99,9 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 					nowBook.id &&
 					nowBook.title
 				) {
-					const url = `/api/raw/${nowBook.id}/${encodeURIComponent(nowBook.title)}`;
+					const url = window.ComiGoPath(
+						`/api/raw/${nowBook.id}/${encodeURIComponent(nowBook.title)}`,
+					);
 					playlistData.push({
 						id: nowBook.id,
 						title: nowBook.title,
@@ -342,7 +347,7 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 						- Alpine 初始化后，会用 :src 动态切换为播放列表里的 currentMedia.url
 					-->
 					<source
-						src={ templ.SafeURL(fmt.Sprintf("/api/raw/%s/%s", book.BookID, url.QueryEscape(book.Title))) }
+						src={ templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/raw/%s/%s", book.BookID, url.QueryEscape(book.Title)))) }
 						:src="currentMedia?.url || ''"
 						:type="currentMedia?.mimeType || ''"
 					/>
@@ -512,8 +517,8 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 										<!-- 优先显示封面（对 MP3：后端会尝试读取 ID3 APIC 内嵌封面） -->
 										<img
 											class="w-full h-full object-cover"
-											src={ templ.SafeURL(fmt.Sprintf("/api/get-cover?id=%s&resize_height=%d", book.BookID, 352)) }
-											:src="`/api/get-cover?id=${currentMedia?.id || ''}&resize_height=352`"
+											src={ templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/get-cover?id=%s&resize_height=%d", book.BookID, 352))) }
+											:src="window.ComiGoPath(`/api/get-cover?id=${currentMedia?.id || ''}&resize_height=352`)"
 											x-show="!showFallbackCover"
 											@error="showFallbackCover = true"
 										/>
@@ -542,7 +547,7 @@ templ MainArea(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 					@pause="isPlaying = false"
 				>
 					<source
-						src={ templ.SafeURL(fmt.Sprintf("/api/raw/%s/%s", book.BookID, url.QueryEscape(book.Title))) }
+						src={ templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/raw/%s/%s", book.BookID, url.QueryEscape(book.Title)))) }
 						:src="currentMedia?.url || ''"
 						:type="currentMedia?.mimeType || ''"
 					/>

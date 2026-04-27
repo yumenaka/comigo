@@ -67,7 +67,7 @@ func ScrollModeHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		scrollPage, // define body content
-		[]string{"script/ws_sync.js", "script/scroll.js"},
+		[]string{"static/js/ws_sync.js", "static/js/scroll.js"},
 	)
 	// 渲染页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {

@@ -53,6 +53,7 @@ func ShowQRCodeTailscale(ctx context.Context) {
 					if config.GetCfg().TailscalePort != 80 && config.GetCfg().TailscalePort != 443 {
 						readURL = readURL + ":" + strconv.Itoa(config.GetCfg().TailscalePort)
 					}
+					readURL += config.PrefixPath("/")
 					logger.Info(locale.GetString("tailscale_reading_url") + readURL)
 					tools.PrintQRCode(readURL)
 					readUrlPrinted = true

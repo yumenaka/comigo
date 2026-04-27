@@ -11,7 +11,9 @@ import (
 // ReaderPage 本地压缩包阅读页面。
 templ ReaderPage(c echo.Context) {
 	<script>
+		// 标记当前页面是本地 reader，公共 header/drawer 会据此调整二维码、全屏等入口。
 		window.ComiGoReaderMode = true;
+		// 鼠标指针图片由后端内联为 data URL，便携 HTML 模式也能正常显示。
 		window.ComiGoReaderCursorImages = {
 			settings: "{{ assets.GetImageDataSrc("SettingsOutline.png") }}",
 			prohibited: "{{ assets.GetImageDataSrc("Prohibited28Filled.png") }}",
@@ -20,11 +22,12 @@ templ ReaderPage(c echo.Context) {
 		};
 	</script>
 	if c.QueryParam("static") != "" {
-		@templ.Raw("<script>window.ComiGoReaderStaticWasmBase64=\"" + assets.GetDataBase64("script/wasm/archive.wasm") + "\";</script>")
+		// 便携网页需要离线可用，因此把解包用 WASM 也内联到页面中。
+		@templ.Raw("<script>window.ComiGoReaderStaticWasmBase64=\"" + assets.GetDataBase64("static/wasm/archive.wasm") + "\";</script>")
 	}
 	@common.Toast()
 	@common.Header(
-		common.HeaderBackLeft("/"),
+		common.HeaderBackLeft(config.PrefixPath("/")),
 		ReaderHeaderTitle(locale.GetString("reader_title")),
 		common.HeaderDefaultRight(),
 	)
@@ -32,7 +35,7 @@ templ ReaderPage(c echo.Context) {
 	<div id="ReaderFooter" class="w-full" x-show="$store.global.readMode !== 'page_flip'">
 		@common.Footer(config.GetVersion())
 	</div>
-	@common.Drawer(c, nil, DrawerSlot(c), true, "/")
+	@common.Drawer(c, nil, DrawerSlot(c), true, config.PrefixPath("/"))
 	@common.QRCode()
 }
 
@@ -54,6 +57,7 @@ templ MainArea(c echo.Context) {
 		id="ReaderRoot"
 		class="flex flex-col items-center justify-start flex-1 w-full max-w-full text-base-content"
 	>
+		<!-- 初始文件选择区。压缩包只在浏览器本地读取，不上传到后端。 -->
 		<section
 			id="ReaderFilePicker"
 			class="flex flex-col items-center justify-center w-full max-w-3xl min-h-[60vh] px-4"
@@ -83,7 +87,7 @@ templ MainArea(c echo.Context) {
 						添加为PWA应用
 					</button>
 					<a
-						href="/reader?static=comigo-reader.html"
+						href={ templ.SafeURL(config.PrefixPath("/reader?static=comigo-reader.html")) }
 						download={ "comigo-" + config.GetVersion() + ".html" }
 						class="inline-flex items-center justify-center h-10 px-3 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300"
 						:title="i18next.t('download_portable_web_file')"
@@ -95,14 +99,17 @@ templ MainArea(c echo.Context) {
 			}
 			<div id="ReaderStatus" class="w-full mt-4 text-sm text-center opacity-80"></div>
 		</section>
+		<!-- 阅读区。reader.js 会根据 readMode 在卷轴容器和翻页容器之间切换。 -->
 		<section
 			id="ReaderShell"
 			class="hidden flex-col items-center justify-start flex-1 w-full max-w-full pt-0"
 		>
+			<!-- 无限卷轴模式：页面 img 节点由 reader.js 动态创建，并通过 IntersectionObserver 懒加载。 -->
 			<div
 				id="ScrollMainArea"
 				class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content"
 			></div>
+			<!-- 翻页模式：左/中/右三页结构用于触摸拖动时显示相邻页并完成滑出动画。 -->
 			<div
 				id="ReaderFlipArea"
 				class="hidden flex-col items-start justify-start flex-1 w-full h-[calc(100vh-7rem)] min-h-[60vh] m-0 p-0 text-base-content"
@@ -135,6 +142,7 @@ templ MainArea(c echo.Context) {
 					</div>
 				</div>
 			</div>
+			<!-- 翻页模式进度条。漫画模式下显示值会反向映射到实际页码。 -->
 			<div
 				id="ReaderFlipStepsRangeArea"
 				@click.stop=""

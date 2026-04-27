@@ -35,6 +35,38 @@ func TestBuildConfigChangeAction(t *testing.T) {
 	}
 }
 
+func TestBuildConfigChangeActionRestartsWebServerWhenBasePathChanges(t *testing.T) {
+	oldCfg := &config.Config{
+		BasePath: "",
+		Port:     1234,
+	}
+	newCfg := &config.Config{
+		BasePath: "/proxy",
+		Port:     1234,
+	}
+
+	action := BuildConfigChangeAction(*oldCfg, newCfg)
+	if !action.ReStartWebServer {
+		t.Fatalf("expected ReStartWebServer=true")
+	}
+}
+
+func TestBuildConfigChangeActionIgnoresEquivalentBasePath(t *testing.T) {
+	oldCfg := &config.Config{
+		BasePath: "/proxy/",
+		Port:     1234,
+	}
+	newCfg := &config.Config{
+		BasePath: "/proxy",
+		Port:     1234,
+	}
+
+	action := BuildConfigChangeAction(*oldCfg, newCfg)
+	if action.ReStartWebServer {
+		t.Fatalf("expected ReStartWebServer=false for equivalent BasePath")
+	}
+}
+
 func TestBuildConfigChangeActionStartTailscale(t *testing.T) {
 	oldCfg := &config.Config{
 		EnableTailscale:   false,

@@ -225,7 +225,7 @@ function isScrollSyncEnabled() {
 
 // 生成无限滚动模式下指定起始页码的 URL
 function getInfiniteScrollURL(pageNum) {
-    const targetURL = new URL(`/scroll/${book.id}`, window.location.origin)
+    const targetURL = new URL(window.ComiGoPath ? window.ComiGoPath(`/scroll/${book.id}`) : `/scroll/${book.id}`, window.location.origin)
     if (pageNum > 1) {
         targetURL.searchParams.set('start', pageNum.toString())
     }
@@ -240,7 +240,7 @@ function getPagedChunkForPageNum(pageNum) {
 // 生成指定图片页码所在分页块的 URL
 function getPagedScrollURL(pageNum) {
     const chunkPage = getPagedChunkForPageNum(pageNum)
-    const targetURL = new URL(`/scroll/${book.id}`, window.location.origin)
+    const targetURL = new URL(window.ComiGoPath ? window.ComiGoPath(`/scroll/${book.id}`) : `/scroll/${book.id}`, window.location.origin)
     targetURL.searchParams.set('page', chunkPage.toString())
     return targetURL.toString()
 }
@@ -510,11 +510,11 @@ function applyTrackedPage(tracked) {
             sendScrollSyncData(tracked)
         } else if (debugMode) {
             //console.log('[scroll-sync] applyTrackedPage: 未满足发送条件 (pageChanged=%s, percentDelta=%.3f, timeDelta=%dms)',
-                pageChanged, percentDelta, now - scrollSyncState.lastSyncSendTime)
+            //    pageChanged, percentDelta, now - scrollSyncState.lastSyncSendTime)
         }
     } else if (debugMode) {
         //console.log('[scroll-sync] applyTrackedPage: 同步未启用或处于抑制期 (syncEnabled=%s, suppressing=%s)',
-            isScrollSyncEnabled(), isSuppressingRemoteBroadcast())
+        //    isScrollSyncEnabled(), isSuppressingRemoteBroadcast())
     }
 }
 

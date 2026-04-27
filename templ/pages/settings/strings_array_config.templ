@@ -115,16 +115,19 @@ templ StringArrayConfigJavaScript() {
 				// 发送添加请求到服务器
 				try {
 					const addValueB64 = window.base64UrlEncodeUtf8(addValue);
-					const response = await fetch("/api/add-array-config", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath("/api/add-array-config"),
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								configName: configName,
+								addValue: addValueB64,
+							}),
 						},
-						body: JSON.stringify({
-							configName: configName,
-							addValue: addValueB64,
-						}),
-					});
+					);
 					// 检查响应状态
 					if (!response.ok) {
 						showToast(i18next.t("err_add_config_failed"), "error");
@@ -177,16 +180,19 @@ templ StringArrayConfigJavaScript() {
 			async function deleteStringConfigValue(configName, deleteValue) {
 				try {
 					const deleteValueB64 = window.base64UrlEncodeUtf8(deleteValue);
-					const response = await fetch("/api/delete-array-config", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath("/api/delete-array-config"),
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								configName: configName,
+								deleteValue: deleteValueB64,
+							}),
 						},
-						body: JSON.stringify({
-							configName: configName,
-							deleteValue: deleteValueB64,
-						}),
-					});
+					);
 					// 检查响应状态
 					if (!response.ok) {
 						showToast(i18next.t("err_delete_config_failed"), "error");

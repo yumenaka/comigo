@@ -38,7 +38,7 @@ func decodeBase64URLStrict(s string) (string, error) {
 
 func reloadHintForStringConfig(name string) (saveSuccessHint bool, reason string) {
 	switch name {
-	case "Host":
+	case "Host", "BasePath":
 		return true, sse_hub.UISuggestReasonServerConfig
 	default:
 		return false, ""

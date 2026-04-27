@@ -47,7 +47,7 @@ func OpenDatabase(configDir string) error {
 		logger.Infof(locale.GetString("init_database")+"%s", dataSourceName)
 	}
 	if configDir == "" {
-		dataSourceName = "\":memory:\""
+		dataSourceName = ":memory:"
 	}
 	ctx := context.Background()
 	var err error
@@ -69,6 +69,10 @@ func OpenDatabase(configDir string) error {
 		// 即使创建表失败，我们也要尝试创建 DBQueries，因为表可能已经存在
 		// 只要数据库连接正常，就应该能正常工作
 	}
+	if err := migrateDatabase(ctx, client); err != nil {
+		logger.Infof("database migration failed: %v", err)
+		return err
+	}
 
 	// 创建 StoreDatabase 实例
 	DbStore = NewDBStore(client)
@@ -83,8 +87,46 @@ func CloseDatabase() {
 	}
 }
 
+func migrateDatabase(ctx context.Context, db *sql.DB) error {
+	if err := ensureColumn(ctx, db, "bookmarks", "book_store_id", "TEXT"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func ensureColumn(ctx context.Context, db *sql.DB, tableName string, columnName string, columnType string) error {
+	rows, err := db.QueryContext(ctx, "PRAGMA table_info("+tableName+")")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cid int
+		var name string
+		var dataType string
+		var notNull int
+		var defaultValue sql.NullString
+		var pk int
+		if err := rows.Scan(&cid, &name, &dataType, &notNull, &defaultValue, &pk); err != nil {
+			return err
+		}
+		if name == columnName {
+			return rows.Err()
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	_, err = db.ExecContext(ctx, "ALTER TABLE "+tableName+" ADD COLUMN "+columnName+" "+columnType)
+	return err
+}
+
 // CheckDBQueries 检查 queries 是否已初始化
 func (db *StoreDatabase) CheckDBQueries() error {
+	if db == nil {
+		return fmt.Errorf("database not initialized, StoreDatabase is nil")
+	}
 	if db.queries == nil {
 		return fmt.Errorf("database not initialized, DBQueries is nil")
 	}

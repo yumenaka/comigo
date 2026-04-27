@@ -31,6 +31,7 @@ type StartConfig struct {
 	Username                  string   `json:"username"`
 	Password                  string   `json:"password"`
 	Host                      string   `json:"host"`
+	BasePath                  string   `json:"basePath"`
 	CacheDir                  string   `json:"cacheDir"`
 	ConfigDir                 string   `json:"configDir"`
 	StoreUrls                 []string `json:"storeUrls"`
@@ -127,7 +128,7 @@ func GetServerInfo() string {
 func GetBaseURL() string {
 	runtimeMu.Lock()
 	defer runtimeMu.Unlock()
-	return localBaseURL()
+	return localBaseURL() + config.PrefixPath("/")
 }
 
 // GetPort 返回当前服务端口。
@@ -188,6 +189,7 @@ func configureRuntime(startCfg StartConfig) error {
 	cfg.Username = strings.TrimSpace(startCfg.Username)
 	cfg.Password = strings.TrimSpace(startCfg.Password)
 	cfg.Host = strings.TrimSpace(startCfg.Host)
+	cfg.BasePath = config.NormalizeBasePath(startCfg.BasePath)
 	cfg.AutoRescanIntervalMinutes = startCfg.AutoRescanIntervalMinutes
 
 	if trimmedCacheDir := strings.TrimSpace(startCfg.CacheDir); trimmedCacheDir != "" {
@@ -244,7 +246,7 @@ func loadConfigFileIfExists(configDir string) error {
 }
 
 func waitForReady(timeout time.Duration) error {
-	healthURL := localBaseURL() + "/healthz"
+	healthURL := localBaseURL() + config.PrefixPath("/healthz")
 	client := &http.Client{Timeout: 1500 * time.Millisecond}
 	deadline := time.Now().Add(timeout)
 	var lastErr error
@@ -274,8 +276,8 @@ func currentResult(running bool, errMessage string) StartResult {
 	return StartResult{
 		Success:   errMessage == "",
 		Running:   running,
-		BaseURL:   localBaseURL(),
-		HealthURL: localBaseURL() + "/healthz",
+		BaseURL:   localBaseURL() + config.PrefixPath("/"),
+		HealthURL: localBaseURL() + config.PrefixPath("/healthz"),
 		Port:      config.GetCfg().Port,
 		StoreUrls: append([]string(nil), config.GetCfg().StoreUrls...),
 		Error:     errMessage,

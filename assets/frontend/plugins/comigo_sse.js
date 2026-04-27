@@ -6,12 +6,13 @@ function shouldEnableComigoSSE() {
         return false
     }
     // 登录页没有 JWT，会导致 /api/sse 持续 401 重连
-    return window.location.pathname !== '/login'
+    const pathname = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname
+    return pathname !== '/login'
 }
 
 // 仅在书架与设置页弹出「建议刷新」；阅读页（flip/scroll 等）不打断
 function shouldShowUISuggestReloadPrompt() {
-    const p = window.location.pathname
+    const p = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname
     if (p === '/settings') {
         return true
     }
@@ -126,7 +127,8 @@ function comigoSSEInit() {
     if (window.__comigoSSEInstance) {
         return window.__comigoSSEInstance
     }
-    const es = new EventSource('/api/sse', { withCredentials: true })
+    const sseURL = window.ComiGoPath ? window.ComiGoPath('/api/sse') : '/api/sse'
+    const es = new EventSource(sseURL, { withCredentials: true })
     window.__comigoSSEInstance = es
     comigoAttachSSEListeners(es)
     return es

@@ -13,13 +13,13 @@ import (
 
 func ShowQRCode() {
 	// 如果只有一本书，二维码展示的 URL 需要附加参数，让读者可以直接去读这本书
-	etcStr := ""
+	etcStr := config.PrefixPath("/")
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	if len(allBooks) == 1 {
-		etcStr = fmt.Sprintf("/#/%s/%s", "scroll", allBooks[0].BookID)
+		etcStr = config.PrefixPath(fmt.Sprintf("/#/%s/%s", "scroll", allBooks[0].BookID))
 	}
 
 	// 判断是否启用 TLS

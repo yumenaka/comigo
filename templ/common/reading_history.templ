@@ -1,6 +1,10 @@
 package common
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/yumenaka/comigo/config"
+)
 
 // ReadingHistory 阅读历史记录列表组件（限制显示数量，默认10条）
 // 用于各个页面的 drawer 侧边栏
@@ -73,7 +77,7 @@ templ ReadingHistoryWithLimit(limit int) {
 						<!-- 封面 -->
 						<div
 							class="w-16 h-20 bg-cover bg-center rounded shrink-0 border-2 border-gray-500 dark:border-gray-200"
-							:style="'background-image: url(' + (item.book_info.cover.url.includes('api/get_file?') ? item.book_info.cover.url + '&resize_height=128&no-cache=true' : item.book_info.cover.url) + ')'"
+							:style="'background-image: url(' + window.ComiGoPath((item.book_info.cover.url.includes('api/get_file?') ? item.book_info.cover.url + '&resize_height=128&no-cache=true' : item.book_info.cover.url)) + ')'"
 						></div>
 						<!-- 信息 -->
 						<div class="flex-1 min-w-0">
@@ -115,7 +119,7 @@ templ ReadingHistoryWithLimit(limit int) {
 			<!-- 查看更多链接（当有更多记录时显示） -->
 			<a
 				x-show="limit > 0 && totalCount > limit"
-				href="/settings#reading_history"
+				href={ templ.SafeURL(config.PrefixPath("/settings#reading_history")) }
 				class="flex justify-center items-center w-full py-2 text-sm text-blue-500 hover:text-blue-700 hover:underline"
 			>
 				<span x-text="i18next.t('view_all_reading_history') + ' (' + totalCount + ')'"></span>
@@ -135,7 +139,7 @@ func getReadingHistoryXData(limit int) string {
 		async refresh() {
 			this.loading = true;
 			try {
-				const response = await fetch('/api/reading-history?limit=` + strconv.Itoa(limit) + `');
+				const response = await fetch(window.ComiGoPath('/api/reading-history') + '?limit=` + strconv.Itoa(limit) + `');
 				if (response.ok) {
 					const data = await response.json();
 					this.bookmarks = data.items || [];

@@ -75,6 +75,7 @@ type Config struct {
 	EnableDatabase            bool           `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
 	EnableTLS                 bool           `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
 	AutoTLSCertificate        bool           `json:"AutoTLSCertificate" comment:"自动申请、签发 HTTPS 证书（Let's Encrypt）"`
+	BasePath                  string         `json:"BasePath" comment:"反向代理基础路径，例如 /some/path。留空表示服务挂载在根路径 /"`
 	Host                      string         `json:"Host" comment:"自定义二维码显示的主机名，如果为空，则使用自动检测到的局域网IP地址。自动申请HTTPS证书时，必须设置为公网可访问的域名"`
 	KeyFile                   string         `json:"KeyFile" comment:"TLS/SSL key文件路径 (default: ~/.config/.comigo/key.key)"`
 	CertFile                  string         `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
@@ -113,6 +114,10 @@ type Config struct {
 
 func (c *Config) GetHost() string {
 	return c.Host
+}
+
+func (c *Config) GetBasePath() string {
+	return NormalizeBasePath(c.BasePath)
 }
 
 func (c *Config) GetPort() int {
@@ -417,6 +422,9 @@ func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
 		f.SetInt(intVal)
 
 	case reflect.String:
+		if fieldName == "BasePath" {
+			fieldValue = NormalizeBasePath(fieldValue)
+		}
 		f.SetString(fieldValue)
 
 	case reflect.Slice:
@@ -594,6 +602,11 @@ func UpdateConfigByJson(jsonString string) error {
 	t := v.Type()
 
 	for key, value := range updates {
+		if key == "BasePath" {
+			if basePath, ok := value.(string); ok {
+				value = NormalizeBasePath(basePath)
+			}
+		}
 		// 查找字段
 		field := v.FieldByName(key)
 		if !field.IsValid() || !field.CanSet() {

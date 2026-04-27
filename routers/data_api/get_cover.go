@@ -81,12 +81,13 @@ func GetCover(c echo.Context) error {
 		logger.Errorf(locale.GetString("err_failed_to_get_config_dir"), err)
 	}
 	needFile := cover.Name
+	coverURLPath := config.StripBasePath(cover.Url)
 	// 处理 TypeBooksGroup 的情况：封面来自子书籍
 	coverBook := book
-	if book.Type == model.TypeBooksGroup && strings.HasPrefix(cover.Url, "/api/get-file") {
+	if book.Type == model.TypeBooksGroup && strings.HasPrefix(coverURLPath, "/api/get-file") {
 		// 解析封面 URL 获取子书籍 ID 和文件名
 		// URL 格式：/api/get-file?id=子书籍ID&filename=文件名
-		parsedURL, err := url.Parse(cover.Url)
+		parsedURL, err := url.Parse(coverURLPath)
 		if err != nil {
 			logger.Infof(locale.GetString("log_failed_to_parse_cover_url"), err)
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid cover URL"})
@@ -109,7 +110,7 @@ func GetCover(c echo.Context) error {
 		}
 	}
 	// 如果封面URL是内嵌图片, 通过封面文件获取
-	if strings.HasPrefix(cover.Url, "/images/") {
+	if strings.HasPrefix(coverURLPath, "/images/") {
 		// 从内嵌文件系统读取图片数据
 		imgData := assets.GetImageData(cover.Name)
 		if len(imgData) == 0 {

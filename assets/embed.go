@@ -3,6 +3,7 @@ package assets
 import (
 	"embed"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"mime"
@@ -10,12 +11,13 @@ import (
 	"strings"
 
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-//go:embed script/*
-var Script embed.FS
-var ScriptFS fs.FS
+//go:embed dist/* static/*
+var Frontend embed.FS
+var FrontendFS fs.FS
 
 //go:embed images/*
 var Images embed.FS
@@ -33,27 +35,52 @@ var Robots embed.FS
 // GetCSS 在页面中插入需要的css代码
 func GetCSS(oneFileMode bool) (cssString string) {
 	if oneFileMode {
-		cssString = "<style>" + GetFileStr("script/styles.css") + "</style>\n"
+		cssString = "<style>" + GetFileStr("dist/styles.css") + "</style>\n"
 	} else {
-		cssString = "<link rel=\"stylesheet\" href=\"/script/styles.css\">\n"
+		cssString = "<link rel=\"stylesheet\" href=\"" + config.PrefixPath("/assets/dist/styles.css") + "\">\n"
 	}
 	return cssString
 }
 
+// GetBasePathScript 暴露前端路径工具，供静态 JS 与模板内联脚本统一处理反向代理基础路径。
+func GetBasePathScript() string {
+	basePath, _ := json.Marshal(config.GetBasePath())
+	return `<script>
+window.ComiGoBasePath = ` + string(basePath) + `;
+window.ComiGoPath = function(path) {
+  const base = window.ComiGoBasePath || '';
+  if (!path) return base ? base + '/' : '/';
+  if (/^(https?:|data:|blob:|#)/.test(path)) return path;
+  const normalized = path.startsWith('/') ? path : '/' + path;
+  if (!base) return normalized;
+  return normalized === '/' ? base + '/' : base + normalized;
+};
+window.ComiGoRelativePath = function(pathname) {
+  const base = window.ComiGoBasePath || '';
+  const path = pathname || window.location.pathname || '/';
+  if (!base) return path;
+  if (path === base) return '/';
+  return path.startsWith(base + '/') ? path.slice(base.length) : path;
+};
+</script>
+`
+}
+
 // GetJavaScript 在页面中插入需要的js代码
 func GetJavaScript(oneFileMode bool, insertScript []string) (jsString string) {
+	jsString = GetBasePathScript()
 	// <!-- 通用js代码,初始化htmx、Alpine等第三方库  -->
 	if oneFileMode {
-		jsString = "<script>" + GetFileStr("script/main.js") + "</script>\n"
+		jsString += "<script>" + GetFileStr("dist/main.js") + "</script>\n"
 	} else {
-		jsString = "<script src=\"/script/main.js\"></script>\n"
+		jsString += "<script src=\"" + config.PrefixPath("/assets/dist/main.js") + "\"></script>\n"
 	}
 	// <!-- 每个页面的特殊js代码片段  -->
 	for _, script := range insertScript {
 		if oneFileMode {
 			jsString += "<script>" + GetFileStr(script) + "</script>\n"
 		} else {
-			jsString += "<script src=\"/" + script + "\"></script>\n"
+			jsString += "<script src=\"" + config.PrefixPath("/assets/"+script) + "\"></script>\n"
 		}
 	}
 	// fmt.Println("jsString:", jsString)
@@ -63,7 +90,7 @@ func GetJavaScript(oneFileMode bool, insertScript []string) (jsString string) {
 // GetFileStr 从Static获取字符串形式的脚本
 func GetFileStr(filePath string) string {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
-	data, err := Script.ReadFile(filePath)
+	data, err := Frontend.ReadFile(filePath)
 	if err != nil {
 		return "Not Found Script:" + filePath
 	}
@@ -78,7 +105,7 @@ func GetFileStr(filePath string) string {
 // GetImageSrc 从Static获取Base64编码的图片的src属性
 func GetImageSrc(filePath string) string {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
-	data, err := Script.ReadFile(filePath)
+	data, err := Frontend.ReadFile(filePath)
 	if err != nil {
 		logger.Errorf(locale.GetString("err_failed_to_read_embedded_image"), err)
 		return "Not Found Image:" + filePath
@@ -103,7 +130,7 @@ func GetImageSrc(filePath string) string {
 // GetData 从Static获取字节切片形式的数据
 func GetData(filePath string) []byte {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
-	data, err := Script.ReadFile(filePath)
+	data, err := Frontend.ReadFile(filePath)
 	if err != nil {
 		// 如果有错误发生，返回空的字节切片，并输出错误信息
 		logger.Errorf(locale.GetString("err_failed_to_read_embedded_data"), err)
