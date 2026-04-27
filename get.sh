@@ -12,6 +12,9 @@
 #   bash <(curl -s https://comigo.xyz/get.sh) --cn
 #   或指定代理域名：
 #   bash <(curl -s https://comigo.xyz/get.sh) --proxy-base https://comigo.xyz
+#
+# 指定版本（默认下载最新版本）：
+#   bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh) --version v1.2.22
 # ============================================================================
 
 # 遇到错误时立即退出
@@ -29,6 +32,7 @@ system_language=$(locale 2>/dev/null | grep -E '^LANG=' | cut -d= -f2 | cut -d. 
 # ============================================================================
 USE_PROXY=false
 PROXY_BASE="https://comigo.xyz"
+SPECIFIED_VERSION=""
 
 # 解析命令行参数
 while [[ $# -gt 0 ]]; do
@@ -42,12 +46,23 @@ while [[ $# -gt 0 ]]; do
             USE_PROXY=true
             shift 2
             ;;
+        --version|-V)
+            SPECIFIED_VERSION="$2"
+            shift 2
+            ;;
         *)
             # 未知参数，忽略
             shift
             ;;
     esac
 done
+
+# 如果指定了版本号，确保以 v 开头
+if [[ -n "$SPECIFIED_VERSION" ]]; then
+    if [[ ! "$SPECIFIED_VERSION" =~ ^v ]]; then
+        SPECIFIED_VERSION="v${SPECIFIED_VERSION}"
+    fi
+fi
 
 # ============================================================================
 # URL 转换函数
@@ -366,6 +381,38 @@ function print_message() {
                     ;;
             esac
             ;;
+        "using_specified_version")
+            case "$system_language" in
+                zh_CN)
+                    echo "使用指定版本：$param"
+                    ;;
+                en_US)
+                    echo "Using specified version: $param"
+                    ;;
+                ja_JP)
+                    echo "指定されたバージョンを使用：$param"
+                    ;;
+                *)
+                    echo "Using specified version: $param"
+                    ;;
+            esac
+            ;;
+        "error_invalid_version")
+            case "$system_language" in
+                zh_CN)
+                    echo "错误：无效的版本号格式：$param（应为 vX.Y.Z 格式）"
+                    ;;
+                en_US)
+                    echo "Error: Invalid version format: $param (expected vX.Y.Z)"
+                    ;;
+                ja_JP)
+                    echo "エラー：無効なバージョン形式：$param（vX.Y.Z 形式が必要です）"
+                    ;;
+                *)
+                    echo "Error: Invalid version format: $param (expected vX.Y.Z)"
+                    ;;
+            esac
+            ;;
         "extracting")
             case "$system_language" in
                 zh_CN)
@@ -546,26 +593,32 @@ done
 # ============================================================================
 # 版本信息获取
 # ============================================================================
-# 从 GitHub API 获取最新版本标签
-api_url=$(convert_github_url "https://api.github.com/repos/yumenaka/comigo/releases/latest")
-if [ "$download_tool" = "curl" ]; then
-    latest_release=$(curl --silent "$api_url")
+if [[ -n "$SPECIFIED_VERSION" ]]; then
+    # 使用用户指定的版本
+    print_message "using_specified_version" "$SPECIFIED_VERSION"
+    latest_tag="$SPECIFIED_VERSION"
 else
-    latest_release=$(wget -qO- "$api_url")
-fi
+    # 从 GitHub API 获取最新版本标签
+    api_url=$(convert_github_url "https://api.github.com/repos/yumenaka/comigo/releases/latest")
+    if [ "$download_tool" = "curl" ]; then
+        latest_release=$(curl --silent "$api_url")
+    else
+        latest_release=$(wget -qO- "$api_url")
+    fi
 
-# 使用 sed 提取最新标签（MacOS 不支持 grep -P）
-latest_tag=$(echo "$latest_release" | sed -n 's/.*"tag_name": *"\(v[^"]*\)".*/\1/p')
-if [[ -z "$latest_tag" ]]; then
-    print_message "error_cannot_get_latest_tag"
-    exit 1
+    # 使用 sed 提取最新标签（MacOS 不支持 grep -P）
+    latest_tag=$(echo "$latest_release" | sed -n 's/.*"tag_name": *"\(v[^"]*\)".*/\1/p')
+    if [[ -z "$latest_tag" ]]; then
+        print_message "error_cannot_get_latest_tag"
+        exit 1
+    fi
 fi
 
 # 从标签中提取版本号（支持两个或多个数字段的版本号，如 v1.2.3）
 if [[ $latest_tag =~ ^v([0-9]+(\.[0-9]+)+) ]]; then
     Version="${BASH_REMATCH[1]}"
 else
-    print_message "error_cannot_parse_version" "$latest_tag"
+    print_message "error_invalid_version" "$latest_tag"
     exit 1
 fi
 
@@ -601,8 +654,9 @@ case "$ARCH" in
     x86_64)
         ARCH_NAME="x86_64"
         ;;
-    armv7l)
-        ARCH_NAME="arm"
+    armv7l|armv7)
+        # Linux armv7l 实际对应的发布文件名为 *_Linux_armv7.tar.gz
+        ARCH_NAME="armv7"
         ;;
     arm64|aarch64)
         ARCH_NAME="arm64"

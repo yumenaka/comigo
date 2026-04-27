@@ -1,9 +1,10 @@
 package plugins
 
 import (
+	"strings"
+
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
-	"strings"
 )
 
 // RenderCustomPlugin 渲染单个自定义插件
@@ -27,7 +28,9 @@ templ RenderCustomPlugins(c echo.Context) {
 			<script>
 				console.log(
 					"Loading custom plugin, current path:",
-					window.location.pathname,
+					window.ComiGoRelativePath
+						? window.ComiGoRelativePath(window.location.pathname)
+						: window.location.pathname,
 				);
 			</script>
 		}
@@ -36,18 +39,18 @@ templ RenderCustomPlugins(c echo.Context) {
 			@RenderCustomPlugin(plugin)
 		}
 		// 根据路径加载特定范围的插件
-		if strings.HasPrefix(c.Request().URL.Path, "/shelf") || c.Request().URL.Path == "/" {
+		if strings.HasPrefix(customPluginRequestPath(c), "/shelf") || customPluginRequestPath(c) == "/" {
 			for _, plugin := range config.GetCustomPluginsByScope("shelf") {
 				@RenderCustomPlugin(plugin)
 			}
 		}
-		if strings.HasPrefix(c.Request().URL.Path, "/flip") {
+		if strings.HasPrefix(customPluginRequestPath(c), "/flip") {
 			// 加载 flip 范围的通用插件
 			for _, plugin := range config.GetCustomPluginsByScope("flip") {
 				@RenderCustomPlugin(plugin)
 			}
 			// 提取书籍 ID 并加载书籍特定插件
-			if bookID := extractBookID(c.Request().URL.Path); bookID != "" {
+			if bookID := extractBookID(customPluginRequestPath(c)); bookID != "" {
 				if bookPlugins, err := config.LoadBookPlugins(bookID, "flip"); err == nil {
 					for _, plugin := range bookPlugins {
 						@RenderCustomPlugin(plugin)
@@ -55,13 +58,13 @@ templ RenderCustomPlugins(c echo.Context) {
 				}
 			}
 		}
-		if strings.HasPrefix(c.Request().URL.Path, "/scroll") {
+		if strings.HasPrefix(customPluginRequestPath(c), "/scroll") {
 			// 加载 scroll 范围的通用插件
 			for _, plugin := range config.GetCustomPluginsByScope("scroll") {
 				@RenderCustomPlugin(plugin)
 			}
 			// 提取书籍 ID 并加载书籍特定插件
-			if bookID := extractBookID(c.Request().URL.Path); bookID != "" {
+			if bookID := extractBookID(customPluginRequestPath(c)); bookID != "" {
 				if bookPlugins, err := config.LoadBookPlugins(bookID, "scroll"); err == nil {
 					for _, plugin := range bookPlugins {
 						@RenderCustomPlugin(plugin)
@@ -72,8 +75,15 @@ templ RenderCustomPlugins(c echo.Context) {
 	}
 }
 
+func customPluginRequestPath(c echo.Context) string {
+	if c == nil || c.Request() == nil || c.Request().URL == nil {
+		return "/"
+	}
+	return config.StripBasePath(c.Request().URL.Path)
+}
+
 // extractBookID 从 URL 路径中提取书籍 ID
-// 例如: "/flip/aBcE4Fz" -> "aBcE4Fz"
+// 例如: "/flip/a1cE4Fz" -> "a1cE4Fz"
 //
 //	"/scroll/abc123" -> "abc123"
 func extractBookID(path string) string {

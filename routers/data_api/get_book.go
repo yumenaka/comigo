@@ -1,11 +1,10 @@
 package data_api
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -21,7 +20,7 @@ func GetBook(c echo.Context) error {
 	}
 	id := c.QueryParam("id")
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, "not set id param")
+		return apiresp.BadRequest(c, "missing_param", "not set id param", map[string]string{"param": "id"})
 	}
 	model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
 	model.ClearBookNotExist()
@@ -29,7 +28,7 @@ func GetBook(c echo.Context) error {
 	b, err := model.IStore.GetBook(id)
 	if err != nil {
 		logger.Infof("%s", err)
-		return c.JSON(http.StatusBadRequest, "id not found")
+		return apiresp.BadRequest(c, "book_not_found", "id not found", map[string]string{"id": id})
 	}
 	b.SortPages(sortBy)
 	// 如果是epub文件，重新按照Epub信息排序
@@ -37,9 +36,9 @@ func GetBook(c echo.Context) error {
 		imageList, err := file.GetImageListFromEpubFile(b.BookPath)
 		if err != nil {
 			logger.Infof("%s", err)
-			return c.JSON(http.StatusOK, b)
+			return apiresp.Success(c, "ok", "book retrieved", b)
 		}
 		b.SortPagesByImageList(imageList)
 	}
-	return c.JSON(http.StatusOK, b)
+	return apiresp.Success(c, "ok", "book retrieved", b)
 }

@@ -44,7 +44,7 @@ func GetBookTitle(bookID string) string {
 func GetReturnUrl(BookID string) string {
 	childID := BookID
 	if childID == "" {
-		return "/"
+		return config.PrefixPath("/")
 	}
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
@@ -58,13 +58,13 @@ func GetReturnUrl(BookID string) string {
 			if id == childID {
 				b, err := model.IStore.GetBook(bookGroup.BookID)
 				if err != nil {
-					return "/"
+					return config.PrefixPath("/")
 				}
-				return "/shelf/" + b.BookID
+				return config.PrefixPath("/shelf/" + b.BookID)
 			}
 		}
 	}
-	return "/"
+	return config.PrefixPath("/")
 }
 
 func QuickJumpBarBooks(b *model.Book) (list *model.BookInfos) {

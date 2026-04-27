@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"unsafe"
 
+	"github.com/yumenaka/comigo/tools/logger"
 	"golang.org/x/sys/windows"
 )
 
@@ -36,5 +37,6 @@ func openURL(uri string) error {
 		// callErr 可能为 Errno(0)，这里也一并返回便于定位
 		return fmt.Errorf("ShellExecuteW failed: ret=%d err=%v", r, callErr)
 	}
+	logger.Infof("Opening URL: %s", uri)
 	return nil
 }

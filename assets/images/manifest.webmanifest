@@ -1,33 +1,47 @@
 {
-  "name": "My PWA Project",
-  "short_name": "My PWA Project",
-  "description": "The PWA (Progressive Web App) part of the Gowebly project.",
-  "background_color": "#FEFEF5",
-  "theme_color": "#FEFEF5",
+  "name": "Comigo Reader",
+  "short_name": "Reader",
+  "description": "Read ZIP, CBZ, RAR and CBR archives locally in the browser.",
+  "background_color": "#dce6ff",
+  "theme_color": "#076c0a",
   "display": "standalone",
-  "orientation": "portrait",
-  "start_url": ".",
+  "orientation": "any",
+  "start_url": "/reader",
+  "scope": "/",
   "icons": [
     {
-      "src": "manifest-touch-icon.svg",
-      "type": "image/svg+xml",
-      "sizes": "any"
+      "src": "/images/pwa-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/pwa-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/pwa-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ],
   "screenshots": [
     {
-      "src": "manifest-desktop-screenshot.jpg",
-      "sizes": "1280x720",
-      "type": "image/jpeg",
+      "src": "/images/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "form_factor": "wide",
-      "label": "Desktop homescreen of My PWA Project"
+      "label": "Desktop homescreen of Comigo"
     },
     {
-      "src": "manifest-mobile-screenshot.jpg",
-      "sizes": "720x1280",
-      "type": "image/jpeg",
+      "src": "/images/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "form_factor": "narrow",
-      "label": "Mobile homescreen of My PWA Project"
+      "label": "Mobile homescreen of Comigo"
     }
   ]
 }

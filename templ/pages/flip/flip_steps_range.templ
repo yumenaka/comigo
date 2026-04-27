@@ -121,7 +121,7 @@ templ StepsRangeArea() {
 	<!-- 阻止事件冒泡，防止触发父组件上的翻页动作 -->
 	<div
 		id="StepsRangeArea"
-		x-on:click.stop=""
+		@click.stop=""
 		class="w-5/6 h-12 px-4 md:px-8 overflow-visible font-semibold StepsRangeArea  rounded-xl drop-shadow-lg self-center-safe bg-base-100 text-base-content toolbar backdrop-blur-3xl"
 		:class="($store.flip.autoHideToolbar? 'fixed bottom-0':'flex flex-col justify-center bg-base-100/50')+($store.flip.mangaMode?' manga-mode': '')"
 	>

@@ -20,7 +20,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 				const pageIndex = $store.global.nowPageNum;
 				$store.global.UpdateBookmark({
 					type: 'user',
-					bookId: $store.global.bookID || window.location.pathname.split('/').pop(),
+					bookId: $store.global.bookID || (window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).split('/').pop(),
 					pageIndex: pageIndex,
 					description: ''
 				}).then(() => {
@@ -55,13 +55,29 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	@plugins.AutoScrollPlugin(c)
 	@common.ReadModeSwitchButton()
 	@common.DownloadButton(c, book)
+	<!-- 远程同步翻页 -->
+	<label
+		x-show="$store.global.onlineBook"
+		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
+	>
+		<input
+			type="checkbox"
+			:value="$store.global.syncPageByWS"
+			@click="$store.global.syncPageByWS = !$store.global.syncPageByWS"
+			class="sr-only peer"
+		/>
+		<div
+			class="relative w-11 min-w-[44px] h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+		></div>
+		<span class="font-medium ms-3" x-text="i18next.t('sync_page')"></span>
+	</label>
 	<!-- 【显示页数】 -->
 	<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
 		<div
 			class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
 		></div>
-		<span class="font-medium ms-3" x-text="i18next.t('showPageNum')"></span>
+		<span class="font-medium ms-3" x-text="i18next.t('show_page_num')"></span>
 	</label>
 	<!-- 【页面间距】 -->
 	<!-- range 组件参考：https://flowbite.com/docs/forms/range/-->
@@ -89,7 +105,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.global.autoCrop"
-			x-on:click="$store.global.autoCrop =!$store.global.autoCrop;"
+			@click="$store.global.autoCrop =!$store.global.autoCrop;"
 			class="sr-only peer"
 		/>
 		<div
@@ -222,7 +238,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 		<input
 			type="checkbox"
 			:value="$store.global.autoResize"
-			x-on:click="$store.global.autoResize =!$store.global.autoResize;"
+			@click="$store.global.autoResize =!$store.global.autoResize;"
 			class="sr-only peer"
 		/>
 		<div

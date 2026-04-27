@@ -1,85 +1,86 @@
 <div align="center">
 
-# ComiGo：简单高效的漫画阅读器
-
+# ComiGo: Simple and Efficient Comic Reader  
 [![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
-[![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)
-[English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md) | [中文文档](https://github.com/yumenaka/comigo/blob/master/README.md)
+[![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)  
+[中文文档](https://github.com/yumenaka/comigo/blob/master/README_ZH.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md) | [English](https://github.com/yumenaka/comigo/blob/master/README.md)
 <!--
 [![Downloads](https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success)](https://github.com/yumenaka/comigo/releases)
-<img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：简单方便的漫画阅读器" width="200">
+<img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：Simple Comig & Manga Reader" width="200">
 -->
 </div>
 
-![Windows示例](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows示例")
+![Windows Sample](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows Sample")
 
-## 功能特点
+## Features
 
-- 📚 **多格式支持**：支持图片文件夹与 `.rar`、`.zip`、`.tar`、`.cbz`、`.cbr`、`.epub` 等压缩包格式
-- 📱 **便捷访问**：支持手机/平板扫描二维码阅读，Windows 支持拖拽打开
-- 🐧 **跨平台支持**：适配 Windows、Linux、MacOS 系统
-- 📖 **多样化阅读模式**：提供卷轴、翻页等多种阅读模式
-- ⚙️ **灵活配置**：支持命令行操作，可通过 `config.toml` 配置文件设定书库
-- 🖼️ **现代图片格式**：除了常见的`jpg`、`png`，还支持 `heic`、`avif` 等新一代图片格式
-- ✂️ **智能优化**：支持图片自动裁边，压缩图片节省流量
-- 🔄 **同步阅读**：支持不同设备间同步翻页进度
-- 🔌 **插件系统**：支持自动翻页、时钟等插件，可扩展自定义插件
-- 🎬 **媒体播放**：内置音频、视频播放器
-- 📥 **灵活下载**：支持打包下载图片文件夹，支持转换并下载为 EPUB 格式
-- 📜 **阅读历史**：自动记录阅读历史，方便续读
+- 📚 **Multiple Format Support**: Supports image folders and compressed files like `.rar`, `.zip`, `.tar`, `.cbz`, `.cbr`, `.epub`
+- 📱 **Easy Access**: QR code scanning for mobile/tablet devices, drag-and-drop support for Windows
+- 📴 **Offline Mode / PWA App**: Read ZIP/CBZ/RAR/CBR directly in your browser without uploading files. [Try it online](https://comigo.xyz/reader)
+- 🐧 **Cross-Platform**: Compatibility with Windows, Linux, and macOS
+- 📖 **Diverse Reading Modes**: Offers scroll, and page-turning modes
+- ⚙️ **Flexible Configuration**: Command-line operation with `config.toml` library settings
+- 🖼️ **Modern Image Formats**: In addition to `jpg` and `png`, it also supports next-gen formats like `heic` and `avif`
+- ✂️ **Smart Optimization**: Automatic image cropping and compression for bandwidth saving
+- 🔄 **Sync Reading**: Synchronized page-turning across different devices
+- 🔌 **Plugin System**: Built-in plugins like auto page-turn and clock, with custom plugin support
+- 🎬 **Media Playback**: Built-in audio and video player
+- 📥 **Flexible Download**: Batch download image folders, convert and download as EPUB format
+- 📜 **Reading History**: Automatic reading history tracking for easy continuation
 
-## 安装指南
+PC/Mobile Sync:   
+![Mobile Sync Sample](https://www.yumenaka.net/wp-content/uploads/2026/04/scroll.gif "Mobile Sync Sample")
 
-### 托盘版（推荐）
+## Installation Guide
 
-| 系统 | 下载链接 |
-|------|---------|
-| Windows 64位 | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
-| macOS (Intel/Apple芯片) | [Comigo.app.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo.app.zip) |
+### GUI Version (Recommended for Beginners)
 
-> 💡 **说明**：托盘版提供系统托盘图标，可最小化到后台运行。
->  Windows 用户双击运行即可，macOS 用户需要将APP拖入 应用程序 文件夹。
+| System | Download |
+|--------|----------|
+| Windows 64-bit | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
+| macOS (Intel/Apple Silicon) | [Comigo_latest.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo_latest.dmg) |
 
-### 一键安装(命令行版)
+> 💡 **Note**: GUI version provides system tray icon, can run minimized in background. Windows: Double-click to run; macOS: Drag to Applications folder.
+
+### Quick Install for CLI
 
 ```bash
-# 中国大陆用户推荐使用中转脚本：
-bash <(curl -s https://comigo.xyz/get.sh) --cn
-
-# 从 GitHub下载：
+# Recommended:
 bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 
-# 如果您已设置 Golang 环境：
+# For users in Mainland China:
+bash <(curl -s https://comigo.xyz/get.sh) --cn
+
+# If you have Golang (go 1.23 or higher):
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
 
-### 下载命令行版
+### CLI Version
 
-| 系统类型 | 下载链接 |
-|---------|---------|
-| Windows 64位 | [comi_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_x86_64.zip) |
+| System | Download |
+|--------|----------|
+| Windows 64-bit | [comi_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_x86_64.zip) |
 | Windows ARM | [comi_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_arm64.zip) |
 | macOS Intel | [comi_latest_MacOS_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_x86_64.tar.gz) |
-| macOS Apple芯片 | [comi_latest_MacOS_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz) |
-| Linux 64位 | [comi_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_x86_64.tar.gz) |
+| macOS Apple Silicon | [comi_latest_MacOS_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz) |
+| Linux 64-bit | [comi_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_x86_64.tar.gz) |
 | Linux ARM64 | [comi_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_arm64.tar.gz) |
 | Linux ARM32 | [comi_latest_Linux_armv7.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_armv7.tar.gz) |
-| Debian/Ubuntu 64位 | [comi_latest_amd64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_amd64.deb) |
+| Debian/Ubuntu 64-bit | [comi_latest_amd64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_amd64.deb) |
 | Debian/Ubuntu ARM64 | [comi_latest_arm64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_arm64.deb) |
 
-> 💡 **说明**：命令行版适合服务器部署和高级用户。下载后需手动添加到系统 PATH 环境变量。
+> 💡 **Note**: CLI version suitable for server deployment and advanced users. Manual PATH configuration required after download.
 
-### 发布页
+### Manual Installation
 
-也可以在 [Releases 页面](https://github.com/yumenaka/comigo/releases) 下载最新版本，并将可执行文件添加到系统的 `PATH` 环境变量中。
+Download the latest version from the [Releases page](https://github.com/yumenaka/comigo/releases) and add the executable to your system's `PATH` environment variable.
 
+## Docker Deployment
 
-## 使用Docker 部署
-
-### 快速开始
+### Quick Start with Docker
 
 ```bash
-# 拉取并运行最新镜像
+# Pull and run the latest image
 docker run -d \
   --name comigo \
   -p 1234:1234 \
@@ -87,164 +88,106 @@ docker run -d \
   yumenaka/comigo:latest
 ```
 
-访问 `http://localhost:1234` 即可使用。
+Visit `http://localhost:1234` to access your library.
 
-### 使用 Docker Compose
+### Using Docker Compose
 
-1. 下载 [`docker-compose.yml`](sample/docker/docker-compose.yml) 文件
-2. 根据需要编辑配置
-3. 启动服务：
+1. Download the [`docker-compose.yml`](sample/docker/docker-compose.yml) file
+2. Edit the configuration as needed
+3. Start the service:
 
 ```bash
 docker-compose up -d
 ```
 
-更多详细说明请查看完整的 [Docker 使用文档](sample/docker/README.md)。
+### Supported Platforms
 
-## 使用方法
+- `linux/amd64` - Standard x86_64 servers
+- `linux/arm64` - ARM64 servers (Raspberry Pi 4/5)
+- `linux/arm/v7` - ARMv7 devices (Raspberry Pi 2-4)
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `COMIGO_PORT` | Service port | `1234` |
+| `COMIGO_USERNAME` | Login username (optional) | - |
+| `COMIGO_PASSWORD` | Login password (optional) | - |
+| `COMIGO_ENABLE_UPLOAD` | Enable file upload | `true` |
+
+For more details, see the complete [Docker documentation](sample/docker/README.md).
+
+## Usage
 
 ```bash
 comi [flags] file_or_dir
 ```
 
-### 命令行参数
+### Command Line Options
 
-| 参数 | 简写 | 默认值 | 说明                   |
-|------|------|--------|----------------------|
-| `--config` | `-c` | - | 指定配置文件路径             |
-| `--port` | `-p` | 1234 | 服务端口                 |
-| `--host` | - | - | 自定义主机名/域名            |
-| `--local` | - | false | 仅本地访问，不对局域网开放        |
-| `--max-depth` | `-m` | 5 | 文件扫描最大深度             |
-| `--open-browser` | `-o` | false | 启动后自动打开浏览器           |
-| `--enable-upload` | - | true | 启用文件上传功能             |
-| `--read-only` | - | false | 只读模式，禁止网页端修改配置       |
-| `--username` | - | - | 登录用户名（设置后启用登录保护）     |
-| `--password` | - | - | 登录密码                 |
-| `--lang` | - | auto | CLI语言（auto/zh/en/ja） |
-| `--debug` | - | false | 启用调试模式               |
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--config` | `-c` | - | Specify config file path |
+| `--port` | `-p` | 1234 | Service port |
+| `--host` | - | - | Custom hostname/domain |
+| `--local` | - | false | Local access only |
+| `--max-depth` | `-m` | 5 | Max scan depth |
+| `--open-browser` | `-o` | false | Open browser on start |
+| `--enable-upload` | - | true | Enable file upload |
+| `--read-only` | - | false | Read-only mode |
+| `--username` | - | - | Login username |
+| `--password` | - | - | Login password |
+| `--debug` | - | false | Debug mode |
 
-<details>
-<summary>更多参数（点击展开）</summary>
-
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `--tls` | false | 启用 HTTPS |
-| `--auto-tls` | false | 自动申请 Let's Encrypt 证书 |
-| `--tls-crt` | - | TLS 证书文件路径 |
-| `--tls-key` | - | TLS 密钥文件路径 |
-| `--use-cache` | false | 启用本地图片缓存 |
-| `--cache-dir` | - | 缓存目录路径 |
-| `--cache-clean` | false | 退出时清除缓存 |
-| `--database` | false | 启用本地数据库存储 |
-| `--auto-rescan-min` | 0 | 自动扫描间隔（分钟，0为禁用） |
-| `--min-image` | 1 | 最少图片数量才认定为漫画 |
-| `--zip-encode` | gbk | 非UTF-8 ZIP文件的编码 |
-| `--log-file` | false | 输出日志到文件 |
-| `--print-all` | false | 打印所有网卡的访问地址 |
-| `--single-instance` | false | 单实例模式 |
-| `--plugin` | true | 启用插件系统 |
-| `--tailscale` | false | 启用 Tailscale 网络 |
-| `--tailscale-hostname` | comigo | Tailscale 主机名 |
-| `--tailscale-funnel` | false | 启用 Tailscale Funnel |
-
-</details>
-
-### 使用示例
+### Examples
 
 ```bash
-# 打开当前目录
+# Open current directory
 comi .
 
-# 指定端口和书库路径
+# Specify port and path
 comi -p 8080 /path/to/manga
 
-# 仅本地访问，启用登录保护
-comi --local --username admin --password 123456 /path/to/manga
-
-# 使用配置文件
-comi -c /path/to/comigo.toml
 ```
 
-## 配置文件说明
+## Configuration File
 
-Comigo 支持多种配置文件位置：
+Comigo supports  configuration file locations:
 
-1. **用户主目录**  
-   - Windows: `C:\Users\用户名\.config\comigo.toml`
-   - Linux/MacOS: `/home/用户名/.config/comigo.toml`
-   - 程序启动时默认读取此位置
+1. **User Home Directory**  
+   - Windows: `C:\Users\username\.config\comigo.toml`
+   - Linux/MacOS: `/home/username/.config/comigo.toml`
+   - Default location read at startup
 
-2. **程序目录**  
-   - 将 `comigo.toml` 放在可执行文件同目录
-   - 适合作为绿色软件使用
+2. **Program Directory**  
+   - Place `comigo.toml` in the same directory as the executable
+   - Suitable for portable usage
 
-3. **当前运行目录**  
-   - 在启动命令的当前目录下查找配置文件
+3. **Current Working Directory**  
+   - Searches for configuration file in the current directory when running commands
 
-4. **自定义位置**  
-   - 使用 `--config` 参数指定配置文件路径
+4. **Custom Location**  
+   - Specify configuration file path using the `--config` parameter
 
-### 配置文件示例
+## Feedback and Support
 
-```toml
-# comigo.toml 配置示例
+If you have any suggestions or encounter issues, feel free to:
+- Submit an [Issue](https://github.com/yumenaka/comigo/issues)
+- Contact me via [Twitter](https://x.com/yumenaka7)
+- Join the discussion on [Discord](https://discord.gg/c5q6d3dM8r)
+## Special Thanks
 
-# 服务设置
-Port = 1234                    # 服务端口
-Host = ""                      # 自定义主机名（留空自动检测）
-DisableLAN = false             # 仅本地访问
-OpenBrowser = false            # 启动后打开浏览器
-Language = "auto"              # 界面语言 (auto/zh/en/ja)
-
-# 书库设置
-StoreUrls = ["/path/to/manga", "/path/to/comics"]  # 书库路径列表
-MaxScanDepth = 5               # 扫描深度
-MinImageNum = 1                # 最少图片数量
-AutoRescanIntervalMinutes = 0  # 自动扫描间隔（0为禁用）
-
-# 登录保护
-Username = ""                  # 用户名（留空禁用登录）
-Password = ""                  # 密码
-Timeout = 43200                # Cookie过期时间（分钟）
-
-# 功能开关
-EnableUpload = true            # 启用上传
-ReadOnlyMode = false           # 只读模式
-EnablePlugin = true            # 启用插件
-Debug = false                  # 调试模式
-
-# 缓存设置
-UseCache = false               # 启用图片缓存
-CacheDir = ""                  # 缓存目录（留空使用系统临时目录）
-ClearCacheExit = false         # 退出时清除缓存
-
-# ZIP文件设置
-ZipFileTextEncoding = "gbk"    # 非UTF-8编码ZIP的解析编码
-```
-
-## 反馈与支持
-
-如果您有任何建议或遇到问题，欢迎：
-- 提交 [Issue](https://github.com/yumenaka/comigo/issues)
-- 通过 [Twitter](https://x.com/yumenaka7) 联系我
-- Discord讨论群 [Discord](https://discord.gg/c5q6d3dM8r)
-## 开发与TODO
-- [开发备忘](https://github.com/yumenaka/comigo/blob/master/TODO.md)
-
-## 特别鸣谢
-
-感谢以下开源项目及其贡献者：
+Thanks to the following open-source projects and their contributors:
 - [mholt](https://github.com/mholt)
 - [spf13](https://github.com/spf13)
 - [disintegration](https://github.com/disintegration)
 - [Baozisoftware](https://github.com/Baozisoftware)
-- 以及更多贡献者
+- And many more contributors
 
-## 项目统计
+## Project Statistics
 
 [![Stargazers over time](https://starchart.cc/yumenaka/comigo.svg?variant=adaptive)](https://starchart.cc/yumenaka/comigo)
 
-## 开源协议
+## License
 
-本项目采用 MIT 协议开源。
+This software is released under the MIT license.

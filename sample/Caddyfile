@@ -1,0 +1,31 @@
+{
+	order webdav before file_server
+}
+localhost
+# https://test:1234@localhost/dav/ caddy会自动生成自签名 https 证书。macos finder 连接： CMD+K
+# 此caddy配置，是同一路径下同时开启有认证的 WebDAV + file_server。用户名与密码都是 test ，实际使用时请使用更复杂的密码。
+# 配置需要 hash 后的密码，计算方法：caddy hash-password
+
+#  需要在自己编译caddy，并添加插件（ https://github.com/mholt/caddy-webdav）：
+## 下载编译用工具xcaddy：
+#  go install github.com/caddyserver/xcaddy/cmd/xcaddy@master
+#
+### 编译 Caddy2：
+# xcaddy build \
+# --with github.com/abiosoft/caddy-exec \
+# --with github.com/imgk/caddy-trojan  \
+#	    --with github.com/mholt/caddy-webdav \
+#	    --with github.com/caddy-dns/cloudflare
+
+root * /your/path/here
+@get method GET HEAD
+route {
+	basicauth {
+		test $2a$14$/GQ8ShAau5gB/N1DrB.ExOwSFpPTDnneGJWr0cOEOvCqZ4w/.x//S
+	}
+	rewrite /dav /dav/
+	webdav /dav/* {
+		prefix /dav
+	}
+	file_server @get browse
+}

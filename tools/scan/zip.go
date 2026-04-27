@@ -26,10 +26,9 @@ func handleZipAndEpubFiles(filePath string, newBook *model.Book) error {
 
 	err = walkUTF8ZipFs(fsys, "", ".", newBook)
 	if err != nil {
-		var pathError *fs.PathError
-		if errors.As(err, &pathError) {
+		if _, ok := errors.AsType[*fs.PathError](err); ok {
 			if cfg.GetDebug() {
-				logger.Infof(locale.GetString("log_nonutf8_zip_error"), filePath, err.Error())
+				logger.Infof(locale.GetString("log_non_utf8_zip_error"), filePath, err.Error())
 			}
 			err = scanNonUTF8ZipFile(filePath, newBook)
 		} else {

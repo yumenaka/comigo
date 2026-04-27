@@ -1,23 +1,23 @@
 package upload_page
 
 templ UploadArea() {
-	<div class="relative w-full max-w-2xl p-8 bg-white rounded shadow-md">
+	<div class="relative w-full max-w-2xl p-8 bg-base-100 rounded shadow-md">
 		<!-- 书库选择下拉框 -->
 		<div class="mb-6">
-			<label class="block mb-2 text-sm font-medium text-gray-700" x-text="i18next.t('select_upload_target_store')">选择上传目标书库</label>
+			<label class="block mb-2 text-sm font-medium text-base-content" x-text="i18next.t('select_upload_target_store')">选择上传目标书库</label>
 			<select id="store-select" class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
 				<option value="" x-text="i18next.t('loading')">加载中...</option>
 			</select>
 			<p id="store-warning" class="mt-2 text-sm text-red-500 hidden"></p>
 		</div>
 		<!-- 文件选择与拖拽区域 -->
-		<div id="drop-area" class="px-6 py-24 text-center transition duration-300 border-4 border-gray-300 border-dashed rounded cursor-pointer hover:border-blue-500">
-			<p class="text-gray-500" x-text="i18next.t('drag_or_click_to_upload')">>将文件拖拽到此处或点击选择文件</p>
+		<div id="drop-area" class="px-6 py-24 text-center transition duration-300 border-4 border-gray-400 border-dashed rounded cursor-pointer hover:border-blue-500">
+			<p class="text-base-content" x-text="i18next.t('drag_or_click_to_upload')">>将文件拖拽到此处或点击选择文件</p>
 			<input type="file" id="file-input" multiple class="hidden"/>
 		</div>
 		<!-- 预览选中文件列表 -->
 		<div id="preview" class="mt-6">
-			<h3 class="mb-4 text-lg font-semibold" x-text="i18next.t('selected_file')">选择的文件</h3>
+			<h3 class="mb-4 text-lg font-semibold text-base-content" x-text="i18next.t('selected_file')">选择的文件</h3>
 			<ul class="divide-y divide-gray-200" id="file-list">
 				<!-- 动态插入文件项 -->
 			</ul>
@@ -25,11 +25,11 @@ templ UploadArea() {
 		<!-- 进度条背景 显示与隐藏有过渡效果，不可点击。-->
 		<div id="progress-bar" class="absolute pointer-events-none top-0 left-0 h-full transition-opacity duration-500 bg-blue-500/30" style="width: 0%;"></div>
 		<!-- 上传按钮 -->
-		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed" disabled x-text="i18next.t('upload_file')">上传文件</button>
+		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300 font-semibold disabled:cursor-not-allowed" disabled x-text="i18next.t('upload_file')">上传文件</button>
 		<!-- 上传结果显示区域 -->
 		<div id="result" class="mt-4"></div>
 	</div>
-	<div class="flex-grow bg-gray-400 place-holder"></div>
+	<div class="grow bg-gray-400 place-holder"></div>
 	<script>
 		// 获取元素
 		const dropArea = document.getElementById("drop-area");
@@ -69,7 +69,7 @@ templ UploadArea() {
 
 		// 获取书库列表的函数
 		function loadStores() {
-			fetch("/api/stores")
+			fetch(window.ComiGoPath("/api/stores"))
 				.then((response) => response.json())
 				.then((data) => {
 					const stores = data.stores || [];
@@ -86,7 +86,9 @@ templ UploadArea() {
 						// 显示更详细的提示，引导用户去设置书库
 						storeWarning.innerHTML =
 							i18next.t("no_available_stores") +
-							' <a href="/settings" class="text-blue-500 underline hover:text-blue-700">' +
+							' <a href="' +
+							window.ComiGoPath("/settings") +
+							'" class="text-blue-500 underline hover:text-blue-700">' +
 							i18next.t("settings_stores") +
 							"</a>";
 						storeWarning.classList.remove("hidden");
@@ -121,7 +123,9 @@ templ UploadArea() {
 						// 所有书库路径都不存在
 						storeWarning.innerHTML =
 							i18next.t("no_available_stores") +
-							' <a href="/settings" class="text-blue-500 underline hover:text-blue-700">' +
+							' <a href="' +
+							window.ComiGoPath("/settings") +
+							'" class="text-blue-500 underline hover:text-blue-700">' +
 							i18next.t("settings_stores") +
 							"</a>";
 						storeWarning.classList.remove("hidden");
@@ -265,7 +269,7 @@ templ UploadArea() {
 			detailsDiv.appendChild(fileName);
 			// 计算文件大小
 			const fileSize = document.createElement("p");
-			fileSize.className = "text-sm text-gray-500";
+			fileSize.className = "text-sm text-base-content";
 			fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
 			if (file.size > 1024 * 1024) {
 				fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
@@ -329,7 +333,9 @@ templ UploadArea() {
 			const xhr = new XMLHttpRequest();
 			xhr.open(
 				"POST",
-				"/api/upload?store_url=" + encodeURIComponent(selectedStore),
+				window.ComiGoPath("/api/upload") +
+					"?store_url=" +
+					encodeURIComponent(selectedStore),
 				true,
 			);
 			// 监听上传进度

@@ -35,6 +35,8 @@ type Book struct {
 	NonUtf8zip       sql.NullBool
 	ZipTextEncoding  sql.NullString
 	CreatedByVersion sql.NullString
+	IsRemote         sql.NullBool
+	RemoteUrl        sql.NullString
 	Deleted          sql.NullBool
 }
 
@@ -42,6 +44,7 @@ type Bookmark struct {
 	ID          int64
 	Type        string
 	BookID      string
+	BookStoreID sql.NullString
 	PageIndex   int64
 	Description sql.NullString
 	CreatedAt   sql.NullTime

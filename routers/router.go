@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"errors"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -8,6 +9,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/yumenaka/comigo/assets"
+	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -21,6 +25,7 @@ func InitEcho() {
 	engine = echo.New()
 	// 禁用 Echo 的 banner
 	engine.HideBanner = true
+	SetHTTPErrorHandler(engine)
 	// 设置中间件
 	SetMiddleware()
 	// 绑定路由：内嵌资源
@@ -29,10 +34,43 @@ func InitEcho() {
 	BindURLs()
 }
 
+func SetHTTPErrorHandler(e *echo.Echo) {
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		status := http.StatusInternalServerError
+		code := "internal_error"
+		message := locale.GetString("err_internal_server")
+		var details interface{}
+
+		if he, ok := errors.AsType[*echo.HTTPError](err); ok {
+			status = he.Code
+			switch v := he.Message.(type) {
+			case string:
+				message = v
+			default:
+				details = v
+			}
+			if status >= 400 && status < 500 {
+				code = "bad_request"
+			}
+			if status == http.StatusUnauthorized {
+				code = "unauthorized"
+			}
+			if status == http.StatusForbidden {
+				code = "forbidden"
+			}
+			if status == http.StatusNotFound {
+				code = "not_found"
+			}
+		}
+		_ = apiresp.Error(c, status, code, message, details)
+	}
+}
+
 // SetMiddleware 设置 Echo 的中间件等
 func SetMiddleware() {
 	// Recovery 中间件。返回 500 错误，避免程序直接崩溃，同时记录错误日志。
 	engine.Use(middleware.Recover())
+	engine.Use(middleware.RequestID())
 
 	// 设置 Echo 的日志输出
 	SetEchoLogger(engine)
@@ -66,7 +104,7 @@ func SetMiddleware() {
 		Skipper: func(c echo.Context) bool {
 			// 如果url里面包含了 .js 或者 .css 文件或 base64 这几个关键字
 			// 那么就启用 gzip 压缩
-			url := c.Request().URL.Path
+			url := config.StripBasePath(c.Request().URL.Path)
 			// SSE 与 WebSocket 路由不应启用 gzip，以免长连接阻塞
 			if url == "/api/sse" || url == "/api/ws" {
 				return true
@@ -94,40 +132,72 @@ func SetMiddleware() {
 	// e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(20))))
 
 	// CORS 中间件
+	allowOrigins := []string{"*"}
+	allowCredentials := false
+	if config.GetCfg().RequiresAuth() {
+		//port := strconv.Itoa(config.GetCfg().Port)
+		//allowOrigins = []string{
+		//	"http://127.0.0.1:" + port,
+		//	"http://localhost:" + port,
+		//	"https://127.0.0.1:" + port,
+		//	"https://localhost:" + port,
+		//}
+		//if host := strings.TrimSpace(config.GetCfg().Host); host != "" {
+		//	allowOrigins = append(allowOrigins, "http://"+host, "https://"+host)
+		//}
+		allowOrigins = []string{"*"}
+		allowCredentials = true
+	}
 	engine.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     allowOrigins,
 		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodPatch},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderContentLength, echo.HeaderAcceptEncoding, "X-CSRF-Token", echo.HeaderAuthorization},
-		ExposeHeaders:    []string{echo.HeaderContentLength},
-		AllowCredentials: true,
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderContentLength, echo.HeaderAcceptEncoding, "X-CSRF-Token", echo.HeaderAuthorization, echo.HeaderXRequestID},
+		ExposeHeaders:    []string{echo.HeaderContentLength, echo.HeaderXRequestID},
+		AllowCredentials: allowCredentials,
 	}))
 }
 
 // EmbedStaticFiles 绑定静态资源
 func EmbedStaticFiles() {
-	// 嵌入JavaScript与css脚本
+	// 嵌入前端资源：/assets/dist 是编译产物，/assets/static 是页面级静态脚本。
 	var err error = nil
-	assets.ScriptFS, err = fs.Sub(assets.Script, "script")
+	assets.FrontendFS, err = fs.Sub(assets.Frontend, ".")
 	if err != nil {
 		logger.Infof("%s", err)
 	}
-	engine.StaticFS("/script/", assets.ScriptFS)
+	engine.StaticFS(config.PrefixPath("/assets"), assets.FrontendFS)
 	// 嵌入图片资源
 	assets.ImagesFS, err = fs.Sub(assets.Images, "images")
 	if err != nil {
 		logger.Infof("%s", err)
 	}
-	engine.StaticFS("/images/", assets.ImagesFS)
+	engine.StaticFS(config.PrefixPath("/images"), assets.ImagesFS)
+	// PWA manifest 使用标准 MIME，避免部分浏览器拒绝识别安装信息。
+	engine.GET(config.PrefixPath("/images/manifest.webmanifest"), func(c echo.Context) error {
+		data, err := fs.ReadFile(assets.Images, "images/manifest.webmanifest")
+		if err != nil {
+			return err
+		}
+		manifest := string(data)
+		manifest = strings.ReplaceAll(manifest, `"start_url": "/reader"`, `"start_url": "`+config.PrefixPath("/reader")+`"`)
+		manifest = strings.ReplaceAll(manifest, `"scope": "/"`, `"scope": "`+config.PrefixPath("/")+`"`)
+		manifest = strings.ReplaceAll(manifest, `"src": "/images/`, `"src": "`+config.PrefixPath("/images/"))
+		return c.Blob(http.StatusOK, "application/manifest+json", []byte(manifest))
+	})
+	// PWA Service Worker 必须挂在根路径，才能覆盖 /reader 页面。
+	engine.FileFS(config.PrefixPath("/reader-sw.js"), "pwa/reader-sw.js", assets.Pwa)
+	// 暴露 robots.txt，供搜索引擎按标准路径读取
+	engine.FileFS(config.PrefixPath("/robots.txt"), "robots.txt", assets.Robots)
 }
 
 // StartWebServer 启动web服务
-func StartWebServer() {
+func StartWebServer() error {
 	// 初始化web服务器
 	InitEcho()
 	// 设置网页端口
 	SetHttpPort()
 	// 监听并启动web服务
-	StartEcho(engine)
+	return StartEcho(engine)
 }
 
 // GetWebServer 获取echo.Echo (实现了 http.Handler 接口)

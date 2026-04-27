@@ -15,6 +15,9 @@ MAIN_FILE_DIR := ./
 # -trimpath 去掉源码绝对路径，比如构建机目录
 # -ldflags 指定编译参数。-s 去掉符号信息  -w去掉调试信息 减小二进制体积
 GOBUILD=go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'"
+WASM_DIR := assets/script/wasm
+WASM_EXEC_JS := $(shell go env GOROOT 2>/dev/null)/lib/wasm/wasm_exec.js
+WASM_EXEC_JS_LEGACY := $(shell go env GOROOT 2>/dev/null)/misc/wasm/wasm_exec.js
 
 ifeq ($(OS), Darwin)
   MD5_UTIL = md5
@@ -23,7 +26,7 @@ else
 endif
 
 # 跨平台编译的默认目标
-all: app Windows_x86_64_full Windows_i386_full Windows_arm64_full compileAll_CGO deb-all md5SumThemAll
+all: dmg Windows_x86_64_full Windows_i386_full Windows_arm64_full compileAll_CGO deb-all md5SumThemAll
 
 ## windows 可能不需要CGO就能支持Tailscale？
 
@@ -37,21 +40,42 @@ android: Linux_arm_android Linux_arm64-android
 
 UPX := $(shell command -v upx 2> /dev/null)
 DOCKER := $(shell command -v docker 2> /dev/null)
+UNAME_M := $(shell uname -m)
+
+# Apple Silicon 等 ARM64 主机在拉取纯 amd64 镜像时，需要强制 --platform=linux/amd64。
+# 适用于：main-debian9、darwin-debian12、armhf-debian9（这些镜像只发布了 amd64 manifest）。
+# 不适用于：base-arm-debian9、darwin-arm64-debian12（这些镜像本身就是 arm64）。
+DOCKER_PLATFORM_AMD64 :=
+ifeq ($(UNAME_M),arm64)
+DOCKER_PLATFORM_AMD64 := --platform=linux/amd64
+endif
 
 gomobile:
 	export ANDROID_NDK_HOME=/Users/bai/Library/Android/sdk/ndk/26.1.10909125
 	gomobile bind -target=android -o comigo.aar -androidapi 26
 
+.PHONY: build-wasm
+build-wasm:
+	@echo "==> Building reader archive wasm"
+	@mkdir -p $(WASM_DIR)
+	CGO_ENABLED=0 GOOS=js GOARCH=wasm go build -trimpath -ldflags "-s -w" -o $(WASM_DIR)/archive.wasm ./cmd/archivewasm
+	@if [ -f "$(WASM_EXEC_JS)" ]; then \
+		cp "$(WASM_EXEC_JS)" "$(WASM_DIR)/wasm_exec.js"; \
+	elif [ -f "$(WASM_EXEC_JS_LEGACY)" ]; then \
+		cp "$(WASM_EXEC_JS_LEGACY)" "$(WASM_DIR)/wasm_exec.js"; \
+	else \
+		echo "wasm_exec.js not found in Go toolchain" >&2; \
+		exit 1; \
+	fi
+
 md5SumThemAll:
 	rm -f $(MD5_TEXTFILE)
 	find $(BINDIR) -type f -name "$(NAME)_*" -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
 	find $(BINDIR) -type f -name "$(FULL_NAME)_*" -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
-	# 如果存在 Comigo.app 目录，则先打包为 zip 再计算 md5
-	if [ -d "$(BINDIR)/Comigo.app" ]; then \
-		echo "==> 打包 Comigo.app 为 Comigo.app.zip 用于计算 md5"; \
-		rm -f "$(BINDIR)/Comigo.app.zip"; \
-		cd "$(BINDIR)" && zip -r "Comigo.app.zip" "Comigo.app" > /dev/null; \
-		cd .. && $(MD5_UTIL) "$(BINDIR)/Comigo.app.zip" >> $(MD5_TEXTFILE); \
+	# 如果存在版本化 DMG 文件，则计算并写入 md5
+	if [ -f "$(BINDIR)/Comigo_$(VERSION).dmg" ]; then \
+		echo "==> 计算 Comigo_$(VERSION).dmg 的 md5"; \
+		$(MD5_UTIL) "$(BINDIR)/Comigo_$(VERSION).dmg" >> $(MD5_TEXTFILE); \
 	fi
 	# 删除 $(MD5_TEXTFILE)里面的 ./bin/ 字符串
 	sed -i '' 's|./bin/||g' $(MD5_TEXTFILE)
@@ -79,18 +103,18 @@ ifndef DOCKER
 	$(error "No docker found! Please install docker to build Linux_armv7_cgo")
 endif
 ifdef DOCKER
-	docker run -it  \
+	docker run $(DOCKER_PLATFORM_AMD64) -it  \
 	 -v "$$PWD":/go/src/github.com/user/go-project \
 	 -w /go/src/github.com/user/go-project \
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Linux_armv7" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-armhf-debian9 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.2-armhf-debian9 \
 	 --build-cmd "make linux_armv7_cgo_docker VERSION=$(VERSION)" \
 	 -p "linux/armv7"
 endif
 
-linux_armv7_cgo_docker:
+linux_armv7_cgo_docker: build-wasm
 	CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
@@ -101,18 +125,18 @@ ifndef DOCKER
 	$(error "No docker found! Please install docker to build MacOS_x86_64_cgo")
 endif
 ifdef DOCKER
-	docker run -it  \
+	docker run $(DOCKER_PLATFORM_AMD64) -it  \
 	 -v "$$PWD":/go/src/github.com/user/go-project \
 	 -w /go/src/github.com/user/go-project \
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="MacOS_x86_64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-darwin-debian12 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.2-darwin-debian12 \
 	 --build-cmd "make darwin_x86_64_cgo_docker VERSION=$(VERSION)" \
 	 -p "darwin/amd64"
 endif
 
-darwin_x86_64_cgo_docker:
+darwin_x86_64_cgo_docker: build-wasm
 	CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
@@ -129,12 +153,12 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="MacOS_arm64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-darwin-arm64-debian12 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.2-darwin-arm64-debian12 \
 	 --build-cmd "make darwin_arm64_cgo_docker VERSION=$(VERSION)" \
 	 -p "darwin/arm64"
 endif
 
-darwin_arm64_cgo_docker:
+darwin_arm64_cgo_docker: build-wasm
 	CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
@@ -151,12 +175,12 @@ ifdef DOCKER
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Linux_arm64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-base-arm-debian9 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.2-base-arm-debian9 \
 	 --build-cmd "make linux_arm64_cgo_docker VERSION=$(VERSION)" \
 	 -p "linux/arm64"
 endif
 
-linux_arm64_cgo_docker:
+linux_arm64_cgo_docker: build-wasm
 	CGO_ENABLED=1 GOOS=linux GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
@@ -167,18 +191,18 @@ ifndef DOCKER
 	$(error "No docker found! Please install docker to build Linux_x86_64_cgo")
 endif
 ifdef DOCKER
-	docker run -it  \
+	docker run $(DOCKER_PLATFORM_AMD64) -it  \
 	 -v "$$PWD":/go/src/github.com/user/go-project \
 	 -w /go/src/github.com/user/go-project \
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Linux_x86_64" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-main-debian7 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.2-main-debian9 \
 	 --build-cmd "make linux_x86_64_cgo_docker VERSION=$(VERSION)" \
 	 -p "linux/amd64"
 endif
 
-linux_x86_64_cgo_docker:
+linux_x86_64_cgo_docker: build-wasm
 	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)
@@ -189,18 +213,18 @@ ifndef DOCKER
 	$(error "No docker found! Please install docker to build Linux_i386_cgo")
 endif
 ifdef DOCKER
-	docker run -it  \
+	docker run $(DOCKER_PLATFORM_AMD64) -it  \
 	 -v "$$PWD":/go/src/github.com/user/go-project \
 	 -w /go/src/github.com/user/go-project \
 	 -e CGO_ENABLED=1 \
 	 -e VERSION=$(VERSION) \
 	 -e FILE_LABLE="Linux_i386" \
-	 docker.elastic.co/beats-dev/golang-crossbuild:1.25.6-main-debian7 \
+	 docker.elastic.co/beats-dev/golang-crossbuild:1.26.2-main-debian9 \
 	 --build-cmd "make linux_i386_cgo_docker VERSION=$(VERSION)" \
 	 -p "linux/386"
 endif
 
-linux_i386_cgo_docker:
+linux_i386_cgo_docker: build-wasm
 	CGO_ENABLED=1 GOOS=linux GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)/$(NAME) cmd/comi/main.go
 	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)  -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE).tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$(FILE_LABLE)

@@ -9,16 +9,18 @@ templ QRCode() {
 			class="relative w-64 h-64 p-1 m-1"
 			x-data="{ qrcodeSrc: '', qrcodeImageSrc: '' }"
 			x-init="
-			qrcodeSrc = window.location.origin +'/api/qrcode.png?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
-			// 使用 fetch 加载二维码
-			fetch(qrcodeSrc)
-				.then(response => response.text())
-				.then(data => {
-					qrcodeImageSrc = data;
-				})
-				.catch(error => {
-					console.error('加载二维码失败:', error);
-				});
+			if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+				qrcodeSrc = window.location.origin + window.ComiGoPath('/api/qrcode.png') + '?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
+				// 使用 fetch 加载二维码
+				fetch(qrcodeSrc)
+					.then(response => response.text())
+					.then(data => {
+						qrcodeImageSrc = data;
+					})
+					.catch(error => {
+						console.error('加载二维码失败:', error);
+					});
+			}
 		"
 		>
 			<img
@@ -29,9 +31,9 @@ templ QRCode() {
 				alt="QR Code"
 			/>
 			<a x-ref="content" :href="window.location.toString()" class="" target="_blank">
-				<div class="w-full p-1 mt-1 text-center text-black bg-base-100 rounded text-sm text-shadow-2xs font-semibold" x-text="window.location.toString()"></div>
+				<div class="w-full p-1 mt-1 text-center text-base-content bg-base-100 rounded text-sm text-shadow-2xs font-semibold" x-text="window.location.toString()"></div>
 			</a>
-			<!-- <button type="button" class="absolute buttom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-primary m-2 p-2 rounded text-sm self-center" x-on:click="navigator.clipboard.writeText($refs.content.href);alert('You copy it');"  >Copy URL</button> -->
+			<!-- <button type="button" class="absolute buttom-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-primary m-2 p-2 rounded text-sm self-center" @click="navigator.clipboard.writeText($refs.content.href);alert('You copy it');"  >Copy URL</button> -->
 		</div>
 	</div>
 }

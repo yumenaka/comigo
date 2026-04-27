@@ -36,7 +36,7 @@ func GetCover(c echo.Context) error {
 	// 获取书籍信息
 	book, err := model.IStore.GetBook(id)
 	if err != nil {
-		logger.Infof("GetBook error: %s", err)
+		logger.Infof(locale.GetString("log_getbook_error_common"), err)
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
 	}
 	// 获取封面信息
@@ -70,7 +70,7 @@ func GetCover(c echo.Context) error {
 			// 缓存封面到本地
 			if metaPath != "" {
 				if err := fileutil.SaveCoverToLocal(metaPath, id, imgData); err != nil {
-					logger.Infof("SaveCoverToLocal error: %s", err)
+					logger.Infof(locale.GetString("log_save_cover_to_local_error"), err)
 				}
 			}
 			return c.Blob(http.StatusOK, "image/jpeg", imgData)
@@ -81,25 +81,26 @@ func GetCover(c echo.Context) error {
 		logger.Errorf(locale.GetString("err_failed_to_get_config_dir"), err)
 	}
 	needFile := cover.Name
+	coverURLPath := config.StripBasePath(cover.Url)
 	// 处理 TypeBooksGroup 的情况：封面来自子书籍
 	coverBook := book
-	if book.Type == model.TypeBooksGroup && strings.HasPrefix(cover.Url, "/api/get-file") {
+	if book.Type == model.TypeBooksGroup && strings.HasPrefix(coverURLPath, "/api/get-file") {
 		// 解析封面 URL 获取子书籍 ID 和文件名
 		// URL 格式：/api/get-file?id=子书籍ID&filename=文件名
-		parsedURL, err := url.Parse(cover.Url)
+		parsedURL, err := url.Parse(coverURLPath)
 		if err != nil {
-			logger.Infof("Failed to parse cover URL: %s", err)
+			logger.Infof(locale.GetString("log_failed_to_parse_cover_url"), err)
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid cover URL"})
 		}
 		childID := parsedURL.Query().Get("id")
 		if childID == "" {
-			logger.Infof("Child book ID is missing in cover URL")
+			logger.Infof(locale.GetString("log_child_book_id_missing_in_cover_url"))
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Child book ID is required in cover URL"})
 		}
 		// 获取子书籍信息
 		childBook, err := model.IStore.GetBook(childID)
 		if err != nil {
-			logger.Infof("Failed to get child book: %s", err)
+			logger.Infof(locale.GetString("log_failed_to_get_child_book"), err)
 			return c.JSON(http.StatusNotFound, map[string]string{"error": "Child book not found"})
 		}
 		coverBook = childBook
@@ -109,11 +110,11 @@ func GetCover(c echo.Context) error {
 		}
 	}
 	// 如果封面URL是内嵌图片, 通过封面文件获取
-	if strings.HasPrefix(cover.Url, "/images/") {
+	if strings.HasPrefix(coverURLPath, "/images/") {
 		// 从内嵌文件系统读取图片数据
 		imgData := assets.GetImageData(cover.Name)
 		if len(imgData) == 0 {
-			logger.Infof("Failed to read embedded image: %s", cover.Url)
+			logger.Infof(locale.GetString("log_failed_to_read_embedded_image"), cover.Url)
 			return c.JSON(http.StatusNotFound, map[string]string{"error": "Embedded image not found"})
 		}
 		// 确定MIME类型
@@ -127,7 +128,7 @@ func GetCover(c echo.Context) error {
 			// 内嵌图片也缓存封面到本地（方便以后做手动指定封面功能）
 			err = fileutil.SaveCoverToLocal(metaPath, id, imgData)
 			if err != nil {
-				logger.Infof("SaveCoverToLocal error: %s", err)
+				logger.Infof(locale.GetString("log_save_cover_to_local_error"), err)
 			}
 		}
 		// 返回图片数据
@@ -136,17 +137,21 @@ func GetCover(c echo.Context) error {
 	// 获取图片数据的选项
 	option := fileutil.GetPictureDataOption{
 		PictureName:      needFile,
+		BookID:           coverBook.BookID,
 		BookPath:         coverBook.BookPath,
 		BookIsPDF:        coverBook.Type == model.TypePDF,
 		BookIsDir:        coverBook.Type == model.TypeDir,
 		BookIsNonUTF8Zip: coverBook.NonUTF8Zip,
 		Debug:            config.GetCfg().Debug,
 		ResizeHeight:     resizeHeight,
+		// 远程书籍支持
+		IsRemote:  coverBook.IsRemote,
+		RemoteURL: coverBook.RemoteURL,
 	}
 	// 获取图片数据
 	imgData, contentType, err := fileutil.GetPictureData(option)
 	if err != nil {
-		logger.Infof("Get file error: %s", err)
+		logger.Infof(locale.GetString("log_get_file_error"), err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Get file error: " + err.Error()})
 	}
 	// 缓存封面到 configDir
@@ -154,7 +159,7 @@ func GetCover(c echo.Context) error {
 		// 缓存封面到本地
 		err = fileutil.SaveCoverToLocal(metaPath, id, imgData)
 		if err != nil {
-			logger.Infof("SaveCoverToLocal error: %s", err)
+			logger.Infof(locale.GetString("log_save_cover_to_local_error"), err)
 		}
 	}
 	// 返回图片数据

@@ -29,7 +29,7 @@ package tools
 //		logger.Infof(locale.GetString("frpc_ini_error"))
 //		return err
 //	} else {
-//		logger.Infof(locale.GetString("frpc_setting_save_completed"), configPath, cfg)
+//		logger.Infof(locale.GetString("frp_setting_save_completed"), configPath, cfg)
 //	}
 //	//实际执行
 //	var cmd *exec.Cmd

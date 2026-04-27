@@ -17,50 +17,65 @@ import (
 )
 
 var (
-	Server *http.Server
-	Mutex  sync.Mutex
+	Server         *http.Server
+	Mutex          sync.Mutex
+	ConfigFileLock sync.Mutex
 )
 
-// UpdateConfigFile 如果存在本地配置，更新本地配置
+func configFilePathForLocation(location string) (string, error) {
+	switch location {
+	case HomeDirectory:
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		return path.Join(home, ".config/comigo/config.toml"), nil
+	case WorkingDirectory:
+		return "config.toml", nil
+	case ProgramDirectory:
+		executable, err := os.Executable()
+		if err != nil {
+			return "", err
+		}
+		return path.Join(path.Dir(executable), "config.toml"), nil
+	default:
+		return "", errors.New("unknown config location")
+	}
+}
+
+func writeConfigBytes(filePath string, data []byte) error {
+	if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+		return err
+	}
+	return writeFileAtomically(filePath, data, 0o644)
+}
+
+// UpdateConfigFile 更新当前正在使用的配置文件。
+// 如果尚未存在配置文件，则会自动在默认位置创建一份。
 func UpdateConfigFile() error {
+	if runtime.GOOS == "js" {
+		return nil
+	}
+	ConfigFileLock.Lock()
+	defer ConfigFileLock.Unlock()
+
 	bytes, err := toml.Marshal(cfg)
 	if err != nil {
 		return err
 	}
-	// HomeDirectory
-	userConfigDir, err := os.UserConfigDir()
-	if err != nil {
-		return err
-	}
-	if tools.FileExist(filepath.Join(userConfigDir, "comigo", "config.toml")) {
-		err = os.WriteFile(filepath.Join(userConfigDir, "comigo", "config.toml"), bytes, 0o644)
+
+	targetPath := cfg.ConfigFile
+	if targetPath == "" {
+		targetPath, err = configFilePathForLocation(DefaultConfigLocation())
 		if err != nil {
 			return err
 		}
 	}
 
-	// 当前执行目录
-	if tools.FileExist("config.toml") {
-		err = os.WriteFile("config.toml", bytes, 0o644)
-		if err != nil {
-			return err
-		}
-	}
-
-	// 可执行程序自身的路径
-	executable, err := os.Executable()
-	if err != nil {
-		logger.Info(executable)
+	if err := writeConfigBytes(targetPath, bytes); err != nil {
 		return err
 	}
-	p := path.Join(path.Dir(executable), "config.toml")
-	if tools.FileExist(p) {
-		err = os.WriteFile(p, bytes, 0o644)
-		if err != nil {
-			logger.Info(path.Join(executable, "config.toml"))
-			return err
-		}
-	}
+	cfg.ConfigFile = targetPath
 	return nil
 }
 
@@ -136,44 +151,23 @@ func SaveConfig(to string) error {
 	if runtime.GOOS == "js" {
 		return nil
 	}
+	ConfigFileLock.Lock()
+	defer ConfigFileLock.Unlock()
+
 	// 保存配置
 	bytes, errMarshal := toml.Marshal(cfg)
 	if errMarshal != nil {
 		return errMarshal
 	}
 	logger.Infof(locale.GetString("log_cfg_save_to"), to)
-	switch to {
-	case HomeDirectory:
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return err
-		}
-		err = os.MkdirAll(path.Join(home, ".config/comigo/"), os.ModePerm)
-		if err != nil {
-			return err
-		}
-		err = os.WriteFile(path.Join(home, ".config/comigo/config.toml"), bytes, 0o644)
-		if err != nil {
-			return err
-		}
-	case WorkingDirectory:
-		err := os.WriteFile("config.toml", bytes, 0o644)
-		if err != nil {
-			return err
-		}
-	case ProgramDirectory:
-		executable, err := os.Executable()
-		if err != nil {
-			logger.Info(executable)
-			return err
-		}
-		p := path.Join(path.Dir(executable), "config.toml")
-		err = os.WriteFile(p, bytes, 0o644)
-		if err != nil {
-			logger.Info(path.Join(executable, "config.toml"))
-			return err
-		}
+	configPath, err := configFilePathForLocation(to)
+	if err != nil {
+		return err
 	}
+	if err := writeConfigBytes(configPath, bytes); err != nil {
+		return err
+	}
+	cfg.ConfigFile = configPath
 	return nil
 }
 
@@ -203,9 +197,9 @@ func GetHomeDirectoryConfig() string {
 			absPath, errAbs := filepath.Abs(homePath)
 			if errAbs == nil {
 				HomeDirectoryConfig = absPath
+			} else {
+				HomeDirectoryConfig = homePath
 			}
-			// 如果取绝对路径出错，就返回相对路径；或者你也可以直接忽略
-			HomeDirectoryConfig = homePath
 		}
 	} else {
 		// 获取HomeDir失败，可以做个日志或忽略
@@ -223,8 +217,9 @@ func GetProgramDirectoryConfig() string {
 			absPath, errAbs := filepath.Abs(progPath)
 			if errAbs == nil {
 				ProgramDirectoryConfig = absPath
+			} else {
+				ProgramDirectoryConfig = progPath
 			}
-			ProgramDirectoryConfig = progPath
 		}
 	}
 	return ProgramDirectoryConfig
@@ -235,6 +230,9 @@ func DeleteConfigIn(in string) error {
 	if runtime.GOOS == "js" {
 		return nil
 	}
+	ConfigFileLock.Lock()
+	defer ConfigFileLock.Unlock()
+
 	logger.Infof(locale.GetString("log_try_delete_cfg_in"), in)
 	var configFile string
 	switch in {
@@ -256,22 +254,57 @@ func DeleteConfigIn(in string) error {
 	return tools.DeleteFileIfExist(configFile)
 }
 
+func writeFileAtomically(filePath string, data []byte, perm os.FileMode) error {
+	dir := filepath.Dir(filePath)
+	tempFile, err := os.CreateTemp(dir, ".config-*.tmp")
+	if err != nil {
+		return err
+	}
+	tmpName := tempFile.Name()
+	cleanup := func() {
+		_ = os.Remove(tmpName)
+	}
+	if _, err = tempFile.Write(data); err != nil {
+		_ = tempFile.Close()
+		cleanup()
+		return err
+	}
+	if err = tempFile.Chmod(perm); err != nil {
+		_ = tempFile.Close()
+		cleanup()
+		return err
+	}
+	if err = tempFile.Close(); err != nil {
+		cleanup()
+		return err
+	}
+	if err = os.Rename(tmpName, filePath); err != nil {
+		cleanup()
+		return err
+	}
+	return nil
+}
+
 func GetQrcodeURL() string {
 	enableTLS := cfg.CertFile != "" && cfg.KeyFile != ""
 	protocol := "http://"
 	if enableTLS {
 		protocol = "https://"
 	}
+	if cfg.Host != "" {
+		return protocol + cfg.Host + ":" + strconv.Itoa(int(cfg.Port)) + PrefixPath("/")
+	}
 	// 取得本机的首选出站IP
 	OutIP := tools.GetOutboundIP().String()
-	if cfg.Host == "" {
-		return protocol + OutIP + ":" + strconv.Itoa(int(cfg.Port))
-	}
-	return protocol + cfg.Host + ":" + strconv.Itoa(int(cfg.Port))
+	return protocol + OutIP + ":" + strconv.Itoa(int(cfg.Port)) + PrefixPath("/")
 }
 
 func OpenBrowserIfNeeded() {
 	if cfg.OpenBrowser == true {
-		go tools.OpenBrowser(cfg.EnableTLS, "127.0.0.1", cfg.Port)
+		protocol := "http://"
+		if cfg.EnableTLS {
+			protocol = "https://"
+		}
+		go tools.OpenBrowserByURL(protocol + "127.0.0.1:" + strconv.Itoa(cfg.Port) + PrefixPath("/"))
 	}
 }

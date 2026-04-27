@@ -13,12 +13,12 @@ templ BoolConfig(name string, value bool, description string) {
 				value="true"
 				checked?={ value }
 				class="sr-only peer"
-				x-on:change={ "updateBoolConfig('" + name + "', $event.target.checked)" }
+				@change={ "updateBoolConfig('" + name + "', $event.target.checked)" }
 			/>
 			<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 			<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
 		</label>
-		<div x-text={ getTranslations(description) } class="w-full py-1 text-left text-xs text-gray-500"></div>
+		<div x-text={ getTranslations(description) } class="w-full py-1 text-left text-xs text-base-content"></div>
 	</div>
 }
 
@@ -32,16 +32,19 @@ templ BoolConfigJavaScript() {
 			// 更新布尔配置的函数
 			async function updateBoolConfig(name, value) {
 				try {
-					const response = await fetch("/api/update-bool-config", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath("/api/update-bool-config"),
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								name: name,
+								value: value,
+							}),
 						},
-						body: JSON.stringify({
-							name: name,
-							value: value,
-						}),
-					});
+					);
 					if (!response.ok) {
 						showToast(i18next.t("err_update_config_failed"), "error");
 						// 恢复 checkbox 状态
@@ -52,28 +55,18 @@ templ BoolConfigJavaScript() {
 						return;
 					}
 					const data = await response.json();
-					// 显示成功提示
-					if (data.saveSuccessHint) {
-						showToast(i18next.t("saveSuccessHint"), "info");
-						if (name == "Port") {
-							// 2秒后跳转到新端口
-							setTimeout(() => {
-								window.location.href =
-									window.location.protocol +
-									"//" +
-									window.location.hostname +
-									":" +
-									value;
-							}, 2000);
-							return;
+					if (name === "Debug") {
+						const settingsMainArea =
+							document.getElementById("settingsMainArea");
+						if (settingsMainArea?.__x?.$data) {
+							settingsMainArea.__x.$data.debug_mode = value;
 						}
-						// 2秒后刷新页面
-						setTimeout(() => {
-							window.location.reload();
-						}, 2000);
-					} else {
-						showToast(i18next.t("saveSuccessHint"), "info");
 					}
+					// 显示成功提示（需整页刷新时由服务端 SSE 推送确认）
+					showToast(
+						i18next.t("save_success_hint"),
+						data.saveSuccessHint ? "info" : "success",
+					);
 				} catch (error) {
 					console.error("更新配置失败:", error);
 					showToast(i18next.t("err_network_error"), "error");

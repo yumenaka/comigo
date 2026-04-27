@@ -20,13 +20,10 @@ templ FlipPage(c echo.Context, book *model.Book) {
 		}))
 	if book != nil {
 		@common.Header(
-			common.HeaderProps{
-				TitleText:         common.GetBookTitle(book.BookInfo.BookID),
-				ShowReturnIcon:    true,
-				ShowReSortIcon:    true,
-				ReturnUrl:         common.GetReturnUrl(book.BookInfo.BookID),
-				QuickJumpBarBooks: common.QuickJumpBarBooks(book),
-			})
+			common.HeaderBackSortLeft(common.GetReturnUrl(book.BookInfo.BookID)),
+			common.HeaderQuickJumpTitle(common.GetBookTitle(book.BookInfo.BookID), common.QuickJumpBarBooks(book)),
+			common.HeaderDefaultRight(),
+		)
 		@MainArea(book)
 	}
 	<!-- 阅读进度条-->

@@ -69,7 +69,7 @@ func waitSystemMessages() {
 		switch msg {
 		// 重启网页服务器
 		case "restart_web_server":
-			logger.Infof("Config changed, restarting web server...\n", msg)
+			logger.Infof(locale.GetString("log_config_changed_restart_web") + "\n")
 			routers.RestartWebServer()
 			routers.StartTailscale()
 			// 阻塞等待端口就绪，确保服务可用
@@ -78,18 +78,18 @@ func waitSystemMessages() {
 			ShowQRCode()
 			// 重启网页服务器
 		case "start_tailscale":
-			logger.Infof("Config changed, starting tailscale...\n", msg)
+			logger.Infof(locale.GetString("log_config_changed_start_tailscale") + "\n")
 			routers.StartTailscale()
 		case "stop_tailscale":
-			logger.Infof("Config changed, stopping tailscale...\n", msg)
+			logger.Infof(locale.GetString("log_config_changed_stop_tailscale") + "\n")
 			routers.StopTailscale()
 		case "restart_tailscale":
-			logger.Infof("Config changed, restart tailscale...\n", msg)
+			logger.Infof(locale.GetString("log_config_changed_restart_tailscale") + "\n")
 			routers.StopTailscale()
 			routers.StartTailscale()
 		// 重新扫描指定目录
 		case "rescan_path_sample":
-			logger.Infof("收到重新扫描消息：%s", msg)
+			logger.Infof(locale.GetString("log_received_rescan_message"), msg)
 			ReScanPath(msg, false)
 		default:
 			continue

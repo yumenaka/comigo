@@ -6,6 +6,35 @@ import (
 	"testing"
 )
 
+func TestUpdateConfigFileCreatesTargetAndTracksConfigFile(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	targetDir := t.TempDir()
+	targetFile := filepath.Join(targetDir, "nested", "config.toml")
+	cfg.ConfigFile = targetFile
+	cfg.Debug = true
+
+	if err := UpdateConfigFile(); err != nil {
+		t.Fatalf("UpdateConfigFile 返回错误: %v", err)
+	}
+
+	if cfg.ConfigFile != targetFile {
+		t.Fatalf("ConfigFile 未记录实际写入路径: got %q want %q", cfg.ConfigFile, targetFile)
+	}
+
+	content, err := os.ReadFile(targetFile)
+	if err != nil {
+		t.Fatalf("读取生成的配置文件失败: %v", err)
+	}
+	if len(content) == 0 {
+		t.Fatal("生成的配置文件内容为空")
+	}
+}
+
 // TestIsPathOverlapping 测试路径重合检测
 func TestIsPathOverlapping(t *testing.T) {
 	// 创建一个测试配置

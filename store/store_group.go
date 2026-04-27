@@ -19,7 +19,35 @@ import (
 // StoreInRam 内存书库，扫描后生成。可以有多个子书库。
 type StoreInRam struct {
 	StoreInfo
-	ChildStores sync.Map // key为路径 存储 *Store
+	ChildStores      sync.Map // key为路径 存储 *Store
+	PendingBookmarks sync.Map // 待迁移的书签，key为BookID，value为model.BookMarks
+}
+
+// getMajorMinorVersion 提取版本号的前两段（major.minor）
+// 支持格式："v1.2.23"、"1.13.4"、"v1.2"、"1.13" 等
+// 返回格式："v1.2" 或 "1.13"，如果解析失败返回空字符串
+func getMajorMinorVersion(version string) string {
+	if version == "" {
+		return ""
+	}
+	// 去除可能的前缀 "v" 或 "V"
+	trimmed := version
+	hasPrefix := false
+	if len(version) > 0 && (version[0] == 'v' || version[0] == 'V') {
+		trimmed = version[1:]
+		hasPrefix = true
+	}
+	// 按 "." 分割版本号
+	parts := strings.Split(trimmed, ".")
+	if len(parts) < 2 {
+		return "" // 版本号格式不正确，至少需要 major.minor
+	}
+	// 拼接前两段
+	majorMinor := parts[0] + "." + parts[1]
+	if hasPrefix {
+		return "v" + majorMinor
+	}
+	return majorMinor
 }
 
 // AddStore 创建一个新书库
@@ -85,7 +113,7 @@ func (ramStore *StoreInRam) SaveBooksToJson() error {
 			logger.Infof(locale.GetString("log_error_saving_book"), book.BookID, err)
 		}
 	}
-	logger.Infof(locale.GetString("log_successfully_saved_books"), len(allBooks), metaPath)
+	logger.Infof(locale.GetString("log_successfully_saved_books_metadata"), len(allBooks), metaPath)
 	return nil
 }
 
@@ -153,14 +181,22 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	logger.Infof(locale.GetString("log_configured_store_urls"), config.GetCfg().StoreUrls)
 	// 遍历所有 storeUrl 对应的目录
 	for _, storeUrl := range config.GetCfg().StoreUrls {
-		// 计算 storeUrl 的绝对路径
-		storePathAbs, err := filepath.Abs(storeUrl)
-		if err != nil {
-			logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
-			storePathAbs = storeUrl
+		// 计算 StoreID（对于远程 URL 直接使用，本地路径转换为绝对路径）
+		var storeID string
+		if IsRemoteURL(storeUrl) {
+			// 远程 URL 直接使用
+			storeID = storeUrl
+		} else {
+			// 本地路径转换为绝对路径
+			storePathAbs, err := filepath.Abs(storeUrl)
+			if err != nil {
+				logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
+				storePathAbs = storeUrl
+			}
+			storeID = storePathAbs
 		}
 		// 计算缓存目录路径
-		cacheDir := filepath.Join(metaPath, base62.EncodeToString([]byte(storePathAbs)))
+		cacheDir := filepath.Join(metaPath, base62.EncodeToString([]byte(storeID)))
 		// 检查目录是否存在
 		_, err = os.Stat(cacheDir)
 		// 目录不存在是正常的（首次运行），不返回错误
@@ -191,7 +227,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 			// 只处理 .json 文件
 			fileName := entry.Name()
 			if !strings.HasSuffix(fileName, ".json") {
-				//logger.Infof(locale.GetString("log_skipping_non_json_file"), fileName)
+				// logger.Infof(locale.GetString("log_skipping_non_json_file"), fileName)
 				continue
 			}
 			// 读取文件内容
@@ -213,9 +249,13 @@ func (ramStore *StoreInRam) LoadBooks() error {
 				}
 				continue // 继续处理其他文件
 			}
-			// 检查版本号：为空或与当前版本不一致时跳过加载并删除元数据文件
+			// 检查版本号：根据前两段版本号(major.minor)决定处理方式
 			currentVersion := config.GetVersion()
-			if book.CreatedByVersion == "" || book.CreatedByVersion != currentVersion {
+			bookMajorMinor := getMajorMinorVersion(book.CreatedByVersion)
+			currentMajorMinor := getMajorMinorVersion(currentVersion)
+
+			// 版本号为空或前两段版本号不一致时，跳过加载并删除元数据文件
+			if book.CreatedByVersion == "" || bookMajorMinor == "" || bookMajorMinor != currentMajorMinor {
 				logger.Infof(locale.GetString("log_book_version_mismatch_skip"), book.BookID, book.CreatedByVersion, currentVersion)
 				// 删除版本不匹配的元数据文件
 				errDel := os.Remove(filePath)
@@ -224,15 +264,34 @@ func (ramStore *StoreInRam) LoadBooks() error {
 				}
 				continue // 跳过版本不匹配的书籍
 			}
-			// 检查书籍文件或目录是否存在，如果不存在则跳过加载并删除元数据文件
-			if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
-				logger.Infof(locale.GetString("log_book_file_not_exist_skip"), book.BookPath)
-				// 删除不存在书籍的元数据文件
+
+			// 前两段版本号一致但完整版本号不同时，保存bookmark后删除老数据
+			if book.CreatedByVersion != currentVersion {
+				logger.Infof(locale.GetString("log_book_version_minor_mismatch"), book.BookID, book.CreatedByVersion, currentVersion)
+				// 如果有bookmark，保存到待迁移列表中
+				if len(book.BookMarks) > 0 {
+					ramStore.PendingBookmarks.Store(book.BookID, book.BookMarks)
+					logger.Infof(locale.GetString("log_bookmark_saved_for_migration"), book.BookID, len(book.BookMarks))
+				}
+				// 删除老的元数据文件
 				errDel := os.Remove(filePath)
 				if errDel != nil {
-					logger.Infof(locale.GetString("log_error_deleting_orphan_metadata"), fileName, errDel)
+					logger.Infof(locale.GetString("log_error_deleting_version_mismatch_metadata"), fileName, errDel)
 				}
-				continue // 跳过不存在的书籍
+				continue // 跳过，等待重新扫描生成新数据
+			}
+			// 检查书籍文件或目录是否存在，如果不存在则跳过加载并删除元数据文件
+			// 注意：远程书籍（WebDAV 等）不需要检查本地文件系统
+			if !book.IsRemote {
+				if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
+					logger.Infof(locale.GetString("log_book_file_not_exist_skip"), book.BookPath)
+					// 删除不存在书籍的元数据文件
+					errDel := os.Remove(filePath)
+					if errDel != nil {
+						logger.Infof(locale.GetString("log_error_deleting_orphan_metadata"), fileName, errDel)
+					}
+					continue // 跳过不存在的书籍
+				}
 			}
 			// 添加书籍到内存书库
 			err = ramStore.StoreBook(&book)
@@ -251,7 +310,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	return nil
 }
 
-// AddBook 添加一本书
+// StoreBook 添加一本书
 func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
 	if b.BookID == "" {
 		return errors.New(locale.GetString("err_add_book_empty_bookid"))
@@ -260,6 +319,14 @@ func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
 	if _, ok := ramStore.ChildStores.Load(b.StoreUrl); !ok {
 		if err := ramStore.AddStore(b.StoreUrl); err != nil {
 			logger.Infof(locale.GetString("log_error_adding_subfolder"), err)
+		}
+	}
+	// 检查是否有待迁移的书签（来自版本升级时的老数据）
+	if pendingMarks, ok := ramStore.PendingBookmarks.LoadAndDelete(b.BookID); ok {
+		if marks, valid := pendingMarks.(model.BookMarks); valid && len(marks) > 0 {
+			// 合并书签到新书中（保留新书中已有的书签，追加老书签）
+			b.BookMarks = append(b.BookMarks, marks...)
+			logger.Infof(locale.GetString("log_bookmark_migrated"), b.BookID, len(marks))
 		}
 	}
 	err := SaveBookJson(b)
@@ -467,25 +534,32 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 	var storeBookInfoList []model.StoreBookInfo
 	storeUrls := config.GetCfg().StoreUrls
 	for _, storeUrl := range storeUrls {
-		storePathAbs, err := filepath.Abs(storeUrl)
-		if err != nil {
-			logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
-			storePathAbs = storeUrl
+		// 对于远程 URL 直接使用，本地路径转换为绝对路径
+		var storeID string
+		if IsRemoteURL(storeUrl) {
+			storeID = storeUrl
+		} else {
+			storePathAbs, err := filepath.Abs(storeUrl)
+			if err != nil {
+				logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
+				storePathAbs = storeUrl
+			}
+			storeID = storePathAbs
 		}
 		newStoreBookInfo := model.StoreBookInfo{
-			StoreUrl: storePathAbs,
+			StoreUrl: storeID,
 		}
 		for _, topBook := range topBookList {
-			if topBook.StoreUrl == storePathAbs {
+			if topBook.StoreUrl == storeID {
 				newStoreBookInfo.BookInfos = append(newStoreBookInfo.BookInfos, topBook)
 			}
 		}
 		newStoreBookInfo.BookInfos.SortBooks(sortBy)
 		childBookNum := 0
 		for _, b := range allBooks {
-			if b.StoreUrl == storePathAbs && b.Type != model.TypeBooksGroup {
+			if b.StoreUrl == storeID && b.Type != model.TypeBooksGroup {
 				childBookNum++
-				// logger.Infof("[%v]Counting book %s in store %s, BookID=%s", childBookNum, b.Title, storePathAbs, b.BookID)
+				// logger.Infof("[%v]Counting book %s in store %s, BookID=%s", childBookNum, b.Title, storeID, b.BookID)
 			}
 		}
 		newStoreBookInfo.ChildBookNum = childBookNum

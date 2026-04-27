@@ -30,6 +30,7 @@ func FromSQLCBook(sqlcBook Book) *model.Book {
 		BookInfo: model.BookInfo{
 			Title:            sqlcBook.Title,
 			BookID:           sqlcBook.BookID,
+			Author:           sqlcBook.Author.String,
 			StoreUrl:         sqlcBook.StoreUrl,
 			ChildBooksNum:    int(sqlcBook.ChildBooksNum.Int64),
 			ChildBooksID:     ConvertCommaSeparatedString(sqlcBook.ChildBooksID),
@@ -51,6 +52,8 @@ func FromSQLCBook(sqlcBook Book) *model.Book {
 			Type:             model.SupportFileType(sqlcBook.Type),
 			ZipTextEncoding:  sqlcBook.ZipTextEncoding.String,
 			CreatedByVersion: sqlcBook.CreatedByVersion.String,
+			IsRemote:         sqlcBook.IsRemote.Bool,
+			RemoteURL:        sqlcBook.RemoteUrl.String,
 		},
 	}
 }
@@ -81,34 +84,39 @@ func ToSQLCCreateBookParams(book *model.Book) CreateBookParams {
 		NonUtf8zip:       sql.NullBool{Bool: book.NonUTF8Zip, Valid: true},
 		ZipTextEncoding:  sql.NullString{String: book.ZipTextEncoding, Valid: book.ZipTextEncoding != ""},
 		CreatedByVersion: sql.NullString{String: book.CreatedByVersion, Valid: book.CreatedByVersion != ""},
+		IsRemote:         sql.NullBool{Bool: book.IsRemote, Valid: true},
+		RemoteUrl:        sql.NullString{String: book.RemoteURL, Valid: book.RemoteURL != ""},
 	}
 }
 
 // ToSQLCUpdateBookParams 将model.Book转换为sqlc.UpdateBookParams //"Valid"必须是验证条件或true
 func ToSQLCUpdateBookParams(book *model.Book) UpdateBookParams {
 	return UpdateBookParams{
-		Title:           book.Title,
-		Owner:           sql.NullString{String: "admin", Valid: true},
-		BookPath:        book.BookPath,
-		StoreUrl:        book.StoreUrl,
-		Type:            string(book.Type),
-		ChildBooksNum:   sql.NullInt64{Int64: int64(book.ChildBooksNum), Valid: true},
-		ChildBooksID:    sql.NullString{String: strings.Join(book.ChildBooksID, ", "), Valid: len(book.ChildBooksID) > 0},
-		Depth:           sql.NullInt64{Int64: int64(book.Depth), Valid: true},
-		ParentFolder:    sql.NullString{String: book.ParentFolder, Valid: book.ParentFolder != ""},
-		PageCount:       sql.NullInt64{Int64: int64(book.PageCount), Valid: true},
-		FileSize:        sql.NullInt64{Int64: book.FileSize, Valid: true},
-		Author:          sql.NullString{String: book.Author, Valid: book.Author != ""},
-		Isbn:            sql.NullString{String: book.ISBN, Valid: book.ISBN != ""},
-		Press:           sql.NullString{String: book.Press, Valid: book.Press != ""},
-		PublishedAt:     sql.NullString{String: book.PublishedAt, Valid: book.PublishedAt != ""},
-		ExtractPath:     sql.NullString{String: book.ExtractPath, Valid: book.ExtractPath != ""},
-		ExtractNum:      sql.NullInt64{Int64: int64(book.ExtractNum), Valid: true},
-		BookComplete:    sql.NullBool{Bool: book.BookComplete, Valid: true},
-		InitComplete:    sql.NullBool{Bool: book.InitComplete, Valid: true},
-		NonUtf8zip:      sql.NullBool{Bool: book.NonUTF8Zip, Valid: true},
-		ZipTextEncoding: sql.NullString{String: book.ZipTextEncoding, Valid: book.ZipTextEncoding != ""},
-		BookID:          book.BookID,
+		Title:            book.Title,
+		Owner:            sql.NullString{String: "admin", Valid: true},
+		BookPath:         book.BookPath,
+		StoreUrl:         book.StoreUrl,
+		Type:             string(book.Type),
+		ChildBooksNum:    sql.NullInt64{Int64: int64(book.ChildBooksNum), Valid: true},
+		ChildBooksID:     sql.NullString{String: strings.Join(book.ChildBooksID, ", "), Valid: len(book.ChildBooksID) > 0},
+		Depth:            sql.NullInt64{Int64: int64(book.Depth), Valid: true},
+		ParentFolder:     sql.NullString{String: book.ParentFolder, Valid: book.ParentFolder != ""},
+		PageCount:        sql.NullInt64{Int64: int64(book.PageCount), Valid: true},
+		FileSize:         sql.NullInt64{Int64: book.FileSize, Valid: true},
+		Author:           sql.NullString{String: book.Author, Valid: book.Author != ""},
+		Isbn:             sql.NullString{String: book.ISBN, Valid: book.ISBN != ""},
+		Press:            sql.NullString{String: book.Press, Valid: book.Press != ""},
+		PublishedAt:      sql.NullString{String: book.PublishedAt, Valid: book.PublishedAt != ""},
+		ExtractPath:      sql.NullString{String: book.ExtractPath, Valid: book.ExtractPath != ""},
+		ExtractNum:       sql.NullInt64{Int64: int64(book.ExtractNum), Valid: true},
+		BookComplete:     sql.NullBool{Bool: book.BookComplete, Valid: true},
+		InitComplete:     sql.NullBool{Bool: book.InitComplete, Valid: true},
+		NonUtf8zip:       sql.NullBool{Bool: book.NonUTF8Zip, Valid: true},
+		ZipTextEncoding:  sql.NullString{String: book.ZipTextEncoding, Valid: book.ZipTextEncoding != ""},
+		CreatedByVersion: sql.NullString{String: book.CreatedByVersion, Valid: book.CreatedByVersion != ""},
+		IsRemote:         sql.NullBool{Bool: book.IsRemote, Valid: true},
+		RemoteUrl:        sql.NullString{String: book.RemoteURL, Valid: book.RemoteURL != ""},
+		BookID:           book.BookID,
 	}
 }
 

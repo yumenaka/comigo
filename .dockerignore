@@ -37,9 +37,10 @@ dist/
 
 # 测试和覆盖率
 test/
-*.test
 coverage.txt
 *.prof
+sample/docker/config
+sample/docker/books
 
 # 临时文件
 tmp/

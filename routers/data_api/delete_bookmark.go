@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -44,7 +45,7 @@ func DeleteBookmark(c echo.Context) error {
 	// 调用 Store 层删除书签
 	err = model.IStore.DeleteBookMark(bookID, mt, pageIndex)
 	if err != nil {
-		logger.Infof("Failed to delete bookmark: %v", err)
+		logger.Infof(locale.GetString("log_failed_to_delete_bookmark"), err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete bookmark: "+err.Error())
 	}
 

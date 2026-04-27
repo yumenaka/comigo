@@ -16,6 +16,7 @@ import (
 	"github.com/yumenaka/comigo/templ/pages/flip"
 	"github.com/yumenaka/comigo/templ/pages/login_page"
 	"github.com/yumenaka/comigo/templ/pages/player"
+	"github.com/yumenaka/comigo/templ/pages/reader"
 	"github.com/yumenaka/comigo/templ/pages/scroll"
 	"github.com/yumenaka/comigo/templ/pages/settings"
 	"github.com/yumenaka/comigo/templ/pages/shelf"
@@ -26,9 +27,15 @@ import (
 // BindURLs 为前端绑定 API 路由
 func BindURLs() {
 	// 绑定公开页面与api
-	publicViewGroup := engine.Group("")
-	// API 的URL统一以 /api 开头
-	publicAPI := engine.Group("/api")
+	basePath := config.GetBasePath()
+	if basePath != "" {
+		engine.GET(basePath, func(c echo.Context) error {
+			return c.Redirect(http.StatusMovedPermanently, basePath+"/")
+		})
+	}
+	publicViewGroup := engine.Group(basePath)
+	// API 的URL统一以 /api 开头；配置 BasePath 后实际挂载在 /base/api 下。
+	publicAPI := engine.Group(config.PrefixPath("/api"))
 	bindPublicView(publicViewGroup)
 	bindPublicAPI(publicAPI)
 
@@ -49,12 +56,12 @@ func BindURLs() {
 			// 处理验证错误
 			ErrorHandler: func(c echo.Context, err error) error {
 				// 更安全的方式判断API请求
-				path := c.Request().URL.Path
+				path := config.StripBasePath(c.Request().URL.Path)
 				if len(path) >= 4 && path[:4] == "/api" {
 					return echo.NewHTTPError(http.StatusUnauthorized, "请先登录")
 				}
 				// 页面请求重定向到登录页
-				return c.Redirect(http.StatusFound, "/login")
+				return c.Redirect(http.StatusFound, config.PrefixPath("/login"))
 			},
 		}
 		privateAPI.Use(echojwt.WithConfig(jwtConfig))
@@ -67,6 +74,7 @@ func BindURLs() {
 // bindPublicView 注册公共页面
 func bindPublicView(group *echo.Group) {
 	group.GET("/login", login_page.Handler)
+	group.GET("/healthz", data_api.Healthz)
 	// 简化路径：/get.sh -> https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh
 	group.GET("/get.sh", reverse_proxy.GetComigoScriptHandler)
 	group.HEAD("/get.sh", reverse_proxy.GetComigoScriptHandler)
@@ -85,10 +93,11 @@ func bindPublicAPI(group *echo.Group) {
 
 // bindProtectedView 注册需要登录的页面
 func bindProtectedView(group *echo.Group) {
-	// 主页
-	group.GET("/", shelf.ShelfHandler)
+	// 书架相关页面
+	group.GET("/", shelf.ShelfHandler) //主书架
 	group.GET("/index.html", shelf.ShelfHandler)
-	group.GET("/shelf/:id", shelf.ShelfHandler)
+	group.GET("/shelf/:id", shelf.ShelfHandler) //子书架
+	group.GET("/search", shelf.SearchHandler)   //书架搜索
 	// 卷轴模式
 	group.GET("/scroll/:id", scroll.ScrollModeHandler)
 	// 翻页模式
@@ -97,6 +106,8 @@ func bindProtectedView(group *echo.Group) {
 	group.GET("/player/:id", player.PlayerModeHandler)
 	// 上传页面
 	group.GET("/upload", upload_page.PageHandler)
+	// 本地压缩包阅读页面（文件不上传服务器）
+	group.GET("/reader", reader.PageHandler)
 	// 设置页面
 	group.GET("/settings", settings.PageHandler)
 }

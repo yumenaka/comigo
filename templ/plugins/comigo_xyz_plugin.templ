@@ -140,9 +140,14 @@ templ ComigoXYZPlugin(c echo.Context) {
 					},
 					{
 						os: "Linux",
-						arch: "arm",
+						arch: "armv7",
 						type: "cli",
-						label: "Linux arm (命令行)",
+						label: "Linux armv7 (命令行)",
+					},
+					// Android APK：固定为列表最后一项，需用户手动选择，不参与默认平台检测
+					{
+						type: "apk",
+						label: i18next.t("comigo_xyz_platform_android_apk"),
 					},
 				];
 
@@ -192,6 +197,9 @@ templ ComigoXYZPlugin(c echo.Context) {
 					},
 					getDownloadUrl() {
 						const platform = this.selectedPlatform;
+						if (platform.type === "apk") {
+							return \`\${this.proxyBase}/yumenaka/comigo/releases/download/\${this.version}/app-release.apk\`;
+						}
 						let filename = "";
 
 						if (platform.type === "tray") {
@@ -200,8 +208,8 @@ templ ComigoXYZPlugin(c echo.Context) {
 								// Windows 托盘版：comigo_v{version}_Windows_x86_64_full.zip
 								filename = \`comigo_\${this.version}_Windows_x86_64_full.zip\`;
 							} else if (platform.os === "MacOS") {
-								// MacOS 托盘版：Comigo.app.zip
-								filename = \`Comigo.app.zip\`;
+								// MacOS 托盘版：Comigo_v{version}.dmg
+								filename = \`Comigo_\${this.version}.dmg\`;
 							}
 						} else {
 							// 命令行版本：comi_v{version}_{OS}_{ARCH}.tar.gz
@@ -211,20 +219,64 @@ templ ComigoXYZPlugin(c echo.Context) {
 					},
 					async copyToClipboard(text, index) {
 						try {
-							await navigator.clipboard.writeText(text);
-							this.copiedIndex = index;
-							setTimeout(() => {
-								this.copiedIndex = -1;
-							}, 2000);
+							// 优先使用现代 Clipboard API
+							if (navigator.clipboard && navigator.clipboard.writeText) {
+								await navigator.clipboard.writeText(text);
+								this.copiedIndex = index;
+								setTimeout(() => {
+									this.copiedIndex = -1;
+								}, 2000);
+							} else {
+								// 降级方案：使用传统的 execCommand 方法
+								const textArea = document.createElement('textarea');
+								textArea.value = text;
+								textArea.style.position = 'fixed';
+								textArea.style.left = '-999999px';
+								textArea.style.top = '-999999px';
+								document.body.appendChild(textArea);
+								textArea.focus();
+								textArea.select();
+								const successful = document.execCommand('copy');
+								document.body.removeChild(textArea);
+								if (successful) {
+									this.copiedIndex = index;
+									setTimeout(() => {
+										this.copiedIndex = -1;
+									}, 2000);
+								} else {
+									console.error('复制失败: execCommand 不支持');
+								}
+							}
 						} catch (err) {
 							console.error('复制失败:', err);
+							// 如果 Clipboard API 失败，尝试降级方案
+							try {
+								const textArea = document.createElement('textarea');
+								textArea.value = text;
+								textArea.style.position = 'fixed';
+								textArea.style.left = '-999999px';
+								textArea.style.top = '-999999px';
+								document.body.appendChild(textArea);
+								textArea.focus();
+								textArea.select();
+								const successful = document.execCommand('copy');
+								document.body.removeChild(textArea);
+								if (successful) {
+									this.copiedIndex = index;
+									setTimeout(() => {
+										this.copiedIndex = -1;
+									}, 2000);
+								}
+							} catch (fallbackErr) {
+								console.error('降级复制方案也失败:', fallbackErr);
+							}
 						}
 					}
 				}`,
 				);
 
 				homePageBlock.innerHTML = `
-					<div class="flex mt-[-16px] flex-col items-center bg-base-200 border justify-center w-full p-8 rounded-lg">
+					<div class="flex mt-[-16px] flex-col items-center bg-base-100 border justify-center w-full p-8 rounded-lg">
 						<div class="max-w-4xl w-full space-y-8">
 							<!-- 标题区域 -->
 							<div class="text-center space-y-4">
@@ -253,8 +305,18 @@ templ ComigoXYZPlugin(c echo.Context) {
 							</div>
 							<!-- 一键安装命令行版 -->
 							<div class="mt-8">
-								<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_title')">一键安装命令行版：</p>
 								<div class="space-y-3">
+									<!-- 纯离线 reader / PWA 入口。主页不能直接安装 /reader 的 PWA，跳转后由 reader 页面处理添加。 -->
+									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_no_install_title')">你甚至不用安装：</p>
+									<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 flex justify-center">
+										<a
+											href={ templ.SafeURL(config.PrefixPath("/reader")) }
+											class="inline-flex items-center justify-center px-6 py-3 border bg-green-500 text-black dark:text-white rounded-lg font-semibold"
+										>
+											<span x-text="i18next.t('comigo_xyz_try_offline_or_add_pwa')">尝试纯离线模式 或 添加为PWA应用</span>
+										</a>
+									</div>
+									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_title')">一键安装命令行版：</p>
 									<!-- 第一个代码块 -->
 									<div class="bg-black relative border border-gray-500 dark:border-gray-200  rounded-lg p-4">
 										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code class="w-full h-full text-center">bash &lt;(curl -s https://comigo.xyz/get.sh)</code></pre>
@@ -284,6 +346,23 @@ templ ComigoXYZPlugin(c echo.Context) {
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
 											</svg>
 											<svg x-show="copiedIndex === 1" class="w-5 h-5 text-green-500" fill="none" stroke="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+											</svg>
+										</button>
+									</div>
+									<!-- Docker 部署代码块 -->
+									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_docker_deploy_title')">使用Docker部署：</p>
+									<div class="bg-black relative border border-gray-500 dark:border-gray-200 rounded-lg p-4">
+										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code>docker run -d --name comigo -p 1234:1234 -v /path/to/books:/data yumenaka/comigo:latest</code></pre>
+										<button
+											@click="copyToClipboard('docker run -d --name comigo -p 1234:1234 -v /path/to/books:/data yumenaka/comigo:latest', 2)"
+											class="absolute top-2 right-2 p-2 text-base-content/70 dark:text-base-content/80 hover:text-base-content dark:hover:text-white transition-colors"
+											:title="copiedIndex === 2 ? i18next.t('comigo_xyz_cli_install_copied') : i18next.t('comigo_xyz_cli_install_copy')"
+										>
+											<svg x-show="copiedIndex !== 2" class="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+											</svg>
+											<svg x-show="copiedIndex === 2" class="w-5 h-5 text-green-500" fill="none" stroke="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
 											</svg>
 										</button>

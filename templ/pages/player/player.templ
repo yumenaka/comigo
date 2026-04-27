@@ -20,11 +20,10 @@ templ PlayerPage(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 	@common.Toast()
 	if book != nil {
 		@common.Header(
-			common.HeaderProps{
-				TitleText:      common.GetBookTitle(book.BookInfo.BookID),
-				ShowReturnIcon: true,
-				ReturnUrl:      common.GetReturnUrl(book.BookInfo.BookID),
-			})
+			common.HeaderBackLeft(common.GetReturnUrl(book.BookInfo.BookID)),
+			common.HeaderTextTitle(common.GetBookTitle(book.BookInfo.BookID)),
+			common.HeaderDefaultRight(),
+		)
 		@MainArea(c, book, playlist)
 	}
 	if book != nil {

@@ -160,7 +160,7 @@ templ SketchPracticeScript() {
 
 // SketchPracticeOverlay 可拖动的倒计时浮层（渲染在页面顶层）
 templ SketchPracticeOverlay(c echo.Context) {
-	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("sketch_practice") && strings.HasPrefix(c.Request().URL.Path, "/flip/") {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("sketch_practice") && strings.HasPrefix(config.StripBasePath(c.Request().URL.Path), "/flip/") {
 		@SketchPracticeScript()
 		<!-- 可拖动的倒计时浮层 -->
 		<div
@@ -170,7 +170,7 @@ templ SketchPracticeOverlay(c echo.Context) {
 			:style="$store.sketchPractice ? 'left: ' + $store.sketchPractice.floatX + 'px; top: ' + $store.sketchPractice.floatY + 'px;' : ''"
 			@mousedown="$store.sketchPractice.startDrag($event)"
 			@touchstart="$store.sketchPractice.startDrag($event)"
-			class="fixed z-[9999] px-4 py-2 bg-black/70 text-white rounded-lg cursor-move select-none shadow-lg"
+			class="fixed z-9999 px-4 py-2 bg-black/70 text-white rounded-lg cursor-move select-none shadow-lg"
 			style="touch-action: none;"
 		>
 			<div class="text-center">
@@ -184,7 +184,7 @@ templ SketchPracticeOverlay(c echo.Context) {
 // SketchPracticePlugin 速写练习插件控制面板（仅支持翻页模式）
 // 与自动翻页插件功能相同，但会在画面上显示可拖动的倒计时提示
 templ SketchPracticePlugin(c echo.Context) {
-	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("sketch_practice") && strings.HasPrefix(c.Request().URL.Path, "/flip/") {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("sketch_practice") && strings.HasPrefix(config.StripBasePath(c.Request().URL.Path), "/flip/") {
 		if config.GetCfg().Debug {
 			<script>
 				console.log("Sketch practice plugin enabled");

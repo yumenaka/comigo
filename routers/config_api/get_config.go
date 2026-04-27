@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/pelletier/go-toml/v2"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -27,7 +28,7 @@ func GetConfigToml(c echo.Context) error {
 
 	bytes, err := toml.Marshal(tempConfig)
 	if err != nil {
-		logger.Infof("%s", "toml.Marshal Error")
+		logger.Infof(locale.GetString("log_toml_marshal_error"))
 		return err
 	}
 

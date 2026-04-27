@@ -38,7 +38,6 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVarP(&cfg.ConfigFile, "config", "c", "", locale.GetString("config"))
 	runtimeViper.BindPFlag("ConfigFile", RootCmd.PersistentFlags().Lookup("config"))
 
-	// 启用登陆保护，需要设定用户名
 	RootCmd.PersistentFlags().StringVar(&cfg.Username, "username", "", locale.GetString("username"))
 	runtimeViper.BindPFlag("Username", RootCmd.PersistentFlags().Lookup("username"))
 
@@ -64,16 +63,23 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVar(&cfg.Host, "host", "", locale.GetString("local_host"))
 	runtimeViper.BindPFlag("Host", RootCmd.PersistentFlags().Lookup("host"))
 
+	// 反向代理基础路径，留空时服务挂载在根路径。
+	RootCmd.PersistentFlags().StringVar(&cfg.BasePath, "base-path", "", locale.GetString("base_path"))
+	runtimeViper.BindPFlag("BasePath", RootCmd.PersistentFlags().Lookup("base-path"))
+
 	// TLS设定
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTLS, "tls", false, locale.GetString("tls_enable"))
 	runtimeViper.BindPFlag("EnableTLS", RootCmd.PersistentFlags().Lookup("tls"))
 
+	// 自动获取HTTPS证书
 	RootCmd.PersistentFlags().BoolVar(&cfg.AutoTLSCertificate, "auto-tls", false, locale.GetString("auto_https_cert"))
 	runtimeViper.BindPFlag("AutoTLSCertificate", RootCmd.PersistentFlags().Lookup("auto-tls"))
 
+	// TLS 证书文件路径
 	RootCmd.PersistentFlags().StringVar(&cfg.CertFile, "tls-crt", "", locale.GetString("tls_crt"))
 	runtimeViper.BindPFlag("CertFile", RootCmd.PersistentFlags().Lookup("tls-crt"))
 
+	// TLS 密钥文件路径
 	RootCmd.PersistentFlags().StringVar(&cfg.KeyFile, "tls-key", "", locale.GetString("tls_key"))
 	runtimeViper.BindPFlag("KeyFile", RootCmd.PersistentFlags().Lookup("tls-key"))
 
@@ -126,27 +132,27 @@ func InitFlags() {
 	runtimeViper.BindPFlag("ZipFileTextEncoding", RootCmd.PersistentFlags().Lookup("zip-encode"))
 
 	// 启用Tailscale服务
-	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale", false, locale.GetString("EnableTailscale"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale", false, locale.GetString("enable_tailscale"))
 	runtimeViper.BindPFlag("EnableTailscale", RootCmd.PersistentFlags().Lookup("tailscale"))
 
 	// Tailscale服务 启用Funnel模式
-	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelTunnel, "tailscale-funnel", false, locale.GetString("FunnelTunnel"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelTunnel, "tailscale-funnel", false, locale.GetString("funnel_tunnel_label"))
 	runtimeViper.BindPFlag("FunnelTunnel", RootCmd.PersistentFlags().Lookup("tailscale-funnel"))
 
 	// FunnelLoginCheck Funnel密码保护检查
-	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelLoginCheck, "funnel-password-check", true, locale.GetString("FunnelLoginCheck"))
+	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelLoginCheck, "funnel-password-check", true, locale.GetString("funnel_login_check"))
 	runtimeViper.BindPFlag("FunnelLoginCheck", RootCmd.PersistentFlags().Lookup("funnel-password-check"))
 
 	// Tailscale服务主机名,用于 Tailscale 网络中的标识节点
-	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale-hostname", "comigo", locale.GetString("TailscaleHostname"))
+	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale-hostname", "comigo", locale.GetString("tailscale_hostname"))
 	runtimeViper.BindPFlag("TailscaleHostname", RootCmd.PersistentFlags().Lookup("tailscale-hostname"))
 
 	// Tailscale服务端口号
-	RootCmd.PersistentFlags().IntVar(&cfg.TailscalePort, "tailscale-port", 443, locale.GetString("TailscalePort"))
+	RootCmd.PersistentFlags().IntVar(&cfg.TailscalePort, "tailscale-port", 443, locale.GetString("tailscale_port"))
 	runtimeViper.BindPFlag("TailscalePort", RootCmd.PersistentFlags().Lookup("tailscale-port"))
 
 	// Tailscale AuthKey
-	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleAuthKey, "tailscale-authKey", "", locale.GetString("TailscaleAuthKey"))
+	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleAuthKey, "tailscale-authKey", "", locale.GetString("tailscale_auth_key"))
 	runtimeViper.BindPFlag("TailscaleAuthKey", RootCmd.PersistentFlags().Lookup("tailscale-authKey"))
 
 	// ReadOnlyMode 只读模式，禁止网页端修改配置或上传文件
@@ -177,6 +183,9 @@ func InitFlags() {
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
 	runtimeViper.BindPFlag("Debug", RootCmd.PersistentFlags().Lookup("debug"))
+
+	// 自升级（不绑定 viper，避免环境变量误触发）
+	RootCmd.PersistentFlags().BoolVarP(&cfg.SelfUpgrade, "upgrade", "u", false, locale.GetString("self_upgrade_flag"))
 }
 
 // SetByExecutableFilename 根据可执行文件名或软链接名自动设置部分配置项的默认值。
@@ -246,7 +255,7 @@ func SetByExecutableFilename() {
 	filenameLower := strings.ToLower(filename)
 	cfg := config.GetCfg()
 	// Windows 默认打开浏览器
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" || filenameLower == "comigo" {
 		cfg.OpenBrowser = true
 	}
 	// 打开浏览器

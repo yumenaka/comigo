@@ -66,7 +66,7 @@ func getNumberFromString(s string) (int, error) {
 			for _, v := range value {
 				temp, errTemp := strconv.Atoi(v)
 				if errTemp != nil {
-					logger.Infof("error num value:%s", v)
+					logger.Infof(locale.GetString("log_error_num_value"), v)
 				} else {
 					num = num + temp
 				}

@@ -20,11 +20,11 @@ templ StringConfig(name string, value string, description string) {
 			placeholder={ name }
 			value={ value }
 			data-original-value={ value }
-			class="px-2.5  w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm placeholder-gray-500 placeholder-opacity-50"
-			x-on:change={ "updateStringConfig('" + name + "', $event.target.value)" }
+			class="px-2.5  w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+			@change={ "updateStringConfig('" + name + "', $event.target.value)" }
 		/>
 		<div
-			class="w-full py-1 text-xs text-gray-500"
+			class="w-full py-1 text-xs text-base-content"
 			x-text={ getTranslations(description) }
 		></div>
 		<div class="bg-red-600"></div>
@@ -38,16 +38,19 @@ templ StringConfigJavascript() {
 			// 更新字符串配置的函数
 			async function updateStringConfig(name, value) {
 				try {
-					const response = await fetch("/api/update-string-config", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath("/api/update-string-config"),
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								name: name,
+								value: value,
+							}),
 						},
-						body: JSON.stringify({
-							name: name,
-							value: value,
-						}),
-					});
+					);
 					if (!response.ok) {
 						showToast(i18next.t("err_update_config_failed"), "error");
 						// 恢复输入框的值
@@ -64,15 +67,11 @@ templ StringConfigJavascript() {
 					if (input) {
 						input.setAttribute("data-original-value", value);
 					}
-					// 显示成功提示
+					// 显示成功提示（需整页刷新时由服务端 SSE 推送确认）
 					if (data.saveSuccessHint) {
-						showToast(i18next.t("saveSuccessHint"), "info");
-						// 2秒后刷新页面
-						setTimeout(() => {
-							window.location.reload();
-						}, 2000);
+						showToast(i18next.t("save_success_hint"), "info");
 					} else {
-						showToast(i18next.t("saveSuccessHint"), "success");
+						showToast(i18next.t("save_success_hint"), "success");
 					}
 				} catch (error) {
 					console.error("更新配置失败:", error);

@@ -6,7 +6,7 @@ templ ReadingHistoryPanel() {
 	<div
 		id="reading_history"
 		x-data="{
-			collapsed: $persist(false).as('settings_reading_history_collapsed'),
+			collapsed: $persist(true).as('settings_reading_history_collapsed'),
 			bookmarks: [],
 			loading: false,
 			deleting: {},
@@ -18,7 +18,7 @@ templ ReadingHistoryPanel() {
 			async fetchPage(page) {
 				this.loading = true;
 				try {
-					const response = await fetch('/api/reading-history?page=' + page + '&page_size=' + this.pageSize);
+					const response = await fetch(window.ComiGoPath('/api/reading-history') + '?page=' + page + '&page_size=' + this.pageSize);
 					if (response.ok) {
 						const data = await response.json();
 						// 后端已完成过滤和排序，直接使用返回的数据
@@ -45,7 +45,7 @@ templ ReadingHistoryPanel() {
 				const key = item.book_info.id + '_' + item.book_mark.mark_type + '_' + item.book_mark.page_index;
 				this.deleting[key] = true;
 				try {
-					const url = '/api/delete-bookmark?book_id=' + encodeURIComponent(item.book_info.id) +
+					const url = window.ComiGoPath('/api/delete-bookmark') + '?book_id=' + encodeURIComponent(item.book_info.id) +
 						'&mark_type=' + encodeURIComponent(item.book_mark.mark_type) +
 						'&page_index=' + item.book_mark.page_index;
 					const response = await fetch(url, { method: 'DELETE' });
@@ -91,7 +91,7 @@ templ ReadingHistoryPanel() {
 			}
 		}"
 		x-init="fetchPage(1)"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<!-- 折叠/展开按钮 -->
 		<button

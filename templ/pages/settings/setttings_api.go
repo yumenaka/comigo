@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/a-h/templ"
@@ -19,6 +20,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
+	"github.com/yumenaka/comigo/tools/sse_hub"
 )
 
 // decodeBase64URLStrict 将 base64url（RawURLEncoding，无 padding）解码为原始字符串。
@@ -32,6 +34,50 @@ func decodeBase64URLStrict(s string) (string, error) {
 		return "", err
 	}
 	return string(b), nil
+}
+
+func reloadHintForStringConfig(name string) (saveSuccessHint bool, reason string) {
+	switch name {
+	case "Host", "BasePath":
+		return true, sse_hub.UISuggestReasonServerConfig
+	default:
+		return false, ""
+	}
+}
+
+func reloadHintForBoolConfig(name string) (saveSuccessHint bool, reason string) {
+	switch name {
+	case "DisableLAN":
+		return true, sse_hub.UISuggestReasonServerConfig
+	case "Debug":
+		return true, sse_hub.UISuggestReasonDebugToggle
+	case "EnablePlugin":
+		return true, sse_hub.UISuggestReasonPluginsChanged
+	default:
+		return false, ""
+	}
+}
+
+func reloadHintForNumberConfig(name string) (saveSuccessHint bool, reason string) {
+	switch name {
+	case "Port":
+		// 端口变更由前端自行跳转，不再弹刷新确认。
+		return true, ""
+	case "Timeout":
+		return true, sse_hub.UISuggestReasonServerConfig
+	case "AutoRescanIntervalMinutes":
+		// 自动重扫仅调整调度器，不需要整页刷新。
+		return true, ""
+	default:
+		return false, ""
+	}
+}
+
+func renderArrayConfigComponent(configName string, values []string) templ.Component {
+	if configName == "StoreUrls" {
+		return StoreConfig(configName, values, configName+"_Description", GetStoreBookCounts())
+	}
+	return StringArrayConfig(configName, values, configName+"_Description")
 }
 
 // -------------------------
@@ -70,9 +116,8 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 
 	logger.Infof(locale.GetString("log_update_config"), name, newValue)
 
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	if setErr := config.GetCfg().SetConfigValue(name, newValue); setErr != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
@@ -85,7 +130,7 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 	}
 
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	return name, newValue, nil
 }
@@ -111,9 +156,8 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name, request.Value)
 
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	if setErr := config.GetCfg().SetConfigValue(request.Name, request.Value); setErr != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
@@ -126,7 +170,7 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 	}
 
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	return request.Name, request.Value, nil
 }
@@ -144,9 +188,9 @@ func UpdateStringConfigHandler(c echo.Context) error {
 	}
 
 	// 判断是否需要显示保存成功提示并刷新页面
-	saveSuccessHint := false
-	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" {
-		saveSuccessHint = true
+	saveSuccessHint, reloadReason := reloadHintForStringConfig(name)
+	if reloadReason != "" {
+		sse_hub.BroadcastUISuggestReload(reloadReason)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -175,9 +219,8 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name, newValue)
 
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	if setErr := config.GetCfg().SetConfigValue(request.Name, newValue); setErr != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
@@ -190,7 +233,7 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 	}
 
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	return request.Name, request.Value, nil
 }
@@ -208,9 +251,9 @@ func UpdateBoolConfigHandler(c echo.Context) error {
 	}
 
 	// 判断是否需要显示保存成功提示并刷新页面
-	saveSuccessHint := false
-	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" || name == "Debug" {
-		saveSuccessHint = true
+	saveSuccessHint, reloadReason := reloadHintForBoolConfig(name)
+	if reloadReason != "" {
+		sse_hub.BroadcastUISuggestReload(reloadReason)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -239,9 +282,8 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, er
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name, newValue)
 
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	if setErr := config.GetCfg().SetConfigValue(request.Name, newValue); setErr != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
@@ -271,16 +313,16 @@ func UpdateNumberConfigHandler(c echo.Context) error {
 		go func() {
 			// 延迟1秒执行
 			time.Sleep(1 * time.Second)
-			beforeConfigUpdate(oldConfig, config.GetCfg())
+			beforeConfigUpdate(*oldConfig, config.GetCfg())
 		}()
 	} else {
-		beforeConfigUpdate(oldConfig, config.GetCfg())
+		beforeConfigUpdate(*oldConfig, config.GetCfg())
 	}
 
 	// 判断是否需要显示保存成功提示并刷新页面
-	saveSuccessHint := false
-	if name == "Username" || name == "Password" || name == "Port" || name == "Host" || name == "DisableLAN" || name == "Timeout" || name == "AutoRescanIntervalMinutes" {
-		saveSuccessHint = true
+	saveSuccessHint, reloadReason := reloadHintForNumberConfig(name)
+	if reloadReason != "" {
+		sse_hub.BroadcastUISuggestReload(reloadReason)
 	}
 
 	// 构建响应
@@ -304,6 +346,9 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 		return fmt.Errorf("invalid JSON request: %v", err)
 	}
 
+	request.Username = strings.TrimSpace(request.Username)
+	request.CurrentPassword = strings.TrimSpace(request.CurrentPassword)
+
 	// 除非是调试模式, 密码不明文记录到日志
 	if config.GetCfg().Debug {
 		logger.Infof(locale.GetString("log_update_user_info_username"), request.Username)
@@ -312,32 +357,44 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 		logger.Infof(locale.GetString("log_update_user_info_reenter_password"), request.ReEnterPassword)
 	}
 
-	// 两次输入的密码不一致
-	if request.Password != request.ReEnterPassword {
-		return errors.New("Password do not match")
-	}
-	// 用户名或密码为空
-	if request.Username == "" || request.Password == "" {
-		return errors.New("Username and Password cannot be empty")
-	}
+	cfg := config.GetCfg()
+	existingPasswordLogin := cfg.HasPasswordLoginConfigured()
+	passwordLoginChanged := request.Username != cfg.Username ||
+		request.Password != "" ||
+		request.ReEnterPassword != ""
 
-	// 当前密码不正确（如果已有密码）
-	if config.GetCfg().Password != "" && config.GetCfg().Password != request.CurrentPassword {
+	// 仅在修改账号密码登录设置时校验当前密码。
+	if existingPasswordLogin && passwordLoginChanged && cfg.Password != request.CurrentPassword {
 		return errors.New("Current Password is incorrect")
 	}
 
-	// 旧配置做个备份（后面需要对比）
-	oldConfig := config.CopyCfg()
+	effectiveUsername := cfg.Username
+	effectivePassword := cfg.Password
+	if request.Password != request.ReEnterPassword {
+		return errors.New("Password do not match")
+	}
+	if request.Username == "" {
+		if request.Password != "" || request.ReEnterPassword != "" {
+			return errors.New(locale.GetString("prompt_set_username"))
+		}
+		effectiveUsername = ""
+		effectivePassword = ""
+	} else {
+		effectiveUsername = request.Username
+		switch {
+		case request.Password != "":
+			effectivePassword = request.Password
+		case existingPasswordLogin:
+			effectivePassword = cfg.Password
+		default:
+			return errors.New(locale.GetString("prompt_set_password"))
+		}
+	}
 
-	// 更新用户名
-	if err := config.GetCfg().SetConfigValue("Username", request.Username); err != nil {
-		logger.Errorf(locale.GetString("err_failed_to_set_username"), err)
-		return fmt.Errorf("failed to update username: %v", err)
-	}
-	// 更新密码
-	if err := config.GetCfg().SetConfigValue("Password", request.Password); err != nil {
-		return fmt.Errorf("failed to update password: %v", err)
-	}
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
+	oldConfig := config.CopyCfg()
+	cfg.Username = effectiveUsername
+	cfg.Password = effectivePassword
 
 	// 写入配置文件
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
@@ -345,7 +402,7 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	}
 
 	// 根据配置的变化，做相应操作
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	return nil
 }
@@ -361,6 +418,7 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonLoginSettings)
 	return c.NoContent(http.StatusOK)
 }
 
@@ -395,12 +453,12 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 		if request.FunnelTunnel && (request.TailscalePort != 443 && request.TailscalePort != 8443 && request.TailscalePort != 10000) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Port must be 443, 8443, or 10000 when Funnel Mode is enabled")
 		}
-		// 如果Funnel模式强制密码，但当前没有设置密码，则返回错误
+		// 如果 Funnel 模式要求登录保护，但当前没有可用登录方式，则返回错误
 		if request.FunnelTunnel && request.FunnelLoginCheck && !config.GetCfg().RequiresAuth() {
-			return echo.NewHTTPError(http.StatusBadRequest, "Cannot Turn on FunnelMode when no password not set")
+			return echo.NewHTTPError(http.StatusBadRequest, "Cannot turn on FunnelMode when login protection is unavailable")
 		}
 	}
-	// 旧配置做个备份（后面需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
 	// 更新Tailscale配置
 	config.GetCfg().EnableTailscale = request.EnableTailscale
@@ -415,7 +473,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	}
 
 	// 根据配置的变化，做相应操作
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 
 	// 返回成功响应
 	return c.NoContent(http.StatusOK)
@@ -461,8 +519,8 @@ func AddArrayConfigHandler(c echo.Context) error {
 		saveSuccessHint = true
 	}
 
-	// 渲染更新后的 HTML
-	updatedHTML := StringArrayConfig(decodedConfigName, values, decodedConfigName+"_Description")
+	// 渲染更新后的 HTML。StoreUrls 需要回传专用组件，保证空书架/设置页都能即时更新列表。
+	updatedHTML := renderArrayConfigComponent(decodedConfigName, values)
 	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
 	if renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
@@ -475,9 +533,8 @@ func AddArrayConfigHandler(c echo.Context) error {
 }
 
 func doAdd(configName, addValue string) ([]string, error) {
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	values, err := config.GetCfg().AddStringArrayConfig(configName, addValue)
 	if err != nil {
@@ -489,7 +546,7 @@ func doAdd(configName, addValue string) ([]string, error) {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 	return values, nil
 }
 
@@ -512,16 +569,16 @@ func EnablePluginHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "pluginName is required")
 	}
 
-	logger.Infof("启用插件: %s\n", request.PluginName)
+	logger.Infof(locale.GetString("log_plugin_enabled")+"\n", request.PluginName)
 
 	// 互斥逻辑：auto_flip 和 sketch_practice 不能同时启用
 	if request.PluginName == "sketch_practice" && config.GetCfg().IsPluginEnabled("auto_flip") {
 		// 启用 sketch_practice 时，禁用 auto_flip
-		logger.Infof("禁用互斥插件: auto_flip\n")
+		logger.Infof(locale.GetString("log_disable_mutex_plugin_auto_flip") + "\n")
 		_ = config.GetCfg().DisablePlugin("auto_flip")
 	} else if request.PluginName == "auto_flip" && config.GetCfg().IsPluginEnabled("sketch_practice") {
 		// 启用 auto_flip 时，禁用 sketch_practice
-		logger.Infof("禁用互斥插件: sketch_practice\n")
+		logger.Infof(locale.GetString("log_disable_mutex_plugin_sketch_practice") + "\n")
 		_ = config.GetCfg().DisablePlugin("sketch_practice")
 	}
 
@@ -536,6 +593,7 @@ func EnablePluginHandler(c echo.Context) error {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonPluginsChanged)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success":         true,
 		"message":         "插件已启用",
@@ -562,7 +620,7 @@ func DisablePluginHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "pluginName is required")
 	}
 
-	logger.Infof("禁用插件: %s\n", request.PluginName)
+	logger.Infof(locale.GetString("log_plugin_disabled")+"\n", request.PluginName)
 
 	// 禁用插件
 	err := config.GetCfg().DisablePlugin(request.PluginName)
@@ -575,6 +633,7 @@ func DisablePluginHandler(c echo.Context) error {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonPluginsChanged)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"message": "插件已禁用",
@@ -633,9 +692,8 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 }
 
 func doDelete(configName string, deleteValue string) ([]string, error) {
-	// 旧配置做个备份（有需要对比）
+	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
-
 	// 更新配置
 	values, err := config.GetCfg().DeleteStringArrayConfig(configName, deleteValue)
 	if err != nil {
@@ -647,7 +705,7 @@ func doDelete(configName string, deleteValue string) ([]string, error) {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(&oldConfig, config.GetCfg())
+	beforeConfigUpdate(oldConfig, config.GetCfg())
 	return values, nil
 }
 
@@ -763,7 +821,7 @@ func RescanStoreHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is not valid base64url")
 	}
-	logger.Infof("重新扫描书库: %s\n", storeUrl)
+	logger.Infof(locale.GetString("log_rescan_store")+"\n", storeUrl)
 
 	// 记录扫描前的书籍数量
 	beforeCount := model.GetAllBooksNumber()
@@ -790,8 +848,9 @@ func RescanStoreHandler(c echo.Context) error {
 		newBooksCount = 0
 	}
 
-	logger.Infof("书库扫描完成，新增 %d 本书\n", newBooksCount)
+	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount)
 
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonSingleStoreRescan)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success":       true,
 		"newBooksCount": newBooksCount,
@@ -822,7 +881,7 @@ func DeleteStoreHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is not valid base64url")
 	}
-	logger.Infof("删除书库: %s\n", storeUrl)
+	logger.Infof(locale.GetString("log_delete_store")+"\n", storeUrl)
 
 	// 先删除该书库的所有书籍数据
 	targetStoreAbs, err := filepath.Abs(storeUrl)
@@ -856,7 +915,7 @@ func DeleteStoreHandler(c echo.Context) error {
 		}
 	}
 
-	logger.Infof("删除了 %d 本书籍\n", deletedCount)
+	logger.Infof(locale.GetString("log_deleted_books_count")+"\n", deletedCount)
 
 	// 从配置中移除该书库 URL
 	values, err := doDelete("StoreUrls", storeUrl)

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
@@ -33,7 +34,7 @@ func DeleteBookCache(c echo.Context) error {
 	// 获取书籍信息
 	book, err := model.IStore.GetBook(id)
 	if err != nil {
-		logger.Infof("GetBook error: %s", err)
+		logger.Infof(locale.GetString("log_getbook_error_common"), err)
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
 	}
 
@@ -46,7 +47,7 @@ func DeleteBookCache(c echo.Context) error {
 	// 获取配置目录
 	configDir, err := config.GetConfigDir()
 	if err != nil {
-		logger.Infof("GetConfigDir error: %s", err)
+		logger.Infof(locale.GetString("log_get_config_dir_error"), err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get config directory"})
 	}
 
@@ -57,7 +58,7 @@ func DeleteBookCache(c echo.Context) error {
 	if deleteMetadata {
 		err := store.DeleteBookJson(book)
 		if err != nil {
-			logger.Infof("DeleteBookJson error: %s", err)
+			logger.Infof(locale.GetString("log_delete_book_json_error"), err)
 			deletedMap["metadata"] = false
 		} else {
 			deletedMap["metadata"] = true
@@ -68,7 +69,7 @@ func DeleteBookCache(c echo.Context) error {
 	if deleteCover {
 		err := fileutil.DeleteCoverCache(metaPath, id)
 		if err != nil {
-			logger.Infof("DeleteCoverCache error: %s", err)
+			logger.Infof(locale.GetString("log_delete_cover_cache_error"), err)
 			deletedMap["cover"] = false
 		} else {
 			deletedMap["cover"] = true
@@ -79,7 +80,7 @@ func DeleteBookCache(c echo.Context) error {
 	if deleteImageCache && config.GetCfg().CacheDir != "" {
 		err := fileutil.DeleteBookCache(config.GetCfg().CacheDir, id)
 		if err != nil {
-			logger.Infof("DeleteBookCache error: %s", err)
+			logger.Infof(locale.GetString("log_delete_book_cache_error"), err)
 			deletedMap["image_cache"] = false
 		} else {
 			deletedMap["image_cache"] = true

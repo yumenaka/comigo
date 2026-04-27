@@ -11,15 +11,23 @@ import (
 templ ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) {
 	@common.Toast()
 	@common.Header(
-		common.HeaderProps{
-			TitleText:         common.GetPageTitle(c.Param("id"), nowBookNum, storeBookInfos, childBookInfos),
-			ShowReturnIcon:    c.Param("id") != "",
-			ShowReSortIcon:    true,
-			ShowServerSetting: true,
-			ReturnUrl:         common.GetReturnUrl(c.Param("id")),
-		})
+		ShelfHeaderLeft(c),
+		common.HeaderTextTitle(getShelfHeaderTitle(c, nowBookNum, storeBookInfos, childBookInfos)),
+		common.HeaderDefaultRight(),
+	)
 	@MainArea(c, nowBookNum, storeBookInfos, childBookInfos)
 	@common.Footer(config.GetVersion())
-	@common.Drawer(c, nil, ShelfDrawerSlot(), c.Param("id") != "", common.GetReturnUrl(c.Param("id")))
+	@common.Drawer(c, nil, ShelfDrawerSlot(c), shouldShowShelfReturnIcon(c), getShelfReturnURL(c))
 	@common.QRCode()
+}
+
+// ShelfHeaderLeft 书架页左侧工具区。作为组件传给 common.Header，而不是让 Header 自己判断行为。
+templ ShelfHeaderLeft(c echo.Context) {
+	if shouldShowShelfReturnIcon(c) {
+		@common.ReturnButton(getShelfReturnURL(c))
+	}
+	@common.ReaderButton()
+	@common.FullScreenOfflineButton()
+	@common.ServerSettingsButton()
+	@common.ReSortIcon()
 }
