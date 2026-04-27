@@ -22,10 +22,11 @@ import (
 func main() {
 	// 检查是否只是查看版本或帮助信息
 	for _, arg := range os.Args {
-		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" {
+		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" ||
+			arg == "-u" || arg == "--upgrade" {
 			// 初始化命令行flag与args，环境变量与配置文件
 			cmd.Execute()
-			// 打印信息后直接退出
+			// 打印信息后直接退出（含自升级流程内的 os.Exit）
 			return
 		}
 	}
@@ -46,6 +47,10 @@ func main() {
 			cmd.ScanStore()
 			// 保存书籍元数据
 			cmd.SaveMetadata()
+			// 生成书组
+			model.GenerateBookGroup()
+			// 判断是否需要打开浏览器
+			config.OpenBrowserIfNeeded()
 			return nil
 		}
 		// 确保单实例模式运行
@@ -62,6 +67,10 @@ func main() {
 		// 注册退出时清理单实例资源
 		defer tools.CleanupSingleInstance()
 	}
+	var releaseSingleInstance func()
+	if config.GetCfg().EnableSingleInstance {
+		releaseSingleInstance = tools.CleanupSingleInstance
+	}
 	// 设置系统托盘并启动服务器
 	system_tray.SetupSystray(
 		startServer,
@@ -72,6 +81,7 @@ func main() {
 		toggleTailscale,
 		setLanguage,
 		getTailscaleEnabled,
+		releaseSingleInstance,
 	)
 }
 
@@ -87,12 +97,16 @@ func startServer() {
 	cmd.LoadMetadata()
 	// 扫描书库
 	cmd.ScanStore()
+	// 生成书组
+	model.GenerateBookGroup()
 	// 保存书籍元数据（包括书签）
 	cmd.SaveMetadata()
 	// 启动自动扫描（如果配置了间隔）
 	config.StartOrStopAutoRescan()
-	// 在命令行显示QRCode
+	// 在命令行显示 QRCode
 	cmd.ShowQRCode()
+	// 判断是否需要打开浏览器
+	config.OpenBrowserIfNeeded()
 }
 
 // getServerURL 获取服务器URL

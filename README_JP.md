@@ -1,11 +1,10 @@
 <div align="center">
 
-# ComiGo：シンプルで使いやすい漫画リーダー
-
+# ComiGo：シンプルで使いやすい漫画リーダー  
 [![Go Report](https://goreportcard.com/badge/github.com/yumenaka/comi?style=flat-square)](https://goreportcard.com/report/github.com/yumenaka/comi)
-[![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)
-[中文文档](https://github.com/yumenaka/comigo/blob/master/README.md) | [English](https://github.com/yumenaka/comigo/blob/master/README_EN.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)
-![Windowsサンプル](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windowsサンプル")
+[![License](https://img.shields.io/github/license/yumenaka/comi?style=flat-square&color=blue)](https://github.com/yumenaka/comigo/blob/main/LICENSE)  
+[English](https://github.com/yumenaka/comigo/blob/master/README.md) | [中文文档](https://github.com/yumenaka/comigo/blob/master/README_ZH.md) | [日本語](https://github.com/yumenaka/comigo/blob/master/README_JP.md)  
+![Windowsサンプル](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windowsサンプル") 
 <!--
 [![Downloads](https://img.shields.io/github/downloads/yumenaka/comi/total?style=flat-square&color=success)](https://github.com/yumenaka/comigo/releases)
 <img src="https://raw.githubusercontent.com/yumenaka/comi/master/icon.ico" alt="ComiGo：Simple Comig & Manga Reader" width="200">
@@ -18,6 +17,7 @@
 
 - 📚 **多様なフォーマット対応**：画像フォルダ、`.rar`、`.zip`、`.tar`、`.cbz`、`.cbr`、`.epub` などの圧縮ファイルをサポート
 - 🔄 **簡単アクセス**：スマートフォン/タブレットでのQRコードスキャン、Windowsでのドラッグ＆ドロップ対応
+- 📴 **オフラインモード / PWAアプリ**：ZIP/CBZ/RAR/CBR をブラウザ内で直接読み込み、ファイルはアップロードされません。[オンラインで試す](https://comigo.xyz/reader)
 - 🐧 **マルチプラットフォーム**：Windows、Linux、MacOS に対応
 - 📖 **多彩な閲覧モード**：スクロール、ページめくりなど閲覧モードを提供
 - ⚙️ **柔軟な設定**：コマンドライン操作、`config.toml` 設定ファイルによるライブラリ設定
@@ -29,6 +29,9 @@
 - 📥 **柔軟なダウンロード**：画像フォルダの一括ダウンロード、EPUBフォーマットへの変換とダウンロードに対応
 - 📜 **閲覧履歴**：閲覧履歴を自動記録、続きから読める
 
+PC/モバイル同期：  
+![モバイル同期サンプル](https://www.yumenaka.net/wp-content/uploads/2026/04/scroll.gif "モバイル同期サンプル")
+
 ## インストール方法
 
 ### GUI版（初心者におすすめ）
@@ -36,7 +39,7 @@
 | システム | ダウンロード |
 |----------|-------------|
 | Windows 64bit | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
-| macOS (Intel/Apple Silicon) | [Comigo.app.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo.app.zip) |
+| macOS (Intel/Apple Silicon) | [Comigo_latest.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo_latest.dmg) |
 
 > 💡 **説明**：GUI版はシステムトレイアイコンを提供し、バックグラウンドで実行できます。Windows: ダブルクリックで実行; macOS: Applicationsフォルダにドラッグ。
 
@@ -146,9 +149,6 @@ comi .
 
 # ポートとパスを指定
 comi -p 8080 /path/to/manga
-
-# ローカルのみ、ログイン保護付き
-comi --local --username admin --password 123456 /path/to/manga
 ```
 
 ## 設定ファイルについて

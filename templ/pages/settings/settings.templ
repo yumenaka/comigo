@@ -10,12 +10,10 @@ import (
 // SettingsPage 设置页面
 templ SettingsPage(c echo.Context, tsStatus *tailscale_plugin.TailscaleStatus) {
 	@common.Header(
-		common.HeaderProps{
-			TitleText:      "i18next.t('settings_page')",
-			ShowReturnIcon: true,
-			ShowUploadIcon: true,
-			ReturnUrl:      "/",
-		})
+		common.HeaderSettingsLeft("/"),
+		common.HeaderTextTitle("i18next.t('settings_page')"),
+		common.HeaderDefaultRight(),
+	)
 	@common.Toast()
 	@MainArea(tsStatus)
 	@common.Drawer(c, nil, nil, true, "/")

@@ -11,7 +11,7 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 	>
 		<label for={ name } class="w-full py-0 text-left" x-text={ getTranslations(name) }></label>
 		<input
-			class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm"
+			class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black"
 			id={ name }
 			name={ name }
 			type="number"
@@ -26,9 +26,9 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 			max={ strconv.Itoa(max) }
 			min={ strconv.Itoa(min) }
 			data-original-value={ strconv.Itoa(value) }
-			x-on:change={ "updateNumberConfig('" + name + "', $event.target.value, " + strconv.Itoa(min) + ", " + strconv.Itoa(max) + ")" }
+			@change={ "updateNumberConfig('" + name + "', $event.target.value, " + strconv.Itoa(min) + ", " + strconv.Itoa(max) + ")" }
 		/>
-		<div class="w-full py-1 text-left text-xs text-gray-500" x-text={ getTranslations(description) }></div>
+		<div class="w-full py-1 text-left text-xs text-base-content" x-text={ getTranslations(description) }></div>
 		<div class="bg-red-600"></div>
 	</div>
 }
@@ -64,16 +64,19 @@ templ NumberConfigJavaScript() {
 					return;
 				}
 				try {
-					const response = await fetch("/api/update-number-config", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath("/api/update-number-config"),
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								name: name,
+								value: numValue,
+							}),
 						},
-						body: JSON.stringify({
-							name: name,
-							value: numValue,
-						}),
-					});
+					);
 					// 检查响应状态
 					if (!response.ok) {
 						showToast(i18next.t("err_update_config_failed"), "error");
@@ -94,47 +97,25 @@ templ NumberConfigJavaScript() {
 					// 显示成功提示
 					if (data.saveSuccessHint) {
 						if (name === "Port") {
-							// 如果更新的是端口号，提示用户需要跳转新端口
 							showToast(i18next.t("port_change_hint"), "info");
-							// 2秒后跳转到新端口
 							setTimeout(() => {
 								const newUrl = new URL(window.location.href);
 								newUrl.port = numValue;
 								window.location.href = newUrl.href;
-							}, 2000);
+							}, 1500);
 							return;
 						}
-						//如果更新的是自动重扫间隔
 						if (name === "AutoRescanIntervalMinutes") {
-							// 如果numValue > 0，提示用户自动重扫已启用
 							if (numValue > 0) {
-								showMessage({
-									message: i18next.t("auto_rescan_enabled_hint"),
-									buttons: "confirm",
-									onConfirm: function () {
-										window.location.reload();
-									},
-								});
-							}
-							// 如果numValue === 0，提示用户自动重扫已禁用
-							if (numValue === 0) {
-								showMessage({
-									message: i18next.t("auto_rescan_disabled_hint"),
-									buttons: "confirm",
-									onConfirm: function () {
-										window.location.reload();
-									},
-								});
+								showToast(i18next.t("auto_rescan_enabled_hint"), "success");
+							} else {
+								showToast(i18next.t("auto_rescan_disabled_hint"), "success");
 							}
 							return;
 						}
-						showToast(i18next.t("saveSuccessHint"), "info");
-						// 2秒后刷新页面
-						setTimeout(() => {
-							window.location.reload();
-						}, 2000);
+						showToast(i18next.t("save_success_hint"), "info");
 					} else {
-						showToast(i18next.t("saveSuccessHint"), "success");
+						showToast(i18next.t("save_success_hint"), "success");
 					}
 				} catch (error) {
 					console.error("更新配置失败:", error);

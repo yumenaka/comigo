@@ -10,6 +10,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/vfs"
 )
 
 // Book 定义书籍结构
@@ -147,6 +148,7 @@ func GetAllBooksNumber() int {
 // ClearBookNotExist  检查内存中的书的源文件是否存在，不存在就删掉
 func ClearBookNotExist() {
 	logger.Info(locale.GetString("log_checking_book_files_exist"))
+	//return
 	// 遍历所有书籍
 	var deletedBooks []string
 	allBooks, err := IStore.ListBooks()
@@ -154,8 +156,41 @@ func ClearBookNotExist() {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, book := range allBooks {
-		// 如果父文件夹存在，但书籍文件不存在，说明这本书被删除了
-		if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
+		var exists bool
+		if book.IsRemote {
+			// 远程书籍：使用 VFS 检查文件是否存在
+			fs, fsErr := vfs.GetOrCreate(book.RemoteURL, vfs.Options{
+				CacheEnabled: false,
+				Timeout:      10, // 使用较短的超时时间，因为只是检查存在性
+			})
+			if fsErr != nil {
+				// 无法连接远程服务器，跳过检查（可能是网络问题）
+				logger.Infof(locale.GetString("log_remote_store_check_book_existence_failed"), book.RemoteURL, fsErr)
+				continue
+			}
+			exists, err = fs.Exists(book.BookPath)
+			if err != nil {
+				// 检查出错，跳过这本书（可能是网络问题或路径问题，不删除书籍）
+				logger.Infof(locale.GetString("log_remote_book_existence_check_failed"), book.BookPath, err)
+				logger.Infof(locale.GetString("log_remote_book_existence_check_failed_detail"),
+					book.BookID, book.RemoteURL, book.BookPath, err)
+				continue
+			}
+		} else {
+			// 本地书籍：使用 os.Stat 检查文件是否存在
+			if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
+				exists = false
+			} else if err != nil {
+				// 其他错误，跳过这本书
+				logger.Infof(locale.GetString("log_local_book_existence_check_failed"), book.BookPath, err)
+				continue
+			} else {
+				exists = true
+			}
+		}
+
+		// 如果文件不存在，删除这本书
+		if !exists {
 			deletedBooks = append(deletedBooks, book.BookPath)
 			err := IStore.DeleteBook(book.BookID)
 			if err != nil {

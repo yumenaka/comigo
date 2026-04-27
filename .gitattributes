@@ -2,10 +2,8 @@
 
 #排除文档文件
 resource/CHANGELOG.md -linguist-documentation
-
 # 排除目录
 assets/images/**/* linguist-vendored
-
 #排除手机项目
 app/**/* linguist-vendored
 
@@ -19,5 +17,4 @@ assets/script/styles.css  linguist-vendored
 assets/script/main.js.map  linguist-vendored
 assets/script/styles.css.map  linguist-vendored
 assets/wailsjs   linguist-vendored
-
 *.templ linguist-language=Go

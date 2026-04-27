@@ -27,7 +27,7 @@ func SaveFileToCache(id, filename string, data []byte, queryString, contentType 
 	cacheDir := filepath.Join(cachePath, id)
 	err := os.MkdirAll(cacheDir, os.ModePerm)
 	if err != nil {
-		logger.Infof(locale.GetString("saveFileToCache_error")+": %v", err)
+		logger.Infof(locale.GetString("log_save_file_to_cache_error"), err)
 		return err
 	}
 	// 特殊字符转义，避免文件名不合法

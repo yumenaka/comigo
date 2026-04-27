@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -30,6 +31,14 @@ var RootCmd = &cobra.Command{
 		// 通过“可执行文件名”设置部分默认参数
 		SetByExecutableFilename()
 		cfg := config.GetCfg()
+		if cfg.SelfUpgrade {
+			locale.InitLanguageFromConfig(cfg.Language)
+			if err := runSelfUpgrade(); err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				os.Exit(1)
+			}
+			os.Exit(0)
+		}
 		// 默认启用几个内置插件
 		if cfg.EnablePlugin {
 			cfg.EnabledPluginList = append(cfg.EnabledPluginList, "auto_flip", "auto_scroll")
@@ -38,7 +47,7 @@ var RootCmd = &cobra.Command{
 			if strings.Contains(cfg.Host, "comigo.xyz") {
 				cfg.EnabledPluginList = append(cfg.EnabledPluginList, "comigo_xyz")
 			}
-			logger.Infof("cfg.Host: %v , cfg.EnabledPluginList: %v ", cfg.Host, cfg.EnabledPluginList)
+			logger.Infof(locale.GetString("log_cfg_host_enabled_plugin_list"), cfg.Host, cfg.EnabledPluginList)
 		}
 
 		// 设置临时文件夹
@@ -62,6 +71,13 @@ var RootCmd = &cobra.Command{
 			}
 		}
 	},
+}
+
+func init() {
+	// 自定义 -v/--version 输出：软件版本、系统类型、Go 版本
+	RootCmd.SetVersionTemplate(`Comigo {{.Version}}
+OS/Arch: ` + runtime.GOOS + "/" + runtime.GOARCH + `
+Go: ` + runtime.Version() + "\n")
 }
 
 // Execute 将所有子命令添加到根命令并适当设置标志。 由 main.main() 调用。 rootCmd 只需要执行一次。

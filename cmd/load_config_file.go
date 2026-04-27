@@ -32,7 +32,7 @@ func LoadConfigFile() {
 	ProgramDirectory, err := os.Executable()
 	if err == nil {
 		logger.Infof(locale.GetString("log_program_directory"), ProgramDirectory)
-		runtimeViper.AddConfigPath(ProgramDirectory)
+		runtimeViper.AddConfigPath(path.Dir(ProgramDirectory))
 	} else {
 		logger.Infof(locale.GetString("log_failed_to_get_program_directory"), err)
 	}
@@ -63,6 +63,7 @@ func LoadConfigFile() {
 		// 获取当前使用的配置文件路径
 		// https://github.com/spf13/viper/issues/89
 		tempConfigDir := runtimeViper.ConfigFileUsed()
+		config.GetCfg().ConfigFile = tempConfigDir
 		logger.Infof(locale.GetString("found_config_file")+"%s", tempConfigDir)
 	}
 	// 把设定文件的内容，解析到构造体里面。

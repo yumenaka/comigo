@@ -20,9 +20,9 @@ var counter int = 0
 func ShowQRCodeTailscale(ctx context.Context) {
 	// 前提： 启用 Tailscale 服务
 	if config.GetCfg().EnableTailscale == false {
-		if config.GetCfg().Debug {
-			logger.Info(locale.GetString("log_tailscale_disabled_skip_qrcode"))
-		}
+		//if config.GetCfg().Debug {
+		//	logger.Info(locale.GetString("log_tailscale_disabled_skip_qrcode"))
+		//}
 		return
 	}
 	if counter > 100 {
@@ -53,6 +53,7 @@ func ShowQRCodeTailscale(ctx context.Context) {
 					if config.GetCfg().TailscalePort != 80 && config.GetCfg().TailscalePort != 443 {
 						readURL = readURL + ":" + strconv.Itoa(config.GetCfg().TailscalePort)
 					}
+					readURL += config.PrefixPath("/")
 					logger.Info(locale.GetString("tailscale_reading_url") + readURL)
 					tools.PrintQRCode(readURL)
 					readUrlPrinted = true

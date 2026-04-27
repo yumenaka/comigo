@@ -1,14 +1,15 @@
 package plugins
 
 import (
+	"strings"
+
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
-	"strings"
 )
 
 // AutoScrollPlugin 自动滚动插件（仅支持滚动模式）
 templ AutoScrollPlugin(c echo.Context) {
-	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_scroll") && strings.HasPrefix(c.Request().URL.Path, "/scroll/") {
+	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_scroll") && strings.HasPrefix(config.StripBasePath(c.Request().URL.Path), "/scroll/") {
 		if config.GetCfg().Debug {
 			<script>
 				console.log("Auto scroll plugin enabled");

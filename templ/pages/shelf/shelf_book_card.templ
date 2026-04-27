@@ -5,13 +5,14 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 )
 
 // http://127.0.0.1:1234/api/get-cover?id=2b17a13 获取封面图片的URL
 
 css GetCoverBackgroundCSS(id string) {
-	background-image: { "url(" + "/api/get-cover?id=" +id+")" };
+	background-image: { "url(" + config.PrefixPath("/api/get-cover?id="+id) + ")" };
 }
 
 templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {

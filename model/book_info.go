@@ -27,6 +27,10 @@ type BookInfo struct {
 	ParentFolder string `json:"parent_folder"` // 父文件夹
 	StoreUrl     string `json:"store_url"`     // 在哪个子书库
 
+	// ===== 远程存储 =====
+	IsRemote  bool   `json:"is_remote"`  // 是否为远程书籍（WebDAV 等）
+	RemoteURL string `json:"remote_url"` // 远程存储的基础 URL
+
 	// ===== 文件属性 =====
 	FileSize  int64     `json:"file_size"`     // 文件大小
 	Modified  time.Time `json:"modified_time"` // 修改时间
@@ -77,7 +81,7 @@ func (b *BookInfo) GetAllChildBooksNum() int {
 
 // initBookID 根据路径的 MD5，初始化书籍 ID
 func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
-	//查看书库中是否已经有了这本书，有了就跳过
+	// 查看书库中是否已经有了这本书，有了就跳过
 	allBooks, err := IStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
@@ -137,6 +141,14 @@ func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
 
 // setFilePath 初始化 Book 时，设置 BookPath
 func (b *BookInfo) setFilePath(path string) *BookInfo {
+	// 如果 StoreUrl 是远程 URL（包含 ://），说明这是远程书籍，直接使用原始路径
+	// 因为远程路径不应该使用 filepath.Abs 转换为本地绝对路径
+	if strings.Contains(b.StoreUrl, "://") {
+		b.BookPath = path
+		return b
+	}
+
+	// 本地书籍：转换为绝对路径
 	fileAbsPath, err := filepath.Abs(path)
 	if err != nil {
 		// 因为权限问题，无法取得绝对路径的情况下，用相对路径

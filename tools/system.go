@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 	httpChecker "wait4x.dev/v3/checker/http"
@@ -123,6 +121,11 @@ func OpenBrowser(isHTTPS bool, host string, port int) {
 	}
 }
 
+// OpenURL 直接调用系统默认浏览器打开指定 URL，不做健康检查。
+func OpenURL(uri string) error {
+	return openURL(uri)
+}
+
 // OpenBrowserByURL 打开浏览器，为了防止阻塞，需要使用go关键字调用
 func OpenBrowserByURL(uri string) {
 	// Create a context with cancellation
@@ -152,13 +155,15 @@ func OpenBrowserByURL(uri string) {
 		waiter.WithBackoffPolicy(waiter.BackoffPolicyExponential),
 	)
 	if err != nil {
-		log.Fatalf("API health check failed: %v", err)
+		logger.Infof(locale.GetString("log_api_health_check_failed"), err)
+		return
 	}
 	logger.Info(locale.GetString("log_api_healthy_ready"))
 
 	// 打开浏览器（Windows 使用 ShellExecute，避免闪黑框）
+	logger.Infof(locale.GetString("log_opening_browser"), uri)
 	if err := openURL(uri); err != nil {
-		logger.Infof(locale.GetString("open_browser_error")+"%s", err.Error())
+		logger.Infof(locale.GetString("open_browser_error")+" %s", err.Error())
 	}
 }
 
@@ -187,42 +192,7 @@ func GetSystemStatus() SystemStatus {
 		MemoryFree:        0.0,
 		MemoryUsedPercent: 0,
 	}
-	// 获取物理和逻辑核数,以及CPU、内存整体使用率
-	CPUNumLogical, err := cpu.Counts(true)
-	if err != nil {
-		logger.Infof("%s", err)
-	} else {
-		sys.CPUNumLogical = CPUNumLogical
-	}
-	CPUNumPhysical, err := cpu.Counts(false)
-	if err != nil {
-		logger.Infof("%s", err)
-	} else {
-		sys.CPUNumPhysical = CPUNumPhysical
-	}
-	CPUUsedPercent, err := cpu.Percent(0, false)
-	if err != nil {
-		logger.Infof("%s", err)
-	} else {
-		// p := 0.0
-		// if len(CPUUsedPercent) > 1 {
-		//	for _, value := range CPUUsedPercent {
-		//		p += value
-		//	}
-		//	p = p / float64(len(CPUUsedPercent))
-		// } else if len(CPUUsedPercent) == 1 {
-		//	p = CPUUsedPercent[0]
-		// }
-		sys.CPUUsedPercent = CPUUsedPercent[0]
-	}
-	v, err := mem.VirtualMemory()
-	if err != nil {
-		logger.Infof("%s", err)
-	} else {
-		sys.MemoryTotal = v.Total
-		sys.MemoryFree = v.Free
-		sys.MemoryUsedPercent = v.UsedPercent
-	}
+	populateSystemMetrics(&sys)
 	// // almost every return value is a struct
 	// logger.Infof("Total: %v, Free:%v, UsedPercent:%f%%\n", v.Total, v.Free, v.UsedPercent)
 	// // convert to JSON. String() is also implemented

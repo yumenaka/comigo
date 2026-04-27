@@ -7,11 +7,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/vfs"
 )
 
 // StoreBook 向数据库中插入一本书
@@ -22,7 +25,7 @@ func (db *StoreDatabase) StoreBook(book *model.Book) error {
 	if book.BookID == "" {
 		return fmt.Errorf("book ID is empty: %s", book.BookPath)
 	}
-	if err := DbStore.CheckDBQueries(); err != nil {
+	if err := db.CheckDBQueries(); err != nil {
 		return fmt.Errorf("StoreBook: %v", err)
 	}
 	ctx := context.Background()
@@ -49,12 +52,10 @@ func (db *StoreDatabase) StoreBook(book *model.Book) error {
 		}
 		logger.Infof(locale.GetString("log_updated_existing_book"), book.BookID, book.BookPath)
 	}
-	// 保存书籍的页面信息（媒体文件）
-	if len(book.PageInfos) > 0 {
-		err = db.SaveBookPageInfos(ctx, book.BookID, book.PageInfos)
-		if err != nil {
-			return fmt.Errorf("book media files error: %v", err)
-		}
+	// 保存书籍的页面信息。即使列表为空也要清理旧记录，保持和 JSON 元数据一致。
+	err = db.SaveBookPageInfos(ctx, book.BookID, book.PageInfos)
+	if err != nil {
+		return fmt.Errorf("book media files error: %v", err)
 	}
 	if err := db.SaveBookBookmarks(ctx, book.BookID, book.BookMarks); err != nil {
 		return fmt.Errorf("book bookmarks error: %v", err)
@@ -183,7 +184,7 @@ func (db *StoreDatabase) SaveBookBookmarks(ctx context.Context, bookID string, b
 
 // ListBooks  从数据库查询所有书籍的详细信息,避免重复扫描压缩包。忽略已删除书籍
 func (db *StoreDatabase) ListBooks() (list []*model.Book, err error) {
-	if err := DbStore.CheckDBQueries(); err != nil {
+	if err := db.CheckDBQueries(); err != nil {
 		return nil, fmt.Errorf("GetAllBook: %v", err)
 	}
 	ctx := context.Background()
@@ -197,10 +198,6 @@ func (db *StoreDatabase) ListBooks() (list []*model.Book, err error) {
 	pagesMap := make(map[string][]model.PageInfo)
 	bookmarksMap := make(map[string]model.BookMarks)
 	for _, sqlcBook := range sqlcBooks {
-		// 过滤掉已删除的书籍
-		if sqlcBook.Deleted.Valid && sqlcBook.Deleted.Bool {
-			continue
-		}
 		sqlcPageInfos, err := db.queries.GetPageInfosByBookID(ctx, sqlcBook.BookID)
 		if err != nil {
 			logger.Infof(locale.GetString("log_get_media_files_for_book_error"), sqlcBook.BookID, err.Error())
@@ -217,15 +214,8 @@ func (db *StoreDatabase) ListBooks() (list []*model.Book, err error) {
 		}
 	}
 
-	// 过滤未删除的书籍
-	var validBooks []Book
-	for _, book := range sqlcBooks {
-		if !book.Deleted.Valid || !book.Deleted.Bool {
-			validBooks = append(validBooks, book)
-		}
-	}
 	// 批量转换
-	books := FromSQLCBooks(validBooks, pagesMap, bookmarksMap)
+	books := FromSQLCBooks(sqlcBooks, pagesMap, bookmarksMap)
 	return books, nil
 }
 
@@ -255,30 +245,35 @@ func (db *StoreDatabase) GetBook(bookID string) (*model.Book, error) {
 
 // GenerateBookGroup 分析所有子书库，并并生成书籍组
 func (db *StoreDatabase) GenerateBookGroup() (e error) {
-	if err := DbStore.CheckDBQueries(); err != nil {
+	if err := db.CheckDBQueries(); err != nil {
 		return fmt.Errorf("GetAllBook: %v", err)
 	}
 	ctx := context.Background()
 	// 遍历所有子书库
-	storeUrls, err := DbStore.queries.ListAllBookStoreURLs(ctx)
+	storeUrls, err := db.queries.ListAllBookStoreURLs(ctx)
 	if err != nil {
 		return fmt.Errorf("ListAllBookStoreURLs error: %v", err)
 	}
 	for _, storeUrl := range storeUrls {
-		sqlcBook, err := DbStore.queries.ListBooksByStorePath(ctx, storeUrl)
+		sqlcBook, err := db.queries.ListBooksByStorePath(ctx, storeUrl)
 		if err != nil {
 			return fmt.Errorf("ListBooksByStorePath error: %v", err)
 		}
 		storeBooks := FromSQLCBooks(sqlcBook, nil, nil)
 		// 遍历 BookMap ，删除所有 BooksGroup 类型的书籍
+		activeBooks := make([]*model.Book, 0, len(storeBooks))
 		for _, b := range storeBooks {
 			if b.Type == model.TypeBooksGroup {
 				err := db.DeleteBook(b.BookID)
 				if err != nil {
 					return err
 				}
+				continue
 			}
+			activeBooks = append(activeBooks, b)
 		}
+		storeBooks = activeBooks
+		addedGroupPath := make(map[string]bool)
 		// 然后再重新生成 BooksGroup
 		depthBooksMap := make(map[int][]*model.Book) // key是Depth的临时map
 		// 计算最大深度
@@ -292,23 +287,94 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 		// 从深往浅遍历
 		// 如果有几本书同时有同一个父文件夹，那么应该【新建】一本书(组)，并加入到depth-1层里面
 		for depth := maxDepth; depth >= 0; depth-- {
-			// 用父文件夹做key的parentMap，后面遍历用
+			// 用父目录"绝对路径"做 key 的 parentMap（仅用 ParentFolder 的名字会发生同名目录误合并）
 			parentTempMap := make(map[string][]*model.Book)
 			// //遍历depth等于i的所有book
 			for _, b := range depthBooksMap[depth] {
-				parentTempMap[b.ParentFolder] = append(parentTempMap[b.ParentFolder], b)
+				// 计算父目录路径：
+				// - 文件型书籍：BookPath 是文件路径，父目录为 Dir(BookPath)
+				// - 目录型书籍/书组：BookPath 是目录路径，先去掉结尾分隔符再取父目录
+				parentPath := b.BookPath
+				if b.Type == model.TypeDir || b.Type == model.TypeBooksGroup {
+					parentPath = strings.TrimRight(parentPath, "/\\")
+				}
+				// 判断是否为远程路径
+				if b.IsRemote {
+					// 远程路径：使用字符串操作计算父目录
+					parentPath = strings.TrimRight(parentPath, "/\\")
+					lastSlash := strings.LastIndexAny(parentPath, "/\\")
+					if lastSlash >= 0 {
+						parentPath = parentPath[:lastSlash]
+					} else {
+						// 已经是根目录，使用书库根路径
+						parentPath = b.RemoteURL
+					}
+				} else {
+					// 本地路径：使用 filepath.Dir
+					parentPath = filepath.Dir(parentPath)
+				}
+				parentTempMap[parentPath] = append(parentTempMap[parentPath], b)
 			}
 			// 循环parentMap，把有相同parent的书创建为一个书组
-			for parent, sameParentBookList := range parentTempMap {
-				// 新建一本书,类型是书籍组
-				// 获取文件夹信息
-				pathInfo, err := os.Stat(sameParentBookList[0].BookPath)
-				if err != nil {
-					return err
+			for parentPath, sameParentBookList := range parentTempMap {
+				// depth-1 小于 0 说明已经到达子书库根目录以上，不生成书组
+				if (depth - 1) < 0 {
+					continue
 				}
-				// 获取修改时间
-				modTime := pathInfo.ModTime()
-				tempBook, err := model.NewBook(filepath.Dir(sameParentBookList[0].BookPath), modTime, 0, storeUrl, depth-1, model.TypeBooksGroup)
+				if addedGroupPath[parentPath] {
+					continue
+				}
+				addedGroupPath[parentPath] = true
+				// 新建一本书,类型是书籍组
+				// 获取父目录信息（作为书组的时间信息来源）
+				var modTime time.Time
+				isRemote := vfs.IsRemoteURL(storeUrl)
+				if isRemote {
+					// 远程书库：使用 VFS 获取文件信息
+					vfsInstance, err := vfs.GetOrCreate(storeUrl, vfs.Options{
+						CacheEnabled: false,
+						Timeout:      10,
+					})
+					if err != nil {
+						// 无法连接远程服务器，退化为使用子项目的时间信息
+						if len(sameParentBookList) > 0 {
+							firstBook := sameParentBookList[0]
+							if firstBook.IsRemote {
+								modTime = firstBook.Modified
+							} else {
+								modTime = time.Now()
+							}
+						} else {
+							modTime = time.Now()
+						}
+					} else {
+						// 尝试获取父目录信息
+						pathInfo, err := vfsInstance.Stat(parentPath)
+						if err != nil {
+							// 父目录可能暂时不可访问，退化为使用子项目的时间信息
+							if len(sameParentBookList) > 0 {
+								firstBook := sameParentBookList[0]
+								modTime = firstBook.Modified
+							} else {
+								modTime = time.Now()
+							}
+						} else {
+							modTime = pathInfo.ModTime()
+						}
+					}
+				} else {
+					// 本地书库：使用 os.Stat
+					pathInfo, err := os.Stat(parentPath)
+					if err != nil {
+						// 父目录可能暂时不可访问，退化为使用子项目的时间信息
+						pathInfo, err = os.Stat(sameParentBookList[0].BookPath)
+						if err != nil {
+							return err
+						}
+					}
+					modTime = pathInfo.ModTime()
+				}
+				tempBook, err := model.NewBook(parentPath, modTime, 0, storeUrl, depth-1, model.TypeBooksGroup)
 				if err != nil {
 					if config.GetCfg().Debug {
 						logger.Infof(locale.GetString("log_error_creating_new_book_group"), err)
@@ -316,9 +382,22 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 					continue
 				}
 				newBookGroup := tempBook
-				// 书名应该设置成parent
-				if newBookGroup.Title != parent {
-					newBookGroup.Title = parent
+				// 书名设置为目录名（更符合"文件夹/书组"语义）
+				var parentName string
+				if isRemote {
+					// 远程路径：使用字符串操作提取目录名
+					trimmedPath := strings.TrimRight(parentPath, "/\\")
+					lastSlash := strings.LastIndexAny(trimmedPath, "/\\")
+					if lastSlash >= 0 {
+						parentName = trimmedPath[lastSlash+1:]
+					} else {
+						parentName = trimmedPath
+					}
+				} else {
+					parentName = filepath.Base(parentPath)
+				}
+				if newBookGroup.Title != parentName {
+					newBookGroup.Title = parentName
 				}
 				// 初始化ChildBook
 				// 然后把同一parent的书，都加进某个书籍组
@@ -328,25 +407,6 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 				newBookGroup.ChildBooksNum = len(sameParentBookList)
 				// 如果书籍组的子书籍数量等于0，那么不需要添加
 				if newBookGroup.ChildBooksNum == 0 {
-					continue
-				}
-				// 检测是否已经生成并添加过
-				Added := false
-				sqlAllBook, err := db.queries.ListBooks(ctx)
-				if err != nil {
-					return fmt.Errorf("ListBooks error: %v", err)
-				}
-				allBooks := FromSQLCBooks(sqlAllBook, nil, nil)
-				for _, bookGroup := range allBooks {
-					if bookGroup.Type != model.TypeBooksGroup {
-						continue // 只关心书籍组类型
-					}
-					if bookGroup.BookPath == newBookGroup.BookPath {
-						Added = true
-					}
-				}
-				// 添加过的不需要添加
-				if Added {
 					continue
 				}
 				if (depth - 1) < 0 {
@@ -360,7 +420,6 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 				}
 			}
 		}
-		return nil
 	}
 	return e
 }
@@ -374,7 +433,7 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 
 // DeleteBook 删除书籍信息
 func (db *StoreDatabase) DeleteBook(bookID string) error {
-	if err := DbStore.CheckDBQueries(); err != nil {
+	if err := db.CheckDBQueries(); err != nil {
 		return err
 	}
 	ctx := context.Background()

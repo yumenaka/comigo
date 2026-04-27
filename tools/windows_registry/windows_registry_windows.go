@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"syscall"
+	"unsafe"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"golang.org/x/sys/windows/registry"
@@ -15,14 +16,30 @@ import (
 
 const (
 	comigoArchiveProgID    = "Comigo.Archive"
-	classesRootCurrentUser = `Software\\Classes`
+	classesRootCurrentUser = `Software\Classes`
+	// FileExts 路径，Windows 资源管理器实际读取的位置
+	fileExtsPath = `Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts`
 )
 
 // 默认作为候选打开方式支持的压缩扩展名
-var defaultArchiveExts = []string{".zip", ".rar"}
+var defaultArchiveExts = []string{".zip", ".rar", ".cbz", ".cbr", ".tar", ".epub"}
 
-// RegisterComigoAsDefaultArchiveHandler 将当前可执行程序注册为指定扩展名的“候选打开方式”（OpenWithProgids），并提供 Comigo.Archive ProgID。
-// exts 为空时，会使用默认扩展名 [.zip, .rar]。
+// Windows Shell32 相关常量和函数声明，用于通知系统刷新文件关联
+var (
+	shell32                    = syscall.NewLazyDLL("shell32.dll")
+	procSHChangeNotify         = shell32.NewProc("SHChangeNotify")
+	shcneAssocchanged  uintptr = 0x08000000 // SHCNE_ASSOCCHANGED
+	shcnfIdlist        uintptr = 0x0000     // SHCNF_IDLIST
+)
+
+// notifyShellAssociationChanged 通知 Windows Shell 文件关联已更改，刷新缓存
+func notifyShellAssociationChanged() {
+	// SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL)
+	_, _, _ = procSHChangeNotify.Call(shcneAssocchanged, shcnfIdlist, 0, 0)
+}
+
+// RegisterComigoAsDefaultArchiveHandler 将当前可执行程序注册为指定扩展名的"候选打开方式"（OpenWithProgids），并提供 Comigo.Archive ProgID。
+// exts 为空时，会使用默认扩展名列表。
 // 该操作仅在当前用户 (HKCU) 范围内生效，不会尝试修改 UserChoice。
 func RegisterComigoAsDefaultArchiveHandler(exts []string) error {
 	exePath, err := currentExecutablePath()
@@ -32,28 +49,34 @@ func RegisterComigoAsDefaultArchiveHandler(exts []string) error {
 
 	command := fmt.Sprintf("\"%s\" \"%%1\"", exePath)
 
-	// 1. 设置 Comigo.Archive ProgID（幂等，多次调用会覆盖旧值）
-	if err := setArchiveProgID(command); err != nil {
-		return err
-	}
-
-	// 2. 为 Applications\\<exe> 注册 open 命令，便于系统在“选择其他应用”中展示
-	if err := registerComigoApplication(command); err != nil {
-		return err
-	}
-
-	// 3. 将特定扩展名关联到 Comigo.Archive，并写入 OpenWithProgids
 	if len(exts) == 0 {
 		exts = defaultArchiveExts
 	}
+
+	// 1. 设置 Comigo.Archive ProgID（幂等，多次调用会覆盖旧值）
+	if err := setArchiveProgID(command, exePath); err != nil {
+		return err
+	}
+
+	// 2. 为 Applications\<exe> 注册 open 命令和 SupportedTypes，便于系统在"选择其他应用"中展示
+	if err := registerComigoApplication(command, exts); err != nil {
+		return err
+	}
+
+	// 3. 将特定扩展名关联到 Comigo.Archive，并写入 OpenWithProgids（两个位置）
 	for _, ext := range exts {
-		if err := associateExtensionWithProgID(ext, comigoArchiveProgID); err != nil {
-			return err
-		}
+		// 在 Software\Classes\.ext\OpenWithProgids 下注册
 		if err := registerOpenWithProgID(ext, comigoArchiveProgID); err != nil {
 			return err
 		}
+		// 在 FileExts 位置注册（Windows 资源管理器实际读取的位置）
+		if err := registerFileExtsOpenWithProgID(ext, comigoArchiveProgID); err != nil {
+			return err
+		}
 	}
+
+	// 4. 通知 Shell 刷新文件关联缓存
+	notifyShellAssociationChanged()
 
 	return nil
 }
@@ -66,23 +89,26 @@ func UnregisterComigoAsDefaultArchiveHandler(exts []string) error {
 	}
 
 	for _, ext := range exts {
-		if err := dissociateExtensionFromProgID(ext, comigoArchiveProgID); err != nil {
+		if err := unregisterOpenWithProgID(ext, comigoArchiveProgID); err != nil {
 			return err
 		}
-		if err := unregisterOpenWithProgID(ext, comigoArchiveProgID); err != nil {
+		if err := unregisterFileExtsOpenWithProgID(ext, comigoArchiveProgID); err != nil {
 			return err
 		}
 	}
 
 	// 尝试删除 Comigo.Archive ProgID 相关键（如果仍被其他扩展使用则可能保留）
 	_ = deleteComigoArchiveProgID()
-	// 尝试删除 Applications\\<exe> 相关键
+	// 尝试删除 Applications\<exe> 相关键
 	_ = unregisterComigoApplication()
+
+	// 通知 Shell 刷新文件关联缓存
+	notifyShellAssociationChanged()
 
 	return nil
 }
 
-// AddComigoToFolderContextMenu 在文件夹右键菜单中添加“使用Comigo打开”菜单项。
+// AddComigoToFolderContextMenu 在文件夹右键菜单中添加"使用Comigo打开"菜单项。
 // 该操作仅在当前用户 (HKCU) 范围内生效，多次调用会覆盖原有设置。
 func AddComigoToFolderContextMenu() error {
 	exePath, err := currentExecutablePath()
@@ -94,13 +120,19 @@ func AddComigoToFolderContextMenu() error {
 	menuText := locale.GetString("context_menu_open_with_comigo")
 
 	// HKCU\Software\Classes\Directory\shell\ComigoOpen
-	keyPath := filepath.Join(classesRootCurrentUser, `Directory\\shell\\ComigoOpen`)
+	keyPath := classesRootCurrentUser + `\Directory\shell\ComigoOpen`
 	if err := setStringValue(registry.CURRENT_USER, keyPath, "", menuText); err != nil {
 		return err
 	}
 
+	// 设置图标
+	iconValue := fmt.Sprintf("%s,0", exePath)
+	if err := setStringValue(registry.CURRENT_USER, keyPath, "Icon", iconValue); err != nil {
+		return err
+	}
+
 	// HKCU\Software\Classes\Directory\shell\ComigoOpen\command
-	commandKeyPath := filepath.Join(keyPath, "command")
+	commandKeyPath := keyPath + `\command`
 	if err := setStringValue(registry.CURRENT_USER, commandKeyPath, "", command); err != nil {
 		return err
 	}
@@ -108,17 +140,17 @@ func AddComigoToFolderContextMenu() error {
 	return nil
 }
 
-// RemoveComigoFromFolderContextMenu 移除文件夹右键菜单中的“使用Comigo打开”菜单项。
+// RemoveComigoFromFolderContextMenu 移除文件夹右键菜单中的"使用Comigo打开"菜单项。
 // 仅在当前用户 (HKCU) 范围内生效。
 func RemoveComigoFromFolderContextMenu() error {
 	// 先删除 command 子键
-	commandKeyPath := filepath.Join(classesRootCurrentUser, `Directory\\shell\\ComigoOpen\\command`)
+	commandKeyPath := classesRootCurrentUser + `\Directory\shell\ComigoOpen\command`
 	if err := deleteRegistryKey(registry.CURRENT_USER, commandKeyPath); err != nil {
 		return err
 	}
 
 	// 再删除 ComigoOpen 主键
-	menuKeyPath := filepath.Join(classesRootCurrentUser, `Directory\\shell\\ComigoOpen`)
+	menuKeyPath := classesRootCurrentUser + `\Directory\shell\ComigoOpen`
 	if err := deleteRegistryKey(registry.CURRENT_USER, menuKeyPath); err != nil {
 		return err
 	}
@@ -128,13 +160,9 @@ func RemoveComigoFromFolderContextMenu() error {
 
 // HasComigoFolderContextMenu 检查当前用户下是否已存在 Comigo 文件夹右键菜单。
 func HasComigoFolderContextMenu() bool {
-	menuKeyPath := filepath.Join(classesRootCurrentUser, `Directory\\shell\\ComigoOpen`)
+	menuKeyPath := classesRootCurrentUser + `\Directory\shell\ComigoOpen`
 	key, err := registry.OpenKey(registry.CURRENT_USER, menuKeyPath, registry.QUERY_VALUE)
 	if err != nil {
-		if isNotFoundError(err) {
-			return false
-		}
-		// 其他错误视为"未知"，这里保守返回 false，避免误判为存在
 		return false
 	}
 	_ = key.Close()
@@ -155,7 +183,7 @@ func AddComigoHereToFolderBackgroundMenu() error {
 	iconValue := fmt.Sprintf("%s,0", exePath)
 
 	// HKCU\Software\Classes\Directory\Background\shell\ComiGo
-	keyPath := filepath.Join(classesRootCurrentUser, `Directory\\Background\\shell\\ComiGo`)
+	keyPath := classesRootCurrentUser + `\Directory\Background\shell\ComiGo`
 	if err := setStringValue(registry.CURRENT_USER, keyPath, "", menuText); err != nil {
 		return err
 	}
@@ -166,7 +194,7 @@ func AddComigoHereToFolderBackgroundMenu() error {
 	}
 
 	// HKCU\Software\Classes\Directory\Background\shell\ComiGo\command
-	commandKeyPath := filepath.Join(keyPath, "command")
+	commandKeyPath := keyPath + `\command`
 	if err := setStringValue(registry.CURRENT_USER, commandKeyPath, "", command); err != nil {
 		return err
 	}
@@ -178,13 +206,13 @@ func AddComigoHereToFolderBackgroundMenu() error {
 // 仅在当前用户 (HKCU) 范围内生效。
 func RemoveComigoHereFromFolderBackgroundMenu() error {
 	// 先删除 command 子键
-	commandKeyPath := filepath.Join(classesRootCurrentUser, `Directory\\Background\\shell\\ComiGo\\command`)
+	commandKeyPath := classesRootCurrentUser + `\Directory\Background\shell\ComiGo\command`
 	if err := deleteRegistryKey(registry.CURRENT_USER, commandKeyPath); err != nil {
 		return err
 	}
 
 	// 再删除 ComiGo 主键
-	menuKeyPath := filepath.Join(classesRootCurrentUser, `Directory\\Background\\shell\\ComiGo`)
+	menuKeyPath := classesRootCurrentUser + `\Directory\Background\shell\ComiGo`
 	if err := deleteRegistryKey(registry.CURRENT_USER, menuKeyPath); err != nil {
 		return err
 	}
@@ -194,13 +222,9 @@ func RemoveComigoHereFromFolderBackgroundMenu() error {
 
 // HasComigoHereFolderBackgroundMenu 检查当前用户下是否已存在 Comigo 文件夹空白处右键菜单。
 func HasComigoHereFolderBackgroundMenu() bool {
-	menuKeyPath := filepath.Join(classesRootCurrentUser, `Directory\\Background\\shell\\ComiGo`)
+	menuKeyPath := classesRootCurrentUser + `\Directory\Background\shell\ComiGo`
 	key, err := registry.OpenKey(registry.CURRENT_USER, menuKeyPath, registry.QUERY_VALUE)
 	if err != nil {
-		if isNotFoundError(err) {
-			return false
-		}
-		// 其他错误视为"未知"，这里保守返回 false，避免误判为存在
 		return false
 	}
 	_ = key.Close()
@@ -214,7 +238,7 @@ func HasComigoArchiveAssociation(exts []string) bool {
 		exts = defaultArchiveExts
 	}
 	for _, ext := range exts {
-		if hasOpenWithProgID(ext, comigoArchiveProgID) {
+		if hasOpenWithProgID(ext, comigoArchiveProgID) || hasFileExtsOpenWithProgID(ext, comigoArchiveProgID) {
 			return true
 		}
 	}
@@ -238,16 +262,28 @@ func currentExecutablePath() (string, error) {
 }
 
 // setArchiveProgID 在 HKCU\Software\Classes 下创建/更新 Comigo.Archive ProgID。
-func setArchiveProgID(command string) error {
-	progIDPath := filepath.Join(classesRootCurrentUser, comigoArchiveProgID)
+func setArchiveProgID(command, exePath string) error {
+	progIDPath := classesRootCurrentUser + `\` + comigoArchiveProgID
 
 	// 设置描述
 	if err := setStringValue(registry.CURRENT_USER, progIDPath, "", "Comigo Archive"); err != nil {
 		return err
 	}
 
+	// 设置 FriendlyTypeName（在"打开方式"对话框中显示的名称）
+	if err := setStringValue(registry.CURRENT_USER, progIDPath, "FriendlyTypeName", "ComiGo Archive Reader"); err != nil {
+		return err
+	}
+
+	// 设置 DefaultIcon
+	iconPath := progIDPath + `\DefaultIcon`
+	iconValue := fmt.Sprintf("%s,0", exePath)
+	if err := setStringValue(registry.CURRENT_USER, iconPath, "", iconValue); err != nil {
+		return err
+	}
+
 	// 设置 shell\open\command
-	commandKeyPath := filepath.Join(progIDPath, `shell\\open\\command`)
+	commandKeyPath := progIDPath + `\shell\open\command`
 	if err := setStringValue(registry.CURRENT_USER, commandKeyPath, "", command); err != nil {
 		return err
 	}
@@ -258,12 +294,14 @@ func setArchiveProgID(command string) error {
 // deleteComigoArchiveProgID 尝试删除 Comigo.Archive 相关的注册表键。
 // 如果键不存在或删除失败，不视为致命错误。
 func deleteComigoArchiveProgID() error {
+	basePath := classesRootCurrentUser + `\Comigo.Archive`
 	// 依次删除子键，最后删除主键
 	paths := []string{
-		filepath.Join(classesRootCurrentUser, `Comigo.Archive\\shell\\open\\command`),
-		filepath.Join(classesRootCurrentUser, `Comigo.Archive\\shell\\open`),
-		filepath.Join(classesRootCurrentUser, `Comigo.Archive\\shell`),
-		filepath.Join(classesRootCurrentUser, `Comigo.Archive`),
+		basePath + `\shell\open\command`,
+		basePath + `\shell\open`,
+		basePath + `\shell`,
+		basePath + `\DefaultIcon`,
+		basePath,
 	}
 
 	for _, p := range paths {
@@ -278,7 +316,7 @@ func deleteComigoArchiveProgID() error {
 	return nil
 }
 
-// registerOpenWithProgID 在 HKCU\\Software\\Classes\\.ext\\OpenWithProgids 下登记 Comigo 的 ProgID 作为候选打开方式。
+// registerOpenWithProgID 在 HKCU\Software\Classes\.ext\OpenWithProgids 下登记 Comigo 的 ProgID 作为候选打开方式。
 func registerOpenWithProgID(ext, progID string) error {
 	if ext == "" {
 		return nil
@@ -286,12 +324,12 @@ func registerOpenWithProgID(ext, progID string) error {
 	if ext[0] != '.' {
 		ext = "." + ext
 	}
-	keyPath := filepath.Join(classesRootCurrentUser, ext, "OpenWithProgids")
+	keyPath := classesRootCurrentUser + `\` + ext + `\OpenWithProgids`
 	// 值内容通常为空字符串即可
 	return setStringValue(registry.CURRENT_USER, keyPath, progID, "")
 }
 
-// unregisterOpenWithProgID 从 HKCU\\Software\\Classes\\.ext\\OpenWithProgids 中移除 Comigo 的 ProgID。
+// unregisterOpenWithProgID 从 HKCU\Software\Classes\.ext\OpenWithProgids 中移除 Comigo 的 ProgID。
 func unregisterOpenWithProgID(ext, progID string) error {
 	if ext == "" {
 		return nil
@@ -299,7 +337,7 @@ func unregisterOpenWithProgID(ext, progID string) error {
 	if ext[0] != '.' {
 		ext = "." + ext
 	}
-	keyPath := filepath.Join(classesRootCurrentUser, ext, "OpenWithProgids")
+	keyPath := classesRootCurrentUser + `\` + ext + `\OpenWithProgids`
 	key, err := registry.OpenKey(registry.CURRENT_USER, keyPath, registry.SET_VALUE)
 	if err != nil {
 		if isNotFoundError(err) {
@@ -315,7 +353,7 @@ func unregisterOpenWithProgID(ext, progID string) error {
 	return nil
 }
 
-// hasOpenWithProgID 判断 HKCU\\Software\\Classes\\.ext\\OpenWithProgids 下是否存在指定 ProgID。
+// hasOpenWithProgID 判断 HKCU\Software\Classes\.ext\OpenWithProgids 下是否存在指定 ProgID。
 func hasOpenWithProgID(ext, progID string) bool {
 	if ext == "" {
 		return false
@@ -323,7 +361,7 @@ func hasOpenWithProgID(ext, progID string) bool {
 	if ext[0] != '.' {
 		ext = "." + ext
 	}
-	keyPath := filepath.Join(classesRootCurrentUser, ext, "OpenWithProgids")
+	keyPath := classesRootCurrentUser + `\` + ext + `\OpenWithProgids`
 	key, err := registry.OpenKey(registry.CURRENT_USER, keyPath, registry.QUERY_VALUE)
 	if err != nil {
 		return false
@@ -333,30 +371,126 @@ func hasOpenWithProgID(ext, progID string) bool {
 	return err == nil
 }
 
-// registerComigoApplication 在 HKCU\\Software\\Classes\\Applications\\<exe>\\shell\\open\\command 下登记 Comigo 的应用信息。
-func registerComigoApplication(command string) error {
+// registerFileExtsOpenWithProgID 在 HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.ext\OpenWithProgids 下登记 ProgID。
+// 这是 Windows 资源管理器实际读取文件关联的位置。
+func registerFileExtsOpenWithProgID(ext, progID string) error {
+	if ext == "" {
+		return nil
+	}
+	if ext[0] != '.' {
+		ext = "." + ext
+	}
+	keyPath := fileExtsPath + `\` + ext + `\OpenWithProgids`
+	return setStringValue(registry.CURRENT_USER, keyPath, progID, "")
+}
+
+// unregisterFileExtsOpenWithProgID 从 FileExts 位置移除 ProgID。
+func unregisterFileExtsOpenWithProgID(ext, progID string) error {
+	if ext == "" {
+		return nil
+	}
+	if ext[0] != '.' {
+		ext = "." + ext
+	}
+	keyPath := fileExtsPath + `\` + ext + `\OpenWithProgids`
+	key, err := registry.OpenKey(registry.CURRENT_USER, keyPath, registry.SET_VALUE)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil
+		}
+		return fmt.Errorf("open registry key %s: %w", keyPath, err)
+	}
+	defer key.Close()
+
+	if err := key.DeleteValue(progID); err != nil && !isNotFoundError(err) {
+		return fmt.Errorf("delete FileExts OpenWithProgids value %s in %s: %w", progID, keyPath, err)
+	}
+	return nil
+}
+
+// hasFileExtsOpenWithProgID 判断 FileExts 位置下是否存在指定 ProgID。
+func hasFileExtsOpenWithProgID(ext, progID string) bool {
+	if ext == "" {
+		return false
+	}
+	if ext[0] != '.' {
+		ext = "." + ext
+	}
+	keyPath := fileExtsPath + `\` + ext + `\OpenWithProgids`
+	key, err := registry.OpenKey(registry.CURRENT_USER, keyPath, registry.QUERY_VALUE)
+	if err != nil {
+		return false
+	}
+	defer key.Close()
+	_, _, err = key.GetStringValue(progID)
+	return err == nil
+}
+
+// registerComigoApplication 在 HKCU\Software\Classes\Applications\<exe> 下登记 Comigo 的应用信息。
+// 包括 open 命令、FriendlyAppName、SupportedTypes 等。
+func registerComigoApplication(command string, exts []string) error {
 	exePath, err := currentExecutablePath()
 	if err != nil {
 		return err
 	}
 	exeName := filepath.Base(exePath)
-	appCommandPath := filepath.Join(classesRootCurrentUser, `Applications\\`+exeName+`\\shell\\open\\command`)
-	return setStringValue(registry.CURRENT_USER, appCommandPath, "", command)
+	appBasePath := classesRootCurrentUser + `\Applications\` + exeName
+
+	// 设置 FriendlyAppName（在"打开方式"对话框中显示的应用名称）
+	if err := setStringValue(registry.CURRENT_USER, appBasePath, "FriendlyAppName", "ComiGo"); err != nil {
+		return err
+	}
+
+	// 设置 DefaultIcon
+	iconPath := appBasePath + `\DefaultIcon`
+	iconValue := fmt.Sprintf("%s,0", exePath)
+	if err := setStringValue(registry.CURRENT_USER, iconPath, "", iconValue); err != nil {
+		return err
+	}
+
+	// 设置 shell\open\command
+	appCommandPath := appBasePath + `\shell\open\command`
+	if err := setStringValue(registry.CURRENT_USER, appCommandPath, "", command); err != nil {
+		return err
+	}
+
+	// 设置 SupportedTypes（声明支持的文件类型，使应用出现在"打开方式"列表中）
+	supportedTypesPath := appBasePath + `\SupportedTypes`
+	for _, ext := range exts {
+		if ext == "" {
+			continue
+		}
+		if ext[0] != '.' {
+			ext = "." + ext
+		}
+		// 值内容为空字符串即可
+		if err := setStringValue(registry.CURRENT_USER, supportedTypesPath, ext, ""); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-// unregisterComigoApplication 尝试清理 Applications\\<exe> 相关注册表键。
+// unregisterComigoApplication 尝试清理 Applications\<exe> 相关注册表键。
 func unregisterComigoApplication() error {
 	exePath, err := currentExecutablePath()
 	if err != nil {
 		return err
 	}
 	exeName := filepath.Base(exePath)
+	basePath := classesRootCurrentUser + `\Applications\` + exeName
+
+	// 先尝试删除 SupportedTypes 下的所有值
+	supportedTypesPath := basePath + `\SupportedTypes`
+	_ = deleteRegistryKey(registry.CURRENT_USER, supportedTypesPath)
 
 	paths := []string{
-		filepath.Join(classesRootCurrentUser, `Applications\\`+exeName+`\\shell\\open\\command`),
-		filepath.Join(classesRootCurrentUser, `Applications\\`+exeName+`\\shell\\open`),
-		filepath.Join(classesRootCurrentUser, `Applications\\`+exeName+`\\shell`),
-		filepath.Join(classesRootCurrentUser, `Applications\\`+exeName),
+		basePath + `\shell\open\command`,
+		basePath + `\shell\open`,
+		basePath + `\shell`,
+		basePath + `\DefaultIcon`,
+		basePath,
 	}
 	for _, p := range paths {
 		if err := deleteRegistryKey(registry.CURRENT_USER, p); err != nil {
@@ -365,62 +499,6 @@ func unregisterComigoApplication() error {
 			}
 		}
 	}
-	return nil
-}
-
-// associateExtensionWithProgID 将指定扩展名关联到给定的 ProgID（在 HKCU\Software\Classes 下）。
-func associateExtensionWithProgID(ext, progID string) error {
-	if ext == "" {
-		return nil
-	}
-
-	// 确保扩展名以 '.' 开头
-	if ext[0] != '.' {
-		ext = "." + ext
-	}
-
-	extKeyPath := filepath.Join(classesRootCurrentUser, ext)
-	return setStringValue(registry.CURRENT_USER, extKeyPath, "", progID)
-}
-
-// dissociateExtensionFromProgID 取消扩展名到指定 ProgID 的默认关联（如果当前默认值为该 ProgID）。
-func dissociateExtensionFromProgID(ext, progID string) error {
-	if ext == "" {
-		return nil
-	}
-
-	if ext[0] != '.' {
-		ext = "." + ext
-	}
-
-	extKeyPath := filepath.Join(classesRootCurrentUser, ext)
-
-	key, err := registry.OpenKey(registry.CURRENT_USER, extKeyPath, registry.QUERY_VALUE|registry.SET_VALUE)
-	if err != nil {
-		if isNotFoundError(err) {
-			return nil
-		}
-		return fmt.Errorf("open registry key %s: %w", extKeyPath, err)
-	}
-	defer key.Close()
-
-	current, _, err := key.GetStringValue("")
-	if err != nil {
-		if isNotFoundError(err) {
-			return nil
-		}
-		return fmt.Errorf("get registry value for %s: %w", extKeyPath, err)
-	}
-
-	if current != progID {
-		// 当前默认值不是 Comigo 的 ProgID，避免误删
-		return nil
-	}
-
-	if err := key.DeleteValue(""); err != nil && !isNotFoundError(err) {
-		return fmt.Errorf("delete default value for %s: %w", extKeyPath, err)
-	}
-
 	return nil
 }
 
@@ -527,3 +605,6 @@ func getDesktopPath() (string, error) {
 
 	return desktopPath, nil
 }
+
+// 确保 unsafe 包被使用（用于 SHChangeNotify 调用）
+var _ = unsafe.Sizeof(0)

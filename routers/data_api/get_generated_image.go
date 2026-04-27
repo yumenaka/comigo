@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 
 	"github.com/golang/freetype/truetype"
@@ -28,7 +29,7 @@ func GetGeneratedImage(c echo.Context) error {
 	widthStr := c.QueryParam("width")
 	text := c.QueryParam("text")
 	fontSizeStr := c.QueryParam("font_size")
-	logger.Infof("GetGeneratedImage: height=%s, width=%s, text=%s, font_size=%s",
+	logger.Infof(locale.GetString("log_get_generated_image_params"),
 		heightStr, widthStr, text, fontSizeStr)
 	bgColorStr := c.QueryParam("bg_color") // 背景颜色参数
 

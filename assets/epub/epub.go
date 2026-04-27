@@ -19,6 +19,7 @@ import (
 	_ "golang.org/x/image/webp"
 
 	"github.com/yumenaka/comigo/assets"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -153,7 +154,7 @@ func (g *Generator) Generate(w io.Writer, bookData BookData, images []ImageFile)
 			var readErr error
 			imgData, readErr = os.ReadFile(img.Path)
 			if readErr != nil {
-				logger.Infof("Failed to read image %s: %v", img.Path, readErr)
+				logger.Infof(locale.GetString("log_failed_to_read_image_epub"), img.Path, readErr)
 				continue
 			}
 		}
@@ -268,7 +269,7 @@ func getImageDimensions(data []byte) (width, height int) {
 	reader := bytes.NewReader(data)
 	config, _, err := image.DecodeConfig(reader)
 	if err != nil {
-		logger.Infof("Failed to decode image config: %v, using default dimensions", err)
+		logger.Infof(locale.GetString("log_failed_to_decode_image_config_epub"), err)
 		return defaultWidth, defaultHeight
 	}
 

@@ -5,12 +5,14 @@ package system_tray
 import (
 	"embed"
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
 
 	"github.com/atotto/clipboard"
 	"github.com/energye/systray"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/windows_registry"
@@ -22,14 +24,15 @@ import (
 var iconData embed.FS
 
 var (
-	startServerFunc         func()
-	shutdownServerFunc      func()
-	getURLFunc              func() string
-	getConfigDirFunc        func() (string, error)
-	getStoreUrlsFunc        func() []string
-	toggleTailscaleFunc     func() error
-	setLanguageFunc         func(string) error
-	getTailscaleEnabledFunc func() bool
+	startServerFunc           func()
+	shutdownServerFunc        func()
+	getURLFunc                func() string
+	getConfigDirFunc          func() (string, error)
+	getStoreUrlsFunc          func() []string
+	toggleTailscaleFunc       func() error
+	setLanguageFunc           func(string) error
+	getTailscaleEnabledFunc   func() bool
+	releaseSingleInstanceFunc func()
 	// 菜单项引用，用于语言切换时更新
 	menuItems struct {
 		mOpenBrowser           *systray.MenuItem
@@ -47,6 +50,7 @@ var (
 		mOpenDir               *systray.MenuItem
 		mConfigDir             *systray.MenuItem
 		mStoreFolders          []*systray.MenuItem
+		mCheckUpgrade          *systray.MenuItem
 		mQuit                  *systray.MenuItem
 	}
 )
@@ -60,6 +64,7 @@ var (
 // toggleTailscale: 切换Tailscale状态的函数
 // setLanguage: 设置语言的函数
 // getTailscaleEnabled: 获取Tailscale是否启用的函数
+// releaseSingleInstance: 升级重启前释放单实例锁（未启用单实例时传 nil）
 func SetupSystray(
 	startServer, shutdownServer func(),
 	getURL func() string,
@@ -68,6 +73,7 @@ func SetupSystray(
 	toggleTailscale func() error,
 	setLanguage func(string) error,
 	getTailscaleEnabled func() bool,
+	releaseSingleInstance func(),
 ) {
 	startServerFunc = startServer
 	shutdownServerFunc = shutdownServer
@@ -77,6 +83,7 @@ func SetupSystray(
 	toggleTailscaleFunc = toggleTailscale
 	setLanguageFunc = setLanguage
 	getTailscaleEnabledFunc = getTailscaleEnabled
+	releaseSingleInstanceFunc = releaseSingleInstance
 
 	// 在主线程运行 systray
 	systray.Run(onReady, onExit)
@@ -147,6 +154,27 @@ func initMenuItems() {
 				logger.Infof(locale.GetString("log_copied_url_to_clipboard"), url)
 			}
 		}
+	})
+
+	// 检测升级（经 comigo.xyz，若有新版本则替换并重启进程）
+	menuItems.mCheckUpgrade = systray.AddMenuItem(locale.GetString("systray_check_upgrade"), locale.GetString("systray_check_upgrade_tooltip"))
+	menuItems.mCheckUpgrade.Click(func() {
+		go func() {
+			upgraded, err := cmd.RunTraySelfUpgrade()
+			if err != nil {
+				logger.Infof(locale.GetString("upgrade_tray_failed"), err)
+				return
+			}
+			if !upgraded {
+				return
+			}
+			if err := cmd.PrepareTrayUpgradeRestart(shutdownServerFunc, releaseSingleInstanceFunc); err != nil {
+				logger.Infof(locale.GetString("upgrade_tray_restart_failed"), err)
+				return
+			}
+			systray.Quit()
+			os.Exit(0)
+		}()
 	})
 
 	// Tailscale 开关

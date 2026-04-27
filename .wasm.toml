@@ -1,0 +1,62 @@
+# Air 配置：开发 /reader 本地压缩包阅读页面时使用。
+# 使用方式：air -c .wasm.toml
+#
+# 说明：
+# - pre_cmd 先编译 Go wasm，再重新构建前端资源。
+# - cmd 负责格式化/生成 templ，并构建本地服务二进制。
+# - 生成的 wasm 位于 assets/script/wasm/archive.wasm，由服务端作为静态资源提供。
+
+root = "."
+tmp_dir = "test/.temp"
+
+[build]
+pre_cmd = [
+  "bun run build:wasm",
+  "bun run dev",
+]
+cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/.temp/comi-wasm ./cmd/comigo/main.go"
+post_cmd = []
+
+# 默认启动示例书库，使用 1235 端口以便和普通 .air.toml 的 1234 端口并存。
+args_bin = ["./test", "--port", "1235", "--tailscale", "--debug"]
+entrypoint = ["./test/.temp/comi-wasm"]
+
+delay = 3000
+exclude_dir = ["app", "test", ".parcel-cache", "node_modules", "tmp", "bin", "testdata"]
+exclude_regex = ["_test\\.go", "node_modules", "_templ\\.go", "tar.gz", "zip", "tgz", "exe", "app", "archive\\.wasm"]
+exclude_unchanged = false
+follow_symlink = false
+full_bin = ""
+include_ext = ["go", "templ", "html", "json", "js", "ts", "css", "scss"]
+kill_delay = 500
+log = "test/air-wasm.log"
+poll = false
+poll_interval = 500
+rerun = true
+rerun_delay = 1000
+send_interrupt = false
+stop_on_error = true
+
+[log]
+main_only = false
+silent = false
+time = false
+
+[color]
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+clean_on_exit = true
+
+[screen]
+clear_on_rebuild = false
+keep_scroll = true
+
+[proxy]
+enabled = true
+app_port = 1235
+proxy_port = 7778
+app_start_timeout = 5000

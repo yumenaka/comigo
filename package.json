@@ -3,31 +3,34 @@
   "version": "1.2.0",
   "description": "Frontend for Comigo.",
   "license": "MIT",
-  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "browserslist": [
+    "baseline widely available on 2025-12-01"
+  ],
   "scripts": {
     "fmt": "prettier --write .",
-    "build": "parcel build ./assets/main.js ./assets/styles.css --dist-dir assets/script",
-    "dev": "parcel build ./assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize",
-    "watch": "parcel watch ./assets/main.js ./assets/styles.css --dist-dir assets/script --no-optimize"
+    "build": "parcel build ./assets/frontend/main.js ./assets/frontend/styles.css --dist-dir assets/dist",
+    "dev": "parcel build ./assets/frontend/main.js ./assets/frontend/styles.css --dist-dir assets/dist --no-optimize",
+    "watch": "parcel watch ./assets/frontend/main.js ./assets/frontend/styles.css --dist-dir assets/dist --no-optimize",
+    "build:wasm": "GOOS=js GOARCH=wasm go build -o assets/static/wasm/archive.wasm ./cmd/archivewasm"
   },
   "dependencies": {
-    "@alpinejs/intersect": "latest",
-    "@alpinejs/morph": "latest",
-    "@alpinejs/persist": "latest",
-    "alpinejs": "latest",
+    "@alpinejs/intersect": "3.15.11",
+    "@alpinejs/morph": "3.15.11",
+    "@alpinejs/persist": "3.15.11",
+    "alpinejs": "3.15.11",
     "flowbite": "latest",
-    "i18next": "latest",
-    "i18next-browser-languagedetector": "latest",
+    "i18next": "26.0.6",
+    "i18next-browser-languagedetector": "8.2.1",
     "screenfull": "latest",
-    "tailwindcss": "latest"
+    "tailwindcss": "4.2.4"
   },
   "devDependencies": {
-    "@tailwindcss/forms": "latest",
-    "@tailwindcss/typography": "latest",
-    "@tailwindcss/postcss": "latest",
     "@parcel/transformer-css": "latest",
+    "@tailwindcss/forms": "latest",
+    "@tailwindcss/postcss": "4.2.4",
+    "@tailwindcss/typography": "latest",
     "parcel": "latest",
-    "postcss": "latest",
-    "prettier": "latest"
+    "postcss": "8.5.10",
+    "prettier": "3.8.3"
   }
 }

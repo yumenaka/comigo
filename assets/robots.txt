@@ -1,0 +1,19 @@
+User-agent: *
+
+# API 与实时通道、脚本与下载等
+Disallow: /api/
+Disallow: /ws
+Disallow: /get.sh
+Disallow: /yumenaka/
+
+# 账户与管理相关页面
+Disallow: /login
+Disallow: /settings
+Disallow: /upload
+
+# 允许抓取书架与阅读页面
+Allow: /shelf/
+Allow: /search
+Allow: /scroll/
+Allow: /flip/
+Allow: /player/

@@ -4,12 +4,14 @@
 *.dll
 *.so
 *.dylib
+# 不希望 wasm 文件被 git 管理，如 assets/static/wasm/archive.wasm
 *.wasm
 # Test binary, built with `go test -c`
 *.test
 *wasm_exec.js
+!assets/static/wasm/wasm_exec.js
 *test_build
-
+*comi
 # Output of the go coverage tools, specifically when used with LiteIDE
 *.out
 
@@ -55,7 +57,8 @@ bin
 resource.syso
 \[*
 *upload
-
+sample/docker/books
+sample/docker/config
 __*
 #routers/web_static
 tmp
@@ -112,6 +115,9 @@ go.work
 bin/
 dist-ssr/
 dist/
+!assets/dist/
+!assets/dist/main.js
+!assets/dist/styles.css
 pb_data/
 */dbs/
 pagoda/uploads/*
@@ -140,3 +146,4 @@ frontend/dist
 assets/AppIcon.icns
 assets/icon.png
 assets/icon_no_frame.png
+Caddyfile

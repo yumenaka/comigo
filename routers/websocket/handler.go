@@ -3,11 +3,13 @@ package websocket
 import (
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -23,7 +25,9 @@ type Message struct {
 	TabID      string `json:"tab_id"`      // 前端页面的 Tab ID
 	Token      string `json:"Token"`       // 认证用
 	Detail     string `json:"detail"`
-	DataString string `json:"data_string"` // 附加的json字符串数据，服务器根据情况解析
+	DataString string `json:"data_string"`         // 附加的json字符串数据，服务器根据情况解析
+	PageType   string `json:"page_type,omitempty"` // 当前页面类型：flip / scroll / shelf
+	BookID     string `json:"book_id,omitempty"`   // 当前书籍 ID（可选）
 }
 
 type MessageWithClientID struct {
@@ -44,7 +48,7 @@ var upGrader = websocket.Upgrader{
 		//	return false
 		// }
 		// 验证路径
-		if r.URL.Path != "/api/ws" {
+		if config.StripBasePath(r.URL.Path) != "/api/ws" {
 			logger.Info(locale.GetString("log_path_error") + "\n")
 			return false
 		}
@@ -54,7 +58,10 @@ var upGrader = websocket.Upgrader{
 
 // map 映射，其键对应是一个指向 WebSocket 的指针，
 // 其值是一个int值。我们实际上并不需要这个值，但使用的映射数据结构需要有一个映射值，这样做更容易添加和删除单项。
-var clients = make(map[*websocket.Conn]string) // connected clients
+var (
+	clients   = make(map[*websocket.Conn]string) // connected clients
+	clientsMu sync.RWMutex
+)
 
 // 用于由客户端发送消息的队列，扮演通道的角色。后面定义了一个 goroutine 来从这个通道读取新消息，然后将它们发送给其它连接到服务器的客户端。
 var broadcast = make(chan MessageWithClientID) // broadcast channel
@@ -74,7 +81,9 @@ func WsHandler(c echo.Context) error {
 	}
 	// 把新的客户端添加到全局的 "clients" 映射表中进行注册
 	clientID := uuid.New().String()
+	clientsMu.Lock()
 	clients[wsConn] = clientID
+	clientsMu.Unlock()
 
 	// 比 defer wsConn.Close() 更好?
 	// 通知 Go 在函数返回的时候关闭 WebSocket。
@@ -83,7 +92,9 @@ func WsHandler(c echo.Context) error {
 		if closeSocketErr != nil {
 			logger.Infof("%s", closeSocketErr)
 		}
+		clientsMu.Lock()
 		delete(clients, wsConn)
+		clientsMu.Unlock()
 	}()
 
 	// 无限循环，等待要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Detail 对象然后送入广播频道。
@@ -113,7 +124,7 @@ func handleMessages() {
 		// Grab the next message from the broadcast channel
 		msgWithClientID := <-broadcast // 广播频道
 		// Send it out to every client that is currently connected
-		for client := range clients {
+		for _, client := range snapshotClients() {
 			switch msgWithClientID.Msg.Type {
 			case "ping", "ping!", "乒":
 				handPingMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
@@ -128,4 +139,22 @@ func handleMessages() {
 			}
 		}
 	}
+}
+
+// ClientCount 返回当前 WebSocket 连接数量。
+func ClientCount() int {
+	clientsMu.RLock()
+	defer clientsMu.RUnlock()
+	return len(clients)
+}
+
+func snapshotClients() []*websocket.Conn {
+	clientsMu.RLock()
+	defer clientsMu.RUnlock()
+
+	result := make([]*websocket.Conn, 0, len(clients))
+	for client := range clients {
+		result = append(result, client)
+	}
+	return result
 }

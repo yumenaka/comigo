@@ -42,6 +42,8 @@ CREATE TABLE IF NOT EXISTS books
     non_utf8zip       BOOLEAN  DEFAULT FALSE,             -- Non-UTF8 zip flag
     zip_text_encoding  TEXT,                               -- Zip text encoding
     created_by_version TEXT,                               -- Comigo version when data was created
+    is_remote          BOOLEAN  DEFAULT FALSE,             -- Whether the book is from remote storage (WebDAV, etc.)
+    remote_url         TEXT,                               -- Remote storage base URL
     deleted            BOOLEAN  DEFAULT FALSE              -- Soft delete flag
 );
 
@@ -70,6 +72,7 @@ CREATE TABLE IF NOT EXISTS bookmarks
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     type        TEXT NOT NULL,                     -- Bookmark type (like: "auto", "user")
     book_id     TEXT    NOT NULL,                   -- Associated book ID
+    book_store_id TEXT,                             -- Encoded store ID for API compatibility with JSON metadata
     page_index  INTEGER NOT NULL,                   -- Page index, starts from 0
     description TEXT,                               -- User note
     created_at  DATETIME DEFAULT CURRENT_TIMESTAMP, -- Created time
@@ -87,4 +90,3 @@ CREATE INDEX IF NOT EXISTS idx_page_infos_book_id ON page_infos (book_id);
 CREATE INDEX IF NOT EXISTS idx_page_infos_page_num ON page_infos (book_id, page_num);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_book_id ON bookmarks (book_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_book_page ON bookmarks (book_id, page_index);
-
