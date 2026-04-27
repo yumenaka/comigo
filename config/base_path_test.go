@@ -29,6 +29,12 @@ func TestPrefixAndStripBasePath(t *testing.T) {
 	if got := PrefixPath("/"); got != "/some/path/" {
 		t.Fatalf("PrefixPath root = %q", got)
 	}
+	if got := PrefixPath("/some/path/"); got != "/some/path/" {
+		t.Fatalf("PrefixPath prefixed root should be idempotent, got %q", got)
+	}
+	if got := PrefixPath("/some/path/settings"); got != "/some/path/settings" {
+		t.Fatalf("PrefixPath prefixed nested path should be idempotent, got %q", got)
+	}
 	if got := StripBasePath("/some/path/flip/book-id"); got != "/flip/book-id" {
 		t.Fatalf("StripBasePath nested = %q", got)
 	}
