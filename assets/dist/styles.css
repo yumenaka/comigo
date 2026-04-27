@@ -2833,6 +2833,10 @@
     height: calc(100% - 1rem);
   }
 
+  .h-\[calc\(100dvh-4rem\)\] {
+    height: calc(100dvh - 4rem);
+  }
+
   .h-\[calc\(100vh-7rem\)\] {
     height: calc(100vh - 7rem);
   }
@@ -2903,6 +2907,10 @@
 
   .min-h-\[60vh\] {
     min-height: 60vh;
+  }
+
+  .min-h-\[calc\(100dvh-4rem\)\] {
+    min-height: calc(100dvh - 4rem);
   }
 
   .min-h-auto {

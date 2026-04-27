@@ -25,8 +25,9 @@ templ ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBook
 templ ShelfHeaderLeft(c echo.Context) {
 	if shouldShowShelfReturnIcon(c) {
 		@common.ReturnButton(getShelfReturnURL(c))
+	} else {
+		@common.ReaderButton()
 	}
-	@common.ReaderButton()
 	@common.FullScreenOfflineButton()
 	@common.ServerSettingsButton()
 	@common.ReSortIcon()
