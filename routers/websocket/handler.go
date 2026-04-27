@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -47,7 +48,7 @@ var upGrader = websocket.Upgrader{
 		//	return false
 		// }
 		// 验证路径
-		if r.URL.Path != "/api/ws" {
+		if config.StripBasePath(r.URL.Path) != "/api/ws" {
 			logger.Info(locale.GetString("log_path_error") + "\n")
 			return false
 		}

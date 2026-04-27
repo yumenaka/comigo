@@ -847,17 +847,17 @@ func buildBookTargetURL(book modelpkg.BookInfo, readMode int) string {
 	base := strings.TrimRight(baseURL, "/")
 	switch book.Type {
 	case modelpkg.TypeBooksGroup:
-		return base + "/shelf/" + book.BookID
+		return base + config.PrefixPath("/shelf/"+book.BookID)
 	case modelpkg.TypeVideo, modelpkg.TypeAudio:
-		return base + "/player/" + book.BookID
+		return base + config.PrefixPath("/player/"+book.BookID)
 	case modelpkg.TypeHTML, modelpkg.TypeUnknownFile:
-		return base + "/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title)
+		return base + config.PrefixPath("/api/raw/"+book.BookID+"/"+url.QueryEscape(book.Title))
 	default:
 		prefix := "/scroll/"
 		if readMode == 1 {
 			prefix = "/flip/"
 		}
-		target := base + prefix + book.BookID
+		target := base + config.PrefixPath(prefix+book.BookID)
 		if readMode == 0 && modelpkg.IStore != nil {
 			if marks, err := modelpkg.IStore.GetBookMarks(book.BookID); err == nil && marks != nil {
 				if start := marks.GetLastReadPage(); start > 1 {
@@ -895,9 +895,9 @@ func buildBaseURL() string {
 func (m *appModel) buildCurrentShelfURL() string {
 	baseURL := strings.TrimRight(buildBaseURL(), "/")
 	if len(m.stack) == 0 {
-		return baseURL
+		return baseURL + config.PrefixPath("/")
 	}
-	return baseURL + "/shelf/" + m.stack[len(m.stack)-1].BookID
+	return baseURL + config.PrefixPath("/shelf/"+m.stack[len(m.stack)-1].BookID)
 }
 
 // displayStoreName 从 Store URL/路径中提取适合显示的简短名称。

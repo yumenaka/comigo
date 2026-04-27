@@ -18,6 +18,7 @@ LIMIT 1;
 -- name: ListBooks :many
 SELECT *
 FROM books
+WHERE deleted = FALSE
 ORDER BY modified_time DESC;
 
 -- List books by type
@@ -25,18 +26,21 @@ ORDER BY modified_time DESC;
 SELECT *
 FROM books
 WHERE type = ?
+  AND deleted = FALSE
 ORDER BY modified_time DESC;
 
 -- get all store_url for books
 -- name: ListAllBookStoreURLs :many
 SELECT DISTINCT store_url
-FROM books;
+FROM books
+WHERE deleted = FALSE;
 
 -- List books by store path
 -- name: ListBooksByStorePath :many
 SELECT *
 FROM books
 WHERE store_url = ?
+  AND deleted = FALSE
 ORDER BY modified_time DESC;
 
 -- Search books by title (fuzzy search)
@@ -44,6 +48,7 @@ ORDER BY modified_time DESC;
 SELECT *
 FROM books
 WHERE title LIKE '%' || ? || '%'
+  AND deleted = FALSE
 ORDER BY modified_time DESC;
 
 -- Create new book
@@ -80,6 +85,7 @@ SET title             = ?,
     init_complete     = ?,
     non_utf8zip       = ?,
     zip_text_encoding = ?,
+    created_by_version = ?,
     is_remote         = ?,
     remote_url        = ?,
     modified_time     = CURRENT_TIMESTAMP
@@ -164,8 +170,8 @@ ORDER BY created_at DESC;
 
 -- Create a bookmark
 -- name: CreateBookmark :one
-INSERT INTO bookmarks (type, book_id, page_index, description, created_at, updated_at)
-VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+INSERT INTO bookmarks (type, book_id, book_store_id, page_index, description, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?)
 RETURNING *;
 
 -- Update a bookmark (by book_id, type)

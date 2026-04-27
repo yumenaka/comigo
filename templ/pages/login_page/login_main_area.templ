@@ -32,7 +32,7 @@ templ LoginMainArea() {
 					<form
 						@submit.prevent="
 						loading = true;
-						fetch('/api/login', {
+						fetch(window.ComiGoPath('/api/login'), {
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/x-www-form-urlencoded',
@@ -53,7 +53,7 @@ templ LoginMainArea() {
 							return res.json();
 						})
 						.then(() => {
-							window.location.href = '/';
+							window.location.href = window.ComiGoPath('/');
 						})
 						.catch(err => {
 							error = err.message;

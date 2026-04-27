@@ -27,9 +27,15 @@ import (
 // BindURLs 为前端绑定 API 路由
 func BindURLs() {
 	// 绑定公开页面与api
-	publicViewGroup := engine.Group("")
-	// API 的URL统一以 /api 开头
-	publicAPI := engine.Group("/api")
+	basePath := config.GetBasePath()
+	if basePath != "" {
+		engine.GET(basePath, func(c echo.Context) error {
+			return c.Redirect(http.StatusMovedPermanently, basePath+"/")
+		})
+	}
+	publicViewGroup := engine.Group(basePath)
+	// API 的URL统一以 /api 开头；配置 BasePath 后实际挂载在 /base/api 下。
+	publicAPI := engine.Group(config.PrefixPath("/api"))
 	bindPublicView(publicViewGroup)
 	bindPublicAPI(publicAPI)
 
@@ -50,12 +56,12 @@ func BindURLs() {
 			// 处理验证错误
 			ErrorHandler: func(c echo.Context, err error) error {
 				// 更安全的方式判断API请求
-				path := c.Request().URL.Path
+				path := config.StripBasePath(c.Request().URL.Path)
 				if len(path) >= 4 && path[:4] == "/api" {
 					return echo.NewHTTPError(http.StatusUnauthorized, "请先登录")
 				}
 				// 页面请求重定向到登录页
-				return c.Redirect(http.StatusFound, "/login")
+				return c.Redirect(http.StatusFound, config.PrefixPath("/login"))
 			},
 		}
 		privateAPI.Use(echojwt.WithConfig(jwtConfig))

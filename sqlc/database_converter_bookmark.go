@@ -28,6 +28,7 @@ func FromSQLCBookmark(sqlcBookmark Bookmark) model.BookMark {
 	return model.BookMark{
 		Type:        model.MarkType(sqlcBookmark.Type),
 		BookID:      sqlcBookmark.BookID,
+		BookStoreID: sqlcBookmark.BookStoreID.String,
 		PageIndex:   int(sqlcBookmark.PageIndex),
 		Description: description,
 		CreatedAt:   createdAt,
@@ -57,11 +58,22 @@ func ToSQLCCreateBookmarkParams(bookID string, bookmark model.BookMark) CreateBo
 	if markType == "" {
 		markType = model.UserMark
 	}
+	createdAt := bookmark.CreatedAt
+	if createdAt.IsZero() {
+		createdAt = time.Now()
+	}
+	updatedAt := bookmark.UpdatedAt
+	if updatedAt.IsZero() {
+		updatedAt = createdAt
+	}
 	return CreateBookmarkParams{
 		Type:        string(markType),
 		BookID:      resolvedBookID,
+		BookStoreID: sql.NullString{String: bookmark.BookStoreID, Valid: bookmark.BookStoreID != ""},
 		PageIndex:   int64(bookmark.PageIndex),
 		Description: sql.NullString{String: bookmark.Description, Valid: bookmark.Description != ""},
+		CreatedAt:   sql.NullTime{Time: createdAt, Valid: true},
+		UpdatedAt:   sql.NullTime{Time: updatedAt, Valid: true},
 	}
 }
 

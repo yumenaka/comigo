@@ -13,7 +13,7 @@ templ Header(left templ.Component, center templ.Component, right templ.Component
 	<header
 		id="header"
 		class="z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400"
-		:class="{ 'absolute top-0 ': (window.location.pathname.startsWith(`/flip`) || window.ComiGoReaderMode) && $store.flip.autoHideToolbar && $store.global.readMode === 'page_flip','mx-auto bg-base-100/50': (window.location.pathname.startsWith(`/flip`) || window.ComiGoReaderMode) && $store.global.readMode === 'page_flip'}"
+		:class="{ 'absolute top-0 ': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.flip.autoHideToolbar && $store.global.readMode === 'page_flip','mx-auto bg-base-100/50': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.global.readMode === 'page_flip'}"
 	>
 		<div class="flex flex-row">
 			if left != nil {
@@ -85,21 +85,21 @@ templ FullScreenOfflineButton() {
 
 // 服务器设置按钮，点击进入Comigo设置页面
 templ ServerSettingsButton() {
-	<a x-show="$store.global.onlineBook" href="/settings" class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+	<a x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/settings")) } class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 		@svg.ServerDisk()
 	</a>
 }
 
 // 上传按钮，点击进入上传页面
 templ UploadButton() {
-	<a x-show="$store.global.onlineBook" href="/upload" class="w-10 mx-1 my-0 rounded hover:ring ">
+	<a x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/upload")) } class="w-10 mx-1 my-0 rounded hover:ring ">
 		@svg.Upload()
 	</a>
 }
 
 // 本地解析工具按钮，点击本地解析阅读页面
 templ ReaderButton() {
-	<a x-show="$store.global.onlineBook" href="/reader" class="w-10 mx-1 my-0 rounded hover:ring ">
+	<a x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/reader")) } class="w-10 mx-1 my-0 rounded hover:ring ">
 		@svg.CloudOffline()
 	</a>
 }
@@ -215,7 +215,7 @@ templ HeaderQuickJumpTitle(title string, books *model.BookInfos) {
 					for _, book := range *books {
 						if book.Type == model.TypeBooksGroup {
 							<li>
-								<a href={ templ.SafeURL("/shelf/" + book.BookID) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
+								<a href={ templ.SafeURL(config.PrefixPath("/shelf/" + book.BookID)) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
 							</li>
 						}
 						if book.Type != model.TypeBooksGroup {
@@ -232,7 +232,7 @@ templ HeaderQuickJumpTitle(title string, books *model.BookInfos) {
 
 // 根据阅读模式生成书籍链接，如果是“{}”，templ 可能会把 { something } 解析成模板语法，而不是输出字面量。用 `` 来包裹就不会报错了
 func BookURL(bookID string) string {
-	return fmt.Sprintf(`{BookURL: $store.global.readMode === 'page_flip' ? "/flip/%s" : "/scroll/%s"}`, bookID, bookID)
+	return fmt.Sprintf(`{BookURL: $store.global.readMode === 'page_flip' ? window.ComiGoPath("/flip/%s") : window.ComiGoPath("/scroll/%s")}`, bookID, bookID)
 }
 
 // ReSortIcon 定义了一个排序图标，点击后会显示一个下拉菜单，允许用户选择不同的排序方式。根据当前URL路径，菜单会设置不同的cookie参数名来保存用户的选择，并在页面加载时读取该cookie以确定当前的排序方式。
@@ -258,7 +258,7 @@ templ ReSortIcon() {
                     getCurrentSortBy() {
                         // 根据URL路径决定使用哪个cookie参数名
                         let paramName = '';
-                        const currentUrl = window.location.href;
+                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
                         if (currentUrl.includes('/flip/')) {
                             paramName = 'FlipSortBy';
                         } else if (currentUrl.includes('/scroll/')) {
@@ -279,7 +279,7 @@ templ ReSortIcon() {
                     },
                     setCookie(value) {
                         // 根据URL路径决定使用哪个cookie参数名
-                        const currentUrl = window.location.href;
+                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
                         if (currentUrl.includes('/flip/')) {
                             paramName = 'FlipSortBy';
                         } else if (currentUrl.includes('/scroll/')) {

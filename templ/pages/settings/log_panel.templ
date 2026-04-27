@@ -137,7 +137,7 @@ templ LogPanel() {
 			if (logFlushTimer) return;
 			logFlushTimer = setTimeout(flushLogs, LOG_FLUSH_INTERVAL_MS);
 		};
-		// 将日志输出挂到全局，由 assets/plugins/comigo_sse.js 中的共享 EventSource 转发 log 事件
+		// 将日志输出挂到全局，由 assets/frontend/plugins/comigo_sse.js 中的共享 EventSource 转发 log 事件
 		const ensureSharedSSE = () => {
 			if (typeof window.__comigoSSEInit === "function") {
 				window.__comigoSSEInit();
@@ -154,7 +154,7 @@ templ LogPanel() {
 				const message =
 					document.getElementById("msg").value ||
 					i18next.t("settings_log_broadcast_default_message");
-				await fetch("/api/push", {
+				await fetch(window.ComiGoPath("/api/push"), {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ message }),

@@ -115,6 +115,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<div x-show="!collapsed" x-transition>
 					@NumberConfig("Port", int(config.GetCfg().Port), "Port_Description", 0, 65535)
 					@StringConfig("Host", config.GetCfg().Host, "Host_Description")
+					@StringConfig("BasePath", config.GetCfg().BasePath, "BasePath_Description")
 					@BoolConfig("DisableLAN", config.GetCfg().DisableLAN, "DisableLAN_Description")
 					@NumberConfig("Timeout", config.GetCfg().Timeout, "Timeout_Description", 0, 65535)
 				</div>

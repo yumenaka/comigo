@@ -44,6 +44,7 @@ type Bookmark struct {
 	ID          int64
 	Type        string
 	BookID      string
+	BookStoreID sql.NullString
 	PageIndex   int64
 	Description sql.NullString
 	CreatedAt   sql.NullTime

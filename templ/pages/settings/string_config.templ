@@ -38,16 +38,19 @@ templ StringConfigJavascript() {
 			// 更新字符串配置的函数
 			async function updateStringConfig(name, value) {
 				try {
-					const response = await fetch("/api/update-string-config", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath("/api/update-string-config"),
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								name: name,
+								value: value,
+							}),
 						},
-						body: JSON.stringify({
-							name: name,
-							value: value,
-						}),
-					});
+					);
 					if (!response.ok) {
 						showToast(i18next.t("err_update_config_failed"), "error");
 						// 恢复输入框的值

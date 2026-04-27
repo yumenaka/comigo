@@ -10,12 +10,12 @@ import (
 templ UploadPage(c echo.Context) {
 	@common.Toast()
 	@common.Header(
-		common.HeaderBackLeft("/settings"),
+		common.HeaderBackLeft(config.PrefixPath("/settings")),
 		common.HeaderTextTitle("i18next.t('upload_page')"),
 		common.HeaderDefaultRight(),
 	)
 	@UploadArea()
 	@common.Footer(config.GetVersion())
-	@common.Drawer(c, nil, nil, true, "/settings")
+	@common.Drawer(c, nil, nil, true, config.PrefixPath("/settings"))
 	@common.QRCode()
 }

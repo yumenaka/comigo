@@ -104,7 +104,7 @@ func SetMiddleware() {
 		Skipper: func(c echo.Context) bool {
 			// 如果url里面包含了 .js 或者 .css 文件或 base64 这几个关键字
 			// 那么就启用 gzip 压缩
-			url := c.Request().URL.Path
+			url := config.StripBasePath(c.Request().URL.Path)
 			// SSE 与 WebSocket 路由不应启用 gzip，以免长连接阻塞
 			if url == "/api/sse" || url == "/api/ws" {
 				return true
@@ -159,31 +159,35 @@ func SetMiddleware() {
 
 // EmbedStaticFiles 绑定静态资源
 func EmbedStaticFiles() {
-	// 嵌入JavaScript与css脚本
+	// 嵌入前端资源：/assets/dist 是编译产物，/assets/static 是页面级静态脚本。
 	var err error = nil
-	assets.ScriptFS, err = fs.Sub(assets.Script, "script")
+	assets.FrontendFS, err = fs.Sub(assets.Frontend, ".")
 	if err != nil {
 		logger.Infof("%s", err)
 	}
-	engine.StaticFS("/script/", assets.ScriptFS)
+	engine.StaticFS(config.PrefixPath("/assets"), assets.FrontendFS)
 	// 嵌入图片资源
 	assets.ImagesFS, err = fs.Sub(assets.Images, "images")
 	if err != nil {
 		logger.Infof("%s", err)
 	}
-	engine.StaticFS("/images/", assets.ImagesFS)
+	engine.StaticFS(config.PrefixPath("/images"), assets.ImagesFS)
 	// PWA manifest 使用标准 MIME，避免部分浏览器拒绝识别安装信息。
-	engine.GET("/images/manifest.webmanifest", func(c echo.Context) error {
+	engine.GET(config.PrefixPath("/images/manifest.webmanifest"), func(c echo.Context) error {
 		data, err := fs.ReadFile(assets.Images, "images/manifest.webmanifest")
 		if err != nil {
 			return err
 		}
-		return c.Blob(http.StatusOK, "application/manifest+json", data)
+		manifest := string(data)
+		manifest = strings.ReplaceAll(manifest, `"start_url": "/reader"`, `"start_url": "`+config.PrefixPath("/reader")+`"`)
+		manifest = strings.ReplaceAll(manifest, `"scope": "/"`, `"scope": "`+config.PrefixPath("/")+`"`)
+		manifest = strings.ReplaceAll(manifest, `"src": "/images/`, `"src": "`+config.PrefixPath("/images/"))
+		return c.Blob(http.StatusOK, "application/manifest+json", []byte(manifest))
 	})
 	// PWA Service Worker 必须挂在根路径，才能覆盖 /reader 页面。
-	engine.FileFS("/reader-sw.js", "pwa/reader-sw.js", assets.Pwa)
+	engine.FileFS(config.PrefixPath("/reader-sw.js"), "pwa/reader-sw.js", assets.Pwa)
 	// 暴露 robots.txt，供搜索引擎按标准路径读取
-	engine.FileFS("/robots.txt", "robots.txt", assets.Robots)
+	engine.FileFS(config.PrefixPath("/robots.txt"), "robots.txt", assets.Robots)
 }
 
 // StartWebServer 启动web服务

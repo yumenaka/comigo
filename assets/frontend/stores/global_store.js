@@ -57,6 +57,8 @@ function generateRandomString() {
 const browser = getBrowserInfo();
 const system = getSystemInfo();
 const randomString = generateRandomString();
+const comigoPath = (path) => (window.ComiGoPath ? window.ComiGoPath(path) : path);
+const comigoRelativePath = (pathname) => (window.ComiGoRelativePath ? window.ComiGoRelativePath(pathname) : (pathname || window.location.pathname || '/'));
 // 生成userID: 使用UserAgent的哈希值 + 随机字符串，确保唯一性且长度适中
 const initClientID = `Client_${randomString}_${system}_${browser}`;
 Alpine.store('global', {
@@ -169,11 +171,11 @@ Alpine.store('global', {
     onChangeReadMode() {
         // 切换阅读模式时，如果在阅读，就修改URL路径 参考文献：https://developer.mozilla.org/zh-CN/docs/Web/API/URL
         const url = new URL(window.location.href);
-        const pathname = url.pathname;
+        const pathname = comigoRelativePath(url.pathname);
         // 使用 URLSearchParams 提取键值对
         const params = new URLSearchParams(url.search);
         // 分割路径为各层级关键词, filter(Boolean) 的作用是去除空字符串 如//aa/bb/ 会产生空字符串(虽然这里不会这么做)
-        const pathSegments = url.pathname.split('/').filter(Boolean); // like ["nginx_test", "scroll", "id3DcA1v9"]
+        const pathSegments = pathname.split('/').filter(Boolean); // like ["scroll", "id3DcA1v9"]
         const book_id = pathSegments[pathSegments.length - 1];
         console.log(`切换阅读模式到: ${this.readMode}, 当前路径: ${pathname},${pathSegments}, 查询参数: ${params.toString()}`);
         // 卷轴(无限)模式
@@ -220,7 +222,7 @@ Alpine.store('global', {
         const url = new URL(window.location.href);
         // 卷轴(无限)
         if (this.readMode === 'infinite_scroll') {
-            let new_url = new URL(`/scroll/${book_id}`, url.origin);
+            let new_url = new URL(comigoPath(`/scroll/${book_id}`), url.origin);
             if (start_index > 1) {
                 new_url.searchParams.set("start", start_index.toString());
             }
@@ -228,14 +230,14 @@ Alpine.store('global', {
         }
         // 卷轴(分页)
         if (this.readMode === 'paged_scroll') {
-            let new_url = new URL(`/scroll/${book_id}`, url.origin);
+            let new_url = new URL(comigoPath(`/scroll/${book_id}`), url.origin);
             let page = Math.floor(start_index / PAGED_SIZE) + 1;
             new_url.searchParams.set("page", page.toString());
             return new_url.href;
         }
         // 翻页(左右)
         if (this.readMode === 'page_flip') {
-            let new_url = new URL(`/flip/${book_id}`, url.origin);
+            let new_url = new URL(comigoPath(`/flip/${book_id}`), url.origin);
             if (start_index > 1) {
                 new_url.searchParams.set("start", start_index.toString());
             }
@@ -301,7 +303,7 @@ Alpine.store('global', {
             page_index: pageIndex,
             description: description
         };
-        const response = await fetch('/api/store-bookmark', {
+        const response = await fetch(comigoPath('/api/store-bookmark'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -347,7 +349,7 @@ document.addEventListener('alpine:initialized', () => {
 
 const url = new URL(window.location.href);
 
-if (window.ComiGoReaderMode || url.pathname.includes('/reader')) {
+if (window.ComiGoReaderMode || comigoRelativePath(url.pathname).includes('/reader')) {
     Alpine.store('global').onlineBook = true;
 } else if ((url.protocol === 'http:' || url.protocol === 'https:') && !window.location.toString().endsWith('.html')) {
     Alpine.store('global').onlineBook = true;

@@ -69,7 +69,7 @@ templ UploadArea() {
 
 		// 获取书库列表的函数
 		function loadStores() {
-			fetch("/api/stores")
+			fetch(window.ComiGoPath("/api/stores"))
 				.then((response) => response.json())
 				.then((data) => {
 					const stores = data.stores || [];
@@ -86,7 +86,9 @@ templ UploadArea() {
 						// 显示更详细的提示，引导用户去设置书库
 						storeWarning.innerHTML =
 							i18next.t("no_available_stores") +
-							' <a href="/settings" class="text-blue-500 underline hover:text-blue-700">' +
+							' <a href="' +
+							window.ComiGoPath("/settings") +
+							'" class="text-blue-500 underline hover:text-blue-700">' +
 							i18next.t("settings_stores") +
 							"</a>";
 						storeWarning.classList.remove("hidden");
@@ -121,7 +123,9 @@ templ UploadArea() {
 						// 所有书库路径都不存在
 						storeWarning.innerHTML =
 							i18next.t("no_available_stores") +
-							' <a href="/settings" class="text-blue-500 underline hover:text-blue-700">' +
+							' <a href="' +
+							window.ComiGoPath("/settings") +
+							'" class="text-blue-500 underline hover:text-blue-700">' +
 							i18next.t("settings_stores") +
 							"</a>";
 						storeWarning.classList.remove("hidden");
@@ -329,7 +333,9 @@ templ UploadArea() {
 			const xhr = new XMLHttpRequest();
 			xhr.open(
 				"POST",
-				"/api/upload?store_url=" + encodeURIComponent(selectedStore),
+				window.ComiGoPath("/api/upload") +
+					"?store_url=" +
+					encodeURIComponent(selectedStore),
 				true,
 			);
 			// 监听上传进度

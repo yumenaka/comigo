@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -55,6 +56,9 @@ func BuildConfigChangeAction(oldConfig config.Config, newConfig *config.Config) 
 		action.ReStartWebServer = true
 	}
 	if oldConfig.Host != newConfig.Host {
+		action.ReStartWebServer = true
+	}
+	if config.NormalizeBasePath(oldConfig.BasePath) != config.NormalizeBasePath(newConfig.BasePath) {
 		action.ReStartWebServer = true
 	}
 	if oldConfig.Timeout != newConfig.Timeout {
@@ -144,6 +148,16 @@ func logAction(action ConfigChangeAction) {
 
 func openBrowserIfNeeded(oldConfig config.Config, newConfig *config.Config) {
 	if !oldConfig.OpenBrowser && newConfig.OpenBrowser {
-		go tools.OpenBrowser(newConfig.EnableTLS, "127.0.0.1", newConfig.Port)
+		protocol := "http://"
+		if newConfig.EnableTLS {
+			protocol = "https://"
+		}
+		basePath := config.NormalizeBasePath(newConfig.BasePath)
+		if basePath == "" {
+			basePath = "/"
+		} else {
+			basePath += "/"
+		}
+		go tools.OpenBrowserByURL(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port) + basePath)
 	}
 }

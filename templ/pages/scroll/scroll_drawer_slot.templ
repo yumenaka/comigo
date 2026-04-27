@@ -20,7 +20,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 				const pageIndex = $store.global.nowPageNum;
 				$store.global.UpdateBookmark({
 					type: 'user',
-					bookId: $store.global.bookID || window.location.pathname.split('/').pop(),
+					bookId: $store.global.bookID || (window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).split('/').pop(),
 					pageIndex: pageIndex,
 					description: ''
 				}).then(() => {

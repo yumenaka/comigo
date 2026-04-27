@@ -8,7 +8,7 @@ root = "."
 tmp_dir = "test/.temp"
 
 [build]
-pre_cmd = ["bun run dev"]
+pre_cmd = ["bun run dev", "bun run build:wasm"]
 cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/.temp/comi ./cmd/comigo/main.go"
 # Array of commands to run after ^C
 post_cmd = []
@@ -21,7 +21,7 @@ post_cmd = []
 # smb://guest@192.168.1.1:445/some/path  (samba)                          大量缓存文件，需要优化
 # dav://user:pass@host:port/path   (caddy2 with webdav plugin)            大量缓存文件，需要优化
 # s3://accessKey:secretKey@endpoint/bucket/prefix (minio, aws s3)         未测试
-# args_bin = ["https://test:test@localhost/dav/","sftp://test:test@192.168.1.1/path/to/books","smb://guest@192.168.1.1:445/some/path"，"--tailscale","--debug"]
+# args_bin = ["https://test:test@localhost/dav/","sftp://test:test@192.168.1.1/path/to/books","smb://guest@192.168.1.1:445/some/path","--tailscale","--debug"]
 args_bin = ["./test","--tailscale","--debug"]
 #二进制文件 Binary file yields from 'cmd', will be deprecated soon, recommend using entrypoint.
 # bin = "./test/.temp/comi"

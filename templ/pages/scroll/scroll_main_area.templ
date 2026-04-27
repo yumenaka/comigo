@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 )
@@ -12,11 +13,13 @@ import (
 // ImageXData 在Go函数里面计算图片的x-data属性。渲染结果例：
 // x-data="{  isDoublePage: false, imageUrl: '/api/get-file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
 func ImageXData(Url string) string {
+	Url = config.PrefixPath(Url)
 	return fmt.Sprintf(`{ isDoublePage: false, loaded: false, updateBookmarkCompleted: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
 // 压缩尺寸，切白边，无缓存等选项，http://192.168.3.26:58642/api/get-file?id=xE2Nmdj&filename=001_By_zhonyk_cover.jpg&resize_max_width=200&no-cache=true
 func ImageSrc(Url string) string {
+	Url = config.PrefixPath(Url)
 	autoCrop := `$store.global.autoCrop?"&auto_crop=1":''`
 	autoResize := `$store.global.autoResize?"&resize_max_width="+$store.global.autoResizeWidth:''`
 	noCache := `$store.global.noCache?"&no-cache=true":''`
@@ -95,7 +98,7 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 					if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
 						<div
 							x-data="{ htmlContent: '' }"
-							x-init={ "fetch('" + image.Url + "').then(response => response.text()).then(html => { htmlContent = html; }).catch(error => { console.error('加载HTML内容失败:', error); });" }
+							x-init={ "fetch('" + config.PrefixPath(image.Url) + "').then(response => response.text()).then(html => { htmlContent = html; }).catch(error => { console.error('加载HTML内容失败:', error); });" }
 							x-html="htmlContent"
 							class="w-full m-0"
 						></div>

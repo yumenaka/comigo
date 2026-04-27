@@ -47,10 +47,10 @@ func FlipModeHandler(c echo.Context) error {
 		c,
 		FlipPage(c, book),
 		[]string{
-			"script/ws_sync.js",
-			"script/flip_modules/pagination_utils.js",
-			"script/flip_modules/interaction_utils.js",
-			"script/flip.js",
+			"static/js/ws_sync.js",
+			"static/js/flip_modules/pagination_utils.js",
+			"static/js/flip_modules/interaction_utils.js",
+			"static/js/flip.js",
 		})
 	// 静态模式
 	staticMode := c.QueryParam("static") != ""
@@ -68,10 +68,10 @@ func FlipModeHandler(c echo.Context) error {
 			c,
 			FlipPage(c, &staticBook),
 			[]string{
-				"script/ws_sync.js",
-				"script/flip_modules/pagination_utils.js",
-				"script/flip_modules/interaction_utils.js",
-				"script/flip.js",
+				"static/js/ws_sync.js",
+				"static/js/flip_modules/pagination_utils.js",
+				"static/js/flip_modules/interaction_utils.js",
+				"static/js/flip.js",
 			})
 	}
 	// 渲染翻页模式阅读页面

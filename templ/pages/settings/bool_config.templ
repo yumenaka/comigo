@@ -32,16 +32,19 @@ templ BoolConfigJavaScript() {
 			// 更新布尔配置的函数
 			async function updateBoolConfig(name, value) {
 				try {
-					const response = await fetch("/api/update-bool-config", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath("/api/update-bool-config"),
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								name: name,
+								value: value,
+							}),
 						},
-						body: JSON.stringify({
-							name: name,
-							value: value,
-						}),
-					});
+					);
 					if (!response.ok) {
 						showToast(i18next.t("err_update_config_failed"), "error");
 						// 恢复 checkbox 状态

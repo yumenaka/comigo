@@ -47,7 +47,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<div x-show="!collapsed" x-transition>
 			<form
 				id="tailscale_config_form"
-				action="/api/submit-tailscale-config"
+				action={ templ.SafeURL(config.PrefixPath("/api/submit-tailscale-config")) }
 				method="post"
 				class="flex flex-col justify-start w-full font-semibold items-left text-base-content"
 				x-data="{
@@ -383,7 +383,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 										FunnelTunnel: funnel,
 										FunnelLoginCheck: funnel_password_protection,
 									};
-									fetch("/api/submit-tailscale-config", {
+									fetch(window.ComiGoPath("/api/submit-tailscale-config"), {
 										method: "POST",
 										headers: {
 											"Content-Type": "application/json",
@@ -667,7 +667,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 					}
 				};
 				// 发起请求获取最新状态
-				const url = "/api/tailscale-status";
+				const url = window.ComiGoPath("/api/tailscale-status");
 				fetch(url, { headers: { Accept: "application/json" } })
 					.then((res) => {
 						if (!res.ok) throw new Error("HTTP " + res.status);
@@ -760,7 +760,8 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 									if (qrcodeImg) {
 										const qrcodeUrl =
 											window.location.origin +
-											"/api/qrcode.png?base64=true&qrcode_str=" +
+											window.ComiGoPath("/api/qrcode.png") +
+											"?base64=true&qrcode_str=" +
 											encodeURIComponent(href);
 										fetch(qrcodeUrl)
 											.then((response) => response.text())

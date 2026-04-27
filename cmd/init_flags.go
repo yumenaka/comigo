@@ -63,6 +63,10 @@ func InitFlags() {
 	RootCmd.PersistentFlags().StringVar(&cfg.Host, "host", "", locale.GetString("local_host"))
 	runtimeViper.BindPFlag("Host", RootCmd.PersistentFlags().Lookup("host"))
 
+	// 反向代理基础路径，留空时服务挂载在根路径。
+	RootCmd.PersistentFlags().StringVar(&cfg.BasePath, "base-path", "", locale.GetString("base_path"))
+	runtimeViper.BindPFlag("BasePath", RootCmd.PersistentFlags().Lookup("base-path"))
+
 	// TLS设定
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTLS, "tls", false, locale.GetString("tls_enable"))
 	runtimeViper.BindPFlag("EnableTLS", RootCmd.PersistentFlags().Lookup("tls"))

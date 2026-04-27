@@ -9,6 +9,7 @@ import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/templ/common"
@@ -73,7 +74,7 @@ func ShelfHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		ShelfPage(c, model.GetAllBooksNumber(), storeBookInfos, childBookInfos), // define body content
-		[]string{"script/shelf.js"},
+		[]string{"static/js/shelf.js"},
 	)
 	// 用模板渲染书架页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
@@ -95,9 +96,9 @@ func SearchHandler(c echo.Context) error {
 	if keyword == "" {
 		// 空关键词时回到对应书架，避免渲染无意义的搜索页。
 		if parentID != "" {
-			return c.Redirect(http.StatusFound, "/shelf/"+parentID)
+			return c.Redirect(http.StatusFound, config.PrefixPath("/shelf/"+parentID))
 		}
-		return c.Redirect(http.StatusFound, "/")
+		return c.Redirect(http.StatusFound, config.PrefixPath("/"))
 	}
 
 	sortBy := getShelfSortBy(c)
@@ -136,7 +137,7 @@ func SearchHandler(c echo.Context) error {
 	indexHtml := common.Html(
 		c,
 		ShelfPage(c, nowBookNum, storeBookInfos, childBookInfos),
-		[]string{"script/shelf.js"},
+		[]string{"static/js/shelf.js"},
 	)
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 		return c.NoContent(http.StatusInternalServerError)
@@ -251,9 +252,9 @@ func getShelfReturnURL(c echo.Context) string {
 	if isShelfSearchPage(c) {
 		parentID := getShelfParentID(c)
 		if parentID != "" {
-			return "/shelf/" + parentID
+			return config.PrefixPath("/shelf/" + parentID)
 		}
-		return "/"
+		return config.PrefixPath("/")
 	}
 	return common.GetReturnUrl(c.Param("id"))
 }
@@ -261,15 +262,15 @@ func getShelfReturnURL(c echo.Context) string {
 func generateReadURL(book model.BookInfo, lastReadPage int) string {
 	// 如果是书籍组，就跳转到子书架
 	if book.Type == model.TypeBooksGroup {
-		return fmt.Sprintf("\"/shelf/%s\"", book.BookID)
+		return fmt.Sprintf("%q", config.PrefixPath("/shelf/"+book.BookID))
 	}
 	// 如果是视频、音频，跳转到播放器页面
 	if book.Type == model.TypeVideo || book.Type == model.TypeAudio {
-		return fmt.Sprintf("\"/player/%s\"", book.BookID)
+		return fmt.Sprintf("%q", config.PrefixPath("/player/"+book.BookID))
 	}
 	// 如果是 HTML、未知文件，就在新窗口打开原始文件
 	if book.Type == model.TypeHTML || book.Type == model.TypeUnknownFile {
-		return fmt.Sprintf("\"/api/raw/%s/%s\"", book.BookID, url.QueryEscape(book.Title))
+		return fmt.Sprintf("%q", config.PrefixPath("/api/raw/"+book.BookID+"/"+url.QueryEscape(book.Title)))
 	}
 	// 其他情况，跳转到阅读页面，类似 /scroll/4cTOjFm?page=1
 	return fmt.Sprintf("$store.global.getReadURL(\"%s\",%d)", book.BookID, lastReadPage)

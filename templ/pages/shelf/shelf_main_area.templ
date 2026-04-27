@@ -14,7 +14,7 @@ import (
 // ShelfSearchBar 书架搜索栏（主书架、子书架、搜索页共用）
 templ ShelfSearchBar(c echo.Context) {
 	<div class="w-full my-1">
-		<form action="/search" method="get" class="flex flex-col items-stretch gap-2 w-full">
+		<form action={ templ.SafeURL(config.PrefixPath("/search")) } method="get" class="flex flex-col items-stretch gap-2 w-full">
 			<input
 				type="search"
 				name="keyword"

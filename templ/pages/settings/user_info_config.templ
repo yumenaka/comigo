@@ -169,18 +169,21 @@ templ UserInfoConfig() {
 					if (form.__x) {
 						form.__x.$data.saving = true;
 					}
-					const response = await fetch("/api/update-login-settings", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath("/api/update-login-settings"),
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								username: payload.username,
+								currentPassword: payload.currentPassword,
+								password: payload.password,
+								reEnterPassword: payload.reEnterPassword,
+							}),
 						},
-						body: JSON.stringify({
-							username: payload.username,
-							currentPassword: payload.currentPassword,
-							password: payload.password,
-							reEnterPassword: payload.reEnterPassword,
-						}),
-					});
+					);
 					if (!response.ok) {
 						const responseText = (await response.text()).trim();
 						let message = responseText;
