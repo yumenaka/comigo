@@ -58,10 +58,19 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 		if checkBookInStore(storePathAbs, storePathAbs) {
 			return nil
 		}
+		fileInfo, statErr := os.Stat(storePathAbs)
+		if statErr != nil {
+			return statErr
+		}
+		if shouldSkipFailedArchiveFile(storePathAbs, storePathAbs, fileInfo.Size(), fileInfo.ModTime(), false) {
+			return nil
+		}
 		book, err := scanFileGetBook(storePathAbs, storePathAbs, 0)
 		if err != nil {
+			recordArchiveScanFailure(storePathAbs, storePathAbs, fileInfo.Size(), fileInfo.ModTime(), false, err)
 			return err
 		}
+		clearArchiveScanFailure(storePathAbs, storePathAbs, false)
 		AddBooksToStore([]*model.Book{book})
 		return nil
 	}
@@ -149,12 +158,17 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 		if tools.IsFile(file.Path) && checkBookInStore(storePathAbs, file.Path) {
 			continue
 		}
+		if shouldSkipFailedArchiveFile(storePathAbs, file.Path, file.Size, file.ModTime, false) {
+			continue
+		}
 		// 扫描文件
 		book, err := scanFileGetBook(file.Path, storePathAbs, depth)
 		if err != nil {
+			recordArchiveScanFailure(storePathAbs, file.Path, file.Size, file.ModTime, false, err)
 			logger.Info(err)
 			continue
 		}
+		clearArchiveScanFailure(storePathAbs, file.Path, false)
 		newBookList = append(newBookList, book)
 	}
 
@@ -225,10 +239,19 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 			if checkBookInStore(storeURL, basePath) {
 				return nil
 			}
+			fileInfo, statErr := fs.Stat(basePath)
+			if statErr != nil {
+				return statErr
+			}
+			if shouldSkipFailedArchiveFile(storeURL, basePath, fileInfo.Size(), fileInfo.ModTime(), true) {
+				return nil
+			}
 			book, err := scanRemoteFileGetBook(fs, basePath, storeURL, 0)
 			if err != nil {
+				recordArchiveScanFailure(storeURL, basePath, fileInfo.Size(), fileInfo.ModTime(), true, err)
 				return err
 			}
+			clearArchiveScanFailure(storeURL, basePath, true)
 			AddBooksToStore([]*model.Book{book})
 		}
 		return nil
@@ -314,13 +337,18 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 		if checkBookInStore(storeURL, file.Path) {
 			continue
 		}
+		if shouldSkipFailedArchiveFile(storeURL, file.Path, file.Size, file.ModTime, true) {
+			continue
+		}
 
 		// 扫描文件
 		book, err := scanRemoteFileGetBook(fs, file.Path, storeURL, depth)
 		if err != nil {
+			recordArchiveScanFailure(storeURL, file.Path, file.Size, file.ModTime, true, err)
 			logger.Info(err)
 			continue
 		}
+		clearArchiveScanFailure(storeURL, file.Path, true)
 		newBookList = append(newBookList, book)
 	}
 
