@@ -21,7 +21,7 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component, showReturnI
 		<div class="w-full h-12 flex flex-row justify-center items-center px-1 py-1 m-0 border-b-2 border-slate-400 dark:border-slate-200">
 			<!-- 返回图标 -->
 			if showReturnIcon {
-				<a x-show="!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')" href={ templ.SafeURL(returnUrl) }>
+				<a x-show="!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')" href={ templ.SafeURL(config.PrefixPath(returnUrl)) }>
 					<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 						@svg.Return()
 					</div>
