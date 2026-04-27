@@ -99,7 +99,7 @@ templ UploadButton() {
 
 // 本地解析工具按钮，点击本地解析阅读页面
 templ ReaderButton() {
-	<a x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/reader")) } class="w-10 mx-1 my-0 rounded hover:ring ">
+	<a x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/reader")) } class="hidden md:flex w-10 mx-1 my-0 rounded hover:ring ">
 		@svg.CloudOffline()
 	</a>
 }

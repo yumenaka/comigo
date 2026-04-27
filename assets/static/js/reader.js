@@ -7,6 +7,7 @@ const readerState = {
     // book 是 WASM 返回的轻量元数据；真实图片按页读取后转成 object URL。
     book: null,
     fileName: '',
+    pdfObjectURL: '',
     objectURLs: new Map(),
     // 卷轴模式的懒加载与当前页计算状态。
     observer: null,
@@ -33,6 +34,11 @@ const readerState = {
         wheelThrottleTimer: null,
         toolbarHideTimer: null,
     },
+}
+
+function isReaderPDF(file) {
+    const name = (file?.name || '').toLowerCase()
+    return file?.type === 'application/pdf' || name.endsWith('.pdf')
 }
 
 function readerText(key, fallback) {
@@ -165,6 +171,10 @@ async function openReaderArchive(file) {
     // 每次打开新压缩包前都释放旧 object URL，防止大图阅读时持续占用内存。
     cleanupReaderBook()
     readerState.fileName = file.name || ''
+    if (isReaderPDF(file)) {
+        openReaderPDF(file)
+        return
+    }
     setReaderStatus(readerText('reader_loading_wasm', 'Loading reader core...'))
     try {
         const archive = await loadArchiveWasm()
@@ -191,12 +201,36 @@ async function openReaderArchive(file) {
     }
 }
 
+function openReaderPDF(file) {
+    readerState.fileName = file.name || ''
+    readerState.pdfObjectURL = URL.createObjectURL(file)
+    const book = {
+        id: `reader-pdf-${file.name || 'local'}-${file.size || 0}-${file.lastModified || 0}`,
+        title: file.name || readerText('reader_title', 'Local Reader'),
+        type: '.pdf',
+        page_count: 0,
+        PageInfos: [],
+        reader_only: true,
+        pdf_only: true,
+    }
+    readerState.book = book
+    renderReaderPDF(book)
+    setReaderStatus('')
+    if (typeof showToast === 'function') {
+        showToast(readerText('reader_pdf_ready', 'PDF ready'), 'success')
+    }
+}
+
 function cleanupReaderBook() {
     // object URL 不会被 GC 自动回收，关闭书籍或重新打开时必须显式 revoke。
     for (const url of readerState.objectURLs.values()) {
         URL.revokeObjectURL(url)
     }
     readerState.objectURLs.clear()
+    if (readerState.pdfObjectURL) {
+        URL.revokeObjectURL(readerState.pdfObjectURL)
+        readerState.pdfObjectURL = ''
+    }
     cleanupReaderView()
     readerState.book = null
     readerState.fileName = ''
@@ -213,6 +247,12 @@ function cleanupReaderView() {
     const mainArea = document.getElementById('ScrollMainArea')
     if (mainArea) {
         mainArea.innerHTML = ''
+    }
+    const pdfArea = document.getElementById('ReaderPDFArea')
+    if (pdfArea) {
+        pdfArea.innerHTML = ''
+        pdfArea.classList.add('hidden')
+        pdfArea.classList.remove('flex')
     }
     readerState.lastPageNum = 0
     readerState.scrollTopSave = 0
@@ -246,8 +286,60 @@ function renderReaderBook(book) {
     renderReaderCurrentMode(book)
 }
 
+function renderReaderPDF(book) {
+    Alpine.store('global').onlineBook = false
+    Alpine.store('global').nowPageNum = 1
+    Alpine.store('global').allPageNum = 1
+    Alpine.store('scroll').allPageNum = 1
+
+    const picker = document.getElementById('ReaderFilePicker')
+    const shell = document.getElementById('ReaderShell')
+    const mainArea = document.getElementById('ScrollMainArea')
+    const flipArea = document.getElementById('ReaderFlipArea')
+    const flipSteps = document.getElementById('ReaderFlipStepsRangeArea')
+    const pdfArea = document.getElementById('ReaderPDFArea')
+    if (!shell || !pdfArea || !readerState.pdfObjectURL) return
+
+    cleanupReaderView()
+    if (picker) picker.classList.add('hidden')
+    shell.classList.remove('hidden')
+    shell.classList.add('flex')
+    setReaderHeaderTitle(readerState.fileName, book)
+
+    if (mainArea) {
+        mainArea.classList.add('hidden')
+        mainArea.classList.remove('flex')
+    }
+    if (flipArea) {
+        flipArea.classList.add('hidden')
+        flipArea.classList.remove('flex')
+    }
+    if (flipSteps) {
+        flipSteps.classList.add('hidden')
+    }
+    restoreReaderPageLayout()
+    restoreReaderHeaderToolbar()
+
+    // PDF 查看器由浏览器原生 iframe 承载，容器高度用内联样式兜底，避免 Tailwind 未扫描运行时类时退回默认高度。
+    pdfArea.style.height = 'calc(100dvh - 4rem)'
+    pdfArea.style.minHeight = 'calc(100dvh - 4rem)'
+
+    const frame = document.createElement('iframe')
+    frame.className = 'w-full h-full min-h-0 flex-1 border-0 bg-base-100'
+    frame.title = readerState.fileName || readerText('reader_title', 'Local Reader')
+    frame.src = readerState.pdfObjectURL
+    pdfArea.innerHTML = ''
+    pdfArea.appendChild(frame)
+    pdfArea.classList.remove('hidden')
+    pdfArea.classList.add('flex')
+}
+
 function renderReaderCurrentMode(book = readerState.book) {
     if (!book) return
+    if (book.pdf_only) {
+        renderReaderPDF(book)
+        return
+    }
     // 模式切换时先清空当前视图，避免卷轴/翻页 DOM 与事件状态互相影响。
     cleanupReaderView()
     normalizeReaderReadMode()
@@ -457,6 +549,10 @@ function normalizeReaderReadMode() {
 function setReaderReadMode(mode) {
     // reader 只提供本地无限卷轴和本地翻页，旧的 flip_page 值统一兼容为 page_flip。
     Alpine.store('global').readMode = mode === 'page_flip' || mode === 'flip_page' ? 'page_flip' : 'infinite_scroll'
+    if (readerState.book?.pdf_only) {
+        renderReaderPDF(readerState.book)
+        return
+    }
     if (readerState.book) {
         renderReaderCurrentMode(readerState.book)
     } else if (Alpine.store('global').readMode !== 'page_flip') {
@@ -978,7 +1074,7 @@ function getReaderLayoutElements() {
 }
 
 function isReaderFlipModeActive() {
-    return Alpine.store('global').readMode === 'page_flip'
+    return !readerState.book?.pdf_only && Alpine.store('global').readMode === 'page_flip'
 }
 
 function clearReaderFlipToolbarTimer() {

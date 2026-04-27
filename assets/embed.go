@@ -87,7 +87,7 @@ func GetJavaScript(oneFileMode bool, insertScript []string) (jsString string) {
 	return jsString
 }
 
-// GetFileStr 从Static获取字符串形式的脚本
+// GetFileStr 获取字符串形式的脚本
 func GetFileStr(filePath string) string {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
 	data, err := Frontend.ReadFile(filePath)
@@ -102,7 +102,7 @@ func GetFileStr(filePath string) string {
 	return safe
 }
 
-// GetImageSrc 从Static获取Base64编码的图片的src属性
+// GetImageSrc 获取Base64编码的图片的src属性
 func GetImageSrc(filePath string) string {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
 	data, err := Frontend.ReadFile(filePath)
@@ -127,7 +127,7 @@ func GetImageSrc(filePath string) string {
 	return src
 }
 
-// GetData 从Static获取字节切片形式的数据
+// GetData 获取字节切片形式的数据
 func GetData(filePath string) []byte {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
 	data, err := Frontend.ReadFile(filePath)
