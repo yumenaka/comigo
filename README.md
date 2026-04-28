@@ -12,11 +12,13 @@
 
 ![Windows Sample](https://www.yumenaka.net/wp-content/uploads/2020/08/sample.gif "Windows Sample")
 
+## [Try it Online](https://comigo.xyz/reader)
+
 ## Features
 
 - 📚 **Multiple Format Support**: Supports image folders and compressed files like `.rar`, `.zip`, `.tar`, `.cbz`, `.cbr`, `.epub`
 - 📱 **Easy Access**: QR code scanning for mobile/tablet devices, drag-and-drop support for Windows
-- 📴 **Offline Mode / PWA App**: Read ZIP/CBZ/RAR/CBR directly in your browser without uploading files. [Try it online](https://comigo.xyz/reader)
+- 📴 **Offline Mode / PWA App**: Read ZIP/CBZ/RAR/CBR directly in your browser without uploading files
 - 🐧 **Cross-Platform**: Compatibility with Windows, Linux, and macOS
 - 📖 **Diverse Reading Modes**: Offers scroll, and page-turning modes
 - ⚙️ **Flexible Configuration**: Command-line operation with `config.toml` library settings
