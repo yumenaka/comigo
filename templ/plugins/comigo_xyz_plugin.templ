@@ -310,7 +310,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_no_install_title')">你甚至不用安装：</p>
 									<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 flex justify-center">
 										<a
-											href={ templ.SafeURL(config.PrefixPath("/reader")) }
+											href="${window.ComiGoPath('/reader')}"
 											class="inline-flex items-center justify-center px-6 py-3 border bg-green-500 text-black dark:text-white rounded-lg font-semibold"
 										>
 											<span x-text="i18next.t('comigo_xyz_try_offline_or_add_pwa')">尝试纯离线模式 或 添加为PWA应用</span>
