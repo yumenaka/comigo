@@ -243,7 +243,7 @@ func MainArea(c echo.Context) templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<main id=\"ReaderRoot\" class=\"flex flex-col items-center justify-start flex-1 w-full max-w-full text-base-content\"><!-- 初始文件选择区。压缩包和 PDF 都只在浏览器本地读取，不上传到后端。 --><section id=\"ReaderFilePicker\" class=\"flex flex-col items-center justify-center w-full max-w-3xl min-h-[60vh] px-4\"><label id=\"ReaderDropArea\" for=\"ReaderArchiveInput\" class=\"flex flex-col items-center justify-center w-full min-h-72 px-6 py-12 text-center border-4 border-dashed rounded cursor-pointer bg-base-100/70 border-gray-400 hover:border-blue-500\"><span class=\"text-xl font-semibold\" x-text=\"i18next.t('reader_select_archive')\">Select archive</span> <span class=\"mt-3 text-sm opacity-80\" x-text=\"i18next.t('reader_select_archive_hint')\">ZIP/CBZ/RAR/CBR/PDF, kept in browser</span> <input id=\"ReaderArchiveInput\" type=\"file\" accept=\".zip,.cbz,.rar,.cbr,.pdf,application/pdf\" class=\"hidden\"></label> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<main id=\"ReaderRoot\" class=\"flex flex-col items-center justify-start flex-1 w-full max-w-full text-base-content\"><!-- 初始文件选择区。图片、压缩包和 PDF 都只在浏览器本地读取，不上传到后端。 --><section id=\"ReaderFilePicker\" class=\"flex flex-col items-center justify-center w-full max-w-3xl min-h-[60vh] px-4\"><label id=\"ReaderDropArea\" for=\"ReaderArchiveInput\" class=\"flex flex-col items-center justify-center w-full min-h-72 px-6 py-12 text-center border-4 border-dashed rounded cursor-pointer bg-base-100/70 border-gray-400 hover:border-blue-500\"><span class=\"text-xl font-semibold\" x-text=\"i18next.t('reader_select_archive')\">Select files</span> <span class=\"mt-3 text-sm opacity-80\" x-text=\"i18next.t('reader_select_archive_hint')\">Multiple images, or ZIP/CBZ/RAR/CBR/PDF where only the first file is opened</span> <input id=\"ReaderArchiveInput\" type=\"file\" accept=\".zip,.cbz,.rar,.cbr,.pdf,application/pdf,image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tif,.tiff,.svg,.avif,.heic,.heif\" multiple class=\"hidden\"></label> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -255,7 +255,7 @@ func MainArea(c echo.Context) templ.Component {
 			var templ_7745c5c3_Var12 templ.SafeURL
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath("/reader?static=comigo-reader.html")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 90, Col: 82}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 91, Col: 82}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -268,7 +268,7 @@ func MainArea(c echo.Context) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("comigo-" + config.GetVersion() + ".html")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 91, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/reader/reader.templ`, Line: 92, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {

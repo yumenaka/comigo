@@ -8,6 +8,7 @@ const readerState = {
     book: null,
     fileName: '',
     pdfObjectURL: '',
+    imageFiles: [],
     objectURLs: new Map(),
     // 卷轴模式的懒加载与当前页计算状态。
     observer: null,
@@ -39,6 +40,18 @@ const readerState = {
 function isReaderPDF(file) {
     const name = (file?.name || '').toLowerCase()
     return file?.type === 'application/pdf' || name.endsWith('.pdf')
+}
+
+function isReaderImage(file) {
+    if (!file) return false
+    const name = (file.name || '').toLowerCase()
+    if (file.type && file.type.startsWith('image/')) return true
+    return ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tif', '.tiff', '.svg', '.avif', '.heic', '.heif'].some((ext) => name.endsWith(ext))
+}
+
+function sortReaderImageFiles(files) {
+    const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+    return [...files].sort((a, b) => collator.compare(a.name || '', b.name || ''))
 }
 
 function readerText(key, fallback) {
@@ -201,6 +214,56 @@ async function openReaderArchive(file) {
     }
 }
 
+function openReaderFiles(fileList) {
+    const files = Array.from(fileList || []).filter(Boolean)
+    if (files.length === 0) return
+
+    if (files.every(isReaderImage)) {
+        openReaderImages(files)
+        return
+    }
+
+    if (files.length > 1 && typeof showToast === 'function') {
+        showToast(readerText('reader_first_file_only', 'Multiple files selected; opening the first file only.'), 'info')
+    }
+
+    const firstFile = files[0]
+    if (isReaderImage(firstFile)) {
+        openReaderImages([firstFile])
+        return
+    }
+    openReaderArchive(firstFile)
+}
+
+function openReaderImages(files) {
+    const imageFiles = sortReaderImageFiles(files)
+    cleanupReaderBook()
+    readerState.imageFiles = imageFiles
+    const displayName = imageFiles.length === 1
+        ? imageFiles[0].name
+        : readerText('reader_image_files_title', 'Image files').replace('{{count}}', String(imageFiles.length))
+    const signature = imageFiles.map((file) => `${file.name || 'image'}:${file.size || 0}:${file.lastModified || 0}`).join('|')
+    const book = {
+        id: `reader-images-${imageFiles.length}-${signature}`,
+        title: displayName,
+        type: '.image',
+        page_count: imageFiles.length,
+        PageInfos: imageFiles.map((file, index) => ({
+            name: file.name || `Page ${index + 1}`,
+            index,
+        })),
+        reader_only: true,
+        local_images: true,
+    }
+    readerState.book = book
+    readerState.fileName = displayName
+    renderReaderBook(book)
+    setReaderStatus('')
+    if (typeof showToast === 'function') {
+        showToast(readerText('reader_images_ready', 'Images ready'), 'success')
+    }
+}
+
 function openReaderPDF(file) {
     readerState.fileName = file.name || ''
     readerState.pdfObjectURL = URL.createObjectURL(file)
@@ -234,6 +297,7 @@ function cleanupReaderBook() {
     cleanupReaderView()
     readerState.book = null
     readerState.fileName = ''
+    readerState.imageFiles = []
     if (window.ComiGoArchive && typeof window.ComiGoArchive.close === 'function') {
         window.ComiGoArchive.close()
     }
@@ -444,10 +508,16 @@ async function getReaderPageObjectURL(index) {
         return readerState.objectURLs.get(index)
     }
     try {
-        // 图片数据只从 WASM 按需读取一次，之后通过 object URL 复用。
-        const bytes = await window.ComiGoArchive.readPage(index)
         const page = readerState.book.PageInfos[index]
-        const blob = new Blob([bytes], { type: guessMimeType(page?.name || '') })
+        let blob
+        if (readerState.book?.local_images) {
+            blob = readerState.imageFiles[index]
+        } else {
+            // 图片数据只从 WASM 按需读取一次，之后通过 object URL 复用。
+            const bytes = await window.ComiGoArchive.readPage(index)
+            blob = new Blob([bytes], { type: guessMimeType(page?.name || '') })
+        }
+        if (!blob) return ''
         const objectURL = URL.createObjectURL(blob)
         readerState.objectURLs.set(index, objectURL)
         return objectURL
@@ -1293,7 +1363,7 @@ function initReaderInput() {
     const dropArea = document.getElementById('ReaderDropArea')
     if (!input || !dropArea) return
 
-    input.addEventListener('change', () => openReaderArchive(input.files?.[0]))
+    input.addEventListener('change', () => openReaderFiles(input.files))
     const headerTitle = getReaderHeaderTitle()
     if (headerTitle) {
         headerTitle.addEventListener('click', () => {
@@ -1315,7 +1385,7 @@ function initReaderInput() {
         })
     }
     dropArea.addEventListener('drop', (event) => {
-        openReaderArchive(event.dataTransfer?.files?.[0])
+        openReaderFiles(event.dataTransfer?.files)
     })
 }
 
