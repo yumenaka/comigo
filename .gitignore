@@ -104,6 +104,7 @@ _temp
 .idea/
 .vscode/
 .cursor
+.skill/
 
 # Go workflow files.
 go.work

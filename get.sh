@@ -33,6 +33,14 @@ system_language=$(locale 2>/dev/null | grep -E '^LANG=' | cut -d= -f2 | cut -d. 
 USE_PROXY=false
 PROXY_BASE="https://comigo.xyz"
 SPECIFIED_VERSION=""
+WORK_DIR=""
+
+cleanup() {
+    if [[ -n "$WORK_DIR" && -d "$WORK_DIR" ]]; then
+        rm -rf "$WORK_DIR"
+    fi
+}
+trap cleanup EXIT
 
 # 解析命令行参数
 while [[ $# -gt 0 ]]; do
@@ -42,11 +50,19 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --proxy-base)
+            if [[ $# -lt 2 || "$2" == -* ]]; then
+                echo "Error: --proxy-base requires a value." >&2
+                exit 1
+            fi
             PROXY_BASE="$2"
             USE_PROXY=true
             shift 2
             ;;
         --version|-V)
+            if [[ $# -lt 2 || "$2" == -* ]]; then
+                echo "Error: --version requires a value." >&2
+                exit 1
+            fi
             SPECIFIED_VERSION="$2"
             shift 2
             ;;
@@ -570,7 +586,7 @@ function print_message() {
 # ============================================================================
 # 依赖检查
 # ============================================================================
-dependencies=("tar")
+dependencies=("tar" "file")
 
 # 检查是否有 curl 或 wget（用于下载文件）
 if command -v curl &> /dev/null; then
@@ -614,9 +630,10 @@ else
     fi
 fi
 
-# 从标签中提取版本号（支持两个或多个数字段的版本号，如 v1.2.3）
-if [[ $latest_tag =~ ^v([0-9]+(\.[0-9]+)+) ]]; then
+# 从标签中提取版本号（严格要求 vX.Y.Z）
+if [[ $latest_tag =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
     Version="${BASH_REMATCH[1]}"
+    Version="${Version}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
 else
     print_message "error_invalid_version" "$latest_tag"
     exit 1
@@ -677,23 +694,28 @@ url=$(convert_github_url "$original_url")
 
 print_message "downloading" "$file_name"
 
+# 在临时目录中下载和解压，避免污染或覆盖用户当前目录中的文件。
+WORK_DIR=$(mktemp -d "${TMPDIR:-/tmp}/comigo-install.XXXXXX")
+archive_path="$WORK_DIR/$file_name"
+binary_path="$WORK_DIR/comi"
+
 # 下载文件（包含 404 错误检测）
 if [ "$download_tool" = "curl" ]; then
     # -f 遇到HTTP非200就返回错误码，不写进文件
-    if ! curl -fSL -o "$file_name" "$url"; then
+    if ! curl -fSL -o "$archive_path" "$url"; then
         print_message "error_download_failed"
         exit 1
     fi
 else
     # --tries 和 --timeout 可酌情修改
-    if ! wget --tries=3 --timeout=55 -O "$file_name" "$url"; then
+    if ! wget --tries=3 --timeout=55 -O "$archive_path" "$url"; then
         print_message "error_download_failed"
         exit 1
     fi
 fi
 
 # 验证下载的文件是否存在
-if [[ ! -f "$file_name" ]]; then
+if [[ ! -f "$archive_path" ]]; then
     print_message "error_download_failed"
     exit 1
 fi
@@ -702,9 +724,8 @@ fi
 # 文件验证
 # ============================================================================
 # 检查文件是否为有效的 gzip 格式（无效时可能是文本，比如 404 页面）
-if ! file "$file_name" | grep -q "gzip compressed data"; then
+if ! file "$archive_path" | grep -q "gzip compressed data"; then
     print_message "error_file_not_gzip"
-    rm -f "$file_name"  # 清理无效文件
     exit 1
 fi
 
@@ -712,11 +733,7 @@ fi
 # 文件解压
 # ============================================================================
 print_message "extracting" "$file_name"
-tar -xzf "$file_name"
-
-# 清理下载的压缩文件
-print_message "cleaning" "$file_name"
-rm "$file_name"
+tar -xzf "$archive_path" -C "$WORK_DIR"
 
 # ============================================================================
 # 路径选择函数
@@ -877,13 +894,13 @@ select_install_directory() {
 # 安装到系统路径
 # ============================================================================
 # 验证解压后的文件是否存在
-if [[ ! -f "comi" ]]; then
+if [[ ! -f "$binary_path" ]]; then
     print_message "error_file_not_found" "comi"
     exit 1
 fi
 
 # 添加执行权限
-chmod +x comi
+chmod +x "$binary_path"
 
 # 选择安装目录
 install_result=$(select_install_directory)
@@ -897,9 +914,9 @@ if [ "$INSTALL_DIR" != "." ]; then
     # 移动到安装目录
     print_message "moving" "$INSTALL_DIR"
     if [ "$NEED_SUDO" = "true" ] && [ "$EUID" -ne 0 ]; then
-        sudo mv comi "$INSTALL_DIR/"
+        sudo mv "$binary_path" "$INSTALL_DIR/comi"
     else
-        mv comi "$INSTALL_DIR/"
+        mv "$binary_path" "$INSTALL_DIR/comi"
     fi
     
     # ============================================================================
@@ -917,6 +934,11 @@ else
     # 当前目录，不移动文件，提示用户
     current_dir=$(pwd)
     file_path="$current_dir/comi"
+    if [ -e "$file_path" ]; then
+        echo "Error: File already exists: $file_path" >&2
+        exit 1
+    fi
+    mv "$binary_path" "$file_path"
     print_message "file_in_current_dir" "$file_path"
 fi
 
@@ -936,34 +958,33 @@ if [ "$INSTALL_DIR" != "." ]; then
         exit 1
     fi
 
-    # 检查命令是否可用（需要重新加载 PATH 或新开终端）
-    if command -v comi &> /dev/null; then
-        print_message "installation_complete"
-    else
-        # 文件存在但命令不可用，可能是 PATH 未更新
-        print_message "installation_complete"
-        if ! is_in_path "$INSTALL_DIR"; then
-            shell_config=$(get_shell_config_file)
-            echo ""
-            case "$system_language" in
-                zh_CN)
-                    echo -e "\033[33m提示：请重新打开终端或运行以下命令使 PATH 生效：\033[0m"
-                    echo -e "\033[36msource $shell_config\033[0m"
-                    ;;
-                en_US)
-                    echo -e "\033[33mNote: Please reopen your terminal or run the following to update PATH:\033[0m"
-                    echo -e "\033[36msource $shell_config\033[0m"
-                    ;;
-                ja_JP)
-                    echo -e "\033[33m注意：ターミナルを再起動するか、以下のコマンドを実行して PATH を更新してください：\033[0m"
-                    echo -e "\033[36msource $shell_config\033[0m"
-                    ;;
-                *)
-                    echo -e "\033[33mNote: Please reopen your terminal or run the following to update PATH:\033[0m"
-                    echo -e "\033[36msource $shell_config\033[0m"
-                    ;;
-            esac
-        fi
+    print_message "installation_complete"
+    if ! "$INSTALL_DIR/comi" --version 2>/dev/null | grep -q "$latest_tag"; then
+        "$INSTALL_DIR/comi" --version 2>/dev/null || true
+    fi
+
+    # 如果安装目录还不在 PATH 中，提示用户重新加载 shell 配置。
+    if ! is_in_path "$INSTALL_DIR"; then
+        shell_config=$(get_shell_config_file)
+        echo ""
+        case "$system_language" in
+            zh_CN)
+                echo -e "\033[33m提示：请重新打开终端或运行以下命令使 PATH 生效：\033[0m"
+                echo -e "\033[36msource $shell_config\033[0m"
+                ;;
+            en_US)
+                echo -e "\033[33mNote: Please reopen your terminal or run the following to update PATH:\033[0m"
+                echo -e "\033[36msource $shell_config\033[0m"
+                ;;
+            ja_JP)
+                echo -e "\033[33m注意：ターミナルを再起動するか、以下のコマンドを実行して PATH を更新してください：\033[0m"
+                echo -e "\033[36msource $shell_config\033[0m"
+                ;;
+            *)
+                echo -e "\033[33mNote: Please reopen your terminal or run the following to update PATH:\033[0m"
+                echo -e "\033[36msource $shell_config\033[0m"
+                ;;
+        esac
     fi
 else
     # 当前目录，验证文件存在且可执行
