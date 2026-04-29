@@ -63,13 +63,20 @@ func DeleteFileIfExist(filePath string) error {
 	return nil
 }
 
-// ChickIsDir 判断所给路径是否为文件夹
-func ChickIsDir(path string) bool {
+// CheckIsDir 判断所给路径是否为文件夹
+func CheckIsDir(path string) bool {
 	s, err := os.Stat(path)
 	if err != nil {
 		return false
 	}
 	return s.IsDir()
+}
+
+// ChickIsDir 保留旧拼写以兼容历史调用；新代码请使用 CheckIsDir。
+//
+// Deprecated: use CheckIsDir.
+func ChickIsDir(path string) bool {
+	return CheckIsDir(path)
 }
 
 // GetMainName 取得无后缀的文件名
