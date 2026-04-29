@@ -66,7 +66,7 @@ func GetConfigDir() (dir string, err error) {
 
 func AutoSetCacheDir() {
 	// 手动设置的临时文件夹
-	if cfg.CacheDir != "" && tools.IsExist(cfg.CacheDir) && tools.ChickIsDir(cfg.CacheDir) {
+	if cfg.CacheDir != "" && tools.IsExist(cfg.CacheDir) && tools.CheckIsDir(cfg.CacheDir) {
 		cfg.CacheDir = filepath.Join(cfg.CacheDir)
 	} else {
 		cfg.CacheDir = filepath.Join(os.TempDir(), "comigo_cache") // 使用系统文件夹

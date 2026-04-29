@@ -948,7 +948,7 @@
   "verify_link": "验证链接",
   "view_all_reading_history": "查看全部阅读历史",
   "webp_setting_error": "webp设置错误。",
-  "webp_setting_save_completed": "webp设置保存错误。",
+  "webp_setting_save_completed": "webp设置保存成功。",
   "websocket_error": "websocket错误：",
   "width_use_fixed_value": "横屏宽度: 固定值px",
   "width_use_percent": "横屏宽度: 百分比%",
