@@ -72,7 +72,7 @@ RUN if [ -z "$VERSION" ]; then \
     go build -trimpath \
     -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'" \
     -o /build/comigo \
-    .
+    ./cmd/comi
 
 # ============================================================================
 # 第三阶段: 运行时镜像
