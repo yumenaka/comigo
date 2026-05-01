@@ -8,13 +8,16 @@ root = "."
 tmp_dir = "test/.temp"
 
 [build]
-pre_cmd = ["bun run dev", "bun run build:wasm"]
+pre_cmd = [
+    "bun run dev",
+    # "bun run build:wasm",
+]
 cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/.temp/comi ./cmd/comigo/main.go"
 # Array of commands to run after ^C
 post_cmd = []
 ## 运行的时候，需要传给二进制文件的参数。
 # args_bin = ["./test","--tailscale","--debug", "--config-locked"]
-## 可配置远程书库 
+## 可配置远程书库
 
 # sftp://user:pass@host:port/path  (openssh-server)                       推荐
 # ftp://user:pass@host/path/to/books (nas)                                内存占用很高，不推荐
