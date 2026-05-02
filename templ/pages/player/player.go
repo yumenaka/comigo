@@ -2,6 +2,7 @@ package player
 
 import (
 	"net/http"
+	"path/filepath"
 
 	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
@@ -36,15 +37,8 @@ func PlayerModeHandler(c echo.Context) error {
 	// 获取同文件夹下的所有书籍作为播放列表
 	playlist := common.QuickJumpBarBooks(book)
 
-	// 过滤出音视频文件
-	var mediaList model.BookInfos
-	if playlist != nil {
-		for _, item := range *playlist {
-			if item.Type == model.TypeVideo || item.Type == model.TypeAudio {
-				mediaList = append(mediaList, item)
-			}
-		}
-	}
+	// 过滤出当前目录下的音视频文件。
+	mediaList := buildMediaPlaylist(book, playlist)
 
 	// 定义模板主体内容。
 	playerPage := PlayerPage(c, book, &mediaList)
@@ -60,4 +54,43 @@ func PlayerModeHandler(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	return nil
+}
+
+// buildMediaPlaylist 从同目录书籍列表中提取播放器列表。
+// ParentFolder 只保存目录名，同名目录会混入候选列表；播放器须按真实路径再次过滤
+func buildMediaPlaylist(current *model.Book, playlist *model.BookInfos) model.BookInfos {
+	if playlist == nil {
+		return nil
+	}
+
+	currentDir := ""
+	currentParent := ""
+	if current != nil {
+		currentParent = current.ParentFolder
+		if current.BookPath != "" {
+			currentDir = filepath.Dir(current.BookPath)
+		}
+	}
+
+	mediaList := make(model.BookInfos, 0, len(*playlist))
+	for _, item := range *playlist {
+		if item.Type != model.TypeVideo && item.Type != model.TypeAudio {
+			continue
+		}
+		if !samePlayerFolder(currentDir, currentParent, item) {
+			continue
+		}
+		mediaList = append(mediaList, item)
+	}
+	return mediaList
+}
+
+func samePlayerFolder(currentDir, currentParent string, item model.BookInfo) bool {
+	if currentDir != "" && item.BookPath != "" {
+		return filepath.Dir(item.BookPath) == currentDir
+	}
+	if currentParent != "" {
+		return item.ParentFolder == currentParent
+	}
+	return true
 }
