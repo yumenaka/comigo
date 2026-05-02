@@ -30,7 +30,6 @@
     "@tailwindcss/postcss": "4.2.4",
     "@tailwindcss/typography": "latest",
     "parcel": "latest",
-    "postcss": "8.5.13",
     "prettier": "3.8.3"
   }
 }

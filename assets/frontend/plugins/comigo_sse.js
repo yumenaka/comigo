@@ -64,6 +64,24 @@ function appendSharedLog(line) {
     }
 }
 
+function queueComigoSSEStart() {
+    if (window.__comigoSSEStartQueued) {
+        return
+    }
+    window.__comigoSSEStartQueued = true
+    const start = () => {
+        setTimeout(() => {
+            window.__comigoSSEStartQueued = false
+            comigoSSEInit()
+        }, 1000)
+    }
+    if (document.readyState === 'complete') {
+        start()
+    } else {
+        window.addEventListener('load', start, { once: true })
+    }
+}
+
 function comigoAttachSSEListeners(es) {
     es.addEventListener('ui_suggest_reload', (e) => {
         let reason = 'default'
@@ -127,6 +145,11 @@ function comigoSSEInit() {
     if (window.__comigoSSEInstance) {
         return window.__comigoSSEInstance
     }
+    // 页面初次加载时稍后再连，避免浏览器把 SSE 长连接误报为加载中断。
+    if (document.readyState !== 'complete') {
+        queueComigoSSEStart()
+        return null
+    }
     const sseURL = window.ComiGoPath ? window.ComiGoPath('/api/sse') : '/api/sse'
     const es = new EventSource(sseURL, { withCredentials: true })
     window.__comigoSSEInstance = es
@@ -136,4 +159,3 @@ function comigoSSEInit() {
 
 window.__comigoSSEInit = comigoSSEInit
 window.dispatchEvent(new Event('comigo:sse-ready'))
-comigoSSEInit()
