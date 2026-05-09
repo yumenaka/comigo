@@ -175,8 +175,6 @@ func bindBookmarkAPI(group *echo.Group) {
 
 // bindConfigAPI 注册配置读写 API。
 func bindConfigAPI(group *echo.Group) {
-	// 获取配置
-	group.GET("/config", config_api.GetConfig)
 	// 获取配置状态
 	group.GET("/config/status", config_api.GetConfigStatus)
 	// 更新配置
@@ -185,8 +183,6 @@ func bindConfigAPI(group *echo.Group) {
 	group.POST("/config/:to", config_api.SaveConfigHandler)
 	// 删除特定路径下的配置
 	group.DELETE("/config/:in", config_api.DeleteConfig)
-	// 下载 toml 格式的示例配置
-	group.GET("/config.toml", config_api.GetConfigToml)
 }
 
 // bindSettingsAPI 注册设置页使用的轻量操作 API。

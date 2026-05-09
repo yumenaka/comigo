@@ -114,7 +114,7 @@ func updateConfigGeneric(c echo.Context) (string, string, error) {
 		return "", "", err
 	}
 
-	logger.Infof(locale.GetString("log_update_config"), name, newValue)
+	logger.Infof(locale.GetString("log_update_config"), name)
 
 	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
@@ -154,7 +154,7 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 		return "", "", errors.New("name is required")
 	}
 
-	logger.Infof(locale.GetString("log_update_config"), request.Name, request.Value)
+	logger.Infof(locale.GetString("log_update_config"), request.Name)
 
 	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
@@ -217,7 +217,7 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 	// 将 bool 转换为 string
 	newValue := strconv.FormatBool(request.Value)
 
-	logger.Infof(locale.GetString("log_update_config"), request.Name, newValue)
+	logger.Infof(locale.GetString("log_update_config"), request.Name)
 
 	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
@@ -280,7 +280,7 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, er
 	// 将 int 转换为 string
 	newValue := strconv.Itoa(request.Value)
 
-	logger.Infof(locale.GetString("log_update_config"), request.Name, newValue)
+	logger.Infof(locale.GetString("log_update_config"), request.Name)
 
 	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
@@ -499,7 +499,7 @@ func AddArrayConfigHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "addValue is not valid base64url")
 	}
-	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", decodedConfigName, decodedAddValue)
+	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", decodedConfigName)
 
 	values, err := doAdd(decodedConfigName, decodedAddValue)
 	if err != nil {
@@ -664,7 +664,7 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "deleteValue is not valid base64url")
 	}
-	logger.Infof(locale.GetString("log_delete_array_config_handler")+"\n", decodedConfigName, decodedDeleteValue)
+	logger.Infof(locale.GetString("log_delete_array_config_handler")+"\n", decodedConfigName)
 
 	values, err := doDelete(decodedConfigName, decodedDeleteValue)
 	if err != nil {

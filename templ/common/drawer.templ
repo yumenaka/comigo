@@ -42,16 +42,20 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component, showReturnI
 							type="button"
 							id="logout_button"
 							class="m-0 px-1 py-0.5 text-xs text-center text-white bg-blue-600/80 hover:bg-blue-800/80 rounded  focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-							@click="if(window.confirm(i18next.t('confirm_logout'))) { document.cookie = 'jwt_token=; Max-Age=-99999999; path=/;'; window.location.reload(); }"
 							x-data="{
-                                 isLoggedIn: false,
-                                 checkLoginStatus() {
-                                    const jwtCookie = document.cookie.split(';').find(c => c.trim().startsWith('jwt_token='));
-                                    this.isLoggedIn = !!jwtCookie && jwtCookie.trim() !== 'jwt_token=';
-                                }
-                            }"
-							x-init="checkLoginStatus()"
-							x-show="isLoggedIn"
+								async logout() {
+									if (!window.confirm(i18next.t('confirm_logout'))) return;
+									try {
+										await fetch(window.ComiGoPath('/api/logout'), {
+											method: 'POST',
+											credentials: 'same-origin',
+										});
+									} finally {
+										window.location.href = window.ComiGoPath('/login');
+									}
+								}
+							}"
+							@click="logout()"
 							x-text="i18next.t('logout')"
 						>logout</button>
 					}

@@ -33,6 +33,7 @@ type Message struct {
 type MessageWithClientID struct {
 	Msg      Message
 	ClientID string
+	Client   *websocket.Conn
 }
 
 // 创建一个 upGrader 的实例。这只是一个对象，它具备一些方法，这些方法可以获取一个普通 HTTP 链接然后将其升级成一个 WebSocket
@@ -107,10 +108,10 @@ func WsHandler(c echo.Context) error {
 			// 如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 "clients" 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
 			break
 		} else {
-			if *WsDebug {
+			if isWsDebug() {
 				logger.Infof(locale.GetString("log_websocket_server_received")+"\n", msg)
 			}
-			msgWithClientID := MessageWithClientID{Msg: msg, ClientID: clientID}
+			msgWithClientID := MessageWithClientID{Msg: msg, ClientID: clientID, Client: wsConn}
 			// Send the newly received message to the broadcast channel
 			broadcast <- msgWithClientID
 		}
@@ -118,25 +119,28 @@ func WsHandler(c echo.Context) error {
 	return nil
 }
 
-// 一个简单循环，从"broadcast"中连续读取数据，然后通过各自的 WebSocket 连接将消息传播到客户端。
+// 一个简单循环，从"broadcast"中连续读取数据，再按消息类型决定回复发送方或广播给其他客户端。
 func handleMessages() {
 	for {
-		// Grab the next message from the broadcast channel
 		msgWithClientID := <-broadcast // 广播频道
-		// Send it out to every client that is currently connected
-		for _, client := range snapshotClients() {
-			switch msgWithClientID.Msg.Type {
-			case "ping", "ping!", "乒":
-				handPingMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
-			case "heartbeat":
-				handHeartbeatMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
-			case "flip_mode_sync_page":
-				handSyncPageMessageToFlipMode(client, msgWithClientID.Msg, msgWithClientID.ClientID)
-			case "scroll_mode_sync_page":
-				handSyncPageMessageToScrollMode(client, msgWithClientID.Msg, msgWithClientID.ClientID)
-			default:
-				// handDefaultMessage(client, msgWithClientID.Msg, msgWithClientID.ClientID)
+
+		switch msgWithClientID.Msg.Type {
+		case "ping", "ping!", "乒":
+			writeMessageToClient(msgWithClientID.Client, handPingMessage(msgWithClientID.Msg), "ping")
+		case "heartbeat":
+			writeMessageToClient(msgWithClientID.Client, handHeartbeatMessage(msgWithClientID.Msg), "heartbeat")
+		case "flip_mode_sync_page":
+			msg, ok := handSyncPageMessageToFlipMode(msgWithClientID.Msg, msgWithClientID.ClientID)
+			if ok {
+				broadcastMessage(msg, msgWithClientID.ClientID)
 			}
+		case "scroll_mode_sync_page":
+			msg, ok := handSyncPageMessageToScrollMode(msgWithClientID.Msg, msgWithClientID.ClientID)
+			if ok {
+				broadcastMessage(msg, msgWithClientID.ClientID)
+			}
+		default:
+			// 未识别消息不做广播，避免把客户端私有数据扩散给其它连接。
 		}
 	}
 }
@@ -148,13 +152,47 @@ func ClientCount() int {
 	return len(clients)
 }
 
-func snapshotClients() []*websocket.Conn {
+type clientSnapshot struct {
+	conn *websocket.Conn
+	id   string
+}
+
+func snapshotClients() []clientSnapshot {
 	clientsMu.RLock()
 	defer clientsMu.RUnlock()
 
-	result := make([]*websocket.Conn, 0, len(clients))
-	for client := range clients {
-		result = append(result, client)
+	result := make([]clientSnapshot, 0, len(clients))
+	for client, id := range clients {
+		result = append(result, clientSnapshot{conn: client, id: id})
 	}
 	return result
+}
+
+// broadcastMessage 向除发送方外的所有客户端发送消息；写失败时统一关闭并移除连接。
+func broadcastMessage(msg Message, skipClientID string) {
+	for _, client := range snapshotClients() {
+		if client.id == skipClientID {
+			continue
+		}
+		writeMessageToClient(client.conn, msg, "broadcast")
+	}
+}
+
+func writeMessageToClient(client *websocket.Conn, msg Message, context string) {
+	if client == nil {
+		return
+	}
+	if err := client.WriteJSON(msg); err != nil {
+		log.Printf("%s websocket write error: %v", context, err)
+		closeAndRemoveClient(client)
+	}
+}
+
+func closeAndRemoveClient(client *websocket.Conn) {
+	clientsMu.Lock()
+	delete(clients, client)
+	clientsMu.Unlock()
+	if err := client.Close(); err != nil {
+		logger.Infof("%s", err)
+	}
 }
