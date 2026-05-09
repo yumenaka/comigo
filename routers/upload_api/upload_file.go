@@ -19,6 +19,12 @@ import (
 
 var RescanBroadcast *chan string
 
+func uploadError(key string, args ...interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"error": fmt.Sprintf(locale.GetString(key), args...),
+	}
+}
+
 // UploadFile 上传文件
 // engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
 func UploadFile(c echo.Context) error {
@@ -70,16 +76,12 @@ func UploadFile(c echo.Context) error {
 	// 获取表单文件
 	form, err := c.MultipartForm()
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "解析表单失败",
-		})
+		return c.JSON(http.StatusBadRequest, uploadError("upload_parse_form_failed"))
 	}
 
 	files := form.File["files"]
 	if len(files) == 0 {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "没有上传文件",
-		})
+		return c.JSON(http.StatusBadRequest, uploadError("upload_no_files"))
 	}
 
 	var uploadedFiles []string
@@ -88,9 +90,7 @@ func UploadFile(c echo.Context) error {
 	for _, file := range files {
 		// 验证文件大小（例如，不超过 5000 MB）
 		if file.Size > 5000<<20 {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"error": fmt.Sprintf("文件 %s 超过大小限制", file.Filename),
-			})
+			return c.JSON(http.StatusBadRequest, uploadError("upload_file_too_large", file.Filename))
 		}
 
 		// 验证文件类型
@@ -144,9 +144,7 @@ func UploadFile(c echo.Context) error {
 		}
 
 		if !isAllowed {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"error": fmt.Sprintf("文件类型不允许: %s (类型: %s)", file.Filename, contentType),
-			})
+			return c.JSON(http.StatusBadRequest, uploadError("upload_file_type_not_allowed", file.Filename, contentType))
 		}
 
 		// 生成安全的文件名，避免目录遍历攻击
@@ -169,24 +167,18 @@ func UploadFile(c echo.Context) error {
 		// 保存文件
 		src, err := file.Open()
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": fmt.Sprintf("无法打开文件 %s", filename),
-			})
+			return c.JSON(http.StatusInternalServerError, uploadError("upload_open_file_failed", filename))
 		}
 		defer src.Close()
 
 		dst, err := os.Create(destPath)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": fmt.Sprintf("无法创建文件 %s", filename),
-			})
+			return c.JSON(http.StatusInternalServerError, uploadError("upload_create_file_failed", filename))
 		}
 		defer dst.Close()
 
 		if _, err = io.Copy(dst, src); err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": fmt.Sprintf("无法保存文件 %s", filename),
-			})
+			return c.JSON(http.StatusInternalServerError, uploadError("upload_save_file_failed", filename))
 		}
 		logger.Infof(locale.GetString("log_file_upload_success"), filename)
 		uploadedFiles = append(uploadedFiles, filename)
@@ -200,21 +192,17 @@ func UploadFile(c echo.Context) error {
 	err = scan.InitStore(storeUrl, config.GetCfg())
 	if err != nil {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", storeUrl, err)
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": fmt.Sprintf("扫描上传目录失败: %s", err),
-		})
+		return c.JSON(http.StatusInternalServerError, uploadError("upload_scan_failed", err))
 	}
 	// 保存扫描结果到数据库（如果开启）
 	if config.GetCfg().EnableDatabase {
 		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": fmt.Sprintf("保存数据库失败: %s", err),
-			})
+			return c.JSON(http.StatusInternalServerError, uploadError("upload_save_database_failed", err))
 		}
 	}
 	model.GenerateBookGroup()
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "文件上传成功",
+		"message": locale.GetString("file_uploaded_successfully"),
 		"files":   uploadedFiles,
 	})
 }
