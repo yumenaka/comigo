@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -45,15 +46,24 @@ func SaveFileToCache(id, filename string, data []byte, queryString, contentType 
 	return nil
 }
 
+// coverCacheFilename 根据书籍 ID 和请求尺寸生成封面缓存文件名。
+// 说明：同一本书会被不同页面以不同 resize_height 请求，文件名必须包含尺寸，避免小封面污染大封面缓存。
+func coverCacheFilename(bookID string, resizeHeight int) string {
+	if resizeHeight > 0 {
+		return bookID + "_h" + strconv.Itoa(resizeHeight) + ".jpg"
+	}
+	return bookID + "_original.jpg"
+}
+
 // SaveCoverToLocal 保存封面文件到本地文件夹，加快读取速度
-func SaveCoverToLocal(metaDataDir string, bookID string, data []byte) error {
+func SaveCoverToLocal(metaDataDir string, bookID string, resizeHeight int, data []byte) error {
 	// 创建封面meta data目录
 	err := os.MkdirAll(metaDataDir, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf(locale.GetString("log_failed_to_write_file_to_cache")+": %v", err)
+		return fmt.Errorf(locale.GetString("log_failed_to_write_file_to_cache"), err)
 	}
 	// 写入文件
-	filename := bookID + ".jpg"
+	filename := coverCacheFilename(bookID, resizeHeight)
 	filePath := filepath.Join(metaDataDir, filename)
 	err = os.WriteFile(filePath, data, 0o644)
 	if err != nil {
@@ -63,9 +73,9 @@ func SaveCoverToLocal(metaDataDir string, bookID string, data []byte) error {
 }
 
 // CoverFileCacheExists 检查封面文件是否存在
-func CoverFileCacheExists(metaDataDir string, bookID string) bool {
+func CoverFileCacheExists(metaDataDir string, bookID string, resizeHeight int) bool {
 	// 构建封面文件路径
-	filename := bookID + ".jpg"
+	filename := coverCacheFilename(bookID, resizeHeight)
 	filePath := filepath.Join(metaDataDir, filename)
 	// 检查文件是否存在
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -75,8 +85,8 @@ func CoverFileCacheExists(metaDataDir string, bookID string) bool {
 }
 
 // GetCoverFromLocal 从本地文件夹读取封面文件
-func GetCoverFromLocal(metaDataDir string, bookID string) ([]byte, error) {
-	filename := bookID + ".jpg"
+func GetCoverFromLocal(metaDataDir string, bookID string, resizeHeight int) ([]byte, error) {
+	filename := coverCacheFilename(bookID, resizeHeight)
 	filePath := filepath.Join(metaDataDir, filename)
 	// 读取文件
 	return os.ReadFile(filePath)
@@ -95,13 +105,22 @@ func GetQueryString(query url.Values) string {
 
 // DeleteCoverCache 删除封面缓存文件
 func DeleteCoverCache(metaDataDir string, bookID string) error {
-	filename := bookID + ".jpg"
-	filePath := filepath.Join(metaDataDir, filename)
-	// 检查文件是否存在
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return nil // 文件不存在，无需删除
+	cacheFiles := []string{filepath.Join(metaDataDir, bookID+".jpg")}
+	if matchedFiles, err := filepath.Glob(filepath.Join(metaDataDir, bookID+"_h*.jpg")); err == nil {
+		cacheFiles = append(cacheFiles, matchedFiles...)
 	}
-	return os.Remove(filePath)
+	cacheFiles = append(cacheFiles, filepath.Join(metaDataDir, bookID+"_original.jpg"))
+
+	var deleteErrs []error
+	for _, filePath := range cacheFiles {
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			continue
+		}
+		if err := os.Remove(filePath); err != nil {
+			deleteErrs = append(deleteErrs, err)
+		}
+	}
+	return errors.Join(deleteErrs...)
 }
 
 // DeleteBookCache 删除书籍的图片缓存目录

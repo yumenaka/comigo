@@ -77,7 +77,7 @@ templ ReadingHistoryWithLimit(limit int) {
 						<!-- 封面 -->
 						<div
 							class="w-16 h-20 bg-cover bg-center rounded shrink-0 border-2 border-gray-500 dark:border-gray-200"
-							:style="'background-image: url(' + window.ComiGoPath((item.book_info.cover.url.includes('api/get_file?') ? item.book_info.cover.url + '&resize_height=128&no-cache=true' : item.book_info.cover.url)) + ')'"
+							:style="'background-image: url(' + $store.global.getCoverURL(item.book_info, 128) + ')'"
 						></div>
 						<!-- 信息 -->
 						<div class="flex-1 min-w-0">

@@ -9,10 +9,15 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
-// http://127.0.0.1:1234/api/get-cover?id=2b17a13 获取封面图片的URL
+const shelfCoverResizeHeight = 352
+
+// getCoverURL 生成书架卡片封面 URL，并显式带上缩略图高度，确保后端按尺寸命中独立缓存。
+func getCoverURL(id string, resizeHeight int) string {
+	return config.PrefixPath(fmt.Sprintf("/api/get-cover?id=%s&resize_height=%d", id, resizeHeight))
+}
 
 css GetCoverBackgroundCSS(id string) {
-	background-image: { "url(" + config.PrefixPath("/api/get-cover?id="+id) + ")" };
+	background-image: { "url(" + getCoverURL(id, shelfCoverResizeHeight) + ")" };
 }
 
 templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {

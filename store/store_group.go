@@ -311,8 +311,17 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	return nil
 }
 
-// StoreBook 添加一本书
+// StoreBook 添加一本书，并在内存入库成功后持久化 metadata。
 func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
+	if err := ramStore.storeBookInMemory(b); err != nil {
+		return err
+	}
+	return saveBookMeta(b)
+}
+
+// storeBookInMemory 只更新内存 Store，不写 metadata 文件。
+// 持久化必须由 saveBookMeta 显式完成，避免批量入库时重复落盘。
+func (ramStore *StoreInRam) storeBookInMemory(b *model.Book) error {
 	if b.BookID == "" {
 		return errors.New(locale.GetString("err_add_book_empty_bookid"))
 	}
@@ -330,11 +339,16 @@ func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
 			logger.Infof(locale.GetString("log_bookmark_migrated"), b.BookID, len(marks))
 		}
 	}
-	err := SaveMetaJson(b)
-	if err != nil {
-		logger.Infof(locale.GetString("log_error_saving_book_to_json"), b.BookID, err)
-	}
 	return ramStore.StoreBookToSubStore(b.StoreUrl, b)
+}
+
+// saveBookMeta 只负责保存单本书 metadata，并统一记录保存失败日志。
+func saveBookMeta(b *model.Book) error {
+	if err := SaveMetaJson(b); err != nil {
+		logger.Infof(locale.GetString("log_error_saving_book_to_json"), b.BookID, err)
+		return err
+	}
+	return nil
 }
 
 // StoreBookToSubStore 将某一本书，放到BookMap里面去
@@ -361,16 +375,18 @@ func (ramStore *StoreInRam) StoreBookToSubStore(storeURL string, b *model.Book) 
 
 // StoreBooks 添加多本书
 func (ramStore *StoreInRam) StoreBooks(books []*model.Book) error {
+	var storeErrors []error
 	for _, b := range books {
-		if err := ramStore.StoreBook(b); err != nil {
+		if err := ramStore.storeBookInMemory(b); err != nil {
 			logger.Infof(locale.GetString("log_error_adding_book"), b.BookID, err)
+			storeErrors = append(storeErrors, err)
+			continue
 		}
-		err := SaveMetaJson(b)
-		if err != nil {
-			logger.Infof(locale.GetString("log_error_saving_book_to_json"), b.BookID, err)
+		if err := saveBookMeta(b); err != nil {
+			storeErrors = append(storeErrors, err)
 		}
 	}
-	return nil
+	return errors.Join(storeErrors...)
 }
 
 // GetParentBookID 通过子书籍 ID 获取所属书组 ID

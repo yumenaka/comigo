@@ -50,13 +50,13 @@ func GetCover(c echo.Context) error {
 	// 获取封面信息
 	cover := book.GetCover()
 	cacheCtx := getCoverCacheContext(book)
-	if handled, err := serveCachedCover(c, cacheCtx, req.bookID); handled || err != nil {
+	if handled, err := serveCachedCover(c, cacheCtx, req); handled || err != nil {
 		return err
 	}
 	// 尝试从 MP3 的 ID3(APIC) 内嵌图片中读取封面（在本地缓存未命中时）
 	// 说明：
 	// - 优先使用第三方库提高兼容性（dhowden/tag）
-	// - 成功读取后统一转为 JPEG，并复用现有的封面缓存（bookID.jpg）
+	// - 成功读取后统一转为 JPEG，并按请求尺寸写入封面缓存
 	if handled, err := serveMP3Cover(c, book, cacheCtx, req); handled || err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func GetCover(c echo.Context) error {
 		return apiresp.BadRequest(c, "get_cover_failed", "Get file error: "+err.Error(), nil)
 	}
 	// 缓存封面到 configDir
-	saveCoverCache(cacheCtx, req.bookID, imgData)
+	saveCoverCache(cacheCtx, req, imgData)
 	// 返回图片数据
 	return serveCoverBytes(c, contentType, imgData)
 }
@@ -112,11 +112,11 @@ func getCoverCacheContext(book *model.Book) coverCacheContext {
 	}
 }
 
-func serveCachedCover(c echo.Context, cacheCtx coverCacheContext, bookID string) (bool, error) {
-	if cacheCtx.metaPath == "" || !fileutil.CoverFileCacheExists(cacheCtx.metaPath, bookID) {
+func serveCachedCover(c echo.Context, cacheCtx coverCacheContext, req coverRequest) (bool, error) {
+	if cacheCtx.metaPath == "" || !fileutil.CoverFileCacheExists(cacheCtx.metaPath, req.bookID, req.resizeHeight) {
 		return false, nil
 	}
-	coverData, err := fileutil.GetCoverFromLocal(cacheCtx.metaPath, bookID)
+	coverData, err := fileutil.GetCoverFromLocal(cacheCtx.metaPath, req.bookID, req.resizeHeight)
 	if err != nil {
 		return false, nil
 	}
@@ -132,7 +132,7 @@ func serveMP3Cover(c echo.Context, book *model.Book, cacheCtx coverCacheContext,
 		return false, nil
 	}
 	imgData = tools.ImageResizeByHeight(imgData, req.resizeHeight)
-	saveCoverCache(cacheCtx, req.bookID, imgData)
+	saveCoverCache(cacheCtx, req, imgData)
 	return true, serveCoverBytes(c, "image/jpeg", imgData)
 }
 
@@ -168,7 +168,7 @@ func serveEmbeddedCover(c echo.Context, coverName string, coverURL string, cache
 	}
 	imgData = tools.ImageResizeByHeight(imgData, req.resizeHeight)
 	contentType := tools.GetContentTypeByFileName(".jpg")
-	saveCoverCache(cacheCtx, req.bookID, imgData)
+	saveCoverCache(cacheCtx, req, imgData)
 	return serveCoverBytes(c, contentType, imgData)
 }
 
@@ -188,11 +188,11 @@ func buildCoverPictureDataOption(book *model.Book, needFile string, resizeHeight
 	}
 }
 
-func saveCoverCache(cacheCtx coverCacheContext, bookID string, imgData []byte) {
+func saveCoverCache(cacheCtx coverCacheContext, req coverRequest, imgData []byte) {
 	if cacheCtx.configDir == "" || cacheCtx.metaPath == "" {
 		return
 	}
-	if err := fileutil.SaveCoverToLocal(cacheCtx.metaPath, bookID, imgData); err != nil {
+	if err := fileutil.SaveCoverToLocal(cacheCtx.metaPath, req.bookID, req.resizeHeight, imgData); err != nil {
 		logger.Infof(locale.GetString("log_save_cover_to_local_error"), err)
 	}
 }

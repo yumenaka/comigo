@@ -59,6 +59,25 @@ const system = getSystemInfo();
 const randomString = generateRandomString();
 const comigoPath = (path) => (window.ComiGoPath ? window.ComiGoPath(path) : path);
 const comigoRelativePath = (pathname) => (window.ComiGoRelativePath ? window.ComiGoRelativePath(pathname) : (pathname || window.location.pathname || '/'));
+
+// setURLQueryParam 给站内资源 URL 设置查询参数，返回仍可交给 ComiGoPath 处理的相对 URL。
+function setURLQueryParam(rawURL, key, value) {
+    if (!rawURL || value === undefined || value === null || value === '') {
+        return rawURL;
+    }
+    try {
+        const url = new URL(rawURL, window.location.origin);
+        url.searchParams.set(key, String(value));
+        if (url.origin !== window.location.origin) {
+            return url.href;
+        }
+        return `${comigoRelativePath(url.pathname)}${url.search}${url.hash}`;
+    } catch (error) {
+        const separator = rawURL.includes('?') ? '&' : '?';
+        return `${rawURL}${separator}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+    }
+}
+
 // 生成userID: 使用UserAgent的哈希值 + 随机字符串，确保唯一性且长度适中
 const initClientID = `Client_${randomString}_${system}_${browser}`;
 Alpine.store('global', {
@@ -245,6 +264,20 @@ Alpine.store('global', {
         }
         return "";
     },
+    // getCoverURL 统一生成封面 URL，所有调用方都显式传入展示尺寸，避免不同尺寸共用同一个后端缓存。
+    getCoverURL(bookInfo, resizeHeight = 352) {
+        const rawCoverURL = bookInfo?.cover?.url || (bookInfo?.id ? `/api/get-cover?id=${encodeURIComponent(bookInfo.id)}` : "");
+        if (!rawCoverURL) {
+            return "";
+        }
+        const isResizableCover = rawCoverURL.includes("/api/get-file") || rawCoverURL.includes("/api/get-cover");
+        if (!isResizableCover) {
+            return comigoPath(rawCoverURL);
+        }
+
+        const coverURL = setURLQueryParam(rawCoverURL, "resize_height", resizeHeight);
+        return comigoPath(coverURL);
+    },
     // 竖屏模式
     isPortrait: false,
     // 横屏模式
@@ -253,11 +286,12 @@ Alpine.store('global', {
     getCookieValue(bookID, valueName) {
         let pgCookie = "";
         const paramName = (bookID === "" ? `$${valueName}` : `${bookID}_${valueName}`);
+        const cookiePrefix = `${paramName}=`;
         const cookies = document.cookie.split(";");
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
-            if (cookie.startsWith(paramName)) {
-                pgCookie = decodeURIComponent(cookie.substring(paramName.length + 1));
+            if (cookie.startsWith(cookiePrefix)) {
+                pgCookie = decodeURIComponent(cookie.substring(cookiePrefix.length));
             }
         }
         return pgCookie;
@@ -267,7 +301,7 @@ Alpine.store('global', {
         // 设置cookie，过期时间为365天
         const expirationDate = new Date();
         expirationDate.setDate(expirationDate.getDate() + 365);
-        document.cookie = `${paramName}${encodeURIComponent(value)}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Lax`;
+        document.cookie = `${paramName}=${encodeURIComponent(value)}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Lax`;
         window.location.reload();
     },
     /**

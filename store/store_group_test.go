@@ -1,11 +1,13 @@
 package store
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 )
 
@@ -38,6 +40,65 @@ func setFakeBooks(t *testing.T, books ...*model.Book) {
 		fakeBooks = oldBooks
 		model.IStore = oldStore
 	})
+}
+
+func useTempConfigDir(t *testing.T) string {
+	t.Helper()
+	configDir := t.TempDir()
+	t.Setenv("COMIGO_CONFIG_DIR", configDir)
+	oldConfigFile := config.GetCfg().ConfigFile
+	config.GetCfg().ConfigFile = ""
+	t.Cleanup(func() {
+		config.GetCfg().ConfigFile = oldConfigFile
+	})
+	return configDir
+}
+
+func metaJSONPath(configDir string, book *model.Book) string {
+	return filepath.Join(configDir, "metadata", book.GetStoreID(), book.BookID+".json")
+}
+
+func newStoreGroupTestBook(storeURL, id string) *model.Book {
+	return &model.Book{BookInfo: model.BookInfo{
+		BookID:   id,
+		BookPath: filepath.Join(storeURL, id+".cbz"),
+		StoreUrl: storeURL,
+		Type:     model.TypeZip,
+	}}
+}
+
+func TestStoreBookInMemoryDoesNotPersistMeta(t *testing.T) {
+	configDir := useTempConfigDir(t)
+	storeURL := filepath.Join(t.TempDir(), "books")
+	book := newStoreGroupTestBook(storeURL, "book-in-memory")
+	ramStore := &StoreInRam{}
+
+	if err := ramStore.storeBookInMemory(book); err != nil {
+		t.Fatalf("storeBookInMemory error: %v", err)
+	}
+	if _, err := ramStore.GetBook(book.BookID); err != nil {
+		t.Fatalf("storeBookInMemory 没有写入内存 Store: %v", err)
+	}
+	if _, err := os.Stat(metaJSONPath(configDir, book)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("storeBookInMemory 不应写 metadata 文件，stat err=%v", err)
+	}
+}
+
+func TestStoreBookPersistsMetaAfterInMemoryStore(t *testing.T) {
+	configDir := useTempConfigDir(t)
+	storeURL := filepath.Join(t.TempDir(), "books")
+	book := newStoreGroupTestBook(storeURL, "book-persisted")
+	ramStore := &StoreInRam{}
+
+	if err := ramStore.StoreBook(book); err != nil {
+		t.Fatalf("StoreBook error: %v", err)
+	}
+	if _, err := ramStore.GetBook(book.BookID); err != nil {
+		t.Fatalf("StoreBook 没有写入内存 Store: %v", err)
+	}
+	if _, err := os.Stat(metaJSONPath(configDir, book)); err != nil {
+		t.Fatalf("StoreBook 应写 metadata 文件: %v", err)
+	}
 }
 
 // TestGenerateBookGroup_ShouldCreateFolderGroupsForIntermediateDirs
