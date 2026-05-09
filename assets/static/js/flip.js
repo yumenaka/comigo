@@ -61,8 +61,8 @@ const getConfig = () => ({
 // ============ 导入纯工具模块(utils) ============
 // 获取翻页模式分页与边界判断工具。?. 是可选链语法，避免对象不存在时报错。
 const getFlipPaginationUtils = () => window.ComiGoFlip?.pagination
-// 获取翻页模式交互几何判断工具 ?. 是可选链语法，避免对象不存在时报错。
-const getFlipInteractionUtils = () => window.ComiGoFlip?.interaction
+// 获取通用阅读交互几何判断工具；保留旧命名入口兼容已有页面。
+const getFlipInteractionUtils = () => window.ComiGoInteraction || window.ComiGoFlip?.interaction
 
 // ============ 工具函数 ============
 /**

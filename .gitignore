@@ -151,3 +151,6 @@ Caddyfile
 
 # Wiki is maintained as an independent repository.
 sample/wiki/
+
+# Local review notes.
+docs/maintenance_improvement_checklist.md

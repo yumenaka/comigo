@@ -1,6 +1,5 @@
-// 翻页模式交互几何判断工具IIFE
-// （立即执行函数）：(function(){...})(...) 
-// 创建一个“一次性、私有”的作用域。作用：避免污染全局作用域，即只暴露api，而不暴露实现细节。
+// 阅读交互几何判断工具 IIFE。
+// 只集中“区域命中”这类纯判断；点击响应和鼠标图标仍由各阅读模式自己决定。
 (function (global) {
     'use strict'
 
@@ -35,9 +34,10 @@
         isPointInRect,
     }
 
+    global.ComiGoInteraction = api
     global.ComiGoFlip = global.ComiGoFlip || {}
     global.ComiGoFlip.interaction = api
-    // 如果是 CommonJS 模块系统，则导出 api 
+    // 如果是 CommonJS 模块系统，则导出 api
     // 让 Node/Bun 测试环境也能 require() 这个模块，方便测试。
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = api

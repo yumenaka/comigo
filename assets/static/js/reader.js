@@ -741,7 +741,7 @@ function getReaderFlipPaginationUtils() {
 }
 
 function getReaderFlipInteractionUtils() {
-    return window.ComiGoFlip?.interaction
+    return window.ComiGoInteraction || window.ComiGoFlip?.interaction
 }
 
 function createReaderFlipImage(className) {
@@ -1339,28 +1339,13 @@ function onReaderFlipDocumentMouseMove(event) {
     }
 }
 
-// 判断点击位置是否位于屏幕中央设置区域，逻辑与 scroll 阅读页保持一致。
+// 判断点击位置是否位于屏幕中央设置区域；只复用公共几何判断，保留 reader 自己的响应行为。
 function getInReaderSettingArea(event) {
     const pointer = event.touches ? event.touches[0] : event
     if (!pointer) return false
 
-    const clickX = pointer.clientX
-    const clickY = pointer.clientY
-    const innerWidth = window.innerWidth
-    const innerHeight = window.innerHeight
-    const setArea = 0.15
-
-    let minY = innerHeight * (0.5 - setArea)
-    let maxY = innerHeight * (0.5 + setArea)
-    let minX = innerWidth * 0.5 - (maxY - minY) * 0.5
-    let maxX = innerWidth * 0.5 + (maxY - minY) * 0.5
-    if (innerWidth < innerHeight) {
-        minX = innerWidth * (0.5 - setArea)
-        maxX = innerWidth * (0.5 + setArea)
-        minY = innerHeight * 0.5 - (maxX - minX) * 0.5
-        maxY = innerHeight * 0.5 + (maxX - minX) * 0.5
-    }
-    return clickX > minX && clickX < maxX && clickY > minY && clickY < maxY
+    const util = getReaderFlipInteractionUtils()
+    return Boolean(util?.isInSetArea?.(pointer.clientX, pointer.clientY, window.innerWidth, window.innerHeight, 0.15))
 }
 
 function openReaderSettings() {

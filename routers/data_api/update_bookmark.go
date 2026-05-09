@@ -14,7 +14,7 @@ func StoreBookmark(c echo.Context) error {
 	var request struct {
 		Type        string `json:"type"`        // 书签类型，例如 "auto" 表示自动书签
 		BookID      string `json:"book_id"`     // 书籍 ID
-		PageIndex   int    `json:"page_index"`  // 书签页码，从 0 开始，不会超过 PageCount - 1
+		PageIndex   int    `json:"page_index"`  // 书签页码，从 1 开始，不会超过 PageCount
 		Description string `json:"description"` // 书签描述，自动书签的话，是浏览器+系统信息（like：Firefox in Linux）
 	}
 	if err := c.Bind(&request); err != nil {

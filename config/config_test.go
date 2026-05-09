@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/yumenaka/comigo/tools"
 )
 
 func TestUpdateConfigFileCreatesTargetAndTracksConfigFile(t *testing.T) {
@@ -130,7 +132,7 @@ func TestIsSubPath(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result := isSubPath(filepath.Clean(tt.parent), filepath.Clean(tt.child))
+		result := tools.IsSubPath(filepath.Clean(tt.parent), filepath.Clean(tt.child))
 		if result != tt.expected {
 			t.Errorf("isSubPath(%s, %s) = %v, 期望 %v", tt.parent, tt.child, result, tt.expected)
 		}

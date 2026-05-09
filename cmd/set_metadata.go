@@ -44,7 +44,7 @@ func LoadMetadata() {
 func SaveMetadata() {
 	// 未启用数据库的时候，保存书籍元数据到本地Json文件
 	if !config.GetCfg().EnableDatabase {
-		err := store.RamStore.SaveBooksToJson()
+		err := store.RamStore.SaveAllBooksMetaJson()
 		if err != nil {
 			logger.Infof(locale.GetString("log_savebooks_error"), err)
 		}
@@ -56,7 +56,7 @@ func SaveMetadata() {
 			logger.Infof(locale.GetString("log_error_listing_books_from_database"), err)
 		} else {
 			// 兜底：万一数据库无效，至把书加回RamStore
-			err = store.RamStore.AddBooks(allBooks)
+			err = store.RamStore.StoreBooks(allBooks)
 			if err != nil {
 				return
 			}

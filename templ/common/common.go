@@ -68,7 +68,7 @@ func GetReturnUrl(BookID string) string {
 }
 
 func QuickJumpBarBooks(b *model.Book) (list *model.BookInfos) {
-	list, err := store.GetBookInfoListByParentFolder(b.ParentFolder)
+	list, err := store.GetBookInfoListByBookFolder(b)
 	if err != nil {
 		logger.Infof("%s", err)
 		return nil

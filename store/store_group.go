@@ -94,8 +94,8 @@ func (ramStore *StoreInRam) ListBooks() ([]*model.Book, error) {
 	return books, nil
 }
 
-// SaveBooksToJson  保存书籍信息到本地硬盘（JSON 文件）
-func (ramStore *StoreInRam) SaveBooksToJson() error {
+// SaveAllBooksMetaJson  保存书籍信息到本地硬盘（JSON 文件）
+func (ramStore *StoreInRam) SaveAllBooksMetaJson() error {
 	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return err
@@ -107,9 +107,9 @@ func (ramStore *StoreInRam) SaveBooksToJson() error {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 		return err
 	}
-	// 遍历并保存每本书
+	// 遍历并保存每本书的元数据到 JSON 文件
 	for _, book := range allBooks {
-		err := SaveBookJson(book)
+		err := SaveMetaJson(book)
 		if err != nil {
 			logger.Infof(locale.GetString("log_error_saving_book"), book.BookID, err)
 		}
@@ -118,8 +118,8 @@ func (ramStore *StoreInRam) SaveBooksToJson() error {
 	return nil
 }
 
-// SaveBookJson 将单本书籍信息保存为 JSON 文件
-func SaveBookJson(book *model.Book) error {
+// SaveMetaJson 将单本书籍信息保存为 JSON 文件
+func SaveMetaJson(book *model.Book) error {
 	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return err
@@ -330,15 +330,15 @@ func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
 			logger.Infof(locale.GetString("log_bookmark_migrated"), b.BookID, len(marks))
 		}
 	}
-	err := SaveBookJson(b)
+	err := SaveMetaJson(b)
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_saving_book_to_json"), b.BookID, err)
 	}
-	return ramStore.AddBookToSubStore(b.StoreUrl, b)
+	return ramStore.StoreBookToSubStore(b.StoreUrl, b)
 }
 
-// AddBookToSubStore 将某一本书，放到BookMap里面去
-func (ramStore *StoreInRam) AddBookToSubStore(storeURL string, b *model.Book) error {
+// StoreBookToSubStore 将某一本书，放到BookMap里面去
+func (ramStore *StoreInRam) StoreBookToSubStore(storeURL string, b *model.Book) error {
 	if f, ok := ramStore.ChildStores.Load(storeURL); !ok {
 		// 创建一个新子书库，并添加一本书
 		newSubStore := Store{
@@ -359,13 +359,13 @@ func (ramStore *StoreInRam) AddBookToSubStore(storeURL string, b *model.Book) er
 	}
 }
 
-// AddBooks 添加多本书
-func (ramStore *StoreInRam) AddBooks(books []*model.Book) error {
+// StoreBooks 添加多本书
+func (ramStore *StoreInRam) StoreBooks(books []*model.Book) error {
 	for _, b := range books {
 		if err := ramStore.StoreBook(b); err != nil {
 			logger.Infof(locale.GetString("log_error_adding_book"), b.BookID, err)
 		}
-		err := SaveBookJson(b)
+		err := SaveMetaJson(b)
 		if err != nil {
 			logger.Infof(locale.GetString("log_error_saving_book_to_json"), b.BookID, err)
 		}
@@ -617,15 +617,24 @@ func GetChildBooksInfo(BookID string) (*model.BookInfos, error) {
 	}
 }
 
-// GetBookInfoListByParentFolder 根据父文件夹获取书籍列表
-func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfos, error) {
+// GetBookInfoListByBookFolder 根据当前书籍的真实父目录获取同目录书籍列表。
+// ParentFolder 只保存展示用目录名，不能作为分组 key；这里使用 StoreUrl + BookPath 父目录避免同名目录串组。
+func GetBookInfoListByBookFolder(book *model.Book) (*model.BookInfos, error) {
+	if book == nil {
+		return nil, fmt.Errorf(locale.GetString("err_cannot_find_book_parentfolder"), "")
+	}
+	currentFolderKey := bookFolderKey(book.BookInfo)
+	if currentFolderKey == "" {
+		return nil, fmt.Errorf(locale.GetString("err_cannot_find_book_parentfolder"), book.ParentFolder)
+	}
+
 	var infoList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, b := range allBooks {
-		if b.ParentFolder == parentFolder {
+		if bookFolderKey(b.BookInfo) == currentFolderKey {
 			infoList = append(infoList, b.BookInfo)
 		}
 	}
@@ -633,5 +642,40 @@ func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfos, error
 		infoList.SortBooks("filename")
 		return &infoList, nil
 	}
-	return nil, fmt.Errorf(locale.GetString("err_cannot_find_book_parentfolder"), parentFolder)
+	return nil, fmt.Errorf(locale.GetString("err_cannot_find_book_parentfolder"), book.ParentFolder)
+}
+
+func bookFolderKey(book model.BookInfo) string {
+	parentPath := bookParentPath(book)
+	if parentPath == "" {
+		return ""
+	}
+	return book.StoreUrl + "\x00" + parentPath
+}
+
+func bookParentPath(book model.BookInfo) string {
+	bookPath := strings.TrimSpace(book.BookPath)
+	if bookPath == "" {
+		if book.ParentFolder == "" {
+			return ""
+		}
+		// 兼容旧元数据：没有 BookPath 时只能退回到 StoreUrl + ParentFolder，避免跨书库串组。
+		return book.ParentFolder
+	}
+
+	if book.Type == model.TypeDir || book.Type == model.TypeBooksGroup {
+		bookPath = strings.TrimRight(bookPath, "/\\")
+	}
+	if book.IsRemote {
+		bookPath = strings.TrimRight(bookPath, "/\\")
+		lastSlash := strings.LastIndexAny(bookPath, "/\\")
+		if lastSlash >= 0 {
+			return bookPath[:lastSlash]
+		}
+		if book.RemoteURL != "" {
+			return book.RemoteURL
+		}
+		return book.StoreUrl
+	}
+	return filepath.Dir(bookPath)
 }

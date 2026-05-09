@@ -349,14 +349,6 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	request.Username = strings.TrimSpace(request.Username)
 	request.CurrentPassword = strings.TrimSpace(request.CurrentPassword)
 
-	// 除非是调试模式, 密码不明文记录到日志
-	if config.GetCfg().Debug {
-		logger.Infof(locale.GetString("log_update_user_info_username"), request.Username)
-		logger.Infof(locale.GetString("log_update_user_info_current_password"), request.CurrentPassword)
-		logger.Infof(locale.GetString("log_update_user_info_password"), request.Password)
-		logger.Infof(locale.GetString("log_update_user_info_reenter_password"), request.ReEnterPassword)
-	}
-
 	cfg := config.GetCfg()
 	existingPasswordLogin := cfg.HasPasswordLoginConfigured()
 	passwordLoginChanged := request.Username != cfg.Username ||
@@ -440,7 +432,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	if err := c.Bind(&request); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
 	}
-	fmt.Printf("Received Tailscale config update: %+v\n", request)
+	//fmt.Printf("Received Tailscale config update: %+v\n", request)
 
 	// 验证输入
 	if request.EnableTailscale {

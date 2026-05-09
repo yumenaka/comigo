@@ -746,32 +746,15 @@ onResize()
 //文档视图调整大小时触发 resize 事件。 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/resize_event
 window.addEventListener('resize', onResize)
 
+function getScrollInteractionUtils() {
+    return window.ComiGoInteraction || window.ComiGoFlip?.interaction
+}
+
 //鼠标是否在设置区域
 function getInSetArea(e) {
-    let clickX = e.x //获取鼠标的X坐标（鼠标与屏幕左侧的距离,单位为px）
-    let clickY = e.y //获取鼠标的Y坐标（鼠标与屏幕顶部的距离,单位为px）
-    //浏览器的视口,不包括工具栏和滚动条:
-    let innerWidth = window.innerWidth
-    let innerHeight = window.innerHeight
-    //设置区域为正方形，边长按照宽或高里面，比较小的值决定
-    const setArea = 0.15
-    // innerWidth >= innerHeight 的情况下
-    let MinY = innerHeight * (0.5 - setArea)
-    let MaxY = innerHeight * (0.5 + setArea)
-    let MinX = innerWidth * 0.5 - (MaxY - MinY) * 0.5
-    let MaxX = innerWidth * 0.5 + (MaxY - MinY) * 0.5
-    if (innerWidth < innerHeight) {
-        MinX = innerWidth * (0.5 - setArea)
-        MaxX = innerWidth * (0.5 + setArea)
-        MinY = innerHeight * 0.5 - (MaxX - MinX) * 0.5
-        MaxY = innerHeight * 0.5 + (MaxX - MinX) * 0.5
-    }
-    //在设置区域
-    let inSetArea = false
-    if (clickX > MinX && clickX < MaxX && clickY > MinY && clickY < MaxY) {
-        inSetArea = true
-    }
-    return inSetArea
+    const interactionUtils = getScrollInteractionUtils()
+    // 保持 scroll 旧行为：继续使用 MouseEvent.x/y，触摸事件不额外转成 touches 坐标。
+    return Boolean(interactionUtils?.isInSetArea?.(e.x, e.y, window.innerWidth, window.innerHeight, 0.15))
 }
 
 //获取鼠标位置,决定是否打开设置面板
