@@ -2424,10 +2424,6 @@
     margin-top: calc(var(--spacing) * 12);
   }
 
-  .mt-32 {
-    margin-top: calc(var(--spacing) * 32);
-  }
-
   .mt-\[-16px\] {
     margin-top: -16px;
   }
@@ -4307,8 +4303,8 @@
     border-color: var(--color-red-400);
   }
 
-  .border-red-600 {
-    border-color: var(--color-red-600);
+  .border-red-500 {
+    border-color: var(--color-red-500);
   }
 
   .border-sky-300 {
@@ -4388,16 +4384,6 @@
   @supports (color: color-mix(in lab, red, red)) {
     .bg-black\/20 {
       background-color: color-mix(in oklab, var(--color-black) 20%, transparent);
-    }
-  }
-
-  .bg-black\/30 {
-    background-color: #0000004d;
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-black\/30 {
-      background-color: color-mix(in oklab, var(--color-black) 30%, transparent);
     }
   }
 

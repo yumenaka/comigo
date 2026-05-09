@@ -8,6 +8,8 @@ package settings
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "github.com/yumenaka/comigo/config"
+
 // stringConfigScriptHandle 用于防止 JS 代码重复渲染
 var stringConfigScriptHandle = templ.NewOnceHandle()
 
@@ -44,7 +46,7 @@ func StringConfig(name string, value string, description string) templ.Component
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("stringConfig_" + name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 10, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 12, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -57,7 +59,7 @@ func StringConfig(name string, value string, description string) templ.Component
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 15, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 17, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -70,7 +72,7 @@ func StringConfig(name string, value string, description string) templ.Component
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 15, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 17, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -83,7 +85,7 @@ func StringConfig(name string, value string, description string) templ.Component
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 17, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 19, Col: 12}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -96,7 +98,7 @@ func StringConfig(name string, value string, description string) templ.Component
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 18, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 20, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -109,7 +111,7 @@ func StringConfig(name string, value string, description string) templ.Component
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 20, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 22, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -122,7 +124,7 @@ func StringConfig(name string, value string, description string) templ.Component
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 21, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 23, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -135,39 +137,49 @@ func StringConfig(name string, value string, description string) templ.Component
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 22, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 24, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50\" @change=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if config.GetCfg().ReadOnlyMode {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " disabled")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " class=\"px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50\" @change=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("updateStringConfig('" + name + "', $event.target.value)")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 24, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 27, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"><div class=\"w-full py-1 text-xs text-base-content\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"><div class=\"w-full py-1 text-xs text-base-content\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(description))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 28, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/string_config.templ`, Line: 31, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"></div><div class=\"bg-red-600\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"></div><div class=\"bg-red-600\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -209,7 +221,7 @@ func StringConfigJavascript() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<script>\n\t\t\t// 更新字符串配置的函数\n\t\t\tasync function updateStringConfig(name, value) {\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/update-string-config\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\t\tname: name,\n\t\t\t\t\t\t\t\tvalue: value,\n\t\t\t\t\t\t\t}),\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_update_config_failed\"), \"error\");\n\t\t\t\t\t\t// 恢复输入框的值\n\t\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\t\tif (input) {\n\t\t\t\t\t\t\tinput.value = input.getAttribute(\"data-original-value\") || value;\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t// 解析响应\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\t// 更新原始值标记\n\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\tif (input) {\n\t\t\t\t\t\tinput.setAttribute(\"data-original-value\", value);\n\t\t\t\t\t}\n\t\t\t\t\t// 显示成功提示（需整页刷新时由服务端 SSE 推送确认）\n\t\t\t\t\tif (data.saveSuccessHint) {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"info\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"success\");\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"更新配置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t\t// 恢复输入框的值\n\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\tif (input) {\n\t\t\t\t\t\tinput.value = input.getAttribute(\"data-original-value\") || value;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<script>\n\t\t\t// 更新字符串配置的函数\n\t\t\tasync function updateStringConfig(name, value) {\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/update-string-config\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\t\tname: name,\n\t\t\t\t\t\t\t\tvalue: value,\n\t\t\t\t\t\t\t}),\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_update_config_failed\"), \"error\");\n\t\t\t\t\t\t// 恢复输入框的值\n\t\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\t\tif (input) {\n\t\t\t\t\t\t\tinput.value = input.getAttribute(\"data-original-value\") || value;\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t// 解析响应\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\t// 更新原始值标记\n\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\tif (input) {\n\t\t\t\t\t\tinput.setAttribute(\"data-original-value\", value);\n\t\t\t\t\t}\n\t\t\t\t\t// 显示成功提示（需整页刷新时由服务端 SSE 推送确认）\n\t\t\t\t\tif (data.saveSuccessHint) {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"info\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"success\");\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"更新配置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t\t// 恢复输入框的值\n\t\t\t\t\tconst input = document.getElementById(name);\n\t\t\t\t\tif (input) {\n\t\t\t\t\t\tinput.value = input.getAttribute(\"data-original-value\") || value;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

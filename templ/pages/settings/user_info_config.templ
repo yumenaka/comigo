@@ -1,6 +1,9 @@
 package settings
 
-import "github.com/yumenaka/comigo/config"
+import (
+	"fmt"
+	"github.com/yumenaka/comigo/config"
+)
 
 // userInfoConfigScriptHandle 用于防止 JS 代码重复渲染
 var userInfoConfigScriptHandle = templ.NewOnceHandle()
@@ -148,8 +151,8 @@ templ UserInfoConfig() {
 					<button
 						type="button"
 						class="min-w-28 px-3 h-10 mx-2 my-0 text-center text-black transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
-						:class="{ 'opacity-50 cursor-not-allowed': isFormChanged === false || saving }"
-						:disabled="isFormChanged === false || saving"
+						:class={ fmt.Sprintf("{ 'opacity-50 cursor-not-allowed': isFormChanged === false || saving || %t }", config.GetCfg().ReadOnlyMode) }
+						:disabled={ fmt.Sprintf("isFormChanged === false || saving || %t", config.GetCfg().ReadOnlyMode) }
 						@click={ "if (checkFormData()) { updateLoginSettings({ username, currentPassword: current_password, password, reEnterPassword: ReEnterPassword }); }" }
 						x-text="saving ? i18next.t('saving') : i18next.t('save')"
 					>SAVE</button>

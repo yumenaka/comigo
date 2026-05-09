@@ -142,30 +142,36 @@ func PluginsConfig() templ.Component {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " class=\"sr-only peer\" @change=\"")
+				if config.GetCfg().ReadOnlyMode {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " disabled")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " class=\"sr-only peer\" @change=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("togglePlugin('" + pluginName + "', $event.target.checked)")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 58, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/plugins_config.templ`, Line: 59, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"> <span class=\"absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500\"></span> <span class=\"absolute inset-y-0 w-4 h-4 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-5\"></span></label></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\"> <span class=\"absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500\"></span> <span class=\"absolute inset-y-0 w-4 h-4 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-5\"></span></label></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -210,7 +216,7 @@ func PluginsConfigJavaScript() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<script>\n\t\t\t// 启用/禁用插件\n\t\t\tasync function togglePlugin(pluginName, enabled) {\n\t\t\t\ttry {\n\t\t\t\t\tconst endpoint = enabled\n\t\t\t\t\t\t? window.ComiGoPath(\"/api/enable-plugin\")\n\t\t\t\t\t\t: window.ComiGoPath(\"/api/disable-plugin\");\n\t\t\t\t\tconst response = await fetch(endpoint, {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tpluginName: pluginName,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_update_config_failed\"), \"error\");\n\t\t\t\t\t\t// 恢复 checkbox 状态\n\t\t\t\t\t\tconst checkbox = document.getElementById(\"plugin_\" + pluginName);\n\t\t\t\t\t\tif (checkbox) {\n\t\t\t\t\t\t\tcheckbox.checked = !enabled;\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\tawait response.json();\n\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"success\");\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"切换插件状态失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t\t// 恢复 checkbox 状态\n\t\t\t\t\tconst checkbox = document.getElementById(\"plugin_\" + pluginName);\n\t\t\t\t\tif (checkbox) {\n\t\t\t\t\t\tcheckbox.checked = !enabled;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<script>\n\t\t\t// 启用/禁用插件\n\t\t\tasync function togglePlugin(pluginName, enabled) {\n\t\t\t\ttry {\n\t\t\t\t\tconst endpoint = enabled\n\t\t\t\t\t\t? window.ComiGoPath(\"/api/enable-plugin\")\n\t\t\t\t\t\t: window.ComiGoPath(\"/api/disable-plugin\");\n\t\t\t\t\tconst response = await fetch(endpoint, {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tpluginName: pluginName,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_update_config_failed\"), \"error\");\n\t\t\t\t\t\t// 恢复 checkbox 状态\n\t\t\t\t\t\tconst checkbox = document.getElementById(\"plugin_\" + pluginName);\n\t\t\t\t\t\tif (checkbox) {\n\t\t\t\t\t\t\tcheckbox.checked = !enabled;\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\tawait response.json();\n\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"success\");\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"切换插件状态失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t\t// 恢复 checkbox 状态\n\t\t\t\t\tconst checkbox = document.getElementById(\"plugin_\" + pluginName);\n\t\t\t\t\tif (checkbox) {\n\t\t\t\t\t\tcheckbox.checked = !enabled;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

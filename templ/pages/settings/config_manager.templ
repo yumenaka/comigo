@@ -129,7 +129,8 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				<button
 					id="saveConfigButton"
 					type="button"
-					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+					disabled?={ config.GetCfg().ReadOnlyMode }
+					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
 					x-text={ getTranslations("save") }
 					@click={ "saveConfig(selectedDir)" }
 				>
@@ -138,7 +139,8 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				<button
 					id="deleteConfigButton"
 					type="button"
-					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-red-200 transition delay-150 duration-300 ease-in-out  hover:bg-red-400"
+					disabled?={ config.GetCfg().ReadOnlyMode }
+					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-red-200 transition delay-150 duration-300 ease-in-out hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
 					x-text={ getTranslations("delete") }
 					@click={ "deleteConfig(selectedDir)" }
 				>

@@ -1,5 +1,7 @@
 package settings
 
+import "github.com/yumenaka/comigo/config"
+
 // BoolConfig 布尔类型的配置
 templ BoolConfig(name string, value bool, description string) {
 	@BoolConfigJavaScript()
@@ -12,6 +14,7 @@ templ BoolConfig(name string, value bool, description string) {
 				name={ name }
 				value="true"
 				checked?={ value }
+				disabled?={ config.GetCfg().ReadOnlyMode }
 				class="sr-only peer"
 				@change={ "updateBoolConfig('" + name + "', $event.target.checked)" }
 			/>

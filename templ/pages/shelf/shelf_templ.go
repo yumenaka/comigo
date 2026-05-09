@@ -91,6 +91,10 @@ func ShelfHeaderLeft(c echo.Context) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = common.ServerSettingsButton().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		if shouldShowShelfReturnIcon(c) {
 			templ_7745c5c3_Err = common.ReturnButton(getShelfReturnURL(c)).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -103,10 +107,6 @@ func ShelfHeaderLeft(c echo.Context) templ.Component {
 			}
 		}
 		templ_7745c5c3_Err = common.FullScreenOfflineButton().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = common.ServerSettingsButton().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -137,6 +137,9 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 			continue
 		}
 		if !IsSupportFile(file.Name) {
+			if IsSupportMedia(file.Name) {
+				continue
+			}
 			logger.Infof(locale.GetString("log_skip_unsupported_file_type")+" (路径: %s)", file.Name, file.Path)
 			continue
 		}

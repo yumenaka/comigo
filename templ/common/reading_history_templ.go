@@ -81,7 +81,7 @@ func ReadingHistoryWithLimit(limit int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" x-show=\"!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')\" x-init=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" x-show=\"isOnline()\" x-init=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -123,7 +123,12 @@ func getReadingHistoryXData(limit int) string {
 		loading: false,
 		limit: ` + strconv.Itoa(limit) + `,
 		totalCount: 0,
+		isOnline() {
+			// 便携 HTML 以 file:// 打开时不能请求后端 API。
+			return window.location.protocol === 'http:' || window.location.protocol === 'https:';
+		},
 		async refresh() {
+			if (!this.isOnline()) return;
 			this.loading = true;
 			try {
 				const response = await fetch(window.ComiGoPath('/api/reading-history') + '?limit=` + strconv.Itoa(limit) + `');

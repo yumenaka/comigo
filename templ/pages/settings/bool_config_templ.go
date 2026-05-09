@@ -8,6 +8,8 @@ package settings
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "github.com/yumenaka/comigo/config"
+
 // BoolConfig 布尔类型的配置
 func BoolConfig(name string, value bool, description string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -41,7 +43,7 @@ func BoolConfig(name string, value bool, description string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("boolConfig_" + name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 6, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 8, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -54,7 +56,7 @@ func BoolConfig(name string, value bool, description string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 7, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 9, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -67,7 +69,7 @@ func BoolConfig(name string, value bool, description string) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 8, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 10, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -80,7 +82,7 @@ func BoolConfig(name string, value bool, description string) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 11, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 13, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -93,7 +95,7 @@ func BoolConfig(name string, value bool, description string) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 12, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 14, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -109,33 +111,39 @@ func BoolConfig(name string, value bool, description string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " class=\"sr-only peer\" @change=\"")
+		if config.GetCfg().ReadOnlyMode {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " disabled")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " class=\"sr-only peer\" @change=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs("updateBoolConfig('" + name + "', $event.target.checked)")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 16, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 19, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"> <span class=\"absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500\"></span> <span class=\"absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6\"></span></label><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"> <span class=\"absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500\"></span> <span class=\"absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6\"></span></label><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations(description))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 21, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/bool_config.templ`, Line: 24, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"w-full py-1 text-left text-xs text-base-content\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"w-full py-1 text-left text-xs text-base-content\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -180,7 +188,7 @@ func BoolConfigJavaScript() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<script>\n\t\t\t// 更新布尔配置的函数\n\t\t\tasync function updateBoolConfig(name, value) {\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/update-bool-config\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\t\tname: name,\n\t\t\t\t\t\t\t\tvalue: value,\n\t\t\t\t\t\t\t}),\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_update_config_failed\"), \"error\");\n\t\t\t\t\t\t// 恢复 checkbox 状态\n\t\t\t\t\t\tconst checkbox = document.getElementById(name);\n\t\t\t\t\t\tif (checkbox) {\n\t\t\t\t\t\t\tcheckbox.checked = !value;\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\tif (name === \"Debug\") {\n\t\t\t\t\t\tconst settingsMainArea =\n\t\t\t\t\t\t\tdocument.getElementById(\"settingsMainArea\");\n\t\t\t\t\t\tif (settingsMainArea?.__x?.$data) {\n\t\t\t\t\t\t\tsettingsMainArea.__x.$data.debug_mode = value;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\t// 显示成功提示（需整页刷新时由服务端 SSE 推送确认）\n\t\t\t\t\tshowToast(\n\t\t\t\t\t\ti18next.t(\"save_success_hint\"),\n\t\t\t\t\t\tdata.saveSuccessHint ? \"info\" : \"success\",\n\t\t\t\t\t);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"更新配置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t\t// 恢复 checkbox 状态\n\t\t\t\t\tconst checkbox = document.getElementById(name);\n\t\t\t\t\tif (checkbox) {\n\t\t\t\t\t\tcheckbox.checked = !value;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<script>\n\t\t\t// 更新布尔配置的函数\n\t\t\tasync function updateBoolConfig(name, value) {\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/update-bool-config\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\t\tname: name,\n\t\t\t\t\t\t\t\tvalue: value,\n\t\t\t\t\t\t\t}),\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_update_config_failed\"), \"error\");\n\t\t\t\t\t\t// 恢复 checkbox 状态\n\t\t\t\t\t\tconst checkbox = document.getElementById(name);\n\t\t\t\t\t\tif (checkbox) {\n\t\t\t\t\t\t\tcheckbox.checked = !value;\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\tif (name === \"Debug\") {\n\t\t\t\t\t\tconst settingsMainArea =\n\t\t\t\t\t\t\tdocument.getElementById(\"settingsMainArea\");\n\t\t\t\t\t\tif (settingsMainArea?.__x?.$data) {\n\t\t\t\t\t\t\tsettingsMainArea.__x.$data.debug_mode = value;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\t// 显示成功提示（需整页刷新时由服务端 SSE 推送确认）\n\t\t\t\t\tshowToast(\n\t\t\t\t\t\ti18next.t(\"save_success_hint\"),\n\t\t\t\t\t\tdata.saveSuccessHint ? \"info\" : \"success\",\n\t\t\t\t\t);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"更新配置失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t\t// 恢复 checkbox 状态\n\t\t\t\t\tconst checkbox = document.getElementById(name);\n\t\t\t\t\tif (checkbox) {\n\t\t\t\t\t\tcheckbox.checked = !value;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

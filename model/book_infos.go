@@ -121,6 +121,7 @@ func compareByFileSize(a, b BookInfo) bool {
 
 type StoreBookInfo struct {
 	StoreUrl     string    `json:"store_url"`
+	DisplayName  string    `json:"display_name"`
 	ChildBookNum int       `json:"child_book_num"`
 	BookInfos    BookInfos `json:"book_infos"`
 }

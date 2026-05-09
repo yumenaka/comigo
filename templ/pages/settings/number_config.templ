@@ -1,6 +1,7 @@
 package settings
 
 import "strconv"
+import "github.com/yumenaka/comigo/config"
 
 // NumberConfig 数字类型的配置
 templ NumberConfig(name string, value int, description string, min int, max int) {
@@ -26,6 +27,7 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 			max={ strconv.Itoa(max) }
 			min={ strconv.Itoa(min) }
 			data-original-value={ strconv.Itoa(value) }
+			disabled?={ config.GetCfg().ReadOnlyMode }
 			@change={ "updateNumberConfig('" + name + "', $event.target.value, " + strconv.Itoa(min) + ", " + strconv.Itoa(max) + ")" }
 		/>
 		<div class="w-full py-1 text-left text-xs text-base-content" x-text={ getTranslations(description) }></div>

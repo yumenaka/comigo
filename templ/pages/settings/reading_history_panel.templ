@@ -142,15 +142,17 @@ templ ReadingHistoryPanel() {
 					</button>
 					<!-- 页码 -->
 					<template x-for="page in visiblePages" :key="page">
-						<button
-							x-show="page !== '...'"
-							@click="goToPage(page)"
-							:disabled="loading"
-							:class="currentPage === page ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'"
-							class="px-3 py-1 rounded border transition-colors min-w-10 disabled:opacity-50 disabled:cursor-not-allowed"
-							x-text="page"
-						></button>
-						<span x-show="page === '...'" class="px-2 text-gray-500">...</span>
+						<span>
+							<button
+								x-show="page !== '...'"
+								@click="goToPage(page)"
+								:disabled="loading"
+								:class="currentPage === page ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'"
+								class="px-3 py-1 rounded border transition-colors min-w-10 disabled:opacity-50 disabled:cursor-not-allowed"
+								x-text="page"
+							></button>
+							<span x-show="page === '...'" class="px-2 text-gray-500">...</span>
+						</span>
 					</template>
 					<!-- 下一页 -->
 					<button

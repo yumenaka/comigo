@@ -26,9 +26,12 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScripts []string) 
 				<meta name="apple-mobile-web-app-title" content="Comigo Reader"/>
 				<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 			}
-			<link rel="apple-touch-icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) }/>
-			<link rel="shortcut icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.ico")) } type="image/x-icon"/>
-			<link rel="icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) } sizes="any"/>
+			// 静态导出的便携 HTML 以 file:// 打开时不能访问站点根路径资源。
+			if c.QueryParam("static") == "" {
+				<link rel="apple-touch-icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) }/>
+				<link rel="shortcut icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.ico")) } type="image/x-icon"/>
+				<link rel="icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) } sizes="any"/>
+			}
 			@templ.Raw(assets.GetCSS(c.QueryParam("static") != ""))
 		</head>
 		<!-- x-bind: Alpine.js的语法，全局主题从 $store.global.theme 读取 -->

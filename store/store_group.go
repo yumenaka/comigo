@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -547,7 +548,8 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 			storeID = storePathAbs
 		}
 		newStoreBookInfo := model.StoreBookInfo{
-			StoreUrl: storeID,
+			StoreUrl:    storeID,
+			DisplayName: displayStoreName(storeID),
 		}
 		for _, topBook := range topBookList {
 			if topBook.StoreUrl == storeID {
@@ -570,6 +572,26 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 	}
 	// 没找到任何书
 	return nil, errors.New(locale.GetString("err_cannot_find_book_topofshelf"))
+}
+
+// displayStoreName 生成首页展示用书库名，避免把本机绝对路径直接暴露到页面。
+func displayStoreName(storeID string) string {
+	if storeID == "" {
+		return ""
+	}
+	if IsRemoteURL(storeID) {
+		parsedURL, err := url.Parse(storeID)
+		if err == nil && parsedURL.Host != "" {
+			return parsedURL.Host
+		}
+		return storeID
+	}
+	cleanPath := filepath.Clean(storeID)
+	baseName := filepath.Base(cleanPath)
+	if baseName == "." || baseName == string(filepath.Separator) {
+		return cleanPath
+	}
+	return baseName
 }
 
 // GetChildBooksInfo 根据 ID 获取书籍列表

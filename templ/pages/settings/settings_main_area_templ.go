@@ -58,7 +58,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if config.GetCfg().ReadOnlyMode {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/30 flex items-start justify-center z-50 pointer-events-auto\"><div class=\"mt-32 p-2 font-semibold text-center border border-red-600 rounded bg-red-50 shadow-lg\"><span class=\"text-red-500\" x-text=\"i18next.t('read_only_mode_description')\">Configuration is locked.</span></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"w-full mx-2 my-2 px-3 py-2 text-sm font-semibold text-red-700 bg-red-50 border border-red-500 rounded\"><span x-text=\"i18next.t('read_only_mode_description')\">Configuration is locked.</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -70,7 +70,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("settings_stores"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 53, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 49, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -171,7 +171,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("other_settings"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 145, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 141, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -216,7 +216,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(getTranslations("settings_extra"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 188, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 184, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

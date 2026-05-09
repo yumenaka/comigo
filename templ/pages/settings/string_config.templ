@@ -1,5 +1,7 @@
 package settings
 
+import "github.com/yumenaka/comigo/config"
+
 // stringConfigScriptHandle 用于防止 JS 代码重复渲染
 var stringConfigScriptHandle = templ.NewOnceHandle()
 
@@ -20,6 +22,7 @@ templ StringConfig(name string, value string, description string) {
 			placeholder={ name }
 			value={ value }
 			data-original-value={ value }
+			disabled?={ config.GetCfg().ReadOnlyMode }
 			class="px-2.5  w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 			@change={ "updateStringConfig('" + name + "', $event.target.value)" }
 		/>

@@ -94,3 +94,17 @@ func TestGenerateBookGroup_ShouldCreateFolderGroupsForIntermediateDirs(t *testin
 		}
 	}
 }
+
+func TestDisplayStoreNameHidesLocalParentPath(t *testing.T) {
+	localStore := filepath.Join(t.TempDir(), "books")
+	if got := displayStoreName(localStore); got != "books" {
+		t.Fatalf("本地书库显示名不正确: got %q want %q", got, "books")
+	}
+}
+
+func TestDisplayStoreNameUsesRemoteHost(t *testing.T) {
+	const remoteStore = "sftp://user:pass@example.com:22/manga"
+	if got := displayStoreName(remoteStore); got != "example.com:22" {
+		t.Fatalf("远程书库显示名不正确: got %q want %q", got, "example.com:22")
+	}
+}

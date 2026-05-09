@@ -37,6 +37,20 @@ const readerState = {
     },
 }
 
+function getReaderRuntimeInfo() {
+    // 打开本地文件失败时带上运行环境，方便区分 localhost、局域网 IP、file:// 等场景。
+    return {
+        href: window.location.href,
+        protocol: window.location.protocol,
+        origin: window.location.origin,
+        isSecureContext: window.isSecureContext,
+        preferFileReader: shouldReadReaderFileWithFileReader(),
+        hasCrypto: Boolean(globalThis.crypto),
+        hasGetRandomValues: Boolean(globalThis.crypto?.getRandomValues),
+        hasStaticWasm: Boolean(window.ComiGoReaderStaticWasmBase64),
+    }
+}
+
 function isReaderPDF(file) {
     const name = (file?.name || '').toLowerCase()
     return file?.type === 'application/pdf' || name.endsWith('.pdf')
@@ -179,6 +193,44 @@ function loadScript(src) {
     })
 }
 
+function isReaderLoopbackHostname(hostname) {
+    const host = (hostname || '').toLowerCase()
+    return host === 'localhost' || host.endsWith('.localhost') || host === '127.0.0.1' || host === '[::1]' || host === '::1'
+}
+
+function shouldReadReaderFileWithFileReader() {
+    // 非 loopback 的 HTTP IP 不是浏览器的本机可信来源；这里直接使用兼容性更稳的 FileReader。
+    return window.location.protocol === 'http:' && !isReaderLoopbackHostname(window.location.hostname)
+}
+
+function readReaderFileByFileReader(file) {
+    // 少数浏览器在非 localhost 的 HTTP 地址下会让 File.arrayBuffer() abort；
+    // FileReader 兼容性更稳，用作本地压缩包读取的兜底路径。
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = () => reject(reader.error || new Error('FileReader failed'))
+        reader.onabort = () => reject(reader.error || new DOMException('The operation was aborted.', 'AbortError'))
+        reader.readAsArrayBuffer(file)
+    })
+}
+
+async function readReaderFileArrayBuffer(file) {
+    if (!file) return new ArrayBuffer(0)
+    if (shouldReadReaderFileWithFileReader()) {
+        return readReaderFileByFileReader(file)
+    }
+    // localhost/127.0.0.1 等本机可信来源优先使用现代 API，异常时仍退回 FileReader。
+    if (typeof file.arrayBuffer === 'function') {
+        try {
+            return await file.arrayBuffer()
+        } catch (error) {
+            console.warn('[reader] File.arrayBuffer failed, retrying with FileReader:', error, getReaderRuntimeInfo())
+        }
+    }
+    return readReaderFileByFileReader(file)
+}
+
 async function openReaderArchive(file) {
     if (!file) return
     // 每次打开新压缩包前都释放旧 object URL，防止大图阅读时持续占用内存。
@@ -192,7 +244,7 @@ async function openReaderArchive(file) {
     try {
         const archive = await loadArchiveWasm()
         setReaderStatus(readerText('reader_reading_archive', 'Reading archive...'))
-        const book = await archive.open(await file.arrayBuffer(), file.name, {
+        const book = await archive.open(await readReaderFileArrayBuffer(file), file.name, {
             sortBy: 'default',
         })
         if (!book || !Array.isArray(book.PageInfos) || book.PageInfos.length === 0) {
@@ -206,7 +258,7 @@ async function openReaderArchive(file) {
             showToast(readerText('reader_archive_ready', 'Archive ready'), 'success')
         }
     } catch (error) {
-        console.error('[reader] open archive failed:', error)
+        console.error('[reader] open archive failed:', error, getReaderRuntimeInfo())
         setReaderStatus(String(error?.message || error), 'error')
         if (typeof showToast === 'function') {
             showToast(readerText('reader_archive_failed', 'Failed to open archive'), 'error')

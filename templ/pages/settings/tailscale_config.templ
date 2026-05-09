@@ -311,6 +311,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 					<button
 						id="tailscale-submit-btn"
 						type="button"
+						disabled?={ config.GetCfg().ReadOnlyMode }
 						class="min-w-28 px-2 h-10 mx-2 my-0 text-center font-semibold transition border border-black text-black rounded bg-blue-200  hover:bg-indigo-300 disabled:opacity-70 disabled:cursor-not-allowed"
 						x-text={ getTranslations("submit") }
 					>Submit</button>

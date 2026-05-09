@@ -35,6 +35,28 @@ func TestUpdateConfigFileCreatesTargetAndTracksConfigFile(t *testing.T) {
 	}
 }
 
+func TestGetConfigDirUsesExplicitConfigPathWhenFileDoesNotExist(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	targetDir := filepath.Join(t.TempDir(), "nested")
+	cfg.ConfigFile = filepath.Join(targetDir, "config.toml")
+
+	got, err := GetConfigDir()
+	if err != nil {
+		t.Fatalf("GetConfigDir 返回错误: %v", err)
+	}
+	if got != targetDir {
+		t.Fatalf("配置目录不正确: got %q want %q", got, targetDir)
+	}
+	if _, err := os.Stat(targetDir); err != nil {
+		t.Fatalf("显式配置目录未创建: %v", err)
+	}
+}
+
 // TestIsPathOverlapping 测试路径重合检测
 func TestIsPathOverlapping(t *testing.T) {
 	// 创建一个测试配置

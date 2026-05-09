@@ -54,6 +54,7 @@ templ PluginsConfig() {
 										id={ "plugin_" + pluginName }
 										data-plugin-name={ pluginName }
 										checked?={ config.GetCfg().IsPluginEnabled(pluginName) }
+										disabled?={ config.GetCfg().ReadOnlyMode }
 										class="sr-only peer"
 										@change={ "togglePlugin('" + pluginName + "', $event.target.checked)" }
 									/>
