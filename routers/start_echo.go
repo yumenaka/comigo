@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"path"
@@ -27,80 +28,98 @@ func autoTLSNextProtos() []string {
 	return []string{acme.ALPNProto, "h2", "http/1.1"}
 }
 
+type webServeMode int
+
+const (
+	webServeHTTP webServeMode = iota
+	webServeCustomTLS
+	webServeAutoTLS
+)
+
 // StartEcho 启动网页服务
 func StartEcho(e *echo.Echo) error {
-	// 是否仅监听本地回环地址
-	webHost := ":"
-	if config.GetCfg().DisableLAN {
-		// 绑定到 127.0.0.1，避免 localhost 在不同平台解析到 IPv6 时导致 WebView 无法通过 127.0.0.1 访问。
-		webHost = "127.0.0.1:"
-	}
-	// 记录日志并启动服务器
 	logger.Infof(locale.GetString("log_starting_server_on_port"), config.GetCfg().Port)
-	// 初始化 HTTP 服务器
-	config.Server = &http.Server{
-		Addr:    webHost + strconv.Itoa(config.GetCfg().Port),
-		Handler: e, // echo.Echo 实现了 http.Handler 接口
+	server, serveMode, err := buildHTTPServer(e)
+	if err != nil {
+		return err
 	}
-	// 如果自定义 TLS 证书
-	customCertTlS := config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != ""
-	// 如果自动申请 TLS 证书
-	SetAutoTLS(e)
-	if config.GetCfg().AutoTLSCertificate {
-		configDir, err := config.GetConfigDir()
-		if err != nil {
-			logger.Errorf(locale.GetString("err_failed_to_get_config_dir"), err)
-			return err
-		}
-		autoTLSManager := autocert.Manager{
-			Prompt: autocert.AcceptTOS,
-			// Cache certificates to avoid issues with rate limits (https://letsencrypt.org/docs/rate-limits)
-			Cache:      autocert.DirCache(path.Join(configDir, "autotls_cache")),
-			HostPolicy: autocert.HostWhitelist(config.GetCfg().Host),
-		}
-		// 更新服务器配置以使用自动 TLS
-		logger.Infof(locale.GetString("log_auto_tls_enabled_for_domain"), config.GetCfg().Host)
-		config.Server = &http.Server{
-			Addr:    ":443",
-			Handler: e, // set Echo as handler
-			TLSConfig: &tls.Config{
-				//Certificates: nil, // <-- s.ListenAndServeTLS will populate this field
-				GetCertificate: autoTLSManager.GetCertificate,
-				NextProtos:     autoTLSNextProtos(),
-			},
-			//ReadTimeout: 30 * time.Second, // use custom timeouts
-		}
-	}
+	config.Server = server
 	listener, err := net.Listen("tcp", config.Server.Addr)
 	if err != nil {
 		return err
 	}
-	// 在 goroutine 中初始化 HTTP 服务器，这样它就不会阻塞关闭处理
-	go func() {
-		// 监听并启动服务(自定义TLS证书)
-		if config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != "" {
-			logger.Infof(locale.GetString("log_custom_tls_cert"), config.GetCfg().CertFile, config.GetCfg().KeyFile)
-			if serveErr := config.Server.ServeTLS(listener, config.GetCfg().CertFile, config.GetCfg().KeyFile); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
-				logger.Errorf("listen: %s", serveErr)
-			}
-			return
-		}
-		// 监听并启动服务(自动TLS)
-		if config.GetCfg().AutoTLSCertificate {
-			tlsListener := tls.NewListener(listener, config.Server.TLSConfig)
-			if serveErr := config.Server.Serve(tlsListener); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
-				logger.Errorf("listen: %s", serveErr)
-			}
-			return
-		}
-		// 监听并启动服务(无TLS,普通HTTP)
-		if !customCertTlS && !config.GetCfg().AutoTLSCertificate {
-			if serveErr := config.Server.Serve(listener); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
-				logger.Errorf("listen: %s", serveErr)
-			}
-		}
-	}()
+	// 在 goroutine 中初始化 HTTP 服务器，这样它就不会阻塞关闭处理。
+	go serveHTTPServer(listener, config.Server, serveMode)
 	return nil
+}
+
+func buildHTTPServer(e *echo.Echo) (*http.Server, webServeMode, error) {
+	SetAutoTLS(e)
+	if config.GetCfg().AutoTLSCertificate {
+		return buildAutoTLSServer(e)
+	}
+	serveMode := webServeHTTP
+	if hasCustomTLSCertificate() {
+		serveMode = webServeCustomTLS
+	}
+	return &http.Server{
+		Addr:    webServerAddr(),
+		Handler: e, // echo.Echo 实现了 http.Handler 接口
+	}, serveMode, nil
+}
+
+func webServerAddr() string {
+	// 绑定到 127.0.0.1，避免 localhost 在不同平台解析到 IPv6 时导致 WebView 无法通过 127.0.0.1 访问。
+	if config.GetCfg().DisableLAN {
+		return "127.0.0.1:" + strconv.Itoa(config.GetCfg().Port)
+	}
+	return ":" + strconv.Itoa(config.GetCfg().Port)
+}
+
+func hasCustomTLSCertificate() bool {
+	return config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != ""
+}
+
+func buildAutoTLSServer(e *echo.Echo) (*http.Server, webServeMode, error) {
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		logger.Errorf(locale.GetString("err_failed_to_get_config_dir"), err)
+		return nil, webServeHTTP, err
+	}
+	autoTLSManager := autocert.Manager{
+		Prompt: autocert.AcceptTOS,
+		// 缓存证书，避免触发 Let's Encrypt 频率限制。
+		Cache:      autocert.DirCache(path.Join(configDir, "autotls_cache")),
+		HostPolicy: autocert.HostWhitelist(config.GetCfg().Host),
+	}
+	logger.Infof(locale.GetString("log_auto_tls_enabled_for_domain"), config.GetCfg().Host)
+	return &http.Server{
+		Addr:    ":443",
+		Handler: e,
+		TLSConfig: &tls.Config{
+			GetCertificate: autoTLSManager.GetCertificate,
+			NextProtos:     autoTLSNextProtos(),
+		},
+	}, webServeAutoTLS, nil
+}
+
+func serveHTTPServer(listener net.Listener, server *http.Server, serveMode webServeMode) {
+	switch serveMode {
+	case webServeCustomTLS:
+		logger.Infof(locale.GetString("log_custom_tls_cert"), config.GetCfg().CertFile, config.GetCfg().KeyFile)
+		logServeError(server.ServeTLS(listener, config.GetCfg().CertFile, config.GetCfg().KeyFile))
+	case webServeAutoTLS:
+		tlsListener := tls.NewListener(listener, server.TLSConfig)
+		logServeError(server.Serve(tlsListener))
+	default:
+		logServeError(server.Serve(listener))
+	}
+}
+
+func logServeError(err error) {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		logger.Errorf("listen: %s", err)
+	}
 }
 
 // StopWebServer 停止当前的HTTP服务器
@@ -132,14 +151,17 @@ func StopWebServer() error {
 	return nil
 }
 
-// RestartWebServer 停止当前的服务器并重新启动(比如切换端口的时候)
-func RestartWebServer() {
+// RestartWebServer 停止当前服务器并重新启动，失败时返回错误，由调用方决定如何处理。
+func RestartWebServer() error {
 	if err := StopWebServer(); err != nil {
-		logger.Fatalf("Server Shutdown Failed:%+v", err)
+		return fmt.Errorf("%s: %w", locale.GetString("err_server_shutdown_failed"), err)
 	}
 	logger.Infof(locale.GetString("log_server_shutdown_successfully"), config.GetCfg().Port)
 	// 重新初始化web服务器
 	InitEcho()
 	// 重新启动web服务器
-	StartEcho(engine)
+	if err := StartEcho(engine); err != nil {
+		return fmt.Errorf("%s: %w", locale.GetString("err_server_start_failed"), err)
+	}
+	return nil
 }

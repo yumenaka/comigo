@@ -8,6 +8,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/store"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -23,7 +24,7 @@ import (
 func DeleteBookCache(c echo.Context) error {
 	id := c.QueryParam("id")
 	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+		return apiresp.BadRequest(c, "missing_param", "id is required", map[string]string{"param": "id"})
 	}
 
 	// 获取可选参数
@@ -35,7 +36,7 @@ func DeleteBookCache(c echo.Context) error {
 	book, err := model.IStore.GetBook(id)
 	if err != nil {
 		logger.Infof(locale.GetString("log_getbook_error_common"), err)
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
+		return apiresp.Error(c, http.StatusNotFound, "book_not_found", "Book not found", map[string]string{"id": id})
 	}
 
 	result := map[string]interface{}{
@@ -48,7 +49,7 @@ func DeleteBookCache(c echo.Context) error {
 	configDir, err := config.GetConfigDir()
 	if err != nil {
 		logger.Infof(locale.GetString("log_get_config_dir_error"), err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get config directory"})
+		return apiresp.Error(c, http.StatusInternalServerError, "config_dir_failed", "Failed to get config directory", err.Error())
 	}
 
 	// 元数据目录路径

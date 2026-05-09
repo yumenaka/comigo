@@ -6,6 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers/config_api"
 	"github.com/yumenaka/comigo/routers/data_api"
@@ -58,7 +59,7 @@ func BindURLs() {
 				// 更安全的方式判断API请求
 				path := config.StripBasePath(c.Request().URL.Path)
 				if len(path) >= 4 && path[:4] == "/api" {
-					return echo.NewHTTPError(http.StatusUnauthorized, "请先登录")
+					return echo.NewHTTPError(http.StatusUnauthorized, locale.GetString("err_login_required"))
 				}
 				// 页面请求重定向到登录页
 				return c.Redirect(http.StatusFound, config.PrefixPath("/login"))
@@ -114,12 +115,28 @@ func bindProtectedView(group *echo.Group) {
 
 // bindProtectedAPI 注册需要认证的路由
 func bindProtectedAPI(group *echo.Group) {
+	bindServerAPI(group)
+	bindBookAPI(group)
+	bindBookmarkAPI(group)
+	bindConfigAPI(group)
+	bindSettingsAPI(group)
+	bindRealtimeAPI(group)
+}
+
+// bindServerAPI 注册服务状态、上传和书库管理等服务级 API。
+func bindServerAPI(group *echo.Group) {
 	// 服务器状态
 	group.GET("/server-info", data_api.GetServerInfoHandler)
 	// 获取书库列表
 	group.GET("/stores", data_api.GetStores)
 	// 文件上传
 	group.POST("/upload", upload_api.UploadFile)
+	// 获取 tailscale 状态
+	group.GET("/tailscale-status", data_api.GetTailscaleStatus)
+}
+
+// bindBookAPI 注册书籍读取、封面、下载和缓存相关 API。
+func bindBookAPI(group *echo.Group) {
 	// 获取特定文件
 	group.GET("/get-file", data_api.GetFile)
 	// 获取书籍封面
@@ -130,6 +147,22 @@ func bindProtectedAPI(group *echo.Group) {
 	group.GET("/top-shelf", data_api.GetTopOfShelfInfo)
 	// 查询书籍信息
 	group.GET("/get-book", data_api.GetBook)
+	// 查询父书籍信息
+	group.GET("/parent-book-info", data_api.GetParentBook)
+	// 下载 reg 设置文件
+	group.GET("/comigo.reg", data_api.GetRegFile)
+	// 生成图片 http://localhost:1234/api/generate-image?height=220&width=160&text=12345&font_size=32
+	group.GET("/generate-image", data_api.GetGeneratedImage)
+	// 下载 TypeDir 书籍为 zip 文件
+	group.GET("/download-zip", data_api.DownloadZip)
+	// 下载书籍为 EPUB 文件
+	group.GET("/download-epub", data_api.DownloadEpub)
+	// 删除书籍的元数据和缓存文件
+	group.DELETE("/book-cache", data_api.DeleteBookCache)
+}
+
+// bindBookmarkAPI 注册阅读历史和书签相关 API。
+func bindBookmarkAPI(group *echo.Group) {
 	// 获取所有书签的API
 	group.GET("/all-bookmarks", data_api.GetAllBookmarks)
 	// 获取阅读历史（支持limit和分页参数）
@@ -138,14 +171,12 @@ func bindProtectedAPI(group *echo.Group) {
 	group.POST("/store-bookmark", data_api.StoreBookmark)
 	// 删除特定书签
 	group.DELETE("/delete-bookmark", data_api.DeleteBookmark)
-	// 查询父书籍信息
-	group.GET("/parent-book-info", data_api.GetParentBook)
-	// 下载 reg 设置文件
-	group.GET("/comigo.reg", data_api.GetRegFile)
+}
+
+// bindConfigAPI 注册配置读写 API。
+func bindConfigAPI(group *echo.Group) {
 	// 获取配置
 	group.GET("/config", config_api.GetConfig)
-	// 生成图片 http://localhost:1234/api/generate-image?height=220&width=160&text=12345&font_size=32
-	group.GET("/generate-image", data_api.GetGeneratedImage)
 	// 获取配置状态
 	group.GET("/config/status", config_api.GetConfigStatus)
 	// 更新配置
@@ -156,9 +187,10 @@ func bindProtectedAPI(group *echo.Group) {
 	group.DELETE("/config/:in", config_api.DeleteConfig)
 	// 下载 toml 格式的示例配置
 	group.GET("/config.toml", config_api.GetConfigToml)
-	// TODO: 测试需要登录时的表现
-	websocket.WsDebug = &config.GetCfg().Debug
-	group.GET("/ws", websocket.WsHandler)
+}
+
+// bindSettingsAPI 注册设置页使用的轻量操作 API。
+func bindSettingsAPI(group *echo.Group) {
 	// 字符串、布尔值、数字配置的更改
 	group.POST("/update-string-config", settings.UpdateStringConfigHandler)
 	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)
@@ -179,16 +211,15 @@ func bindProtectedAPI(group *echo.Group) {
 	// 保存和删除配置
 	group.POST("/config-save", settings.HandleConfigSave)
 	group.POST("/config-delete", settings.HandleConfigDelete)
-	// 获取 tailscale 状态
-	group.GET("/tailscale-status", data_api.GetTailscaleStatus)
+}
+
+// bindRealtimeAPI 注册 WebSocket/SSE 等实时通信 API。
+func bindRealtimeAPI(group *echo.Group) {
+	// TODO: 测试需要登录时的表现
+	websocket.WsDebug = &config.GetCfg().Debug
+	group.GET("/ws", websocket.WsHandler)
 	// SSE 服务器发送事件
 	group.GET("/sse", sse_hub.SSEHandler)
 	// SSE 广播接口
 	group.POST("/push", sse_hub.PushHandler)
-	// 下载 TypeDir 书籍为 zip 文件
-	group.GET("/download-zip", data_api.DownloadZip)
-	// 下载书籍为 EPUB 文件
-	group.GET("/download-epub", data_api.DownloadEpub)
-	// 删除书籍的元数据和缓存文件
-	group.DELETE("/book-cache", data_api.DeleteBookCache)
 }

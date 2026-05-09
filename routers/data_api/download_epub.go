@@ -1,15 +1,14 @@
 package data_api
 
 import (
-	"fmt"
 	"net/http"
-	"net/url"
 	"path/filepath"
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/epub"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -19,28 +18,21 @@ import (
 // 相关参数：
 // id：书籍的ID，必须参数  &id=2b17a13
 func DownloadEpub(c echo.Context) error {
-	id := c.QueryParam("id")
-	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
-	}
-
-	// 获取书籍信息
-	book, err := model.IStore.GetBook(id)
-	if err != nil {
-		logger.Infof(locale.GetString("log_getbook_error_common"), err)
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
+	book, handled, err := requireBookByQueryID(c)
+	if handled || err != nil {
+		return err
 	}
 
 	// 检查书籍类型，不支持 TypeBooksGroup、TypeVideo、TypeAudio、TypeHTML
 	switch book.Type {
 	case model.TypeBooksGroup:
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Cannot convert book group to EPUB"})
+		return apiresp.BadRequest(c, "unsupported_book_type", "Cannot convert book group to EPUB", map[string]string{"type": string(book.Type)})
 	case model.TypeVideo:
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Cannot convert video to EPUB"})
+		return apiresp.BadRequest(c, "unsupported_book_type", "Cannot convert video to EPUB", map[string]string{"type": string(book.Type)})
 	case model.TypeAudio:
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Cannot convert audio to EPUB"})
+		return apiresp.BadRequest(c, "unsupported_book_type", "Cannot convert audio to EPUB", map[string]string{"type": string(book.Type)})
 	case model.TypeHTML:
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Cannot convert HTML to EPUB"})
+		return apiresp.BadRequest(c, "unsupported_book_type", "Cannot convert HTML to EPUB", map[string]string{"type": string(book.Type)})
 	case model.TypeEpub:
 		// 如果已经是 EPUB，直接返回原文件
 		return c.File(book.BookPath)
@@ -48,14 +40,14 @@ func DownloadEpub(c echo.Context) error {
 
 	// 检查页面数量
 	if len(book.PageInfos) == 0 {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Book has no pages"})
+		return apiresp.BadRequest(c, "book_has_no_pages", "Book has no pages", map[string]string{"id": book.BookID})
 	}
 
 	// 创建 EPUB 生成器
 	generator, err := epub.NewGenerator()
 	if err != nil {
 		logger.Infof(locale.GetString("log_failed_to_create_epub_generator"), err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create EPUB generator"})
+		return apiresp.Error(c, http.StatusInternalServerError, "create_epub_generator_failed", "Failed to create EPUB generator", err.Error())
 	}
 
 	// 收集图片数据
@@ -90,7 +82,7 @@ func DownloadEpub(c echo.Context) error {
 	}
 
 	if len(imageFiles) == 0 {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Failed to extract any images from the book"})
+		return apiresp.BadRequest(c, "extract_epub_images_failed", "Failed to extract any images from the book", map[string]string{"id": book.BookID})
 	}
 
 	// 创建书籍数据
@@ -103,12 +95,7 @@ func DownloadEpub(c echo.Context) error {
 		epubFileName = epubFileName[:len(epubFileName)-len(ext)]
 	}
 	epubFileName += ".epub"
-	encodedFileName := url.PathEscape(epubFileName)
-
-	c.Response().Header().Set(echo.HeaderContentType, "application/epub+zip")
-	// 使用 RFC 5987 格式支持中文文件名
-	c.Response().Header().Set(echo.HeaderContentDisposition,
-		fmt.Sprintf("attachment; filename=\"%s\"; filename*=UTF-8''%s", encodedFileName, encodedFileName))
+	setAttachmentHeaders(c, "application/epub+zip", epubFileName)
 	c.Response().WriteHeader(http.StatusOK)
 
 	// 生成 EPUB 并写入响应

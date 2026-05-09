@@ -13,6 +13,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/tools/logger"
 
 	"github.com/golang/freetype/truetype"
@@ -36,23 +37,23 @@ func GetGeneratedImage(c echo.Context) error {
 	// 将高度和宽度转换为整数
 	height, err := strconv.Atoi(heightStr)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid height")
+		return apiresp.BadRequest(c, "invalid_height", "Invalid height", map[string]string{"height": heightStr})
 	}
 	width, err := strconv.Atoi(widthStr)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid width")
+		return apiresp.BadRequest(c, "invalid_width", "Invalid width", map[string]string{"width": widthStr})
 	}
 
 	// 将字体大小转换为浮点数
 	fontSize, err := strconv.ParseFloat(fontSizeStr, 64)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid font_size")
+		return apiresp.BadRequest(c, "invalid_font_size", "Invalid font_size", map[string]string{"font_size": fontSizeStr})
 	}
 
 	// 解析字体
 	f, err := truetype.Parse(fontBytes)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Could not parse font")
+		return apiresp.Error(c, http.StatusInternalServerError, "parse_font_failed", "Could not parse font", err.Error())
 	}
 
 	// 创建图像
@@ -68,7 +69,7 @@ func GetGeneratedImage(c echo.Context) error {
 	if bgColorStr != "" {
 		bgColorParsed, err := ParseHexColor(bgColorStr)
 		if err != nil {
-			return c.String(http.StatusBadRequest, "Invalid bg_color")
+			return apiresp.BadRequest(c, "invalid_bg_color", "Invalid bg_color", map[string]string{"bg_color": bgColorStr})
 		}
 		bgColor = bgColorParsed
 	}
@@ -110,7 +111,7 @@ func GetGeneratedImage(c echo.Context) error {
 	// 设置响应头并返回图片
 	c.Response().Header().Set("Content-Type", "image/jpeg")
 	if err := jpeg.Encode(c.Response().Writer, rgba, nil); err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to encode image")
+		return apiresp.Error(c, http.StatusInternalServerError, "encode_image_failed", "Failed to encode image", err.Error())
 	}
 
 	return nil

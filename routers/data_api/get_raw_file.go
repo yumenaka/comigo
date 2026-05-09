@@ -20,93 +20,108 @@ func GetRawFile(c echo.Context) error {
 	b, err := model.IStore.GetBook(bookID)
 	// 打印文件名
 	if err != nil {
-		return c.String(http.StatusNotFound, "404 page not found")
+		return rawFileNotFound(c)
 	}
 	fileName := c.Param("file_name")
 	logger.Infof(locale.GetString("log_download_file"), fileName)
 
-	var file http.File
-	var modTime time.Time
+	resource, err := openRawBookFile(b)
+	if err != nil {
+		return rawFileNotFound(c)
+	}
+	defer func() {
+		_ = resource.file.Close()
+	}()
 
-	// 判断是否为远程书籍
-	if b.IsRemote {
-		// 远程书库：使用 VFS 获取文件信息
-		vfsInstance, err := vfs.GetOrCreate(b.RemoteURL, vfs.Options{
-			CacheEnabled: false,
-			Timeout:      30,
-		})
-		if err != nil {
-			logger.Infof(locale.GetString("log_remote_store_connect_failed"), b.RemoteURL, err)
-			return c.String(http.StatusNotFound, "404 page not found")
-		}
+	setRawFileHeaders(c, resource.contentType)
 
-		// 获取文件信息
-		vfsFileInfo, err := vfsInstance.Stat(b.BookPath)
-		if err != nil {
-			logger.Infof(locale.GetString("log_remote_file_stat_failed"), b.BookPath, err)
-			return c.String(http.StatusNotFound, "404 page not found")
-		}
+	// 使用标准库 ServeContent：支持 Range（206），适合媒体播放/拖动进度。
+	http.ServeContent(c.Response().Writer, c.Request(), fileName, resource.modTime, resource.file)
+	return nil
+}
 
-		// 如果是目录，返回 404
-		if vfsFileInfo.IsDir() {
-			return c.String(http.StatusNotFound, "404 page not found")
-		}
+type rawFileResource struct {
+	file        http.File
+	modTime     time.Time
+	contentType string
+}
 
-		// 打开文件
-		vfsFile, err := vfsInstance.Open(b.BookPath)
-		if err != nil {
-			logger.Infof(locale.GetString("log_remote_file_open_failed"), b.BookPath, err)
-			return c.String(http.StatusNotFound, "404 page not found")
-		}
-		defer func() {
-			_ = vfsFile.Close()
-		}()
+func openRawBookFile(book *model.Book) (*rawFileResource, error) {
+	if book.IsRemote {
+		return openRemoteRawBookFile(book)
+	}
+	return openLocalRawBookFile(book)
+}
 
-		// 将 vfs.File 适配为 http.File（io.ReadSeeker）
-		file = &vfsFileAdapter{file: vfsFile, fileInfo: vfsFileInfo}
-		modTime = vfsFileInfo.ModTime()
-	} else {
-		// 本地书库：使用 os.Stat 和 os.Open
-		osFileInfo, err := os.Stat(b.BookPath)
-		if err != nil {
-			return c.String(http.StatusNotFound, "404 page not found")
-		}
-		// 如果是目录，返回 404
-		if osFileInfo.IsDir() {
-			return c.String(http.StatusNotFound, "404 page not found")
-		}
-
-		// 打开文件（os.File 实现了 io.ReadSeeker）
-		osFile, err := os.Open(b.BookPath)
-		if err != nil {
-			return c.String(http.StatusNotFound, "404 page not found")
-		}
-		defer func() {
-			_ = osFile.Close()
-		}()
-
-		file = osFile
-		modTime = osFileInfo.ModTime()
+func openRemoteRawBookFile(book *model.Book) (*rawFileResource, error) {
+	vfsInstance, err := vfs.GetOrCreate(book.RemoteURL, vfs.Options{
+		CacheEnabled: false,
+		Timeout:      30,
+	})
+	if err != nil {
+		logger.Infof(locale.GetString("log_remote_store_connect_failed"), book.RemoteURL, err)
+		return nil, err
 	}
 
-	// 显式设置 Content-Type，避免浏览器无法识别媒体类型
-	ext := strings.ToLower(filepath.Ext(b.BookPath))
-	contentType := mime.TypeByExtension(ext)
-	if contentType != "" {
-		c.Response().Header().Set(echo.HeaderContentType, contentType)
+	fileInfo, err := vfsInstance.Stat(book.BookPath)
+	if err != nil {
+		logger.Infof(locale.GetString("log_remote_file_stat_failed"), book.BookPath, err)
+		return nil, err
+	}
+	if fileInfo.IsDir() {
+		return nil, os.ErrNotExist
 	}
 
-	// 对音视频尽量 inline，避免被当成附件下载导致无法播放
+	openedFile, err := vfsInstance.Open(book.BookPath)
+	if err != nil {
+		logger.Infof(locale.GetString("log_remote_file_open_failed"), book.BookPath, err)
+		return nil, err
+	}
+
+	return &rawFileResource{
+		file:        &vfsFileAdapter{file: openedFile, fileInfo: fileInfo},
+		modTime:     fileInfo.ModTime(),
+		contentType: rawFileContentType(book.BookPath),
+	}, nil
+}
+
+func openLocalRawBookFile(book *model.Book) (*rawFileResource, error) {
+	fileInfo, err := os.Stat(book.BookPath)
+	if err != nil {
+		return nil, err
+	}
+	if fileInfo.IsDir() {
+		return nil, os.ErrNotExist
+	}
+
+	openedFile, err := os.Open(book.BookPath)
+	if err != nil {
+		return nil, err
+	}
+	return &rawFileResource{
+		file:        openedFile,
+		modTime:     fileInfo.ModTime(),
+		contentType: rawFileContentType(book.BookPath),
+	}, nil
+}
+
+func rawFileContentType(bookPath string) string {
+	return mime.TypeByExtension(strings.ToLower(filepath.Ext(bookPath)))
+}
+
+func setRawFileHeaders(c echo.Context, contentType string) {
+	if contentType == "" {
+		return
+	}
+	c.Response().Header().Set(echo.HeaderContentType, contentType)
+	// 对音视频尽量 inline，避免被当成附件下载导致无法播放。
 	if strings.HasPrefix(contentType, "audio/") || strings.HasPrefix(contentType, "video/") {
 		c.Response().Header().Set(echo.HeaderContentDisposition, "inline")
 	}
+}
 
-	// 使用标准库 ServeContent：支持 Range（206），适合媒体播放/拖动进度
-	// http.ServeContent 需要一个实现了 io.ReadSeeker 的对象
-	// 对于本地文件，os.File 已经实现了 io.ReadSeeker
-	// 对于远程文件，vfsFileAdapter 将 vfs.File 适配为 io.ReadSeeker
-	http.ServeContent(c.Response().Writer, c.Request(), fileName, modTime, file)
-	return nil
+func rawFileNotFound(c echo.Context) error {
+	return c.String(http.StatusNotFound, "404 page not found")
 }
 
 // vfsFileAdapter 将 vfs.File 适配为 http.File（io.ReadSeeker）接口

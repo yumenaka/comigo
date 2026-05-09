@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -20,39 +20,25 @@ import (
 // 相关参数：
 // id：书籍的ID，必须参数  &id=2b17a13
 func DownloadZip(c echo.Context) error {
-	id := c.QueryParam("id")
-	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
-	}
-
-	// 获取书籍信息
-	book, err := model.IStore.GetBook(id)
-	if err != nil {
-		logger.Infof(locale.GetString("log_getbook_error_common"), err)
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
+	book, handled, err := requireBookByQueryID(c)
+	if handled || err != nil {
+		return err
 	}
 
 	// 检查书籍类型是否为 TypeDir
 	if book.Type != model.TypeDir {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": fmt.Sprintf("Only TypeDir books can be downloaded as zip, current type: %s", book.Type),
-		})
+		return apiresp.BadRequest(c, "unsupported_book_type", fmt.Sprintf("Only TypeDir books can be downloaded as zip, current type: %s", book.Type), map[string]string{"type": string(book.Type)})
 	}
 
 	// 检查目录是否存在
 	if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book directory not found"})
+		return apiresp.Error(c, http.StatusNotFound, "book_directory_not_found", "Book directory not found", map[string]string{"id": book.BookID})
 	}
 
 	// 设置响应头
 	// 使用 URL 编码处理文件名中的特殊字符
 	zipFileName := filepath.Base(book.BookPath) + ".zip"
-	encodedFileName := url.PathEscape(zipFileName)
-
-	c.Response().Header().Set(echo.HeaderContentType, "application/zip")
-	// 使用 RFC 5987 格式支持中文文件名
-	c.Response().Header().Set(echo.HeaderContentDisposition,
-		fmt.Sprintf("attachment; filename=\"%s\"; filename*=UTF-8''%s", encodedFileName, encodedFileName))
+	setAttachmentHeaders(c, "application/zip", zipFileName)
 	c.Response().WriteHeader(http.StatusOK)
 
 	// 创建 zip writer，直接写入响应流

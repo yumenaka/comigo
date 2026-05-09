@@ -179,20 +179,6 @@ func (c *Config) IsPathOverlapping(newPath string) (overlapping bool, conflictPa
 	return false, "", ""
 }
 
-// StoreUrlIsExits 检查书库URL是否可添加（已弃用，使用 IsPathOverlapping 代替）
-func (c *Config) StoreUrlIsExits(url string) bool {
-	// 检查书库URL是否已存在
-	for _, storeUrl := range c.StoreUrls {
-		if storeUrl == url {
-			if c.Debug {
-				logger.Infof(locale.GetString("log_store_url_already_exists"), storeUrl)
-			}
-			return true
-		}
-	}
-	return false
-}
-
 // AddStoreUrl 添加书库（支持本地路径和远程 URL）
 // 本地路径会将相对路径转换为绝对路径，并检查路径冲突
 // 远程 URL（WebDAV 等）会在扫描时验证连接

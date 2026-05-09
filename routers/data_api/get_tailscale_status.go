@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
@@ -11,7 +12,7 @@ import (
 func GetTailscaleStatus(c echo.Context) error {
 	tailscaleStatus, err := tailscale_plugin.GetTailscaleStatus(c.Request().Context())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return apiresp.Error(c, http.StatusInternalServerError, "tailscale_status_failed", err.Error(), nil)
 	}
 	return c.JSON(http.StatusOK, tailscaleStatus)
 }

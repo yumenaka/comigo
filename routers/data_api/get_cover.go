@@ -14,10 +14,21 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/tools"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
 )
+
+type coverRequest struct {
+	bookID       string
+	resizeHeight int
+}
+
+type coverCacheContext struct {
+	configDir string
+	metaPath  string
+}
 
 // GetCover 获取书籍封面
 // 相关参数：
@@ -26,143 +37,167 @@ import (
 // 示例 URL： http://127.0.0.1:1234/api/get-cover?id=2b17a13
 // 示例 URL（自定义高度）： http://127.0.0.1:1234/api/get-cover?id=2b17a13&resize_height=500
 func GetCover(c echo.Context) error {
-	// 获取书籍ID
-	id := c.QueryParam("id")
-	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	req, err := parseCoverRequest(c)
+	if err != nil {
+		return err
 	}
-	// 获取 resize_height 参数，默认值为 352
-	resizeHeight := getIntQueryParam(c, "resize_height", 352)
-	// 获取书籍信息
-	book, err := model.IStore.GetBook(id)
+	book, err := model.IStore.GetBook(req.bookID)
 	if err != nil {
 		logger.Infof(locale.GetString("log_getbook_error_common"), err)
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
+		return apiresp.Error(c, http.StatusNotFound, "book_not_found", "Book not found", map[string]string{"id": req.bookID})
 	}
+
 	// 获取封面信息
 	cover := book.GetCover()
-	configDir, err := config.GetConfigDir()
-	// 封面元数据目录路径
-	metaPath := ""
-	// 如果获取配置目录成功，尝试从本地缓存读取封面
-	if err == nil {
-		//  封面元数据目录路径
-		metaPath = filepath.Join(configDir, "metadata", book.GetStoreID())
-		// 先从本地缓存读取封面
-		coverFileCacheExists := fileutil.CoverFileCacheExists(metaPath, id)
-		if coverFileCacheExists {
-			coverData, err := fileutil.GetCoverFromLocal(metaPath, id)
-			if err == nil {
-				return c.Blob(http.StatusOK, "image/jpeg", coverData)
-			}
-		}
+	cacheCtx := getCoverCacheContext(book)
+	if handled, err := serveCachedCover(c, cacheCtx, req.bookID); handled || err != nil {
+		return err
 	}
 	// 尝试从 MP3 的 ID3(APIC) 内嵌图片中读取封面（在本地缓存未命中时）
 	// 说明：
 	// - 优先使用第三方库提高兼容性（dhowden/tag）
 	// - 成功读取后统一转为 JPEG，并复用现有的封面缓存（bookID.jpg）
-	if book.Type == model.TypeAudio && strings.EqualFold(filepath.Ext(book.BookPath), ".mp3") {
-		// 使用第三方库解析（dhowden/tag）
-		imgData, err := extractMP3CoverByTag(book.BookPath)
-		if err == nil && len(imgData) > 0 {
-			// 缩放图片到指定高度，并编码成 JPEG（tools.ImageResizeByHeight 会输出 JPEG）
-			imgData = tools.ImageResizeByHeight(imgData, resizeHeight)
-			// 缓存封面到本地
-			if metaPath != "" {
-				if err := fileutil.SaveCoverToLocal(metaPath, id, imgData); err != nil {
-					logger.Infof(locale.GetString("log_save_cover_to_local_error"), err)
-				}
-			}
-			return c.Blob(http.StatusOK, "image/jpeg", imgData)
-		}
+	if handled, err := serveMP3Cover(c, book, cacheCtx, req); handled || err != nil {
+		return err
 	}
-	// 如果本地没有缓存封面，就从压缩文件中获取封面
-	if err != nil {
-		logger.Errorf(locale.GetString("err_failed_to_get_config_dir"), err)
-	}
+
 	needFile := cover.Name
 	coverURLPath := config.StripBasePath(cover.Url)
 	// 处理 TypeBooksGroup 的情况：封面来自子书籍
 	coverBook := book
 	if book.Type == model.TypeBooksGroup && strings.HasPrefix(coverURLPath, "/api/get-file") {
-		// 解析封面 URL 获取子书籍 ID 和文件名
-		// URL 格式：/api/get-file?id=子书籍ID&filename=文件名
-		parsedURL, err := url.Parse(coverURLPath)
+		coverBook, needFile, err = resolveBookGroupCover(c, coverURLPath, cover.Name)
 		if err != nil {
-			logger.Infof(locale.GetString("log_failed_to_parse_cover_url"), err)
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid cover URL"})
-		}
-		childID := parsedURL.Query().Get("id")
-		if childID == "" {
-			logger.Infof(locale.GetString("log_child_book_id_missing_in_cover_url"))
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Child book ID is required in cover URL"})
-		}
-		// 获取子书籍信息
-		childBook, err := model.IStore.GetBook(childID)
-		if err != nil {
-			logger.Infof(locale.GetString("log_failed_to_get_child_book"), err)
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "Child book not found"})
-		}
-		coverBook = childBook
-		// 从 URL 中获取文件名，如果没有则使用 cover.Name
-		if filename := parsedURL.Query().Get("filename"); filename != "" {
-			needFile = filename
+			return err
 		}
 	}
+
 	// 如果封面URL是内嵌图片, 通过封面文件获取
 	if strings.HasPrefix(coverURLPath, "/images/") {
-		// 从内嵌文件系统读取图片数据
-		imgData := assets.GetImageData(cover.Name)
-		if len(imgData) == 0 {
-			logger.Infof(locale.GetString("log_failed_to_read_embedded_image"), cover.Url)
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "Embedded image not found"})
-		}
-		// 确定MIME类型
-		contentType := tools.GetContentTypeByFileName(cover.Name)
-		// 缩放图片到指定高度
-		imgData = tools.ImageResizeByHeight(imgData, resizeHeight)
-		// 缩放后的图片转换为JPEG格式
-		contentType = tools.GetContentTypeByFileName(".jpg")
-		// 缓存封面到 configDir
-		if configDir != "" {
-			// 内嵌图片也缓存封面到本地（方便以后做手动指定封面功能）
-			err = fileutil.SaveCoverToLocal(metaPath, id, imgData)
-			if err != nil {
-				logger.Infof(locale.GetString("log_save_cover_to_local_error"), err)
-			}
-		}
-		// 返回图片数据
-		return c.Blob(http.StatusOK, contentType, imgData)
+		return serveEmbeddedCover(c, cover.Name, cover.Url, cacheCtx, req)
 	}
-	// 获取图片数据的选项
-	option := fileutil.GetPictureDataOption{
+
+	// 获取图片数据
+	imgData, contentType, err := fileutil.GetPictureData(buildCoverPictureDataOption(coverBook, needFile, req.resizeHeight))
+	if err != nil {
+		logger.Infof(locale.GetString("log_get_file_error"), err)
+		return apiresp.BadRequest(c, "get_cover_failed", "Get file error: "+err.Error(), nil)
+	}
+	// 缓存封面到 configDir
+	saveCoverCache(cacheCtx, req.bookID, imgData)
+	// 返回图片数据
+	return serveCoverBytes(c, contentType, imgData)
+}
+
+func parseCoverRequest(c echo.Context) (coverRequest, error) {
+	req := coverRequest{
+		bookID:       c.QueryParam("id"),
+		resizeHeight: getIntQueryParam(c, "resize_height", 352),
+	}
+	if req.bookID == "" {
+		return req, apiresp.BadRequest(c, "missing_param", "id is required", map[string]string{"param": "id"})
+	}
+	return req, nil
+}
+
+func getCoverCacheContext(book *model.Book) coverCacheContext {
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		logger.Errorf(locale.GetString("err_failed_to_get_config_dir"), err)
+		return coverCacheContext{}
+	}
+	return coverCacheContext{
+		configDir: configDir,
+		metaPath:  filepath.Join(configDir, "metadata", book.GetStoreID()),
+	}
+}
+
+func serveCachedCover(c echo.Context, cacheCtx coverCacheContext, bookID string) (bool, error) {
+	if cacheCtx.metaPath == "" || !fileutil.CoverFileCacheExists(cacheCtx.metaPath, bookID) {
+		return false, nil
+	}
+	coverData, err := fileutil.GetCoverFromLocal(cacheCtx.metaPath, bookID)
+	if err != nil {
+		return false, nil
+	}
+	return true, serveCoverBytes(c, "image/jpeg", coverData)
+}
+
+func serveMP3Cover(c echo.Context, book *model.Book, cacheCtx coverCacheContext, req coverRequest) (bool, error) {
+	if book.Type != model.TypeAudio || !strings.EqualFold(filepath.Ext(book.BookPath), ".mp3") {
+		return false, nil
+	}
+	imgData, err := extractMP3CoverByTag(book.BookPath)
+	if err != nil || len(imgData) == 0 {
+		return false, nil
+	}
+	imgData = tools.ImageResizeByHeight(imgData, req.resizeHeight)
+	saveCoverCache(cacheCtx, req.bookID, imgData)
+	return true, serveCoverBytes(c, "image/jpeg", imgData)
+}
+
+func resolveBookGroupCover(c echo.Context, coverURLPath string, fallbackName string) (*model.Book, string, error) {
+	// URL 格式：/api/get-file?id=子书籍ID&filename=文件名。
+	parsedURL, err := url.Parse(coverURLPath)
+	if err != nil {
+		logger.Infof(locale.GetString("log_failed_to_parse_cover_url"), err)
+		return nil, "", apiresp.BadRequest(c, "invalid_cover_url", "Invalid cover URL", nil)
+	}
+	childID := parsedURL.Query().Get("id")
+	if childID == "" {
+		logger.Infof(locale.GetString("log_child_book_id_missing_in_cover_url"))
+		return nil, "", apiresp.BadRequest(c, "missing_child_book_id", "Child book ID is required in cover URL", nil)
+	}
+	childBook, err := model.IStore.GetBook(childID)
+	if err != nil {
+		logger.Infof(locale.GetString("log_failed_to_get_child_book"), err)
+		return nil, "", apiresp.Error(c, http.StatusNotFound, "child_book_not_found", "Child book not found", map[string]string{"id": childID})
+	}
+	needFile := fallbackName
+	if filename := parsedURL.Query().Get("filename"); filename != "" {
+		needFile = filename
+	}
+	return childBook, needFile, nil
+}
+
+func serveEmbeddedCover(c echo.Context, coverName string, coverURL string, cacheCtx coverCacheContext, req coverRequest) error {
+	imgData := assets.GetImageData(coverName)
+	if len(imgData) == 0 {
+		logger.Infof(locale.GetString("log_failed_to_read_embedded_image"), coverURL)
+		return apiresp.Error(c, http.StatusNotFound, "embedded_image_not_found", "Embedded image not found", nil)
+	}
+	imgData = tools.ImageResizeByHeight(imgData, req.resizeHeight)
+	contentType := tools.GetContentTypeByFileName(".jpg")
+	saveCoverCache(cacheCtx, req.bookID, imgData)
+	return serveCoverBytes(c, contentType, imgData)
+}
+
+func buildCoverPictureDataOption(book *model.Book, needFile string, resizeHeight int) fileutil.GetPictureDataOption {
+	return fileutil.GetPictureDataOption{
 		PictureName:      needFile,
-		BookID:           coverBook.BookID,
-		BookPath:         coverBook.BookPath,
-		BookIsPDF:        coverBook.Type == model.TypePDF,
-		BookIsDir:        coverBook.Type == model.TypeDir,
-		BookIsNonUTF8Zip: coverBook.NonUTF8Zip,
+		BookID:           book.BookID,
+		BookPath:         book.BookPath,
+		BookIsPDF:        book.Type == model.TypePDF,
+		BookIsDir:        book.Type == model.TypeDir,
+		BookIsNonUTF8Zip: book.NonUTF8Zip,
 		Debug:            config.GetCfg().Debug,
 		ResizeHeight:     resizeHeight,
 		// 远程书籍支持
-		IsRemote:  coverBook.IsRemote,
-		RemoteURL: coverBook.RemoteURL,
+		IsRemote:  book.IsRemote,
+		RemoteURL: book.RemoteURL,
 	}
-	// 获取图片数据
-	imgData, contentType, err := fileutil.GetPictureData(option)
-	if err != nil {
-		logger.Infof(locale.GetString("log_get_file_error"), err)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Get file error: " + err.Error()})
+}
+
+func saveCoverCache(cacheCtx coverCacheContext, bookID string, imgData []byte) {
+	if cacheCtx.configDir == "" || cacheCtx.metaPath == "" {
+		return
 	}
-	// 缓存封面到 configDir
-	if configDir != "" {
-		// 缓存封面到本地
-		err = fileutil.SaveCoverToLocal(metaPath, id, imgData)
-		if err != nil {
-			logger.Infof(locale.GetString("log_save_cover_to_local_error"), err)
-		}
+	if err := fileutil.SaveCoverToLocal(cacheCtx.metaPath, bookID, imgData); err != nil {
+		logger.Infof(locale.GetString("log_save_cover_to_local_error"), err)
 	}
-	// 返回图片数据
+}
+
+func serveCoverBytes(c echo.Context, contentType string, imgData []byte) error {
 	return c.Blob(http.StatusOK, contentType, imgData)
 }
 

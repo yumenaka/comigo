@@ -70,7 +70,10 @@ func waitSystemMessages() {
 		// 重启网页服务器
 		case "restart_web_server":
 			logger.Infof(locale.GetString("log_config_changed_restart_web") + "\n")
-			routers.RestartWebServer()
+			if err := routers.RestartWebServer(); err != nil {
+				logger.Errorf(locale.GetString("err_restart_web_server_failed"), err)
+				continue
+			}
 			routers.StartTailscale()
 			// 阻塞等待端口就绪，确保服务可用
 			tools.WaitUntilServerReady("localhost", uint16(config.GetCfg().Port), 15*time.Second)
