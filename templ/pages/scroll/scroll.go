@@ -79,12 +79,10 @@ func ScrollModeHandler(c echo.Context) error {
 }
 
 func parseScrollLoadMode(c echo.Context) string {
-	switch c.QueryParam("load") {
-	case scrollLoadModePaged:
+	if c.QueryParam("page") != "" {
 		return scrollLoadModePaged
-	default:
-		return scrollLoadModeInfinite
 	}
+	return scrollLoadModeInfinite
 }
 
 func parseScrollPageLimit(c echo.Context) int {
@@ -120,9 +118,9 @@ func scrollTotalPages(book *model.Book, pageLimit int) int {
 	return total
 }
 
-// 跳转用分页链接 /scroll/4cTOjFm?load=paged&page=1&limit=32
+// 跳转用分页链接 /scroll/4cTOjFm?page=1&limit=32
 func getScrollPaginationURL(book *model.Book, page int, pageLimit int) string {
-	readURL := `/scroll/` + book.BookID + `?load=paged&page=` + strconv.Itoa(page) + `&limit=` + strconv.Itoa(pageLimit)
+	readURL := `/scroll/` + book.BookID + `?page=` + strconv.Itoa(page) + `&limit=` + strconv.Itoa(pageLimit)
 	// href="javascript:void(0)" 是“点了什么也不发生”的老式写法
 	if page < 1 {
 		return `javascript:showToast(i18next.t('hint_first_page'), 'warning');`

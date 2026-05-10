@@ -51,7 +51,7 @@ Alpine.store("scroll", {
 if (isScrollReadPage()) {
 	const scrollURLParams = new URLSearchParams(window.location.search);
 	const scrollStore = Alpine.store("scroll");
-	if (scrollURLParams.get("load") === "paged") {
+	if (scrollURLParams.has("page")) {
 		scrollStore.loadMode = "paged";
 		scrollStore.pageLimit = normalizeScrollPageLimit(scrollURLParams.get("limit"));
 	} else if (scrollStore.loadMode === "paged" || !["infinite", "lazy"].includes(scrollStore.loadMode)) {

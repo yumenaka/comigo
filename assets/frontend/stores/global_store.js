@@ -217,7 +217,6 @@ Alpine.store('global', {
             const loadMode = ['infinite', 'lazy', 'paged'].includes(scrollStore.loadMode) ? scrollStore.loadMode : 'infinite';
             const pageLimit = Math.max(1, parseInt(scrollStore.pageLimit, 10) || 32);
             if (loadMode === 'paged') {
-                new_url.searchParams.set("load", loadMode);
                 const page = Math.floor((pageNum - 1) / pageLimit) + 1;
                 new_url.searchParams.set("page", page.toString());
                 new_url.searchParams.set("limit", pageLimit.toString());

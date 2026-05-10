@@ -12,8 +12,8 @@ Alpine.store('scroll').allPageNum = parseInt(book.page_count)
 const userID = Alpine.store('global').clientID
 const scrollURLParams = new URLSearchParams(window.location.search)
 const scrollStore = Alpine.store('scroll')
-// 分页加载由 URL 定位；无限卷轴与延迟加载只读取 scroll store。
-if (scrollURLParams.get('load') === 'paged') {
+// 分页加载由 page 参数定位；无限卷轴与延迟加载只读取 scroll store。
+if (scrollURLParams.has('page')) {
     scrollStore.loadMode = 'paged'
     scrollStore.pageLimit = Math.max(1, parseInt(scrollURLParams.get('limit'), 10) || 32)
 } else if (scrollStore.loadMode === 'paged' || !['infinite', 'lazy'].includes(scrollStore.loadMode)) {
@@ -244,7 +244,6 @@ function getPagedChunkForPageNum(pageNum) {
 function getPagedScrollURL(pageNum) {
     const chunkPage = getPagedChunkForPageNum(pageNum)
     const targetURL = new URL(window.ComiGoPath ? window.ComiGoPath(`/scroll/${book.id}`) : `/scroll/${book.id}`, window.location.origin)
-    targetURL.searchParams.set('load', 'paged')
     targetURL.searchParams.set('page', chunkPage.toString())
     targetURL.searchParams.set('limit', PAGE_LIMIT.toString())
     return targetURL.toString()
@@ -944,7 +943,7 @@ function handle(e, down) {
 addEventListener('keydown', (e) => handle(e, true))
 addEventListener('keyup', (e) => handle(e, false))
 
-// 根据 URL 获取分页加载块号，当前 URL 类似 http://localhost:1234/scroll/somebookid?load=paged&page=1&limit=32
+// 根据 URL 获取分页加载块号，当前 URL 类似 http://localhost:1234/scroll/somebookid?page=1&limit=32
 function getNowPageNum() {
     const urlParams = new URLSearchParams(window.location.search)
     const page = parseInt(urlParams.get('page'))
