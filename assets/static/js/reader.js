@@ -10,7 +10,7 @@ const readerState = {
     pdfObjectURL: '',
     imageFiles: [],
     objectURLs: new Map(),
-    // 卷轴模式的懒加载与当前页计算状态。
+    // 卷轴阅读的懒加载与当前页计算状态。
     observer: null,
     centerUpdateRaf: null,
     lastPageNum: 0,
@@ -18,7 +18,7 @@ const readerState = {
     scrollDownFlag: false,
     showBackTopFlag: false,
     backTopButton: null,
-    // 翻页模式的交互状态。这里不放进 Alpine store，避免高频 touchmove 触发响应式更新。
+    // 翻页阅读的交互状态。这里不放进 Alpine store，避免高频 touchmove 触发响应式更新。
     flip: {
         initialized: false,
         touchStartX: 0,
@@ -459,7 +459,7 @@ function renderReaderCurrentMode(book = readerState.book) {
     // 模式切换时先清空当前视图，避免卷轴/翻页 DOM 与事件状态互相影响。
     cleanupReaderView()
     normalizeReaderReadMode()
-    if (Alpine.store('global').readMode === 'page_flip') {
+    if (Alpine.store('global').readMode === 'flip') {
         renderReaderFlipBook(book)
         return
     }
@@ -494,7 +494,7 @@ function renderReaderScrollBook(book) {
     })
     mainArea.appendChild(fragment)
     Alpine.initTree(mainArea)
-    // 卷轴模式先生成空 img，再由 IntersectionObserver 近屏加载图片，减少大压缩包首屏等待。
+    // 卷轴阅读先生成空 img，再由 IntersectionObserver 近屏加载图片，减少大压缩包首屏等待。
     initReaderLazyLoading()
     initReaderGestures()
     restoreReaderProgress(book)
@@ -659,25 +659,21 @@ function restoreReaderProgress(book) {
 
 function normalizeReaderReadMode() {
     const mode = Alpine.store('global').readMode
-    if (mode === 'flip_page') {
-        Alpine.store('global').readMode = 'page_flip'
-        return
-    }
-    if (mode !== 'page_flip' && mode !== 'infinite_scroll') {
-        Alpine.store('global').readMode = 'infinite_scroll'
+    if (mode !== 'flip' && mode !== 'scroll') {
+        Alpine.store('global').readMode = 'scroll'
     }
 }
 
 function setReaderReadMode(mode) {
-    // reader 只提供本地无限卷轴和本地翻页，旧的 flip_page 值统一兼容为 page_flip。
-    Alpine.store('global').readMode = mode === 'page_flip' || mode === 'flip_page' ? 'page_flip' : 'infinite_scroll'
+    // reader 只提供本地卷轴阅读和翻页阅读，不引入在线卷轴加载策略。
+    Alpine.store('global').readMode = mode === 'flip' ? 'flip' : 'scroll'
     if (readerState.book?.pdf_only) {
         renderReaderPDF(readerState.book)
         return
     }
     if (readerState.book) {
         renderReaderCurrentMode(readerState.book)
-    } else if (Alpine.store('global').readMode !== 'page_flip') {
+    } else if (Alpine.store('global').readMode !== 'flip') {
         restoreReaderPageLayout()
         restoreReaderHeaderToolbar()
     }
@@ -713,7 +709,7 @@ function renderReaderFlipBook(book) {
         backTop.style.display = 'none'
     }
 
-    // 翻页模式不保留卷轴滚动位置，恢复的是最后阅读页码。
+    // 翻页阅读不保留卷轴滚动位置，恢复的是最后阅读页码。
     Alpine.store('global').nowPageNum = getReaderStoredPage(book)
     initReaderFlipListeners()
     syncReaderFlipToolbar()
@@ -780,7 +776,7 @@ function getReaderFlipStepPrevious() {
 }
 
 async function updateReaderFlipImages() {
-    if (!readerState.book || Alpine.store('global').readMode !== 'page_flip') return
+    if (!readerState.book || Alpine.store('global').readMode !== 'flip') return
     const elements = getReaderFlipElements()
     const nowPageNum = parseInt(Alpine.store('global').nowPageNum, 10)
     const allPageNum = Alpine.store('global').allPageNum
@@ -1021,7 +1017,7 @@ function readerFlipShouldBlock(diffX) {
 }
 
 function readerFlipTouchStart(event) {
-    if (Alpine.store('global').readMode !== 'page_flip' || !Alpine.store('flip').swipeTurn || readerState.flip.isAnimating) return
+    if (Alpine.store('global').readMode !== 'flip' || !Alpine.store('flip').swipeTurn || readerState.flip.isAnimating) return
     const point = getReaderPointerPoint(event)
     readerState.flip.startTime = Date.now()
     readerState.flip.isSwiping = true
@@ -1104,7 +1100,7 @@ function onReaderFlipClick(event) {
 }
 
 function onReaderFlipWheel(event) {
-    if (!Alpine.store('flip').wheelFlip || Alpine.store('global').readMode !== 'page_flip') return
+    if (!Alpine.store('flip').wheelFlip || Alpine.store('global').readMode !== 'flip') return
     if (event.deltaY === 0 || readerState.flip.wheelThrottleTimer || readerState.flip.isAnimating) return
     event.preventDefault()
     readerState.flip.wheelThrottleTimer = setTimeout(() => {
@@ -1118,7 +1114,7 @@ function onReaderFlipWheel(event) {
 }
 
 function onReaderFlipMouseMove(event) {
-    if (Alpine.store('global').readMode !== 'page_flip') return
+    if (Alpine.store('global').readMode !== 'flip') return
     const elements = getReaderFlipElements()
     const x = event.clientX
     const y = event.clientY
@@ -1196,7 +1192,7 @@ function getReaderLayoutElements() {
 }
 
 function isReaderFlipModeActive() {
-    return !readerState.book?.pdf_only && Alpine.store('global').readMode === 'page_flip'
+    return !readerState.book?.pdf_only && Alpine.store('global').readMode === 'flip'
 }
 
 function clearReaderFlipToolbarTimer() {
@@ -1221,7 +1217,7 @@ function restoreReaderHeaderToolbar() {
 
 function applyReaderFlipLayout() {
     const { header, footer, root, shell, flipArea } = getReaderLayoutElements()
-    // 翻页模式需要占满视口；底部 footer 会挤压图片，因此进入翻页时隐藏。
+    // 翻页阅读需要占满视口；底部 footer 会挤压图片，因此进入翻页时隐藏。
     if (footer) {
         footer.style.setProperty('display', 'none', 'important')
     }
@@ -1257,7 +1253,7 @@ function applyReaderFlipLayout() {
 
 function restoreReaderPageLayout() {
     const { header, footer, root, shell, flipArea } = getReaderLayoutElements()
-    // 退出翻页模式时撤销所有内联样式，避免影响卷轴模式和普通页面布局。
+    // 退出翻页阅读时撤销所有内联样式，避免影响卷轴阅读和普通页面布局。
     if (footer) {
         footer.style.removeProperty('display')
     }
@@ -1315,7 +1311,7 @@ function syncReaderFlipToolbar() {
     applyReaderFlipLayout()
     showReaderFlipToolbar()
     if (Alpine.store('flip').autoHideToolbar) {
-        // 自动隐藏只作用于翻页模式，卷轴模式继续使用普通 header/footer。
+        // 自动隐藏只作用于翻页阅读，卷轴阅读继续使用普通 header/footer。
         readerState.flip.toolbarHideTimer = setTimeout(hideReaderFlipToolbar, 1000)
     }
 }
@@ -1370,7 +1366,7 @@ function initReaderGestures() {
     if (!mainArea || mainArea.dataset.readerGesturesReady === 'true') return
 
     mainArea.dataset.readerGesturesReady = 'true'
-    // 卷轴模式保留中间区域打开设置的交互，和 scroll 阅读页保持一致。
+    // 卷轴阅读保留中间区域打开设置的交互，和在线 scroll 阅读页保持一致。
     mainArea.addEventListener('mousemove', onReaderMouseMove)
     mainArea.addEventListener('click', onReaderClick)
     mainArea.addEventListener('touchstart', onReaderClick, { passive: true })
@@ -1470,7 +1466,7 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 window.addEventListener('keydown', (event) => {
-    if (Alpine.store('global').readMode !== 'page_flip' || !readerState.book) return
+    if (Alpine.store('global').readMode !== 'flip' || !readerState.book) return
     const key = event.key.toLowerCase()
     if (key === 'arrowleft' || key === 'h' || key === ',' || key === '<' || key === 'pageup') {
         event.preventDefault()

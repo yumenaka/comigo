@@ -10,12 +10,22 @@ const images = book.PageInfos
 Alpine.store('scroll').allPageNum = parseInt(book.page_count)
 // 用户ID和令牌，假设已在其他地方定义
 const userID = Alpine.store('global').clientID
-// 分页卷轴每页图片数（与后端 PAGED_SIZE 保持一致）
-const PAGED_SIZE = 32
-// 最大页码
-const MaxPageNum = Math.floor(parseInt(book.page_count) / PAGED_SIZE) + 1
+const scrollURLParams = new URLSearchParams(window.location.search)
+const scrollStore = Alpine.store('scroll')
+// 分页加载由 URL 定位；无限卷轴与延迟加载只读取 scroll store。
+if (scrollURLParams.get('load') === 'paged') {
+    scrollStore.loadMode = 'paged'
+    scrollStore.pageLimit = Math.max(1, parseInt(scrollURLParams.get('limit'), 10) || 32)
+} else if (scrollStore.loadMode === 'paged' || !['infinite', 'lazy'].includes(scrollStore.loadMode)) {
+    scrollStore.loadMode = 'infinite'
+}
+scrollStore.pageLimit = Math.max(1, parseInt(scrollStore.pageLimit, 10) || 32)
+const SCROLL_LOAD_MODE = scrollStore.loadMode
+const PAGE_LIMIT = scrollStore.pageLimit
+// 分页加载模式下的最大分页序号。
+const MaxPageNum = Math.max(1, Math.ceil(parseInt(book.page_count) / PAGE_LIMIT))
 
-// ====== 卷轴模式 WebSocket 同步常量 ======
+// ====== 卷轴阅读 WebSocket 同步常量 ======
 const SCROLL_SYNC_PENDING_KEY = `comigo_scroll_sync_${book.id}` // 跨页导航时暂存远端同步数据的 sessionStorage 键
 const SCROLL_REMOTE_SUPPRESS_MS = 1800       // 接收远端同步后，抑制本端回传的时长（ms）
 const SCROLL_SYNC_PERCENT_THRESHOLD = 0.08   // 同页内触发同步发送的最小 percent 变化量
@@ -48,6 +58,8 @@ const scrollSyncState = {
     remoteScrollSettleTimer: null,             // 动画结束后延迟更新中心追踪的定时器
     lastSentAtEdge: false,                     // 上次发送时是否处于文档边缘
 }
+
+let scrollLazyObserver = null
 
 // 将数值限制在 [min, max] 范围内
 function clamp(value, min, max) {
@@ -208,14 +220,14 @@ function animateRemoteScrollTo(targetTop, triggerSource) {
     scrollSyncState.remoteScrollAnimationFrameID = requestAnimationFrame(step)
 }
 
-// 判断当前是否为分页卷轴模式
+// 判断当前是否为分页加载模式
 function isPagedScrollMode() {
-    return new URLSearchParams(window.location.search).has('page')
+    return SCROLL_LOAD_MODE === 'paged'
 }
 
-// 判断当前是否为无限滚动模式
-function isInfiniteScrollMode() {
-    return !isPagedScrollMode()
+// 判断当前是否为延迟加载模式
+function isLazyScrollMode() {
+    return SCROLL_LOAD_MODE === 'lazy'
 }
 
 // 判断卷轴同步功能是否开启（需在线且全局开关启用）
@@ -223,25 +235,18 @@ function isScrollSyncEnabled() {
     return Alpine.store('global').onlineBook && Alpine.store('global').syncPageByWS
 }
 
-// 生成无限滚动模式下指定起始页码的 URL
-function getInfiniteScrollURL(pageNum) {
-    const targetURL = new URL(window.ComiGoPath ? window.ComiGoPath(`/scroll/${book.id}`) : `/scroll/${book.id}`, window.location.origin)
-    if (pageNum > 1) {
-        targetURL.searchParams.set('start', pageNum.toString())
-    }
-    return targetURL.toString()
-}
-
 // 根据图片页码计算所属分页块号
 function getPagedChunkForPageNum(pageNum) {
-    return Math.floor((pageNum - 1) / PAGED_SIZE) + 1
+    return Math.floor((pageNum - 1) / PAGE_LIMIT) + 1
 }
 
 // 生成指定图片页码所在分页块的 URL
 function getPagedScrollURL(pageNum) {
     const chunkPage = getPagedChunkForPageNum(pageNum)
     const targetURL = new URL(window.ComiGoPath ? window.ComiGoPath(`/scroll/${book.id}`) : `/scroll/${book.id}`, window.location.origin)
+    targetURL.searchParams.set('load', 'paged')
     targetURL.searchParams.set('page', chunkPage.toString())
+    targetURL.searchParams.set('limit', PAGE_LIMIT.toString())
     return targetURL.toString()
 }
 
@@ -312,6 +317,76 @@ function getScrollImageByPageNum(pageNum) {
     return document.querySelector(
         `#ScrollMainArea img.manga_image[data-scroll-page-num="${pageNum}"]`,
     )
+}
+
+// 延迟加载模式下，近屏图片才写入真实 src；远端同步定位会强制加载目标页。
+function loadScrollLazyImage(image) {
+    if (!image || image.getAttribute('src')) {
+        return Promise.resolve()
+    }
+
+    const src = image.getAttribute('data-scroll-src')
+    if (!src) {
+        return Promise.resolve()
+    }
+
+    return new Promise((resolve) => {
+        const finish = () => {
+            image.removeEventListener('load', finish)
+            image.removeEventListener('error', finish)
+            scheduleCenterPageUpdate()
+            resolve()
+        }
+        image.addEventListener('load', finish, { once: true })
+        image.addEventListener('error', finish, { once: true })
+        image.src = src
+    })
+}
+
+function ensureScrollImageLoaded(image) {
+    if (!image?.matches?.('img.manga_image[data-scroll-lazy="true"]')) {
+        return Promise.resolve()
+    }
+    return loadScrollLazyImage(image)
+}
+
+function initScrollLazyLoading() {
+    if (!isLazyScrollMode()) {
+        return
+    }
+
+    const lazyImages = Array.from(
+        document.querySelectorAll('#ScrollMainArea img.manga_image[data-scroll-lazy="true"]'),
+    )
+    if (lazyImages.length === 0) {
+        return
+    }
+
+    if (scrollLazyObserver) {
+        scrollLazyObserver.disconnect()
+    }
+
+    if (typeof IntersectionObserver === 'undefined') {
+        lazyImages.forEach((image) => loadScrollLazyImage(image))
+        return
+    }
+
+    scrollLazyObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+            if (!entry.isIntersecting) {
+                continue
+            }
+            const image = entry.target
+            loadScrollLazyImage(image)
+            scrollLazyObserver.unobserve(image)
+        }
+    }, {
+        root: null,
+        rootMargin: '1200px 0px',
+        threshold: 0.01,
+    })
+
+    lazyImages.forEach((image) => scrollLazyObserver.observe(image))
 }
 
 // 获取当前已加载图片的起止页码范围
@@ -393,7 +468,7 @@ function resolveCenterTrackedPage() {
     }
 }
 
-// 更新卷轴模式的自动书签
+// 更新卷轴阅读的自动书签
 function updateScrollBookmark(pageNum) {
     if (!book || !book.id || !Alpine.store('global').onlineBook) {
         return
@@ -410,7 +485,7 @@ function updateScrollBookmark(pageNum) {
             pageIndex: pageNum,
         })
         .catch((error) => {
-            console.error('更新卷轴模式自动书签失败:', error)
+            console.error('更新卷轴阅读自动书签失败:', error)
         })
 }
 
@@ -457,7 +532,7 @@ function sendScrollSyncData(tracked) {
     window.ComiGoWS.send(
         'scroll_mode_sync_page',
         syncData,
-        `卷轴模式，${triggerSource === 'auto' ? '自动' : '手动'}发送同步页数`,
+        `卷轴阅读，${triggerSource === 'auto' ? '自动' : '手动'}发送同步页数`,
     )
 }
 
@@ -584,7 +659,7 @@ function applyRemoteScrollSync(data, { allowNavigation = true } = {}) {
     beginRemoteApply()
 
     if (!targetImage) {
-        if (allowNavigation) {
+        if (allowNavigation && isPagedScrollMode()) {
             savePendingRemoteSync({
                 book_id: data.book_id,
                 now_page_num: pageNum,
@@ -593,16 +668,15 @@ function applyRemoteScrollSync(data, { allowNavigation = true } = {}) {
                 is_at_bottom: edgeFlags.isAtBottom,
                 trigger_source: data.trigger_source === 'auto' ? 'auto' : 'manual',
             })
-            // 根据当前模式选择正确的导航 URL
-            window.location.href = isPagedScrollMode()
-                ? getPagedScrollURL(pageNum)
-                : getInfiniteScrollURL(pageNum)
+            window.location.href = getPagedScrollURL(pageNum)
         }
         return
     }
 
-    waitForImageReady(targetImage, () => {
-        scrollImageToTrackedPercent(targetImage, percent, triggerSource, edgeFlags)
+    ensureScrollImageLoaded(targetImage).then(() => {
+        waitForImageReady(targetImage, () => {
+            scrollImageToTrackedPercent(targetImage, percent, triggerSource, edgeFlags)
+        })
     })
 }
 
@@ -628,7 +702,7 @@ function restorePendingRemoteSync(retryCount = 20) {
     applyRemoteScrollSync(pending, { allowNavigation: false })
 }
 
-// 初始化卷轴模式的 WebSocket 同步连接与消息处理
+// 初始化卷轴阅读的 WebSocket 同步连接与消息处理
 function initScrollModeSync() {
     if (typeof window.ComiGoWS === 'undefined') {
         return
@@ -661,7 +735,7 @@ function initScrollModeSync() {
                         applyRemoteScrollSync(data)
                     }
                 } catch (error) {
-                    console.error('卷轴模式 WebSocket 同步数据解析失败:', error)
+                    console.error('卷轴阅读 WebSocket 同步数据解析失败:', error)
                 }
             } else if (msg.type === 'heartbeat' && Alpine.store('global').debugMode) {
                 console.log('收到心跳消息')
@@ -870,7 +944,7 @@ function handle(e, down) {
 addEventListener('keydown', (e) => handle(e, true))
 addEventListener('keyup', (e) => handle(e, false))
 
-// 根据url获取当前页码 当前 url 类似 http://localhost:1234/scroll/somebookid?page=1
+// 根据 URL 获取分页加载块号，当前 URL 类似 http://localhost:1234/scroll/somebookid?load=paged&page=1&limit=32
 function getNowPageNum() {
     const urlParams = new URLSearchParams(window.location.search)
     const page = parseInt(urlParams.get('page'))
@@ -925,10 +999,11 @@ function jumpPageNum(pageNum) {
     window.location.href = url.toString()
 }
 
-// 卷轴模式总初始化入口
+// 卷轴阅读总初始化入口
 function initScrollMode() {
     initScrollModeSync()
-    // 无限滚动和分页模式均启用中心追踪与 pending sync 恢复
+    initScrollLazyLoading()
+    // 所有卷轴加载策略均启用中心追踪与 pending sync 恢复。
     scheduleCenterPageUpdate()
     setTimeout(scheduleCenterPageUpdate, 120)
     window.addEventListener(
@@ -942,5 +1017,5 @@ function initScrollMode() {
     restorePendingRemoteSync()
 }
 
-// ============ 卷轴模式 WebSocket 同步 ============
+// ============ 卷轴阅读 WebSocket 同步 ============
 document.addEventListener('DOMContentLoaded', initScrollMode)

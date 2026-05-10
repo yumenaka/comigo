@@ -7,7 +7,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// AutoFlipPlugin 自动翻页插件（仅支持翻页模式）
+// AutoFlipPlugin 自动翻页插件（仅支持翻页阅读）
 templ AutoFlipPlugin(c echo.Context) {
 	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_flip") && strings.HasPrefix(config.StripBasePath(c.Request().URL.Path), "/flip/") {
 		if config.GetCfg().Debug {
@@ -29,7 +29,7 @@ templ AutoFlipPlugin(c echo.Context) {
 					}
 					// 确保使用最新的 intervalSeconds 值
 					const currentInterval = parseInt(self.intervalSeconds) || 3;
-					// 翻页模式：调用翻页函数
+					// 翻页阅读：调用翻页函数
 					if (typeof toNextPage === 'function') {
 						self.autoFlipInterval = setInterval(() => {
 							const nowPageNum = parseInt(Alpine.store('global').nowPageNum);

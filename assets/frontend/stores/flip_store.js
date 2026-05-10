@@ -1,4 +1,4 @@
-// Flip 翻页模式
+// Flip 翻页阅读
 Alpine.store('flip', {
     imageMaxWidth: 400,
     //自动隐藏工具条
@@ -62,4 +62,4 @@ Alpine.store('flip', {
     websocketMaxReconnect: Alpine.$persist(200).as('flip.websocketMaxReconnect'),
     // WebSocket 重连间隔（毫秒）
     websocketReconnectInterval: Alpine.$persist(3000).as('flip.websocketReconnectInterval'),
-}) 
+})

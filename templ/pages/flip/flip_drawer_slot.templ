@@ -54,7 +54,6 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	@plugins.AutoFlipPlugin(c)
 	<!-- 速写练习插件 -->
 	@plugins.SketchPracticePlugin(c)
-	@common.ReadModeSwitchButton()
 	@common.DownloadButton(c, book)
 	<!-- 远程同步翻页 -->
 	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->

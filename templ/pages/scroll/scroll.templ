@@ -8,8 +8,8 @@ import (
 	"github.com/yumenaka/comigo/tools"
 )
 
-// ScrollPage 定义 BodyHTML
-templ ScrollPage(c echo.Context, book *model.Book, readMode string, pagedIndex int, startIndex int) {
+// ScrollPage 定义卷轴阅读页面。
+templ ScrollPage(c echo.Context, book *model.Book, loadMode string, pagedIndex int, pageLimit int) {
 	@InsertData(book, tools.GetServerInfo(
 		tools.ServerInfoParams{
 			Cfg:            config.GetCfg(),
@@ -24,7 +24,7 @@ templ ScrollPage(c echo.Context, book *model.Book, readMode string, pagedIndex i
 			common.HeaderQuickJumpTitle(common.GetBookTitle(book.BookInfo.BookID), common.QuickJumpBarBooks(book)),
 			common.HeaderDefaultRight(),
 		)
-		@MainArea(c, book, readMode, pagedIndex, startIndex)
+		@MainArea(c, book, loadMode, pagedIndex, pageLimit)
 	}
 	@common.Footer(config.GetVersion())
 	if book != nil {

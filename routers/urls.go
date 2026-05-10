@@ -99,9 +99,9 @@ func bindProtectedView(group *echo.Group) {
 	group.GET("/index.html", shelf.ShelfHandler)
 	group.GET("/shelf/:id", shelf.ShelfHandler) //子书架
 	group.GET("/search", shelf.SearchHandler)   //书架搜索
-	// 卷轴模式
+	// 卷轴阅读
 	group.GET("/scroll/:id", scroll.ScrollModeHandler)
-	// 翻页模式
+	// 翻页阅读
 	group.GET("/flip/:id", flip.FlipModeHandler)
 	// 播放器模式
 	group.GET("/player/:id", player.PlayerModeHandler)

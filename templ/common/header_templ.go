@@ -38,7 +38,7 @@ func Header(left templ.Component, center templ.Component, right templ.Component)
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header id=\"header\" class=\"z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400\" :class=\"{ 'absolute top-0 ': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.flip.autoHideToolbar && $store.global.readMode === 'page_flip','mx-auto bg-base-100/50': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.global.readMode === 'page_flip'}\"><div class=\"flex flex-row\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header id=\"header\" class=\"z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400\" :class=\"{ 'absolute top-0 ': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.flip.autoHideToolbar && $store.global.readMode === 'flip','mx-auto bg-base-100/50': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.global.readMode === 'flip'}\"><div class=\"flex flex-row\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1029,9 +1029,9 @@ func HeaderQuickJumpTitle(title string, books *model.BookInfos) templ.Component 
 	})
 }
 
-// 根据阅读模式生成书籍链接，如果是“{}”，templ 可能会把 { something } 解析成模板语法，而不是输出字面量。用 “ 来包裹就不会报错了
+// 根据当前阅读模式和卷轴加载策略生成书籍链接。
 func BookURL(bookID string) string {
-	return fmt.Sprintf(`{BookURL: $store.global.readMode === 'page_flip' ? window.ComiGoPath("/flip/%s") : window.ComiGoPath("/scroll/%s")}`, bookID, bookID)
+	return fmt.Sprintf(`{BookURL: $store.global.getReadURL("%s", 1)}`, bookID)
 }
 
 // ReSortIcon 定义了一个排序图标，点击后会显示一个下拉菜单，允许用户选择不同的排序方式。根据当前URL路径，菜单会设置不同的cookie参数名来保存用户的选择，并在页面加载时读取该cookie以确定当前的排序方式。

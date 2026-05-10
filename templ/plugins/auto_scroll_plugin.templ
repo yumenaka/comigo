@@ -7,7 +7,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// AutoScrollPlugin 自动滚动插件（仅支持滚动模式）
+// AutoScrollPlugin 自动滚动插件（仅支持卷轴阅读）
 templ AutoScrollPlugin(c echo.Context) {
 	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("auto_scroll") && strings.HasPrefix(config.StripBasePath(c.Request().URL.Path), "/scroll/") {
 		if config.GetCfg().Debug {
@@ -32,7 +32,7 @@ templ AutoScrollPlugin(c echo.Context) {
 					const currentInterval = parseInt(self.intervalSeconds) || 3;
 					// 确保使用最新的 scrollPercent 值
 					const currentPercent = parseInt(self.scrollPercent) || 90;
-					// 滚动模式：自动向下滚动
+					// 卷轴阅读：自动向下滚动
 
 					self.autoScrollInterval = setInterval(() => {
 						// 检查是否到达页面底部

@@ -59,7 +59,7 @@ const getConfig = () => ({
 })
 
 // ============ 导入纯工具模块(utils) ============
-// 获取翻页模式分页与边界判断工具。?. 是可选链语法，避免对象不存在时报错。
+// 获取翻页阅读分页与边界判断工具。?. 是可选链语法，避免对象不存在时报错。
 const getFlipPaginationUtils = () => window.ComiGoFlip?.pagination
 // 获取通用阅读交互几何判断工具；保留旧命名入口兼容已有页面。
 const getFlipInteractionUtils = () => window.ComiGoInteraction || window.ComiGoFlip?.interaction
@@ -186,7 +186,7 @@ if (params.has('start')) {
     // 优先使用URL参数中的页码
     let pageNum = parseInt(params.get('start'))
     jumpPageNum(pageNum, false); // 使用跳转函数更新页面
-    // 翻页模式自动跳转后删除start查询参数
+    // 翻页阅读自动跳转后删除 start 查询参数
     params.delete('start');
     if (params.toString() !== '') {
         const newUrl = `${url.origin}${url.pathname}?${params.toString()}`;
@@ -758,7 +758,7 @@ function getInSetArea(e) {
     return false
 }
 
-// 翻页模式功能：显示工具栏时，点击设置区域，自动漫画区域居中。
+// 翻页阅读功能：显示工具栏时，点击设置区域，自动漫画区域居中。
 function scrollToMangaMain() {
     if (!Alpine.store('flip').autoHideToolbar) {
         // 将 slider_container 顶部对齐到浏览器可见区域顶部
@@ -1010,7 +1010,7 @@ function sendFlipData() {
     window.ComiGoWS.send('flip_mode_sync_page', {
         book_id: book.id,
         now_page_num: Alpine.store('global').nowPageNum,
-    }, '翻页模式，发送数据')
+    }, '翻页阅读，发送数据')
 }
 
 // 设置标签页标题
@@ -1293,10 +1293,10 @@ function initFlipMode() {
         }
         
         if (Alpine.store('global').debugMode) {
-            console.log('翻页模式初始化完成')
+            console.log('翻页阅读初始化完成')
         }
     } catch (error) {
-        console.error('翻页模式初始化失败:', error)
+        console.error('翻页阅读初始化失败:', error)
     }
 }
 

@@ -32,7 +32,7 @@ templ ReaderPage(c echo.Context) {
 		common.HeaderDefaultRight(),
 	)
 	@MainArea(c)
-	<div id="ReaderFooter" class="w-full" x-show="$store.global.readMode !== 'page_flip'">
+	<div id="ReaderFooter" class="w-full" x-show="$store.global.readMode !== 'flip'">
 		@common.Footer(config.GetVersion())
 	</div>
 	@common.Drawer(c, nil, DrawerSlot(c), true, config.PrefixPath("/"))
@@ -110,12 +110,12 @@ templ MainArea(c echo.Context) {
 				id="ReaderPDFArea"
 				class="hidden flex-col items-center justify-start flex-1 w-full max-w-full h-[calc(100dvh-4rem)] min-h-[calc(100dvh-4rem)] pt-0 text-base-content"
 			></div>
-			<!-- 无限卷轴模式：页面 img 节点由 reader.js 动态创建，并通过 IntersectionObserver 懒加载。 -->
+			<!-- 卷轴阅读：页面 img 节点由 reader.js 动态创建，并通过 IntersectionObserver 懒加载。 -->
 			<div
 				id="ScrollMainArea"
 				class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content"
 			></div>
-			<!-- 翻页模式：左/中/右三页结构用于触摸拖动时显示相邻页并完成滑出动画。 -->
+			<!-- 翻页阅读：左/中/右三页结构用于触摸拖动时显示相邻页并完成滑出动画。 -->
 			<div
 				id="ReaderFlipArea"
 				class="hidden flex-col items-start justify-start flex-1 w-full h-[calc(100vh-7rem)] min-h-[60vh] m-0 p-0 text-base-content"
@@ -148,11 +148,11 @@ templ MainArea(c echo.Context) {
 					</div>
 				</div>
 			</div>
-			<!-- 翻页模式进度条。漫画模式下显示值会反向映射到实际页码。 -->
+			<!-- 翻页阅读进度条。漫画模式下显示值会反向映射到实际页码。 -->
 			<div
 				id="ReaderFlipStepsRangeArea"
 				@click.stop=""
-				x-show="$store.global.readMode === 'page_flip' && $store.global.allPageNum > 0"
+				x-show="$store.global.readMode === 'flip' && $store.global.allPageNum > 0"
 				class="hidden w-5/6 h-12 px-4 md:px-8 overflow-visible font-semibold StepsRangeArea rounded-xl drop-shadow-lg self-center-safe bg-base-100 text-base-content toolbar backdrop-blur-3xl"
 				:class="($store.flip.autoHideToolbar? 'fixed bottom-0 flex flex-col justify-center':'flex flex-col justify-center bg-base-100/50')+($store.flip.mangaMode?' manga-mode': '')"
 			>
@@ -232,7 +232,7 @@ templ MainArea(c echo.Context) {
 				</div>
 			</div>
 			<div
-				x-show="$store.flip.showPageNum && $store.global.readMode === 'page_flip'"
+				x-show="$store.flip.showPageNum && $store.global.readMode === 'flip'"
 				class="fixed bottom-2 left-2 text-gray-500 text-sm pointer-events-none z-10"
 				x-text="$store.global.nowPageNum+'/'+$store.global.allPageNum"
 			></div>
@@ -401,44 +401,10 @@ templ MainArea(c echo.Context) {
 	</main>
 }
 
-// ReaderReadModeSwitchButton 切换 reader 页本地阅读模式，只保留无限卷轴与翻页两个候选项。
-templ ReaderReadModeSwitchButton() {
-	<div
-		x-data="{
-			readModeSwitchOptions: {
-				infinite_scroll: ['page_flip'],
-				paged_scroll: ['infinite_scroll', 'page_flip'],
-				page_flip: ['infinite_scroll'],
-			}
-		}"
-		class="flex flex-row justify-center items-center w-full mt-2 mb-2 pb-1 gap-2 border-2 border-gray-500 dark:border-gray-200 rounded relative"
-	>
-		<span
-			class="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content"
-			x-text="i18next.t('switch')"
-		>
-			切换
-		</span>
-		<template
-			x-for="mode in readModeSwitchOptions[$store.global.readMode] ?? ['infinite_scroll', 'page_flip']"
-			:key="mode"
-		>
-			<button
-				type="button"
-				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
-				@click="window.ComiGoReader?.setReadMode(mode)"
-				x-text="i18next.t(mode+'_button')"
-				x-bind:aria-label="i18next.t(mode+'_button')"
-			></button>
-		</template>
-	</div>
-}
-
 templ DrawerSlot(c echo.Context) {
-	@ReaderReadModeSwitchButton()
 	<!-- 自动滚动插件可以直接复用卷轴页面滚动行为 -->
 	<div
-		x-show="$store.global.readMode === 'infinite_scroll'"
+		x-show="$store.global.readMode === 'scroll'"
 		class="w-full"
 		x-data="{ 
 		autoScrollEnabled: false,
@@ -481,8 +447,8 @@ templ DrawerSlot(c echo.Context) {
 			<input type="range" min="50" max="150" x-model.number="scrollPercent" step="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 		</div>
 	</div>
-	<div x-show="$store.global.readMode === 'page_flip'" class="w-full">
-		<!-- reader 翻页模式复用 flip store 参数，但不启用在线 WS 同步。 -->
+	<div x-show="$store.global.readMode === 'flip'" class="w-full">
+		<!-- reader 翻页阅读复用 flip store 参数，但不启用在线 WS 同步。 -->
 		<label class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 			<input type="checkbox" x-model="$store.flip.swipeTurn" class="sr-only peer" checked/>
 			<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
@@ -519,37 +485,37 @@ templ DrawerSlot(c echo.Context) {
 			<span class="font-medium ms-3" x-text="i18next.t('auto_align')"></span>
 		</label>
 	</div>
-	<label x-show="$store.global.readMode === 'infinite_scroll'" class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<label x-show="$store.global.readMode === 'scroll'" class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input type="checkbox" x-model="$store.scroll.showPageNum" class="sr-only peer" checked/>
 		<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 		<span class="font-medium ms-3" x-text="i18next.t('show_page_num')"></span>
 	</label>
-	<div x-show="$store.global.readMode === 'infinite_scroll'" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'scroll'" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('margin_bottom_on_scroll_mode') + $store.scroll.marginBottomOnScrollMode+'px'"></label>
 		<input type="range" min="0" max="100" x-model="$store.scroll.marginBottomOnScrollMode" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 range-lg"/>
 	</div>
-	<div x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isPortrait" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'scroll' && $store.global.isPortrait" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('portrait_width_percent') + $store.scroll.portraitWidthPercent+'%'"></label>
 		<input type="range" min="10" max="100" x-model="$store.scroll.portraitWidthPercent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
-	<label x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape" class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<label x-show="$store.global.readMode === 'scroll' && $store.global.isLandscape" class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input type="checkbox" x-model="$store.scroll.widthUseFixedValue" class="sr-only peer" checked/>
 		<div class="relative w-11 min-w-[44px] h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 		<span class="font-medium ms-3" x-text="$store.scroll.widthUseFixedValue?i18next.t('width_use_fixed_value'):i18next.t('width_use_percent')"></span>
 	</label>
-	<div x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && !$store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'scroll' && $store.global.isLandscape && !$store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('single_page_width') + $store.scroll.singlePageWidth_Percent+'%'"></label>
 		<input type="range" min="10" max="100" x-model="$store.scroll.singlePageWidth_Percent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
-	<div x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && !$store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'scroll' && $store.global.isLandscape && !$store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('double_page_width') + $store.scroll.doublePageWidth_Percent+'%'"></label>
 		<input type="range" min="10" max="100" x-model="$store.scroll.doublePageWidth_Percent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
-	<div x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && $store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'scroll' && $store.global.isLandscape && $store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('single_page_width') + $store.scroll.singlePageWidth_PX+' px'"></label>
 		<input type="range" min="100" max="1600" x-model="$store.scroll.singlePageWidth_PX" step="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
-	<div x-show="$store.global.readMode === 'infinite_scroll' && $store.global.isLandscape && $store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-show="$store.global.readMode === 'scroll' && $store.global.isLandscape && $store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label class="block w-full mb-0 font-medium" x-text="i18next.t('double_page_width') + $store.scroll.doublePageWidth_PX+' px'"></label>
 		<input type="range" min="100" max="1600" x-model="$store.scroll.doublePageWidth_PX" step="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>

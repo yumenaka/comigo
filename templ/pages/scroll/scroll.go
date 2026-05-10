@@ -14,7 +14,14 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// ScrollModeHandler 阅读界面（卷轴模式）
+const (
+	scrollLoadModeInfinite = "infinite"
+	scrollLoadModePaged    = "paged"
+	defaultScrollPageLimit = 32
+	maxScrollPageLimit     = 512
+)
+
+// ScrollModeHandler 阅读界面（卷轴阅读）
 func ScrollModeHandler(c echo.Context) error {
 	// 图片排序方式
 	sortBy := "default"
@@ -44,25 +51,15 @@ func ScrollModeHandler(c echo.Context) error {
 		return nil
 	}
 	book.SortPages(sortBy)
-	readMode := "infinite_scroll"
-	// 读取分页索引
-	pagedIndex := -1
-	page := c.QueryParam("page")
-	if page != "" {
-		readMode = "paged_scroll"
-		index, err := strconv.Atoi(page)
-		if err == nil {
-			pagedIndex = index
-		}
-	}
-
-	startIndex, err := strconv.Atoi(c.QueryParam("start"))
-	if err != nil {
-		startIndex = 0
+	loadMode := parseScrollLoadMode(c)
+	pageLimit := parseScrollPageLimit(c)
+	pagedIndex := parseScrollPageIndex(c, loadMode)
+	if loadMode == scrollLoadModePaged && pagedIndex > scrollTotalPages(book, pageLimit) {
+		pagedIndex = scrollTotalPages(book, pageLimit)
 	}
 
 	// 定义模板主体内容。
-	scrollPage := ScrollPage(c, book, readMode, pagedIndex, startIndex)
+	scrollPage := ScrollPage(c, book, loadMode, pagedIndex, pageLimit)
 	// 拼接页面
 	indexHtml := common.Html(
 		c,
@@ -81,14 +78,56 @@ func ScrollModeHandler(c echo.Context) error {
 	return nil
 }
 
-// 跳转用分页链接 /scroll/4cTOjFm?page=1
-func getScrollPaginationURL(book *model.Book, page int) string {
-	readURL := `/scroll/` + book.BookID + `?page=` + strconv.Itoa(page)
+func parseScrollLoadMode(c echo.Context) string {
+	switch c.QueryParam("load") {
+	case scrollLoadModePaged:
+		return scrollLoadModePaged
+	default:
+		return scrollLoadModeInfinite
+	}
+}
+
+func parseScrollPageLimit(c echo.Context) int {
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil || limit < 1 {
+		return defaultScrollPageLimit
+	}
+	if limit > maxScrollPageLimit {
+		return maxScrollPageLimit
+	}
+	return limit
+}
+
+func parseScrollPageIndex(c echo.Context, loadMode string) int {
+	if loadMode != scrollLoadModePaged {
+		return -1
+	}
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page < 1 {
+		return 1
+	}
+	return page
+}
+
+func scrollTotalPages(book *model.Book, pageLimit int) int {
+	if book == nil || pageLimit < 1 {
+		return 1
+	}
+	total := (book.PageCount + pageLimit - 1) / pageLimit
+	if total < 1 {
+		return 1
+	}
+	return total
+}
+
+// 跳转用分页链接 /scroll/4cTOjFm?load=paged&page=1&limit=32
+func getScrollPaginationURL(book *model.Book, page int, pageLimit int) string {
+	readURL := `/scroll/` + book.BookID + `?load=paged&page=` + strconv.Itoa(page) + `&limit=` + strconv.Itoa(pageLimit)
 	// href="javascript:void(0)" 是“点了什么也不发生”的老式写法
 	if page < 1 {
 		return `javascript:showToast(i18next.t('hint_first_page'), 'warning');`
 	}
-	if page > (book.PageCount/32 + 1) {
+	if page > scrollTotalPages(book, pageLimit) {
 		return `javascript:showToast(i18next.t('hint_last_page'), 'warning')`
 	}
 	return readURL
@@ -97,10 +136,10 @@ func getScrollPaginationURL(book *model.Book, page int) string {
 // 自动书签脚本，同时更新当前页码
 func intersectScript(pageIndex int) string {
 	return fmt.Sprintf(`
-    $nextTick(() => {
-	if ($store.global.readMode === 'infinite_scroll') {
-		return;
-	}
+	    $nextTick(() => {
+		if ($store.scroll.loadMode !== 'paged') {
+			return;
+		}
 	if(!loaded || counter < 1){
         return;
     }

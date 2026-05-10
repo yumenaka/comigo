@@ -132,7 +132,7 @@ Alpine.store('global', {
     clientID: Alpine.$persist(initClientID).as('global.clientID'),
     // debugMode 是否开启调试模式
     debugMode: Alpine.$persist(true).as('global.debugMode'),
-    //是否通过websocket同步翻页
+    // 是否通过 WebSocket 同步阅读页码
     syncPageByWS: Alpine.$persist(true).as('global.syncPageByWS'),
     // bookSortBy 书籍排序方式 以按照文件名、修改时间、文件大小排序（或反向排序）
     bookSortBy: Alpine.$persist('name').as('global.bookSortBy'),
@@ -178,87 +178,49 @@ Alpine.store('global', {
             console.error("Error saving page number to localStorage:", e);
         }
     },
-    // readerMode 当前阅读模式: infinite_scroll  paged_scroll  flip_page
-    readMode: Alpine.$persist('infinite_scroll').as('global.readMode'),
-    // 切换阅读模式
-    infiniteScrollLoadAllPage(mode) {
-        this.readMode = "infinite_scroll";
-        const url = new URL(window.location.href);
-        url.searchParams.delete("start");
-        window.location.href = url.href;
+    // 当前阅读模式：scroll=卷轴阅读，flip=翻页阅读
+    readMode: Alpine.$persist('scroll').as('global.readMode'),
+    // 切换为卷轴阅读，并使用无限卷轴加载策略。
+    infiniteScrollLoadAllPage() {
+        Alpine.store('scroll').loadMode = 'infinite';
+        this.readMode = "scroll";
+        this.onChangeReadMode();
     },
     onChangeReadMode() {
         // 切换阅读模式时，如果在阅读，就修改URL路径 参考文献：https://developer.mozilla.org/zh-CN/docs/Web/API/URL
         const url = new URL(window.location.href);
         const pathname = comigoRelativePath(url.pathname);
-        // 使用 URLSearchParams 提取键值对
-        const params = new URLSearchParams(url.search);
         // 分割路径为各层级关键词, filter(Boolean) 的作用是去除空字符串 如//aa/bb/ 会产生空字符串(虽然这里不会这么做)
         const pathSegments = pathname.split('/').filter(Boolean); // like ["scroll", "id3DcA1v9"]
         const book_id = pathSegments[pathSegments.length - 1];
-        console.log(`切换阅读模式到: ${this.readMode}, 当前路径: ${pathname},${pathSegments}, 查询参数: ${params.toString()}`);
-        // 卷轴(无限)模式
-        if (this.readMode === 'infinite_scroll') {
-            // 如果已经是无限卷轴模式
-            if (pathSegments.includes("scroll") && params.get("page") === null) {
-                console.log(`${pathSegments} , ${params.get("page")}`);
-                console.log("已经是无限卷轴模式，无需切换");
-                return;
-            }
-        }
-        // 卷轴(分页)模式
-        if (this.readMode === 'paged_scroll') {
-            // 如果已经是分页卷轴模式
-            if (pathSegments.includes("scroll") && params.get("page") !== null) {
-                console.log(`${pathSegments} , ${params.get("page")}`);
-                console.log("已经是分页卷轴模式，无需切换");
-                return;
-            }
-        }
-        // 翻页模式
-        if (this.readMode === 'page_flip') {
-            // 如果已经是翻页模式
-            if (pathSegments.includes("flip")) {
-                console.log("已经是翻页模式，无需切换");
-                console.log(`${pathSegments} , ${params.get("start")}`);
-                return;
-            }
-        }
+        console.log(`切换阅读模式到: ${this.readMode}, 当前路径: ${pathname},${pathSegments}`);
         // 跳转到新的阅读模式URL
         if (pathSegments.includes("scroll")||pathSegments.includes("flip")) {
             window.location.href = this.getReadURL(book_id, this.nowPageNum);
         }
     },
     getReadURL(book_id, start_index) {
-        // TODO: 处理旧版本数据干扰的问题。若干个版本后大概就不需要了，到时候删除这段代码。
-        if (this.readMode !== 'page_flip'&& this.readMode !== 'paged_scroll' && this.readMode !== 'infinite_scroll') {
-            console.error(`未知的阅读模式: ${this.readMode}, 可能是旧版本数据干扰, 重置为 infinite_scroll`);
-            this.readMode = 'infinite_scroll';
-        }
-        let PAGED_SIZE = 32;
-        // console.log(`生成阅读模式URL: ${this.readMode}`);
-        // console.log(`当前页码: ${start_index}`);
         const url = new URL(window.location.href);
-        // 卷轴(无限)
-        if (this.readMode === 'infinite_scroll') {
-            let new_url = new URL(comigoPath(`/scroll/${book_id}`), url.origin);
-            if (start_index > 1) {
-                new_url.searchParams.set("start", start_index.toString());
+        const pageNum = Math.max(1, parseInt(start_index, 10) || 1);
+        // 翻页阅读
+        if (this.readMode === 'flip') {
+            let new_url = new URL(comigoPath(`/flip/${book_id}`), url.origin);
+            if (pageNum > 1) {
+                new_url.searchParams.set("start", pageNum.toString());
             }
             return new_url.href;
         }
-        // 卷轴(分页)
-        if (this.readMode === 'paged_scroll') {
+        // 卷轴阅读
+        if (this.readMode === 'scroll') {
             let new_url = new URL(comigoPath(`/scroll/${book_id}`), url.origin);
-            let page = Math.floor(start_index / PAGED_SIZE) + 1;
-            new_url.searchParams.set("page", page.toString());
-            return new_url.href;
-        }
-        // 翻页(左右)
-        if (this.readMode === 'page_flip') {
-            let new_url = new URL(comigoPath(`/flip/${book_id}`), url.origin);
-            if (start_index > 1) {
-                new_url.searchParams.set("start", start_index.toString());
+            const scrollStore = Alpine.store('scroll');
+            const loadMode = ['infinite', 'lazy', 'paged'].includes(scrollStore.loadMode) ? scrollStore.loadMode : 'infinite';
+            const pageLimit = Math.max(1, parseInt(scrollStore.pageLimit, 10) || 32);
+            if (loadMode === 'paged') {
+                new_url.searchParams.set("load", loadMode);
+                const page = Math.floor((pageNum - 1) / pageLimit) + 1;
+                new_url.searchParams.set("page", page.toString());
+                new_url.searchParams.set("limit", pageLimit.toString());
             }
             return new_url.href;
         }
@@ -376,15 +338,25 @@ Alpine.store('global', {
     }
 })
 
+// 旧版本可能留下非 scroll/flip 的 global.readMode，统一回落到卷轴阅读。
+if (!['scroll', 'flip'].includes(Alpine.store('global').readMode)) Alpine.store('global').readMode = 'scroll';
+
 // 初始化全局存储
 document.addEventListener('alpine:initialized', () => {
     Alpine.store('global').init();
 });
 
 const url = new URL(window.location.href);
+const currentRelativePath = comigoRelativePath(url.pathname);
 
-if (window.ComiGoReaderMode || comigoRelativePath(url.pathname).includes('/reader')) {
-    Alpine.store('global').onlineBook = true;
+if (currentRelativePath.includes('/flip/')) {
+    Alpine.store('global').readMode = 'flip';
+} else if (currentRelativePath.includes('/scroll/')) {
+    Alpine.store('global').readMode = 'scroll';
+}
+
+if (window.ComiGoReaderMode || currentRelativePath.includes('/reader')) {
+    Alpine.store('global').onlineBook = false;
 } else if ((url.protocol === 'http:' || url.protocol === 'https:') && !window.location.toString().endsWith('.html')) {
     Alpine.store('global').onlineBook = true;
 } else {

@@ -12,7 +12,7 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// FlipModeHandler 阅读界面（翻页模式）
+// FlipModeHandler 阅读界面（翻页阅读）
 func FlipModeHandler(c echo.Context) error {
 	bookID := c.Param("id")
 	logger.Infof(locale.GetString("log_flip_mode_book_id"), bookID)
@@ -42,7 +42,7 @@ func FlipModeHandler(c echo.Context) error {
 	}
 	book.SortPages(sortBy)
 
-	// 翻页模式（先加载共享 WebSocket 模块，再加载页面逻辑）
+	// 翻页阅读（先加载共享 WebSocket 模块，再加载页面逻辑）
 	indexHtml := common.Html(
 		c,
 		FlipPage(c, book),
@@ -74,7 +74,7 @@ func FlipModeHandler(c echo.Context) error {
 				"static/js/flip.js",
 			})
 	}
-	// 渲染翻页模式阅读页面
+	// 渲染翻页阅读页面
 	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
 		// 如果渲染失败，返回 HTTP 500 错误
 		return c.NoContent(http.StatusInternalServerError)

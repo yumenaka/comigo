@@ -24,7 +24,7 @@ func handHeartbeatMessage(msg Message) Message {
 	return msg
 }
 
-// handSyncPageMessageToFlipMode 处理翻页消息(翻页模式)
+// handSyncPageMessageToFlipMode 处理翻页阅读消息
 func handSyncPageMessageToFlipMode(msg Message, clientID string) (Message, bool) {
 	msg.Detail = "同步页数。"
 	// Message 定义一个对象来管理消息，反引号包含的文本是 Go 在对象和 JSON 之间进行序列化和反序列化时需要的元数据。
@@ -38,7 +38,7 @@ func handSyncPageMessageToFlipMode(msg Message, clientID string) (Message, bool)
 		log.Printf("handSyncPageMessageToFlipMode error: %v", err)
 		return msg, false
 	}
-	// log_syncpage_message_to_flipmode 翻页模式同步页数消息 data: %v, clientID: %v
+	// log_syncpage_message_to_flipmode 翻页阅读同步页数消息 data: %v, clientID: %v
 	if isWsDebug() {
 		logger.Infof(locale.GetString("log_syncpage_message_to_flipmode"), data, clientID)
 	}
