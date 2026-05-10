@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"image/jpeg"
 	"io"
-	"log"
 	"os"
 	"strconv"
 	"time"
@@ -110,7 +109,7 @@ func ExportImageFromPDF(pdfFile string, pageNum int) {
 		// 写入文件，如果文件不存在则创建，文件权限设置为 0644
 		err = os.WriteFile("example.jpeg", imgBytes, 0o644)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}
 
@@ -126,12 +125,12 @@ type dim struct {
 // GetPageDimensions 取得PDF页面分辨率
 func GetPageDimensions(fileName string) []dim {
 	pageCount, _ := CountPagesOfPDF(fileName)
-	log.Printf("pagecount of %v was %v", fileName, pageCount)
+	logger.Infof("pagecount of %v was %v", fileName, pageCount)
 	var pageDimensions []dim
 	var currentPageDim dim
 	pdfDims, err := api.PageDimsFile(fileName)
 	if err != nil {
-		log.Printf("Error %v", err)
+		logger.Infof("Error %v", err)
 	}
 	for i := 0; i < pageCount; i++ {
 		currentPageDim.width = pdfDims[i].Width
@@ -176,7 +175,7 @@ func ExportAllImageFromPDF(pdfFile string) {
 		// 写入文件，如果文件不存在则创建，文件权限设置为 0644
 		err = os.WriteFile("test/"+strconv.Itoa(i+1)+".jpg", imgBytes, 0o644)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}
 }

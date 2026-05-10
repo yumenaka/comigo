@@ -24,11 +24,11 @@ func populateSystemMetrics(sys *SystemStatus) {
 		sys.CPUNumPhysical = cpuNumPhysical
 	}
 
-	cpuUsedPercent, err := cpu.Percent(0, false)
+	cpuUsedPercents, err := cpu.Percent(0, true)
 	if err != nil {
 		logger.Infof("%s", err)
-	} else if len(cpuUsedPercent) > 0 {
-		sys.CPUUsedPercent = cpuUsedPercent[0]
+	} else if averagePercent, ok := averageCPUPercent(cpuUsedPercents); ok {
+		sys.CPUUsedPercent = averagePercent
 	} else {
 		logger.Infof("cpu.Percent returned an empty result")
 	}
@@ -41,4 +41,16 @@ func populateSystemMetrics(sys *SystemStatus) {
 		sys.MemoryFree = virtualMemory.Free
 		sys.MemoryUsedPercent = virtualMemory.UsedPercent
 	}
+}
+
+// averageCPUPercent 将每个逻辑核的 CPU 占用率合并成一个平均值，避免 TUI 在多核机器上按核心显示多行。
+func averageCPUPercent(cpuUsedPercents []float64) (float64, bool) {
+	if len(cpuUsedPercents) == 0 {
+		return 0, false
+	}
+	total := 0.0
+	for _, percent := range cpuUsedPercents {
+		total += percent
+	}
+	return total / float64(len(cpuUsedPercents)), true
 }

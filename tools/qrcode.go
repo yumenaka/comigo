@@ -65,6 +65,9 @@ func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string,
 }
 
 func PrintQRCode(text string) {
+	if logger.IsStdoutSuppressed != nil && logger.IsStdoutSuppressed() {
+		return
+	}
 	// or https://github.com/mdp/qrterminal
 	obj := qrcodeTerminal.New()
 	obj.Get(text).Print()

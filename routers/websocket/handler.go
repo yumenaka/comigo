@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"log"
 	"net/http"
 	"sync"
 
@@ -77,7 +76,7 @@ func WsHandler(c echo.Context) error {
 	// // 返回一个 Conn 指针(wsConn)，拿到他后，可使用 Conn 读写数据与客户端通信。
 	wsConn, err := upGrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
-		log.Print("Error during connection upgradation:", err) // 连接升级出错
+		logger.Infof("Error during connection upgradation: %v", err) // 连接升级出错
 		return err
 	}
 	// 把新的客户端添加到全局的 "clients" 映射表中进行注册
@@ -183,7 +182,7 @@ func writeMessageToClient(client *websocket.Conn, msg Message, context string) {
 		return
 	}
 	if err := client.WriteJSON(msg); err != nil {
-		log.Printf("%s websocket write error: %v", context, err)
+		logger.Infof("%s websocket write error: %v", context, err)
 		closeAndRemoveClient(client)
 	}
 }

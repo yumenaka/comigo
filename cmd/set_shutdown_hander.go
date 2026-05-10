@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"path"
@@ -26,7 +25,7 @@ func SetShutdownHandler() {
 	<-ctx.Done()
 	// 恢复中断信号的默认行为并通知用户关机。
 	stop()
-	log.Println(locale.GetString("shutdown_hint"))
+	logger.Info(locale.GetString("shutdown_hint"))
 	// 清理临时文件
 	if config.GetCfg().ClearCacheExit {
 		logger.Infof("\r"+locale.GetString("start_clear_file")+" CacheDir:%s ", config.GetCfg().CacheDir)
@@ -55,7 +54,7 @@ func SetShutdownHandler() {
 	if err := config.Server.Shutdown(ctx); err != nil {
 		// logger.Infof("Comigo Server forced to shutdown: ", err)
 		// time.Sleep(3 * time.Second)
-		log.Fatal("Comigo Server forced to shutdown: ", err)
+		logger.Fatal("Comigo Server forced to shutdown: ", err)
 	}
-	log.Println("Comigo Server exit.")
+	logger.Info("Comigo Server exit.")
 }

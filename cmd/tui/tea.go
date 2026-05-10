@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"io"
+	stdlog "log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -239,10 +240,17 @@ func Run() error {
 	}
 
 	logBuffer := NewLogBuffer()
+	stdLogOutput := stdlog.Writer()
+	stdLogFlags := stdlog.Flags()
+	stdLogPrefix := stdlog.Prefix()
+	stdlog.SetOutput(logBuffer)
 	logger.SetSuppressStdout(true)
 	logger.SetOutput(io.Discard)
 	logger.SetMirrorOutput(logBuffer)
 	defer func() {
+		stdlog.SetOutput(stdLogOutput)
+		stdlog.SetFlags(stdLogFlags)
+		stdlog.SetPrefix(stdLogPrefix)
 		logger.SetMirrorOutput(nil)
 		logger.SetSuppressStdout(false)
 		logger.SetOutput(os.Stderr)
@@ -584,7 +592,7 @@ func (m *appModel) View() string {
 
 	topRow := mergeRows(shelfLines, layout.shelf.w, qrLines)
 	bottomRow := mergeRows(logLines, layout.log.w, infoLines)
-	gapLine := strings.Repeat(" ", m.width)
+	gapLine := strings.Repeat(" ", layout.shelf.w+layoutGap+layout.qr.w)
 	return strings.Join(append(append(topRow, gapLine), bottomRow...), "\n")
 }
 
@@ -879,10 +887,15 @@ func buildBaseURL() string {
 
 	host := cfg.Host
 	if host == "" {
-		if ipList, err := tools.GetIPList(); err == nil && len(ipList) > 0 {
-			host = ipList[0]
-		} else {
+		if cfg.DisableLAN {
 			host = "127.0.0.1"
+		} else {
+			// TUI 只展示一个可访问地址：未指定 Host 时使用系统默认路由选出的出站 IP，避免 ZeroTier 等虚拟网卡因枚举顺序排在前面。
+			if outboundIP, err := tools.LookupOutboundIP(); err == nil {
+				host = outboundIP.String()
+			} else {
+				host = "127.0.0.1"
+			}
 		}
 	}
 	if cfg.AutoTLSCertificate {
@@ -1150,9 +1163,15 @@ func (m *appModel) isNarrow() bool {
 	return m.width < narrowThreshold
 }
 
+// renderWidth 返回 TUI 实际写入的行宽。
+// 终端最后一列写满时容易触发自动换行，下一帧局部刷新会留下上一帧的文字残影。
+func (m *appModel) renderWidth() int {
+	return max(0, m.width-1)
+}
+
 // layout 计算四个面板的矩形布局。宽屏使用 2×2 网格，窄屏使用垂直单栏（隐藏信息面板）。
 func (m *appModel) layout() layoutState {
-	width := max(0, m.width)
+	width := m.renderWidth()
 	height := max(0, m.height)
 
 	if m.isNarrow() {

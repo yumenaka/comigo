@@ -2,7 +2,6 @@ package tools
 
 import (
 	"context"
-	"log"
 	"net"
 	"runtime"
 	"strconv"
@@ -51,7 +50,7 @@ func GetFreePort() (int, error) {
 	defer func(l *net.TCPListener) {
 		err := l.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Infof("%s", err)
 		}
 	}(l)
 	return l.Addr().(*net.TCPAddr).Port, nil
@@ -99,10 +98,19 @@ func GetIPList() (IPList []string, err error) {
 // GetOutboundIP 获取本机的首选出站IP
 // Get preferred outbound ip of this machine
 func GetOutboundIP() net.IP {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
+	ip, err := LookupOutboundIP()
 	if err != nil {
 		time.Sleep(3 * time.Second)
-		log.Fatal(err)
+		logger.Fatal(err)
+	}
+	return ip
+}
+
+// LookupOutboundIP 获取本机的首选出站 IP，并把失败交给调用方决定是否回退。
+func LookupOutboundIP() (net.IP, error) {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return nil, err
 	}
 	defer func(conn net.Conn) {
 		err := conn.Close()
@@ -110,7 +118,7 @@ func GetOutboundIP() net.IP {
 		}
 	}(conn)
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
-	return localAddr.IP
+	return localAddr.IP, nil
 }
 
 func OpenBrowser(isHTTPS bool, host string, port int) {

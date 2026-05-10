@@ -1,7 +1,6 @@
 package sse_hub
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -20,7 +19,6 @@ func PushHandler(c echo.Context) error {
 	if err := c.Bind(&p); err != nil {
 		return err
 	}
-	fmt.Printf("Event %s ID %s DATA %s", p.Event, p.ID, p.Message)
 	MessageHub.Broadcast(Event{
 		Name: p.Event,
 		ID:   p.ID,

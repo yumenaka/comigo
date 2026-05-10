@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"encoding/json"
-	"log"
 	"math"
 	"time"
 
@@ -35,7 +34,7 @@ func handSyncPageMessageToFlipMode(msg Message, clientID string) (Message, bool)
 	}
 	var data syncData
 	if err := json.Unmarshal([]byte(msg.DataString), &data); err != nil {
-		log.Printf("handSyncPageMessageToFlipMode error: %v", err)
+		logger.Infof("handSyncPageMessageToFlipMode error: %v", err)
 		return msg, false
 	}
 	// log_syncpage_message_to_flipmode 翻页阅读同步页数消息 data: %v, clientID: %v
@@ -44,7 +43,7 @@ func handSyncPageMessageToFlipMode(msg Message, clientID string) (Message, bool)
 	}
 	// 验证收到的数据 SyncPage消息发送到FlipMode
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt {
-		log.Printf("handSyncPage_ToFlipode data error: %v", data)
+		logger.Infof("handSyncPage_ToFlipode data error: %v", data)
 		return msg, false
 	}
 	return msg, true
@@ -62,14 +61,14 @@ func handSyncPageMessageToScrollMode(msg Message, clientID string) (Message, boo
 	}
 	var data syncData
 	if err := json.Unmarshal([]byte(msg.DataString), &data); err != nil {
-		log.Printf("handSyncPage_ToFlipode error: %v", err)
+		logger.Infof("handSyncPage_ToFlipode error: %v", err)
 		return msg, false
 	}
 	if isWsDebug() {
 		logger.Infof(locale.GetString("log_syncpage_message_to_scrollmode"), data, clientID)
 	}
 	if data.BookID == "" || data.NowPageNum < 0 || data.NowPageNum > math.MaxInt || data.NowPageNumPercent > 1 {
-		log.Printf("handSyncPage_ToFlipode data error: %v", data)
+		logger.Infof("handSyncPage_ToFlipode data error: %v", data)
 		return msg, false
 	}
 	return msg, true
