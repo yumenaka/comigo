@@ -29,7 +29,7 @@ endif
 DOCKER_HUB_REPO ?= yumenaka/comigo
 GHCR_REPO ?= ghcr.io/yumenaka/comigo
 IMAGE_NAME ?= $(DOCKER_HUB_REPO)
-PLATFORMS := linux/amd64,linux/arm64,linux/arm/v7
+PLATFORMS ?= linux/amd64,linux/arm64,linux/arm/v7
 
 # Docker 构建相关
 DOCKERFILE := sample/docker/Dockerfile

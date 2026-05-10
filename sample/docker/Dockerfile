@@ -10,7 +10,7 @@
 # ============================================================================
 # 第一阶段: 前端构建
 # ============================================================================
-FROM alpine:3.23 AS frontend-builder
+FROM --platform=$BUILDPLATFORM alpine:3.23 AS frontend-builder
 
 WORKDIR /build
 
@@ -31,12 +31,13 @@ RUN bun install && \
 # ============================================================================
 # 第二阶段: Go 构建
 # ============================================================================
-FROM golang:alpine AS go-builder
+FROM --platform=$BUILDPLATFORM golang:alpine AS go-builder
 
 # 构建参数：版本号
 ARG VERSION
 ARG TARGETOS
 ARG TARGETARCH
+ARG TARGETVARIANT
 
 WORKDIR /build
 
@@ -55,9 +56,9 @@ COPY --from=frontend-builder /build/assets/ ./assets/
 
 # 构建本地阅读器 wasm，并复制与当前 Go 版本匹配的 wasm_exec.js。
 # 这两个文件会通过 go:embed 打包进最终二进制，必须在 go build 前生成。
-RUN mkdir -p assets/script/wasm && \
-    CGO_ENABLED=0 GOOS=js GOARCH=wasm go build -trimpath -ldflags "-s -w" -o assets/script/wasm/archive.wasm ./cmd/archivewasm && \
-    cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" assets/script/wasm/wasm_exec.js
+RUN mkdir -p assets/static/wasm && \
+    CGO_ENABLED=0 GOOS=js GOARCH=wasm go build -trimpath -ldflags "-s -w" -o assets/static/wasm/archive.wasm ./cmd/archivewasm && \
+    cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" assets/static/wasm/wasm_exec.js
 
 # 生成 templ 模板文件
 RUN go run github.com/a-h/templ/cmd/templ@latest generate
@@ -68,7 +69,10 @@ RUN go run github.com/a-h/templ/cmd/templ@latest generate
 RUN if [ -z "$VERSION" ]; then \
         VERSION=$(grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' config/version.go | head -1); \
     fi && \
-    GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    if [ "$TARGETARCH" = "arm" ] && [ -n "$TARGETVARIANT" ]; then \
+        export GOARM="${TARGETVARIANT#v}"; \
+    fi && \
+    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath \
     -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=${VERSION}'" \
     -o /build/comigo \
