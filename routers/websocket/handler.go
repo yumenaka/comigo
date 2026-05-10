@@ -18,12 +18,12 @@ func init() {
 	go handleMessages()
 }
 
-// Message 定义一个结构体来定义消息
+// Message 定义 WebSocket 同步消息结构。
+// 认证边界在 /api/ws 路由连接层处理，单条消息不携带占位 token 字段。
 type Message struct {
 	Type       string `json:"type"`
 	StatusCode int    `json:"status_code"` // 参考http状态码： https://zh.wikipedia.org/zh-hans/HTTP%E7%8A%B6%E6%80%81%E7%A0%81
 	TabID      string `json:"tab_id"`      // 前端页面的 Tab ID
-	Token      string `json:"Token"`       // 认证用
 	Detail     string `json:"detail"`
 	DataString string `json:"data_string"`         // 附加的json字符串数据，服务器根据情况解析
 	PageType   string `json:"page_type,omitempty"` // 当前页面类型：flip / scroll / shelf

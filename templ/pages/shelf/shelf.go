@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
@@ -63,11 +62,7 @@ func ShelfHandler(c echo.Context) error {
 				error_page.NotFound404(c),
 				[]string{},
 			)
-			if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
-				// 如果出错，返回 HTTP 500 错误。
-				return c.NoContent(http.StatusInternalServerError)
-			}
-			return nil
+			return common.RenderHTML(c, indexHtml)
 		}
 	}
 	// 为首页定义模板布局。
@@ -77,11 +72,7 @@ func ShelfHandler(c echo.Context) error {
 		[]string{"static/js/shelf.js"},
 	)
 	// 用模板渲染书架页面
-	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
-		// 如果出错，返回 HTTP 500 错误。
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	return nil
+	return common.RenderHTML(c, indexHtml)
 }
 
 // SearchHandler 书架搜索页面处理程序。
@@ -139,10 +130,7 @@ func SearchHandler(c echo.Context) error {
 		ShelfPage(c, nowBookNum, storeBookInfos, childBookInfos),
 		[]string{"static/js/shelf.js"},
 	)
-	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	return nil
+	return common.RenderHTML(c, indexHtml)
 }
 
 // getShelfSortBy 获取书架排序方式（与原书架页面保持一致）。
@@ -162,10 +150,7 @@ func renderShelfNotFound(c echo.Context) error {
 		error_page.NotFound404(c),
 		[]string{},
 	)
-	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	return nil
+	return common.RenderHTML(c, indexHtml)
 }
 
 // filterStoreBookInfosByKeyword 在顶层书架中按标题过滤。

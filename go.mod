@@ -1,6 +1,6 @@
 module github.com/yumenaka/comigo
 
-go 1.26.1
+go 1.26.2
 
 tool (
 	entgo.io/ent/cmd/ent
@@ -20,7 +20,7 @@ require (
 	github.com/bbrks/go-blurhash v1.2.0
 	github.com/cheggaaa/pb/v3 v3.1.7
 	github.com/disintegration/imaging v1.6.2
-	github.com/fsnotify/fsnotify v1.10.0
+	github.com/fsnotify/fsnotify v1.10.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/jxskiss/base62 v1.1.0
@@ -28,7 +28,7 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/mandykoh/autocrop v0.4.7
 	github.com/nicksnyder/go-i18n/v2 v2.6.1
-	github.com/pelletier/go-toml/v2 v2.3.0
+	github.com/pelletier/go-toml/v2 v2.3.1
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/sirupsen/logrus v1.9.4
@@ -36,18 +36,17 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/xxjwxc/gowp v0.0.0-20240929033016-5be68d222389
-	golang.org/x/net v0.53.0
-	golang.org/x/text v0.36.0
+	golang.org/x/net v0.54.0
+	golang.org/x/text v0.37.0
 	modernc.org/sqlite v1.50.0
 )
 
 require (
-	github.com/a-h/templ v0.3.1001
-	github.com/angelofallars/htmx-go v0.5.0
+	github.com/a-h/templ v0.3.1020
 	github.com/atotto/clipboard v0.1.4
 	github.com/aws/aws-sdk-go-v2 v1.41.7
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.16
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.100.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.101.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/cloudsoda/go-smb2 v0.0.0-20260408191215-349cbc5b0af3
 	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8
@@ -58,7 +57,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/jlaffaye/ftp v0.2.0
 	github.com/labstack/echo-jwt/v4 v4.4.0
-	github.com/labstack/echo/v4 v4.15.1
+	github.com/labstack/echo/v4 v4.15.2
 	github.com/mattn/go-runewidth v0.0.23
 	github.com/minio/selfupdate v0.6.0
 	github.com/pdfcpu/pdfcpu v0.12.0
@@ -66,12 +65,12 @@ require (
 	github.com/sevlyar/go-daemon v0.1.6
 	github.com/studio-b12/gowebdav v0.12.0
 	github.com/yumenaka/archives v0.0.0-20251213105147-9aacc4911770
-	golang.org/x/crypto v0.50.0
-	golang.org/x/image v0.39.0
-	golang.org/x/mod v0.35.0
-	golang.org/x/sys v0.43.0
-	golang.org/x/term v0.42.0
-	tailscale.com v1.96.5
+	golang.org/x/crypto v0.51.0
+	golang.org/x/image v0.40.0
+	golang.org/x/mod v0.36.0
+	golang.org/x/sys v0.44.0
+	golang.org/x/term v0.43.0
+	tailscale.com v1.98.1
 	wait4x.dev/v3 v3.6.0
 )
 
@@ -95,20 +94,14 @@ require (
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.10 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.31.17 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.23 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.23 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.23 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.4 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.24 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.9 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.23 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.23 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.65.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.30.17 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.21 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.42.1 // indirect
 	github.com/aws/smithy-go v1.25.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bep/godartsass/v2 v2.5.0 // indirect
@@ -223,7 +216,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
-	github.com/prometheus-community/pro-bing v0.7.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/riza-io/grpc-go v0.2.0 // indirect
@@ -240,12 +232,12 @@ require (
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/tailscale/certstore v0.1.1-0.20231202035212-d3fa0460f47e // indirect
+	github.com/tailscale/certstore v0.1.1-0.20260409135935-3638fb84b77d // indirect
 	github.com/tailscale/go-winio v0.0.0-20231025203758-c4f33415bf55 // indirect
-	github.com/tailscale/hujson v0.0.0-20250605163823-992244df8c5a // indirect
+	github.com/tailscale/hujson v0.0.0-20260302212456-ecc657c15afd // indirect
 	github.com/tailscale/peercred v0.0.0-20250107143737-35a0c7bd7edc // indirect
 	github.com/tailscale/web-client-prebuilt v0.0.0-20251127225136-f19339b67368 // indirect
-	github.com/tailscale/wireguard-go v0.0.0-20250716170648-1d0488a3d7da // indirect
+	github.com/tailscale/wireguard-go v0.0.0-20260427181203-e3ac4a0afb4e // indirect
 	github.com/tdewolff/parse/v2 v2.8.5 // indirect
 	github.com/tetratelabs/wazero v1.10.1 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
@@ -272,10 +264,10 @@ require (
 	go4.org/mem v0.0.0-20240501181205-ae6ca9944745 // indirect
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba // indirect
 	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa // indirect
-	golang.org/x/oauth2 v0.34.0 // indirect
+	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
-	golang.org/x/tools v0.43.0 // indirect
+	golang.org/x/tools v0.44.0 // indirect
 	golang.zx2c4.com/wintun v0.0.0-20230126152724-0fa3db229ce2 // indirect
 	golang.zx2c4.com/wireguard/windows v0.5.3 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251213004720-97cd9d5aeac2 // indirect
@@ -287,7 +279,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gvisor.dev/gvisor v0.0.0-20260224225140-573d5e7127a8 // indirect
-	modernc.org/libc v1.72.1 // indirect
+	modernc.org/libc v1.72.3 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )

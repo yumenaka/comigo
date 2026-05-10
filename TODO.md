@@ -13,7 +13,6 @@
 - **模板引擎**: [Templ](https://templ.guide/) - 高性能 Go 模板引擎
 - **UI 组件**: [Flowbite](https://flowbite.com/docs/components/gallery/) - UI 组件库
 - **交互增强**: 
-  - [htmx](https://htmx.org/examples) - AJAX 库
   - [Alpine.js](https://alpinejs.dev) - 轻量 JavaScript 框架
 - **样式框架**: [Tailwind CSS](https://tailwindcss.com/docs/flex) - 实用优先的 CSS 框架
 - **国际化**: [i18next](https://www.i18next.com) - 国际化解决方案

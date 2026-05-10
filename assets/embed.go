@@ -69,7 +69,7 @@ window.ComiGoRelativePath = function(pathname) {
 // GetJavaScript 在页面中插入需要的js代码
 func GetJavaScript(oneFileMode bool, insertScript []string) (jsString string) {
 	jsString = GetBasePathScript()
-	// <!-- 通用js代码,初始化htmx、Alpine等第三方库  -->
+	// 插入通用 JS 代码，初始化 Alpine、Flowbite 等前端基础能力。
 	if oneFileMode {
 		jsString += "<script>" + GetFileStr("dist/main.js") + "</script>\n"
 	} else {

@@ -1,9 +1,6 @@
 package player
 
 import (
-	"net/http"
-
-	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
@@ -26,11 +23,7 @@ func PlayerModeHandler(c echo.Context) error {
 			[]string{},
 		)
 		// 渲染 404 页面
-		if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
-			// 渲染失败，返回 HTTP 500 错误。
-			return c.NoContent(http.StatusInternalServerError)
-		}
-		return nil
+		return common.RenderHTML(c, indexHtml)
 	}
 
 	// 获取同文件夹下的所有书籍作为播放列表
@@ -48,11 +41,7 @@ func PlayerModeHandler(c echo.Context) error {
 		[]string{"static/js/player.js"},
 	)
 	// 渲染页面
-	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
-		// 渲染失败，返回 HTTP 500 错误。
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	return nil
+	return common.RenderHTML(c, indexHtml)
 }
 
 // buildMediaPlaylist 从同目录书籍列表中提取播放器列表。

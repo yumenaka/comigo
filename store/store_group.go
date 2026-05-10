@@ -389,7 +389,8 @@ func (ramStore *StoreInRam) StoreBooks(books []*model.Book) error {
 	return errors.Join(storeErrors...)
 }
 
-// GetParentBookID 通过子书籍 ID 获取所属书组 ID
+// GetParentBookID 通过子书籍 ID 获取所属书组 ID。
+// 找不到父书组时返回空字符串和错误，调用方应按“没有父级”处理。
 func (ramStore *StoreInRam) GetParentBookID(childID string) (string, error) {
 	allBooks, err := ramStore.ListBooks()
 	if err != nil {
@@ -401,7 +402,7 @@ func (ramStore *StoreInRam) GetParentBookID(childID string) (string, error) {
 		}
 		for _, id := range bookGroup.ChildBooksID {
 			if id == childID {
-				fmt.Println("Found group for book ID:", childID, "Group ID:", bookGroup.BookID)
+				logger.Infof(locale.GetString("log_found_parent_book_group"), childID, bookGroup.BookID)
 				return bookGroup.BookID, nil
 			}
 		}

@@ -1,9 +1,6 @@
 package reader
 
 import (
-	"net/http"
-
-	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/common"
 )
@@ -27,8 +24,5 @@ func PageHandler(c echo.Context) error {
 		ReaderPage(c),
 		insertScripts,
 	)
-	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	return nil
+	return common.RenderHTML(c, indexHtml)
 }

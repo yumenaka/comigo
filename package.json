@@ -19,15 +19,15 @@
     "@alpinejs/persist": "3.15.12",
     "alpinejs": "3.15.12",
     "flowbite": "latest",
-    "i18next": "26.0.8",
+    "i18next": "26.0.10",
     "i18next-browser-languagedetector": "8.2.1",
     "screenfull": "latest",
-    "tailwindcss": "4.2.4"
+    "tailwindcss": "4.3.0"
   },
   "devDependencies": {
     "@parcel/transformer-css": "latest",
     "@tailwindcss/forms": "latest",
-    "@tailwindcss/postcss": "4.2.4",
+    "@tailwindcss/postcss": "4.3.0",
     "@tailwindcss/typography": "latest",
     "parcel": "latest",
     "prettier": "3.8.3"

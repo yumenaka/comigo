@@ -6,7 +6,6 @@
 (function () {
     'use strict'
 
-    const token = 'your_token' // TODO: 使用真正的令牌
     const tabID = (Date.now() % 10000000).toString(36) + Math.random().toString(36).substring(2, 5)
 
     let socket = null
@@ -119,7 +118,8 @@
         },
 
         /**
-         * 发送消息。自动附带 page_type、book_id（若 getBookId 有返回值）、tab_id、token
+         * 发送消息。自动附带 page_type、book_id（若 getBookId 有返回值）和 tab_id。
+         * 说明：同步消息不携带占位鉴权字段；登录态与权限由 /api/ws 路由层处理。
          * @param {string} type - 消息类型，如 'flip_mode_sync_page'、'heartbeat'
          * @param {Object} data - 会序列化为 data_string；同时 page_type 与可选的 book_id 放在顶层
          * @param {string} [detail] - 可选说明
@@ -137,7 +137,6 @@
                 type,
                 status_code: 200,
                 tab_id: tabID,
-                Token: token,
                 detail: detail || '',
                 data_string: data != null ? JSON.stringify(data) : '',
                 page_type: options ? options.pageType : undefined,

@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
-	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
@@ -78,61 +77,6 @@ func renderArrayConfigComponent(configName string, values []string) templ.Compon
 		return StoreConfig(configName, values, configName+"_Description", GetStoreBookCounts())
 	}
 	return StringArrayConfig(configName, values, configName+"_Description")
-}
-
-// -------------------------
-// 更新配置的公共逻辑
-// -------------------------
-
-// parseSingleHTMXFormPair 提取并返回表单中的"第一对" key/value
-func parseSingleHTMXFormPair(c echo.Context) (string, string, error) {
-	if !htmx.IsHTMX(c.Request()) {
-		return "", "", errors.New(locale.GetString("err_non_htmx_request"))
-	}
-	formData, err := c.FormParams()
-	if err != nil {
-		return "", "", fmt.Errorf("parseForm error: %v", err)
-	}
-	if len(formData) == 0 {
-		return "", "", errors.New(locale.GetString("err_no_form_data"))
-	}
-	var name, newValue string
-	for key, values := range formData {
-		name = key
-		if len(values) > 0 {
-			newValue = values[0]
-		}
-		break
-	}
-	return name, newValue, nil
-}
-
-// updateConfigGeneric 抽取了更新配置的大部分公共逻辑，返回 name 和 newValue 等。
-func updateConfigGeneric(c echo.Context) (string, string, error) {
-	name, newValue, err := parseSingleHTMXFormPair(c)
-	if err != nil {
-		return "", "", err
-	}
-
-	logger.Infof(locale.GetString("log_update_config"), name)
-
-	// 更新前先保存旧配置，后续用于比较并触发副作用。
-	oldConfig := config.CopyCfg()
-	// 更新配置
-	if setErr := config.GetCfg().SetConfigValue(name, newValue); setErr != nil {
-		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
-		return "", "", setErr
-	}
-
-	// 写入配置文件
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
-	}
-
-	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(oldConfig, config.GetCfg())
-
-	return name, newValue, nil
 }
 
 // -------------------------

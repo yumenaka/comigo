@@ -1,12 +1,10 @@
 package settings
 
 import (
-	"net/http"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
@@ -88,11 +86,7 @@ func PageHandler(c echo.Context) error {
 		[]string{},
 	)
 	// 渲染页面
-	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
-		// 渲染失败，返回 HTTP 500 错误。
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	return nil
+	return common.RenderHTML(c, indexHtml)
 }
 
 // -----------------------------------------

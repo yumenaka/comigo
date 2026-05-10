@@ -3,7 +3,6 @@ package model
 import (
 	"fmt"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -79,54 +78,63 @@ func (b *BookInfo) GetAllChildBooksNum() int {
 	return total
 }
 
-// initBookID 根据路径的 MD5，初始化书籍 ID
+// initBookID 根据路径和书籍属性初始化稳定 BookID。
+// 行为保持原则：
+// - 已存在同路径、同类型书籍时，仍返回“书籍数据已存在”的错误。
+// - 完整 ID 的生成字段和短 ID 扩展顺序不变，保证重扫时 ID 前缀稳定。
+// - 只把重复读取 Store 的部分换成一次快照，不改变外部可见的成功/失败结果。
 func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
-	// 查看书库中是否已经有了这本书，有了就跳过
+	// 只读取一次当前书库快照。旧实现会先为了重复路径检测读一次，
+	// 后续每尝试一个短 ID 又重新 ListBooks；大书库下这个成本会被放大。
 	allBooks, err := IStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
-	for _, exitBook := range allBooks {
-		path, err := filepath.Abs(bookPath)
-		if err != nil {
-			logger.Infof(locale.GetString("log_error_getting_absolute_path"), err)
-			continue
-		}
-		if exitBook.BookPath == path && (exitBook.Type == b.Type) {
-			return nil, fmt.Errorf(locale.GetString("log_book_data_already_exists"), exitBook.BookID, bookPath)
+
+	// existingIDs 用于后面的短 ID 冲突判断。这里只保存 ID，不保存整本书，
+	// 避免后续每扩展一位 shortID 都重新遍历 allBooks。
+	existingIDs := make(map[string]struct{}, len(allBooks))
+
+	// 保持旧逻辑的比较边界：重复书籍检测使用传入 bookPath 的 filepath.Abs 结果，
+	// 而不是 b.BookPath。这样不会改变远程路径、相对路径失败等边界场景的现有结果。
+	absBookPath, absErr := filepath.Abs(bookPath)
+	if absErr != nil {
+		logger.Infof(locale.GetString("log_error_getting_absolute_path"), absErr)
+	}
+
+	for _, existingBook := range allBooks {
+		existingIDs[existingBook.BookID] = struct{}{}
+
+		// 与旧实现一致：遍历到第一个同路径、同类型书籍时立刻返回，
+		// 错误信息中也继续使用这个已存在书籍的 BookID。
+		if absErr == nil && existingBook.BookPath == absBookPath && existingBook.Type == b.Type {
+			return nil, fmt.Errorf(locale.GetString("log_book_data_already_exists"), existingBook.BookID, bookPath)
 		}
 	}
-	// 生成 BookID 的字符串
-	tempStr := b.BookPath + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.StoreUrl
-	// 两次 MD5 加密，然后转为 base62 编码
+
+	// 生成完整 BookID 的字符串。字段顺序保持旧规则不变：
+	// BookPath + FileSize + Type + ParentFolder + StoreUrl。
+	idSource := b.BookPath + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.StoreUrl
+	// 两次 MD5 加密，然后转为 base62 编码。
 	// 为什么选择 Base62?
-	// 1. 人类可读，可以目视或简单的 regexp 进行验证
-	// 2. 仅包含字母数字符号，不包含特殊字符
-	// 3. 可以通过在任何文本编辑器和浏览器地址栏中双击鼠标来完全选择
-	// 4. 紧凑，生成的字符串比 Base32 短
-	b62 := base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(tempStr))))
-	// 生成短的 BookID，并避免冲突
-	fullID := b62
+	// 1. 人类可读，可以目视或简单的 regexp 进行验证。
+	// 2. 仅包含字母数字符号，不包含特殊字符。
+	// 3. 可以通过在任何文本编辑器和浏览器地址栏中双击鼠标来完全选择。
+	// 4. 紧凑，生成的字符串比 Base32 短。
+	fullID := base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(idSource))))
+
+	// 生成短 BookID，并沿用旧策略避免冲突：
+	// 从 7 位开始尝试；如果该前缀已被占用，就逐位扩展，直到没有冲突或已经扩展到 fullID 全长。
 	minLength := 7
 	if len(fullID) <= minLength {
 		logger.Infof(locale.GetString("log_cannot_shorten_id"), fullID)
 		b.BookID = fullID
+		return b, nil
 	}
 	shortID := fullID[:minLength]
 	add := 0
 	for {
-		conflict := false
-		allBooks, err := IStore.ListBooks()
-		if err != nil {
-			logger.Infof(locale.GetString("log_error_listing_books"), err)
-		}
-		for _, b := range allBooks {
-			if b.BookID == shortID {
-				conflict = true
-				break
-			}
-		}
-		if !conflict {
+		if _, conflict := existingIDs[shortID]; !conflict {
 			break
 		}
 		add++
@@ -187,91 +195,10 @@ func (b *BookInfo) setTitle(filePath string) *BookInfo {
 	return b
 }
 
-var (
-	// 只删除结尾处的常见扩展名（忽略大小写）
-	reExt = regexp.MustCompile(`\.(?i)(zip|rar|cbr|cbz|tar|pdf|mp3|mp4|flv|gz|webm|gif|png|jpg|jpeg|webp|svg|psd|bmp|tif)$`)
-
-	// 去除各种括号及其内容（非贪婪）
-	reRound         = regexp.MustCompile(`\([^()]*?\)`)  // 匹配 ()
-	reSquare        = regexp.MustCompile(`\[[^\[\]]*?]`) // 匹配 []
-	reChineseRound  = regexp.MustCompile(`（[^（）]*?）`)    // 匹配 （）
-	reChineseSquare = regexp.MustCompile(`【[^【】]*?】`)    // 匹配 【】
-
-	// 如果只想移除开头的 domain 就保留 ^；想全局替换就去掉 ^
-	domainReg = regexp.MustCompile(`^(((ht|f)tps?)://)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-zA-Z]{2,6}/?`)
-
-	// 去除开头的所有空白
-	reLeadingSpace = regexp.MustCompile(`^\s+`)
-	// 去除结尾的所有空白
-	reTrailingSpace = regexp.MustCompile(`\s+$`)
-
-	// 去除开头的一连串标点符号 (移除括号)
-	reLeadingPunctuation = regexp.MustCompile(`^[\-` + "`" + `~!@#$^&*=|{}':;'@#￥……&*——|{}‘；：”“'。，、？]+`)
-)
-
-// ShortName 返回简短的标题（文件名）
+// ShortName 返回简短的标题（文件名）。
+// 实际字符串清洗放在 tools.ShortName，避免 model 层承担无状态文本规则。
 func (b *BookInfo) ShortName() string {
-	shortTitle := b.Title
-
-	// 1. 移除常见文件扩展名 (忽略大小写)
-	shortTitle = reExt.ReplaceAllString(shortTitle, "")
-
-	// 2. 顺序移除所有括号及内部描述
-	shortTitle = reRound.ReplaceAllString(shortTitle, "")         // 移除 ()
-	shortTitle = reSquare.ReplaceAllString(shortTitle, "")        // 移除 []
-	shortTitle = reChineseRound.ReplaceAllString(shortTitle, "")  // 移除 （）
-	shortTitle = reChineseSquare.ReplaceAllString(shortTitle, "") // 移除 【】
-
-	// 3. 移除域名
-	shortTitle = domainReg.ReplaceAllString(shortTitle, "")
-
-	// 4. 去除开头空格
-	shortTitle = reLeadingSpace.ReplaceAllString(shortTitle, "")
-
-	// 5. 去除结尾空格
-	shortTitle = reTrailingSpace.ReplaceAllString(shortTitle, "")
-
-	// 6. 去除开头标点
-	shortTitle = reLeadingPunctuation.ReplaceAllString(shortTitle, "")
-
-	// 7. 再次去除首尾空格（以防上述操作后留下空格）
-	shortTitle = reLeadingSpace.ReplaceAllString(shortTitle, "")
-	shortTitle = reTrailingSpace.ReplaceAllString(shortTitle, "")
-
-	// 转成 rune，便于按字符截取
-	runes := []rune(shortTitle)
-	originalRunes := []rune(b.Title) // 原始标题的 runes
-
-	// 如果简化后标题过短 (<2个字符)
-	if len(runes) < 2 {
-		// 但原标题很长 (>15个字符)，则截取原标题前15个字符 + ...
-		if len(originalRunes) > 15 {
-			cutLen := 15
-			// 如果原标题本身不足15，则取原标题长度
-			if len(originalRunes) < cutLen {
-				cutLen = len(originalRunes)
-			}
-			return string(originalRunes[:cutLen]) + "…"
-		}
-		// 如果原标题不长，或者简化后长度为0但原标题不为0，返回原标题（或原标题截断）
-		if len(originalRunes) > 0 {
-			cutLen := 15
-			if len(originalRunes) < cutLen {
-				cutLen = len(originalRunes)
-				return string(originalRunes) // 如果原标题 <= 15, 直接返回原标题
-			}
-			return string(originalRunes[:cutLen]) + "…" // 返回截断的原标题
-		}
-		// 如果原标题也是空的，返回空字符串
-		return ""
-	}
-	// [简化标题] 如果简化后长度 <= 15，直接返回
-	if len(runes) <= 15 {
-		return shortTitle
-	}
-
-	// [简化不完全] 超过 15 则截断加省略号
-	return string(runes[:15]) + "…"
+	return tools.ShortName(b.Title)
 }
 
 // GetCover 获取封面

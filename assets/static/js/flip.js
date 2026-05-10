@@ -172,7 +172,7 @@ let startTime = 0
 let animationID = 0
 
 // 设置图片资源，预加载等
-// 需要 HTTP 响应头中允许缓存（没有使用 Cache-Control: no-cache），也就是 gin 不能用htmx/router/server.go 里面的noCache 中间件。
+// 需要 HTTP 响应头中允许缓存（没有使用 Cache-Control: no-cache），避免预加载资源被 no-cache 中间件影响。
 // 在预加载用到的图片资源 URL
 let preloadedImages = new Set()
 
