@@ -53,7 +53,7 @@ func SettingsPage(c echo.Context, tsStatus *tailscale_plugin.TailscaleStatus) te
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(c, nil, nil, true, "/").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(c, nil, nil, nil, true, "/").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

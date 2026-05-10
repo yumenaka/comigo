@@ -27,7 +27,7 @@ templ PlayerPage(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 		@MainArea(c, book, playlist)
 	}
 	if book != nil {
-		@common.Drawer(c, book, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
+		@common.Drawer(c, book, nil, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
 	}
 	@common.QRCode()
 }

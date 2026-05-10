@@ -816,35 +816,46 @@ async function updateReaderFlipImages() {
             adjacentLoads.push(setImageElementSrc(next, nowPageNum))
         }
     } else {
-        const leftIndex = mangaMode ? nowPageNum : nowPageNum - 1
-        const rightIndex = mangaMode ? nowPageNum - 1 : nowPageNum
+        // 双页模式与 /flip 页面保持一致：第一页作为封面单独显示，
+        // 第 2 页起才与下一页组成跨页，避免首次进入时把第二页误塞进封面屏。
+        const hasSecondPage = nowPageNum > 1 && nowPageNum < allPageNum
+        const leftIndex = mangaMode ? (hasSecondPage ? nowPageNum : -1) : nowPageNum - 1
+        const rightIndex = mangaMode ? nowPageNum - 1 : (hasSecondPage ? nowPageNum : -1)
         await setImageElementSrc(elements.doubleLeft, leftIndex)
         await setImageElementSrc(elements.doubleRight, rightIndex)
         elements.leftSlide.innerHTML = ''
         elements.rightSlide.innerHTML = ''
-        const prevStart = Math.max(0, nowPageNum + getReaderFlipStepPrevious() - 1)
-        if (nowPageNum > 1) {
-            const useSinglePrev = nowPageNum === 2
-            const prevA = createReaderFlipImage(useSinglePrev ? singleImgClass : doublePageClass)
-            elements.leftSlide.appendChild(prevA)
-            adjacentLoads.push(setImageElementSrc(prevA, useSinglePrev ? nowPageNum - 2 : (mangaMode ? prevStart + 1 : prevStart)))
-            if (!useSinglePrev) {
-                const prevB = createReaderFlipImage(doublePageClass)
-                elements.leftSlide.appendChild(prevB)
-                adjacentLoads.push(setImageElementSrc(prevB, mangaMode ? prevStart : prevStart + 1))
+
+        const appendReaderDoubleScreen = (container, pageNum) => {
+            if (pageNum < 1 || pageNum > allPageNum) return
+            const screenHasSecondPage = pageNum > 1 && pageNum < allPageNum
+            if (!screenHasSecondPage) {
+                const img = createReaderFlipImage(singleImgClass)
+                container.appendChild(img)
+                adjacentLoads.push(setImageElementSrc(img, pageNum - 1))
+                return
             }
+
+            const currentImg = createReaderFlipImage(doublePageClass)
+            const nextImg = createReaderFlipImage(doublePageClass)
+            if (mangaMode) {
+                container.appendChild(nextImg)
+                container.appendChild(currentImg)
+            } else {
+                container.appendChild(currentImg)
+                container.appendChild(nextImg)
+            }
+            adjacentLoads.push(setImageElementSrc(currentImg, pageNum - 1))
+            adjacentLoads.push(setImageElementSrc(nextImg, pageNum))
         }
-        const nextStart = nowPageNum + getReaderFlipStepNext() - 1
-        if (nextStart < allPageNum) {
-            const useSingleNext = nextStart === allPageNum - 1
-            const nextA = createReaderFlipImage(useSingleNext ? singleImgClass : doublePageClass)
-            elements.rightSlide.appendChild(nextA)
-            adjacentLoads.push(setImageElementSrc(nextA, useSingleNext ? nextStart : (mangaMode ? nextStart + 1 : nextStart)))
-            if (!useSingleNext) {
-                const nextB = createReaderFlipImage(doublePageClass)
-                elements.rightSlide.appendChild(nextB)
-                adjacentLoads.push(setImageElementSrc(nextB, mangaMode ? nextStart : nextStart + 1))
-            }
+
+        const previousStep = getReaderFlipStepPrevious()
+        if (previousStep !== 0) {
+            appendReaderDoubleScreen(elements.leftSlide, nowPageNum + previousStep)
+        }
+        const nextStep = getReaderFlipStepNext()
+        if (nextStep !== 0) {
+            appendReaderDoubleScreen(elements.rightSlide, nowPageNum + nextStep)
         }
     }
 
@@ -898,12 +909,20 @@ function addReaderFlipPage(step) {
 
 function toNextReaderFlipPage() {
     const step = getReaderFlipStepNext()
-    if (step !== 0) addReaderFlipPage(step)
+    if (step === 0) {
+        if (typeof showToast === 'function') showToast(i18next.t('hint_last_page'), 'warning')
+        return
+    }
+    addReaderFlipPage(step)
 }
 
 function toPreviousReaderFlipPage() {
     const step = getReaderFlipStepPrevious()
-    if (step !== 0) addReaderFlipPage(step)
+    if (step === 0) {
+        if (typeof showToast === 'function') showToast(i18next.t('hint_first_page'), 'warning')
+        return
+    }
+    addReaderFlipPage(step)
 }
 
 function resetReaderFlipSlider() {
@@ -1011,6 +1030,7 @@ function readerFlipShouldBlock(diffX) {
             Alpine.store('flip').mangaMode,
             Alpine.store('global').nowPageNum,
             Alpine.store('global').allPageNum,
+            Alpine.store('flip').doublePageMode === true,
         )
     }
     return false

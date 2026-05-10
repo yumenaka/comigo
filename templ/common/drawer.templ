@@ -7,7 +7,7 @@ import (
 	"github.com/yumenaka/comigo/templ/common/svg"
 )
 
-templ Drawer(c echo.Context, book *model.Book, slot templ.Component, showReturnIcon bool, returnUrl string) {
+templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component, slot templ.Component, showReturnIcon bool, returnUrl string) {
 	<!-- Drawer component -->
 	<!-- https://flowbite.com/docs/components/drawer/ -->
 	<div
@@ -74,6 +74,10 @@ templ Drawer(c echo.Context, book *model.Book, slot templ.Component, showReturnI
 		<div id="drawer-right-slot" class="flex flex-col items-center justify-end grow px-1 pt-1 my-0 rounded drawer_slot text-accent-content dark:text-white">
 			@ReadModeSelect()
 			@ReadModeSwitchButton()
+			<!-- 阅读历史之前的页面专属控件，例如 scroll 页面的卷轴加载策略。 -->
+			if beforeHistorySlot != nil {
+				@beforeHistorySlot
+			}
 			<!-- 阅读历史记录 -->
 			@ReadingHistory()
 			<!-- drawer插槽 -->

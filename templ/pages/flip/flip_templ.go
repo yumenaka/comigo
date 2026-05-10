@@ -83,12 +83,12 @@ func FlipPage(c echo.Context, book *model.Book) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if book != nil {
-			templ_7745c5c3_Err = common.Drawer(c, book, FlipDrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = common.Drawer(c, book, nil, FlipDrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID)).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = common.Drawer(c, book, FlipDrawerSlot(c, book), true, "/").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = common.Drawer(c, book, nil, FlipDrawerSlot(c, book), true, "/").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

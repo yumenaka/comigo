@@ -71,7 +71,7 @@ func PlayerPage(c echo.Context, book *model.Book, playlist *model.BookInfos) tem
 			}
 		}
 		if book != nil {
-			templ_7745c5c3_Err = common.Drawer(c, book, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = common.Drawer(c, book, nil, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID)).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

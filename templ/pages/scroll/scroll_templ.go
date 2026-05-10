@@ -75,12 +75,12 @@ func ScrollPage(c echo.Context, book *model.Book, loadMode string, pagedIndex in
 			return templ_7745c5c3_Err
 		}
 		if book != nil {
-			templ_7745c5c3_Err = common.Drawer(c, book, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = common.Drawer(c, book, ScrollLoadModeControls(), DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID)).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = common.Drawer(c, book, DrawerSlot(c, book), true, "/").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = common.Drawer(c, book, ScrollLoadModeControls(), DrawerSlot(c, book), true, "/").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

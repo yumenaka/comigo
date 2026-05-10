@@ -57,7 +57,7 @@ func ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = common.Drawer(c, nil, ShelfDrawerSlot(c), shouldShowShelfReturnIcon(c), getShelfReturnURL(c)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Drawer(c, nil, nil, ShelfDrawerSlot(c), shouldShowShelfReturnIcon(c), getShelfReturnURL(c)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,7 +69,7 @@ func ShelfPage(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 	})
 }
 
-// ShelfHeaderLeft 书架页左侧工具区。作为组件传给 common.Header，而不是让 Header 自己判断行为。
+// ShelfHeaderLeft 书架页左侧工具区。子书库/搜索页优先放返回按钮，顶层书库才显示服务器设置入口。
 func ShelfHeaderLeft(c echo.Context) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -91,16 +91,20 @@ func ShelfHeaderLeft(c echo.Context) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = common.ServerSettingsButton().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		if shouldShowShelfReturnIcon(c) {
 			templ_7745c5c3_Err = common.ReturnButton(getShelfReturnURL(c)).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
+			templ_7745c5c3_Err = common.ServerSettingsButton().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			templ_7745c5c3_Err = common.ReaderButton().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

@@ -35,9 +35,9 @@ templ FlipPage(c echo.Context, book *model.Book) {
 		x-text="$store.global.nowPageNum+'/'+$store.global.allPageNum"
 	></div>
 	if book != nil {
-		@common.Drawer(c, book, FlipDrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
+		@common.Drawer(c, book, nil, FlipDrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
 	} else {
-		@common.Drawer(c, book, FlipDrawerSlot(c, book), true, "/")
+		@common.Drawer(c, book, nil, FlipDrawerSlot(c, book), true, "/")
 	}
 	@common.QRCode()
 }

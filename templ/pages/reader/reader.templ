@@ -35,7 +35,7 @@ templ ReaderPage(c echo.Context) {
 	<div id="ReaderFooter" class="w-full" x-show="$store.global.readMode !== 'flip'">
 		@common.Footer(config.GetVersion())
 	</div>
-	@common.Drawer(c, nil, DrawerSlot(c), true, config.PrefixPath("/"))
+	@common.Drawer(c, nil, nil, DrawerSlot(c), true, config.PrefixPath("/"))
 	@common.QRCode()
 }
 
@@ -134,12 +134,13 @@ templ MainArea(c echo.Context) {
 								<img
 									id="ReaderFlipDoubleImageLeft"
 									draggable="false"
-									x-show="$store.global.nowPageNum < $store.global.allPageNum"
+									x-show="!$store.flip.mangaMode || ($store.global.nowPageNum > 1 && $store.global.nowPageNum < $store.global.allPageNum)"
 									class="select-none object-contain m-0 max-w-1/2 w-auto h-auto max-h-screen grow-0"
 								/>
 								<img
 									id="ReaderFlipDoubleImageRight"
 									draggable="false"
+									x-show="$store.flip.mangaMode || ($store.global.nowPageNum > 1 && $store.global.nowPageNum < $store.global.allPageNum)"
 									class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
 								/>
 							</div>

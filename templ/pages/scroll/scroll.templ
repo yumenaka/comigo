@@ -28,9 +28,9 @@ templ ScrollPage(c echo.Context, book *model.Book, loadMode string, pagedIndex i
 	}
 	@common.Footer(config.GetVersion())
 	if book != nil {
-		@common.Drawer(c, book, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
+		@common.Drawer(c, book, ScrollLoadModeControls(), DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
 	} else {
-		@common.Drawer(c, book, DrawerSlot(c, book), true, "/")
+		@common.Drawer(c, book, ScrollLoadModeControls(), DrawerSlot(c, book), true, "/")
 	}
 	@common.QRCode()
 }
