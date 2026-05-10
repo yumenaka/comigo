@@ -88,7 +88,6 @@
   "comigo_xyz_feature_security_desc": "Supports HTTPS and user authentication, built-in Tailscale remote access",
   "comigo_xyz_github_button": "Visit GitHub Project",
   "comigo_xyz_no_install_title": "You do not even have to install it:",
-  "comigo_xyz_platform_android_apk": "Android (APK)",
   "comigo_xyz_quick_start": "Quick Start",
   "comigo_xyz_quick_start_step1": "Download and run Comigo",
   "comigo_xyz_quick_start_step2": "Configure your library path in settings",
