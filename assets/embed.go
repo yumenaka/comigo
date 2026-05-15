@@ -62,6 +62,40 @@ window.ComiGoRelativePath = function(pathname) {
   if (path === base) return '/';
   return path.startsWith(base + '/') ? path.slice(base.length) : path;
 };
+window.ComiGoElectron = (function() {
+  const key = 'ComiGoElectron';
+  const params = new URLSearchParams(window.location.search || '');
+  const flag = params.get('comigo_electron');
+  try {
+    if (flag === '1') {
+      window.localStorage.setItem(key, '1');
+      return true;
+    }
+    if (flag === '0') {
+      window.localStorage.removeItem(key);
+      return false;
+    }
+    return window.localStorage.getItem(key) === '1';
+  } catch (_) {
+    return flag === '1';
+  }
+})();
+window.ComiGoElectronAction = function(action) {
+  if (!window.ComiGoElectron || !action) return false;
+  const normalizedAction = String(action).trim();
+  if (!normalizedAction) return false;
+  // Electron 外壳会拦截这个自定义协议，不会真正离开当前页面，也不会给 WebView 暴露 Node 能力。
+  window.location.href = 'comigo-electron://' + encodeURIComponent(normalizedAction);
+  return true;
+};
+window.ComiGoToggleFullscreen = function() {
+  if (window.ComiGoElectronAction('toggle-fullscreen')) return;
+  if (Screenfull.isEnabled) {
+    Screenfull.toggle();
+  } else {
+    showToast(i18next.t('not_support_fullscreen'));
+  }
+};
 </script>
 `
 }

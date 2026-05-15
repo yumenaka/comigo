@@ -714,6 +714,8 @@
   "reader_select_archive": "ローカルファイルを選択",
   "reader_select_archive_hint": "複数画像を選択できます。ZIP/CBZ/RAR/CBR/PDF を複数選択した場合は最初のファイルのみ開きます。ファイルはアップロードされません",
   "reader_settings": "設定",
+  "electron_open_external": "ブラウザで開く",
+  "electron_open_settings": "アプリ設定",
   "reader_title": "ローカル読書",
   "reading_history": "読書履歴",
   "reading_progress_page": "読書進捗（数字）",

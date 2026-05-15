@@ -310,7 +310,7 @@ func FullScreenOfflineButton() templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"FullScreenIcon\" x-show=\"window.location.href.startsWith('file://') || window.location.href.startsWith('content://')\" onclick=\"if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"FullScreenIcon\" x-show=\"window.location.href.startsWith('file://') || window.location.href.startsWith('content://')\" onclick=\"window.ComiGoToggleFullscreen ? window.ComiGoToggleFullscreen() : (Screenfull.isEnabled ? Screenfull.toggle() : showToast(i18next.t('not_support_fullscreen')))\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -569,7 +569,7 @@ func FullScreenOnlineButton() templ.Component {
 			templ_7745c5c3_Var17 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div id=\"FullScreenIcon\" x-show=\"$store.global.onlineBook || (window.ComiGoReaderMode && !window.location.href.startsWith('file://') && !window.location.href.startsWith('content://'))\" onclick=\"if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div id=\"FullScreenIcon\" x-show=\"$store.global.onlineBook || (window.ComiGoReaderMode && !window.location.href.startsWith('file://') && !window.location.href.startsWith('content://'))\" onclick=\"window.ComiGoToggleFullscreen ? window.ComiGoToggleFullscreen() : (Screenfull.isEnabled ? Screenfull.toggle() : showToast(i18next.t('not_support_fullscreen')))\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
