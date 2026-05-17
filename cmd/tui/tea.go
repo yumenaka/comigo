@@ -48,6 +48,33 @@ const (
 	focusQRCode                   // QRCode 面板
 )
 
+// appScreen 表示当前 TUI 主界面。
+type appScreen int
+
+const (
+	screenShelf  appScreen = iota // 书架/日志/QRCode 总览界面
+	screenReader                  // 终端阅读界面
+)
+
+// qrAction 表示 QRCode 面板按钮动作。
+type qrAction int
+
+const (
+	qrActionScrollMode     qrAction = iota // 切换到卷轴阅读 URL
+	qrActionFlipMode                       // 切换到翻页阅读 URL
+	qrActionCopyURL                        // 复制当前 URL
+	qrActionTerminalReader                 // 在 TUI 内打开终端阅读
+	qrActionOpenBrowser                    // 调用系统浏览器打开当前 URL
+)
+
+// qrButtonHitbox 记录 QRCode 面板按钮的点击范围。
+type qrButtonHitbox struct {
+	action qrAction
+	row    int
+	start  int
+	end    int
+}
+
 // shelfItemKind 书架列表条目类型
 type shelfItemKind int
 
@@ -129,8 +156,9 @@ func (r panelRect) innerHeight() int {
 // layoutState 四个面板的布局位置
 type layoutState struct {
 	shelf panelRect // 书架面板
+	cover panelRect // 封面预览面板
 	log   panelRect // 日志面板
-	info  panelRect // 信息面板（窄屏模式下隐藏，w=0 h=0）
+	info  panelRect // 信息面板（暂不渲染，保留字段便于后续恢复）
 	qr    panelRect // QRCode 面板
 }
 
@@ -141,6 +169,7 @@ type appModel struct {
 	width  int        // 终端当前宽度
 	height int        // 终端当前高度
 	focus  focusPanel // 当前聚焦的面板
+	screen appScreen  // 当前主界面
 
 	logs           []string // 当前快照的日志行
 	logOffset      int      // 日志滚动偏移（首行索引）
@@ -156,13 +185,26 @@ type appModel struct {
 	shelfOffset  int          // 书架列表滚动偏移（首个可见的 item 索引）
 	shelfRowToID map[int]int  // 面板内容行号 → items 索引的映射（用于鼠标点击定位）
 
-	currentShelfURL string         // 当前书架层级对应的 Web URL
-	qrLines         []string       // QR 码的 Unicode 字符行
-	qrButtonFocus   int            // QR 面板按钮焦点：0=浏览器打开, 1=复制URL, 2=模式切换
-	qrButtonRow     int            // 操作按钮在 QR 面板内容区的行号
-	qrModeRow       int            // 模式切换行在 QR 面板内容区的行号
+	currentShelfURL string   // 当前书架层级对应的 Web URL
+	qrLines         []string // QR 码的 Unicode 字符行
+	qrButtonFocus   qrAction // QR 面板当前聚焦按钮
+	qrButtonHitbox  []qrButtonHitbox
 	readMode        int            // 阅读模式：0=scroll（卷轴阅读）, 1=flip（翻页阅读）
 	status          systemSnapshot // 最新的系统状态快照
+
+	coverProtocol  tuiImageProtocol             // 终端图片协议，自动检测后可用 COMIGO_TUI_IMAGE 覆盖
+	coverPreview   coverPreviewState            // 当前选中书籍的封面预览状态
+	coverCache     map[string]coverPreviewState // 已渲染封面缓存，避免频繁滚动时重复解码
+	coverRequestID int                          // 封面异步加载序号，用于丢弃过期结果
+
+	readerProtocol           tuiImageProtocol               // 终端阅读使用的图片协议，现代 Kitty 协议终端会尝试原生图像
+	terminalReader           terminalReaderState            // 终端阅读状态
+	terminalReaderCache      map[string]terminalReaderState // 终端阅读页缓存
+	readerRequestID          int                            // 终端阅读异步加载序号
+	readerAutoFlip           bool                           // 是否正在自动翻页
+	readerAutoInterval       int                            // 自动翻页间隔秒数
+	readerNextAutoAt         time.Time                      // 下一次自动翻页时间
+	terminalReaderFullscreen bool                           // 终端阅读是否隐藏顶部和底部状态栏
 }
 
 // LogBuffer 用来缓存 TUI 需要展示的实时日志。
@@ -209,11 +251,18 @@ func (lb *LogBuffer) GetLines() []string {
 // InitialModel 构建 TUI 初始模型，设定默认焦点和状态。
 func InitialModel(lb *LogBuffer) *appModel {
 	m := &appModel{
-		logBuffer:       lb,
-		focus:           focusShelf,
-		autoFollowLogs:  true,
-		shelfRowToID:    make(map[int]int),
-		currentShelfURL: "",
+		logBuffer:           lb,
+		focus:               focusShelf,
+		screen:              screenShelf,
+		autoFollowLogs:      true,
+		shelfRowToID:        make(map[int]int),
+		currentShelfURL:     "",
+		qrButtonFocus:       qrActionTerminalReader,
+		coverProtocol:       detectTUIImageProtocol(),
+		coverCache:          make(map[string]coverPreviewState),
+		readerProtocol:      detectTUIReaderImageProtocol(),
+		terminalReaderCache: make(map[string]terminalReaderState),
+		readerAutoInterval:  defaultReaderAutoInterval,
 	}
 	m.setActionMsg(locale.GetString("tui_starting_service"))
 	m.refreshData()
@@ -339,21 +388,24 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.focus = focusShelf
 		}
 		m.refreshData()
-		return m, nil
+		return m, m.syncActiveImageCmd()
 	case tickMsg:
+		if m.screen == screenReader {
+			return m, tea.Batch(tickCmd(), m.handleReaderAutoFlip(time.Time(msg)))
+		}
 		m.refreshData()
-		return m, tickCmd()
+		return m, tea.Batch(tickCmd(), m.handleReaderAutoFlip(time.Time(msg)), m.syncActiveImageCmd())
 	case backendStartedMsg:
 		m.backendReady = true
 		m.backendError = ""
 		m.setActionMsg(locale.GetString("tui_service_started"))
 		m.refreshData()
-		return m, nil
+		return m, m.syncActiveImageCmd()
 	case backendErrorMsg:
 		m.backendError = msg.err.Error()
 		m.setActionMsg(locale.GetString("tui_backend_failed"))
 		m.refreshData()
-		return m, nil
+		return m, m.syncActiveImageCmd()
 	case openURLResultMsg:
 		if msg.err != nil {
 			m.setActionMsg(shortenText(fmt.Sprintf(locale.GetString("tui_open_browser_failed"), msg.err.Error()), maxActionMessage))
@@ -363,6 +415,12 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			logger.Infof(locale.GetString("log_opening_browser"), msg.url)
 		}
 		m.refreshData()
+		return m, m.syncActiveImageCmd()
+	case coverPreviewMsg:
+		m.applyCoverPreviewMsg(msg)
+		return m, nil
+	case terminalReaderPageMsg:
+		m.applyTerminalReaderPageMsg(msg)
 		return m, nil
 	case tea.MouseMsg:
 		return m.handleMouse(msg)
@@ -375,24 +433,29 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // handleKey 处理键盘输入，包含全局快捷键（退出、Tab 切换面板）和各面板专属按键。
 func (m *appModel) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
-	case "ctrl+c", "q":
+	case "ctrl+c":
+		return m, tea.Quit
+	case "q":
+		if m.screen == screenReader {
+			return m, m.exitTerminalReader()
+		}
 		return m, tea.Quit
 	case "tab":
-		m.focus = (m.focus + 1) % 4
-		if m.isNarrow() && m.focus == focusInfo {
-			m.focus = (m.focus + 1) % 4
+		if m.screen == screenReader {
+			return m, nil
 		}
+		m.moveFocus(1)
 		return m, nil
 	case "shift+tab":
-		if m.focus == focusShelf {
-			m.focus = focusQRCode
-		} else {
-			m.focus--
-			if m.isNarrow() && m.focus == focusInfo {
-				m.focus--
-			}
+		if m.screen == screenReader {
+			return m, nil
 		}
+		m.moveFocus(-1)
 		return m, nil
+	}
+
+	if m.screen == screenReader {
+		return m.handleTerminalReaderKey(msg)
 	}
 
 	switch m.focus {
@@ -437,38 +500,30 @@ func (m *appModel) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case focusQRCode:
 		switch msg.String() {
 		case "up", "k":
-			if m.qrButtonFocus < 2 {
-				m.qrButtonFocus = 2
-			}
+			m.moveQRButtonVertical(-1)
 		case "down", "j":
-			if m.qrButtonFocus == 2 {
-				m.qrButtonFocus = 0
-			}
+			m.moveQRButtonVertical(1)
 		case "left", "h":
-			if m.qrButtonFocus < 2 {
-				m.qrButtonFocus = 0
-			}
+			m.moveQRButtonHorizontal(-1)
 		case "right", "l":
-			if m.qrButtonFocus < 2 {
-				m.qrButtonFocus = 1
-			}
+			m.moveQRButtonHorizontal(1)
 		case "tab":
-			m.qrButtonFocus = (m.qrButtonFocus + 1) % 3
+			m.moveQRButtonTab()
 		case "enter", " ":
-			if m.qrButtonFocus == 2 {
-				m.toggleReadMode()
-			} else {
-				return m, m.executeQRButton()
-			}
+			return m, m.executeQRButton()
 		}
 	}
 
 	m.refreshStatus()
-	return m, nil
+	return m, m.syncActiveImageCmd()
 }
 
 // handleMouse 处理鼠标事件：点击切换面板焦点、书架选中项、QR 面板按钮及滚轮操作。
 func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+	if m.screen == screenReader {
+		return m, nil
+	}
+
 	layout := m.layout()
 	if msg.Action != tea.MouseActionPress {
 		return m, nil
@@ -479,11 +534,11 @@ func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 		m.focus = focusShelf
 		if msg.Button == tea.MouseButtonWheelUp {
 			m.moveSelection(-1)
-			return m, nil
+			return m, m.syncActiveImageCmd()
 		}
 		if msg.Button == tea.MouseButtonWheelDown {
 			m.moveSelection(1)
-			return m, nil
+			return m, m.syncActiveImageCmd()
 		}
 		if msg.Button == tea.MouseButtonLeft {
 			row := msg.Y - layout.shelf.y - 1
@@ -492,6 +547,7 @@ func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 				m.syncShelfOffset()
 				m.refreshQRCode()
 				m.refreshStatus()
+				return m, m.syncActiveImageCmd()
 			}
 		}
 	case contains(layout.log, msg.X, msg.Y):
@@ -508,65 +564,25 @@ func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 		m.focus = focusQRCode
 		if msg.Button == tea.MouseButtonLeft {
 			clickRow := msg.Y - layout.qr.y - 1
-			innerW := layout.qr.innerWidth()
 			col := msg.X - layout.qr.x - 1
-			if clickRow == m.qrModeRow {
-				m.qrButtonFocus = 2
-				scrollText := locale.GetString("tui_mode_scroll")
-				btn0Str := "[ " + scrollText + " ]"
-				if m.readMode == 0 {
-					btn0Str = "> " + scrollText + " <"
+			for _, hitbox := range m.qrButtonHitbox {
+				if clickRow == hitbox.row && col >= hitbox.start && col < hitbox.end {
+					m.qrButtonFocus = hitbox.action
+					return m, m.executeQRButton()
 				}
-				modeFull := btn0Str + "  "
-				modeFullW := runewidth.StringWidth(modeFull)
-				allText := modeFull
-				flipText := locale.GetString("tui_mode_flip")
-				if m.readMode == 1 {
-					allText += "> " + flipText + " <"
-				} else {
-					allText += "[ " + flipText + " ]"
-				}
-				allW := runewidth.StringWidth(allText)
-				offset := 0
-				if allW < innerW {
-					offset = (innerW - allW) / 2
-				}
-				if col < offset+modeFullW {
-					if m.readMode != 0 {
-						m.toggleReadMode()
-					}
-				} else {
-					if m.readMode != 1 {
-						m.toggleReadMode()
-					}
-				}
-				return m, nil
-			}
-			if clickRow == m.qrButtonRow {
-				btn0Text := "[ " + locale.GetString("tui_btn_open_browser") + " ]"
-				btn1Text := "[ " + locale.GetString("tui_btn_copy_url") + " ]"
-				btnLine := btn0Text + "  " + btn1Text
-				btnW := runewidth.StringWidth(btnLine)
-				offset := 0
-				if btnW < innerW {
-					offset = (innerW - btnW) / 2
-				}
-				btn0End := offset + runewidth.StringWidth(btn0Text)
-				if col >= offset && col < btn0End {
-					m.qrButtonFocus = 0
-				} else {
-					m.qrButtonFocus = 1
-				}
-				return m, m.executeQRButton()
 			}
 		}
 	}
 	m.refreshStatus()
-	return m, nil
+	return m, m.syncActiveImageCmd()
 }
 
 // View 实现 tea.Model 接口，根据当前终端尺寸渲染全部面板并拼接为最终输出字符串。
 func (m *appModel) View() string {
+	if m.screen == screenReader {
+		return m.renderTerminalReaderView()
+	}
+
 	if m.width < minTUIWidth || m.height < minTUIHeight {
 		return fmt.Sprintf(locale.GetString("tui_terminal_too_small"), minTUIWidth, minTUIHeight) + "\n" +
 			fmt.Sprintf(locale.GetString("tui_current_size"), m.width, m.height) + "\n"
@@ -586,14 +602,12 @@ func (m *appModel) View() string {
 	}
 
 	shelfLines := m.makePanel(locale.GetString("tui_panel_shelf"), m.renderShelfContent(layout.shelf), layout.shelf, m.focus == focusShelf)
-	logLines := m.makePanel(locale.GetString("tui_panel_log"), m.renderLogContent(layout.log), layout.log, m.focus == focusLog)
-	infoLines := m.makePanel(locale.GetString("tui_panel_info"), m.renderInfoContent(layout.info), layout.info, m.focus == focusInfo)
 	qrLines := m.makePanel("QRCode", m.renderQRCodeContent(layout.qr), layout.qr, m.focus == focusQRCode)
+	logLines := m.makePanel(locale.GetString("tui_panel_log"), m.renderLogContent(layout.log), layout.log, m.focus == focusLog)
+	coverLines := m.makeStyledPanel(locale.GetString("tui_panel_preview"), m.renderCoverPreviewContent(layout.cover), layout.cover, false)
 
-	topRow := mergeRows(shelfLines, layout.shelf.w, qrLines)
-	bottomRow := mergeRows(logLines, layout.log.w, infoLines)
-	gapLine := strings.Repeat(" ", layout.shelf.w+layoutGap+layout.qr.w)
-	return strings.Join(append(append(topRow, gapLine), bottomRow...), "\n")
+	rows := mergeWideLayoutRows(layout, shelfLines, logLines, qrLines, coverLines)
+	return m.renderCoverClearPrefix(layout.cover) + m.renderCoverSetupPrefix() + strings.Join(rows, "\n") + m.renderCoverOverlay(layout.cover)
 }
 
 // refreshData 一次性刷新日志、书架、系统状态和二维码等全部数据。
@@ -1001,8 +1015,7 @@ func (m *appModel) selectLast() {
 // syncShelfOffset 调整滚动偏移，使当前选中项始终在可视区域内。
 func (m *appModel) syncShelfOffset() {
 	const headerLines = 2 // 面包屑 + 操作提示
-	const footerLines = 2 // 分隔线 + 底行服务状态（与 renderShelfContent 一致）
-	visible := m.layout().shelf.innerHeight() - headerLines - footerLines
+	visible := m.layout().shelf.innerHeight() - headerLines
 	if visible <= 0 {
 		m.shelfOffset = 0
 		return
@@ -1071,7 +1084,7 @@ func (m *appModel) activateSelectedItem() tea.Cmd {
 	switch item.Kind {
 	case shelfItemBack:
 		m.goBack()
-		return nil
+		return m.syncCoverPreviewCmd()
 	case shelfItemGroup:
 		m.stack = append(m.stack, shelfLevel{
 			BookID: item.BookID,
@@ -1081,11 +1094,9 @@ func (m *appModel) activateSelectedItem() tea.Cmd {
 		m.shelfOffset = 0
 		m.setActionMsg(fmt.Sprintf(locale.GetString("tui_entered_sub_shelf"), item.Title))
 		m.refreshData()
-		return nil
+		return m.syncCoverPreviewCmd()
 	case shelfItemBook:
-		m.setActionMsg(fmt.Sprintf(locale.GetString("tui_opening_url"), item.TargetURL))
-		m.refreshStatus()
-		return openURLCmd(item.TargetURL)
+		return m.startTerminalReader(item)
 	default:
 		return nil
 	}
@@ -1093,6 +1104,22 @@ func (m *appModel) activateSelectedItem() tea.Cmd {
 
 // executeQRButton 执行 QR 面板当前聚焦按钮的动作。
 func (m *appModel) executeQRButton() tea.Cmd {
+	switch m.qrButtonFocus {
+	case qrActionScrollMode:
+		m.setReadMode(0)
+		return nil
+	case qrActionFlipMode:
+		m.setReadMode(1)
+		return nil
+	case qrActionTerminalReader:
+		if item := m.currentItem(); item != nil && item.Kind == shelfItemBook {
+			return m.startTerminalReader(item)
+		}
+		m.setActionMsg(locale.GetString("tui_terminal_reader_no_book"))
+		m.refreshStatus()
+		return nil
+	}
+
 	target := m.selectedURL()
 	if target == "" {
 		m.setActionMsg(locale.GetString("tui_no_url_available"))
@@ -1100,11 +1127,11 @@ func (m *appModel) executeQRButton() tea.Cmd {
 		return nil
 	}
 	switch m.qrButtonFocus {
-	case 0:
+	case qrActionOpenBrowser:
 		m.setActionMsg(fmt.Sprintf(locale.GetString("tui_opening_url"), shortenText(target, maxActionMessage-6)))
 		m.refreshStatus()
 		return openURLCmd(target)
-	case 1:
+	case qrActionCopyURL:
 		if err := clipboard.WriteAll(target); err != nil {
 			m.setActionMsg(fmt.Sprintf(locale.GetString("tui_copy_failed"), err.Error()))
 			logger.Infof(locale.GetString("tui_copy_failed"), err.Error())
@@ -1122,10 +1149,18 @@ func (m *appModel) executeQRButton() tea.Cmd {
 // toggleReadMode 在卷轴阅读和翻页阅读之间切换，并刷新所有受影响的数据。
 func (m *appModel) toggleReadMode() {
 	if m.readMode == 0 {
-		m.readMode = 1
+		m.setReadMode(1)
 	} else {
-		m.readMode = 0
+		m.setReadMode(0)
 	}
+}
+
+// setReadMode 设置 Web 阅读 URL 使用的模式，并刷新书架和二维码。
+func (m *appModel) setReadMode(readMode int) {
+	if readMode != 0 && readMode != 1 {
+		return
+	}
+	m.readMode = readMode
 	m.refreshShelf()
 	m.refreshQRCode()
 	m.refreshStatus()
@@ -1163,19 +1198,36 @@ func (m *appModel) isNarrow() bool {
 	return m.width < narrowThreshold
 }
 
+// moveFocus 在当前可交互面板之间切换；信息栏暂不展示，因此不参与焦点循环。
+func (m *appModel) moveFocus(delta int) {
+	order := []focusPanel{focusShelf, focusLog, focusQRCode}
+	current := 0
+	for i, panel := range order {
+		if panel == m.focus {
+			current = i
+			break
+		}
+	}
+	next := (current + delta) % len(order)
+	if next < 0 {
+		next += len(order)
+	}
+	m.focus = order[next]
+}
+
 // renderWidth 返回 TUI 实际写入的行宽。
 // 终端最后一列写满时容易触发自动换行，下一帧局部刷新会留下上一帧的文字残影。
 func (m *appModel) renderWidth() int {
 	return max(0, m.width-1)
 }
 
-// layout 计算四个面板的矩形布局。宽屏使用 2×2 网格，窄屏使用垂直单栏（隐藏信息面板）。
+// layout 计算 TUI 面板矩形布局。宽屏使用 2×2 网格，窄屏使用垂直单栏（隐藏封面预览和信息面板）。
 func (m *appModel) layout() layoutState {
 	width := m.renderWidth()
 	height := max(0, m.height)
 
 	if m.isNarrow() {
-		// 窄屏单栏：书架(3) / QR(5) / 日志(2)，info 隐藏
+		// 窄屏单栏：书架(3) / QR(5) / 日志(2)，封面预览和 info 隐藏
 		logH := height * 2 / 10
 		shelfH := height * 3 / 10
 		qrH := height - shelfH - logH
@@ -1183,6 +1235,7 @@ func (m *appModel) layout() layoutState {
 		logY := shelfH + qrH
 		return layoutState{
 			shelf: panelRect{x: 0, y: 0, w: width, h: shelfH},
+			cover: panelRect{},
 			qr:    panelRect{x: 0, y: qrY, w: width, h: qrH},
 			log:   panelRect{x: 0, y: logY, w: width, h: logH},
 			info:  panelRect{},
@@ -1191,20 +1244,57 @@ func (m *appModel) layout() layoutState {
 
 	leftWidth := (width - layoutGap) * 2 / 3
 	rightWidth := width - layoutGap - leftWidth
-	// 宽屏上下两排面板之间留 layoutGap 行；总输出 = topHeight + layoutGap + bottomHeight = height
 	split := height - layoutGap
-	topHeight := (split * 2) / 3
-	bottomHeight := split - topHeight
+	leftTopHeight := (split * 2) / 3
+	leftBottomHeight := split - leftTopHeight
+	// 右侧 QRCode 与预览区按 1:1 切分；奇数高度时把多出的 1 行给 QRCode。
+	rightTopHeight := (split + 1) / 2
+	rightBottomHeight := split - rightTopHeight
 
 	return layoutState{
-		shelf: panelRect{x: 0, y: 0, w: leftWidth, h: topHeight},
-		qr:    panelRect{x: leftWidth + layoutGap, y: 0, w: rightWidth, h: topHeight},
-		log:   panelRect{x: 0, y: topHeight + layoutGap, w: leftWidth, h: bottomHeight},
-		info:  panelRect{x: leftWidth + layoutGap, y: topHeight + layoutGap, w: rightWidth, h: bottomHeight},
+		shelf: panelRect{x: 0, y: 0, w: leftWidth, h: leftTopHeight},
+		log:   panelRect{x: 0, y: leftTopHeight + layoutGap, w: leftWidth, h: leftBottomHeight},
+		qr:    panelRect{x: leftWidth + layoutGap, y: 0, w: rightWidth, h: rightTopHeight},
+		cover: panelRect{x: leftWidth + layoutGap, y: rightTopHeight + layoutGap, w: rightWidth, h: rightBottomHeight},
+		info:  panelRect{},
 	}
 }
 
-// renderShelfContent 渲染书架面板内容：面包屑、操作提示、可滚动条目列表；底部以分隔线 + 服务状态固定展示。
+// mergeWideLayoutRows 按绝对 y 坐标合并左右两列，允许左右列使用不同的上下高度比例。
+func mergeWideLayoutRows(layout layoutState, shelfLines []string, logLines []string, qrLines []string, coverLines []string) []string {
+	height := max(layout.shelf.y+layout.shelf.h, layout.log.y+layout.log.h)
+	height = max(height, layout.qr.y+layout.qr.h)
+	height = max(height, layout.cover.y+layout.cover.h)
+	widthLeft := layout.shelf.w
+	widthRight := layout.qr.w
+	rows := make([]string, 0, height)
+	for y := 0; y < height; y++ {
+		left := panelLineAt(y, layout.shelf, shelfLines)
+		if left == "" {
+			left = panelLineAt(y, layout.log, logLines)
+		}
+		right := panelLineAt(y, layout.qr, qrLines)
+		if right == "" {
+			right = panelLineAt(y, layout.cover, coverLines)
+		}
+		rows = append(rows, clipAndPadStyled(left, widthLeft)+strings.Repeat(" ", layoutGap)+clipAndPadStyled(right, widthRight))
+	}
+	return rows
+}
+
+// panelLineAt 取指定绝对行对应的面板内容；不在面板范围内时返回空字符串。
+func panelLineAt(row int, rect panelRect, lines []string) string {
+	if rect.w <= 0 || rect.h <= 0 || row < rect.y || row >= rect.y+rect.h {
+		return ""
+	}
+	index := row - rect.y
+	if index < 0 || index >= len(lines) {
+		return ""
+	}
+	return lines[index]
+}
+
+// renderShelfContent 渲染书架面板内容：面包屑、操作提示和可滚动条目列表。
 func (m *appModel) renderShelfContent(rect panelRect) []string {
 	inner := rect.innerHeight()
 	if inner <= 0 {
@@ -1226,8 +1316,7 @@ func (m *appModel) renderShelfContent(rect panelRect) []string {
 	lines = append(lines, locale.GetString("tui_path_prefix")+breadcrumb)
 	lines = append(lines, locale.GetString("tui_controls_hint"))
 
-	const footerLines = 2 // 分隔线 + 底部服务状态
-	visibleItems := max(0, inner-len(lines)-footerLines)
+	visibleItems := max(0, inner-len(lines))
 	if isShelfEffectivelyEmpty(m.items) {
 		if visibleItems > 0 {
 			lines = append(lines, locale.GetString("tui_no_shelf_content"))
@@ -1244,14 +1333,6 @@ func (m *appModel) renderShelfContent(rect panelRect) []string {
 			lines = append(lines, line)
 		}
 	}
-
-	// 用空行填充，使分隔线和状态提示始终固定在面板底部
-	for len(lines) < inner-footerLines {
-		lines = append(lines, "")
-	}
-
-	lines = append(lines, padRightWith("", w, "─"))
-	lines = append(lines, clipAndPad(shortenText(m.status.StatusText, w), w))
 
 	return fitLines(lines, w, inner)
 }
@@ -1275,23 +1356,39 @@ func (m *appModel) formatShelfLine(item shelfItem, selected bool) string {
 	}
 }
 
-// renderLogContent 渲染日志面板内容，支持滚动和自动跟随最新日志。
+// renderLogContent 渲染日志面板内容，支持滚动和自动跟随最新日志；底部固定显示当前状态提示。
 func (m *appModel) renderLogContent(rect panelRect) []string {
 	height := rect.innerHeight()
 	if height <= 0 {
 		return nil
 	}
-	if len(m.logs) == 0 {
-		return fitLines([]string{locale.GetString("tui_no_logs")}, rect.innerWidth(), height)
+	w := rect.innerWidth()
+	if height == 1 {
+		return []string{clipAndPad(shortenText(m.status.StatusText, w), w)}
 	}
 
-	start := min(m.logOffset, len(m.logs))
-	end := min(len(m.logs), start+height)
-	lines := append([]string(nil), m.logs[start:end]...)
-	if !m.autoFollowLogs {
-		lines = append(lines, fmt.Sprintf(locale.GetString("tui_log_scrolling"), end, len(m.logs)))
+	const footerLines = 2 // 分隔线 + 底行服务状态
+	bodyHeight := max(0, height-footerLines)
+	lines := make([]string, 0, height)
+	if len(m.logs) == 0 {
+		if bodyHeight > 0 {
+			lines = append(lines, locale.GetString("tui_no_logs"))
+		}
+	} else {
+		start := min(m.logOffset, len(m.logs))
+		end := min(len(m.logs), start+bodyHeight)
+		lines = append(lines, m.logs[start:end]...)
+		if !m.autoFollowLogs && len(lines) < bodyHeight {
+			lines = append(lines, fmt.Sprintf(locale.GetString("tui_log_scrolling"), end, len(m.logs)))
+		}
 	}
-	return fitLines(lines, rect.innerWidth(), height)
+
+	for len(lines) < bodyHeight {
+		lines = append(lines, "")
+	}
+	lines = append(lines, padRightWith("", w, "─"))
+	lines = append(lines, clipAndPad(shortenText(m.status.StatusText, w), w))
+	return fitLines(lines, w, height)
 }
 
 // renderInfoContent 渲染信息面板内容：CPU/RAM、在线人数、版本及时间等；服务状态在书架面板底部展示。
@@ -1327,9 +1424,10 @@ func (m *appModel) renderInfoContent(rect panelRect) []string {
 	return append(body, clipAndPad(versionLine, w))
 }
 
-// renderQRCodeContent 渲染 QRCode 面板内容：选中项 URL、二维码、阅读模式切换和操作按钮。
+// renderQRCodeContent 渲染 QRCode 面板内容：选中项 URL、二维码、阅读模式和操作按钮。
 func (m *appModel) renderQRCodeContent(rect panelRect) []string {
 	w := rect.innerWidth()
+	m.qrButtonHitbox = nil
 	selURL := m.selectedURL()
 	label := locale.GetString("tui_qr_shelf_url")
 	if item := m.currentItem(); item != nil && item.TargetURL != "" {
@@ -1339,36 +1437,13 @@ func (m *appModel) renderQRCodeContent(rect panelRect) []string {
 	if len(m.qrLines) == 0 {
 		lines = append(lines, centerText(locale.GetString("tui_qr_unavailable"), w))
 	} else {
-		lines = append(lines, "")
 		for _, qrLine := range m.qrLines {
 			lines = append(lines, centerText(qrLine, w))
 		}
 	}
 
-	// 模式切换行
-	lines = append(lines, "")
-	scrollText := locale.GetString("tui_mode_scroll")
-	flipText := locale.GetString("tui_mode_flip")
-	modeBtn0 := "[ " + scrollText + " ]"
-	modeBtn1 := "[ " + flipText + " ]"
-	if m.readMode == 0 {
-		modeBtn0 = "> " + scrollText + " <"
-	} else {
-		modeBtn1 = "> " + flipText + " <"
-	}
-	modeLine := modeBtn0 + "  " + modeBtn1
-	m.qrModeRow = len(lines)
-	lines = append(lines, centerText(modeLine, w))
-
-	// 操作按钮行
-	lines = append(lines, "")
-	btnOpenText := locale.GetString("tui_btn_open_browser")
-	btnCopyText := locale.GetString("tui_btn_copy_url")
-	btn0 := "[ " + btnOpenText + " ]"
-	btn1 := "[ " + btnCopyText + " ]"
-	btnLine := btn0 + "  " + btn1
-	m.qrButtonRow = len(lines)
-	lines = append(lines, centerText(btnLine, w))
+	lines = m.appendQRCodeButtonRow(lines, w, []qrAction{qrActionScrollMode, qrActionFlipMode, qrActionCopyURL})
+	lines = m.appendQRCodeButtonRow(lines, w, []qrAction{qrActionTerminalReader, qrActionOpenBrowser})
 
 	// 操作结果提示行（浏览器打开/URL复制等；加标记强调，不自动隐藏）
 	if m.actionMsg != "" {
@@ -1377,6 +1452,143 @@ func (m *appModel) renderQRCodeContent(rect panelRect) []string {
 	}
 
 	return fitLines(lines, w, rect.innerHeight())
+}
+
+// appendQRCodeButtonRow 追加一行 QRCode 操作按钮，并记录鼠标点击范围。
+func (m *appModel) appendQRCodeButtonRow(lines []string, width int, actions []qrAction) []string {
+	if width <= 0 || len(actions) == 0 {
+		return lines
+	}
+	parts := make([]string, len(actions))
+	totalWidth := 0
+	for i, action := range actions {
+		parts[i] = m.formatQRButton(action)
+		totalWidth += runewidth.StringWidth(parts[i])
+		if i > 0 {
+			totalWidth += 2
+		}
+	}
+
+	row := len(lines)
+	offset := 0
+	if totalWidth < width {
+		offset = (width - totalWidth) / 2
+	}
+	col := offset
+	var builder strings.Builder
+	builder.WriteString(strings.Repeat(" ", offset))
+	for i, action := range actions {
+		if i > 0 {
+			builder.WriteString("  ")
+			col += 2
+		}
+		partWidth := runewidth.StringWidth(parts[i])
+		m.qrButtonHitbox = append(m.qrButtonHitbox, qrButtonHitbox{
+			action: action,
+			row:    row,
+			start:  col,
+			end:    col + partWidth,
+		})
+		builder.WriteString(parts[i])
+		col += partWidth
+	}
+	return append(lines, builder.String())
+}
+
+// formatQRButton 根据当前阅读模式和按钮焦点渲染按钮文本。
+func (m *appModel) formatQRButton(action qrAction) string {
+	label := qrActionLabel(action)
+	activeMode := (action == qrActionScrollMode && m.readMode == 0) || (action == qrActionFlipMode && m.readMode == 1)
+	if activeMode || m.qrButtonFocus == action {
+		return "> " + label + " <"
+	}
+	return "[ " + label + " ]"
+}
+
+func qrActionLabel(action qrAction) string {
+	switch action {
+	case qrActionScrollMode:
+		return locale.GetString("tui_mode_scroll")
+	case qrActionFlipMode:
+		return locale.GetString("tui_mode_flip")
+	case qrActionCopyURL:
+		return locale.GetString("tui_btn_copy_url")
+	case qrActionTerminalReader:
+		return locale.GetString("tui_btn_terminal_reader")
+	case qrActionOpenBrowser:
+		return locale.GetString("tui_btn_open_browser")
+	default:
+		return ""
+	}
+}
+
+func qrButtonRows() [][]qrAction {
+	return [][]qrAction{
+		{qrActionScrollMode, qrActionFlipMode, qrActionCopyURL},
+		{qrActionTerminalReader, qrActionOpenBrowser},
+	}
+}
+
+func qrButtonPosition(action qrAction) (row int, col int, ok bool) {
+	for rowIndex, actions := range qrButtonRows() {
+		for colIndex, candidate := range actions {
+			if candidate == action {
+				return rowIndex, colIndex, true
+			}
+		}
+	}
+	return 0, 0, false
+}
+
+// moveQRButtonHorizontal 在当前按钮行内移动焦点。
+func (m *appModel) moveQRButtonHorizontal(delta int) {
+	row, col, ok := qrButtonPosition(m.qrButtonFocus)
+	if !ok {
+		m.qrButtonFocus = qrActionTerminalReader
+		return
+	}
+	actions := qrButtonRows()[row]
+	next := col + delta
+	if next < 0 {
+		next = 0
+	}
+	if next >= len(actions) {
+		next = len(actions) - 1
+	}
+	m.qrButtonFocus = actions[next]
+}
+
+// moveQRButtonVertical 在上下两行按钮之间移动焦点，并尽量保持列位置。
+func (m *appModel) moveQRButtonVertical(delta int) {
+	row, col, ok := qrButtonPosition(m.qrButtonFocus)
+	if !ok {
+		m.qrButtonFocus = qrActionTerminalReader
+		return
+	}
+	rows := qrButtonRows()
+	nextRow := row + delta
+	if nextRow < 0 {
+		nextRow = 0
+	}
+	if nextRow >= len(rows) {
+		nextRow = len(rows) - 1
+	}
+	if col >= len(rows[nextRow]) {
+		col = len(rows[nextRow]) - 1
+	}
+	m.qrButtonFocus = rows[nextRow][col]
+}
+
+// moveQRButtonTab 按视觉顺序循环 QRCode 按钮焦点。
+func (m *appModel) moveQRButtonTab() {
+	order := []qrAction{qrActionScrollMode, qrActionFlipMode, qrActionCopyURL, qrActionTerminalReader, qrActionOpenBrowser}
+	for i, action := range order {
+		if action == m.qrButtonFocus {
+			m.qrButtonFocus = order[(i+1)%len(order)]
+			return
+		}
+	}
+	m.qrButtonFocus = qrActionTerminalReader
 }
 
 // makePanel 将内容行包装进带边框的面板，聚焦面板使用双线边框，非聚焦使用单线边框。
