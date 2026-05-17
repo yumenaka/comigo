@@ -34,4 +34,4 @@ i18next
         },
     })
 
-window.i18next = i18next // 使i18next在全局作用域中可用 
+window.i18next = i18next // 使i18next在全局作用域中可用
