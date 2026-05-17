@@ -157,6 +157,8 @@ func (m *appModel) startTerminalReader(item *shelfItem) tea.Cmd {
 	m.screen = screenReader
 	m.readerAutoFlip = false
 	m.readerNextAutoAt = time.Time{}
+	m.readerPendingPage = false
+	m.readerPendingRequestKey = ""
 	if m.readerAutoInterval <= 0 {
 		m.readerAutoInterval = defaultReaderAutoInterval
 	}
@@ -176,6 +178,8 @@ func (m *appModel) exitTerminalReader() tea.Cmd {
 	m.screen = screenShelf
 	m.readerAutoFlip = false
 	m.readerNextAutoAt = time.Time{}
+	m.readerPendingPage = false
+	m.readerPendingRequestKey = ""
 	m.readerRequestID++
 	return m.syncCoverPreviewCmd()
 }
@@ -223,7 +227,7 @@ func (m *appModel) handleTerminalReaderMouse(msg tea.MouseMsg) (tea.Model, tea.C
 
 // moveTerminalReaderPage 翻到相邻页，越界时停在当前页并提示。
 func (m *appModel) moveTerminalReaderPage(delta int) bool {
-	next := m.terminalReader.PageIndex + delta
+	next := m.terminalReaderTargetPageIndex() + delta
 	if next < 0 {
 		m.setActionMsg(locale.GetString("hint_first_page"))
 		return false
@@ -233,17 +237,20 @@ func (m *appModel) moveTerminalReaderPage(delta int) bool {
 		return false
 	}
 	if next == m.terminalReader.PageIndex {
+		if m.readerPendingPage {
+			// 回到当前可见页时取消后台请求，继续保留当前画面。
+			m.readerPendingPage = false
+			m.readerPendingRequestKey = ""
+			m.readerRequestID++
+			return true
+		}
 		return false
 	}
+	// 翻页时先只记录目标页，旧图和旧页码继续显示，等新图 ready 后一次性替换。
 	m.readerRequestID++
-	m.terminalReader.PageIndex = next
-	m.terminalReader.Width = 0
-	m.terminalReader.Height = 0
-	m.terminalReader.Loading = true
-	m.terminalReader.ErrText = ""
-	m.terminalReader.Setup = ""
-	m.terminalReader.Lines = nil
-	m.terminalReader.Overlay = ""
+	m.readerPendingPage = true
+	m.readerPendingPageIndex = next
+	m.readerPendingRequestKey = ""
 	return true
 }
 
@@ -286,6 +293,9 @@ func (m *appModel) handleReaderAutoFlip(now time.Time) tea.Cmd {
 	if m.screen != screenReader || !m.readerAutoFlip || m.readerNextAutoAt.IsZero() || now.Before(m.readerNextAutoAt) {
 		return nil
 	}
+	if m.readerPendingPage {
+		return nil
+	}
 	if !m.moveTerminalReaderPage(1) {
 		m.readerAutoFlip = false
 		m.readerNextAutoAt = time.Time{}
@@ -303,6 +313,8 @@ func (m *appModel) syncTerminalReaderPageCmd() tea.Cmd {
 		return nil
 	}
 	if m.readerProtocol == termimg.Unsupported {
+		m.readerPendingPage = false
+		m.readerPendingRequestKey = ""
 		m.terminalReader.ErrText = locale.GetString("tui_cover_disabled")
 		m.terminalReader.Loading = false
 		return nil
@@ -311,12 +323,19 @@ func (m *appModel) syncTerminalReaderPageCmd() tea.Cmd {
 		m.terminalReaderCache = make(map[string]terminalReaderState)
 	}
 
-	key := terminalReaderCacheKey(m.terminalReader.BookID, m.terminalReader.PageIndex, area.w, area.h, m.readerProtocol)
+	targetPage := m.terminalReaderTargetPageIndex()
+	key := terminalReaderCacheKey(m.terminalReader.BookID, targetPage, area.w, area.h, m.readerProtocol)
 	if cached, ok := m.terminalReaderCache[key]; ok {
-		if m.terminalReader.Loading && m.terminalReader.PageIndex != cached.PageIndex {
-			m.readerRequestID++
-		}
+		wasPending := m.readerPendingPage
+		m.readerPendingPage = false
+		m.readerPendingRequestKey = ""
 		m.terminalReader = cached
+		if wasPending && m.readerAutoFlip {
+			m.scheduleNextReaderAutoFlip(time.Now())
+		}
+		return nil
+	}
+	if m.readerPendingPage && m.readerPendingRequestKey == key {
 		return nil
 	}
 	if m.terminalReader.Loading &&
@@ -329,6 +348,7 @@ func (m *appModel) syncTerminalReaderPageCmd() tea.Cmd {
 	m.readerRequestID++
 	requestID := m.readerRequestID
 	state := m.terminalReader
+	state.PageIndex = targetPage
 	state.Width = area.w
 	state.Height = area.h
 	state.Protocol = m.readerProtocol
@@ -337,6 +357,10 @@ func (m *appModel) syncTerminalReaderPageCmd() tea.Cmd {
 	state.Setup = ""
 	state.Lines = nil
 	state.Overlay = ""
+	if m.readerPendingPage {
+		m.readerPendingRequestKey = key
+		return loadTerminalReaderPageCmd(requestID, state, m.readerProtocol)
+	}
 	m.terminalReader = state
 	return loadTerminalReaderPageCmd(requestID, state, m.readerProtocol)
 }
@@ -346,9 +370,15 @@ func (m *appModel) applyTerminalReaderPageMsg(msg terminalReaderPageMsg) {
 	if msg.requestID != m.readerRequestID {
 		return
 	}
+	wasPending := m.readerPendingPage
+	m.readerPendingPage = false
+	m.readerPendingRequestKey = ""
 	m.terminalReader = msg.state
 	if msg.state.ErrText == "" && !msg.state.Loading {
 		m.terminalReaderCache[terminalReaderCacheKey(msg.state.BookID, msg.state.PageIndex, msg.state.Width, msg.state.Height, msg.state.Protocol)] = msg.state
+	}
+	if wasPending && m.readerAutoFlip {
+		m.scheduleNextReaderAutoFlip(time.Now())
 	}
 }
 
@@ -459,6 +489,14 @@ func terminalReaderCacheKey(bookID string, pageIndex int, width int, height int,
 	return fmt.Sprintf("%s:%d:%d:%d:%s", bookID, pageIndex, width, height, protocolName(protocol))
 }
 
+// terminalReaderTargetPageIndex 返回当前应该后台加载的页；没有 pending 时就是可见页。
+func (m *appModel) terminalReaderTargetPageIndex() int {
+	if m.readerPendingPage {
+		return m.readerPendingPageIndex
+	}
+	return m.terminalReader.PageIndex
+}
+
 // terminalReaderImageArea 计算阅读页图片可用区域；普通模式保留顶部标题和底部状态各 1 行。
 func (m *appModel) terminalReaderImageArea() terminalReaderImageArea {
 	width := m.renderWidth()
@@ -506,7 +544,7 @@ func (m *appModel) renderTerminalReaderImageLines(area terminalReaderImageArea) 
 // renderTerminalReaderTitle 在标题栏左侧显示书名，加载中时把状态提示放到整屏右上角。
 func (m *appModel) renderTerminalReaderTitle(width int) string {
 	title := m.renderTerminalReaderTitleText(width)
-	if !m.terminalReader.Loading {
+	if !m.terminalReaderIsLoading() {
 		return clipAndPad(title, width)
 	}
 	loading := shortenText(locale.GetString("tui_terminal_reader_loading"), width)
@@ -522,6 +560,10 @@ func (m *appModel) renderTerminalReaderTitleText(width int) string {
 		return ""
 	}
 	return shortenText(readerTitleBackPrefix+m.terminalReader.Title, width)
+}
+
+func (m *appModel) terminalReaderIsLoading() bool {
+	return m.terminalReader.Loading || m.readerPendingPage
 }
 
 // terminalReaderTitleHitWidth 返回标题栏可点击范围宽度，限制到实际显示的返回提示与书名。
@@ -583,7 +625,10 @@ func (m *appModel) renderTerminalReaderClearPrefix() string {
 	}
 	switch m.terminalReader.Protocol {
 	case termimg.ITerm2:
-		builder.WriteString("\x1b[2J\x1b[H")
+		if m.terminalReader.Loading && m.terminalReader.Overlay == "" {
+			// 初次进入或尺寸切换且没有旧图可保留时才整屏清理；普通翻页保留旧图，避免 iTerm2 先黑屏。
+			builder.WriteString("\x1b[2J\x1b[H")
+		}
 	default:
 	}
 	return builder.String()
@@ -604,6 +649,9 @@ func isTerminalReaderOverlayProtocol(protocol tuiImageProtocol) bool {
 
 func (m *appModel) renderTerminalReaderOverlay(area terminalReaderImageArea) string {
 	if area.w <= 0 || area.h <= 0 || !isTerminalReaderOverlayProtocol(m.terminalReader.Protocol) || m.terminalReader.Overlay == "" {
+		return ""
+	}
+	if m.readerPendingPage {
 		return ""
 	}
 	imageW := min(max(1, m.terminalReader.ImageW), area.w)

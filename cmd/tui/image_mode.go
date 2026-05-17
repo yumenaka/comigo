@@ -57,6 +57,8 @@ func (m *appModel) invalidateTUIImageState() {
 		return
 	}
 	m.readerRequestID++
+	m.readerPendingPage = false
+	m.readerPendingRequestKey = ""
 	m.terminalReader.Width = 0
 	m.terminalReader.Height = 0
 	m.terminalReader.Protocol = m.readerProtocol

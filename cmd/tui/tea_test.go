@@ -761,12 +761,15 @@ func TestTerminalReaderKeyBindings(t *testing.T) {
 	}
 
 	_, _ = model.handleTerminalReaderKey(tea.KeyMsg{Type: tea.KeyRight})
-	if model.terminalReader.PageIndex != 2 {
-		t.Fatalf("right key page = %d, want 2", model.terminalReader.PageIndex)
+	if model.terminalReader.PageIndex != 1 {
+		t.Fatalf("right key should keep visible page = %d, want 1", model.terminalReader.PageIndex)
+	}
+	if !model.readerPendingPage || model.readerPendingPageIndex != 2 {
+		t.Fatalf("right key pending = %v/%d, want true/2", model.readerPendingPage, model.readerPendingPageIndex)
 	}
 	_, _ = model.handleTerminalReaderKey(tea.KeyMsg{Type: tea.KeyLeft})
-	if model.terminalReader.PageIndex != 1 {
-		t.Fatalf("left key page = %d, want 1", model.terminalReader.PageIndex)
+	if model.readerPendingPage || model.terminalReader.PageIndex != 1 {
+		t.Fatalf("left key should cancel pending and keep page 1, pending=%v page=%d", model.readerPendingPage, model.terminalReader.PageIndex)
 	}
 	_, _ = model.handleTerminalReaderKey(tea.KeyMsg{Type: tea.KeyDelete})
 	if model.screen != screenShelf {
@@ -789,9 +792,12 @@ func TestTerminalReaderKeyBindings(t *testing.T) {
 
 func TestTerminalReaderMouseClickPagesAndTitleBack(t *testing.T) {
 	model := &appModel{
-		screen: screenReader,
-		width:  80,
-		height: 24,
+		screen:                    screenReader,
+		width:                     80,
+		height:                    24,
+		readerProtocol:            termimg.Halfblocks,
+		terminalReaderCache:       make(map[string]terminalReaderState),
+		clearKittyImagesNextFrame: false,
 		terminalReader: terminalReaderState{
 			BookID:    "book1",
 			Title:     "Book 1",
@@ -801,12 +807,15 @@ func TestTerminalReaderMouseClickPagesAndTitleBack(t *testing.T) {
 	}
 
 	_, _ = model.handleMouse(tea.MouseMsg{Action: tea.MouseActionPress, Button: tea.MouseButtonLeft, X: 60, Y: 12})
-	if model.terminalReader.PageIndex != 2 {
-		t.Fatalf("right half click page = %d, want 2", model.terminalReader.PageIndex)
+	if model.terminalReader.PageIndex != 1 {
+		t.Fatalf("right half click should keep visible page = %d, want 1", model.terminalReader.PageIndex)
+	}
+	if !model.readerPendingPage || model.readerPendingPageIndex != 2 {
+		t.Fatalf("right half click pending = %v/%d, want true/2", model.readerPendingPage, model.readerPendingPageIndex)
 	}
 	_, _ = model.handleMouse(tea.MouseMsg{Action: tea.MouseActionPress, Button: tea.MouseButtonLeft, X: 10, Y: 12})
-	if model.terminalReader.PageIndex != 1 {
-		t.Fatalf("left half click page = %d, want 1", model.terminalReader.PageIndex)
+	if model.readerPendingPage || model.terminalReader.PageIndex != 1 {
+		t.Fatalf("left half click should cancel pending and keep page 1, pending=%v page=%d", model.readerPendingPage, model.terminalReader.PageIndex)
 	}
 	_, _ = model.handleMouse(tea.MouseMsg{Action: tea.MouseActionPress, Button: tea.MouseButtonLeft, X: 0, Y: 0})
 	if model.screen != screenShelf {
@@ -1000,6 +1009,7 @@ func TestTerminalReaderPageTurnDoesNotClearBeforeNewKittyPage(t *testing.T) {
 			Protocol:  termimg.Kitty,
 			PageIndex: 0,
 			PageCount: 3,
+			Lines:     []string{"old"},
 		},
 	}
 
@@ -1008,6 +1018,65 @@ func TestTerminalReaderPageTurnDoesNotClearBeforeNewKittyPage(t *testing.T) {
 	}
 	if model.clearKittyImagesNextFrame {
 		t.Fatal("page turn should not clear Kitty images until the new page is ready")
+	}
+	if model.terminalReader.PageIndex != 0 || len(model.terminalReader.Lines) != 1 || model.terminalReader.Lines[0] != "old" {
+		t.Fatalf("page turn should keep old visible page, state=%+v", model.terminalReader)
+	}
+}
+
+func TestTerminalReaderPendingPageReplacesWhenReady(t *testing.T) {
+	model := &appModel{
+		readerRequestID:        7,
+		readerPendingPage:      true,
+		readerPendingPageIndex: 2,
+		terminalReaderCache:    make(map[string]terminalReaderState),
+		terminalReader: terminalReaderState{
+			BookID:    "book1",
+			Title:     "Book 1",
+			PageIndex: 1,
+			PageCount: 4,
+			Width:     80,
+			Height:    20,
+			Protocol:  termimg.ITerm2,
+			Overlay:   "OLD",
+		},
+	}
+
+	next := terminalReaderState{
+		BookID:    "book1",
+		Title:     "Book 1",
+		PageIndex: 2,
+		PageCount: 4,
+		Width:     80,
+		Height:    20,
+		Protocol:  termimg.ITerm2,
+		Overlay:   "NEW",
+	}
+	model.applyTerminalReaderPageMsg(terminalReaderPageMsg{requestID: 7, state: next})
+	if model.readerPendingPage || model.terminalReader.PageIndex != 2 || model.terminalReader.Overlay != "NEW" {
+		t.Fatalf("ready page should replace visible state, pending=%v state=%+v", model.readerPendingPage, model.terminalReader)
+	}
+	key := terminalReaderCacheKey("book1", 2, 80, 20, termimg.ITerm2)
+	if _, ok := model.terminalReaderCache[key]; !ok {
+		t.Fatalf("ready page should be cached with key %q", key)
+	}
+}
+
+func TestITerm2PendingPageKeepsOldImageLayer(t *testing.T) {
+	model := &appModel{
+		readerPendingPage: true,
+		terminalReader: terminalReaderState{
+			Protocol: termimg.ITerm2,
+			Overlay:  "OLD",
+			ImageW:   10,
+			ImageH:   8,
+		},
+	}
+	if prefix := model.renderTerminalReaderClearPrefix(); strings.Contains(prefix, "\x1b[2J") {
+		t.Fatalf("pending iTerm2 page should not clear the full screen, got %q", prefix)
+	}
+	if overlay := model.renderTerminalReaderOverlay(terminalReaderImageArea{w: 20, h: 12}); overlay != "" {
+		t.Fatalf("pending iTerm2 page should keep old overlay without re-rendering it, got %q", overlay)
 	}
 }
 

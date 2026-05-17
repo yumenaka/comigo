@@ -209,6 +209,9 @@ type appModel struct {
 	readerAutoInterval        int                            // 自动翻页间隔秒数
 	readerNextAutoAt          time.Time                      // 下一次自动翻页时间
 	terminalReaderFullscreen  bool                           // 终端阅读是否隐藏顶部和底部状态栏
+	readerPendingPage         bool                           // 是否有后台加载中的目标页，加载期间继续显示当前页
+	readerPendingPageIndex    int                            // 后台加载中的目标页索引
+	readerPendingRequestKey   string                         // 后台加载请求 key，避免同一目标页重复发起渲染
 	clearKittyImagesNextFrame bool                           // 切换界面时下一帧清理 Kitty 图像层，避免旧 overlay 残留
 }
 
