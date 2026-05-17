@@ -490,12 +490,18 @@ func previewVersionLine() string {
 	return time.Now().Format("2006-01-02 15:04:05") + "  Comigo " + config.GetVersion()
 }
 
+// renderCoverClearPrefix 在主界面绘制前清理必要的图像层；Kitty 清理只在跨界面切换时触发。
 func (m *appModel) renderCoverClearPrefix(rect panelRect) string {
-	if _, ok := previewImageFrameFor(rect); !ok || m.coverProtocol != termimg.ITerm2 {
-		return ""
+	var builder strings.Builder
+	if m.clearKittyImagesNextFrame {
+		builder.WriteString(termimg.ClearAllString())
+		m.clearKittyImagesNextFrame = false
 	}
-	// iTerm2 是独立图像层，切换封面时先清一帧屏幕，避免上一次 inline image 残留。
-	return "\x1b[2J\x1b[H"
+	if _, ok := previewImageFrameFor(rect); ok && m.coverProtocol == termimg.ITerm2 {
+		// iTerm2 是独立图像层，切换封面时先清一帧屏幕，避免上一次 inline image 残留。
+		builder.WriteString("\x1b[2J\x1b[H")
+	}
+	return builder.String()
 }
 
 // renderCoverSetupPrefix 输出 Kitty 图片传输控制序列；可见 placeholder 行仍在主文本里渲染。
@@ -680,7 +686,10 @@ func centerStyledLine(text string, width int) string {
 	if width <= 0 {
 		return ""
 	}
-	text = xansi.Truncate(text, width, "")
+	if xansi.StringWidth(text) > width {
+		// Kitty placeholder 行包含组合符，未超宽时不要交给 Truncate 重写，避免破坏行列编码。
+		text = xansi.Truncate(text, width, "")
+	}
 	pad := max(0, (width-xansi.StringWidth(text))/2)
 	return strings.Repeat(" ", pad) + clipAndPadStyled(text, width-pad)
 }

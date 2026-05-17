@@ -36,6 +36,7 @@ const (
 	narrowThreshold  = 100                    // 窄屏/宽屏布局切换阈值（宽度小于此值为窄屏单栏模式）
 	layoutGap        = 1                      // 面板之间的间距列数
 	maxActionMessage = 120                    // 操作消息最大显示宽度
+	doubleClickGap   = 500 * time.Millisecond // 终端没有原生双击事件，用短时间内同一行两次点击模拟
 )
 
 // focusPanel 表示当前聚焦的面板类型
@@ -175,15 +176,18 @@ type appModel struct {
 	logOffset      int      // 日志滚动偏移（首行索引）
 	autoFollowLogs bool     // 是否自动跟随最新日志
 
-	backendReady bool   // 后台服务是否已启动完成
-	backendError string // 后台启动错误信息（空表示无错误）
-	actionMsg    string // 最近一次操作的状态提示
+	backendReady bool       // 后台服务是否已启动完成
+	backendError string     // 后台启动错误信息（空表示无错误）
+	actionMsg    string     // 最近一次操作的状态提示
+	modal        modalState // 全局提示弹窗，优先接管键盘和鼠标事件
 
-	stack        []shelfLevel // 书架导航栈（从根到当前层级）
-	items        []shelfItem  // 当前层级的书架条目列表
-	selected     int          // 当前选中的条目索引
-	shelfOffset  int          // 书架列表滚动偏移（首个可见的 item 索引）
-	shelfRowToID map[int]int  // 面板内容行号 → items 索引的映射（用于鼠标点击定位）
+	stack               []shelfLevel // 书架导航栈（从根到当前层级）
+	items               []shelfItem  // 当前层级的书架条目列表
+	selected            int          // 当前选中的条目索引
+	shelfOffset         int          // 书架列表滚动偏移（首个可见的 item 索引）
+	shelfRowToID        map[int]int  // 面板内容行号 → items 索引的映射（用于鼠标点击定位）
+	lastShelfClickIndex int          // 上一次书架左键点击的条目索引，用于判断双击
+	lastShelfClickAt    time.Time    // 上一次书架左键点击时间，用于判断双击
 
 	currentShelfURL string   // 当前书架层级对应的 Web URL
 	qrLines         []string // QR 码的 Unicode 字符行
@@ -197,14 +201,15 @@ type appModel struct {
 	coverCache     map[string]coverPreviewState // 已渲染封面缓存，避免频繁滚动时重复解码
 	coverRequestID int                          // 封面异步加载序号，用于丢弃过期结果
 
-	readerProtocol           tuiImageProtocol               // 终端阅读使用的图片协议，现代 Kitty 协议终端会尝试原生图像
-	terminalReader           terminalReaderState            // 终端阅读状态
-	terminalReaderCache      map[string]terminalReaderState // 终端阅读页缓存
-	readerRequestID          int                            // 终端阅读异步加载序号
-	readerAutoFlip           bool                           // 是否正在自动翻页
-	readerAutoInterval       int                            // 自动翻页间隔秒数
-	readerNextAutoAt         time.Time                      // 下一次自动翻页时间
-	terminalReaderFullscreen bool                           // 终端阅读是否隐藏顶部和底部状态栏
+	readerProtocol            tuiImageProtocol               // 终端阅读使用的图片协议，现代 Kitty 协议终端会尝试原生图像
+	terminalReader            terminalReaderState            // 终端阅读状态
+	terminalReaderCache       map[string]terminalReaderState // 终端阅读页缓存
+	readerRequestID           int                            // 终端阅读异步加载序号
+	readerAutoFlip            bool                           // 是否正在自动翻页
+	readerAutoInterval        int                            // 自动翻页间隔秒数
+	readerNextAutoAt          time.Time                      // 下一次自动翻页时间
+	terminalReaderFullscreen  bool                           // 终端阅读是否隐藏顶部和底部状态栏
+	clearKittyImagesNextFrame bool                           // 切换界面时下一帧清理 Kitty 图像层，避免旧 overlay 残留
 }
 
 // LogBuffer 用来缓存 TUI 需要展示的实时日志。
@@ -408,7 +413,9 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, m.syncActiveImageCmd()
 	case openURLResultMsg:
 		if msg.err != nil {
-			m.setActionMsg(shortenText(fmt.Sprintf(locale.GetString("tui_open_browser_failed"), msg.err.Error()), maxActionMessage))
+			text := fmt.Sprintf(locale.GetString("tui_open_browser_failed"), msg.err.Error())
+			m.setActionMsg(shortenText(text, maxActionMessage))
+			m.showModal(locale.GetString("tui_modal_title_notice"), text)
 			logger.Infof(locale.GetString("tui_open_browser_failed"), msg.err.Error())
 		} else {
 			m.setActionMsg(shortenText(fmt.Sprintf(locale.GetString("tui_opened_url"), msg.url), maxActionMessage))
@@ -435,11 +442,19 @@ func (m *appModel) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "ctrl+c":
 		return m, tea.Quit
+	}
+	if m.modal.Visible {
+		return m.handleModalKey(msg)
+	}
+
+	switch msg.String() {
 	case "q":
 		if m.screen == screenReader {
 			return m, m.exitTerminalReader()
 		}
 		return m, tea.Quit
+	case "c":
+		return m, m.toggleTUIImageMode()
 	case "tab":
 		if m.screen == screenReader {
 			return m, nil
@@ -520,8 +535,11 @@ func (m *appModel) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 // handleMouse 处理鼠标事件：点击切换面板焦点、书架选中项、QR 面板按钮及滚轮操作。
 func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+	if m.modal.Visible {
+		return m.handleModalMouse(msg)
+	}
 	if m.screen == screenReader {
-		return m, nil
+		return m.handleTerminalReaderMouse(msg)
 	}
 
 	layout := m.layout()
@@ -547,6 +565,9 @@ func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 				m.syncShelfOffset()
 				m.refreshQRCode()
 				m.refreshStatus()
+				if m.isShelfDoubleClick(idx, time.Now()) {
+					return m, m.activateShelfDoubleClick()
+				}
 				return m, m.syncActiveImageCmd()
 			}
 		}
@@ -577,8 +598,35 @@ func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	return m, m.syncActiveImageCmd()
 }
 
+// isShelfDoubleClick 判断本次书架点击是否构成双击；单击仍会立即更新选中项。
+func (m *appModel) isShelfDoubleClick(index int, now time.Time) bool {
+	elapsed := now.Sub(m.lastShelfClickAt)
+	doubleClick := index == m.lastShelfClickIndex && !m.lastShelfClickAt.IsZero() && elapsed >= 0 && elapsed <= doubleClickGap
+	m.lastShelfClickIndex = index
+	m.lastShelfClickAt = now
+	return doubleClick
+}
+
+// activateShelfDoubleClick 双击书籍时按当前打开方式执行；双击分组/返回项仍沿用原激活逻辑。
+func (m *appModel) activateShelfDoubleClick() tea.Cmd {
+	item := m.currentItem()
+	if item == nil {
+		return nil
+	}
+	if item.Kind != shelfItemBook {
+		return m.activateSelectedItem()
+	}
+	if m.qrButtonFocus == qrActionOpenBrowser {
+		return m.executeQRButton()
+	}
+	return m.startTerminalReader(item)
+}
+
 // View 实现 tea.Model 接口，根据当前终端尺寸渲染全部面板并拼接为最终输出字符串。
 func (m *appModel) View() string {
+	if m.modal.Visible {
+		return m.renderModalView()
+	}
 	if m.screen == screenReader {
 		return m.renderTerminalReaderView()
 	}

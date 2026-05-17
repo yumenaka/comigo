@@ -300,6 +300,17 @@ func TestSplitRenderedImageLinesSeparatesKittySetup(t *testing.T) {
 	}
 }
 
+func TestCenterStyledLineKeepsKittyPlaceholderEncoding(t *testing.T) {
+	placeholderRow := "\x1b[38;2;0;0;1m" + termimg.CreatePlaceholder(0, 0, 0) + strings.Repeat(termimg.PLACEHOLDER_CHAR, 2) + "\x1b[39m"
+	centered := centerStyledLine(placeholderRow, 7)
+	if !strings.Contains(centered, termimg.CreatePlaceholder(0, 0, 0)+strings.Repeat(termimg.PLACEHOLDER_CHAR, 2)) {
+		t.Fatalf("centered placeholder should keep row/column encoding, got %q", centered)
+	}
+	if got := xansi.StringWidth(centered); got != 7 {
+		t.Fatalf("centered placeholder width = %d, want 7", got)
+	}
+}
+
 func TestSplitRenderedImageLinesKeepsAnsiInline(t *testing.T) {
 	setup, lines := splitRenderedImageLines("a\nb", termimg.Halfblocks)
 	if setup != "" {
@@ -547,6 +558,154 @@ func TestShelfEnterStartsTerminalReader(t *testing.T) {
 	}
 }
 
+func TestShelfSingleClickOnlySelectsItem(t *testing.T) {
+	model := &appModel{
+		width:         120,
+		height:        40,
+		focus:         focusShelf,
+		coverProtocol: termimg.Halfblocks,
+		items: []shelfItem{
+			{Kind: shelfItemBook, Title: "Book 1", BookID: "book1", Selectable: true},
+			{Kind: shelfItemBook, Title: "Book 2", BookID: "book2", Selectable: true},
+		},
+		selected:      0,
+		shelfRowToID:  make(map[int]int),
+		qrButtonFocus: qrActionTerminalReader,
+	}
+	layout := model.layout()
+	_ = model.renderShelfContent(layout.shelf)
+
+	_, _ = model.handleMouse(tea.MouseMsg{
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+		X:      layout.shelf.x + 2,
+		Y:      layout.shelf.y + 1 + 3,
+	})
+	if model.selected != 1 {
+		t.Fatalf("single click selected = %d, want 1", model.selected)
+	}
+	if model.screen != screenShelf {
+		t.Fatalf("single click screen = %v, want shelf", model.screen)
+	}
+}
+
+func TestShelfDoubleClickStartsTerminalReaderByDefault(t *testing.T) {
+	restoreModelStore(t, &tuiTestStore{books: map[string]*modelpkg.Book{
+		"book2": {
+			BookInfo:  modelpkg.BookInfo{BookID: "book2", Title: "Book 2", Type: modelpkg.TypeDir},
+			PageInfos: modelpkg.PageInfos{{Name: "1.jpg"}},
+		},
+	}})
+	model := &appModel{
+		width:               120,
+		height:              40,
+		focus:               focusShelf,
+		readerProtocol:      termimg.Halfblocks,
+		terminalReaderCache: make(map[string]terminalReaderState),
+		items: []shelfItem{
+			{Kind: shelfItemBook, Title: "Book 1", BookID: "book1", Selectable: true},
+			{Kind: shelfItemBook, Title: "Book 2", BookID: "book2", Selectable: true},
+		},
+		selected:            0,
+		shelfRowToID:        make(map[int]int),
+		qrButtonFocus:       qrActionTerminalReader,
+		lastShelfClickIndex: 1,
+		lastShelfClickAt:    time.Now(),
+	}
+	layout := model.layout()
+	_ = model.renderShelfContent(layout.shelf)
+
+	_, cmd := model.handleMouse(tea.MouseMsg{
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+		X:      layout.shelf.x + 2,
+		Y:      layout.shelf.y + 1 + 3,
+	})
+	if model.screen != screenReader {
+		t.Fatalf("double click screen = %v, want terminal reader", model.screen)
+	}
+	if model.terminalReader.BookID != "book2" {
+		t.Fatalf("terminalReader book = %q, want book2", model.terminalReader.BookID)
+	}
+	if cmd == nil {
+		t.Fatal("double click terminal reader should request page render")
+	}
+}
+
+func TestShelfDoubleClickUsesCurrentBrowserAction(t *testing.T) {
+	model := &appModel{
+		width:  120,
+		height: 40,
+		focus:  focusShelf,
+		items: []shelfItem{{
+			Kind:       shelfItemBook,
+			Title:      "Book 1",
+			BookID:     "book1",
+			TargetURL:  "http://127.0.0.1:1234/reader/book1",
+			Selectable: true,
+		}},
+		shelfRowToID:        make(map[int]int),
+		qrButtonFocus:       qrActionOpenBrowser,
+		lastShelfClickIndex: 0,
+		lastShelfClickAt:    time.Now(),
+	}
+	layout := model.layout()
+	_ = model.renderShelfContent(layout.shelf)
+
+	_, cmd := model.handleMouse(tea.MouseMsg{
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+		X:      layout.shelf.x + 2,
+		Y:      layout.shelf.y + 1 + 2,
+	})
+	if model.screen != screenShelf {
+		t.Fatalf("browser double click should stay on shelf before command runs, screen=%v", model.screen)
+	}
+	if cmd == nil {
+		t.Fatal("browser double click should request open browser command")
+	}
+	if !strings.Contains(model.actionMsg, "http://127.0.0.1:1234/reader/book1") {
+		t.Fatalf("action message = %q, want opened target URL", model.actionMsg)
+	}
+}
+
+func TestStartTerminalReaderClearsGhosttyCoverOverlay(t *testing.T) {
+	t.Setenv("TERM_PROGRAM", "ghostty")
+	t.Setenv("TERM", "xterm-ghostty")
+	restoreModelStore(t, &tuiTestStore{books: map[string]*modelpkg.Book{
+		"book1": {
+			BookInfo:  modelpkg.BookInfo{BookID: "book1", Title: "Book 1", Type: modelpkg.TypeDir},
+			PageInfos: modelpkg.PageInfos{{Name: "1.jpg"}},
+		},
+	}})
+	model := &appModel{
+		width:               100,
+		height:              40,
+		focus:               focusShelf,
+		coverProtocol:       termimg.Kitty,
+		readerProtocol:      termimg.Halfblocks,
+		terminalReaderCache: make(map[string]terminalReaderState),
+		items: []shelfItem{{
+			Kind:       shelfItemBook,
+			Title:      "Book 1",
+			BookID:     "book1",
+			Selectable: true,
+		}},
+	}
+
+	_, _ = model.handleKey(tea.KeyMsg{Type: tea.KeyEnter})
+	if !model.clearKittyImagesNextFrame {
+		t.Fatal("entering reader from Ghostty cover overlay should request Kitty image clear")
+	}
+	prefix := model.renderTerminalReaderClearPrefix()
+	if !strings.Contains(prefix, "a=d,d=A") {
+		t.Fatalf("clear prefix should delete Kitty images, got %q", prefix)
+	}
+	if model.clearKittyImagesNextFrame {
+		t.Fatal("clear flag should be consumed after rendering prefix")
+	}
+}
+
 func TestQRTerminalReaderRequiresBookItem(t *testing.T) {
 	model := &appModel{
 		qrButtonFocus: qrActionTerminalReader,
@@ -587,6 +746,9 @@ func TestTerminalReaderQReturnsToShelf(t *testing.T) {
 }
 
 func TestTerminalReaderKeyBindings(t *testing.T) {
+	if defaultReaderAutoInterval != 10 {
+		t.Fatalf("default auto interval = %d, want 10", defaultReaderAutoInterval)
+	}
 	model := &appModel{
 		screen:             screenReader,
 		readerAutoInterval: defaultReaderAutoInterval,
@@ -606,6 +768,11 @@ func TestTerminalReaderKeyBindings(t *testing.T) {
 	if model.terminalReader.PageIndex != 1 {
 		t.Fatalf("left key page = %d, want 1", model.terminalReader.PageIndex)
 	}
+	_, _ = model.handleTerminalReaderKey(tea.KeyMsg{Type: tea.KeyDelete})
+	if model.screen != screenShelf {
+		t.Fatalf("delete key screen = %v, want shelf", model.screen)
+	}
+	model.screen = screenReader
 	_, _ = model.handleTerminalReaderKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'f'}})
 	if !model.terminalReaderFullscreen {
 		t.Fatal("f should enable fullscreen")
@@ -617,6 +784,141 @@ func TestTerminalReaderKeyBindings(t *testing.T) {
 	_, _ = model.handleTerminalReaderKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'+'}})
 	if model.readerAutoInterval != defaultReaderAutoInterval+1 {
 		t.Fatalf("auto interval = %d, want %d", model.readerAutoInterval, defaultReaderAutoInterval+1)
+	}
+}
+
+func TestTerminalReaderMouseClickPagesAndTitleBack(t *testing.T) {
+	model := &appModel{
+		screen: screenReader,
+		width:  80,
+		height: 24,
+		terminalReader: terminalReaderState{
+			BookID:    "book1",
+			Title:     "Book 1",
+			PageIndex: 1,
+			PageCount: 3,
+		},
+	}
+
+	_, _ = model.handleMouse(tea.MouseMsg{Action: tea.MouseActionPress, Button: tea.MouseButtonLeft, X: 60, Y: 12})
+	if model.terminalReader.PageIndex != 2 {
+		t.Fatalf("right half click page = %d, want 2", model.terminalReader.PageIndex)
+	}
+	_, _ = model.handleMouse(tea.MouseMsg{Action: tea.MouseActionPress, Button: tea.MouseButtonLeft, X: 10, Y: 12})
+	if model.terminalReader.PageIndex != 1 {
+		t.Fatalf("left half click page = %d, want 1", model.terminalReader.PageIndex)
+	}
+	_, _ = model.handleMouse(tea.MouseMsg{Action: tea.MouseActionPress, Button: tea.MouseButtonLeft, X: 0, Y: 0})
+	if model.screen != screenShelf {
+		t.Fatalf("title click screen = %v, want shelf", model.screen)
+	}
+}
+
+func TestTerminalReaderMouseIgnoresBarsOutsideTitle(t *testing.T) {
+	model := &appModel{
+		screen: screenReader,
+		width:  80,
+		height: 24,
+		terminalReader: terminalReaderState{
+			BookID:    "book1",
+			Title:     "Book 1",
+			PageIndex: 1,
+			PageCount: 3,
+		},
+	}
+
+	_, _ = model.handleMouse(tea.MouseMsg{Action: tea.MouseActionPress, Button: tea.MouseButtonLeft, X: 79, Y: 0})
+	if model.screen != screenReader || model.terminalReader.PageIndex != 1 {
+		t.Fatalf("top bar outside title should be ignored, screen=%v page=%d", model.screen, model.terminalReader.PageIndex)
+	}
+	_, _ = model.handleMouse(tea.MouseMsg{Action: tea.MouseActionPress, Button: tea.MouseButtonLeft, X: 60, Y: 23})
+	if model.terminalReader.PageIndex != 1 {
+		t.Fatalf("footer click should not turn page, page=%d", model.terminalReader.PageIndex)
+	}
+}
+
+func TestGlobalCTogglesImageAndANSIMode(t *testing.T) {
+	t.Setenv("COMIGO_TUI_IMAGE", "auto")
+	t.Setenv("TERM_PROGRAM", "iTerm.app")
+	t.Setenv("TERM", "xterm-256color")
+	t.Setenv("LC_TERMINAL", "")
+	t.Setenv("ITERM_SESSION_ID", "")
+	t.Setenv("GHOSTTY_RESOURCES_DIR", "")
+	t.Setenv("WEZTERM_EXECUTABLE", "")
+	t.Setenv("WEZTERM_PANE", "")
+	t.Setenv("KITTY_WINDOW_ID", "")
+	model := &appModel{
+		coverProtocol:       termimg.ITerm2,
+		readerProtocol:      termimg.ITerm2,
+		terminalReaderCache: make(map[string]terminalReaderState),
+	}
+
+	_, _ = model.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'c'}})
+	if model.coverProtocol != termimg.Halfblocks || model.readerProtocol != termimg.Halfblocks {
+		t.Fatalf("c should switch to ANSI mode, cover=%v reader=%v", model.coverProtocol, model.readerProtocol)
+	}
+
+	_, _ = model.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'c'}})
+	if model.coverProtocol != termimg.ITerm2 || model.readerProtocol != termimg.ITerm2 {
+		t.Fatalf("c should switch back to native image mode, cover=%v reader=%v", model.coverProtocol, model.readerProtocol)
+	}
+	if model.modal.Visible {
+		t.Fatal("supported terminal should not show incompatible modal")
+	}
+}
+
+func TestGlobalCShowsModalWhenImageModeUnsupported(t *testing.T) {
+	t.Setenv("COMIGO_TUI_IMAGE", "off")
+	model := &appModel{
+		width:          80,
+		height:         24,
+		coverProtocol:  termimg.Halfblocks,
+		readerProtocol: termimg.Halfblocks,
+	}
+
+	_, _ = model.handleKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'c'}})
+	if !model.modal.Visible {
+		t.Fatal("unsupported image mode should show modal")
+	}
+	if !strings.Contains(model.modal.Message, "当前终端不兼容") {
+		t.Fatalf("modal message = %q, want incompatible terminal hint", model.modal.Message)
+	}
+}
+
+func TestModalClosesOnEnterAndMouseOK(t *testing.T) {
+	model := &appModel{width: 80, height: 24}
+	model.showModal("提示", "消息")
+	if !strings.Contains(model.View(), "OK") || model.modal.OKRect.w == 0 {
+		t.Fatalf("modal view should render OK button, rect=%+v", model.modal.OKRect)
+	}
+	_, _ = model.handleKey(tea.KeyMsg{Type: tea.KeyEnter})
+	if model.modal.Visible {
+		t.Fatal("enter should close modal")
+	}
+
+	model.showModal("提示", "消息")
+	_ = model.View()
+	_, _ = model.handleMouse(tea.MouseMsg{
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+		X:      model.modal.OKRect.x,
+		Y:      model.modal.OKRect.y,
+	})
+	if model.modal.Visible {
+		t.Fatal("clicking OK should close modal")
+	}
+}
+
+func TestOpenBrowserFailureShowsModal(t *testing.T) {
+	model := &appModel{logBuffer: NewLogBuffer(), shelfRowToID: make(map[int]int)}
+
+	updated, _ := model.Update(openURLResultMsg{url: "http://127.0.0.1:1234", err: errors.New("no browser")})
+	got := updated.(*appModel)
+	if !got.modal.Visible {
+		t.Fatal("browser failure should show modal")
+	}
+	if !strings.Contains(got.modal.Message, "打开浏览器失败") {
+		t.Fatalf("modal message = %q, want browser failure", got.modal.Message)
 	}
 }
 
@@ -642,7 +944,7 @@ func TestReaderAutoFlipStopsAtLastPage(t *testing.T) {
 }
 
 func TestTerminalReaderFooterKeepsRightStatusVisible(t *testing.T) {
-	right := "2026-05-17 15:43:09  Comigo 1.2.3"
+	right := "Comigo 1.2.3"
 	line := formatThreePartStatusLine("very long shortcut hint that should be shortened first", "1/33", right, 80)
 	if !strings.Contains(line, right) {
 		t.Fatalf("footer should keep right status visible, got %q", line)
@@ -655,13 +957,10 @@ func TestTerminalReaderFooterKeepsRightStatusVisible(t *testing.T) {
 	}
 }
 
-func TestTerminalReaderVersionLineUsesMinutePrecision(t *testing.T) {
-	line := terminalReaderVersionLineAt(time.Date(2026, 5, 17, 15, 43, 9, 0, time.Local))
-	if !strings.Contains(line, "2026-05-17 15:43") {
-		t.Fatalf("terminal reader version line should include minute precision time, got %q", line)
-	}
-	if strings.Contains(line, "15:43:09") {
-		t.Fatalf("terminal reader version line should not include seconds, got %q", line)
+func TestTerminalReaderVersionLineOmitsClock(t *testing.T) {
+	line := terminalReaderVersionLine()
+	if want := "Comigo " + config.GetVersion(); line != want {
+		t.Fatalf("terminal reader version line = %q, want %q", line, want)
 	}
 }
 
@@ -673,7 +972,7 @@ func TestTerminalReaderLoadingAppearsInTitleBar(t *testing.T) {
 		},
 	}
 	title := model.renderTerminalReaderTitle(24)
-	if !strings.HasPrefix(title, "Book") {
+	if !strings.HasPrefix(title, readerTitleBackPrefix+"Book") {
 		t.Fatalf("title line should keep book title on the left, got %q", title)
 	}
 	if !strings.HasSuffix(title, "正在加载页面...") {
@@ -689,6 +988,26 @@ func TestTerminalReaderLoadingAppearsInTitleBar(t *testing.T) {
 	imageLines = model.renderTerminalReaderImageLines(terminalReaderImageArea{w: 24, h: 3})
 	if strings.TrimSpace(strings.Join(imageLines, "")) != "" {
 		t.Fatalf("fullscreen loading state should not render loading text, got %#v", imageLines)
+	}
+}
+
+func TestTerminalReaderPageTurnDoesNotClearBeforeNewKittyPage(t *testing.T) {
+	model := &appModel{
+		readerProtocol:            termimg.Kitty,
+		clearKittyImagesNextFrame: false,
+		terminalReader: terminalReaderState{
+			BookID:    "book1",
+			Protocol:  termimg.Kitty,
+			PageIndex: 0,
+			PageCount: 3,
+		},
+	}
+
+	if !model.moveTerminalReaderPage(1) {
+		t.Fatal("page turn should succeed")
+	}
+	if model.clearKittyImagesNextFrame {
+		t.Fatal("page turn should not clear Kitty images until the new page is ready")
 	}
 }
 
