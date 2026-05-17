@@ -62,6 +62,15 @@ type terminalReaderImageArea struct {
 // detectTUIReaderImageProtocol 是终端阅读专用协议选择。
 // WezTerm 避开已验证不稳定的 Kitty 路径，改走当前问题最少的 iTerm2 inline image 协议。
 func detectTUIReaderImageProtocol() tuiImageProtocol {
+	return detectTUIReaderImageProtocolWithKittyAuto(false)
+}
+
+// detectNativeTUIReaderImageProtocol 用于手动切换图片模式；自动启动仍让 Kitty 系终端默认走 ANSI。
+func detectNativeTUIReaderImageProtocol() tuiImageProtocol {
+	return detectTUIReaderImageProtocolWithKittyAuto(true)
+}
+
+func detectTUIReaderImageProtocolWithKittyAuto(allowKittyAuto bool) tuiImageProtocol {
 	switch strings.ToLower(strings.TrimSpace(os.Getenv("COMIGO_TUI_IMAGE"))) {
 	case "", "auto":
 		if isITerm2Terminal() {
@@ -71,10 +80,14 @@ func detectTUIReaderImageProtocol() tuiImageProtocol {
 			return termimg.ITerm2
 		}
 		if isKittyTerminal() || isGhosttyTerminal() {
-			return termimg.Kitty
+			// Kitty 系终端默认走 ANSI；用户按 c 切换图片模式时再启用 Kitty 原生路径。
+			if allowKittyAuto {
+				return termimg.Kitty
+			}
+			return termimg.Halfblocks
 		}
 		protocol := termimg.DetectProtocol()
-		if protocol == termimg.Kitty || protocol == termimg.ITerm2 {
+		if protocol == termimg.ITerm2 || (allowKittyAuto && protocol == termimg.Kitty) {
 			return protocol
 		}
 		return termimg.Halfblocks

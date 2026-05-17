@@ -58,23 +58,34 @@ type coverPreviewMsg struct {
 // detectTUIImageProtocol 自动选择 TUI 封面预览协议。
 // COMIGO_TUI_IMAGE 可强制覆盖，用于排查不同终端协议的显示差异。
 func detectTUIImageProtocol() tuiImageProtocol {
+	return detectTUIImageProtocolWithKittyAuto(false)
+}
+
+// detectNativeTUIImageProtocol 用于手动切换图片模式；自动启动仍让 Kitty 系终端默认走 ANSI。
+func detectNativeTUIImageProtocol() tuiImageProtocol {
+	return detectTUIImageProtocolWithKittyAuto(true)
+}
+
+func detectTUIImageProtocolWithKittyAuto(allowKittyAuto bool) tuiImageProtocol {
 	switch strings.ToLower(strings.TrimSpace(os.Getenv("COMIGO_TUI_IMAGE"))) {
 	case "", "auto":
 		// iTerm2 的环境变量比通用检测更稳定，优先识别，避免误走 ANSI 回退。
 		if isITerm2Terminal() {
 			return termimg.ITerm2
 		}
-		if isGhosttyTerminal() {
-			// Ghostty 预览区仍使用 Kitty 协议，但后续渲染改走 overlay，避开 placeholder 裁切。
-			return termimg.Kitty
+		if isKittyTerminal() || isGhosttyTerminal() {
+			// Kitty 系终端默认走 ANSI，避免原生协议的残留/错位；手动切换时仍允许 Kitty。
+			if allowKittyAuto {
+				return termimg.Kitty
+			}
+			return termimg.Halfblocks
 		}
 		if isWezTermTerminal() {
 			// WezTerm 的 Kitty/placeholder 路径在预览区仍不稳定，改用实测问题更少的 iTerm2 inline image 协议。
 			return termimg.ITerm2
 		}
 		protocol := termimg.DetectProtocol()
-		// Kitty 与 iTerm2 保留原生图像能力；其它图像层协议默认回退 halfblocks，降低残留风险。
-		if protocol == termimg.Kitty || protocol == termimg.ITerm2 {
+		if protocol == termimg.ITerm2 || (allowKittyAuto && protocol == termimg.Kitty) {
 			return protocol
 		}
 		return termimg.Halfblocks

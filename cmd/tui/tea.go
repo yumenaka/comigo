@@ -291,6 +291,11 @@ func Run() error {
 		}
 	}
 
+	if shouldBypassTUI(os.Args) {
+		runWithoutTUI()
+		return nil
+	}
+
 	if !term.IsTerminal(int(os.Stdout.Fd())) {
 		runWithoutTUI()
 		return nil
@@ -327,6 +332,35 @@ func Run() error {
 	return nil
 }
 
+// shouldBypassTUI 在 Cobra 正式解析前识别 --no-tui/-n。
+// TUI 会先于 cmd.Execute() 创建，因此这里必须提前判断一次启动入口。
+func shouldBypassTUI(args []string) bool {
+	bypass := false
+	for _, arg := range args[1:] {
+		if arg == "--" {
+			break
+		}
+		if arg == "--no-tui" || arg == "-n" {
+			bypass = true
+			continue
+		}
+		if strings.HasPrefix(arg, "--no-tui=") {
+			value, err := strconv.ParseBool(strings.TrimPrefix(arg, "--no-tui="))
+			if err == nil {
+				bypass = value
+			}
+			continue
+		}
+		if strings.HasPrefix(arg, "-n=") {
+			value, err := strconv.ParseBool(strings.TrimPrefix(arg, "-n="))
+			if err == nil {
+				bypass = value
+			}
+		}
+	}
+	return bypass
+}
+
 // runWithoutTUI 在非终端环境下（如管道、重定向）退回普通服务模式启动。
 func runWithoutTUI() {
 	cmd.Execute()
@@ -339,6 +373,9 @@ func runWithoutTUI() {
 	cmd.ScanStore()
 	cmd.SaveMetadata()
 	config.StartOrStopAutoRescan()
+	// 非 TUI 模式没有右侧 QRCode 面板，需要在命令行最后打印阅读链接和二维码。
+	cmd.ShowQRCode()
+	cmd.OpenReaderBrowserIfNeeded()
 	cmd.SetShutdownHandler()
 }
 

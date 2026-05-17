@@ -12,7 +12,7 @@ services:
     image: yumenaka/comigo:latest
     container_name: comigo
     restart: unless-stopped
-    command: ["/app/comigo", "--base-path", "/nginx_test", "/data"]
+    command: ["/app/comigo", "--no-tui", "--base-path", "/nginx_test", "/data"]
     ports:
       - "1234:1234"
     environment:

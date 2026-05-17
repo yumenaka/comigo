@@ -139,6 +139,31 @@ func TestLogContentRendersBottomStatus(t *testing.T) {
 	}
 }
 
+func TestShouldBypassTUI(t *testing.T) {
+	tests := []struct {
+		name string
+		args []string
+		want bool
+	}{
+		{name: "long flag", args: []string{"comigo", "--no-tui"}, want: true},
+		{name: "short flag", args: []string{"comigo", "-n"}, want: true},
+		{name: "long true", args: []string{"comigo", "--no-tui=true"}, want: true},
+		{name: "long false", args: []string{"comigo", "--no-tui=false"}, want: false},
+		{name: "short false", args: []string{"comigo", "-n=false"}, want: false},
+		{name: "last value wins", args: []string{"comigo", "--no-tui=false", "-n"}, want: true},
+		{name: "after separator", args: []string{"comigo", "--", "-n"}, want: false},
+		{name: "absent", args: []string{"comigo", "--open-browser"}, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shouldBypassTUI(tt.args); got != tt.want {
+				t.Fatalf("shouldBypassTUI(%v) = %v, want %v", tt.args, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestQRCodeContentDoesNotInsertBlankAroundQRCode(t *testing.T) {
 	model := &appModel{
 		qrLines:         []string{"QR-A", "QR-B"},
@@ -183,6 +208,11 @@ func TestDetectTUIImageProtocolAllowsEnvOverride(t *testing.T) {
 		t.Fatalf("detectTUIImageProtocol() = %v, want Halfblocks", got)
 	}
 
+	t.Setenv("COMIGO_TUI_IMAGE", "kitty")
+	if got := detectTUIImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("detectTUIImageProtocol() = %v, want Kitty", got)
+	}
+
 	t.Setenv("COMIGO_TUI_IMAGE", "off")
 	if got := detectTUIImageProtocol(); got != termimg.Unsupported {
 		t.Fatalf("detectTUIImageProtocol() = %v, want Unsupported", got)
@@ -198,8 +228,11 @@ func TestDetectTUIImageProtocolUsesTerminalSpecificProtocols(t *testing.T) {
 	t.Setenv("GHOSTTY_RESOURCES_DIR", "")
 	t.Setenv("WEZTERM_EXECUTABLE", "")
 	t.Setenv("WEZTERM_PANE", "")
-	if got := detectTUIImageProtocol(); got != termimg.Kitty {
-		t.Fatalf("detectTUIImageProtocol() = %v, want Kitty for Ghostty auto mode", got)
+	if got := detectTUIImageProtocol(); got != termimg.Halfblocks {
+		t.Fatalf("detectTUIImageProtocol() = %v, want Halfblocks for Ghostty auto mode", got)
+	}
+	if got := detectNativeTUIImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("detectNativeTUIImageProtocol() = %v, want Kitty for manual Ghostty image mode", got)
 	}
 
 	t.Setenv("TERM", "xterm-256color")
@@ -1113,7 +1146,7 @@ func TestTopRightPreviewTextPlacesLoadingAtTopRight(t *testing.T) {
 	}
 }
 
-func TestReaderProtocolUsesKittyForGhosttyAndPreview(t *testing.T) {
+func TestReaderProtocolDefaultsToANSIButAllowsKittyForGhosttyAndPreview(t *testing.T) {
 	t.Setenv("COMIGO_TUI_IMAGE", "auto")
 	t.Setenv("TERM_PROGRAM", "ghostty")
 	t.Setenv("TERM", "xterm-ghostty")
@@ -1122,15 +1155,21 @@ func TestReaderProtocolUsesKittyForGhosttyAndPreview(t *testing.T) {
 	t.Setenv("WEZTERM_EXECUTABLE", "")
 	t.Setenv("WEZTERM_PANE", "")
 
-	if got := detectTUIReaderImageProtocol(); got != termimg.Kitty {
-		t.Fatalf("reader protocol = %v, want Kitty for Ghostty", got)
+	if got := detectTUIReaderImageProtocol(); got != termimg.Halfblocks {
+		t.Fatalf("reader protocol = %v, want Halfblocks for Ghostty auto mode", got)
 	}
-	if got := detectTUIImageProtocol(); got != termimg.Kitty {
-		t.Fatalf("preview protocol = %v, want Kitty for Ghostty preview", got)
+	if got := detectTUIImageProtocol(); got != termimg.Halfblocks {
+		t.Fatalf("preview protocol = %v, want Halfblocks for Ghostty auto mode", got)
+	}
+	if got := detectNativeTUIReaderImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("native reader protocol = %v, want Kitty for manual Ghostty image mode", got)
+	}
+	if got := detectNativeTUIImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("native preview protocol = %v, want Kitty for manual Ghostty image mode", got)
 	}
 }
 
-func TestReaderProtocolUsesKittyForKittyTerminal(t *testing.T) {
+func TestReaderProtocolDefaultsToANSIForKittyTerminal(t *testing.T) {
 	t.Setenv("COMIGO_TUI_IMAGE", "auto")
 	t.Setenv("TERM", "xterm-kitty")
 	t.Setenv("TERM_PROGRAM", "")
@@ -1140,8 +1179,17 @@ func TestReaderProtocolUsesKittyForKittyTerminal(t *testing.T) {
 	t.Setenv("GHOSTTY_RESOURCES_DIR", "")
 	t.Setenv("WEZTERM_PANE", "")
 
-	if got := detectTUIReaderImageProtocol(); got != termimg.Kitty {
-		t.Fatalf("reader protocol = %v, want Kitty for Kitty terminal", got)
+	if got := detectTUIReaderImageProtocol(); got != termimg.Halfblocks {
+		t.Fatalf("reader protocol = %v, want Halfblocks for Kitty auto mode", got)
+	}
+	if got := detectTUIImageProtocol(); got != termimg.Halfblocks {
+		t.Fatalf("preview protocol = %v, want Halfblocks for Kitty auto mode", got)
+	}
+	if got := detectNativeTUIReaderImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("native reader protocol = %v, want Kitty for manual Kitty image mode", got)
+	}
+	if got := detectNativeTUIImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("native preview protocol = %v, want Kitty for manual Kitty image mode", got)
 	}
 }
 

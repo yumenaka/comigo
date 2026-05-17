@@ -13,8 +13,8 @@ import (
 func (m *appModel) toggleTUIImageMode() tea.Cmd {
 	wasKitty := m.coverProtocol == termimg.Kitty || m.readerProtocol == termimg.Kitty
 	if m.isANSIImageMode() {
-		coverProtocol := detectTUIImageProtocol()
-		readerProtocol := detectTUIReaderImageProtocol()
+		coverProtocol := detectNativeTUIImageProtocol()
+		readerProtocol := detectNativeTUIReaderImageProtocol()
 		if !isNativeTUIImageProtocol(coverProtocol) || !isNativeTUIImageProtocol(readerProtocol) {
 			m.showModal(locale.GetString("tui_modal_title_notice"), locale.GetString("tui_image_mode_incompatible"))
 			return nil

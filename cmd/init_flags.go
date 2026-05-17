@@ -91,6 +91,9 @@ func InitFlags() {
 	RootCmd.PersistentFlags().BoolVarP(&cfg.OpenBrowser, "open-browser", "o", false, locale.GetString("open_browser"))
 	runtimeViper.BindPFlag("OpenBrowser", RootCmd.PersistentFlags().Lookup("open-browser"))
 
+	// 不启动 TUI（不绑定 viper，避免配置文件或环境变量影响默认交互入口）
+	RootCmd.PersistentFlags().BoolVarP(&cfg.NoTUI, "no-tui", "n", false, locale.GetString("no_tui"))
+
 	// 不对局域网开放
 	RootCmd.PersistentFlags().BoolVar(&cfg.DisableLAN, "local", false, locale.GetString("disable_lan"))
 	runtimeViper.BindPFlag("DisableLAN", RootCmd.PersistentFlags().Lookup("local"))
@@ -255,9 +258,13 @@ func SetByExecutableFilename() {
 	filenameLower := strings.ToLower(filename)
 	cfg := config.GetCfg()
 	// Windows 默认打开浏览器
-	if runtime.GOOS == "windows" || filenameLower == "comigo" {
+	if runtime.GOOS == "windows" {
 		cfg.OpenBrowser = true
 	}
+	// 旧逻辑：文件名为 comigo 时强制打开浏览器；Docker 也使用该文件名，容易误触发。
+	// if filenameLower == "comigo" {
+	// 	cfg.OpenBrowser = true
+	// }
 	// 打开浏览器
 	if strings.Contains(filenameLower, "open-browser") {
 		cfg.OpenBrowser = true

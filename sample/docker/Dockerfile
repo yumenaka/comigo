@@ -127,5 +127,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:${COMIGO_PORT}/ || exit 1
 
 # 启动命令
-# 默认扫描 /data 目录
-CMD ["/app/comigo", "/data"]
+# Docker 没有可交互终端，默认禁用 TUI 并扫描 /data 目录。
+CMD ["/app/comigo", "--no-tui", "/data"]
