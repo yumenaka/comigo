@@ -39,19 +39,11 @@ func (s *BookInfos) SortBooks(sortBy string) {
 		}
 	case "modify_time": // 根据修改时间排序 从新到旧
 		lessFunc = func(i, j int) bool {
-			// if (*s)[i].Type == TypeDir || (*s)[j].Type == TypeDir {
-			//	logger.Info("!!!!" + (*s)[i].Title + "!!!modify_time:" + (*s)[i].Modified.String())
-			//	logger.Info("!!!!" + (*s)[j].Title + "!!!modify_time:" + (*s)[j].Modified.String())
-			// }
 			return (*s)[i].Modified.After((*s)[j].Modified)
 		}
 	case "last_read": // 根据最后阅读时间排序 从新到旧。没有阅读记录的书籍按照修改时间排序
 
 		lessFunc = func(i, j int) bool {
-			// if (*s)[i].Type == TypeDir || (*s)[j].Type == TypeDir {
-			//	logger.Info("!!!!" + (*s)[i].Title + "!!!modify_time:" + (*s)[i].Modified.String())
-			//	logger.Info("!!!!" + (*s)[j].Title + "!!!modify_time:" + (*s)[j].Modified.String())
-			// }
 			iBookMarks, iErr := IStore.GetBookMarks((*s)[i].BookID)
 			jBookMarks, jErr := IStore.GetBookMarks((*s)[j].BookID)
 			if (iErr != nil && jErr != nil) || (len(*jBookMarks) == 0 && len(*iBookMarks) == 0) {

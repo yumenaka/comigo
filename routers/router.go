@@ -105,9 +105,6 @@ func SetMiddleware() {
 		Skipper: gzipSkipper,
 	}))
 
-	// 禁止缓存中间件。使用 noCache ，会导强制浏览器每次都重新加载页面。除了测试和调试，一般不启用。
-	// router.Use(noCache())
-
 	// 反向代理中间件。
 	// 反向代理中间件会将请求转发到后端服务器，并将响应返回给客户端。
 	// 以下示例将使用默认的内存存储将应用程序限制为 20 个请求/秒：
@@ -223,15 +220,4 @@ func StartWebServer() error {
 	SetHttpPort()
 	// 监听并启动web服务
 	return StartEcho(engine)
-}
-
-// GetWebServer 获取echo.Echo (实现了 http.Handler 接口)
-func GetWebServer() *echo.Echo {
-	// 设置网页端口
-	SetHttpPort()
-	EmbedStaticFiles()
-	// 设置中间件，绑定资源
-	BindURLs()
-	SetMiddleware()
-	return engine
 }

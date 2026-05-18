@@ -261,10 +261,6 @@ func SetByExecutableFilename() {
 	if runtime.GOOS == "windows" {
 		cfg.OpenBrowser = true
 	}
-	// 旧逻辑：文件名为 comigo 时强制打开浏览器；Docker 也使用该文件名，容易误触发。
-	// if filenameLower == "comigo" {
-	// 	cfg.OpenBrowser = true
-	// }
 	// 打开浏览器
 	if strings.Contains(filenameLower, "open-browser") {
 		cfg.OpenBrowser = true

@@ -54,11 +54,7 @@ func TestViewLeavesRightmostColumnUnused(t *testing.T) {
 		focus:          focusShelf,
 		shelfRowToID:   make(map[int]int),
 		autoFollowLogs: true,
-		status: systemSnapshot{
-			CPUPercent: 10,
-			RAMPercent: 20,
-			StatusText: "running",
-		},
+		status:         systemSnapshot{StatusText: "running"},
 	}
 
 	for lineNumber, line := range strings.Split(model.View(), "\n") {
@@ -87,12 +83,9 @@ func TestWideLayoutPlacesQRCodeTopRightAndPreviewBottomRight(t *testing.T) {
 	if layout.qr.h+layout.cover.h+layoutGap != model.height {
 		t.Fatalf("right column should fill full height: qr=%+v cover=%+v height=%d", layout.qr, layout.cover, model.height)
 	}
-	if layout.info.w != 0 || layout.info.h != 0 {
-		t.Fatalf("info panel should stay hidden: %+v", layout.info)
-	}
 }
 
-func TestMoveFocusSkipsHiddenInfoPanel(t *testing.T) {
+func TestMoveFocusCyclesInteractivePanels(t *testing.T) {
 	model := &appModel{focus: focusShelf}
 
 	model.moveFocus(1)
@@ -391,17 +384,12 @@ func TestPreviewContentShowsOnlyVersionAtBottom(t *testing.T) {
 		}},
 		selected:      0,
 		coverProtocol: termimg.Halfblocks,
-		status: systemSnapshot{
-			CPUPercent: 10,
-			RAMPercent: 20,
-			StatusText: "running",
-			TargetURL:  "http://127.0.0.1:1234/scroll/book1",
-		},
+		status:        systemSnapshot{StatusText: "running"},
 	}
 	lines := model.renderCoverPreviewContent(panelRect{w: 60, h: 28})
 	content := strings.Join(lines, "\n")
-	if strings.Contains(content, "10.0") || strings.Contains(content, protocolName(termimg.Halfblocks)) || strings.Contains(content, model.status.TargetURL) {
-		t.Fatalf("preview content should hide status details, protocol and target URL, got:\n%s", content)
+	if strings.Contains(content, protocolName(termimg.Halfblocks)) {
+		t.Fatalf("preview content should hide protocol details, got:\n%s", content)
 	}
 	if got := strings.TrimSpace(lines[len(lines)-1]); !strings.Contains(got, "Comigo ") {
 		t.Fatalf("bottom line = %q, want Comigo version line", got)
@@ -1130,19 +1118,6 @@ func TestTerminalReaderUsesPlaceholderForKitty(t *testing.T) {
 	}
 	if isTerminalReaderOverlayProtocol(termimg.Halfblocks) {
 		t.Fatal("Halfblocks terminal reader should stay in text mode")
-	}
-}
-
-func TestTopRightPreviewTextPlacesLoadingAtTopRight(t *testing.T) {
-	lines := topRightPreviewText("loading", 10, 3)
-	if len(lines) != 3 {
-		t.Fatalf("line count = %d, want 3", len(lines))
-	}
-	if lines[0] != "   loading" {
-		t.Fatalf("first line = %q, want right aligned loading text", lines[0])
-	}
-	if strings.TrimSpace(lines[1]) != "" || strings.TrimSpace(lines[2]) != "" {
-		t.Fatalf("only first line should contain loading text, got %#v", lines)
 	}
 }
 

@@ -260,17 +260,3 @@ func generateReadURL(book model.BookInfo, lastReadPage int) string {
 	// 其他情况，跳转到阅读页面，类似 /scroll/4cTOjFm?page=1
 	return fmt.Sprintf("$store.global.getReadURL(\"%s\",%d)", book.BookID, lastReadPage)
 }
-
-// getBookCardTarget 根据书籍类型，返回书籍卡片的 target 属性值。似乎有点问题，暂时未使用。
-func getBookCardTarget(book model.BookInfo) string {
-	// 新页面打开
-	if book.Type == model.TypeVideo || book.Type == model.TypeAudio || book.Type == model.TypeUnknownFile {
-		return `_blank`
-	}
-	// 按照用户设置决定
-	if book.Type == model.TypeZip || book.Type == model.TypeCbz || book.Type == model.TypeEpub || book.Type == model.TypeRar || book.Type == model.TypeCbr || book.Type == model.TypeTar {
-		return `$store.shelf.openInNewTab ? '_blank' : '_self'`
-	}
-	// 当前页面打开
-	return `_self`
-}

@@ -67,43 +67,6 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 		>
 			便携网页
 		</a>
-		<!-- 【清除缓存】按钮,暂时注释掉 -->
-		if book != nil &&  false {
-			<button
-				type="button"
-				x-data="{ deleting: false }"
-				@click="
-					if (confirm(i18next.t('confirm_clear_cache'))) {
-						deleting = true;
-						fetch(window.ComiGoPath('/api/book-cache') + '?id=' + encodeURIComponent($store.global.bookID || (window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).split('/').pop()), { method: 'DELETE' })
-							.then(res => res.json())
-							.then(data => {
-								deleting = false;
-								if (typeof window.showToast === 'function') {
-									window.showToast(i18next.t('clear_cache_success'), 'success');
-								} else {
-									alert(i18next.t('clear_cache_success'));
-								}
-							})
-							.catch(err => {
-								deleting = false;
-								console.error('Delete cache error:', err);
-								if (typeof window.showToast === 'function') {
-									window.showToast(i18next.t('clear_cache_failed'), 'error');
-								} else {
-									alert(i18next.t('clear_cache_failed'));
-								}
-							});
-					}
-				"
-				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
-				:title="i18next.t('clear_cache')"
-				:disabled="deleting"
-			>
-				<span x-show="!deleting" x-text="i18next.t('clear_cache')">清除缓存</span>
-				<span x-show="deleting" class="animate-pulse">...</span>
-			</button>
-		}
 	</div>
 }
 

@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-// Go(Echo) 后端实现 SSE 推送 + 一个超简前端（HTML+JS）接收与显示消息，并提供一个 /push 接口用于服务器端主动广播
+// Go(Echo) 后端实现 SSE 推送，用于把后端日志和 UI 通知推送给前端。
 
 // --- 简单的广播中心 ---
 
@@ -72,52 +72,6 @@ func (h *Hub) Broadcast(ev Event) {
 			// 丢弃过慢的客户端，避免阻塞
 		}
 	}
-}
-
-// BroadcastMessage 向所有注册的客户端广播纯文本消息（简化版）
-func (h *Hub) BroadcastMessage(msg string) {
-	h.Broadcast(Event{Data: msg})
-}
-
-// SendToClient 向某一个客户端发送消息
-func (h *Hub) SendToClient(id string, ev Event) {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	if ch, ok := h.clients[id]; ok {
-		select {
-		case ch <- ev:
-		default:
-			// 丢弃过慢的客户端，避免阻塞
-		}
-	}
-}
-
-// ClientCount 返回当前注册的客户端数量
-func (h *Hub) ClientCount() int {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	return len(h.clients)
-}
-
-// ClientIDs 返回当前注册的所有客户端 ID 列表
-func (h *Hub) ClientIDs() []string {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	ids := make([]string, 0, len(h.clients))
-	for id := range h.clients {
-		ids = append(ids, id)
-	}
-	return ids
-}
-
-// Clear 关闭并清空所有客户端连接
-func (h *Hub) Clear() {
-	h.mu.Lock()
-	for id, ch := range h.clients {
-		close(ch)
-		delete(h.clients, id)
-	}
-	h.mu.Unlock()
 }
 
 // --- 辅助函数 ---

@@ -201,40 +201,8 @@ func GetSystemStatus() SystemStatus {
 		MemoryUsedPercent: 0,
 	}
 	populateSystemMetrics(&sys)
-	// // almost every return value is a struct
-	// logger.Infof("Total: %v, Free:%v, UsedPercent:%f%%\n", v.Total, v.Free, v.UsedPercent)
-	// // convert to JSON. String() is also implemented
-	// logger.Infof(v)
-
-	// hostname, err := os.Hostname()
-	// if err == nil {
-	//	logger.Infof(hostname)
-	// }
 	return sys
 }
-
-// // 获取mac地址列表,暂时用不着
-// func GetMacAddrList() (macAddrList []string) {
-//	netInterfaces, err := net.Interfaces()
-//	if err != nil {
-//		logger.Infof(locale.GetString("check_mac_error")+": %v", err)
-//		return macAddrList
-//	}
-//	//for _, netInterface := range netInterfaces {
-//	//	macAddr := netInterface.HardwareAddr.String()
-//	//	if len(macAddr) == 0 {
-//	//		continue
-//	//	}
-//	//	macAddrList = append(macAddrList, macAddr)
-//	//}
-//	for _, netInterface := range netInterfaces {
-//		flags := netInterface.Flags.String()
-//		if strings.Contains(flags, "up") && strings.Contains(flags, "broadcast") {
-//			macAddrList = append(macAddrList, netInterface.HardwareAddr.String())
-//		}
-//	}
-//	return macAddrList
-// }
 
 // ServerStatus 服务器当前状况
 type ServerStatus struct {

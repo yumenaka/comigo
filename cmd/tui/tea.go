@@ -22,7 +22,6 @@ import (
 	"github.com/yumenaka/comigo/config"
 	modelpkg "github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers"
-	wsrouter "github.com/yumenaka/comigo/routers/websocket"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -45,7 +44,6 @@ type focusPanel int
 const (
 	focusShelf  focusPanel = iota // 书架面板
 	focusLog                      // 日志面板
-	focusInfo                     // 信息面板
 	focusQRCode                   // QRCode 面板
 )
 
@@ -117,17 +115,9 @@ type shelfLevel struct {
 	Title  string // 显示名称
 }
 
-// systemSnapshot 系统状态快照，用于信息面板展示
+// systemSnapshot 保存当前仍会渲染到 TUI 的状态文本。
 type systemSnapshot struct {
-	CPUPercent   float64
-	RAMPercent   float64
-	OnlineUsers  int
-	Books        int
-	ServerPort   int
-	ShelfURL     string
-	SelectedText string
-	TargetURL    string
-	StatusText   string
+	StatusText string
 }
 
 // panelRect 表示一个面板在终端中的矩形区域（含边框）
@@ -159,7 +149,6 @@ type layoutState struct {
 	shelf panelRect // 书架面板
 	cover panelRect // 封面预览面板
 	log   panelRect // 日志面板
-	info  panelRect // 信息面板（暂不渲染，保留字段便于后续恢复）
 	qr    panelRect // QRCode 面板
 }
 
@@ -429,9 +418,6 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		if m.isNarrow() && m.focus == focusInfo {
-			m.focus = focusShelf
-		}
 		m.refreshData()
 		return m, m.syncActiveImageCmd()
 	case tickMsg:
@@ -619,8 +605,6 @@ func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 		case tea.MouseButtonWheelDown:
 			m.scrollLogs(2)
 		}
-	case contains(layout.info, msg.X, msg.Y):
-		m.focus = focusInfo
 	case contains(layout.qr, msg.X, msg.Y):
 		m.focus = focusQRCode
 		if msg.Button == tea.MouseButtonLeft {
@@ -714,15 +698,8 @@ func (m *appModel) refreshShelf() {
 	m.currentShelfURL = m.buildCurrentShelfURL()
 }
 
-// refreshStatus 更新系统状态快照（CPU、RAM、在线人数、书籍数等）。
+// refreshStatus 更新当前界面底部需要展示的服务状态。
 func (m *appModel) refreshStatus() {
-	selectedText := locale.GetString("tui_info_none")
-	targetURL := ""
-	if item := m.currentItem(); item != nil {
-		selectedText = item.Title
-		targetURL = item.TargetURL
-	}
-
 	statusText := locale.GetString("tui_status_starting")
 	if m.backendError != "" {
 		statusText = locale.GetString("tui_status_failed")
@@ -733,26 +710,9 @@ func (m *appModel) refreshStatus() {
 		statusText = m.actionMsg
 	}
 
-	bookCount := 0
-	if modelpkg.IStore != nil {
-		bookCount = modelpkg.GetAllBooksNumber()
-	}
-
-	cfg := config.GetCfg()
 	m.status = systemSnapshot{
-		CPUPercent:   0,
-		RAMPercent:   0,
-		OnlineUsers:  wsrouter.ClientCount(),
-		Books:        bookCount,
-		ServerPort:   cfg.Port,
-		ShelfURL:     m.currentShelfURL,
-		SelectedText: selectedText,
-		TargetURL:    targetURL,
-		StatusText:   statusText,
+		StatusText: statusText,
 	}
-	sys := tools.GetSystemStatus()
-	m.status.CPUPercent = sys.CPUUsedPercent
-	m.status.RAMPercent = sys.MemoryUsedPercent
 }
 
 // setActionMsg 统一设置操作提示消息，用于 QR 面板和信息面板展示。
@@ -1234,15 +1194,6 @@ func (m *appModel) executeQRButton() tea.Cmd {
 	}
 }
 
-// toggleReadMode 在卷轴阅读和翻页阅读之间切换，并刷新所有受影响的数据。
-func (m *appModel) toggleReadMode() {
-	if m.readMode == 0 {
-		m.setReadMode(1)
-	} else {
-		m.setReadMode(0)
-	}
-}
-
 // setReadMode 设置 Web 阅读 URL 使用的模式，并刷新书架和二维码。
 func (m *appModel) setReadMode(readMode int) {
 	if readMode != 0 && readMode != 1 {
@@ -1286,7 +1237,7 @@ func (m *appModel) isNarrow() bool {
 	return m.width < narrowThreshold
 }
 
-// moveFocus 在当前可交互面板之间切换；信息栏暂不展示，因此不参与焦点循环。
+// moveFocus 在当前可交互面板之间切换。
 func (m *appModel) moveFocus(delta int) {
 	order := []focusPanel{focusShelf, focusLog, focusQRCode}
 	current := 0
@@ -1309,13 +1260,13 @@ func (m *appModel) renderWidth() int {
 	return max(0, m.width-1)
 }
 
-// layout 计算 TUI 面板矩形布局。宽屏使用 2×2 网格，窄屏使用垂直单栏（隐藏封面预览和信息面板）。
+// layout 计算 TUI 面板矩形布局。宽屏使用 2×2 网格，窄屏使用垂直单栏（隐藏封面预览）。
 func (m *appModel) layout() layoutState {
 	width := m.renderWidth()
 	height := max(0, m.height)
 
 	if m.isNarrow() {
-		// 窄屏单栏：书架(3) / QR(5) / 日志(2)，封面预览和 info 隐藏
+		// 窄屏单栏：书架(3) / QR(5) / 日志(2)，封面预览隐藏。
 		logH := height * 2 / 10
 		shelfH := height * 3 / 10
 		qrH := height - shelfH - logH
@@ -1326,7 +1277,6 @@ func (m *appModel) layout() layoutState {
 			cover: panelRect{},
 			qr:    panelRect{x: 0, y: qrY, w: width, h: qrH},
 			log:   panelRect{x: 0, y: logY, w: width, h: logH},
-			info:  panelRect{},
 		}
 	}
 
@@ -1344,7 +1294,6 @@ func (m *appModel) layout() layoutState {
 		log:   panelRect{x: 0, y: leftTopHeight + layoutGap, w: leftWidth, h: leftBottomHeight},
 		qr:    panelRect{x: leftWidth + layoutGap, y: 0, w: rightWidth, h: rightTopHeight},
 		cover: panelRect{x: leftWidth + layoutGap, y: rightTopHeight + layoutGap, w: rightWidth, h: rightBottomHeight},
-		info:  panelRect{},
 	}
 }
 
@@ -1477,39 +1426,6 @@ func (m *appModel) renderLogContent(rect panelRect) []string {
 	lines = append(lines, padRightWith("", w, "─"))
 	lines = append(lines, clipAndPad(shortenText(m.status.StatusText, w), w))
 	return fitLines(lines, w, height)
-}
-
-// renderInfoContent 渲染信息面板内容：CPU/RAM、在线人数、版本及时间等；服务状态在书架面板底部展示。
-func (m *appModel) renderInfoContent(rect panelRect) []string {
-	w := rect.innerWidth()
-	h := rect.innerHeight()
-	if h <= 0 {
-		return nil
-	}
-	lines := []string{
-		fmt.Sprintf(locale.GetString("tui_info_cpu"), m.status.CPUPercent),
-		fmt.Sprintf(locale.GetString("tui_info_ram"), m.status.RAMPercent),
-		fmt.Sprintf(locale.GetString("tui_info_online_users"), m.status.OnlineUsers),
-		fmt.Sprintf(locale.GetString("tui_info_books_total"), m.status.Books),
-		fmt.Sprintf(locale.GetString("tui_info_server_port"), m.status.ServerPort),
-		locale.GetString("tui_info_shelf_url"),
-		m.status.ShelfURL,
-		fmt.Sprintf(locale.GetString("tui_info_selected"), m.status.SelectedText),
-	}
-	if m.status.TargetURL != "" {
-		lines = append(lines, locale.GetString("tui_info_target_url"), m.status.TargetURL)
-	}
-
-	versionLine := time.Now().Format("2006-01-02 15:04:05") + "  Comigo " + config.GetVersion()
-	vw := runewidth.StringWidth(versionLine)
-	if vw < w {
-		versionLine = strings.Repeat(" ", w-vw) + versionLine
-	}
-	if h == 1 {
-		return []string{clipAndPad(versionLine, w)}
-	}
-	body := fitLines(lines, w, h-1)
-	return append(body, clipAndPad(versionLine, w))
 }
 
 // renderQRCodeContent 渲染 QRCode 面板内容：选中项 URL、二维码、阅读模式和操作按钮。
@@ -1815,42 +1731,9 @@ func padRightWith(text string, width int, pad string) string {
 	return text + strings.Repeat(pad, count) + strings.Repeat(" ", extra)
 }
 
-// mergeRows 将左右两个面板的行按行拼接，中间加上间距，用于宽屏 2×2 布局。
-func mergeRows(left []string, leftWidth int, right []string) []string {
-	count := max(len(left), len(right))
-	rows := make([]string, 0, count)
-	for i := 0; i < count; i++ {
-		l := ""
-		r := ""
-		if i < len(left) {
-			l = left[i]
-		}
-		if i < len(right) {
-			r = right[i]
-		}
-		l = clipAndPad(l, leftWidth)
-		rows = append(rows, l+strings.Repeat(" ", layoutGap)+r)
-	}
-	return rows
-}
-
 // renderQRCodeLines 将文本编码为 QR 码，并转换为 Unicode 半高块字符行（▀▄█ ），适合终端显示。
 func renderQRCodeLines(text string) ([]string, error) {
 	return tools.RenderQRCodeLinesTerminal(text)
-}
-
-// qrBlock 根据上下两行像素组合返回对应的 Unicode 半高块字符。
-func qrBlock(top bool, bottom bool) rune {
-	switch {
-	case top && bottom:
-		return '█'
-	case top && !bottom:
-		return '▀'
-	case !top && bottom:
-		return '▄'
-	default:
-		return ' '
-	}
 }
 
 // contains 判断坐标 (x, y) 是否在面板矩形区域内。

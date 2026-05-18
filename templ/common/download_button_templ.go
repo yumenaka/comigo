@@ -171,17 +171,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-1 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\">便携网页</a><!-- 【清除缓存】按钮,暂时注释掉 -->")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if book != nil && false {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<button type=\"button\" x-data=\"{ deleting: false }\" @click=\"\n\t\t\t\t\tif (confirm(i18next.t('confirm_clear_cache'))) {\n\t\t\t\t\t\tdeleting = true;\n\t\t\t\t\t\tfetch(window.ComiGoPath('/api/book-cache') + '?id=' + encodeURIComponent($store.global.bookID || (window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).split('/').pop()), { method: 'DELETE' })\n\t\t\t\t\t\t\t.then(res => res.json())\n\t\t\t\t\t\t\t.then(data => {\n\t\t\t\t\t\t\t\tdeleting = false;\n\t\t\t\t\t\t\t\tif (typeof window.showToast === 'function') {\n\t\t\t\t\t\t\t\t\twindow.showToast(i18next.t('clear_cache_success'), 'success');\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\talert(i18next.t('clear_cache_success'));\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t.catch(err => {\n\t\t\t\t\t\t\t\tdeleting = false;\n\t\t\t\t\t\t\t\tconsole.error('Delete cache error:', err);\n\t\t\t\t\t\t\t\tif (typeof window.showToast === 'function') {\n\t\t\t\t\t\t\t\t\twindow.showToast(i18next.t('clear_cache_failed'), 'error');\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\talert(i18next.t('clear_cache_failed'));\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300\" :title=\"i18next.t('clear_cache')\" :disabled=\"deleting\"><span x-show=\"!deleting\" x-text=\"i18next.t('clear_cache')\">清除缓存</span> <span x-show=\"deleting\" class=\"animate-pulse\">...</span></button>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"z-10 flex justify-center items-center h-10 px-3 mx-1 mt-1 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\">便携网页</a></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

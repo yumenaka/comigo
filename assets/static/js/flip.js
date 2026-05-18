@@ -207,10 +207,6 @@ if (params.has('start')) {
     });
 }
 
-
-//判断当前浏览器是不是Safari，暂时没啥用
-// const isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1
-
 /**
  * 获取图片源 URL
  * @param {number} index - 图片索引
@@ -1222,21 +1218,7 @@ addEventListener("keydown", e => handle(e, true));
 // keyup 松开时触发
 addEventListener("keyup", e => handle(e, false));
 
-// // 2 手柄方向键 (Gamepad API) TODO
-// // https://developer.mozilla.org/zh-CN/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
-// const gamepads = {};          // 按 index 存储 Gamepad 对象
-//
-// window.addEventListener("gamepadconnected",   e => {
-// 	gamepads[e.gamepad.index] = e.gamepad;
-// 	console.log("已连接:", e.gamepad.id);
-// });
-//
-// window.addEventListener("gamepaddisconnected", e => {
-// 	delete gamepads[e.gamepad.index];
-// 	console.log("已断开:", e.gamepad.id);
-// });
-
-// ============ 鼠标滚轮翻页功能 ============
+	// ============ 鼠标滚轮翻页功能 ============
 let wheelThrottleTimer = null
 
 /**

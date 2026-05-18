@@ -41,21 +41,6 @@ templ LogPanel() {
 			>
 				<!-- 日志内容将通过 JavaScript 动态插入 -->
 			</div>
-			<!-- 发送信息按钮，目前用不着，隐藏 -->
-			<div class="hidden items-center justify-center w-full px-2 pt-3">
-				<input
-					id="msg"
-					placeholder="输入广播消息"
-					x-bind:placeholder="i18next.t('settings_log_broadcast_placeholder')"
-					class="flex-1 min-w-0 px-2 py-1 h-10 rounded text-black bg-base-200 border border-base-300"
-				/>
-				<button
-					id="send"
-					class="ml-2 p-1 h-10 w-24 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
-				>
-					<span x-text="i18next.t('settings_log_broadcast_send')">POST</span>
-				</button>
-			</div>
 		</div>
 	</div>
 	<script>
@@ -147,20 +132,5 @@ templ LogPanel() {
 		ensureSharedSSE();
 		window.addEventListener("comigo:sse-ready", ensureSharedSSE);
 
-		// 发送消息按钮的点击事件
-		const sendButton = document.getElementById("send");
-		if (sendButton) {
-			sendButton.onclick = async () => {
-				const message =
-					document.getElementById("msg").value ||
-					i18next.t("settings_log_broadcast_default_message");
-				await fetch(window.ComiGoPath("/api/push"), {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ message }),
-				});
-				console.log("[send] " + message);
-			};
-		}
-	</script>
+		</script>
 }

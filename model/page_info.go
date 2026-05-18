@@ -12,9 +12,9 @@ type PageInfo struct {
 	ModTime    time.Time `json:"mod_time"` // 修改时间
 	Url        string    `json:"url"`      // 远程用户读取图片的URL，为了适应特殊字符，经过转义
 	PageNum    int       `json:"page_num"` // 图片在原始文件中的页码位置，这个字段不解析。用来按照原始顺序排序
-	Blurhash   string    `json:"-"`        // `json:"blurhash"` //blurhash占位符。扫描图片生成（tools.GetImageDataBlurHash）
-	Height     int       `json:"-"`        // 暂时用不着 这个字段不解析`json:"height"`   //blurhash用，图片高
-	Width      int       `json:"-"`        // 暂时用不着 这个字段不解析`json:"width"`    //blurhash用，图片宽
+	Blurhash   string    `json:"-"`        // blurhash 占位符，扫描图片生成
+	Height     int       `json:"-"`        // 图片高度，仅运行时分析使用
+	Width      int       `json:"-"`        // 图片宽度，仅运行时分析使用
 	ImgType    string    `json:"-"`        // 这个字段不解析
 	InsertHtml string    `json:"-"`        // 这个字段不解析
 }

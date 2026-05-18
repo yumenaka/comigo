@@ -584,18 +584,6 @@ func (m *appModel) terminalReaderTitleHitWidth(width int) int {
 	return runewidth.StringWidth(m.renderTerminalReaderTitleText(width))
 }
 
-// topRightPreviewText 将短状态提示放在右上角，供无标题栏场景兜底使用。
-func topRightPreviewText(text string, width int, height int) []string {
-	if height <= 0 {
-		return nil
-	}
-	lines := []string{rightAlignStyled(shortenText(text, width), width)}
-	for len(lines) < height {
-		lines = append(lines, clipAndPadStyled("", width))
-	}
-	return lines
-}
-
 func (m *appModel) renderTerminalReaderFooter(width int) string {
 	left := locale.GetString("tui_terminal_reader_hint")
 	if m.readerAutoFlip {

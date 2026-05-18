@@ -148,7 +148,6 @@ func GetAllBooksNumber() int {
 // ClearBookNotExist  检查内存中的书的源文件是否存在，不存在就删掉
 func ClearBookNotExist() {
 	logger.Info(locale.GetString("log_checking_book_files_exist"))
-	//return
 	// 遍历所有书籍
 	var deletedBooks []string
 	allBooks, err := IStore.ListBooks()

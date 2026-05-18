@@ -42,14 +42,6 @@ func RegisterBroadcast(name string) chan string {
 	return ch
 }
 
-// GetBroadcast 返回指定名称的广播通道（只读锁）。
-func GetBroadcast(name string) (chan string, bool) {
-	broadcastMutex.RLock()
-	defer broadcastMutex.RUnlock()
-	ch, ok := broadcastRegistry[name]
-	return ch, ok
-}
-
 func init() {
 	// 初始化默认的广播通道
 	SystemBroadcast = RegisterBroadcast("uploadAPIBroadcast")

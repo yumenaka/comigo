@@ -216,6 +216,4 @@ func bindRealtimeAPI(group *echo.Group) {
 	group.GET("/ws", websocket.WsHandler)
 	// SSE 服务器发送事件
 	group.GET("/sse", sse_hub.SSEHandler)
-	// SSE 广播接口
-	group.POST("/push", sse_hub.PushHandler)
 }

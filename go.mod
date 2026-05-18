@@ -20,7 +20,7 @@ require (
 	github.com/bbrks/go-blurhash v1.2.0
 	github.com/cheggaaa/pb/v3 v3.1.7
 	github.com/disintegration/imaging v1.6.2
-	github.com/fsnotify/fsnotify v1.10.1
+	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/jxskiss/base62 v1.1.0
@@ -61,10 +61,8 @@ require (
 	github.com/labstack/echo-jwt/v4 v4.4.0
 	github.com/labstack/echo/v4 v4.15.2
 	github.com/mattn/go-runewidth v0.0.23
-	github.com/minio/selfupdate v0.6.0
 	github.com/pdfcpu/pdfcpu v0.12.0
 	github.com/pkg/sftp v1.13.10
-	github.com/sevlyar/go-daemon v0.1.6
 	github.com/studio-b12/gowebdav v0.12.0
 	github.com/yumenaka/archives v0.0.0-20251213105147-9aacc4911770
 	golang.org/x/crypto v0.51.0
@@ -77,7 +75,6 @@ require (
 )
 
 require (
-	aead.dev/minisign v0.3.0 // indirect
 	ariga.io/atlas v0.38.0 // indirect
 	cel.dev/expr v0.25.1 // indirect
 	dario.cat/mergo v1.0.2 // indirect
@@ -178,7 +175,6 @@ require (
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/josephspurrier/goversioninfo v1.5.0 // indirect
 	github.com/jsimonetti/rtnetlink v1.4.2 // indirect
-	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/labstack/gommon v0.5.0 // indirect

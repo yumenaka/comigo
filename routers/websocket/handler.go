@@ -144,13 +144,6 @@ func handleMessages() {
 	}
 }
 
-// ClientCount 返回当前 WebSocket 连接数量。
-func ClientCount() int {
-	clientsMu.RLock()
-	defer clientsMu.RUnlock()
-	return len(clients)
-}
-
 type clientSnapshot struct {
 	conn *websocket.Conn
 	id   string
