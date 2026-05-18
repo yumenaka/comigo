@@ -96,12 +96,18 @@ func handleRemoteZipFile(vfsInstance vfs.FileSystem, filePath string, newBook *m
 
 	// EPUB 特殊处理
 	if newBook.Type == model.TypeEpub {
-		// EPUB 元数据需要读取文件，暂时跳过（或使用流式读取）
-		// 这里可以后续优化
-		logger.Infof(locale.GetString("log_epub_metadata_remote_not_supported"))
+		localPath, err := downloadToCache(vfsInstance, filePath, newBook.BookID)
+		if err != nil {
+			logger.Infof(locale.GetString("log_failed_to_get_metadata_from_epub"), newBook.BookPath, err)
+		} else {
+			// EPUB 元数据和 spine 排序依赖本地随机访问，复用远程文件缓存避免重复下载。
+			applyEpubInfoFromLocalFile(localPath, newBook)
+		}
 	}
 
-	newBook.SortPages("default")
+	if newBook.Type != model.TypeEpub {
+		newBook.SortPages("default")
+	}
 	return nil
 }
 

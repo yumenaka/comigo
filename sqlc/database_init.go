@@ -62,6 +62,10 @@ func OpenDatabase(configDir string) error {
 		logger.Infof(locale.GetString("log_failed_to_ping_database"), err)
 		return err
 	}
+	if err := configureSQLitePragmas(ctx, client); err != nil {
+		logger.Infof("database pragma configuration failed: %v", err)
+		return err
+	}
 
 	// create tables - 现在使用 IF NOT EXISTS，所以即使表已存在也不会报错
 	if _, err := client.ExecContext(ctx, ddl); err != nil {
@@ -77,6 +81,14 @@ func OpenDatabase(configDir string) error {
 	// 创建 StoreDatabase 实例
 	DbStore = NewDBStore(client)
 	logger.Info(locale.GetString("log_database_initialized_successfully"))
+	return nil
+}
+
+func configureSQLitePragmas(ctx context.Context, db *sql.DB) error {
+	// 建库时开启 incremental auto_vacuum，后续大量删除书籍数据后可以逐步回收空闲页。
+	if _, err := db.ExecContext(ctx, "PRAGMA auto_vacuum = INCREMENTAL"); err != nil {
+		return err
+	}
 	return nil
 }
 

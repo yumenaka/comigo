@@ -126,7 +126,7 @@ Alpine.store('global', {
         }
         return classes.join(' ');
     },
-    // 是否禁止缓存（TODO：缓存功能优化与测试）
+    // 是否禁止图片接口缓存；阅读页会把该状态转换为 no-cache 查询参数。
     noCache: Alpine.$persist(false).as('global.noCache'),
     // clientID 用于识别匿名用户与设备
     clientID: Alpine.$persist(initClientID).as('global.clientID'),

@@ -27,7 +27,7 @@ const (
 func newClaims(username string) *JwtCustomClaims {
 	return &JwtCustomClaims{
 		Username: username,
-		Admin:    true, // 账号管理（未实现）
+		Admin:    true, // 当前是单管理员模型，已通过配置页维护管理员账号密码。
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(config.GetCfg().Timeout))),
 		},

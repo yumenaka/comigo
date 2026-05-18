@@ -17,6 +17,9 @@ func newTestStoreDatabase(t *testing.T) (*sql.DB, *StoreDatabase) {
 	if err != nil {
 		t.Fatalf("open sqlite memory database: %v", err)
 	}
+	if err := configureSQLitePragmas(context.Background(), db); err != nil {
+		t.Fatalf("configure sqlite pragmas: %v", err)
+	}
 	if _, err := db.ExecContext(context.Background(), ddl); err != nil {
 		t.Fatalf("create schema: %v", err)
 	}
@@ -35,6 +38,18 @@ func newTestStoreDatabase(t *testing.T) (*sql.DB, *StoreDatabase) {
 		_ = db.Close()
 	})
 	return db, store
+}
+
+func TestConfigureSQLitePragmasEnablesIncrementalAutoVacuum(t *testing.T) {
+	db, _ := newTestStoreDatabase(t)
+
+	var autoVacuum int
+	if err := db.QueryRowContext(context.Background(), "PRAGMA auto_vacuum").Scan(&autoVacuum); err != nil {
+		t.Fatalf("query auto_vacuum pragma: %v", err)
+	}
+	if autoVacuum != 2 {
+		t.Fatalf("auto_vacuum = %d, want 2 (INCREMENTAL)", autoVacuum)
+	}
 }
 
 func TestStoreBookRoundTripKeepsJSONMetadataFields(t *testing.T) {

@@ -774,6 +774,7 @@
   "sort_by_filename_reverse": "Sort by Filename (Z-A)",
   "sort_by_filesize": "Sort by Filesize (Large to Small)",
   "sort_by_filesize_reverse": "Sort by Filesize (Small to Large)",
+  "sort_by_last_read": "Sort by Last Read",
   "sort_by_modify_time": "Sort by Modify Time (Newest to Oldest)",
   "sort_by_modify_time_reverse": "Sort by Modify Time (Oldest to Newest)",
   "start_clear_file": "- Interrupted operation, cleaning the temporary folder -",

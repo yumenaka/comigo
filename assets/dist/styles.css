@@ -114,6 +114,8 @@
     --color-orange-800: oklch(47% .157 37.304);
     --color-orange-900: oklch(40.8% .123 38.172);
     --color-orange-950: oklch(26.6% .079 36.259);
+    --color-amber-200: oklch(92.4% .12 95.746);
+    --color-amber-700: oklch(55.5% .163 48.998);
     --color-yellow-50: oklch(98.7% .026 102.212);
     --color-yellow-100: oklch(97.3% .071 103.193);
     --color-yellow-200: oklch(94.5% .129 101.54);
@@ -171,10 +173,12 @@
     --color-cyan-900: oklch(39.8% .07 227.392);
     --color-cyan-950: oklch(30.2% .056 229.695);
     --color-sky-50: oklch(97.7% .013 236.62);
+    --color-sky-200: oklch(90.1% .058 230.902);
     --color-sky-300: oklch(82.8% .111 230.318);
     --color-sky-400: oklch(74.6% .16 232.661);
     --color-sky-500: oklch(68.5% .169 237.323);
     --color-sky-600: oklch(58.8% .158 241.966);
+    --color-sky-700: oklch(50% .134 242.749);
     --color-sky-900: oklch(39.1% .09 240.876);
     --color-blue-50: oklch(97% .014 254.604);
     --color-blue-100: oklch(93.2% .032 255.585);
@@ -2118,6 +2122,10 @@
     inset-inline: calc(var(--spacing) * 0);
   }
 
+  .inset-x-4 {
+    inset-inline: calc(var(--spacing) * 4);
+  }
+
   .inset-y-0 {
     inset-block: calc(var(--spacing) * 0);
   }
@@ -2148,6 +2156,14 @@
 
   .top-5 {
     top: calc(var(--spacing) * 5);
+  }
+
+  .top-6 {
+    top: calc(var(--spacing) * 6);
+  }
+
+  .top-\[6\.5rem\] {
+    top: 6.5rem;
   }
 
   .-right-20 {
@@ -2182,6 +2198,10 @@
     bottom: calc(var(--spacing) * 2);
   }
 
+  .bottom-3 {
+    bottom: calc(var(--spacing) * 3);
+  }
+
   .bottom-4 {
     bottom: calc(var(--spacing) * 4);
   }
@@ -2204,6 +2224,26 @@
 
   .left-2 {
     left: calc(var(--spacing) * 2);
+  }
+
+  .left-7 {
+    left: calc(var(--spacing) * 7);
+  }
+
+  .left-16 {
+    left: calc(var(--spacing) * 16);
+  }
+
+  .left-20 {
+    left: calc(var(--spacing) * 20);
+  }
+
+  .left-\[8\.5rem\] {
+    left: 8.5rem;
+  }
+
+  .left-\[8\.75rem\] {
+    left: 8.75rem;
   }
 
   .isolate {
@@ -2757,6 +2797,10 @@
     height: calc(var(--spacing) * 2.5);
   }
 
+  .h-3 {
+    height: calc(var(--spacing) * 3);
+  }
+
   .h-4 {
     height: calc(var(--spacing) * 4);
   }
@@ -2801,8 +2845,20 @@
     height: calc(var(--spacing) * 20);
   }
 
+  .h-24 {
+    height: calc(var(--spacing) * 24);
+  }
+
+  .h-28 {
+    height: calc(var(--spacing) * 28);
+  }
+
   .h-32 {
     height: calc(var(--spacing) * 32);
+  }
+
+  .h-36 {
+    height: calc(var(--spacing) * 36);
   }
 
   .h-44 {
@@ -3040,6 +3096,10 @@
 
   .w-32 {
     width: calc(var(--spacing) * 32);
+  }
+
+  .w-56 {
+    width: calc(var(--spacing) * 56);
   }
 
   .w-64 {
@@ -3329,8 +3389,20 @@
     scale: none;
   }
 
+  .-rotate-6 {
+    rotate: -6deg;
+  }
+
   .-rotate-90 {
     rotate: -90deg;
+  }
+
+  .rotate-2 {
+    rotate: 2deg;
+  }
+
+  .rotate-6 {
+    rotate: 6deg;
   }
 
   .rotate-90 {
@@ -3339,6 +3411,10 @@
 
   .rotate-180 {
     rotate: 180deg;
+  }
+
+  .rotate-\[-45deg\] {
+    rotate: -45deg;
   }
 
   .rotate-none {
@@ -4135,6 +4211,11 @@
     border-width: 4px;
   }
 
+  .border-8 {
+    border-style: var(--tw-border-style);
+    border-width: 8px;
+  }
+
   .border-x {
     border-inline-style: var(--tw-border-style);
     border-inline-width: 1px;
@@ -4377,6 +4458,10 @@
     background-color: var(--my_variable);
   }
 
+  .bg-amber-200 {
+    background-color: var(--color-amber-200);
+  }
+
   .bg-black {
     background-color: var(--color-black);
   }
@@ -4461,6 +4546,10 @@
 
   .bg-cyan-200 {
     background-color: var(--color-cyan-200);
+  }
+
+  .bg-emerald-200 {
+    background-color: var(--color-emerald-200);
   }
 
   .bg-gray-100 {
@@ -4589,6 +4678,10 @@
 
   .bg-sky-50 {
     background-color: var(--color-sky-50);
+  }
+
+  .bg-sky-200 {
+    background-color: var(--color-sky-200);
   }
 
   .bg-sky-300 {
@@ -6969,12 +7062,20 @@
       border-color: var(--color-slate-200);
     }
 
+    .dark\:bg-amber-700 {
+      background-color: var(--color-amber-700);
+    }
+
     .dark\:bg-blue-600 {
       background-color: var(--color-blue-600);
     }
 
     .dark\:bg-blue-900 {
       background-color: var(--color-blue-900);
+    }
+
+    .dark\:bg-emerald-700 {
+      background-color: var(--color-emerald-700);
     }
 
     .dark\:bg-gray-600 {
@@ -7011,6 +7112,10 @@
 
     .dark\:bg-green-500 {
       background-color: var(--color-green-500);
+    }
+
+    .dark\:bg-sky-700 {
+      background-color: var(--color-sky-700);
     }
 
     .dark\:text-blue-300 {

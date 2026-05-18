@@ -78,22 +78,22 @@
 
 ### 开发中
 - [ ] 画漫画，当作示例漫画
-- [ ] 错误文件跳过。
-- [ ] 全体设置baseUrl，方便重定向
-- [ ] 根据父文件夹的最后修改时间来决定是否重新扫描书库（似乎有系统差异）？
+- [x] 错误文件跳过。
+- [x] 全体设置baseUrl，方便重定向
+- [x] 根据父文件夹的最后修改时间来决定是否重新扫描书库（似乎有系统差异）？
 - [ ] 新官网,Discord频道,使用文档，参考 https://omarchy.org/ 。内置帮助文档?
 - [ ] 编辑系列和书籍的元数据。支持解析Comicinfo.xml的CBZ,CBR文件。EPUB 文件的元数据。搜索系列和书籍，查看元数据、摘要等。
-- [ ] 支持 OPDS 协议，方便用户在各种设备（如Kindle、Kobo等）上访问电子书。https://specs.opds.io/opds-1.2
+- [x] 支持 OPDS 协议，方便用户在各种设备（如Kindle、Kobo等）上访问电子书。https://specs.opds.io/opds-1.2
 - [ ] 可选的计算文件哈希值，查找重复文件。
-- [ ] SQLite 删除数据后不释放磁盘空间，只标记为空闲。建库时开启 auto_vacuum，可以防止文件持续膨胀
-- [ ] 自动更新，下载最新版本，替换当前程序。
-- [ ] 书架按照最近阅读时间排序，无阅读进度的书籍，以文件修改时间排序
-- [ ] 上传页面挪到设置页面-书库设置。改造上传功能，可选上传到下拉框指定的书库。没有默认书库则不可上传。
+- [x] SQLite 删除数据后不释放磁盘空间，只标记为空闲。建库时开启 auto_vacuum，可以防止文件持续膨胀
+- [x] 自动更新，下载最新版本，替换当前程序。
+- [x] 书架按照最近阅读时间排序，无阅读进度的书籍，以文件修改时间排序
+- [x] 上传页面挪到设置页面-书库设置。改造上传功能，可选上传到下拉框指定的书库。没有默认书库则不可上传。
 - [ ] 手动或自动检测新版本提示，然后可以试着自动更新新版本（win与macos），最后是各种linux软件源
 - [ ] 网页端：自动化测试，修改后自动测试基本功能。
 - [ ] 网页端：卷轴模式页数同步体验优化。
-- [ ] 访问权限控制
-- [ ] PWA 支持
+- [x] 访问权限控制
+- [x] PWA 支持
 - [ ] wasm 模式，在线转换书籍？
 - [ ] 更新提示，自动更新(github.com/jpillora/overseer) 包管理支持。[self update 功能](https://github.com/minio/selfupdate)
 - [ ] 文件监控 https://github.com/sgtdi/fswatcher
@@ -117,7 +117,7 @@
 - [ ] 文件管理，删除。
 - [ ] Debian，RPM包（<https://github.com/goreleaser/nfpm）>
 - [ ] 优化epub与PDF阅读体验，支持图文混排（pdf.js与epub.js）
-- [ ] 显示服务器log：[web终端示例](https://zenn.dev/ikedam/articles/2e078bfc2a4cb6)
+- [x] 显示服务器log：[web终端示例](https://zenn.dev/ikedam/articles/2e078bfc2a4cb6)
 - [ ] -start 参数，后台运行。-stop参数，停止后台运行的进程。
 - [ ] [使用 Go1.24 的 os.Root 类型](https://antonz.org/go-1-24/)，将[文件操作限制在特定目录](https://go.dev/blog/osroot)，以防止攻击者通过转义或相对路径非法访问文件
 - [ ] 自动发版功能 [goreleaser](https://goreleaser.com/)  [github-action](https://dev.to/hadlow/how-to-release-to-homebrew-with-goreleaser-github-actions-and-semantic-release-2gbb)

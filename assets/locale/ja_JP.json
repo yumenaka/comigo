@@ -774,6 +774,7 @@
   "sort_by_filename_reverse": "ファイル名順 (Z-A)",
   "sort_by_filesize": "ファイルサイズ順 (大→小)",
   "sort_by_filesize_reverse": "ファイルサイズ順 (小→大)",
+  "sort_by_last_read": "最近読んだ順",
   "sort_by_modify_time": "更新日時順 (新→旧)",
   "sort_by_modify_time_reverse": "更新日時順 (旧→新)",
   "start_clear_file": "- 一時フォルダの掃除を開始します -",

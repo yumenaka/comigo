@@ -14,6 +14,7 @@ import (
 
 type bookInfoTestStore struct {
 	books     []*Book
+	bookMarks map[string]BookMarks
 	listCalls int
 }
 
@@ -43,6 +44,9 @@ func (s *bookInfoTestStore) GenerateBookGroup() error { return nil }
 func (s *bookInfoTestStore) StoreBookMark(mark *BookMark) error { return nil }
 
 func (s *bookInfoTestStore) GetBookMarks(bookID string) (*BookMarks, error) {
+	if marks, ok := s.bookMarks[bookID]; ok {
+		return &marks, nil
+	}
 	bookMarks := BookMarks{}
 	return &bookMarks, nil
 }
@@ -131,5 +135,47 @@ func TestInitBookIDRejectsExistingSamePathAndType(t *testing.T) {
 	}
 	if store.listCalls != 1 {
 		t.Fatalf("ListBooks calls = %d, want 1", store.listCalls)
+	}
+}
+
+func TestSortBooksByLastReadFallsBackToModifiedTime(t *testing.T) {
+	store := &bookInfoTestStore{
+		bookMarks: map[string]BookMarks{
+			"read-old": {{
+				Type:      AutoMark,
+				BookID:    "read-old",
+				UpdatedAt: time.Unix(1700000200, 0),
+			}},
+			"read-new": {{
+				Type:      AutoMark,
+				BookID:    "read-new",
+				UpdatedAt: time.Unix(1700000300, 0),
+			}},
+			"user-only": {{
+				Type:      UserMark,
+				BookID:    "user-only",
+				UpdatedAt: time.Unix(1700000400, 0),
+			}},
+		},
+	}
+	withBookInfoTestStore(t, store)
+
+	books := BookInfos{
+		{BookID: "unread-old", Title: "unread-old", Modified: time.Unix(1700000100, 0)},
+		{BookID: "read-old", Title: "read-old", Modified: time.Unix(1700000500, 0)},
+		{BookID: "user-only", Title: "user-only", Modified: time.Unix(1700000700, 0)},
+		{BookID: "read-new", Title: "read-new", Modified: time.Unix(1700000000, 0)},
+		{BookID: "unread-new", Title: "unread-new", Modified: time.Unix(1700000600, 0)},
+	}
+
+	books.SortBooks("last_read")
+
+	got := make([]string, 0, len(books))
+	for _, book := range books {
+		got = append(got, book.BookID)
+	}
+	want := []string{"read-new", "read-old", "user-only", "unread-new", "unread-old"}
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Fatalf("last_read order = %v, want %v", got, want)
 	}
 }

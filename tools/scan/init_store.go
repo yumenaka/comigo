@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
@@ -54,10 +55,6 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 
 	// 如果书库URL对应一个文件，返回一本书
 	if tools.IsFile(storePathAbs) && IsSupportFile(storePathAbs) {
-		// 如果书库里已经有这本书，跳过
-		if checkBookInStore(storePathAbs, storePathAbs) {
-			return nil
-		}
 		fileInfo, statErr := os.Stat(storePathAbs)
 		if statErr != nil {
 			return statErr
@@ -65,11 +62,17 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 		if shouldSkipFailedArchiveFile(storePathAbs, storePathAbs, fileInfo.Size(), fileInfo.ModTime(), false) {
 			return nil
 		}
+		previousBook, skip := prepareBookPathForScan(storePathAbs, storePathAbs, fileInfo.Size(), fileInfo.ModTime())
+		if skip {
+			return nil
+		}
 		book, err := scanFileGetBook(storePathAbs, storePathAbs, 0)
 		if err != nil {
+			restorePreviousBookAfterScanFailure(previousBook)
 			recordArchiveScanFailure(storePathAbs, storePathAbs, fileInfo.Size(), fileInfo.ModTime(), false, err)
 			return err
 		}
+		mergePreviousBookState(book, previousBook)
 		clearArchiveScanFailure(storePathAbs, storePathAbs, false)
 		AddBooksToStore([]*model.Book{book})
 		return nil
@@ -85,11 +88,20 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 
 	// 处理根目录
 	if rootDirectoryNode.Files != nil {
-		book, err := scanDirGetBook(storePathAbs, storePathAbs, 0)
-		if err != nil {
-			logger.Infof(locale.GetString("log_skip_to_scan_root_directory"), storePathAbs, err)
-		} else {
-			newBookList = append(newBookList, book)
+		dirInfo, statErr := os.Stat(storePathAbs)
+		if statErr != nil {
+			return statErr
+		}
+		previousBook, skip := prepareBookPathForScan(storePathAbs, storePathAbs, dirInfo.Size(), dirInfo.ModTime())
+		if !skip {
+			book, err := scanDirGetBook(storePathAbs, storePathAbs, 0)
+			if err != nil {
+				restorePreviousBookAfterScanFailure(previousBook)
+				logger.Infof(locale.GetString("log_skip_to_scan_root_directory"), storePathAbs, err)
+			} else {
+				mergePreviousBookState(book, previousBook)
+				newBookList = append(newBookList, book)
+			}
 		}
 	}
 
@@ -121,12 +133,24 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 			continue
 		}
 
+		dirInfo, statErr := os.Stat(absDir)
+		if statErr != nil {
+			logger.Infof(locale.GetString("log_failed_to_get_file_info_scan"), absDir, statErr)
+			continue
+		}
+		previousBook, skip := prepareBookPathForScan(storePathAbs, absDir, dirInfo.Size(), dirInfo.ModTime())
+		if skip {
+			continue
+		}
+
 		// 扫描目录
 		book, err := scanDirGetBook(absDir, storePathAbs, depth)
 		if err != nil {
+			restorePreviousBookAfterScanFailure(previousBook)
 			logger.Infof(locale.GetString("log_skip_to_scan_directory"), absDir, err)
 			continue
 		}
+		mergePreviousBookState(book, previousBook)
 		newBookList = append(newBookList, book)
 	}
 
@@ -157,20 +181,22 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 			logger.Infof(locale.GetString("exceeds_maximum_depth")+" %d, base: %s, scan: %s", cfg.GetMaxScanDepth(), storePathAbs, file.Path)
 			continue
 		}
-		// 如果书库里已经有这本书(文件类型)，跳过。文件夹类型不能跳过。
-		if tools.IsFile(file.Path) && checkBookInStore(storePathAbs, file.Path) {
+		if shouldSkipFailedArchiveFile(storePathAbs, file.Path, file.Size, file.ModTime, false) {
 			continue
 		}
-		if shouldSkipFailedArchiveFile(storePathAbs, file.Path, file.Size, file.ModTime, false) {
+		previousBook, skip := prepareBookPathForScan(storePathAbs, file.Path, file.Size, file.ModTime)
+		if skip {
 			continue
 		}
 		// 扫描文件
 		book, err := scanFileGetBook(file.Path, storePathAbs, depth)
 		if err != nil {
+			restorePreviousBookAfterScanFailure(previousBook)
 			recordArchiveScanFailure(storePathAbs, file.Path, file.Size, file.ModTime, false, err)
 			logger.Info(err)
 			continue
 		}
+		mergePreviousBookState(book, previousBook)
 		clearArchiveScanFailure(storePathAbs, file.Path, false)
 		newBookList = append(newBookList, book)
 	}
@@ -239,9 +265,6 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 	if !isDir {
 		// 单个文件
 		if IsSupportFile(basePath) {
-			if checkBookInStore(storeURL, basePath) {
-				return nil
-			}
 			fileInfo, statErr := fs.Stat(basePath)
 			if statErr != nil {
 				return statErr
@@ -249,11 +272,17 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 			if shouldSkipFailedArchiveFile(storeURL, basePath, fileInfo.Size(), fileInfo.ModTime(), true) {
 				return nil
 			}
+			previousBook, skip := prepareBookPathForScan(storeURL, basePath, fileInfo.Size(), fileInfo.ModTime())
+			if skip {
+				return nil
+			}
 			book, err := scanRemoteFileGetBook(fs, basePath, storeURL, 0)
 			if err != nil {
+				restorePreviousBookAfterScanFailure(previousBook)
 				recordArchiveScanFailure(storeURL, basePath, fileInfo.Size(), fileInfo.ModTime(), true, err)
 				return err
 			}
+			mergePreviousBookState(book, previousBook)
 			clearArchiveScanFailure(storeURL, basePath, true)
 			AddBooksToStore([]*model.Book{book})
 		}
@@ -268,11 +297,20 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 
 	// 处理根目录
 	if rootNode.Files != nil && len(rootNode.Files) >= cfg.GetMinImageNum() {
-		book, err := scanRemoteDirGetBook(fs, basePath, storeURL, 0)
-		if err != nil {
-			logger.Infof(locale.GetString("log_skip_to_scan_root_directory"), basePath, err)
-		} else {
-			newBookList = append(newBookList, book)
+		dirInfo, statErr := fs.Stat(basePath)
+		if statErr != nil {
+			return statErr
+		}
+		previousBook, skip := prepareBookPathForScan(storeURL, basePath, dirInfo.Size(), dirInfo.ModTime())
+		if !skip {
+			book, err := scanRemoteDirGetBook(fs, basePath, storeURL, 0)
+			if err != nil {
+				restorePreviousBookAfterScanFailure(previousBook)
+				logger.Infof(locale.GetString("log_skip_to_scan_root_directory"), basePath, err)
+			} else {
+				mergePreviousBookState(book, previousBook)
+				newBookList = append(newBookList, book)
+			}
 		}
 	}
 
@@ -303,12 +341,24 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 			continue
 		}
 
+		dirInfo, statErr := fs.Stat(dir)
+		if statErr != nil {
+			logger.Infof(locale.GetString("log_failed_to_get_file_info_scan"), dir, statErr)
+			continue
+		}
+		previousBook, skip := prepareBookPathForScan(storeURL, dir, dirInfo.Size(), dirInfo.ModTime())
+		if skip {
+			continue
+		}
+
 		// 扫描目录
 		book, err := scanRemoteDirGetBook(fs, dir, storeURL, depth)
 		if err != nil {
+			restorePreviousBookAfterScanFailure(previousBook)
 			logger.Infof(locale.GetString("log_skip_to_scan_directory"), dir, err)
 			continue
 		}
+		mergePreviousBookState(book, previousBook)
 		newBookList = append(newBookList, book)
 	}
 
@@ -336,21 +386,23 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 			continue
 		}
 
-		// 如果书库里已经有这本书，跳过
-		if checkBookInStore(storeURL, file.Path) {
+		if shouldSkipFailedArchiveFile(storeURL, file.Path, file.Size, file.ModTime, true) {
 			continue
 		}
-		if shouldSkipFailedArchiveFile(storeURL, file.Path, file.Size, file.ModTime, true) {
+		previousBook, skip := prepareBookPathForScan(storeURL, file.Path, file.Size, file.ModTime)
+		if skip {
 			continue
 		}
 
 		// 扫描文件
 		book, err := scanRemoteFileGetBook(fs, file.Path, storeURL, depth)
 		if err != nil {
+			restorePreviousBookAfterScanFailure(previousBook)
 			recordArchiveScanFailure(storeURL, file.Path, file.Size, file.ModTime, true, err)
 			logger.Info(err)
 			continue
 		}
+		mergePreviousBookState(book, previousBook)
 		clearArchiveScanFailure(storeURL, file.Path, true)
 		newBookList = append(newBookList, book)
 	}
@@ -362,13 +414,46 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 	return nil
 }
 
-func checkBookInStore(storePathAbs string, filePathAbs string) bool {
-	bookInStore, err := getBookByPath(storePathAbs, filePathAbs)
-	if err != nil || bookInStore == nil {
-		return false
+// prepareBookPathForScan 在扫描前处理同路径旧书籍：
+// - 指纹未变化时跳过扫描，沿用旧 metadata；
+// - 指纹变化时先移除旧条目，避免 NewBook 的同路径判重阻止重扫。
+// 返回 previousBook 用于扫描失败回滚或扫描成功后迁移用户状态。
+func prepareBookPathForScan(storePath string, filePath string, size int64, modTime time.Time) (previousBook *model.Book, skip bool) {
+	previousBook, err := getBookByPath(storePath, filePath)
+	if err != nil || previousBook == nil {
+		return nil, false
 	}
-	logger.Infof(locale.GetString("log_book_data_already_exists"), bookInStore.BookID, filePathAbs)
-	return true
+	if previousBook.FileSize == size && previousBook.Modified.Equal(modTime) {
+		logger.Infof(locale.GetString("log_book_data_already_exists"), previousBook.BookID, filePath)
+		return previousBook, true
+	}
+	if err := model.IStore.DeleteBook(previousBook.BookID); err != nil {
+		logger.Infof(locale.GetString("log_error_deleting_book"), previousBook.BookID, err)
+		return previousBook, true
+	}
+	return previousBook, false
+}
+
+func mergePreviousBookState(newBook *model.Book, previousBook *model.Book) {
+	if newBook == nil || previousBook == nil {
+		return
+	}
+	// 重扫后 BookID 可能因文件大小变化而改变；迁移书签时同步改到新书 ID。
+	for _, mark := range previousBook.BookMarks {
+		mark.BookID = newBook.BookID
+		mark.BookStoreID = newBook.GetStoreID()
+		newBook.BookMarks = append(newBook.BookMarks, mark)
+	}
+	newBook.BookComplete = previousBook.BookComplete
+}
+
+func restorePreviousBookAfterScanFailure(previousBook *model.Book) {
+	if previousBook == nil {
+		return
+	}
+	if err := model.IStore.StoreBook(previousBook); err != nil {
+		logger.Infof(locale.GetString("log_error_adding_book"), previousBook.BookID, err)
+	}
 }
 
 // getBookByPath 获取指定路径的书籍

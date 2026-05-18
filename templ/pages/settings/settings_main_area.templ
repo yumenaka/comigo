@@ -1,8 +1,10 @@
 package settings
 
-import "github.com/yumenaka/comigo/tools/tailscale_plugin"
-
-import "github.com/yumenaka/comigo/config"
+import (
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/templ/pages/upload_page"
+	"github.com/yumenaka/comigo/tools/tailscale_plugin"
+)
 
 func x_data_debug_mode(debug bool) string {
 	if debug {
@@ -61,6 +63,10 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<!-- 可折叠内容 -->
 				<div x-show="!collapsed" x-transition>
 					@StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", GetStoreBookCounts())
+					if config.GetCfg().EnableUpload && !config.GetCfg().ReadOnlyMode {
+						<!-- 上传入口放在书库设置中，复用 /api/upload 的书库校验，避免独立页面与设置状态脱节。 -->
+						@upload_page.SettingsUploadArea()
+					}
 					@NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535)
 					@StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description")
 				</div>

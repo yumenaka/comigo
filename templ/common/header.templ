@@ -53,12 +53,11 @@ templ HeaderBackSortLeft(returnUrl string) {
 	@ReSortIcon()
 }
 
-// HeaderSettingsLeft 是设置页左侧区域：返回 + 离线全屏 + 上传/本地阅读入口 + 占位。
+// HeaderSettingsLeft 是设置页左侧区域：返回 + 离线全屏 + 本地阅读入口 + 占位。
 templ HeaderSettingsLeft(returnUrl string) {
 	@ReturnButton(returnUrl)
 	@FullScreenOfflineButton()
 	@ReaderButton()
-	@UploadButton()
 	@HeaderPlaceholder()
 }
 
@@ -277,6 +276,10 @@ templ ReSortIcon() {
                         }
                         return ''; // 默认值
                     },
+                    isShelfSortMenu() {
+                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
+                        return !currentUrl.includes('/flip/') && !currentUrl.includes('/scroll/');
+                    },
                     setCookie(value) {
                         // 根据URL路径决定使用哪个cookie参数名
                         const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
@@ -322,6 +325,15 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('filesize')"
 					x-text="i18next.t('sort_by_filesize')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize'}"
+					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+				></a>
+			</li>
+			<li x-show="isShelfSortMenu()">
+				<a
+					href="#"
+					@click.prevent="setCookie('last_read')"
+					x-text="i18next.t('sort_by_last_read')"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'last_read'}"
 					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>

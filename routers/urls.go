@@ -11,6 +11,7 @@ import (
 	"github.com/yumenaka/comigo/routers/config_api"
 	"github.com/yumenaka/comigo/routers/data_api"
 	"github.com/yumenaka/comigo/routers/login"
+	"github.com/yumenaka/comigo/routers/opds"
 	"github.com/yumenaka/comigo/routers/reverse_proxy"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/routers/websocket"
@@ -111,6 +112,10 @@ func bindProtectedView(group *echo.Group) {
 	group.GET("/reader", reader.PageHandler)
 	// 设置页面
 	group.GET("/settings", settings.PageHandler)
+	// OPDS 1.2 目录
+	group.GET("/opds", opds.RootHandler)
+	group.GET("/opds/books", opds.BooksHandler)
+	group.GET("/opds/books/:id", opds.BooksHandler)
 }
 
 // bindProtectedAPI 注册需要认证的路由
@@ -211,7 +216,6 @@ func bindSettingsAPI(group *echo.Group) {
 
 // bindRealtimeAPI 注册 WebSocket/SSE 等实时通信 API。
 func bindRealtimeAPI(group *echo.Group) {
-	// TODO: 测试需要登录时的表现
 	websocket.WsDebug = &config.GetCfg().Debug
 	group.GET("/ws", websocket.WsHandler)
 	// SSE 服务器发送事件
