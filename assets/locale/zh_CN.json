@@ -774,7 +774,7 @@
   "sort_by_filename_reverse": "按文件名排序 (Z-A)",
   "sort_by_filesize": "按文件大小排序 (从大到小)",
   "sort_by_filesize_reverse": "按文件大小排序 (从小到大)",
-  "sort_by_last_read": "按最近阅读排序",
+  "sort_by_last_read": "最近阅读",
   "sort_by_modify_time": "按修改时间排序 (从新到旧)",
   "sort_by_modify_time_reverse": "按修改时间排序 (从旧到新)",
   "start_clear_file": "运行中断，清理临时文件夹中……",
