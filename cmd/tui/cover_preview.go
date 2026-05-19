@@ -58,10 +58,10 @@ type coverPreviewMsg struct {
 // detectTUIImageProtocol 自动选择 TUI 封面预览协议。
 // COMIGO_TUI_IMAGE 可强制覆盖，用于排查不同终端协议的显示差异。
 func detectTUIImageProtocol() tuiImageProtocol {
-	return detectTUIImageProtocolWithKittyAuto(false)
+	return detectTUIImageProtocolWithKittyAuto(true)
 }
 
-// detectNativeTUIImageProtocol 用于手动切换图片模式；自动启动仍让 Kitty 系终端默认走 ANSI。
+// detectNativeTUIImageProtocol 用于手动切换图片模式，和自动启动一样优先使用当前终端的原生图片协议。
 func detectNativeTUIImageProtocol() tuiImageProtocol {
 	return detectTUIImageProtocolWithKittyAuto(true)
 }
@@ -74,7 +74,6 @@ func detectTUIImageProtocolWithKittyAuto(allowKittyAuto bool) tuiImageProtocol {
 			return termimg.ITerm2
 		}
 		if isKittyTerminal() || isGhosttyTerminal() {
-			// Kitty 系终端默认走 ANSI，避免原生协议的残留/错位；手动切换时仍允许 Kitty。
 			if allowKittyAuto {
 				return termimg.Kitty
 			}
@@ -733,7 +732,7 @@ func rightAlignStyled(text string, width int) string {
 
 // debugTUIImageRender 按需记录终端图片渲染诊断信息，默认关闭，避免污染普通 TUI 日志。
 func debugTUIImageRender(scope string, protocol tuiImageProtocol, bounds image.Rectangle, areaW int, areaH int, imageW int, imageH int, lineCount int, setupBytes int) {
-	if os.Getenv("COMIGO_TUI_IMAGE_DEBUG") == "" {
+	if !config.GetCfg().Debug {
 		return
 	}
 	logger.Infof(
@@ -798,7 +797,7 @@ func measureTUIPlaceholderLines(lines []string) tuiPlaceholderLineMetrics {
 
 // debugTUIPlaceholderLayout 只在调试开关打开时记录 Kitty placeholder 布局，不改变渲染文本。
 func debugTUIPlaceholderLayout(scope string, protocol tuiImageProtocol, areaW int, areaH int, imageW int, imageH int, lines []string, setupBytes int) {
-	if os.Getenv("COMIGO_TUI_IMAGE_DEBUG") == "" || protocol != termimg.Kitty {
+	if !config.GetCfg().Debug || protocol != termimg.Kitty {
 		return
 	}
 	metrics := measureTUIPlaceholderLines(lines)

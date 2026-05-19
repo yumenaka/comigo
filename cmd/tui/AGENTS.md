@@ -6,8 +6,8 @@
 
 - ANSI/Halfblocks：当前高度和布局相对稳定，但分辨率低，只适合作为通用兜底。
 - iTerm2：可完整显示图片；预览区和终端阅读区的底部留白已通过“贴边轴固定、另一轴 auto”的 OSC 1337 参数策略修复/缓解。
-- Kitty：默认回退 ANSI/Halfblocks；只有用户手动切到图片模式或 `COMIGO_TUI_IMAGE=kitty` 时，才尝试 Unicode placeholder 路径。
-- Ghostty：默认回退 ANSI/Halfblocks；手动图片模式仍用 Kitty 协议，预览区走 overlay，进入终端阅读时需要一次性清理预览 overlay。
+- Kitty：默认启用 Unicode placeholder 路径；ANSI/Halfblocks 只作为手动切换或不支持图片协议时的兜底。
+- Ghostty：默认启用 Kitty 协议，预览区走 overlay，阅读页走 Unicode placeholder，进入终端阅读时需要一次性清理预览 overlay。
 - WezTerm：对齐到 iTerm2 inline image 协议；Kitty/placeholder 路径在预览区和终端阅读都出现过布局错乱、页码与图片不同步或重复显示的问题。
 
 ## 实现要点
@@ -18,7 +18,7 @@
 - WezTerm 走 iTerm2 协议时，尺寸估算仍使用 WezTerm 的字符格比例；OSC 1337 只固定贴边轴，另一轴传 `auto`，减少协议内部二次等比缩放带来的底部留白。
 - Halfblocks 使用文本模式，不走图像层清理；它的尺寸计算保留半块字符的 1:2 逻辑。
 - 涉及终端差异的特殊处理应按终端类型局部生效，不要把 Ghostty/iTerm2 的 workaround 扩散到 Kitty 或 ANSI。
-- 可设置 `COMIGO_TUI_IMAGE_DEBUG=1` 打开 TUI 图片渲染诊断日志，观察协议、区域大小、源图大小、输出行数、控制序列字节数，以及 Kitty placeholder 行宽/占位符数量/padding。
+- 开启全局 `Debug` flag 后会输出 TUI 图片渲染诊断日志，观察协议、区域大小、源图大小、输出行数、控制序列字节数，以及 Kitty placeholder 行宽/占位符数量/padding。
 - Kitty placeholder 行包含 `U+10EEEE` 和组合符；未超宽时不要做通用 ANSI 截断重写，避免破坏行/列/ID 编码。
 - Kitty setup（图像传输和 `U=1` virtual placement）只应在图片切换或 Kitty 图像层被清理后发送一次；普通 TUI 重绘只输出 placeholder 文本。
 - Kitty 终端阅读的无效尝试需要及时撤回，避免刷新策略堆叠后掩盖真正原因。
@@ -40,8 +40,8 @@
 | 终端 | 官方/当前资料支持 | 当前建议 |
 | --- | --- | --- |
 | iTerm2 | 官方支持 OSC 1337 inline images，参数支持 cell、px、percent、auto；任何 macOS 支持的图片格式可 inline 显示。 | 用 iTerm2 协议，不走 Kitty。底部留白问题改为只固定贴边轴，另一轴传 `auto`。 |
-| Kitty | 官方 Kitty graphics 原生实现；支持 placement、`C=1`、删除命令、Unicode placeholder。 | 默认 ANSI/Halfblocks；手动图片模式可试 placeholder。不要再把已失败的 overlay 清理逻辑扩散回来。 |
-| Ghostty | 官方 Feature 列表明确支持 Kitty graphics protocol。未在官方资料中看到 iTerm2/Sixel 作为主能力。 | 默认 ANSI/Halfblocks；手动图片模式可试 Kitty，预览区目前用 overlay 避开 placeholder 裁切/过小。 |
+| Kitty | 官方 Kitty graphics 原生实现；支持 placement、`C=1`、删除命令、Unicode placeholder。 | 默认启用 Kitty placeholder；ANSI/Halfblocks 只保留为手动回退。不要再把已失败的 overlay 清理逻辑扩散回来。 |
+| Ghostty | 官方 Feature 列表明确支持 Kitty graphics protocol。未在官方资料中看到 iTerm2/Sixel 作为主能力。 | 默认启用 Kitty；预览区目前用 overlay，阅读页用 placeholder，ANSI/Halfblocks 只保留为手动回退。 |
 | WezTerm | 官方 Feature 列表列出 iTerm2 compatible image protocol、Kitty graphics、Sixel experimental；`imgcat` 文档说明 iTerm2 协议在 multiplexer 中不完整；changelog 说明 Kitty Image Protocol 默认启用但动画未实现。 | 预览区和终端阅读都使用 iTerm2 协议，避开当前实测不稳定的 Kitty/placeholder 路径。 |
 | Windows Terminal | 官方 1.22 Preview 先加入 Sixel image support，1.23 Preview 公告确认 stable 1.22 已包含该能力；显示仍需要 `libsixel`/`chafa` 等编码器输出 sixel。 | 非当前 macOS 主测试目标；如未来支持 Windows TUI 图片，优先按 Sixel 检测。 |
 | xterm/foot/mlterm 等 Sixel 终端 | Sixel 是通用传统协议，具体终端常需编译/配置/版本支持；xterm 需确认是否启用 sixel。 | 可作为未来 Linux 终端扩展方向，不应影响当前 Kitty/iTerm2 路径。 |
@@ -58,7 +58,7 @@
 - 封面预览和终端阅读的 Kitty placeholder 路径会在主文本前输出 `Setup`，再由正文中的 placeholder 行定位图片。
 - 原生图像协议的尺寸计算改为按终端字符格像素比例估算，但不做交互式 CSI 查询，避免污染 Bubble Tea 输入流。
 - Kitty overlay 路径在 Kitty/Ghostty/WezTerm 中出现页码已变但图片不刷新的问题；已撤回终端阅读 overlay、`C=1`、loading 清理等特殊处理。
-- Kitty/Ghostty 默认回退 ANSI/Halfblocks；手动图片模式继续使用 Kitty 原生图像的 Unicode placeholder。WezTerm 已改用 iTerm2 inline image 协议。
+- Kitty/Ghostty 默认启用 Kitty 原生图像协议；ANSI/Halfblocks 只作为手动回退。WezTerm 已改用 iTerm2 inline image 协议。
 - iTerm2/WezTerm 底部留白问题已按实测线索处理：WezTerm 走 iTerm2 协议时仍使用 WezTerm 字符格比例估算；OSC 1337 输出只固定贴边轴，避免固定宽高框内二次等比缩放。
 - Kitty 底部“多出两条第一行”的新判断：它不像整体文本错位，更像旧 row=0 placeholder/virtual placement 没有被完全删除，或当前 placeholder 输出在底部附近重复触发 row=0 解析。2 列安全边距、边框内嵌显示、翻页/缓存命中时强制清 Kitty 图层、synchronized output 都已实测无效并撤销。
 - Ghostty 从书架进入终端阅读时，预览区 Kitty overlay 需要在阅读页第一帧前发送 Kitty delete-all 指令；该清理只在进入终端阅读前一次性触发，不扩散为 Kitty 翻页刷新策略。
@@ -66,8 +66,10 @@
 
 ## 2026-05-20 处理记录
 
+- Kitty/Ghostty 自动模式默认启用 Kitty 图像协议；ANSI/Halfblocks 只作为手动切换或不支持图像协议时的回退。
 - Kitty placeholder 路径不再调用 `go-termimg` 的实验 `UseUnicode(true)` 渲染器；`cmd/tui/kitty_image.go` 按官方协议本地生成 `a=T,f=100,U=1,c,r` PNG 传输和可见 placeholder 行。
 - 本地 Kitty renderer 不做 CSI 字号/窗口查询，继续使用 Comigo 自己的非交互字符格估算，避免 Bubble Tea 输入流被终端查询响应污染。
+- 本地 Kitty renderer 会先把 PNG 规整到 virtual placement 的等效像素矩形，避免 Kitty 在 `c/r` 矩形里二次保持比例 fit 时产生内部横向或纵向偏移。
 - 本地 Kitty image id 限制在 24-bit 内，placeholder 只写 row/column 两个 diacritic；超出官方 diacritic 表的极宽列才按协议从左侧 cell 继承递增。
 - `coverSetupKey` / `readerSetupKey` 记录终端侧已发送的 Kitty setup；同一图片的后续 TUI 重绘只输出 placeholder 文本，清理 Kitty 图像层或切换协议后再重新发送 setup。
 

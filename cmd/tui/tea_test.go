@@ -221,8 +221,8 @@ func TestDetectTUIImageProtocolUsesTerminalSpecificProtocols(t *testing.T) {
 	t.Setenv("GHOSTTY_RESOURCES_DIR", "")
 	t.Setenv("WEZTERM_EXECUTABLE", "")
 	t.Setenv("WEZTERM_PANE", "")
-	if got := detectTUIImageProtocol(); got != termimg.Halfblocks {
-		t.Fatalf("detectTUIImageProtocol() = %v, want Halfblocks for Ghostty auto mode", got)
+	if got := detectTUIImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("detectTUIImageProtocol() = %v, want Kitty for Ghostty auto mode", got)
 	}
 	if got := detectNativeTUIImageProtocol(); got != termimg.Kitty {
 		t.Fatalf("detectNativeTUIImageProtocol() = %v, want Kitty for manual Ghostty image mode", got)
@@ -368,6 +368,14 @@ func TestRenderKittyUnicodeImageSplitsSetupAndPlaceholders(t *testing.T) {
 		if got := xansi.StringWidth(line); got != 3 {
 			t.Fatalf("placeholder line width = %d, want 3", got)
 		}
+	}
+}
+
+func TestRasterizeKittyPlacementImageUsesCellRectangle(t *testing.T) {
+	cellW, cellH := protocolCellPixels(termimg.Kitty)
+	got := rasterizeKittyPlacementImage(image.NewRGBA(image.Rect(0, 0, 4, 8)), 3, 2)
+	if got.Bounds().Dx() != 3*cellW || got.Bounds().Dy() != 2*cellH {
+		t.Fatalf("kitty placement image size = %dx%d, want %dx%d", got.Bounds().Dx(), got.Bounds().Dy(), 3*cellW, 2*cellH)
 	}
 }
 
@@ -1174,7 +1182,7 @@ func TestTerminalReaderUsesPlaceholderForKitty(t *testing.T) {
 	}
 }
 
-func TestReaderProtocolDefaultsToANSIButAllowsKittyForGhosttyAndPreview(t *testing.T) {
+func TestReaderProtocolDefaultsToKittyForGhosttyAndPreview(t *testing.T) {
 	t.Setenv("COMIGO_TUI_IMAGE", "auto")
 	t.Setenv("TERM_PROGRAM", "ghostty")
 	t.Setenv("TERM", "xterm-ghostty")
@@ -1183,11 +1191,11 @@ func TestReaderProtocolDefaultsToANSIButAllowsKittyForGhosttyAndPreview(t *testi
 	t.Setenv("WEZTERM_EXECUTABLE", "")
 	t.Setenv("WEZTERM_PANE", "")
 
-	if got := detectTUIReaderImageProtocol(); got != termimg.Halfblocks {
-		t.Fatalf("reader protocol = %v, want Halfblocks for Ghostty auto mode", got)
+	if got := detectTUIReaderImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("reader protocol = %v, want Kitty for Ghostty auto mode", got)
 	}
-	if got := detectTUIImageProtocol(); got != termimg.Halfblocks {
-		t.Fatalf("preview protocol = %v, want Halfblocks for Ghostty auto mode", got)
+	if got := detectTUIImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("preview protocol = %v, want Kitty for Ghostty auto mode", got)
 	}
 	if got := detectNativeTUIReaderImageProtocol(); got != termimg.Kitty {
 		t.Fatalf("native reader protocol = %v, want Kitty for manual Ghostty image mode", got)
@@ -1197,7 +1205,7 @@ func TestReaderProtocolDefaultsToANSIButAllowsKittyForGhosttyAndPreview(t *testi
 	}
 }
 
-func TestReaderProtocolDefaultsToANSIForKittyTerminal(t *testing.T) {
+func TestReaderProtocolDefaultsToKittyForKittyTerminal(t *testing.T) {
 	t.Setenv("COMIGO_TUI_IMAGE", "auto")
 	t.Setenv("TERM", "xterm-kitty")
 	t.Setenv("TERM_PROGRAM", "")
@@ -1207,11 +1215,11 @@ func TestReaderProtocolDefaultsToANSIForKittyTerminal(t *testing.T) {
 	t.Setenv("GHOSTTY_RESOURCES_DIR", "")
 	t.Setenv("WEZTERM_PANE", "")
 
-	if got := detectTUIReaderImageProtocol(); got != termimg.Halfblocks {
-		t.Fatalf("reader protocol = %v, want Halfblocks for Kitty auto mode", got)
+	if got := detectTUIReaderImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("reader protocol = %v, want Kitty for Kitty auto mode", got)
 	}
-	if got := detectTUIImageProtocol(); got != termimg.Halfblocks {
-		t.Fatalf("preview protocol = %v, want Halfblocks for Kitty auto mode", got)
+	if got := detectTUIImageProtocol(); got != termimg.Kitty {
+		t.Fatalf("preview protocol = %v, want Kitty for Kitty auto mode", got)
 	}
 	if got := detectNativeTUIReaderImageProtocol(); got != termimg.Kitty {
 		t.Fatalf("native reader protocol = %v, want Kitty for manual Kitty image mode", got)

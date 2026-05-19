@@ -12,6 +12,7 @@ import (
 	"time"
 
 	termimg "github.com/blacktop/go-termimg"
+	xdraw "golang.org/x/image/draw"
 )
 
 const (
@@ -31,8 +32,9 @@ func renderKittyUnicodeImage(img image.Image, cols int, rows int) (string, []str
 	cols = max(1, cols)
 	rows = min(max(1, rows), kittyDiacriticLimit)
 
+	placementImage := rasterizeKittyPlacementImage(img, cols, rows)
 	var buf bytes.Buffer
-	if err := png.Encode(&buf, img); err != nil {
+	if err := png.Encode(&buf, placementImage); err != nil {
 		return "", nil, fmt.Errorf("encode kitty png: %w", err)
 	}
 
@@ -40,6 +42,17 @@ func renderKittyUnicodeImage(img image.Image, cols int, rows int) (string, []str
 	setup := renderKittyUnicodeSetup(buf.Bytes(), imageID, cols, rows)
 	lines := renderKittyPlaceholderLines(imageID, cols, rows)
 	return setup, lines, nil
+}
+
+// rasterizeKittyPlacementImage 把图片预先缩放到 virtual placement 的等效像素矩形。
+// Kitty 会在 c/r 矩形内保持源图比例 fit；这里让 PNG 自身比例先匹配字符格矩形，避免终端二次居中造成横向或纵向偏移。
+func rasterizeKittyPlacementImage(img image.Image, cols int, rows int) image.Image {
+	cellW, cellH := protocolCellPixels(termimg.Kitty)
+	targetW := max(1, cols*cellW)
+	targetH := max(1, rows*cellH)
+	dst := image.NewRGBA(image.Rect(0, 0, targetW, targetH))
+	xdraw.CatmullRom.Scale(dst, dst.Bounds(), img, img.Bounds(), xdraw.Src, nil)
+	return dst
 }
 
 func nextTUIKittyImageID() uint32 {
