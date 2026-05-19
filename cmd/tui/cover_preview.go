@@ -241,6 +241,7 @@ func loadCoverPreviewCmd(requestID int, bookID string, title string, width int, 
 			state.Setup = setup
 			state.Lines = lines
 			debugTUIImageRender("cover", protocol, img.Bounds(), width, height, imageW, imageH, len(state.Lines), len(state.Setup))
+			debugTUIPlaceholderLayout("cover", protocol, width, height, imageW, imageH, state.Lines, len(state.Setup))
 			return coverPreviewMsg{requestID: requestID, state: state}
 		}
 		termImage := termimg.New(img).
@@ -746,6 +747,84 @@ func debugTUIImageRender(scope string, protocol tuiImageProtocol, bounds image.R
 		imageW,
 		imageH,
 		lineCount,
+		setupBytes,
+	)
+}
+
+type tuiPlaceholderLineMetrics struct {
+	FirstWidth        int
+	LastWidth         int
+	MinWidth          int
+	MaxWidth          int
+	FirstPlaceholders int
+	LastPlaceholders  int
+	MinPlaceholders   int
+	MaxPlaceholders   int
+}
+
+// measureTUIPlaceholderLines 汇总 Kitty placeholder 文本行的宽度和占位符数量，用于定位布局层是否改写了图片网格。
+func measureTUIPlaceholderLines(lines []string) tuiPlaceholderLineMetrics {
+	if len(lines) == 0 {
+		return tuiPlaceholderLineMetrics{}
+	}
+	metrics := tuiPlaceholderLineMetrics{
+		MinWidth:        -1,
+		MinPlaceholders: -1,
+	}
+	for index, line := range lines {
+		width := xansi.StringWidth(line)
+		placeholders := strings.Count(line, termimg.PLACEHOLDER_CHAR)
+		if index == 0 {
+			metrics.FirstWidth = width
+			metrics.FirstPlaceholders = placeholders
+		}
+		metrics.LastWidth = width
+		metrics.LastPlaceholders = placeholders
+		if metrics.MinWidth < 0 || width < metrics.MinWidth {
+			metrics.MinWidth = width
+		}
+		if width > metrics.MaxWidth {
+			metrics.MaxWidth = width
+		}
+		if metrics.MinPlaceholders < 0 || placeholders < metrics.MinPlaceholders {
+			metrics.MinPlaceholders = placeholders
+		}
+		if placeholders > metrics.MaxPlaceholders {
+			metrics.MaxPlaceholders = placeholders
+		}
+	}
+	return metrics
+}
+
+// debugTUIPlaceholderLayout 只在调试开关打开时记录 Kitty placeholder 布局，不改变渲染文本。
+func debugTUIPlaceholderLayout(scope string, protocol tuiImageProtocol, areaW int, areaH int, imageW int, imageH int, lines []string, setupBytes int) {
+	if os.Getenv("COMIGO_TUI_IMAGE_DEBUG") == "" || protocol != termimg.Kitty {
+		return
+	}
+	metrics := measureTUIPlaceholderLines(lines)
+	lineCount := len(lines)
+	lastRow := max(0, lineCount-1)
+	lastColumn := max(0, metrics.LastPlaceholders-1)
+	logger.Infof(
+		"TUI kitty placeholder layout scope=%s area=%dx%d image=%dx%d lines=%d width[first=%d last=%d min=%d max=%d] placeholders[first=%d last=%d min=%d max=%d] pad=%dx%d expectedFirst=0:0 expectedLast=%d:%d setupBytes=%d",
+		scope,
+		areaW,
+		areaH,
+		imageW,
+		imageH,
+		lineCount,
+		metrics.FirstWidth,
+		metrics.LastWidth,
+		metrics.MinWidth,
+		metrics.MaxWidth,
+		metrics.FirstPlaceholders,
+		metrics.LastPlaceholders,
+		metrics.MinPlaceholders,
+		metrics.MaxPlaceholders,
+		max(0, (areaW-imageW)/2),
+		max(0, (areaH-lineCount)/2),
+		lastRow,
+		lastColumn,
 		setupBytes,
 	)
 }

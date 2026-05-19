@@ -380,6 +380,20 @@ func TestKittyPlaceholderCellOmitsUnusedIDExtraDiacritic(t *testing.T) {
 	}
 }
 
+func TestMeasureTUIPlaceholderLines(t *testing.T) {
+	_, lines, err := renderKittyUnicodeImage(image.NewRGBA(image.Rect(0, 0, 4, 4)), 3, 2)
+	if err != nil {
+		t.Fatalf("renderKittyUnicodeImage() error = %v", err)
+	}
+	metrics := measureTUIPlaceholderLines(lines)
+	if metrics.FirstWidth != 3 || metrics.LastWidth != 3 || metrics.MinWidth != 3 || metrics.MaxWidth != 3 {
+		t.Fatalf("placeholder widths = %+v, want all 3", metrics)
+	}
+	if metrics.FirstPlaceholders != 3 || metrics.LastPlaceholders != 3 || metrics.MinPlaceholders != 3 || metrics.MaxPlaceholders != 3 {
+		t.Fatalf("placeholder counts = %+v, want all 3", metrics)
+	}
+}
+
 func TestCoverResizeHeightUsesHighResolutionForTUI(t *testing.T) {
 	if got := coverResizeHeight(10, termimg.Halfblocks); got < coverPreviewMinResizeHeight {
 		t.Fatalf("halfblocks resize height = %d, want at least %d", got, coverPreviewMinResizeHeight)

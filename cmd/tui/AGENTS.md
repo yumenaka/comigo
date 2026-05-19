@@ -18,7 +18,7 @@
 - WezTerm 走 iTerm2 协议时，尺寸估算仍使用 WezTerm 的字符格比例；OSC 1337 只固定贴边轴，另一轴传 `auto`，减少协议内部二次等比缩放带来的底部留白。
 - Halfblocks 使用文本模式，不走图像层清理；它的尺寸计算保留半块字符的 1:2 逻辑。
 - 涉及终端差异的特殊处理应按终端类型局部生效，不要把 Ghostty/iTerm2 的 workaround 扩散到 Kitty 或 ANSI。
-- 可设置 `COMIGO_TUI_IMAGE_DEBUG=1` 打开 TUI 图片渲染诊断日志，观察协议、区域大小、源图大小、输出行数和控制序列字节数。
+- 可设置 `COMIGO_TUI_IMAGE_DEBUG=1` 打开 TUI 图片渲染诊断日志，观察协议、区域大小、源图大小、输出行数、控制序列字节数，以及 Kitty placeholder 行宽/占位符数量/padding。
 - Kitty placeholder 行包含 `U+10EEEE` 和组合符；未超宽时不要做通用 ANSI 截断重写，避免破坏行/列/ID 编码。
 - Kitty setup（图像传输和 `U=1` virtual placement）只应在图片切换或 Kitty 图像层被清理后发送一次；普通 TUI 重绘只输出 placeholder 文本。
 - Kitty 终端阅读的无效尝试需要及时撤回，避免刷新策略堆叠后掩盖真正原因。

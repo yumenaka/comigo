@@ -482,6 +482,7 @@ func renderTerminalReaderImage(state *terminalReaderState, data []byte, img imag
 		state.Setup = setup
 		state.Lines = lines
 		debugTUIImageRender("reader", protocol, img.Bounds(), state.Width, state.Height, imageW, imageH, len(state.Lines), len(state.Setup))
+		debugTUIPlaceholderLayout("reader", protocol, state.Width, state.Height, imageW, imageH, state.Lines, len(state.Setup))
 		return
 	}
 	rendered, err := termImage.Render()
