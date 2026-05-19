@@ -20,6 +20,7 @@
 - 涉及终端差异的特殊处理应按终端类型局部生效，不要把 Ghostty/iTerm2 的 workaround 扩散到 Kitty 或 ANSI。
 - 可设置 `COMIGO_TUI_IMAGE_DEBUG=1` 打开 TUI 图片渲染诊断日志，观察协议、区域大小、源图大小、输出行数和控制序列字节数。
 - Kitty placeholder 行包含 `U+10EEEE` 和组合符；未超宽时不要做通用 ANSI 截断重写，避免破坏行/列/ID 编码。
+- Kitty setup（图像传输和 `U=1` virtual placement）只应在图片切换或 Kitty 图像层被清理后发送一次；普通 TUI 重绘只输出 placeholder 文本。
 - Kitty 终端阅读的无效尝试需要及时撤回，避免刷新策略堆叠后掩盖真正原因。
 
 ## 终端图片协议资料快照（2026-05-17）
@@ -62,6 +63,13 @@
 - Kitty 底部“多出两条第一行”的新判断：它不像整体文本错位，更像旧 row=0 placeholder/virtual placement 没有被完全删除，或当前 placeholder 输出在底部附近重复触发 row=0 解析。2 列安全边距、边框内嵌显示、翻页/缓存命中时强制清 Kitty 图层、synchronized output 都已实测无效并撤销。
 - Ghostty 从书架进入终端阅读时，预览区 Kitty overlay 需要在阅读页第一帧前发送 Kitty delete-all 指令；该清理只在进入终端阅读前一次性触发，不扩散为 Kitty 翻页刷新策略。
 - Sixel 手动补充模式已撤回：iTerm2 切换后输出可见字符，Rio 不显示图片；后续不要仅凭终端资料重新开放，必须先用实际 TUI 页面验证。
+
+## 2026-05-20 处理记录
+
+- Kitty placeholder 路径不再调用 `go-termimg` 的实验 `UseUnicode(true)` 渲染器；`cmd/tui/kitty_image.go` 按官方协议本地生成 `a=T,f=100,U=1,c,r` PNG 传输和可见 placeholder 行。
+- 本地 Kitty renderer 不做 CSI 字号/窗口查询，继续使用 Comigo 自己的非交互字符格估算，避免 Bubble Tea 输入流被终端查询响应污染。
+- 本地 Kitty image id 限制在 24-bit 内，placeholder 只写 row/column 两个 diacritic；超出官方 diacritic 表的极宽列才按协议从左侧 cell 继承递增。
+- `coverSetupKey` / `readerSetupKey` 记录终端侧已发送的 Kitty setup；同一图片的后续 TUI 重绘只输出 placeholder 文本，清理 Kitty 图像层或切换协议后再重新发送 setup。
 
 ## 参考资料
 

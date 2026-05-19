@@ -53,6 +53,7 @@ func isTextTUIImageProtocol(protocol tuiImageProtocol) bool {
 func (m *appModel) invalidateTUIImageState() {
 	m.coverRequestID++
 	m.coverPreview = coverPreviewState{}
+	m.markKittyImagesCleared()
 	if m.terminalReader.BookID == "" {
 		return
 	}
@@ -67,4 +68,10 @@ func (m *appModel) invalidateTUIImageState() {
 	m.terminalReader.Setup = ""
 	m.terminalReader.Lines = nil
 	m.terminalReader.Overlay = ""
+}
+
+// markKittyImagesCleared 标记终端侧 Kitty 图像缓存已经不可用，下一帧需要重新发送 setup。
+func (m *appModel) markKittyImagesCleared() {
+	m.coverSetupKey = ""
+	m.readerSetupKey = ""
 }

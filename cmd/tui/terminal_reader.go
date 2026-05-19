@@ -474,13 +474,13 @@ func renderTerminalReaderImage(state *terminalReaderState, data []byte, img imag
 		Scale(termimg.ScaleFit)
 	if protocol == termimg.Kitty {
 		// Kitty 系列终端用 Unicode placeholder，让图片跟随 Bubble Tea 文本行一起刷新，避免图层和页码不同步。
-		termImage = termImage.UseUnicode(true)
-		rendered, err := termImage.Render()
+		setup, lines, err := renderKittyUnicodeImage(img, renderW, renderH)
 		if err != nil {
 			state.ErrText = err.Error()
 			return
 		}
-		state.Setup, state.Lines = splitRenderedImageLines(rendered, protocol)
+		state.Setup = setup
+		state.Lines = lines
 		debugTUIImageRender("reader", protocol, img.Bounds(), state.Width, state.Height, imageW, imageH, len(state.Lines), len(state.Setup))
 		return
 	}
@@ -623,6 +623,7 @@ func (m *appModel) renderTerminalReaderClearPrefix() string {
 	if m.clearKittyImagesNextFrame {
 		builder.WriteString(termimg.ClearAllString())
 		m.clearKittyImagesNextFrame = false
+		m.markKittyImagesCleared()
 	}
 	switch m.terminalReader.Protocol {
 	case termimg.ITerm2:
@@ -640,6 +641,20 @@ func (m *appModel) renderTerminalReaderSetupPrefix() string {
 	if m.terminalReader.Protocol != termimg.Kitty {
 		return ""
 	}
+	if m.terminalReader.Setup == "" {
+		return ""
+	}
+	key := terminalReaderCacheKey(
+		m.terminalReader.BookID,
+		m.terminalReader.PageIndex,
+		m.terminalReader.Width,
+		m.terminalReader.Height,
+		m.terminalReader.Protocol,
+	)
+	if key == m.readerSetupKey {
+		return ""
+	}
+	m.readerSetupKey = key
 	return m.terminalReader.Setup
 }
 

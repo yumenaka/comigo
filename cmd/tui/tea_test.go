@@ -347,6 +347,39 @@ func TestSplitRenderedImageLinesKeepsAnsiInline(t *testing.T) {
 	}
 }
 
+func TestRenderKittyUnicodeImageSplitsSetupAndPlaceholders(t *testing.T) {
+	setup, lines, err := renderKittyUnicodeImage(image.NewRGBA(image.Rect(0, 0, 4, 4)), 3, 2)
+	if err != nil {
+		t.Fatalf("renderKittyUnicodeImage() error = %v", err)
+	}
+	if !strings.Contains(setup, "a=T,f=100,t=d,i=") || !strings.Contains(setup, "U=1,c=3,r=2") {
+		t.Fatalf("kitty setup should transmit PNG and create virtual placement in one command, got %q", setup)
+	}
+	if strings.Contains(setup, termimg.PLACEHOLDER_CHAR) {
+		t.Fatalf("kitty setup should not include visible placeholders, got %q", setup)
+	}
+	if len(lines) != 2 {
+		t.Fatalf("placeholder line count = %d, want 2", len(lines))
+	}
+	for _, line := range lines {
+		if strings.Count(line, termimg.PLACEHOLDER_CHAR) != 3 {
+			t.Fatalf("placeholder line should contain 3 cells, got %q", line)
+		}
+		if got := xansi.StringWidth(line); got != 3 {
+			t.Fatalf("placeholder line width = %d, want 3", got)
+		}
+	}
+}
+
+func TestKittyPlaceholderCellOmitsUnusedIDExtraDiacritic(t *testing.T) {
+	if got := len([]rune(kittyPlaceholderCell(0, 0, 0))); got != 3 {
+		t.Fatalf("24-bit placeholder rune count = %d, want placeholder + row + column", got)
+	}
+	if got := len([]rune(kittyPlaceholderCell(0, 0, 1))); got != 4 {
+		t.Fatalf("32-bit placeholder rune count = %d, want placeholder + row + column + id extra", got)
+	}
+}
+
 func TestCoverResizeHeightUsesHighResolutionForTUI(t *testing.T) {
 	if got := coverResizeHeight(10, termimg.Halfblocks); got < coverPreviewMinResizeHeight {
 		t.Fatalf("halfblocks resize height = %d, want at least %d", got, coverPreviewMinResizeHeight)
@@ -503,6 +536,9 @@ func TestRenderCoverSetupPrefixOnlyForCurrentKittyImage(t *testing.T) {
 	}
 	if got := model.renderCoverSetupPrefix(); got != "SETUP" {
 		t.Fatalf("cover setup prefix = %q, want SETUP", got)
+	}
+	if got := model.renderCoverSetupPrefix(); got != "" {
+		t.Fatalf("cover setup prefix should only be sent once, got %q", got)
 	}
 	model.coverPreview.BookID = "book2"
 	if got := model.renderCoverSetupPrefix(); got != "" {
@@ -1105,6 +1141,9 @@ func TestTerminalReaderSetupPrefixOnlyForKitty(t *testing.T) {
 	model := &appModel{terminalReader: terminalReaderState{Protocol: termimg.Kitty, Setup: "SETUP"}}
 	if got := model.renderTerminalReaderSetupPrefix(); got != "SETUP" {
 		t.Fatalf("reader setup prefix = %q, want SETUP", got)
+	}
+	if got := model.renderTerminalReaderSetupPrefix(); got != "" {
+		t.Fatalf("reader setup prefix should only be sent once, got %q", got)
 	}
 	model.terminalReader.Protocol = termimg.Halfblocks
 	if got := model.renderTerminalReaderSetupPrefix(); got != "" {

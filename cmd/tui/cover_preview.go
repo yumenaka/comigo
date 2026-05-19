@@ -232,14 +232,21 @@ func loadCoverPreviewCmd(requestID int, bookID string, title string, width int, 
 			return coverPreviewMsg{requestID: requestID, state: state}
 		}
 		renderW, renderH := termImageRenderSizeForProtocol(imageW, imageH, protocol)
+		if protocol == termimg.Kitty && !isCoverOverlayProtocol(protocol) {
+			setup, lines, err := renderKittyUnicodeImage(img, renderW, renderH)
+			if err != nil {
+				state.ErrText = err.Error()
+				return coverPreviewMsg{requestID: requestID, state: state}
+			}
+			state.Setup = setup
+			state.Lines = lines
+			debugTUIImageRender("cover", protocol, img.Bounds(), width, height, imageW, imageH, len(state.Lines), len(state.Setup))
+			return coverPreviewMsg{requestID: requestID, state: state}
+		}
 		termImage := termimg.New(img).
 			Protocol(protocol).
 			Size(renderW, renderH).
 			Scale(termimg.ScaleFit)
-		if protocol == termimg.Kitty && !isCoverOverlayProtocol(protocol) {
-			// Kitty 使用 Unicode placeholder，这样图片区域能跟随文本布局，不需要额外覆盖定位。
-			termImage = termImage.UseUnicode(true)
-		}
 		rendered, err := termImage.Render()
 		if err != nil {
 			state.ErrText = err.Error()
@@ -507,6 +514,7 @@ func (m *appModel) renderCoverClearPrefix(rect panelRect) string {
 	if m.clearKittyImagesNextFrame {
 		builder.WriteString(termimg.ClearAllString())
 		m.clearKittyImagesNextFrame = false
+		m.markKittyImagesCleared()
 	}
 	if _, ok := previewImageFrameFor(rect); ok && m.coverProtocol == termimg.ITerm2 {
 		// iTerm2 是独立图像层，切换封面时先清一帧屏幕，避免上一次 inline image 残留。
@@ -521,6 +529,14 @@ func (m *appModel) renderCoverSetupPrefix() string {
 	if item == nil || item.BookID != m.coverPreview.BookID || m.coverPreview.Protocol != termimg.Kitty {
 		return ""
 	}
+	if m.coverPreview.Setup == "" {
+		return ""
+	}
+	key := coverPreviewCacheKey(m.coverPreview.BookID, m.coverPreview.Width, m.coverPreview.Height, m.coverPreview.Protocol)
+	if key == m.coverSetupKey {
+		return ""
+	}
+	m.coverSetupKey = key
 	return m.coverPreview.Setup
 }
 

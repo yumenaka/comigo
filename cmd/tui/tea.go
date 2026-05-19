@@ -189,11 +189,13 @@ type appModel struct {
 	coverPreview   coverPreviewState            // 当前选中书籍的封面预览状态
 	coverCache     map[string]coverPreviewState // 已渲染封面缓存，避免频繁滚动时重复解码
 	coverRequestID int                          // 封面异步加载序号，用于丢弃过期结果
+	coverSetupKey  string                       // 已发送到 Kitty 的封面 setup key，避免每帧重复传图
 
 	readerProtocol            tuiImageProtocol               // 终端阅读使用的图片协议，现代 Kitty 协议终端会尝试原生图像
 	terminalReader            terminalReaderState            // 终端阅读状态
 	terminalReaderCache       map[string]terminalReaderState // 终端阅读页缓存
 	readerRequestID           int                            // 终端阅读异步加载序号
+	readerSetupKey            string                         // 已发送到 Kitty 的阅读页 setup key，避免每帧重复传图
 	readerAutoFlip            bool                           // 是否正在自动翻页
 	readerAutoInterval        int                            // 自动翻页间隔秒数
 	readerNextAutoAt          time.Time                      // 下一次自动翻页时间
