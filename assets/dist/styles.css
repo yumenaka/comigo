@@ -6716,10 +6716,6 @@
       background-color: var(--color-gray-300);
     }
 
-    .hover\:bg-gray-400:hover {
-      background-color: var(--color-gray-400);
-    }
-
     .hover\:bg-gray-700:hover {
       background-color: var(--color-gray-700);
     }
@@ -6854,6 +6850,10 @@
     --tw-ring-color: var(--color-blue-300);
   }
 
+  .focus\:ring-blue-400:focus {
+    --tw-ring-color: var(--color-blue-400);
+  }
+
   .focus\:ring-blue-500:focus {
     --tw-ring-color: var(--color-blue-500);
   }
@@ -6923,6 +6923,10 @@
 
     .sm\:inline {
       display: inline;
+    }
+
+    .sm\:inline-flex {
+      display: inline-flex;
     }
 
     .sm\:h-22 {
@@ -6999,12 +7003,6 @@
 
     .md\:flex-row {
       flex-direction: row;
-    }
-
-    .md\:truncate {
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
     }
 
     .md\:px-8 {

@@ -2,6 +2,7 @@ package scroll
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -43,6 +44,10 @@ func ScrollModeHandler(c echo.Context) error {
 		)
 		// 渲染 404 页面
 		return common.RenderHTML(c, indexHtml)
+	}
+	// HTML 单文件书籍直接返回源文件，避免卷轴模板包裹后破坏原页面结构和脚本。
+	if book.Type == model.TypeHTML {
+		return c.Redirect(http.StatusTemporaryRedirect, common.RawBookURL(book))
 	}
 	book.SortPages(sortBy)
 	loadMode := parseScrollLoadMode(c)

@@ -186,52 +186,36 @@ templ HeaderTitle(title string, downloadLink string) {
 	</div>
 }
 
-// HeaderQuickJumpTitle 定义了一个标题组件，显示当前书籍的标题，并在在线模式下提供一个下拉菜单，允许用户快速跳转到同一层级的其他书籍。
-// 下拉菜单的内容根据传入的 books 参数动态生成，点击不同的书籍链接会跳转到相应的页面。
-templ HeaderQuickJumpTitle(title string, books *model.BookInfos) {
-	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
-		<span x-show="!$store.global.onlineBook" class="text-lg font-semibold">{ title }</span>
-		<button
-			id="quickJumpBarDropdownButton"
-			title={ title }
-			x-show="$store.global.onlineBook"
-			data-dropdown-toggle="QuickJumpDropdown"
-			data-dropdown-trigger="click"
-			class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
-			type="button"
-		>
-			{ title }
-			@svg.ArrowDown()
-		</button>
-		<!-- 下拉菜单，同一阶层的其他书籍 -->
-		<div
-			id="QuickJumpDropdown"
-			x-show="$store.global.onlineBook"
-			class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700"
-		>
-			<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
-				if books != nil {
-					for _, book := range *books {
-						if book.Type == model.TypeBooksGroup {
-							<li>
-								<a href={ templ.SafeURL(config.PrefixPath("/shelf/" + book.BookID)) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
-							</li>
-						}
-						if book.Type != model.TypeBooksGroup {
-							<li x-data={ BookURL(book.BookID) }>
-								<a :href="BookURL" class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
-							</li>
-						}
-					}
-				}
-			</ul>
-		</div>
-	</div>
+// HeaderQuickJumpTitle 定义阅读页标题区；有同级可切换书籍时显示居中的有限宽 select。
+templ HeaderQuickJumpTitle(title string, currentBookID string, books *model.BookInfos) {
+	@HeaderQuickJumpTitleView(title, NewBookSwitchView(currentBookID, books))
 }
 
-// 根据当前阅读模式和卷轴加载策略生成书籍链接。
-func BookURL(bookID string) string {
-	return fmt.Sprintf(`{BookURL: $store.global.getReadURL("%s", 1)}`, bookID)
+templ HeaderQuickJumpTitleView(title string, view BookSwitchView) {
+	<div class="flex min-w-0 flex-1 items-center justify-center p-0 m-0 font-semibold text-center">
+		<span x-show="!$store.global.onlineBook" title={ title } class="min-w-0 truncate text-lg font-semibold">{ title }</span>
+		if view.HasSwitchTarget() {
+			<div
+				x-show="$store.global.onlineBook"
+				x-data={ BookSwitchXData("") }
+				class="flex min-w-0 max-w-full flex-1 items-center justify-center"
+			>
+				<select
+					id="HeaderBookSwitchSelect"
+					title={ title }
+					@change="go($event.target.value)"
+					class="h-10 w-full min-w-0 max-w-full rounded border-2 border-gray-500 bg-base-100 px-2 py-0 text-center font-semibold text-accent-content focus:outline-none dark:border-gray-200 md:max-w-2xl"
+					aria-label={ BookSwitchLabel() }
+				>
+					for _, item := range view.Items {
+						<option value={ item.BookID } selected?={ item.Current }>{ item.Title }</option>
+					}
+				</select>
+			</div>
+		} else {
+			<span x-show="$store.global.onlineBook" title={ title } class="min-w-0 truncate text-lg font-semibold">{ title }</span>
+		}
+	</div>
 }
 
 // ReSortIcon 定义了一个排序图标，点击后会显示一个下拉菜单，允许用户选择不同的排序方式。根据当前URL路径，菜单会设置不同的cookie参数名来保存用户的选择，并在页面加载时读取该cookie以确定当前的排序方式。

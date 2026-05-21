@@ -83,10 +83,8 @@ func detectTUIImageProtocolWithKittyAuto(allowKittyAuto bool) tuiImageProtocol {
 			// WezTerm 的 Kitty/placeholder 路径在预览区仍不稳定，改用实测问题更少的 iTerm2 inline image 协议。
 			return termimg.ITerm2
 		}
-		protocol := termimg.DetectProtocol()
-		if protocol == termimg.ITerm2 || (allowKittyAuto && protocol == termimg.Kitty) {
-			return protocol
-		}
+		// 不再调用 go-termimg 的交互式 DetectProtocol：它会发送 Kitty/Sixel 查询，
+		// 在 Bubble Tea 接管输入或 Ctrl-C 退出时可能把查询序列泄漏到终端。
 		return termimg.Halfblocks
 	case "off", "none", "false", "0":
 		return termimg.Unsupported

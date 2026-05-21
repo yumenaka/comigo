@@ -875,9 +875,8 @@ func HeaderTitle(title string, downloadLink string) templ.Component {
 	})
 }
 
-// HeaderQuickJumpTitle 定义了一个标题组件，显示当前书籍的标题，并在在线模式下提供一个下拉菜单，允许用户快速跳转到同一层级的其他书籍。
-// 下拉菜单的内容根据传入的 books 参数动态生成，点击不同的书籍链接会跳转到相应的页面。
-func HeaderQuickJumpTitle(title string, books *model.BookInfos) templ.Component {
+// HeaderQuickJumpTitle 定义阅读页标题区；有同级可切换书籍时显示居中的有限宽 select。
+func HeaderQuickJumpTitle(title string, currentBookID string, books *model.BookInfos) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -898,126 +897,7 @@ func HeaderQuickJumpTitle(title string, books *model.BookInfos) templ.Component 
 			templ_7745c5c3_Var32 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<div class=\"flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate\"><span x-show=\"!$store.global.onlineBook\" class=\"text-lg font-semibold\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var33 string
-		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(title)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 193, Col: 80}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "</span> <button id=\"quickJumpBarDropdownButton\" title=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var34 string
-		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 196, Col: 16}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var34)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\" x-show=\"$store.global.onlineBook\" data-dropdown-toggle=\"QuickJumpDropdown\" data-dropdown-trigger=\"click\" class=\"max-w-fit px-5 py-2.5 inline-flex hover:bg-gray-400 rounded-lg font-semibold text-center items-center\" type=\"button\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var35 string
-		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(title)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 203, Col: 10}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = svg.ArrowDown().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "</button><!-- 下拉菜单，同一阶层的其他书籍 --><div id=\"QuickJumpDropdown\" x-show=\"$store.global.onlineBook\" class=\"max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90 dark:bg-gray-700\"><ul class=\"py-2 mt-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"quickJumpBarDropdownButton\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if books != nil {
-			for _, book := range *books {
-				if book.Type == model.TypeBooksGroup {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "<li><a href=\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var36 templ.SafeURL
-					templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath("/shelf/" + book.BookID)))
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 217, Col: 75}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var37 string
-					templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(book.Title)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 217, Col: 177}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</a></li>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, " ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				if book.Type != model.TypeBooksGroup {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<li x-data=\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var38 string
-					templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.ResolveAttributeValue(BookURL(book.BookID))
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 221, Col: 40}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var38)
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "\"><a :href=\"BookURL\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var39 string
-					templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(book.Title)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 222, Col: 126}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "</a></li>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				}
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "</ul></div></div>")
+		templ_7745c5c3_Err = HeaderQuickJumpTitleView(title, NewBookSwitchView(currentBookID, books)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1025,9 +905,185 @@ func HeaderQuickJumpTitle(title string, books *model.BookInfos) templ.Component 
 	})
 }
 
-// 根据当前阅读模式和卷轴加载策略生成书籍链接。
-func BookURL(bookID string) string {
-	return fmt.Sprintf(`{BookURL: $store.global.getReadURL("%s", 1)}`, bookID)
+func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var33 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var33 == nil {
+			templ_7745c5c3_Var33 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<div class=\"flex min-w-0 flex-1 items-center justify-center p-0 m-0 font-semibold text-center\"><span x-show=\"!$store.global.onlineBook\" title=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var34 string
+		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 196, Col: 56}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var34)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" class=\"min-w-0 truncate text-lg font-semibold\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var35 string
+		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 196, Col: 113}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</span> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if view.HasSwitchTarget() {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<div x-show=\"$store.global.onlineBook\" x-data=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var36 string
+			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.ResolveAttributeValue(BookSwitchXData(""))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 200, Col: 32}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var36)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\" class=\"flex min-w-0 max-w-full flex-1 items-center justify-center\"><select id=\"HeaderBookSwitchSelect\" title=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var37 string
+			templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 205, Col: 18}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var37)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "\" @change=\"go($event.target.value)\" class=\"h-10 w-full min-w-0 max-w-full rounded border-2 border-gray-500 bg-base-100 px-2 py-0 text-center font-semibold text-accent-content focus:outline-none dark:border-gray-200 md:max-w-2xl\" aria-label=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var38 string
+			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.ResolveAttributeValue(BookSwitchLabel())
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 208, Col: 35}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var38)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, item := range view.Items {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<option value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var39 string
+				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.ResolveAttributeValue(item.BookID)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 211, Col: 33}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var39)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if item.Current {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, " selected")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, ">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var40 string
+				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(item.Title)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 211, Col: 75}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "</option>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "</select></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<span x-show=\"$store.global.onlineBook\" title=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var41 string
+			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 216, Col: 56}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var41)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "\" class=\"min-w-0 truncate text-lg font-semibold\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var42 string
+			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 216, Col: 113}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
 }
 
 // ReSortIcon 定义了一个排序图标，点击后会显示一个下拉菜单，允许用户选择不同的排序方式。根据当前URL路径，菜单会设置不同的cookie参数名来保存用户的选择，并在页面加载时读取该cookie以确定当前的排序方式。
@@ -1047,12 +1103,12 @@ func ReSortIcon() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var40 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var40 == nil {
-			templ_7745c5c3_Var40 = templ.NopComponent
+		templ_7745c5c3_Var43 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var43 == nil {
+			templ_7745c5c3_Var43 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ --><!-- data-dropdown-trigger=\"{hover|click}\"  二选一--><svg x-show=\"$store.global.onlineBook && !window.location.href.includes('settings') && !window.location.href.includes('upload')\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\" id=\"ResortButton\" data-dropdown-toggle=\"ReSortDropdownMenu\" data-dropdown-trigger=\"hover\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path d=\"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z\" fill=\"currentColor\"></path></svg><div id=\"ReSortDropdownMenu\" x-show=\"$store.global.onlineBook\" x-data=\"{\n                    getCurrentSortBy() {\n                        // 根据URL路径决定使用哪个cookie参数名\n                        let paramName = '';\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        if (currentUrl.includes('/flip/')) {\n                            paramName = 'FlipSortBy';\n                        } else if (currentUrl.includes('/scroll/')) {\n                            paramName = 'ScrollSortBy';\n                        } else {\n                            paramName = 'ShelfSortBy';\n                        }\n\n                        // 获取cookie\n                        const cookies = document.cookie.split(';');\n                        for (let i = 0; i < cookies.length; i++) {\n                            const cookie = cookies[i].trim();\n                            if (cookie.startsWith(paramName + '=')) {\n                                return decodeURIComponent(cookie.substring(paramName.length + 1));\n                            }\n                        }\n                        return ''; // 默认值\n                    },\n                    isShelfSortMenu() {\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        return !currentUrl.includes('/flip/') && !currentUrl.includes('/scroll/');\n                    },\n                    setCookie(value) {\n                        // 根据URL路径决定使用哪个cookie参数名\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        if (currentUrl.includes('/flip/')) {\n                            paramName = 'FlipSortBy';\n                        } else if (currentUrl.includes('/scroll/')) {\n                            paramName = 'ScrollSortBy';\n                        } else {\n                            paramName = 'ShelfSortBy';\n                        }\n                        // 设置cookie，过期时间为365天\n                        const expirationDate = new Date();\n                        expirationDate.setDate(expirationDate.getDate() + 365);\n                        document.cookie = paramName + '=' + encodeURIComponent(value) + '; expires=' + expirationDate.toUTCString() + '; path=/; SameSite=Lax';\n                        window.location.reload();\n                    }\n                }\" class=\"z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700\" x-init=\"currentSortBy = getCurrentSortBy()\"><ul class=\"py-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"ResortButton\"><li><a href=\"#\" @click.prevent=\"setCookie('filename')\" x-text=\"i18next.t('sort_by_filename')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('modify_time')\" x-text=\"i18next.t('sort_by_modify_time')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filesize')\" x-text=\"i18next.t('sort_by_filesize')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li x-show=\"isShelfSortMenu()\"><a href=\"#\" @click.prevent=\"setCookie('last_read')\" x-text=\"i18next.t('sort_by_last_read')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'last_read'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filename_reverse')\" x-text=\"i18next.t('sort_by_filename_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename_reverse'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('modify_time_reverse')\" x-text=\"i18next.t('sort_by_modify_time_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time_reverse'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filesize_reverse')\" x-text=\"i18next.t('sort_by_filesize_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize_reverse'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li></ul></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ --><!-- data-dropdown-trigger=\"{hover|click}\"  二选一--><svg x-show=\"$store.global.onlineBook && !window.location.href.includes('settings') && !window.location.href.includes('upload')\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\" id=\"ResortButton\" data-dropdown-toggle=\"ReSortDropdownMenu\" data-dropdown-trigger=\"hover\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path d=\"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z\" fill=\"currentColor\"></path></svg><div id=\"ReSortDropdownMenu\" x-show=\"$store.global.onlineBook\" x-data=\"{\n                    getCurrentSortBy() {\n                        // 根据URL路径决定使用哪个cookie参数名\n                        let paramName = '';\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        if (currentUrl.includes('/flip/')) {\n                            paramName = 'FlipSortBy';\n                        } else if (currentUrl.includes('/scroll/')) {\n                            paramName = 'ScrollSortBy';\n                        } else {\n                            paramName = 'ShelfSortBy';\n                        }\n\n                        // 获取cookie\n                        const cookies = document.cookie.split(';');\n                        for (let i = 0; i < cookies.length; i++) {\n                            const cookie = cookies[i].trim();\n                            if (cookie.startsWith(paramName + '=')) {\n                                return decodeURIComponent(cookie.substring(paramName.length + 1));\n                            }\n                        }\n                        return ''; // 默认值\n                    },\n                    isShelfSortMenu() {\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        return !currentUrl.includes('/flip/') && !currentUrl.includes('/scroll/');\n                    },\n                    setCookie(value) {\n                        // 根据URL路径决定使用哪个cookie参数名\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        if (currentUrl.includes('/flip/')) {\n                            paramName = 'FlipSortBy';\n                        } else if (currentUrl.includes('/scroll/')) {\n                            paramName = 'ScrollSortBy';\n                        } else {\n                            paramName = 'ShelfSortBy';\n                        }\n                        // 设置cookie，过期时间为365天\n                        const expirationDate = new Date();\n                        expirationDate.setDate(expirationDate.getDate() + 365);\n                        document.cookie = paramName + '=' + encodeURIComponent(value) + '; expires=' + expirationDate.toUTCString() + '; path=/; SameSite=Lax';\n                        window.location.reload();\n                    }\n                }\" class=\"z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700\" x-init=\"currentSortBy = getCurrentSortBy()\"><ul class=\"py-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"ResortButton\"><li><a href=\"#\" @click.prevent=\"setCookie('filename')\" x-text=\"i18next.t('sort_by_filename')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('modify_time')\" x-text=\"i18next.t('sort_by_modify_time')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filesize')\" x-text=\"i18next.t('sort_by_filesize')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li x-show=\"isShelfSortMenu()\"><a href=\"#\" @click.prevent=\"setCookie('last_read')\" x-text=\"i18next.t('sort_by_last_read')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'last_read'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filename_reverse')\" x-text=\"i18next.t('sort_by_filename_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename_reverse'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('modify_time_reverse')\" x-text=\"i18next.t('sort_by_modify_time_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time_reverse'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filesize_reverse')\" x-text=\"i18next.t('sort_by_filesize_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize_reverse'}\" class=\"block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li></ul></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

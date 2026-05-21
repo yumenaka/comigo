@@ -85,10 +85,7 @@ func detectTUIReaderImageProtocolWithKittyAuto(allowKittyAuto bool) tuiImageProt
 			}
 			return termimg.Halfblocks
 		}
-		protocol := termimg.DetectProtocol()
-		if protocol == termimg.ITerm2 || (allowKittyAuto && protocol == termimg.Kitty) {
-			return protocol
-		}
+		// 不再调用 go-termimg 的交互式 DetectProtocol，避免 Ctrl-C 时泄漏 Kitty 查询序列。
 		return termimg.Halfblocks
 	case "off", "none", "false", "0":
 		return termimg.Unsupported

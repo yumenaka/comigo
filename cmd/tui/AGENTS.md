@@ -73,6 +73,11 @@
 - 本地 Kitty image id 限制在 24-bit 内，placeholder 只写 row/column 两个 diacritic；超出官方 diacritic 表的极宽列才按协议从左侧 cell 继承递增。
 - `coverSetupKey` / `readerSetupKey` 记录终端侧已发送的 Kitty setup；同一图片的后续 TUI 重绘只输出 placeholder 文本，清理 Kitty 图像层或切换协议后再重新发送 setup。
 
+## 2026-05-21 处理记录
+
+- 自动协议选择不再调用 `go-termimg` 的交互式 `DetectProtocol()`；已知终端继续用环境变量判断，未知终端直接回退 ANSI/Halfblocks。
+- 原因：`DetectProtocol()` 会发送 Kitty/Sixel 能力查询，Bubble Tea 接管输入或 Ctrl-C 退出时可能把 `Gi=42,s=1,v=1,a=q,t=d,f=24;AAAA` 这类查询内容泄漏到终端。
+
 ## 参考资料
 
 - Kitty graphics protocol: https://sw.kovidgoyal.net/kitty/graphics-protocol/

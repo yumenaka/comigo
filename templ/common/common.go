@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"mime"
+	"net/url"
 	"path/filepath"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -74,6 +75,19 @@ func QuickJumpBarBooks(b *model.Book) (list *model.BookInfos) {
 		return nil
 	}
 	return list
+}
+
+// RawBookURL 生成单文件书籍的原始文件访问地址。
+// HTML/音视频这类单文件内容不需要阅读模板时，应跳转到该地址交给 raw API 返回源文件。
+func RawBookURL(book *model.Book) string {
+	if book == nil {
+		return config.PrefixPath("/")
+	}
+	fileName := book.Title
+	if fileName == "" {
+		fileName = filepath.Base(book.BookPath)
+	}
+	return config.PrefixPath("/api/raw/" + url.PathEscape(book.BookID) + "/" + url.PathEscape(fileName))
 }
 
 func GetFileBase64Text(bookID string, fileName string) string {
