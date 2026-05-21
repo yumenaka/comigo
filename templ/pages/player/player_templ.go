@@ -17,7 +17,7 @@ import (
 )
 
 // PlayerPage 定义播放器页面主体
-func PlayerPage(c echo.Context, book *model.Book, playlist *model.BookInfos) templ.Component {
+func PlayerPage(c echo.Context, book *model.Book, playerData PlayerData) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -38,7 +38,7 @@ func PlayerPage(c echo.Context, book *model.Book, playlist *model.BookInfos) tem
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = InsertData(book, playlist, tools.GetServerInfo(
+		templ_7745c5c3_Err = InsertData(playerData, tools.GetServerInfo(
 			tools.ServerInfoParams{
 				Cfg:            config.GetCfg(),
 				Version:        config.GetVersion(),
@@ -65,7 +65,7 @@ func PlayerPage(c echo.Context, book *model.Book, playlist *model.BookInfos) tem
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = MainArea(c, book, playlist).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = MainArea(c, book, playerData).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -84,8 +84,8 @@ func PlayerPage(c echo.Context, book *model.Book, playlist *model.BookInfos) tem
 	})
 }
 
-// InsertData 插入书籍数据和播放列表到页面
-func InsertData(bookData any, playlist any, serverStatus any) templ.Component {
+// InsertData 插入播放器专用数据到页面，避免把本地 BookPath/StoreUrl 暴露给前端。
+func InsertData(playerData any, serverStatus any) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -106,14 +106,8 @@ func InsertData(bookData any, playlist any, serverStatus any) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if bookData != nil {
-			templ_7745c5c3_Err = templ.JSONScript("NowBook", bookData).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if playlist != nil {
-			templ_7745c5c3_Err = templ.JSONScript("Playlist", playlist).Render(ctx, templ_7745c5c3_Buffer)
+		if playerData != nil {
+			templ_7745c5c3_Err = templ.JSONScript("PlayerData", playerData).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

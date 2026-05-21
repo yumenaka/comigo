@@ -22,13 +22,13 @@ type BookInfo struct {
 	Type   SupportFileType `json:"type"`   // 书籍类型
 
 	// ===== 文件路径 =====
-	BookPath     string `json:"book_path"` // 文件绝对路径，JSON 不解析
-	ParentFolder string `json:"-"`         // 父文件夹名称，JSON 不解析
-	StoreUrl     string `json:"store_url"` // 在哪个子书库
+	BookPath     string `json:"-"` // 文件绝对路径，JSON 不解析
+	ParentFolder string `json:"-"` // 父文件夹名称，JSON 不解析
+	StoreUrl     string `json:"-"` // 在哪个子书库, JSON 不解析
 
 	// ===== 远程存储 =====
-	IsRemote  bool   `json:"is_remote"`  // 是否为远程书籍（WebDAV 等）
-	RemoteURL string `json:"remote_url"` // 远程存储的基础 URL
+	IsRemote  bool   `json:"is_remote"` // 是否为远程书籍（WebDAV 等）
+	RemoteURL string `json:"-"`         // 远程存储的基础 URL，JSON 不解析
 
 	// ===== 文件属性 =====
 	FileSize  int64     `json:"file_size"`     // 文件大小

@@ -83,6 +83,15 @@ func RawBookURL(book *model.Book) string {
 	if book == nil {
 		return config.PrefixPath("/")
 	}
+	return RawBookInfoURL(book.BookInfo)
+}
+
+// RawBookInfoURL 根据 BookInfo 生成原始文件访问地址。
+// 前端播放器、HTML 直出等场景只需要稳定的公开 URL，不需要知道本地 BookPath。
+func RawBookInfoURL(book model.BookInfo) string {
+	if book.BookID == "" {
+		return config.PrefixPath("/")
+	}
 	fileName := book.Title
 	if fileName == "" {
 		fileName = filepath.Base(book.BookPath)

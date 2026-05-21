@@ -1,9 +1,11 @@
 package store
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -98,6 +100,50 @@ func TestStoreBookPersistsMetaAfterInMemoryStore(t *testing.T) {
 	}
 	if _, err := os.Stat(metaJSONPath(configDir, book)); err != nil {
 		t.Fatalf("StoreBook 应写 metadata 文件: %v", err)
+	}
+}
+
+func TestBookInfoJSONHidesLocalPathsButMetadataKeepsThem(t *testing.T) {
+	storeURL := filepath.Join(t.TempDir(), "books")
+	book := newStoreGroupTestBook(storeURL, "book-private-fields")
+	book.RemoteURL = "sftp://user:password@example.com:22/books"
+
+	publicJSON, err := json.Marshal(book)
+	if err != nil {
+		t.Fatalf("marshal public book json: %v", err)
+	}
+	if strings.Contains(string(publicJSON), "book_path") ||
+		strings.Contains(string(publicJSON), "store_url") ||
+		strings.Contains(string(publicJSON), "remote_url") ||
+		strings.Contains(string(publicJSON), book.RemoteURL) {
+		t.Fatalf("普通 JSON 不应输出内部路径字段: %s", publicJSON)
+	}
+
+	metaJSON, err := marshalBookMetaJSON(book)
+	if err != nil {
+		t.Fatalf("marshal metadata json: %v", err)
+	}
+	metaText := string(metaJSON)
+	if !strings.Contains(metaText, `"book_path"`) ||
+		!strings.Contains(metaText, `"store_url"`) ||
+		!strings.Contains(metaText, `"remote_url"`) {
+		t.Fatalf("metadata JSON 必须保留内部路径字段: %s", metaText)
+	}
+
+	var restored model.Book
+	if err := json.Unmarshal(metaJSON, &restored); err != nil {
+		t.Fatalf("unmarshal metadata json: %v", err)
+	}
+	if err := restoreBookMetaPrivateFields(metaJSON, &restored); err != nil {
+		t.Fatalf("restore metadata private fields: %v", err)
+	}
+	if restored.BookPath != book.BookPath || restored.StoreUrl != book.StoreUrl || restored.RemoteURL != book.RemoteURL {
+		t.Fatalf(
+			"metadata 内部字段恢复失败: got path=%q store=%q remote=%q",
+			restored.BookPath,
+			restored.StoreUrl,
+			restored.RemoteURL,
+		)
 	}
 }
 

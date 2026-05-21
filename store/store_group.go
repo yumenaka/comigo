@@ -126,8 +126,9 @@ func SaveMetaJson(book *model.Book) error {
 	}
 	// 构造保存路径
 	metaPath := filepath.Join(configDir, "metadata")
-	// 序列化书籍为 JSON 格式
-	jsonData, err := json.MarshalIndent(book, "", "  ")
+	// 序列化书籍为 metadata JSON。普通 API JSON 会隐藏本地路径；
+	// metadata 文件仍必须写入内部路径字段，否则重启后无法定位原始文件。
+	jsonData, err := marshalBookMetaJSON(book)
 	if err != nil {
 		return err
 	}
@@ -144,6 +145,48 @@ func SaveMetaJson(book *model.Book) error {
 	err = os.WriteFile(fileName, jsonData, 0o644)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+// marshalBookMetaJSON 专用于本地 metadata 持久化。
+// BookPath/StoreUrl/RemoteURL 在普通 JSON 响应中会被隐藏，但 metadata 必须保留这些内部字段。
+func marshalBookMetaJSON(book *model.Book) ([]byte, error) {
+	rawData, err := json.Marshal(book)
+	if err != nil {
+		return nil, err
+	}
+	payload := map[string]any{}
+	if err := json.Unmarshal(rawData, &payload); err != nil {
+		return nil, err
+	}
+	payload["book_path"] = book.BookPath
+	payload["store_url"] = book.StoreUrl
+	if book.RemoteURL != "" {
+		payload["remote_url"] = book.RemoteURL
+	}
+	if book.ParentFolder != "" {
+		payload["parent_folder"] = book.ParentFolder
+	}
+	return json.MarshalIndent(payload, "", "  ")
+}
+
+// restoreBookMetaPrivateFields 从 metadata JSON 读回普通响应中隐藏的内部字段。
+func restoreBookMetaPrivateFields(jsonData []byte, book *model.Book) error {
+	var privateFields struct {
+		BookPath     string `json:"book_path"`
+		StoreUrl     string `json:"store_url"`
+		RemoteURL    string `json:"remote_url"`
+		ParentFolder string `json:"parent_folder"`
+	}
+	if err := json.Unmarshal(jsonData, &privateFields); err != nil {
+		return err
+	}
+	book.BookPath = privateFields.BookPath
+	book.StoreUrl = privateFields.StoreUrl
+	book.RemoteURL = privateFields.RemoteURL
+	if privateFields.ParentFolder != "" {
+		book.ParentFolder = privateFields.ParentFolder
 	}
 	return nil
 }
@@ -249,6 +292,23 @@ func (ramStore *StoreInRam) LoadBooks() error {
 					logger.Infof(locale.GetString("log_error_deleting_corrupted_file"), fileName, errDel)
 				}
 				continue // 继续处理其他文件
+			}
+			err = restoreBookMetaPrivateFields(jsonData, &book)
+			if err != nil {
+				logger.Infof(locale.GetString("log_warning_corrupted_json_file"), fileName, err)
+				continue
+			}
+			if book.BookPath == "" || book.StoreUrl == "" {
+				// BookPath/StoreUrl 不再走普通 JSON 输出，但 metadata 必须保留。
+				// 遇到缺字段的旧/坏 metadata 时，先暂存书签再删除，让后续扫描重建完整数据。
+				if book.BookID != "" && len(book.BookMarks) > 0 {
+					ramStore.PendingBookmarks.Store(book.BookID, book.BookMarks)
+				}
+				errDel := os.Remove(filePath)
+				if errDel != nil {
+					logger.Infof(locale.GetString("log_error_deleting_orphan_metadata"), fileName, errDel)
+				}
+				continue
 			}
 			// 检查版本号：根据前两段版本号(major.minor)决定处理方式
 			currentVersion := config.GetVersion()
