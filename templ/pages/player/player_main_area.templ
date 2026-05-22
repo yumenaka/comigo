@@ -111,7 +111,7 @@ templ MainArea(c echo.Context, book *model.Book, playerData PlayerData) {
 					<p x-text="i18next.t('browser_not_support_audio')">您的浏览器不支持音频播放</p>
 				</audio>
 			}
-			<div class="mt-4 p-4 shadow border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100">
+			<div class="panel-surface mt-4 p-4 shadow border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100">
 				<div class="mb-4">
 					<input
 						type="range"
@@ -136,7 +136,7 @@ templ MainArea(c echo.Context, book *model.Book, playerData PlayerData) {
 							@click="playPrevious"
 							:disabled="currentIndex <= 0"
 							:class="currentIndex <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'"
-							class="p-3 bg-gray-200 rounded-full transition-colors"
+							class="panel-control p-3 bg-gray-200 rounded-full transition-colors"
 							:title="i18next.t('previous')"
 						>
 							<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -146,7 +146,7 @@ templ MainArea(c echo.Context, book *model.Book, playerData PlayerData) {
 						<button
 							type="button"
 							@click="togglePlay"
-							class="p-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+							class="panel-control p-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
 							:title="isPlaying ? i18next.t('pause') : i18next.t('play')"
 						>
 							<svg x-show="!isPlaying" class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -161,7 +161,7 @@ templ MainArea(c echo.Context, book *model.Book, playerData PlayerData) {
 							@click="playNext"
 							:disabled="currentIndex >= playlistData.length - 1"
 							:class="currentIndex >= playlistData.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'"
-							class="p-3 bg-gray-200 rounded-full transition-colors"
+							class="panel-control p-3 bg-gray-200 rounded-full transition-colors"
 							:title="i18next.t('next')"
 						>
 							<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -173,7 +173,7 @@ templ MainArea(c echo.Context, book *model.Book, playerData PlayerData) {
 						<button
 							type="button"
 							@click="toggleMute"
-							class="p-1.5 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
+							class="panel-control p-1.5 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
 							:title="$store.global.playerMuted ? 'Unmute' : 'Mute'"
 						>
 							<svg x-show="!$store.global.playerMuted" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -202,7 +202,7 @@ templ MainArea(c echo.Context, book *model.Book, playerData PlayerData) {
 					</div>
 				</div>
 			</div>
-			<div class="mt-4 p-4 shadow border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100">
+			<div class="panel-surface mt-4 p-4 shadow border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100">
 				<h3 class="text-lg font-semibold mb-2" x-text="i18next.t('playlist')">播放列表</h3>
 				<div class="max-h-72 overflow-y-auto">
 					<template x-for="(item, index) in playlistData" :key="item.id">

@@ -23,6 +23,9 @@ const allowedPrefix = "/yumenaka/"
 // GitHub 目标（固定）
 const githubBase = "https://github.com"
 
+// Comigo release 下载路径。只有这个仓库允许把 latest 映射到当前版本，避免影响其它被代理仓库。
+const comigoReleaseDownloadPathPrefix = "/yumenaka/comigo/releases/download/"
+
 // 预编译的正则表达式，用于替换 URL 中的 "latest" 为实际版本号
 var (
 	// 匹配 /releases/download/latest/ 路径
@@ -74,7 +77,7 @@ func ProxyHandler(c echo.Context) error {
 	// yumenaka/comigo/releases/download/v1.2.4/comi_v1.2.4_MacOS_arm64.tar.gz
 	// ->
 	// yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz
-	if strings.Contains(target, "latest") {
+	if shouldReplaceLatestWithVersion(target) {
 		target = replaceLatestWithVersion(target)
 	}
 
@@ -83,6 +86,19 @@ func ProxyHandler(c echo.Context) error {
 	}
 
 	return fetchAndStream(c, target)
+}
+
+// shouldReplaceLatestWithVersion 判断目标是否为 Comigo 官方 GitHub release 下载地址。
+// 其它仓库可能也有 latest tag 或 _latest_ 文件名，不能用当前 Comigo 版本号替换。
+func shouldReplaceLatestWithVersion(target string) bool {
+	tu, err := url.Parse(target)
+	if err != nil {
+		return false
+	}
+	if tu.Scheme != "https" || !strings.EqualFold(tu.Host, "github.com") {
+		return false
+	}
+	return strings.HasPrefix(tu.Path, comigoReleaseDownloadPathPrefix) && strings.Contains(tu.Path, "latest")
 }
 
 // fetchAndStream 获取目标资源并流式传输

@@ -13,7 +13,7 @@ templ UserInfoConfig() {
 	<div
 		id={ "user_config" }
 		x-data="{ collapsed: $persist(true).as('settings_user_info_collapsed') }"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<button
 			@click="collapsed = !collapsed"
@@ -43,11 +43,11 @@ templ UserInfoConfig() {
 		<div x-show="!collapsed" x-transition>
 			<form
 				id="user_config_form"
-				class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 gap-3"
+				class="panel-surface flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 gap-3"
 				x-data={ userInfoConfigXData() }
 			>
 				<div class="flex flex-col gap-0">
-					<div class="flex flex-col w-full p-3 m-1 border rounded shadow-sm bg-base-100 text-base-content border-slate-300 gap-3">
+					<div class="panel-surface flex flex-col w-full p-3 m-1 border rounded shadow-sm bg-base-100 text-base-content border-slate-300 gap-3">
 						<div>
 							<div x-text={ getTranslations("password_login_always_enabled") } class="text-left"></div>
 							<div x-text={ getTranslations("password_login_always_enabled_description") } class="w-full py-1 text-left text-xs text-base-content"></div>
@@ -62,7 +62,7 @@ templ UserInfoConfig() {
 									:placeholder={ getTranslations("username") }
 									value={ config.GetCfg().Username }
 									x-model="username"
-									class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+									class="panel-control px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 								/>
 							</div>
 							<div class="relative" hidden?={ !config.GetCfg().HasPasswordLoginConfigured() }>
@@ -74,7 +74,7 @@ templ UserInfoConfig() {
 										:type="showPassword ? 'text' : 'password'"
 										:placeholder={ getTranslations("current_password") }
 										x-model="current_password"
-										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+										class="panel-control px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 									/>
 									<button
 										type="button"
@@ -100,7 +100,7 @@ templ UserInfoConfig() {
 										:type="showPassword ? 'text' : 'password'"
 										:placeholder={ getTranslations("password") }
 										x-model="password"
-										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+										class="panel-control px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 									/>
 									<button
 										type="button"
@@ -126,7 +126,7 @@ templ UserInfoConfig() {
 										:type="showPassword ? 'text' : 'password'"
 										:placeholder={ getTranslations("re_enter_password_label") }
 										x-model="ReEnterPassword"
-										class="px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+										class="panel-control px-2.5 w-full rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 									/>
 									<button
 										type="button"
@@ -150,7 +150,7 @@ templ UserInfoConfig() {
 				<div class="flex justify-center items-center w-full my-2">
 					<button
 						type="button"
-						class="min-w-28 px-3 h-10 mx-2 my-0 text-center text-black transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
+						class="panel-control min-w-28 px-3 h-10 mx-2 my-0 text-center text-black transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
 						:class={ fmt.Sprintf("{ 'opacity-50 cursor-not-allowed': isFormChanged === false || saving || %t }", config.GetCfg().ReadOnlyMode) }
 						:disabled={ fmt.Sprintf("isFormChanged === false || saving || %t", config.GetCfg().ReadOnlyMode) }
 						@click={ "if (checkFormData()) { updateLoginSettings({ username, currentPassword: current_password, password, reEnterPassword: ReEnterPassword }); }" }

@@ -12,7 +12,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 	@StoreConfigJavaScript()
 	<div
 		id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "-store-config" }
-		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		x-data="{ selectedStoreB64: '' }"
 	>
 		<label class="w-full py-0 text-left" for={ getTranslations(name) } x-text={ getTranslations(name) }></label>
@@ -22,7 +22,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 				for _, value := range values {
 					<div
 						data-storeb64={ base64.RawURLEncoding.EncodeToString([]byte(value)) }
-						class="flex flex-row items-center mx-0 mb-2 px-3 py-2 text-sm border font-medium rounded cursor-pointer transition-colors"
+						class="panel-control flex flex-row items-center mx-0 mb-2 px-3 py-2 text-sm border font-medium rounded cursor-pointer transition-colors"
 						:class={ "selectedStoreB64 === $el.dataset.storeb64 ? 'bg-blue-400 border-blue-600 text-white' : 'bg-blue-200 border-gray-500 dark:border-gray-200 text-black hover:bg-blue-300'" }
 						@click={ "selectedStoreB64 = selectedStoreB64 === $el.dataset.storeb64 ? '' : $el.dataset.storeb64" }
 					>
@@ -44,7 +44,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput" }
 					:placeholder={ getTranslations("type_or_paste_content") }
 					disabled?={ config.GetCfg().ReadOnlyMode }
-					class="max-w-2/3 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+					class="panel-control max-w-2/3 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 					@keydown={ "if ($event.key === 'Enter') { addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "'); }" }
 				/>
 				<button
@@ -53,7 +53,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "StoreAddButton" }
 					disabled?={ config.GetCfg().ReadOnlyMode }
 					@click={ "addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
-					class="w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold text-black focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
+					class="panel-control w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold text-black focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					添加
 				</button>
@@ -65,7 +65,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					type="button"
 					:disabled={ fmt.Sprintf("selectedStoreB64 === '' || %t", config.GetCfg().ReadOnlyMode) }
 					@click={ "rescanStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
-					class="w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
+					class="panel-control w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
 					:class="selectedStoreB64 === '' ? 'hidden' : 'bg-blue-200  hover:bg-indigo-300'"
 				>
 					重新扫描
@@ -75,7 +75,7 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					type="button"
 					:disabled={ fmt.Sprintf("selectedStoreB64 === '' || %t", config.GetCfg().ReadOnlyMode) }
 					@click={ "deleteStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
-					class="w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
+					class="panel-control w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
 					:class="selectedStoreB64 === '' ? 'hidden' : 'bg-red-200  hover:bg-red-400'"
 				>
 					删除书库

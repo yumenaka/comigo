@@ -119,7 +119,7 @@ func BookSwitchNextLabel(disabled bool) string {
 }
 
 func BookSwitchButtonClass(disabled bool) string {
-	baseClass := "hidden h-10 w-10 shrink-0 items-center justify-center rounded border p-0 transition-colors sm:inline-flex"
+	baseClass := "panel-control hidden h-10 w-10 shrink-0 items-center justify-center rounded border p-0 transition-colors sm:inline-flex"
 	if disabled {
 		return baseClass + " cursor-not-allowed border-gray-300 bg-gray-200 text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
 	}

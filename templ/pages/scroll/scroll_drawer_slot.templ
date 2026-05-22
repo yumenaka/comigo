@@ -41,7 +41,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 				});
 			"
 			type="button"
-			class="flex justify-center items-center w-full px-3 py-2 my-1 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800"
+			class="panel-control flex justify-center items-center w-full px-3 py-2 my-1 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-800"
 			:disabled="adding"
 		>
 			<svg x-show="!adding" class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -277,7 +277,7 @@ templ ScrollLoadModeControls() {
 			id="scrollLoadMode"
 			x-model="$store.scroll.loadMode"
 			@change="$store.global.readMode = 'scroll'; $store.global.onChangeReadMode();"
-			class="w-full h-10 py-0 font-semibold border border-gray-400 rounded bg-base-100 text-accent-content focus:outline-none"
+			class="panel-control w-full h-10 py-0 font-semibold border border-gray-400 rounded bg-base-100 text-accent-content focus:outline-none"
 		>
 			<option value="infinite" x-text="i18next.t('scroll_load_mode_infinite')">无限卷轴</option>
 			<option value="lazy" x-text="i18next.t('scroll_load_mode_lazy')">延迟加载</option>

@@ -4,7 +4,7 @@ templ MessageModal() {
 	<!-- 模态遮罩层 -->
 	<div id="modal-overlay" class="z-50 fixed inset-0 flex items-center justify-center hidden bg-black/50">
 		<!-- 模态窗口 -->
-		<div id="modal" class="max-w-sm min-w-80 min-h-32 h p-6 mx-auto bg-white rounded-lg">
+		<div id="modal" class="panel-surface max-w-sm min-w-80 min-h-32 h p-6 mx-auto bg-white rounded-lg">
 			<!-- 提示信息 -->
 			<p id="modal-message" class="text-lg text-gray-800 font-semibold w-full text-center"></p>
 			<!-- 按钮容器 -->
@@ -31,7 +31,7 @@ templ MessageModal() {
 				const confirmButton = document.createElement("button");
 				confirmButton.textContent = i18next.t("confirm");
 				confirmButton.className =
-					"min-w-24 mx-4 px-4 py-2 bg-blue-400 hover:bg-blue-450 active:bg-blue-500 font-semibold  text-white rounded shadow-md";
+					"panel-control min-w-24 mx-4 px-4 py-2 bg-blue-400 hover:bg-blue-450 active:bg-blue-500 font-semibold  text-white rounded shadow-md";
 				confirmButton.onclick = function () {
 					hideModal();
 					if (typeof options.onConfirm === "function") {
@@ -45,7 +45,7 @@ templ MessageModal() {
 				const confirmButton = document.createElement("button");
 				confirmButton.textContent = i18next.t("ok");
 				confirmButton.className =
-					"min-w-24 mx-4 px-4 py-2 bg-red-400 hover:bg-red-450 active:bg-red-500 font-semibold  text-white rounded shadow-md";
+					"panel-control min-w-24 mx-4 px-4 py-2 bg-red-400 hover:bg-red-450 active:bg-red-500 font-semibold  text-white rounded shadow-md";
 				confirmButton.onclick = function () {
 					hideModal();
 					if (typeof options.onConfirm === "function") {
@@ -55,7 +55,7 @@ templ MessageModal() {
 				const cancelButton = document.createElement("button");
 				cancelButton.textContent = i18next.t("cancel");
 				cancelButton.className =
-					"min-w-24 mx-4 px-4 py-2 bg-gray-500 hover:bg-gray-550 active:bg-gray-600 text-white rounded shadow-md";
+					"panel-control min-w-24 mx-4 px-4 py-2 bg-gray-500 hover:bg-gray-550 active:bg-gray-600 text-white rounded shadow-md";
 				cancelButton.onclick = function () {
 					hideModal();
 					if (typeof options.onCancel === "function") {

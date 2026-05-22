@@ -15,7 +15,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 	<div
 		id="tailscale_config_wrapper"
 		x-data="{ collapsed: $persist(true).as('settings_tailscale_collapsed') }"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<!-- 折叠/展开按钮 -->
 		<button
@@ -86,7 +86,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		        			}}"
 			>
 				<!-- 启用Tailscale -->
-				<div id={ "boolConfig_EnableTailscale" } class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
+				<div id={ "boolConfig_EnableTailscale" } class="panel-surface flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
 					<div x-text={ getTranslations("enable_tailscale") } class="wrap-break-word"></div>
 					<!--  如果一个复选框在其表单被提交时没有被选中，就不会有任何代表其未被选中的状态（例如 value=unchecked）的值被提交给服务器——该值根本就没有被提交给服务器！-->
 					<!-- 如果你想在复选框未被选中时提交一个默认值，你可以在表单中加入一个具有相同的 name 和 value 的 <input type="hidden"> 字段，它可以由 JavaScript 生成。 -->
@@ -121,7 +121,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<div
 					id={ "stringConfig_TailscaleHostname" }
 					x-show="enable_tailscale"
-					class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+					class="panel-surface flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 				>
 					<label x-text={ getTranslations("tailscale_hostname") } for={ "TailscaleHostname" } class="wrap-break-word"></label>
 					<input
@@ -130,7 +130,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						type="text"
 						:placeholder={ getTranslations("tailscale_hostname") }
 						value={ config.GetCfg().TailscaleHostname }
-						class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+						class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 					/>
 					<div
 						class="w-full py-1 text-xs text-base-content wrap-break-word"
@@ -141,12 +141,12 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<!-- Tailscale服务端口号-->
 				<div
 					id={ "numberConfig_TailscalePort" }
-					class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+					class="panel-surface flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 					x-show="enable_tailscale"
 				>
 					<label for={ "TailscalePort" } x-text={ getTranslations("tailscale_port") } class="wrap-break-word"></label>
 					<input
-						class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black  placeholder-gray-500 placeholder-opacity-50"
+						class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black  placeholder-gray-500 placeholder-opacity-50"
 						id={ "TailscalePort" }
 						name={ "TailscalePort" }
 						type="number"
@@ -162,7 +162,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<div
 					id={ "stringConfig_TailscaleAuthKey" }
 					x-show="enable_tailscale"
-					class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+					class="panel-surface flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 				>
 					<label x-text={ getTranslations("tailscale_auth_key") } for={ "TailscaleAuthKey" } class="wrap-break-word"></label>
 					<input
@@ -171,7 +171,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						type="text"
 						:placeholder={ getTranslations("tailscale_auth_key") }
 						value={ config.GetCfg().TailscaleAuthKey }
-						class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+						class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 					/>
 					<div
 						class="w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline wrap-break-word"
@@ -181,7 +181,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<!-- Funnel密码保护检查 -->
 				<div
 					id={ "boolConfig_FunnelLoginCheck" }
-					class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
+					class="panel-surface flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
 					x-show="enable_tailscale"
 				>
 					<!-- Funnel ACL 权限未设置时的遮罩层 -->
@@ -222,7 +222,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<!-- Funnel模式（公网访问） -->
 				<div
 					id={ "boolConfig_FunnelTunnel" }
-					class="flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
+					class="panel-surface flex flex-col justify-start w-full mx-0 my-2 px-4 py-2 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400 relative"
 					x-show="enable_tailscale"
 				>
 					<!-- Funnel ACL 权限未设置时的遮罩层 -->
@@ -263,7 +263,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<div
 					id="funnel-acl-hint"
 					x-show="enable_tailscale"
-					class="flex flex-col justify-start w-full mx-0 mt-0 mb-2 px-4 py-2 font-semibold items-left bg-base-100 text-base-content text-xs/4 md:text-sm/6 border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+					class="panel-surface flex flex-col justify-start w-full mx-0 mt-0 mb-2 px-4 py-2 font-semibold items-left bg-base-100 text-base-content text-xs/4 md:text-sm/6 border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 					if tsStatus != nil {
 						if tsStatus.FunnelCapability == "false" {
 							style=""
@@ -312,7 +312,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						id="tailscale-submit-btn"
 						type="button"
 						disabled?={ config.GetCfg().ReadOnlyMode }
-						class="min-w-28 px-2 h-10 mx-2 my-0 text-center font-semibold transition border border-black text-black rounded bg-blue-200  hover:bg-indigo-300 disabled:opacity-70 disabled:cursor-not-allowed"
+						class="panel-control min-w-28 px-2 h-10 mx-2 my-0 text-center font-semibold transition border border-black text-black rounded bg-blue-200  hover:bg-indigo-300 disabled:opacity-70 disabled:cursor-not-allowed"
 						x-text={ getTranslations("submit") }
 					>Submit</button>
 					<script>
@@ -503,7 +503,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 				setTimeout(() => startAutoRefresh(), 1000);
 			}
 		"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<div class="flex flex-row w-full mb-2 justify-center items-center" @click="UpdateTailscaleStatus">
 			<div id="refresh-text" x-text={ getTranslations("tailscale_status") } class="text-center font-semibold"></div>

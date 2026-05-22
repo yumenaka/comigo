@@ -58,7 +58,7 @@ func ScrollBookSwitch(view common.BookSwitchView) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"mx-auto flex w-full max-w-full items-center gap-2 rounded border border-gray-300 bg-base-100/95 p-3 shadow-sm dark:border-gray-700 md:max-w-2xl\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"panel-surface mx-auto flex w-full max-w-full items-center gap-2 rounded border border-gray-300 bg-base-100/95 p-3 shadow-sm dark:border-gray-700 md:max-w-2xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -137,7 +137,7 @@ func ScrollBookSwitch(view common.BookSwitchView) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</button> <select id=\"ScrollBookSwitchSelect\" @change=\"go($event.target.value)\" class=\"h-10 min-w-0 flex-1 rounded border-2 border-gray-500 bg-base-100 px-2 py-0 font-semibold text-accent-content focus:outline-none dark:border-gray-200\" aria-label=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</button> <select id=\"ScrollBookSwitchSelect\" @change=\"go($event.target.value)\" class=\"panel-control h-10 min-w-0 flex-1 rounded border-2 border-gray-500 bg-base-100 px-2 py-0 font-semibold text-accent-content focus:outline-none dark:border-gray-200\" aria-label=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

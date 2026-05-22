@@ -65,7 +65,7 @@ templ MainArea(c echo.Context) {
 			<label
 				id="ReaderDropArea"
 				for="ReaderArchiveInput"
-				class="flex flex-col items-center justify-center w-full min-h-72 px-6 py-12 text-center border-4 border-dashed rounded cursor-pointer bg-base-100/70 border-gray-400 hover:border-blue-500"
+				class="panel-surface flex flex-col items-center justify-center w-full min-h-72 px-6 py-12 text-center border-4 border-dashed rounded cursor-pointer bg-base-100/70 border-gray-400 hover:border-blue-500"
 			>
 				<span class="text-xl font-semibold" x-text="i18next.t('reader_select_archive')">Select files</span>
 				<span class="mt-3 text-sm opacity-80" x-text="i18next.t('reader_select_archive_hint')">Multiple images, or ZIP/CBZ/RAR/CBR/PDF where only the first file is opened</span>
@@ -82,7 +82,7 @@ templ MainArea(c echo.Context) {
 					<button
 						id="ReaderInstallPWAButton"
 						type="button"
-						class="hidden h-10 px-3 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-50"
+						class="panel-control hidden h-10 px-3 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-50"
 						x-text="i18next.t('reader_install_pwa_app')"
 					>
 						添加为PWA应用
@@ -90,7 +90,7 @@ templ MainArea(c echo.Context) {
 					<a
 						href={ templ.SafeURL(config.PrefixPath("/reader?static=comigo-reader.html")) }
 						download={ "comigo-" + config.GetVersion() + ".html" }
-						class="inline-flex items-center justify-center h-10 px-3 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300"
+						class="panel-control inline-flex items-center justify-center h-10 px-3 text-sm font-semibold text-black transition duration-300 ease-in-out bg-blue-200 border rounded focus:outline-none focus:ring hover:bg-indigo-300"
 						:title="i18next.t('download_portable_web_file')"
 						x-text="i18next.t('download_portable_web_file')"
 					>
@@ -154,7 +154,7 @@ templ MainArea(c echo.Context) {
 				id="ReaderFlipStepsRangeArea"
 				@click.stop=""
 				x-show="$store.global.readMode === 'flip' && $store.global.allPageNum > 0"
-				class="hidden w-5/6 h-12 px-4 md:px-8 overflow-visible font-semibold StepsRangeArea rounded-xl drop-shadow-lg self-center-safe bg-base-100 text-base-content toolbar backdrop-blur-3xl"
+				class="panel-surface hidden w-5/6 h-12 px-4 md:px-8 overflow-visible font-semibold StepsRangeArea rounded-xl drop-shadow-lg self-center-safe bg-base-100 text-base-content toolbar backdrop-blur-3xl"
 				:class="($store.flip.autoHideToolbar? 'fixed bottom-0 flex flex-col justify-center':'flex flex-col justify-center bg-base-100/50')+($store.flip.mangaMode?' manga-mode': '')"
 			>
 				<div class="relative w-full mt-0 self-center-safe">
@@ -238,7 +238,7 @@ templ MainArea(c echo.Context) {
 				x-text="$store.global.nowPageNum+'/'+$store.global.allPageNum"
 			></div>
 		</section>
-		<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
+		<button id="BackTopButton" style="display: none" class="panel-control fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
 		</button>
 		<style>
@@ -435,7 +435,7 @@ templ DrawerSlot(c echo.Context) {
 			type="button"
 			@click="autoScrollEnabled = !autoScrollEnabled; autoScrollEnabled ? startAutoScroll() : (clearInterval(autoScrollInterval), autoScrollInterval = null)"
 			:class="autoScrollEnabled ? 'bg-green-300 hover:bg-green-400' : 'bg-blue-200 hover:bg-indigo-300'"
-			class="w-full mb-2 text-sm text-center inline-flex items-center justify-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
+			class="panel-control w-full mb-2 text-sm text-center inline-flex items-center justify-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
 		>
 			<span x-text="autoScrollEnabled ? i18next.t('auto_flip_pause_scroll') : i18next.t('auto_flip_start_scroll')"></span>
 		</button>

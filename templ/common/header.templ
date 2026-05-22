@@ -12,7 +12,7 @@ import (
 templ Header(left templ.Component, center templ.Component, right templ.Component) {
 	<header
 		id="header"
-		class="z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400"
+		class="panel-surface z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400"
 		:class="{ 'absolute top-0 ': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.flip.autoHideToolbar && $store.global.readMode === 'flip','mx-auto bg-base-100/50': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.global.readMode === 'flip'}"
 	>
 		<div class="flex flex-row">
@@ -203,7 +203,7 @@ templ HeaderQuickJumpTitleView(title string, view BookSwitchView) {
 					id="HeaderBookSwitchSelect"
 					title={ title }
 					@change="go($event.target.value)"
-					class="h-10 w-full min-w-0 max-w-full rounded border-2 border-gray-500 bg-base-100 px-2 py-0 text-center font-semibold text-accent-content focus:outline-none dark:border-gray-200 md:max-w-2xl"
+					class="panel-control h-10 w-full min-w-0 max-w-full rounded border-2 border-gray-500 bg-base-100 px-2 py-0 text-center font-semibold text-accent-content focus:outline-none dark:border-gray-200 md:max-w-2xl"
 					aria-label={ BookSwitchLabel() }
 				>
 					for _, item := range view.Items {
@@ -279,7 +279,7 @@ templ ReSortIcon() {
                         window.location.reload();
                     }
                 }"
-		class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700"
+		class="panel-surface z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700"
 		x-init="currentSortBy = getCurrentSortBy()"
 	>
 		<ul class="py-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="ResortButton">
@@ -289,7 +289,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('filename')"
 					x-text="i18next.t('sort_by_filename')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white "
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white "
 				></a>
 			</li>
 			<li>
@@ -298,7 +298,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('modify_time')"
 					x-text="i18next.t('sort_by_modify_time')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 			<li>
@@ -307,7 +307,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('filesize')"
 					x-text="i18next.t('sort_by_filesize')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 			<li x-show="isShelfSortMenu()">
@@ -316,7 +316,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('last_read')"
 					x-text="i18next.t('sort_by_last_read')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'last_read'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 			<li>
@@ -325,7 +325,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('filename_reverse')"
 					x-text="i18next.t('sort_by_filename_reverse')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename_reverse'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 			<li>
@@ -334,7 +334,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('modify_time_reverse')"
 					x-text="i18next.t('sort_by_modify_time_reverse')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time_reverse'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 			<li>
@@ -343,7 +343,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('filesize_reverse')"
 					x-text="i18next.t('sort_by_filesize_reverse')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize_reverse'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 		</ul>

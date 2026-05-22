@@ -812,22 +812,33 @@
     --lightningcss-light: initial;
     --lightningcss-dark: ;
     color-scheme: light;
-    --primary: #d48498;
-    --primary-content: #2d1b4e;
-    --secondary: #754e96;
-    --secondary-content: #fbe6c6;
-    --accent: #f3b49f;
-    --accent-content: #2d1b4e;
-    --neutral: #2d1b4e;
-    --neutral-content: #fbe6c6;
-    --base-100: #f9c0c4;
-    --base-200: #f3b49f;
-    --base-300: #c3b091;
-    --base-content: #2d1b4e;
-    --info: #754e96;
-    --success: #d48498;
-    --warning: #f3b49f;
-    --error: #754e96;
+    --primary: #d42925;
+    --primary-content: #fff7df;
+    --secondary: #c46a31;
+    --secondary-content: #fff7df;
+    --accent: #ffd24a;
+    --accent-content: #2a1a10;
+    --neutral: #5b321c;
+    --neutral-content: #fff7df;
+    --base-100: #b85c2a;
+    --base-200: #8a3f1d;
+    --base-300: #75c9f2;
+    --base-content: #2a1a10;
+    --panel-surface: #b85c2a;
+    --panel-surface-content: #fff7df;
+    --panel-control: #c46a31;
+    --panel-control-hover: #d47638;
+    --panel-control-active: #e18a3f;
+    --panel-control-muted: #d8a170;
+    --panel-control-content: #fff7df;
+    --panel-border: #5b321c;
+    --panel-control-border: #6b371c;
+    --grid-pattern-color: #ffffff47;
+    --grid-mosaic-color: #5b321c38;
+    --info: #1558c9;
+    --success: #168b44;
+    --warning: #f08a24;
+    --error: #d42925;
     --rounded-box: .25rem;
     --rounded-btn: .125rem;
     --rounded-badge: .125rem;
@@ -4062,6 +4073,13 @@ body {
   background-color: #0000004d;
 }
 
+[drawer-backdrop] {
+  z-index: 30;
+  background-color: #0000004d;
+  position: fixed;
+  inset: 0;
+}
+
 input[type="range"]::-moz-range-progress {
   background: #00c;
 }
@@ -4106,6 +4124,119 @@ input[type="range"]::-moz-range-thumb {
   background-image: linear-gradient(45deg, var(--grid-mosaic-color) 25%, transparent 0), linear-gradient(-45deg, var(--grid-mosaic-color) 25%, transparent 0), linear-gradient(45deg, transparent 75%, var(--grid-mosaic-color) 0), linear-gradient(-45deg, transparent 75%, var(--grid-mosaic-color) 0);
   background-position: 0 0, 0 10px, 10px -10px, 10px 0;
   background-size: 20px 20px;
+}
+
+body[data-theme="lofi"], body[data-theme="lofi"] .grid-line, body[data-theme="lofi"] .grid-point, body[data-theme="lofi"] .grid-mosaic, body[data-theme="lofi"] #ShelfMainArea, body[data-theme="lofi"] #settingsMainArea, body[data-theme="lofi"] #tab-contents {
+  background-color: var(--base-300);
+  background-image: radial-gradient(circle at 14% 18%, #fff7df 0 18px, #0000 19px), radial-gradient(circle at 20% 16%, #fff7df 0 22px, #0000 23px), radial-gradient(circle at 26% 18%, #fff7df 0 18px, #0000 19px), radial-gradient(circle at 74% 13%, #fff7dfeb 0 16px, #0000 17px), radial-gradient(circle at 79% 12%, #fff7dfeb 0 20px, #0000 21px), radial-gradient(circle at 84% 13%, #fff7dfeb 0 16px, #0000 17px), linear-gradient(135deg, #0000 0 62%, #168b44db 62% 76%, #0000 76%), linear-gradient(45deg, #0000 0 66%, #2ea64fd1 66% 80%, #0000 80%), linear-gradient(#0000 0 calc(100% - 118px), #c2742d calc(100% - 118px) 100%), repeating-linear-gradient(90deg, #0000 0 30px, #5b321c6b 30px 32px), repeating-linear-gradient(0deg, #0000 0 30px, #5b321c61 30px 32px);
+  background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 100%, 100% 100%, 0 0, 0 calc(100% - 118px), 0 calc(100% - 118px);
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
+  background-size: 100% 220px, 100% 220px, 100% 220px, 100% 190px, 100% 190px, 100% 190px, 460px 210px, 360px 170px, 100% 100%, 32px 32px, 32px 32px;
+  background-attachment: fixed;
+}
+
+body[data-theme="lofi"] .bg-base-100, body[data-theme="lofi"] .bg-base-100\/50, body[data-theme="lofi"] .bg-base-100\/70, body[data-theme="lofi"] .bg-base-100\/95, body[data-theme="lofi"] .panel-surface {
+  background-image: linear-gradient(#ffd24a2e 1px, #0000 1px), linear-gradient(90deg, #ffd24a2e 1px, #0000 1px), linear-gradient(#5b321c6b 2px, #0000 2px), linear-gradient(90deg, #5b321c59 2px, #0000 2px);
+  background-position: 0 0, 0 0, 0 0, 16px 0;
+  background-size: 32px 18px, 32px 18px, 64px 36px, 64px 36px;
+  background-color: var(--panel-surface) !important;
+}
+
+body[data-theme="lofi"] .bg-base-100.text-base-content, body[data-theme="lofi"] .bg-base-100\/50.text-base-content, body[data-theme="lofi"] .bg-base-100\/70.text-base-content, body[data-theme="lofi"] .bg-base-100\/95.text-base-content, body[data-theme="lofi"] .panel-surface, body[data-theme="lofi"] #header, body[data-theme="lofi"] #drawer-right, body[data-theme="lofi"] .panel-surface .text-base-content {
+  color: var(--panel-surface-content) !important;
+}
+
+body[data-theme="lofi"] .panel-surface, body[data-theme="lofi"] .panel-surface.border, body[data-theme="lofi"] .panel-surface.border-2 {
+  border-color: var(--panel-border) !important;
+}
+
+body[data-theme="lofi"] .panel-control, body[data-theme="lofi"] select, body[data-theme="lofi"] select.bg-base-100, body[data-theme="lofi"] input[type="search"], body[data-theme="lofi"] input[type="search"].bg-base-100, body[data-theme="lofi"] input[type="text"], body[data-theme="lofi"] input[type="text"].bg-base-100, body[data-theme="lofi"] input[type="password"], body[data-theme="lofi"] input[type="password"].bg-base-100, body[data-theme="lofi"] input[type="number"], body[data-theme="lofi"] input[type="number"].bg-base-100 {
+  background-image: linear-gradient(90deg, #fff7df2e 1px, #0000 1px), linear-gradient(#fff7df29 1px, #0000 1px);
+  background-size: 12px 12px;
+  box-shadow: inset 0 0 0 2px #fff7df38, 0 2px #2a1a1059;
+  background-color: var(--panel-control) !important;
+  border-color: var(--panel-control-border) !important;
+  color: var(--panel-control-content) !important;
+}
+
+body[data-theme="lofi"] .panel-control .text-base-content {
+  color: var(--panel-control-content) !important;
+}
+
+body[data-theme="lofi"] .panel-control::placeholder, body[data-theme="lofi"] input[type="search"]::placeholder, body[data-theme="lofi"] input[type="text"]::placeholder, body[data-theme="lofi"] input[type="password"]::placeholder, body[data-theme="lofi"] input[type="number"]::placeholder {
+  color: #fff7dfb8 !important;
+}
+
+body[data-theme="lofi"] .panel-control:hover:not(:disabled), body[data-theme="lofi"] .panel-control:focus-visible, body[data-theme="lofi"] select:hover, body[data-theme="lofi"] input[type="search"]:hover, body[data-theme="lofi"] input[type="text"]:hover, body[data-theme="lofi"] input[type="password"]:hover, body[data-theme="lofi"] input[type="number"]:hover {
+  background-color: var(--panel-control-hover) !important;
+}
+
+body[data-theme="lofi"] select option {
+  background-color: var(--panel-control);
+  color: var(--panel-control-content);
+}
+
+body[data-theme="lofi"] button.bg-blue-200, body[data-theme="lofi"] a.bg-blue-200, body[data-theme="lofi"] button.bg-blue-300, body[data-theme="lofi"] a.bg-blue-300, body[data-theme="lofi"] button.bg-blue-400, body[data-theme="lofi"] a.bg-blue-400, body[data-theme="lofi"] button.bg-blue-500, body[data-theme="lofi"] a.bg-blue-500, body[data-theme="lofi"] button.bg-blue-600, body[data-theme="lofi"] a.bg-blue-600, body[data-theme="lofi"] button.bg-cyan-200, body[data-theme="lofi"] a.bg-cyan-200, body[data-theme="lofi"] button.bg-green-300, body[data-theme="lofi"] a.bg-green-300, body[data-theme="lofi"] button.bg-green-500, body[data-theme="lofi"] a.bg-green-500, body[data-theme="lofi"] button.bg-green-600, body[data-theme="lofi"] a.bg-green-600, body[data-theme="lofi"] .panel-control {
+  box-shadow: inset 0 0 0 2px #fff7df2e, 0 3px 0 var(--panel-control-border);
+  background-image: linear-gradient(#fff7df2e 50%, #0000 50%);
+  background-size: 100% 8px;
+  background-color: var(--panel-control) !important;
+  border-color: var(--panel-control-border) !important;
+  color: var(--panel-control-content) !important;
+}
+
+body[data-theme="lofi"] button.bg-blue-200:hover, body[data-theme="lofi"] a.bg-blue-200:hover, body[data-theme="lofi"] button.bg-blue-300:hover, body[data-theme="lofi"] a.bg-blue-300:hover, body[data-theme="lofi"] button.bg-blue-400:hover, body[data-theme="lofi"] a.bg-blue-400:hover, body[data-theme="lofi"] button.bg-blue-500:hover, body[data-theme="lofi"] a.bg-blue-500:hover, body[data-theme="lofi"] button.bg-blue-600:hover, body[data-theme="lofi"] a.bg-blue-600:hover, body[data-theme="lofi"] button.bg-cyan-200:hover, body[data-theme="lofi"] a.bg-cyan-200:hover, body[data-theme="lofi"] button.bg-green-300:hover, body[data-theme="lofi"] a.bg-green-300:hover, body[data-theme="lofi"] button.bg-green-500:hover, body[data-theme="lofi"] a.bg-green-500:hover, body[data-theme="lofi"] button.bg-green-600:hover, body[data-theme="lofi"] a.bg-green-600:hover {
+  background-color: var(--panel-control-hover) !important;
+}
+
+body[data-theme="lofi"] .panel-control.bg-blue-400, body[data-theme="lofi"] .panel-control.bg-blue-500, body[data-theme="lofi"] .panel-control.bg-blue-600, body[data-theme="lofi"] .panel-control.bg-cyan-200, body[data-theme="lofi"] .panel-control.bg-green-300, body[data-theme="lofi"] .panel-control.bg-green-500, body[data-theme="lofi"] .panel-control.bg-green-600 {
+  background-color: var(--panel-control-active) !important;
+}
+
+body[data-theme="lofi"] input[type="checkbox"].peer + div, body[data-theme="lofi"] input[type="checkbox"].peer + span {
+  background-color: var(--panel-control-muted) !important;
+  border-color: var(--panel-control-border) !important;
+}
+
+body[data-theme="lofi"] input[type="checkbox"].peer:checked + div, body[data-theme="lofi"] input[type="checkbox"].peer:checked + span {
+  background-color: var(--panel-control) !important;
+}
+
+body[data-theme="lofi"] .border-gray-500, body[data-theme="lofi"] .border-slate-400 {
+  border-color: #5b321c !important;
+}
+
+body[data-theme="lofi"] a[title][class*="bg-cover"] {
+  border: 3px solid #5b321c;
+  border-radius: .25rem;
+  box-shadow: 0 4px #5b321c, 0 10px 16px #2a1a1059;
+}
+
+body[data-theme="lofi"] a[title][class*="bg-cover"]:hover {
+  box-shadow: 0 4px 0 var(--accent), 0 12px 18px #2a1a106b;
+}
+
+body[data-theme="lofi"] a[title][class*="bg-cover"] > div[x-show="$store.shelf.showFilename"] {
+  text-shadow: 0 1px #2a1a10;
+  background-image: linear-gradient(#ffd24a33 1px, #0000 1px), linear-gradient(90deg, #5b321c73 1px, #0000 1px);
+  background-size: 28px 14px;
+  border-top: 2px solid #5b321c;
+  color: var(--primary-content) !important;
+  background-color: #b85c2ae6 !important;
+}
+
+body[data-theme="lofi"] .text-yellow-400 {
+  color: var(--accent) !important;
+}
+
+body[data-theme="lofi"] input[type="range"]::-webkit-slider-thumb {
+  background: var(--accent);
+  border-color: #5b321c;
+}
+
+body[data-theme="lofi"] input[type="range"]::-moz-range-thumb {
+  background: var(--accent);
+  border-color: #5b321c;
 }
 
 .bg-primary {

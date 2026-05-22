@@ -1,7 +1,7 @@
 package upload_page
 
 templ UploadArea() {
-	@UploadPanel("relative w-full max-w-2xl p-8 bg-base-100 rounded shadow-md", true)
+	@UploadPanel("panel-surface relative w-full max-w-2xl p-8 bg-base-100 rounded shadow-md", true)
 }
 
 templ SettingsUploadArea() {
@@ -13,7 +13,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 		<!-- 书库选择下拉框 -->
 		<div class="mb-6">
 			<label class="block mb-2 text-sm font-medium text-base-content" x-text="i18next.t('select_upload_target_store')">选择上传目标书库</label>
-			<select id="store-select" class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+			<select id="store-select" class="panel-control w-full px-4 py-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
 				<option value="" x-text="i18next.t('loading')">加载中...</option>
 			</select>
 			<p id="store-warning" class="mt-2 text-sm text-red-500 hidden"></p>
@@ -33,7 +33,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 		<!-- 进度条背景 显示与隐藏有过渡效果，不可点击。-->
 		<div id="progress-bar" class="absolute pointer-events-none top-0 left-0 h-full transition-opacity duration-500 bg-blue-500/30" style="width: 0%;"></div>
 		<!-- 上传按钮 -->
-		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300 font-semibold disabled:cursor-not-allowed" disabled x-text="i18next.t('upload_file')">上传文件</button>
+		<button id="upload-button" class="panel-control w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300 font-semibold disabled:cursor-not-allowed" disabled x-text="i18next.t('upload_file')">上传文件</button>
 		<!-- 上传结果显示区域 -->
 		<div id="result" class="mt-4"></div>
 	</div>
@@ -293,7 +293,8 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 			li.appendChild(infoDiv);
 			// 删除文件按钮
 			const removeBtn = document.createElement("button");
-			removeBtn.className = "text-red-500 hover:text-red-700";
+			removeBtn.className =
+				"panel-control px-2 py-1 text-red-500 hover:text-red-700 rounded";
 			removeBtn.innerHTML = "&#10005;"; // × 符号
 			removeBtn.addEventListener("click", () => {
 				filesToUpload = filesToUpload.filter((f) => f !== file);

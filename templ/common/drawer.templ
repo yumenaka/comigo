@@ -13,7 +13,7 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 	<div
 		id="drawer-right"
 		x-data="{ serverHost: 'localhost' }"
-		class="fixed top-0 right-0 z-40 flex flex-col w-64 min-h-full px-2 py-0 overflow-y-auto transition-transform translate-x-full border-l-2 border-gray-500 dark:border-gray-200 rounded h-dvh bg-base-100 text-base-content"
+		class="panel-surface fixed top-0 right-0 z-40 flex flex-col w-64 min-h-full px-2 py-0 overflow-y-auto transition-transform translate-x-full border-l-2 border-gray-500 dark:border-gray-200 rounded h-dvh bg-base-100 text-base-content"
 		tabindex="-1"
 		aria-labelledby="drawer-right-label"
 	>
@@ -41,7 +41,7 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 						<button
 							type="button"
 							id="logout_button"
-							class="m-0 px-1 py-0.5 text-xs text-center text-white bg-blue-600/80 hover:bg-blue-800/80 rounded  focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+							class="panel-control m-0 px-1 py-0.5 text-xs text-center text-white bg-blue-600/80 hover:bg-blue-800/80 rounded  focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
 							x-data="{
 								async logout() {
 									if (!window.confirm(i18next.t('confirm_logout'))) return;
@@ -82,7 +82,7 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 					id="electron_open_settings_button"
 					@click="window.ComiGoElectronAction && window.ComiGoElectronAction('open-settings')"
 					x-text="i18next.t('electron_open_settings')"
-					class="min-h-9 text-sm text-center px-2 py-1.5 border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
+					class="panel-control min-h-9 text-sm text-center px-2 py-1.5 border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
 				>
 					应用设置
 				</button>
@@ -91,7 +91,7 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 					id="electron_open_external_button"
 					@click="window.ComiGoElectronAction && window.ComiGoElectronAction('open-external')"
 					x-text="i18next.t('electron_open_external')"
-					class="min-h-9 text-sm text-center px-2 py-1.5 border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
+					class="panel-control min-h-9 text-sm text-center px-2 py-1.5 border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
 				>
 					浏览器打开
 				</button>
@@ -146,7 +146,7 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 				x-data="{ buttonText: i18next.t('reset_local_settings') }"
 				x-text="buttonText"
 				@click="if(window.confirm(i18next.t('confirm_reset_settings'))) { localStorage.clear(); location.reload(); }"
-				class="mb-2 text-sm text-center inline-flex items-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				class="panel-control mb-2 text-sm text-center inline-flex items-center px-2.5 py-2 border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
 			>
 				重置本地设置
 			</button>
@@ -160,7 +160,7 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 			<select
 				x-model="$store.global.theme"
 				@change="$store.global.theme = $event.target.value;console.log($store.global.theme);"
-				class="w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
+				class="panel-control w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="retro" x-text="i18next.t('theme_option_retro')">Retro</option>
 				<option value="custom" x-text="i18next.t('theme_option_custom')">Custom</option>
@@ -182,7 +182,7 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 				x-transition
 				x-model="$store.global.bgPattern"
 				@change="$store.global.bgPattern = $event.target.value;console.log($store.global.bgPattern);"
-				class="w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
+				class="panel-control w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="none" x-text="i18next.t('no_pattern')">无花纹</option>
 				<option value="grid-line" x-text="i18next.t('grid_line')">网格线</option>
@@ -193,7 +193,7 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 			<select
 				x-model="i18next.language"
 				@change="i18next.changeLanguage($event.target.value).then(location.reload())"
-				class="w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
+				class="panel-control w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
 			>
 				<option value="en-US">English</option>
 				<option value="zh-CN">中文</option>

@@ -91,7 +91,7 @@ templ ReadingHistoryPanel() {
 			}
 		}"
 		x-init="fetchPage(1)"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<!-- 折叠/展开按钮 -->
 		<button
@@ -134,7 +134,7 @@ templ ReadingHistoryPanel() {
 					<button
 						@click="goToPage(currentPage - 1)"
 						:disabled="loading || currentPage === 1"
-						class="px-3 py-1 rounded border border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+						class="panel-control px-3 py-1 rounded border border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 					>
 						<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -148,7 +148,7 @@ templ ReadingHistoryPanel() {
 								@click="goToPage(page)"
 								:disabled="loading"
 								:class="currentPage === page ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'"
-								class="px-3 py-1 rounded border transition-colors min-w-10 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="panel-control px-3 py-1 rounded border transition-colors min-w-10 disabled:opacity-50 disabled:cursor-not-allowed"
 								x-text="page"
 							></button>
 							<span x-show="page === '...'" class="px-2 text-gray-500">...</span>
@@ -158,7 +158,7 @@ templ ReadingHistoryPanel() {
 					<button
 						@click="goToPage(currentPage + 1)"
 						:disabled="loading || currentPage === totalPages"
-						class="px-3 py-1 rounded border border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+						class="panel-control px-3 py-1 rounded border border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 					>
 						<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -226,7 +226,7 @@ templ ReadingHistoryPanel() {
 								<!-- 继续阅读按钮 -->
 								<a
 									:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)"
-									class="flex h-10 items-center justify-center gap-1 px-3 py-1.5 text-sm border shadow-lg text-black font-semibold focus:ring rounded bg-blue-200  hover:bg-indigo-300 transition-colors"
+									class="panel-control flex h-10 items-center justify-center gap-1 px-3 py-1.5 text-sm border shadow-lg text-black font-semibold focus:ring rounded bg-blue-200  hover:bg-indigo-300 transition-colors"
 								>
 									<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"></path>
@@ -237,7 +237,7 @@ templ ReadingHistoryPanel() {
 								<button
 									@click="deleteBookmark(item, index)"
 									:disabled="deleting[item.book_info.id + '_' + item.book_mark.mark_type + '_' + item.book_mark.page_index] === true"
-									class="flex h-10 items-center justify-center gap-1 px-3 py-1.5 text-sm border shadow-lg text-black font-semibold focus:ring bg-red-300 rounded hover:bg-red-400 transition-colors"
+									class="panel-control flex h-10 items-center justify-center gap-1 px-3 py-1.5 text-sm border shadow-lg text-black font-semibold focus:ring bg-red-300 rounded hover:bg-red-400 transition-colors"
 								>
 									<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -251,7 +251,7 @@ templ ReadingHistoryPanel() {
 							<!-- 继续阅读按钮 -->
 							<a
 								:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)"
-								class="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+								class="panel-control flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
 							>
 								<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"></path>
@@ -262,7 +262,7 @@ templ ReadingHistoryPanel() {
 							<button
 								@click="deleteBookmark(item, index)"
 								:disabled="deleting[item.book_info.id + '_' + item.book_mark.mark_type + '_' + item.book_mark.page_index] === true"
-								class="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+								class="panel-control flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 							>
 								<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
