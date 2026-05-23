@@ -63,31 +63,17 @@ body {
     background-color: rgba(0, 0, 0, 0.3);
 }
 
-/* @tailwindcss/forms注释掉以后需要这些代码来保证滑动条正常 */
-input[type="range"]::-moz-range-progress {
-    background: #0000cc;
+/* 普通 drawer/plugin range 的进度色；专用滑条由各自页面维护。 */
+input[type="range"]:not(.rangeBar):not(.slider-base) {
+    --comigo-range-fill: #3b82f6;
+    accent-color: var(--comigo-range-fill);
+    cursor: pointer;
 }
 
-/* chrome 滑动条的滑动块*/
-input[type="range"]::-webkit-slider-thumb {
-    background: #fff;
-    appearance: auto;
-    cursor: pointer;
-    border-width: 1px;
+input[type="range"]:not(.rangeBar):not(.slider-base)::-moz-range-progress {
+    height: 0.5rem;
     border-radius: 9999px;
-    width: 1.25rem;
-    height: 1.25rem;
-}
-
-/* 火狐 滑动条的滑动块*/
-input[type="range"]::-moz-range-thumb {
-    background: #fff;
-    appearance: auto;
-    cursor: pointer;
-    border-width: 1px;
-    border-radius: 9999px;
-    width: 1.25rem;
-    height: 1.25rem;
+    background: var(--comigo-range-fill);
 }
 
 
@@ -1043,17 +1029,6 @@ body[data-theme="lofi"] a[title][class*="bg-cover"] > div[x-show="$store.shelf.s
 body[data-theme="lofi"] .text-yellow-400 {
   color: var(--accent) !important;
 }
-
-body[data-theme="lofi"] input[type="range"]::-webkit-slider-thumb {
-  background: var(--accent);
-  border-color: #5b321c;
-}
-
-body[data-theme="lofi"] input[type="range"]::-moz-range-thumb {
-  background: var(--accent);
-  border-color: #5b321c;
-}
-
 
 /* 背景色 */
 .bg-primary    { background-color: var(--primary)          !important; }
