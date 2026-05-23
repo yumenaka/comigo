@@ -134,7 +134,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</body><!-- 导入通用 JS 代码，初始化 Alpine、Flowbite 等前端基础能力。 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</body><!-- 导入通用 JS 代码，初始化 Alpine 与页面交互等前端基础能力。 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

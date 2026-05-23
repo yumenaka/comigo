@@ -134,8 +134,7 @@ templ FullScreenOnlineButton() {
 }
 
 // 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
-// data-drawer-body-scrolling="true"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 -->
-// https://flowbite.com/docs/components/drawer/#body-scrolling -->
+// data-drawer-body-scrolling="true" 允许打开抽屉时继续滚动底层页面，避免背景布局抖动。
 templ SettingDrawerButton() {
 	<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring" id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true">
 		@svg.Setting()
@@ -220,8 +219,7 @@ templ HeaderQuickJumpTitleView(title string, view BookSwitchView) {
 
 // ReSortIcon 定义了一个排序图标，点击后会显示一个下拉菜单，允许用户选择不同的排序方式。根据当前URL路径，菜单会设置不同的cookie参数名来保存用户的选择，并在页面加载时读取该cookie以确定当前的排序方式。
 templ ReSortIcon() {
-	<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
-	<!-- data-dropdown-trigger="{hover|click}"  二选一-->
+	<!-- 文件重排序 Dropdown Menu，data-dropdown-trigger="{hover|click}" 二选一。 -->
 	<svg
 		x-show="$store.global.onlineBook && !window.location.href.includes('settings') && !window.location.href.includes('upload')"
 		class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"

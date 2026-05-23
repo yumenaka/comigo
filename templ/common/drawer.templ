@@ -9,7 +9,7 @@ import (
 
 templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component, slot templ.Component, showReturnIcon bool, returnUrl string) {
 	<!-- Drawer component -->
-	<!-- https://flowbite.com/docs/components/drawer/ -->
+	<!-- 右侧阅读设置抽屉，由 assets/frontend/plugins/comigo_ui_controls.js 处理 data-drawer-* 行为。 -->
 	<div
 		id="drawer-right"
 		x-data="{ serverHost: 'localhost' }"

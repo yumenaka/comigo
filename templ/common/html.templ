@@ -46,7 +46,7 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScripts []string) 
 			@MessageModal()
 			@bodyContent
 		</body>
-		<!-- 导入通用 JS 代码，初始化 Alpine、Flowbite 等前端基础能力。 -->
+		<!-- 导入通用 JS 代码，初始化 Alpine 与页面交互等前端基础能力。 -->
 		@templ.Raw(assets.GetJavaScript(c.QueryParam("static") != "", insertScripts))
 		<!-- 导入 Plugins  -->
 		@plugins.RenderAllPlugins(c)

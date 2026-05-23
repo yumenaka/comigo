@@ -79,7 +79,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 		<span class="font-medium ms-3" x-text="i18next.t('show_page_num')"></span>
 	</label>
 	<!-- 【页面间距】 -->
-	<!-- range 组件参考：https://flowbite.com/docs/forms/range/-->
+	<!-- range 组件使用浏览器原生 input 与全局样式，保持轻量。 -->
 	<div class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label
 			for="marginBottom"

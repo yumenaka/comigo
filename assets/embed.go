@@ -103,7 +103,7 @@ window.ComiGoToggleFullscreen = function() {
 // GetJavaScript 在页面中插入需要的js代码
 func GetJavaScript(oneFileMode bool, insertScript []string) (jsString string) {
 	jsString = GetBasePathScript()
-	// 插入通用 JS 代码，初始化 Alpine、Flowbite 等前端基础能力。
+	// 插入通用 JS 代码，初始化 Alpine 与页面交互等前端基础能力。
 	if oneFileMode {
 		jsString += "<script>" + GetFileStr("dist/main.js") + "</script>\n"
 	} else {

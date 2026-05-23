@@ -56,7 +56,7 @@ templ FlipDrawerSlot(c echo.Context, book *model.Book) {
 	@plugins.SketchPracticePlugin(c)
 	@common.DownloadButton(c, book)
 	<!-- 远程同步翻页 -->
-	<!-- toggle组件来自： https://flowbite.com/docs/forms/toggle/ -->
+	<!-- toggle 组件使用 Tailwind peer 选择器实现，不依赖运行时组件库。 -->
 	<label
 		x-show="$store.global.onlineBook"
 		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"

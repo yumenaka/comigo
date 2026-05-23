@@ -36,7 +36,7 @@ func Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component,
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Drawer component --><!-- https://flowbite.com/docs/components/drawer/ --><div id=\"drawer-right\" x-data=\"{ serverHost: 'localhost' }\" class=\"fixed top-0 right-0 z-40 flex flex-col w-64 min-h-full px-2 py-0 overflow-y-auto transition-transform translate-x-full border-l-2 border-gray-500 dark:border-gray-200 rounded h-dvh bg-base-100 text-base-content\" tabindex=\"-1\" aria-labelledby=\"drawer-right-label\"><!-- 阅读设置 --><div class=\"w-full h-12 flex flex-row justify-center items-center px-1 py-1 m-0 border-b-2 border-slate-400 dark:border-slate-200\"><!-- 返回图标 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Drawer component --><!-- 右侧阅读设置抽屉，由 assets/frontend/plugins/comigo_ui_controls.js 处理 data-drawer-* 行为。 --><div id=\"drawer-right\" x-data=\"{ serverHost: 'localhost' }\" class=\"fixed top-0 right-0 z-40 flex flex-col w-64 min-h-full px-2 py-0 overflow-y-auto transition-transform translate-x-full border-l-2 border-gray-500 dark:border-gray-200 rounded h-dvh bg-base-100 text-base-content\" tabindex=\"-1\" aria-labelledby=\"drawer-right-label\"><!-- 阅读设置 --><div class=\"w-full h-12 flex flex-row justify-center items-center px-1 py-1 m-0 border-b-2 border-slate-400 dark:border-slate-200\"><!-- 返回图标 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
