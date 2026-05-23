@@ -81,6 +81,7 @@ func (ramStore *StoreInRam) GenerateBookGroup() (e error) {
 	return e
 }
 
+// ListBooks 列出所有书籍
 func (ramStore *StoreInRam) ListBooks() ([]*model.Book, error) {
 	var books []*model.Book
 	// 遍历 ChildStores 中的所有书籍
@@ -191,6 +192,7 @@ func restoreBookMetaPrivateFields(jsonData []byte, book *model.Book) error {
 	return nil
 }
 
+// DeleteBookJson 删除书籍对应的 JSON 文件
 func DeleteBookJson(book *model.Book) error {
 	configDir, err := config.GetConfigDir()
 	if err != nil {

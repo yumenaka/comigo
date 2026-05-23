@@ -393,7 +393,7 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" class=\"w-full py-1 text-left ml-2 text-xs text-base-content\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" class=\"w-full py-1 text-left mx-2 text-xs text-base-content\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

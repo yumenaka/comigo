@@ -613,7 +613,7 @@ class $84bdf3b771aae356$var$Translator extends $84bdf3b771aae356$var$EventEmitte
             const resForMissing = missingKeyNoValueFallbackToKey && usedKey ? undefined : res;
             const updateMissing = hasDefaultValue && defaultValue !== res && this.options.updateMissing;
             if (usedKey || usedDefault || updateMissing) {
-                this.logger.log(updateMissing ? 'updateKey' : 'missingKey', lng, namespace, key, updateMissing ? defaultValue : res);
+                this.logger.log(updateMissing ? 'updateKey' : 'missingKey', lng, namespace, needsPluralHandling && !updateMissing ? `${key}${this.pluralResolver.getSuffix(lng, opt.count, opt)}` : key, updateMissing ? defaultValue : res);
                 if (keySeparator) {
                     const fk = this.resolve(key, {
                         ...opt,
@@ -1859,7 +1859,8 @@ class $84bdf3b771aae356$var$I18n extends $84bdf3b771aae356$var$EventEmitter {
         } else setLng(lng);
         return deferred;
     }
-    getFixedT(lng, ns, keyPrefix) {
+    getFixedT(lng, ns, keyPrefix, fixedOpts) {
+        const scopeNs = fixedOpts?.scopeNs;
         const fixedT = (key, opts, ...rest)=>{
             let o;
             if (typeof opts !== 'object') o = this.options.overloadTranslationOptionHandler([
@@ -1871,12 +1872,14 @@ class $84bdf3b771aae356$var$I18n extends $84bdf3b771aae356$var$EventEmitter {
             };
             o.lng = o.lng || fixedT.lng;
             o.lngs = o.lngs || fixedT.lngs;
+            const explicitCallNs = o.ns !== undefined && o.ns !== null;
             o.ns = o.ns || fixedT.ns;
             if (o.keyPrefix !== '') o.keyPrefix = o.keyPrefix || keyPrefix || fixedT.keyPrefix;
             const selectorOpts = {
                 ...this.options,
                 ...o
             };
+            if (Array.isArray(scopeNs) && !explicitCallNs) selectorOpts.ns = scopeNs;
             if (typeof o.keyPrefix === 'function') o.keyPrefix = $84bdf3b771aae356$export$ec2cccc18ab4c2ae(o.keyPrefix, selectorOpts);
             const keySeparator = this.options.keySeparator || '.';
             let resultKey;
@@ -3294,8 +3297,8 @@ var $fc0ce661316f8ab4$var$DEFAULT = "DEFAULT";
 var $fc0ce661316f8ab4$var$directiveOrder = [
     "ignore",
     "ref",
-    "data",
     "id",
+    "data",
     "anchor",
     "bind",
     "init",
@@ -4202,7 +4205,7 @@ var $fc0ce661316f8ab4$var$Alpine = {
     get transaction () {
         return $fc0ce661316f8ab4$var$transaction;
     },
-    version: "3.15.11",
+    version: "3.15.12",
     flushAndStopDeferringMutations: $fc0ce661316f8ab4$var$flushAndStopDeferringMutations,
     dontAutoEvaluateFunctions: $fc0ce661316f8ab4$var$dontAutoEvaluateFunctions,
     disableEffectScheduling: $fc0ce661316f8ab4$var$disableEffectScheduling,
@@ -4971,8 +4974,8 @@ $fc0ce661316f8ab4$var$directive("teleport", (el, { modifiers: modifiers, express
         else target2.appendChild(clone3);
     };
     $fc0ce661316f8ab4$var$mutateDom(()=>{
-        placeInDom(clone2, target, modifiers);
         $fc0ce661316f8ab4$var$skipDuringClone(()=>{
+            placeInDom(clone2, target, modifiers);
             $fc0ce661316f8ab4$var$initTree(clone2);
         })();
     });
@@ -5511,7 +5514,7 @@ function $fc0ce661316f8ab4$var$loop(templateEl, iteratorNames, evaluateItems, ev
         if ($fc0ce661316f8ab4$var$isNumeric3(items)) items = Array.from({
             length: items
         }, (_, i)=>i + 1);
-        if (items === void 0) items = [];
+        if (items === void 0 || items === null) items = [];
         if (items instanceof Set) items = Array.from(items);
         if (items instanceof Map) items = Array.from(items);
         let oldLookup = templateEl._x_lookup;
@@ -5611,7 +5614,7 @@ function $fc0ce661316f8ab4$var$getIterationScopeVariables(iteratorNames, item, i
     return scopeVariables;
 }
 function $fc0ce661316f8ab4$var$isNumeric3(subject) {
-    return !Array.isArray(subject) && !isNaN(subject);
+    return typeof subject !== "object" && !isNaN(subject);
 }
 function $fc0ce661316f8ab4$var$isObject2(subject) {
     return typeof subject === "object" && !Array.isArray(subject);
