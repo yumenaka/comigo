@@ -1,0 +1,191 @@
+/* 纸杯甜点模板：变量、背景和面板控件样式集中在这里，避免污染通用样式。 */
+@layer base {
+  /* ====================== Cupcake ====================== */
+  [data-theme="cupcake"] {
+    color-scheme: light;
+    --primary: #ff76bd;
+    --primary-content: #4b1641;
+    --secondary: #8fe6ff;
+    --secondary-content: #123a4d;
+    --accent: #ffe267;
+    --accent-content: #4c3300;
+    --neutral: #624174;
+    --neutral-content: #fff4fb;
+    --base-100: #fff0fa;
+    --base-200: #ffd7ef;
+    --base-300: #b9edff;
+    --base-content: #4b1641;
+    --panel-surface: #ffd4eb;
+    --panel-surface-content: #4b1641;
+    --panel-control: #fff6fc;
+    --panel-control-hover: #ffe6f5;
+    --panel-control-active: #ff9ed0;
+    --panel-control-muted: #f4b8df;
+    --panel-control-content: #4b1641;
+    --panel-border: #cf5c9a;
+    --panel-control-border: #d76aaa;
+    --grid-pattern-color: rgba(255, 255, 255, 0.45);
+    --grid-mosaic-color: rgba(255, 118, 189, 0.18);
+    --info: #2f95d8;
+    --success: #69c86d;
+    --warning: #f0b447;
+    --error: #ec4f88;
+    --rounded-btn: 1.9rem;
+    --tab-border: 2px;
+    --tab-radius: 0.7rem;
+  }
+
+}
+
+/* 背景由远景、地面和散点层组成，保持模板识别度。 */
+body[data-theme="cupcake"],
+body[data-theme="cupcake"] .grid-line,
+body[data-theme="cupcake"] .grid-point,
+body[data-theme="cupcake"] .grid-mosaic,
+body[data-theme="cupcake"] #ShelfMainArea,
+body[data-theme="cupcake"] #settingsMainArea,
+body[data-theme="cupcake"] #tab-contents {
+  background-color: var(--base-300);
+  background-image:
+    radial-gradient(30px 18px at 15px 0, #fff7fd 96%, transparent 100%),
+    repeating-linear-gradient(90deg, #ff98cd 0 24px, #ffd2eb 24px 48px),
+    radial-gradient(ellipse 150px 42px at 12vw 86px, rgba(255, 255, 255, 0.9) 0 62%, transparent 64%),
+    radial-gradient(ellipse 96px 30px at 19vw 70px, rgba(255, 246, 252, 0.88) 0 64%, transparent 66%),
+    radial-gradient(ellipse 170px 46px at 78vw 118px, rgba(255, 255, 255, 0.88) 0 62%, transparent 64%),
+    radial-gradient(ellipse 112px 32px at 88vw 96px, rgba(255, 246, 252, 0.86) 0 64%, transparent 66%),
+    repeating-linear-gradient(120deg, transparent 0 28px, rgba(255, 255, 255, 0.22) 28px 31px, transparent 31px 60px),
+    radial-gradient(ellipse 58vw 156px at 18vw 100%, rgba(174, 238, 166, 0.82) 0 58%, transparent 59%),
+    radial-gradient(ellipse 52vw 136px at 86vw 100%, rgba(255, 198, 230, 0.82) 0 58%, transparent 59%);
+  background-position:
+    left bottom 72px,
+    left bottom,
+    left top,
+    left top,
+    left top,
+    left top,
+    left top,
+    left bottom 58px,
+    right bottom 58px;
+  background-size:
+    30px 18px,
+    100% 72px,
+    100% 210px,
+    100% 170px,
+    100% 220px,
+    100% 180px,
+    120px 120px,
+    100% 150px,
+    100% 130px;
+  background-repeat:
+    repeat-x,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    repeat,
+    no-repeat,
+    no-repeat;
+  background-attachment: fixed;
+}
+
+/* 面板底纹使用小型散点和斜向高光，和背景保持同一模板语气。 */
+body[data-theme="cupcake"] :is(.bg-base-100, .bg-base-100\/50, .bg-base-100\/70, .bg-base-100\/95, .panel-surface) {
+  background-color: var(--panel-surface) !important;
+  background-image:
+    radial-gradient(circle at 16px 16px, rgba(255, 255, 255, 0.42) 0 4px, transparent 5px),
+    radial-gradient(circle at 42px 34px, rgba(255, 226, 103, 0.35) 0 3px, transparent 4px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0 18%, transparent 18% 50%, rgba(255, 255, 255, 0.18) 50% 68%, transparent 68%);
+  background-size: 56px 48px, 56px 48px, 24px 24px;
+}
+
+body[data-theme="cupcake"] :is(.bg-base-100.text-base-content, .bg-base-100\/50.text-base-content, .bg-base-100\/70.text-base-content, .bg-base-100\/95.text-base-content, .panel-surface, #header, #drawer-right) {
+  color: var(--panel-surface-content) !important;
+}
+
+body[data-theme="cupcake"] .panel-surface .text-base-content {
+  color: var(--panel-surface-content) !important;
+}
+
+body[data-theme="cupcake"] :is(.panel-surface, .panel-surface.border, .panel-surface.border-2) {
+  border-color: var(--panel-border) !important;
+}
+
+/* 表单控件和按钮使用更浅的底色，与面板区分但不过度跳出。 */
+body[data-theme="cupcake"] :is(.panel-control, select, input[type="search"], input[type="text"], input[type="password"], input[type="number"]) {
+  background-color: var(--panel-control) !important;
+  background-image:
+    radial-gradient(circle at 12px 10px, rgba(255, 118, 189, 0.22) 0 3px, transparent 4px),
+    radial-gradient(circle at 30px 24px, rgba(143, 230, 255, 0.24) 0 3px, transparent 4px);
+  background-size: 42px 34px;
+  border-color: var(--panel-control-border) !important;
+  color: var(--panel-control-content) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.55),
+    0 3px 0 rgba(207, 92, 154, 0.55);
+}
+
+body[data-theme="cupcake"] .panel-control .text-base-content {
+  color: var(--panel-control-content) !important;
+}
+
+body[data-theme="cupcake"] :is(.panel-control, input[type="search"], input[type="text"], input[type="password"], input[type="number"])::placeholder {
+  color: rgba(75, 22, 65, 0.58) !important;
+}
+
+body[data-theme="cupcake"] :is(.panel-control:hover:not(:disabled), .panel-control:focus-visible, select:hover, input[type="search"]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hover) {
+  background-color: var(--panel-control-hover) !important;
+}
+
+body[data-theme="cupcake"] select option {
+  background-color: var(--panel-control);
+  color: var(--panel-control-content);
+}
+
+body[data-theme="cupcake"] :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600),
+body[data-theme="cupcake"] .panel-control:is(.bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
+  background-color: var(--panel-control-active) !important;
+  border-color: var(--panel-control-border) !important;
+  color: var(--panel-control-content) !important;
+}
+
+body[data-theme="cupcake"] :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600):hover {
+  background-color: #ff86c7 !important;
+}
+
+body[data-theme="cupcake"] input[type="checkbox"].peer + :is(div, span) {
+  background-color: var(--panel-control-muted) !important;
+  border-color: var(--panel-control-border) !important;
+}
+
+body[data-theme="cupcake"] input[type="checkbox"].peer:checked + :is(div, span) {
+  background-color: var(--primary) !important;
+}
+
+body[data-theme="cupcake"] :is(.border-gray-500, .border-slate-400) {
+  border-color: var(--panel-border) !important;
+}
+
+body[data-theme="cupcake"] a[title][class*="bg-cover"] {
+  border: 3px solid var(--panel-border);
+  border-radius: 0.7rem;
+  box-shadow:
+    0 5px 0 rgba(207, 92, 154, 0.65),
+    0 12px 20px rgba(75, 22, 65, 0.22);
+}
+
+body[data-theme="cupcake"] a[title][class*="bg-cover"]:hover {
+  box-shadow:
+    0 5px 0 var(--accent),
+    0 14px 24px rgba(75, 22, 65, 0.28);
+}
+
+body[data-theme="cupcake"] a[title][class*="bg-cover"] > div[x-show="$store.shelf.showFilename"] {
+  background-color: rgba(255, 212, 235, 0.92) !important;
+  border-top: 2px solid var(--panel-border);
+  color: var(--panel-surface-content) !important;
+}
+
+body[data-theme="cupcake"] .text-yellow-400 {
+  color: var(--accent) !important;
+}

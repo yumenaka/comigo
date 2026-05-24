@@ -1,0 +1,25 @@
+/* Valentine 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+@layer base {
+/* ====================== Valentine ====================== */
+  [data-theme="valentine"] {
+    color-scheme: light;
+    --primary: #e96d7b;
+    --primary-content: #3a0a14;
+    --secondary: #a991f7;
+    --secondary-content: #21113f;
+    --accent: #66b1b3;
+    --accent-content: #06292a;
+    --neutral: #af4670;
+    --neutral-content: #f0d6e8;
+    --base-100: #fae7f4;
+    --base-200: #f5d7e8;
+    --base-300: #edc4dc;
+    --base-content: #632c3b;
+    --info: #2563eb;
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: rgb(255, 111, 98);
+    --rounded-btn: 1.9rem;
+    --tab-radius: 0.7rem;
+  }
+}

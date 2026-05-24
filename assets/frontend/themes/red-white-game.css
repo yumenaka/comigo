@@ -1,0 +1,315 @@
+/* 红白游戏模板：变量、像素背景和控件样式集中在这里。 */
+@layer base {
+  /* ====================== Red White Game ====================== */
+  [data-theme="red-white-game"] {
+    color-scheme: light;
+    --primary: #d42925;
+    --primary-content: #fff7df;
+    --secondary: #c46a31;
+    --secondary-content: #fff7df;
+    --accent: #ffd24a;
+    --accent-content: #2a1a10;
+    --neutral: #5b321c;
+    --neutral-content: #fff7df;
+    --base-100: #bd6128;
+    --base-200: #8d421c;
+    --base-300: #65b9ee;
+    --base-content: #2a1a10;
+    --panel-surface: #bd6128;
+    --panel-surface-content: #fff7df;
+    --panel-control: #cb6d2d;
+    --panel-control-hover: #dc7c35;
+    --panel-control-active: #e59342;
+    --panel-control-muted: #dba36b;
+    --panel-control-content: #fff7df;
+    --panel-border: #5b321c;
+    --panel-control-border: #6b371c;
+    --grid-pattern-color: rgba(255, 255, 255, 0.28);
+    --grid-mosaic-color: rgba(91, 50, 28, 0.22);
+    --info: #1558c9;
+    --success: #168b44;
+    --warning: #f08a24;
+    --error: #d42925;
+    --rounded-box: 0.25rem;
+    --rounded-btn: 0.125rem;
+    --rounded-badge: 0.125rem;
+    --tab-radius: 0.125rem;
+    --animation-btn: 0;
+    --animation-input: 0;
+    --btn-focus-scale: 1;
+  }
+
+}
+
+/* 主背景层：天空、山体和砖块地面全部用 CSS 渐变绘制。 */
+body[data-theme="red-white-game"],
+body[data-theme="red-white-game"] .grid-line,
+body[data-theme="red-white-game"] .grid-point,
+body[data-theme="red-white-game"] .grid-mosaic,
+body[data-theme="red-white-game"] #ShelfMainArea,
+body[data-theme="red-white-game"] #settingsMainArea,
+body[data-theme="red-white-game"] #tab-contents {
+  background-color: var(--base-300);
+  /* 红白游戏背景只用 CSS 色块绘制，保持云、山、地面分层可控。 */
+  background-image:
+    linear-gradient(#fff7df 0 0),
+    linear-gradient(#fff7df 0 0),
+    linear-gradient(#fff7df 0 0),
+    linear-gradient(rgba(246, 222, 174, 0.9) 0 0),
+    linear-gradient(rgba(255, 247, 223, 0.92) 0 0),
+    linear-gradient(rgba(255, 247, 223, 0.92) 0 0),
+    linear-gradient(rgba(255, 247, 223, 0.92) 0 0),
+    linear-gradient(rgba(239, 212, 166, 0.72) 0 0),
+    repeating-linear-gradient(90deg, rgba(91, 50, 28, 0.72) 0 3px, transparent 3px 48px),
+    repeating-linear-gradient(90deg, transparent 0 24px, rgba(91, 50, 28, 0.66) 24px 27px, transparent 27px 48px),
+    repeating-linear-gradient(90deg, rgba(91, 50, 28, 0.6) 0 3px, transparent 3px 48px),
+    repeating-linear-gradient(to bottom, rgba(91, 50, 28, 0.78) 0 3px, transparent 3px 24px),
+    repeating-linear-gradient(135deg, transparent 0 21px, rgba(255, 210, 74, 0.22) 21px 24px, transparent 24px 48px),
+    linear-gradient(#c9782c 0 0),
+    conic-gradient(from 120deg at 50% 0%, rgba(39, 151, 69, 0.9) 0 120deg, transparent 0),
+    conic-gradient(from 120deg at 50% 0%, rgba(72, 181, 74, 0.86) 0 120deg, transparent 0);
+  background-position:
+    left 10vw top 78px,
+    left 13vw top 58px,
+    left 17vw top 76px,
+    left 11vw top 108px,
+    right 16vw top 54px,
+    right 11vw top 40px,
+    right 8vw top 58px,
+    right 11vw top 86px,
+    left 0 bottom 48px,
+    left 24px bottom 24px,
+    left 0 bottom 0,
+    left bottom,
+    left bottom,
+    left bottom,
+    left 6vw bottom 72px,
+    right 10vw bottom 72px;
+  background-size:
+    116px 24px,
+    80px 28px,
+    92px 22px,
+    132px 10px,
+    94px 24px,
+    76px 30px,
+    70px 22px,
+    118px 10px,
+    100% 24px,
+    100% 24px,
+    100% 24px,
+    100% 72px,
+    100% 72px,
+    100% 72px,
+    230px 92px,
+    170px 68px;
+  background-repeat:
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat;
+  background-attachment: fixed;
+}
+
+/* 面板使用砖块网格底纹，和地面材质呼应但亮度更收敛。 */
+body[data-theme="red-white-game"] .bg-base-100,
+body[data-theme="red-white-game"] .bg-base-100\/50,
+body[data-theme="red-white-game"] .bg-base-100\/70,
+body[data-theme="red-white-game"] .bg-base-100\/95,
+body[data-theme="red-white-game"] .panel-surface {
+  background-color: var(--panel-surface) !important;
+  background-image:
+    linear-gradient(rgba(255, 210, 74, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 210, 74, 0.18) 1px, transparent 1px),
+    linear-gradient(rgba(91, 50, 28, 0.42) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(91, 50, 28, 0.35) 2px, transparent 2px);
+  background-position: 0 0, 0 0, 0 0, 16px 0;
+  background-size: 32px 18px, 32px 18px, 64px 36px, 64px 36px;
+}
+
+body[data-theme="red-white-game"] .bg-base-100.text-base-content,
+body[data-theme="red-white-game"] .bg-base-100\/50.text-base-content,
+body[data-theme="red-white-game"] .bg-base-100\/70.text-base-content,
+body[data-theme="red-white-game"] .bg-base-100\/95.text-base-content,
+body[data-theme="red-white-game"] .panel-surface,
+body[data-theme="red-white-game"] #header,
+body[data-theme="red-white-game"] #drawer-right {
+  color: var(--panel-surface-content) !important;
+}
+
+body[data-theme="red-white-game"] .panel-surface .text-base-content {
+  color: var(--panel-surface-content) !important;
+}
+
+body[data-theme="red-white-game"] .panel-surface,
+body[data-theme="red-white-game"] .panel-surface.border,
+body[data-theme="red-white-game"] .panel-surface.border-2 {
+  border-color: var(--panel-border) !important;
+}
+
+/* 控件使用更亮的块面和细网格，保证在棕色面板上仍能快速识别。 */
+body[data-theme="red-white-game"] .panel-control,
+body[data-theme="red-white-game"] select,
+body[data-theme="red-white-game"] select.bg-base-100,
+body[data-theme="red-white-game"] input[type="search"],
+body[data-theme="red-white-game"] input[type="search"].bg-base-100,
+body[data-theme="red-white-game"] input[type="text"],
+body[data-theme="red-white-game"] input[type="text"].bg-base-100,
+body[data-theme="red-white-game"] input[type="password"],
+body[data-theme="red-white-game"] input[type="password"].bg-base-100,
+body[data-theme="red-white-game"] input[type="number"],
+body[data-theme="red-white-game"] input[type="number"].bg-base-100 {
+  background-color: var(--panel-control) !important;
+  background-image:
+    linear-gradient(90deg, rgba(255, 247, 223, 0.18) 1px, transparent 1px),
+    linear-gradient(rgba(255, 247, 223, 0.16) 1px, transparent 1px);
+  background-size: 12px 12px;
+  border-color: var(--panel-control-border) !important;
+  color: var(--panel-control-content) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 247, 223, 0.22),
+    0 2px 0 rgba(42, 26, 16, 0.35);
+}
+
+body[data-theme="red-white-game"] .panel-control .text-base-content {
+  color: var(--panel-control-content) !important;
+}
+
+body[data-theme="red-white-game"] .panel-control::placeholder,
+body[data-theme="red-white-game"] input[type="search"]::placeholder,
+body[data-theme="red-white-game"] input[type="text"]::placeholder,
+body[data-theme="red-white-game"] input[type="password"]::placeholder,
+body[data-theme="red-white-game"] input[type="number"]::placeholder {
+  color: rgba(255, 247, 223, 0.72) !important;
+}
+
+body[data-theme="red-white-game"] .panel-control:hover:not(:disabled),
+body[data-theme="red-white-game"] .panel-control:focus-visible,
+body[data-theme="red-white-game"] select:hover,
+body[data-theme="red-white-game"] input[type="search"]:hover,
+body[data-theme="red-white-game"] input[type="text"]:hover,
+body[data-theme="red-white-game"] input[type="password"]:hover,
+body[data-theme="red-white-game"] input[type="number"]:hover {
+  background-color: var(--panel-control-hover) !important;
+}
+
+body[data-theme="red-white-game"] select option {
+  background-color: var(--panel-control);
+  color: var(--panel-control-content);
+}
+
+body[data-theme="red-white-game"] button.bg-blue-200,
+body[data-theme="red-white-game"] a.bg-blue-200,
+body[data-theme="red-white-game"] button.bg-blue-300,
+body[data-theme="red-white-game"] a.bg-blue-300,
+body[data-theme="red-white-game"] button.bg-blue-400,
+body[data-theme="red-white-game"] a.bg-blue-400,
+body[data-theme="red-white-game"] button.bg-blue-500,
+body[data-theme="red-white-game"] a.bg-blue-500,
+body[data-theme="red-white-game"] button.bg-blue-600,
+body[data-theme="red-white-game"] a.bg-blue-600,
+body[data-theme="red-white-game"] button.bg-cyan-200,
+body[data-theme="red-white-game"] a.bg-cyan-200,
+body[data-theme="red-white-game"] button.bg-green-300,
+body[data-theme="red-white-game"] a.bg-green-300,
+body[data-theme="red-white-game"] button.bg-green-500,
+body[data-theme="red-white-game"] a.bg-green-500,
+body[data-theme="red-white-game"] button.bg-green-600,
+body[data-theme="red-white-game"] a.bg-green-600,
+body[data-theme="red-white-game"] .panel-control {
+  background-color: var(--panel-control) !important;
+  background-image: linear-gradient(rgba(255, 247, 223, 0.18) 50%, transparent 50%);
+  background-size: 100% 8px;
+  border-color: var(--panel-control-border) !important;
+  color: var(--panel-control-content) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 247, 223, 0.18),
+    0 3px 0 var(--panel-control-border);
+}
+
+body[data-theme="red-white-game"] button.bg-blue-200:hover,
+body[data-theme="red-white-game"] a.bg-blue-200:hover,
+body[data-theme="red-white-game"] button.bg-blue-300:hover,
+body[data-theme="red-white-game"] a.bg-blue-300:hover,
+body[data-theme="red-white-game"] button.bg-blue-400:hover,
+body[data-theme="red-white-game"] a.bg-blue-400:hover,
+body[data-theme="red-white-game"] button.bg-blue-500:hover,
+body[data-theme="red-white-game"] a.bg-blue-500:hover,
+body[data-theme="red-white-game"] button.bg-blue-600:hover,
+body[data-theme="red-white-game"] a.bg-blue-600:hover,
+body[data-theme="red-white-game"] button.bg-cyan-200:hover,
+body[data-theme="red-white-game"] a.bg-cyan-200:hover,
+body[data-theme="red-white-game"] button.bg-green-300:hover,
+body[data-theme="red-white-game"] a.bg-green-300:hover,
+body[data-theme="red-white-game"] button.bg-green-500:hover,
+body[data-theme="red-white-game"] a.bg-green-500:hover,
+body[data-theme="red-white-game"] button.bg-green-600:hover,
+body[data-theme="red-white-game"] a.bg-green-600:hover {
+  background-color: var(--panel-control-hover) !important;
+}
+
+body[data-theme="red-white-game"] .panel-control.bg-blue-400,
+body[data-theme="red-white-game"] .panel-control.bg-blue-500,
+body[data-theme="red-white-game"] .panel-control.bg-blue-600,
+body[data-theme="red-white-game"] .panel-control.bg-cyan-200,
+body[data-theme="red-white-game"] .panel-control.bg-green-300,
+body[data-theme="red-white-game"] .panel-control.bg-green-500,
+body[data-theme="red-white-game"] .panel-control.bg-green-600 {
+  background-color: var(--panel-control-active) !important;
+}
+
+body[data-theme="red-white-game"] input[type="checkbox"].peer + div,
+body[data-theme="red-white-game"] input[type="checkbox"].peer + span {
+  background-color: var(--panel-control-muted) !important;
+  border-color: var(--panel-control-border) !important;
+}
+
+body[data-theme="red-white-game"] input[type="checkbox"].peer:checked + div,
+body[data-theme="red-white-game"] input[type="checkbox"].peer:checked + span {
+  background-color: var(--panel-control) !important;
+}
+
+body[data-theme="red-white-game"] .border-gray-500,
+body[data-theme="red-white-game"] .border-slate-400 {
+  border-color: #5b321c !important;
+}
+
+body[data-theme="red-white-game"] a[title][class*="bg-cover"] {
+  border: 3px solid #5b321c;
+  border-radius: 0.25rem;
+  box-shadow:
+    0 4px 0 #5b321c,
+    0 10px 16px rgba(42, 26, 16, 0.35);
+}
+
+body[data-theme="red-white-game"] a[title][class*="bg-cover"]:hover {
+  box-shadow:
+    0 4px 0 var(--accent),
+    0 12px 18px rgba(42, 26, 16, 0.42);
+}
+
+body[data-theme="red-white-game"] a[title][class*="bg-cover"] > div[x-show="$store.shelf.showFilename"] {
+  background-color: rgba(184, 92, 42, 0.9) !important;
+  background-image:
+    linear-gradient(rgba(255, 210, 74, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 50, 28, 0.45) 1px, transparent 1px);
+  background-size: 28px 14px;
+  border-top: 2px solid #5b321c;
+  color: var(--primary-content) !important;
+  text-shadow: 0 1px 0 #2a1a10;
+}
+
+body[data-theme="red-white-game"] .text-yellow-400 {
+  color: var(--accent) !important;
+}

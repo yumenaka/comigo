@@ -1,0 +1,23 @@
+/* Cmyk 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+@layer base {
+/* ====================== Cmyk ====================== */
+  [data-theme="cmyk"] {
+    color-scheme: light;
+    --primary: #D90479;
+    --primary-content: #fff1f8;
+    --secondary: #04B2D9;
+    --secondary-content: #03242c;
+    --accent: #67BF63;
+    --accent-content: #0f2a0d;
+    --neutral: #F2421B;
+    --neutral-content: #e0da00;
+    --base-100: #ff00ff;
+    --base-200: #04B2D9;
+    --base-300: #00FFFF;
+    --base-content: #FFFF00;
+    --info: #04B2D9;
+    --success: #67BF63;
+    --warning: #FEF501;
+    --error: #F2421B;
+  }
+}

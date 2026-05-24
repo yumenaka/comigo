@@ -111,7 +111,7 @@ Alpine.store('global', {
     // bgPattern 背景花纹
     bgPattern: Alpine.$persist('grid-line').as('global.bgPattern'),
     // 需要保留 bg-base-300 的主题名单（例如 custom 主题也要使用该背景层级）
-    bgBase300ThemeList: ['light', 'dark', 'retro', 'custom', 'lofi', 'nord'],
+    bgBase300ThemeList: ['light', 'dark', 'retro', 'custom', 'cupcake', 'cyberpunk', 'red-white-game', 'nord'],
     /**
      * 返回主区域背景类名：统一处理背景花纹和 bg-base-300 的组合逻辑
      * @returns {string} 例如 "grid-line bg-base-300" / "bg-base-300" / "grid-line" / ""

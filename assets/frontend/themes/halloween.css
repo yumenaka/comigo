@@ -1,0 +1,25 @@
+/* Halloween 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+@layer base {
+/* ====================== Halloween ====================== */
+  [data-theme="halloween"] {
+    color-scheme: dark;
+    --primary: #ff00cc;
+    --primary-content: #ffffff;
+    --secondary: #3333ff;
+    --secondary-content: #ffffff;
+    --accent: #00ffcc;
+    --accent-content: #000000;
+    --neutral: #000000;
+    --neutral-content: #ffffff;
+    --base-100: #4A2E25;
+    --base-200: #000000;
+    --base-300: #E68A63;
+    --base-content: #F7EB9E;
+    --grid-pattern-color: var(--primary);
+    --grid-mosaic-color: var(--primary);
+    --info: #3333ff;
+    --success: #00ffcc;
+    --warning: #ff00cc;
+    --error: #ff00cc;
+  }
+}

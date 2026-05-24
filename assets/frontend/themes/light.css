@@ -1,0 +1,23 @@
+/* Light 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+@layer base {
+/* ====================== Light ====================== */
+  [data-theme="light"] {
+    color-scheme: light;
+    --primary: rgb(74, 0, 255);
+    --primary-content: #f4f0ff;
+    --secondary: rgb(255, 30, 204);
+    --secondary-content: rgb(255, 248, 253);
+    --accent: rgb(0, 211, 190);
+    --accent-content: #042f2b;
+    --neutral: #2B3440;
+    --neutral-content: #D7DDE4;
+    --base-100: rgb(255, 255, 255);
+    --base-200: #F2F2F2;
+    --base-300: #E5E6E6;
+    --base-content: #1f2937;
+    --info: #2563eb;
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: #dc2626;
+  }
+}

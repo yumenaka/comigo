@@ -1,0 +1,27 @@
+/* Nord 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+@layer base {
+/* ====================== Nord ====================== */
+  [data-theme="nord"] {
+    color-scheme: light;
+    --primary: #374151;
+    --primary-content: #F9FAFB;
+    --secondary: #9CA3AF;
+    --secondary-content: #111827;
+    --accent: #E5E7EB;
+    --accent-content: #111827;
+    --neutral: #111827;
+    --neutral-content: #E5E7EB;
+    --base-100: #F9FAFB;
+    --base-200: #E5E7EB;
+    --base-300: #9CA3AF;
+    --base-content: #111827;
+    --info: #374151;
+    --success: #9CA3AF;
+    --warning: #E5E7EB;
+    --error: #111827;
+    --rounded-box: 0.4rem;
+    --rounded-btn: 0.2rem;
+    --rounded-badge: 0.4rem;
+    --tab-radius: 0.2rem;
+  }
+}

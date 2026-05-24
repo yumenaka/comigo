@@ -41,19 +41,19 @@ templ ThemeCustomConfig() {
 					class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm bg-base-100 text-base-content"
 				>
 					<option value="retro" x-text="i18next.t('theme_option_retro')">Retro</option>
-					<option value="custom" x-text="i18next.t('theme_option_custom')">Custom</option>
-					<option value="light" x-text="i18next.t('theme_option_light')">Light</option>
-					<option value="dark" x-text="i18next.t('theme_option_dark')">Dark</option>
-					<option value="dracula" x-text="i18next.t('theme_option_dracula')">Dracula</option>
 					<option value="cupcake" x-text="i18next.t('theme_option_cupcake')">Cupcake</option>
 					<option value="cyberpunk" x-text="i18next.t('theme_option_cyberpunk')">Cyberpunk</option>
+					<option value="red-white-game" x-text="i18next.t('theme_option_red_white_game')">Red-White Game</option>
+					<option value="dracula" x-text="i18next.t('theme_option_dracula')">Dracula</option>
 					<option value="valentine" x-text="i18next.t('theme_option_valentine')">Valentine</option>
 					<option value="cmyk" x-text="i18next.t('theme_option_cmyk')">CMYK</option>
-					<option value="lofi" x-text="i18next.t('theme_option_lofi')">Lofi</option>
 					<option value="halloween" x-text="i18next.t('theme_option_halloween')">Halloween</option>
 					<option value="coffee" x-text="i18next.t('theme_option_coffee')">Coffee</option>
 					<option value="winter" x-text="i18next.t('theme_option_winter')">Winter</option>
 					<option value="nord" x-text="i18next.t('theme_option_nord')">Nord</option>
+					<option value="light" x-text="i18next.t('theme_option_light')">Light</option>
+					<option value="dark" x-text="i18next.t('theme_option_dark')">Dark</option>
+					<option value="custom" x-text="i18next.t('theme_option_custom')">Custom</option>
 				</select>
 			</div>
 			<div x-show="$store.global.theme.toString() === 'custom'" x-transition class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">

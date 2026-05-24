@@ -1,0 +1,25 @@
+/* Dracula 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+@layer base {
+/* ====================== Dracula ====================== */
+  [data-theme="dracula"] {
+    color-scheme: dark;
+    --primary: #ff79c6;
+    --primary-content: #282a36;
+    --secondary: #bd93f9;
+    --secondary-content: #282a36;
+    --accent: #50fa7b;
+    --accent-content: #282a36;
+    --neutral: #44475a;
+    --neutral-content: #f8f8f2;
+    --base-100: #282a36;
+    --base-200: #44475a;
+    --base-300: #282a36;
+    --base-content: #f87872;
+    --grid-pattern-color: var(--base-content);
+    --grid-mosaic-color: var(--base-content);
+    --info: #bd93f9;
+    --success: #50fa7b;
+    --warning: #ff79c6;
+    --error: #ff79c6;
+  }
+}

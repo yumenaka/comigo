@@ -1,0 +1,23 @@
+/* Coffee 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+@layer base {
+/* ====================== Coffee ====================== */
+  [data-theme="coffee"] {
+    color-scheme: dark;
+    --primary: #A67B5B;
+    --primary-content: #261208;
+    --secondary: #6F4E37;
+    --secondary-content: #FFF8E1;
+    --accent: #D2B48C;
+    --accent-content: #261208;
+    --neutral: #261208;
+    --neutral-content: #D2B48C;
+    --base-100: #6F4E37;
+    --base-200: #261208;
+    --base-300: #442618;
+    --base-content: #FFF8E1;
+    --info: #D2B48C;
+    --success: #A67B5B;
+    --warning: #D2B48C;
+    --error: #442618;
+  }
+}

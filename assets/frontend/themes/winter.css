@@ -1,0 +1,23 @@
+/* Winter 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+@layer base {
+/* ====================== Winter ====================== */
+  [data-theme="winter"] {
+    color-scheme: light;
+    --primary: #7D8E9E;
+    --primary-content: #E3F2FD;
+    --secondary: #9CACBF;
+    --secondary-content: #E3F2FD;
+    --accent: #BBDEFB;
+    --accent-content: #5F6D7A;
+    --neutral: #5F6D7A;
+    --neutral-content: #E3F2FD;
+    --base-100: #E3F2FD;
+    --base-200: #BBDEFB;
+    --base-300: #9CACBF;
+    --base-content: #1F2D5A;
+    --info: #7D8E9E;
+    --success: #9CACBF;
+    --warning: #BBDEFB;
+    --error: #5F6D7A;
+  }
+}
