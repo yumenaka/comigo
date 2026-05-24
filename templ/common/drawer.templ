@@ -181,6 +181,7 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 			</select>
 			<!-- 选择背景花纹的select -->
 			<select
+				x-show="$store.global.canSelectBgPattern()"
 				name="background_pattern"
 				aria-label="background pattern"
 				x-transition

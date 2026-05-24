@@ -5,7 +5,7 @@
     color-scheme: light;
     --primary: #4e7aa4;
     --primary-content: #f3fbff;
-    --secondary: #d18a4f;
+    --secondary: #e6b185;
     --secondary-content: #2d1608;
     --accent: #f0c66d;
     --accent-content: #3a2500;
@@ -19,11 +19,9 @@
     --panel-surface-content: #25384a;
     --panel-control: #f6fbfd;
     --panel-control-hover: #ffffff;
-    --panel-control-active: #d18a4f;
+    --panel-control-active: #e6b185;
     --panel-control-muted: #b8d3e2;
     --panel-control-content: #25384a;
-    --panel-border: #6b95b5;
-    --panel-control-border: #7da8c4;
     --grid-pattern-color: rgba(78, 122, 164, 0.2);
     --grid-mosaic-color: rgba(209, 138, 79, 0.14);
     --info: #4e7aa4;

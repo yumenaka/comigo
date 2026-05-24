@@ -6795,7 +6795,7 @@ Alpine.store('global', {
     // 压缩图片限宽
     autoResizeWidth: Alpine.$persist(800).as('global.autoResizeWidth'),
     // 主题，daisyUI 使用的 data-theme
-    theme: Alpine.$persist('retro').as('global.theme'),
+    theme: Alpine.$persist('cmyk').as('global.theme'),
     // custom 主题：组件颜色
     customBase100: Alpine.$persist('#dce6ff').as('global.customBase100'),
     // custom 主题：背景颜色
@@ -6815,12 +6815,28 @@ Alpine.store('global', {
         'red-white-game',
         'nord'
     ],
+    // 自带完整背景的主题会覆盖纯色/网格线花纹选择，相关控件需要隐藏。
+    ownBackgroundThemeList: [
+        'cupcake',
+        'cyberpunk',
+        'red-white-game',
+        'dracula',
+        'valentine',
+        'cmyk',
+        'halloween',
+        'coffee',
+        'winter',
+        'nord'
+    ],
+    canSelectBgPattern () {
+        return !this.ownBackgroundThemeList.includes(this.theme.toString());
+    },
     /**
      * 返回主区域背景类名：统一处理背景花纹和 bg-base-300 的组合逻辑
      * @returns {string} 例如 "grid-line bg-base-300" / "bg-base-300" / "grid-line" / ""
      */ getMainAreaBgClass () {
         const classes = [];
-        if (this.bgPattern !== 'none') classes.push(this.bgPattern);
+        if (this.canSelectBgPattern() && this.bgPattern !== 'none') classes.push(this.bgPattern);
         if (this.bgBase300ThemeList.includes(this.theme.toString())) classes.push('bg-base-300');
         return classes.join(' ');
     },

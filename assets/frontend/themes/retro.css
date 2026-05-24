@@ -1,68 +1,26 @@
-/* 午后红茶模板：变量、星图背景和控件样式集中在这里。 */
 @layer base {
   /* ====================== Retro ====================== */
   [data-theme="retro"] {
     color-scheme: light;
-    --primary: #1f3f7a;
-    --primary-content: #fff5d5;
-    --secondary: #b7893f;
-    --secondary-content: #21170d;
-    --accent: #8f1d2c;
-    --accent-content: #fff5d5;
-    --neutral: #2a3347;
-    --neutral-content: #f6ecd5;
-    --base-100: #efe3c8;
-    --base-200: #d8c49a;
-    --base-300: #24375f;
-    --base-content: #1e2431;
-    --panel-surface: #ead8ad;
-    --panel-surface-content: #1f2638;
-    --panel-control: #f6ecd5;
-    --panel-control-hover: #fff4d8;
-    --panel-control-active: #b7893f;
-    --panel-control-muted: #c8b07d;
-    --panel-control-content: #1f2638;
-    --panel-border: #8b662f;
-    --panel-control-border: #9b7338;
-    --grid-pattern-color: rgba(246, 236, 213, 0.34);
-    --grid-mosaic-color: rgba(183, 137, 63, 0.22);
-    --info: #1f3f7a;
-    --success: #477057;
-    --warning: #b7893f;
-    --error: #8f1d2c;
-    --rounded-box: 0.35rem;
-    --rounded-btn: 0.25rem;
-    --rounded-badge: 0.25rem;
-    --tab-radius: 0.25rem;
+    --primary: #ef9995;
+    --primary-content: #282425;
+    --secondary: #a4cbb4;
+    --secondary-content: #282425;
+    --accent: #DC8850;
+    --accent-content: #282425;
+    --neutral: #2E282A;
+    --neutral-content: #EDE6D4;
+    --base-100: #ece3ca;
+    --base-200: #e4d8b4;
+    --base-300: #DBCA9A;
+    --base-content: #282425;
+    --info: #2563eb;
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: #f35248;
+    --rounded-box: 0.4rem;
+    --rounded-btn: 0.4rem;
+    --rounded-badge: 0.4rem;
+    --tab-radius: 0.4rem;
   }
-}
-
-/* 主背景：深蓝星域叠加金色航线，保留午后茶色的温度。 */
-body[data-theme="retro"],
-body[data-theme="retro"] .grid-line,
-body[data-theme="retro"] .grid-point,
-body[data-theme="retro"] .grid-mosaic,
-body[data-theme="retro"] #ShelfMainArea,
-body[data-theme="retro"] #settingsMainArea,
-body[data-theme="retro"] #tab-contents {
-  background-color: var(--base-300);
-  background-image:
-    radial-gradient(circle at 12% 20%, rgba(255, 245, 213, 0.8) 0 1px, transparent 2px),
-    radial-gradient(circle at 72% 28%, rgba(255, 245, 213, 0.72) 0 1px, transparent 2px),
-    radial-gradient(circle at 48% 68%, rgba(183, 137, 63, 0.58) 0 1px, transparent 2px),
-    linear-gradient(118deg, transparent 0 36%, rgba(183, 137, 63, 0.28) 36% 37%, transparent 37%),
-    linear-gradient(28deg, transparent 0 58%, rgba(246, 236, 213, 0.16) 58% 59%, transparent 59%),
-    radial-gradient(ellipse at 78% 18%, rgba(143, 29, 44, 0.3), transparent 42%),
-    linear-gradient(180deg, #182a52 0%, #24375f 55%, #d8c49a 100%);
-  background-size: 170px 150px, 240px 180px, 210px 190px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
-  background-attachment: fixed;
-}
-
-/* 面板像纸质星图，控件像浅色标签，避免和深色背景混在一起。 */
-body[data-theme="retro"] .panel-surface {
-  background-color: var(--panel-surface) !important;
-  background-image:
-    linear-gradient(90deg, rgba(139, 102, 47, 0.16) 1px, transparent 1px),
-    linear-gradient(rgba(139, 102, 47, 0.12) 1px, transparent 1px);
-  background-size: 28px 28px;
 }

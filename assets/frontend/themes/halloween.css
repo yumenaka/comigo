@@ -1,4 +1,4 @@
-/* 南瓜诡夜模板：变量、歪月背景和控件样式集中在这里。 */
+/* 南瓜诡夜模板：变量、半月背景和控件样式集中在这里。 */
 @layer base {
   /* ====================== Halloween ====================== */
   [data-theme="halloween"] {
@@ -22,8 +22,6 @@
     --panel-control-active: #f28c28;
     --panel-control-muted: #5a3d2c;
     --panel-control-content: #ffe7b8;
-    --panel-border: #f28c28;
-    --panel-control-border: #b7e35d;
     --grid-pattern-color: rgba(242, 140, 40, 0.26);
     --grid-mosaic-color: rgba(183, 227, 93, 0.18);
     --info: #8e5cff;
@@ -33,7 +31,7 @@
   }
 }
 
-/* 主背景：弯月、斜影和怪诞绿光构成夜色层次。 */
+/* 主背景：半月、星点和暗雾构成夜色层次。 */
 body[data-theme="halloween"],
 body[data-theme="halloween"] .grid-line,
 body[data-theme="halloween"] .grid-point,
@@ -43,12 +41,57 @@ body[data-theme="halloween"] #settingsMainArea,
 body[data-theme="halloween"] #tab-contents {
   background-color: var(--base-300);
   background-image:
-    radial-gradient(circle at 16% 18%, #f6d780 0 54px, transparent 56px),
-    radial-gradient(circle at 19% 15%, #09080b 0 46px, transparent 48px),
-    linear-gradient(128deg, transparent 0 38%, rgba(242, 140, 40, 0.28) 38% 40%, transparent 40%),
-    radial-gradient(ellipse at 80% 78%, rgba(183, 227, 93, 0.2), transparent 38%),
-    repeating-linear-gradient(80deg, transparent 0 36px, rgba(142, 92, 255, 0.1) 36px 38px, transparent 38px 88px),
+    radial-gradient(circle at 60px 98px, #09080b 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 60px 98px, #fff8d5 0 4px, transparent 5px),
+    radial-gradient(circle at 60px 98px, #2d1820 0 7px, transparent 8px),
+    radial-gradient(circle at 60px 98px, #d0a23a 0 10px, transparent 11px),
+    radial-gradient(circle at 145px 68px, #09080b 0 76px, transparent 78px),
+    radial-gradient(circle at 112px 108px, #f6d780 0 72px, #d0a23a 73px 80px, transparent 82px),
+    radial-gradient(circle at 12% 12%, rgba(255, 231, 184, 0.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 32% 18%, rgba(255, 231, 184, 0.58) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 24%, rgba(183, 227, 93, 0.42) 0 1px, transparent 2px),
+    radial-gradient(ellipse 80% 24% at 40% 104%, rgba(0, 0, 0, 0.62), transparent 72%),
+    radial-gradient(ellipse 96% 30% at 88% 106%, rgba(26, 17, 16, 0.8), transparent 74%),
     linear-gradient(180deg, #09080b 0%, #1a1110 62%, #26151b 100%);
+  background-size:
+    260px 220px,
+    260px 220px,
+    260px 220px,
+    260px 220px,
+    260px 220px,
+    260px 220px,
+    170px 140px,
+    220px 170px,
+    260px 210px,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  background-position:
+    42px 48px,
+    42px 48px,
+    42px 48px,
+    42px 48px,
+    42px 48px,
+    42px 48px,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0;
+  background-repeat:
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    repeat,
+    repeat,
+    repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat;
   background-attachment: fixed;
 }
 

@@ -44,11 +44,9 @@
     --panel-surface-content: #f7f3d0;
     --panel-control: #fcee09;
     --panel-control-hover: #fff45c;
-    --panel-control-active: #00f0ff;
+    --panel-control-active: #0eadb5;
     --panel-control-muted: #2b2833;
     --panel-control-content: #111015;
-    --panel-border: #fcee09;
-    --panel-control-border: #111015;
     --grid-pattern-color: rgba(252, 238, 9, 0.36);
     --grid-mosaic-color: rgba(0, 240, 255, 0.18);
     --info: #00f0ff;
@@ -70,18 +68,22 @@
 
 }
 
-/* 主背景层：从上到下分别是闪光、地面、楼体、探照灯和远景光晕。 */
+/* 主背景层：从上到下分别是闪光、楼体、探照灯和远景光晕。 */
 body[data-theme="cyberpunk"],
 body[data-theme="cyberpunk"] .grid-line,
 body[data-theme="cyberpunk"] .grid-point,
 body[data-theme="cyberpunk"] .grid-mosaic,
 body[data-theme="cyberpunk"] #ShelfMainArea,
 body[data-theme="cyberpunk"] #settingsMainArea,
-body[data-theme="cyberpunk"] #tab-contents {
+body[data-theme="cyberpunk"] #tab-contents,
+body[data-theme="cyberpunk"] #ScrollMainArea,
+body[data-theme="cyberpunk"] #FlipMainArea,
+body[data-theme="cyberpunk"] #ReaderShell,
+body[data-theme="cyberpunk"] #ReaderFlipArea,
+body[data-theme="cyberpunk"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image:
     linear-gradient(rgba(252, 238, 9, var(--cyber-flash)) 0 0),
-    repeating-linear-gradient(135deg, rgba(17, 16, 21, 0.96) 0 18px, rgba(252, 238, 9, 0.92) 18px 36px),
     repeating-linear-gradient(90deg, transparent 0 24px, rgba(16, 14, 22, 0.94) 24px 68px, transparent 68px 126px, rgba(12, 11, 17, 0.96) 126px 146px, transparent 146px 226px, rgba(18, 15, 24, 0.94) 226px 292px, transparent 292px 356px, rgba(10, 10, 15, 0.96) 356px 418px, transparent 418px 520px),
     repeating-linear-gradient(90deg, transparent 0 18px, rgba(30, 29, 45, 0.62) 18px 58px, transparent 58px 83px, rgba(20, 22, 34, 0.52) 83px 129px, transparent 129px 166px, rgba(38, 31, 48, 0.5) 166px 232px, transparent 232px 276px, rgba(23, 24, 38, 0.54) 276px 316px, transparent 316px 380px),
     linear-gradient(transparent 0 0),
@@ -90,32 +92,30 @@ body[data-theme="cyberpunk"] #tab-contents {
     linear-gradient(transparent 0 0),
     repeating-linear-gradient(0deg, transparent 0 29px, rgba(0, 240, 255, 0.13) 29px 30px, transparent 30px 47px, rgba(252, 238, 9, 0.08) 47px 48px),
     linear-gradient(to top, rgba(0, 240, 255, 0.24), transparent 74px),
-    conic-gradient(from var(--cyber-spot-a) at 14% calc(100% - 68px), transparent 0deg 5deg, rgba(252, 238, 9, 0.24) 10deg 22deg, transparent 28deg 360deg),
-    conic-gradient(from var(--cyber-spot-b) at 46% calc(100% - 68px), transparent 0deg 5deg, rgba(0, 240, 255, 0.18) 10deg 24deg, transparent 30deg 360deg),
-    conic-gradient(from var(--cyber-spot-c) at 82% calc(100% - 68px), transparent 0deg 5deg, rgba(255, 42, 109, 0.16) 10deg 24deg, transparent 30deg 360deg),
+    conic-gradient(from var(--cyber-spot-a) at 14% 100%, transparent 0deg 5deg, rgba(252, 238, 9, 0.24) 10deg 22deg, transparent 28deg 360deg),
+    conic-gradient(from var(--cyber-spot-b) at 72% 100%, transparent 0deg 5deg, rgba(0, 240, 255, 0.18) 10deg 24deg, transparent 30deg 360deg),
+    conic-gradient(from var(--cyber-spot-c) at 56% 100%, transparent 0deg 5deg, rgba(255, 42, 109, 0.26) 10deg 22deg, transparent 33deg 360deg),
     radial-gradient(ellipse 620px 280px at 82% 18%, rgba(255, 42, 109, 0.26), transparent 64%),
     radial-gradient(ellipse 520px 240px at 18% 48%, rgba(0, 240, 255, 0.2), transparent 62%),
     linear-gradient(180deg, #17151b 0%, #08070b 74%);
   background-position:
     left top,
     left bottom,
-    left bottom 214px,
-    left bottom 68px,
-    left bottom 68px,
-    left bottom 68px,
-    left bottom 68px,
-    left bottom 68px,
-    left bottom 68px,
-    left bottom 68px,
+    left bottom,
+    left bottom,
+    left bottom,
+    left bottom,
+    left bottom,
+    left bottom,
+    left bottom,
     left top,
-    left -18vw top,
     right -10vw top,
+    left -18vw top,
     left top,
     left top,
     left top;
   background-size:
     100% 100%,
-    100% 68px,
     680px 110px,
     460px 220px,
     460px 220px,
@@ -131,7 +131,6 @@ body[data-theme="cyberpunk"] #tab-contents {
     100% 100%,
     100% 100%;
   background-repeat:
-    no-repeat,
     no-repeat,
     repeat-x,
     repeat-x,
@@ -154,6 +153,30 @@ body[data-theme="cyberpunk"] #tab-contents {
     cyber-lightning 53s steps(1, end) infinite;
 }
 
+/* 页脚使用警戒色块，主背景保持建筑和探照灯为主。 */
+body[data-theme="cyberpunk"] footer.footer.panel-surface {
+  background-color: var(--primary) !important;
+  background-image: repeating-linear-gradient(135deg, rgba(17, 16, 21, 0.96) 0 18px, rgba(252, 238, 9, 0.92) 18px 36px) !important;
+  color: var(--primary-content) !important;
+}
+
+body[data-theme="cyberpunk"] footer.footer.panel-surface a {
+  color: var(--primary-content) !important;
+  text-shadow: 0 1px 0 rgba(252, 238, 9, 0.48);
+}
+
+/* 阅读页保持静态初始光效，避免背景动画干扰看图。 */
+body[data-theme="cyberpunk"]:has(#ScrollMainArea),
+body[data-theme="cyberpunk"]:has(#FlipMainArea),
+body[data-theme="cyberpunk"]:has(#ReaderRoot),
+body[data-theme="cyberpunk"] :is(#ScrollMainArea, #FlipMainArea, #ReaderRoot, #ReaderShell, #ReaderFlipArea, #ReaderPDFArea) {
+  --cyber-spot-a: 4deg;
+  --cyber-spot-b: -18deg;
+  --cyber-spot-c: -42deg;
+  --cyber-flash: 0;
+  animation: none !important;
+}
+
 /* 面板采用低亮度网格，避免和背景探照灯抢视觉层级。 */
 body[data-theme="cyberpunk"] :is(.bg-base-100, .bg-base-100\/50, .bg-base-100\/70, .bg-base-100\/95, .panel-surface) {
   background-color: var(--panel-surface) !important;
@@ -169,15 +192,10 @@ body[data-theme="cyberpunk"] .panel-surface .text-base-content {
   color: var(--panel-surface-content) !important;
 }
 
-body[data-theme="cyberpunk"] :is(.panel-surface, .panel-surface.border, .panel-surface.border-2, .border-gray-500, .border-slate-400) {
-  border-color: var(--panel-border) !important;
-}
-
 /* 控件使用高对比色块，保证在深色背景和半透明面板上都可读。 */
 body[data-theme="cyberpunk"] :is(.panel-control, select, input[type="search"], input[type="text"], input[type="password"], input[type="number"]) {
   background-color: var(--panel-control) !important;
   background-image: linear-gradient(110deg, transparent 0 72%, rgba(255, 42, 109, 0.28) 72% 84%, transparent 84%);
-  border-color: var(--panel-control-border) !important;
   color: var(--panel-control-content) !important;
   box-shadow:
     inset 0 0 0 2px rgba(17, 16, 21, 0.5),
@@ -193,7 +211,7 @@ body[data-theme="cyberpunk"] :is(.panel-control, input[type="search"], input[typ
   color: rgba(17, 16, 21, 0.68) !important;
 }
 
-body[data-theme="cyberpunk"] :is(.panel-control:hover:not(:disabled), .panel-control:focus-visible, select:hover, input[type="search"]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hover) {
+body[data-theme="cyberpunk"] :is(.panel-control:focus-visible, select:hover, input[type="search"]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hover) {
   background-color: var(--panel-control-hover) !important;
 }
 
@@ -208,13 +226,8 @@ body[data-theme="cyberpunk"] .panel-control:is(.bg-blue-400, .bg-blue-500, .bg-b
   color: var(--secondary-content) !important;
 }
 
-body[data-theme="cyberpunk"] :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600):hover {
-  background-color: #63f7ff !important;
-}
-
 body[data-theme="cyberpunk"] input[type="checkbox"].peer + :is(div, span) {
   background-color: var(--panel-control-muted) !important;
-  border-color: var(--panel-border) !important;
 }
 
 body[data-theme="cyberpunk"] input[type="checkbox"].peer:checked + :is(div, span) {
@@ -222,7 +235,6 @@ body[data-theme="cyberpunk"] input[type="checkbox"].peer:checked + :is(div, span
 }
 
 body[data-theme="cyberpunk"] a[title][class*="bg-cover"] {
-  border: 3px solid var(--panel-border);
   border-radius: 0;
   box-shadow:
     5px 5px 0 rgba(255, 42, 109, 0.72),
@@ -237,7 +249,6 @@ body[data-theme="cyberpunk"] a[title][class*="bg-cover"]:hover {
 
 body[data-theme="cyberpunk"] a[title][class*="bg-cover"] > div[x-show="$store.shelf.showFilename"] {
   background-color: rgba(23, 21, 27, 0.92) !important;
-  border-top: 2px solid var(--panel-border);
   color: var(--primary) !important;
 }
 

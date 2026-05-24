@@ -178,7 +178,8 @@ templ ComigoXYZPlugin(c echo.Context) {
 				//console.log(`Comigo.xyz插件: 检测到系统 ${currentSystem.os} ${currentSystem.arch}，默认选择平台索引 ${selectedIndex}`,);
 				// 创建主页功能块
 				const homePageBlock = document.createElement("div");
-				homePageBlock.className = "comigo_plugin comigo_xyz_plugin w-full mt-2";
+				homePageBlock.className =
+					"comigo_plugin comigo_xyz_plugin flex justify-center max-w-full mt-2";
 				homePageBlock.setAttribute(
 					"x-data",
 					`{
@@ -268,8 +269,8 @@ templ ComigoXYZPlugin(c echo.Context) {
 				);
 
 				homePageBlock.innerHTML = `
-					<div class="panel-surface flex mt-[-16px] flex-col items-center bg-base-100 border justify-center w-full p-8 rounded-lg">
-						<div class="max-w-4xl w-full space-y-8">
+					<div class="panel-surface flex mt-[-16px] flex-col items-center bg-base-100 border justify-center w-fit max-w-full p-8 rounded-lg">
+						<div class="max-w-4xl space-y-8">
 							<!-- 标题区域 -->
 							<div class="text-center space-y-4">
 								<p class="text-base text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_description')">在所有设备上看漫画。无论电脑还是手机，Windows还是Linux、MacOS</p>

@@ -22,8 +22,6 @@
     --panel-control-active: #ff9ed0;
     --panel-control-muted: #f4b8df;
     --panel-control-content: #4b1641;
-    --panel-border: #cf5c9a;
-    --panel-control-border: #d76aaa;
     --grid-pattern-color: rgba(255, 255, 255, 0.45);
     --grid-mosaic-color: rgba(255, 118, 189, 0.18);
     --info: #2f95d8;
@@ -31,7 +29,6 @@
     --warning: #f0b447;
     --error: #ec4f88;
     --rounded-btn: 1.9rem;
-    --tab-border: 2px;
     --tab-radius: 0.7rem;
   }
 
@@ -107,10 +104,6 @@ body[data-theme="cupcake"] .panel-surface .text-base-content {
   color: var(--panel-surface-content) !important;
 }
 
-body[data-theme="cupcake"] :is(.panel-surface, .panel-surface.border, .panel-surface.border-2) {
-  border-color: var(--panel-border) !important;
-}
-
 /* 表单控件和按钮使用更浅的底色，与面板区分但不过度跳出。 */
 body[data-theme="cupcake"] :is(.panel-control, select, input[type="search"], input[type="text"], input[type="password"], input[type="number"]) {
   background-color: var(--panel-control) !important;
@@ -118,7 +111,6 @@ body[data-theme="cupcake"] :is(.panel-control, select, input[type="search"], inp
     radial-gradient(circle at 12px 10px, rgba(255, 118, 189, 0.22) 0 3px, transparent 4px),
     radial-gradient(circle at 30px 24px, rgba(143, 230, 255, 0.24) 0 3px, transparent 4px);
   background-size: 42px 34px;
-  border-color: var(--panel-control-border) !important;
   color: var(--panel-control-content) !important;
   box-shadow:
     inset 0 0 0 2px rgba(255, 255, 255, 0.55),
@@ -133,7 +125,7 @@ body[data-theme="cupcake"] :is(.panel-control, input[type="search"], input[type=
   color: rgba(75, 22, 65, 0.58) !important;
 }
 
-body[data-theme="cupcake"] :is(.panel-control:hover:not(:disabled), .panel-control:focus-visible, select:hover, input[type="search"]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hover) {
+body[data-theme="cupcake"] :is(.panel-control:focus-visible, select:hover, input[type="search"]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hover) {
   background-color: var(--panel-control-hover) !important;
 }
 
@@ -145,7 +137,6 @@ body[data-theme="cupcake"] select option {
 body[data-theme="cupcake"] :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600),
 body[data-theme="cupcake"] .panel-control:is(.bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
   background-color: var(--panel-control-active) !important;
-  border-color: var(--panel-control-border) !important;
   color: var(--panel-control-content) !important;
 }
 
@@ -155,19 +146,13 @@ body[data-theme="cupcake"] :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blu
 
 body[data-theme="cupcake"] input[type="checkbox"].peer + :is(div, span) {
   background-color: var(--panel-control-muted) !important;
-  border-color: var(--panel-control-border) !important;
 }
 
 body[data-theme="cupcake"] input[type="checkbox"].peer:checked + :is(div, span) {
   background-color: var(--primary) !important;
 }
 
-body[data-theme="cupcake"] :is(.border-gray-500, .border-slate-400) {
-  border-color: var(--panel-border) !important;
-}
-
 body[data-theme="cupcake"] a[title][class*="bg-cover"] {
-  border: 3px solid var(--panel-border);
   border-radius: 0.7rem;
   box-shadow:
     0 5px 0 rgba(207, 92, 154, 0.65),
@@ -182,7 +167,6 @@ body[data-theme="cupcake"] a[title][class*="bg-cover"]:hover {
 
 body[data-theme="cupcake"] a[title][class*="bg-cover"] > div[x-show="$store.shelf.showFilename"] {
   background-color: rgba(255, 212, 235, 0.92) !important;
-  border-top: 2px solid var(--panel-border);
   color: var(--panel-surface-content) !important;
 }
 

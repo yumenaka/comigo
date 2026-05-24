@@ -19,11 +19,9 @@
     --panel-surface-content: #2e241d;
     --panel-control: #f8e7c9;
     --panel-control-hover: #fff0d4;
-    --panel-control-active: #5f8f8a;
+    --panel-control-active: #79bcb7;
     --panel-control-muted: #cfa16e;
     --panel-control-content: #2e241d;
-    --panel-border: #7a4d2b;
-    --panel-control-border: #8a5a35;
     --grid-pattern-color: rgba(122, 77, 43, 0.22);
     --grid-mosaic-color: rgba(95, 143, 138, 0.18);
     --info: #407f9f;
@@ -49,8 +47,8 @@ body[data-theme="coffee"] #tab-contents {
     linear-gradient(180deg, transparent 0 calc(100% - 96px), rgba(122, 77, 43, 0.18) calc(100% - 96px)),
     radial-gradient(ellipse at 86% 18%, rgba(213, 139, 69, 0.32), transparent 34%),
     linear-gradient(180deg, #f2dfbf 0%, #efd6ad 62%, #dcc299 100%);
-  background-position: left top, left top, left bottom 58px, left top, left top, left top;
-  background-size: 100% 100%, 28px 28px, 100% 38px, 100% 100%, 100% 100%, 100% 100%;
+  background-position: left top, left top, left bottom, left top, left top, left top;
+  background-size: 100% 100%, 28px 28px, 100% 64px, 100% 100%, 100% 100%, 100% 100%;
   background-repeat: no-repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   background-attachment: fixed;
 }

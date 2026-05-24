@@ -77,7 +77,7 @@ templ ThemeCustomConfig() {
 					<input type="text" x-model="$store.global.customBase300" class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm font-mono text-black"/>
 				</div>
 			</div>
-			<div class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
+			<div x-show="$store.global.canSelectBgPattern()" x-transition class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
 				<label class="w-full py-0 text-left" x-text="i18next.t('settings_custom_theme_pattern')">背景花纹</label>
 				<select
 					x-transition

@@ -30,8 +30,13 @@
   -moz-osx-font-smoothing: grayscale;
   --grid-pattern-color: rgb(203 213 225);
   --grid-mosaic-color: #8d8b8b;
+  --button-hover-filter: brightness(0.92);
 }
 
+/* 亮色主题按钮 hover 时稍微变暗，暗色主题则稍微变亮，以提供视觉反馈。 */
+body:is([data-theme="dark"], [data-theme="cyberpunk"], [data-theme="dracula"], [data-theme="halloween"]) {
+  --button-hover-filter: brightness(1.20);
+}
 
 body {
   margin: 0;
@@ -177,44 +182,36 @@ input[type="range"]:not(.rangeBar):not(.slider-base)::-moz-range-progress {
 .text-warning    { color: var(--warning)          !important; }
 .text-error      { color: var(--error)            !important; }
 
-/* 主题面板变量的默认映射；复杂模板可在各自 CSS 中用更高优先级覆盖。 */
-.panel-surface {
-  background-color: var(--panel-surface, var(--base-100)) !important;
-  border-color: var(--panel-border, var(--base-300)) !important;
-  color: var(--panel-surface-content, var(--base-content)) !important;
+/* 新模板主题的面板变量映射；旧版主题如 retro 不进入这里，避免压过内联 Tailwind 类。 */
+body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) .panel-surface {
+  background-color: var(--panel-surface) !important;
+  color: var(--panel-surface-content) !important;
 }
 
-.panel-surface .text-base-content {
-  color: var(--panel-surface-content, var(--base-content)) !important;
+body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) .panel-surface .text-base-content {
+  color: var(--panel-surface-content) !important;
 }
 
-.panel-control,
-select,
-input[type="search"],
-input[type="text"],
-input[type="password"],
-input[type="number"] {
-  background-color: var(--panel-control, var(--base-100)) !important;
-  border-color: var(--panel-control-border, var(--base-300)) !important;
-  color: var(--panel-control-content, var(--base-content)) !important;
+body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) :is(.panel-control, select, input[type="search"], input[type="text"], input[type="password"], input[type="number"]) {
+  background-color: var(--panel-control) !important;
+  color: var(--panel-control-content) !important;
 }
 
-.panel-control:hover:not(:disabled),
-.panel-control:focus-visible,
-select:hover,
-input[type="search"]:hover,
-input[type="text"]:hover,
-input[type="password"]:hover,
-input[type="number"]:hover {
-  background-color: var(--panel-control-hover, var(--base-100)) !important;
+body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) :is(.panel-control:focus-visible, select:hover, input[type="search"]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hover) {
+  background-color: var(--panel-control-hover) !important;
 }
 
-select option {
-  background-color: var(--panel-control, var(--base-100));
-  color: var(--panel-control-content, var(--base-content));
+body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) select option {
+  background-color: var(--panel-control);
+  color: var(--panel-control-content);
 }
 
-:is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
-  background-color: var(--panel-control-active, var(--primary)) !important;
-  color: var(--panel-control-active-content, var(--primary-content)) !important;
+body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
+  background-color: var(--panel-control-active) !important;
+  color: var(--panel-control-active-content) !important;
+}
+
+/* 按钮保留各自 Tailwind hover 色，再按主题明暗做轻微亮度提示。 */
+:is(button, a.panel-control, [role="button"], [data-drawer-target], [data-drawer-show], [data-drawer-hide], [data-modal-target], [data-modal-toggle], [onclick]):hover:not(:disabled) {
+  filter: var(--button-hover-filter);
 }

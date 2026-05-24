@@ -19,11 +19,9 @@
     --panel-surface-content: #4a244e;
     --panel-control: #fff8fc;
     --panel-control-hover: #ffeef7;
-    --panel-control-active: #e85f9f;
+    --panel-control-active: #eda0c4;
     --panel-control-muted: #eeb8d6;
     --panel-control-content: #4a244e;
-    --panel-border: #d05a95;
-    --panel-control-border: #d46aa1;
     --grid-pattern-color: rgba(232, 95, 159, 0.22);
     --grid-mosaic-color: rgba(143, 197, 255, 0.18);
     --info: #4f8ed9;

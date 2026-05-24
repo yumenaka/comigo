@@ -22,8 +22,6 @@
     --panel-control-active: #b5162f;
     --panel-control-muted: #4a2a2f;
     --panel-control-content: #f4dfca;
-    --panel-border: #8f1025;
-    --panel-control-border: #d7c7a5;
     --grid-pattern-color: rgba(215, 199, 165, 0.28);
     --grid-mosaic-color: rgba(181, 22, 47, 0.24);
     --info: #7a96c2;
@@ -33,7 +31,7 @@
   }
 }
 
-/* 主背景：厚重暗场、红色斜影和细碎高光模拟强烈明暗分割。 */
+/* 主背景：血色月光、星点和底部浓雾共同形成暗夜层次。 */
 body[data-theme="dracula"],
 body[data-theme="dracula"] .grid-line,
 body[data-theme="dracula"] .grid-point,
@@ -43,12 +41,31 @@ body[data-theme="dracula"] #settingsMainArea,
 body[data-theme="dracula"] #tab-contents {
   background-color: var(--base-300);
   background-image:
-    linear-gradient(118deg, transparent 0 28%, rgba(181, 22, 47, 0.36) 28% 33%, transparent 33%),
-    linear-gradient(64deg, transparent 0 62%, rgba(244, 240, 230, 0.12) 62% 63%, transparent 63%),
-    radial-gradient(ellipse at 22% 18%, rgba(181, 22, 47, 0.34), transparent 34%),
-    radial-gradient(ellipse at 88% 74%, rgba(215, 199, 165, 0.14), transparent 40%),
-    repeating-linear-gradient(90deg, transparent 0 44px, rgba(244, 240, 230, 0.06) 44px 46px, transparent 46px 98px),
-    linear-gradient(180deg, #10090d 0%, #21151b 58%, #12080c 100%);
+    radial-gradient(circle at 79% 15%, #09070b 0 50px, transparent 52px),
+    radial-gradient(circle at 77% 17%, #ffd0b8 0 58px, transparent 60px),
+    radial-gradient(circle at 13% 16%, rgba(244, 240, 230, 0.88) 0 1px, transparent 2px),
+    radial-gradient(circle at 28% 9%, rgba(244, 223, 202, 0.74) 0 1px, transparent 2px),
+    radial-gradient(circle at 45% 22%, rgba(244, 240, 230, 0.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 62% 12%, rgba(244, 223, 202, 0.64) 0 1px, transparent 2px),
+    radial-gradient(circle at 88% 31%, rgba(244, 240, 230, 0.5) 0 1px, transparent 2px),
+    radial-gradient(ellipse 80% 22% at 24% 102%, rgba(0, 0, 0, 0.72), transparent 70%),
+    radial-gradient(ellipse 92% 30% at 76% 106%, rgba(26, 11, 16, 0.88), transparent 72%),
+    linear-gradient(to top, rgba(10, 6, 9, 0.96) 0%, rgba(42, 17, 24, 0.76) 16%, transparent 34%),
+    radial-gradient(ellipse at 76% 18%, rgba(181, 22, 47, 0.26), transparent 36%),
+    linear-gradient(180deg, #09070b 0%, #10090d 48%, #21151b 100%);
+  background-size:
+    100% 100%,
+    100% 100%,
+    180px 150px,
+    220px 170px,
+    260px 190px,
+    210px 180px,
+    240px 210px,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%;
   background-attachment: fixed;
 }
 

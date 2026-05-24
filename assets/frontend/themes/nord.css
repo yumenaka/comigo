@@ -19,15 +19,13 @@
     --panel-surface-content: #263338;
     --panel-control: #f7fbf8;
     --panel-control-hover: #ffffff;
-    --panel-control-active: #5f7f73;
+    --panel-control-active: #ddcdfa;
     --panel-control-muted: #c6d4cf;
     --panel-control-content: #263338;
-    --panel-border: #7b9188;
-    --panel-control-border: #8fa59c;
     --grid-pattern-color: rgba(51, 66, 76, 0.18);
     --grid-mosaic-color: rgba(95, 127, 115, 0.16);
     --info: #638cae;
-    --success: #5f7f73;
+    --success: #ddcdfa;
     --warning: #c49a54;
     --error: #a85c5c;
     --rounded-box: 0.4rem;
