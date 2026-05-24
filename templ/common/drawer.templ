@@ -158,6 +158,8 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 			</label> -->
 			<!-- 选择主题的select -->
 			<select
+				name="theme"
+				aria-label="theme"
 				x-model="$store.global.theme"
 				@change="$store.global.theme = $event.target.value;console.log($store.global.theme);"
 				class="panel-control w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"
@@ -179,6 +181,8 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 			</select>
 			<!-- 选择背景花纹的select -->
 			<select
+				name="background_pattern"
+				aria-label="background pattern"
 				x-transition
 				x-model="$store.global.bgPattern"
 				@change="$store.global.bgPattern = $event.target.value;console.log($store.global.bgPattern);"
@@ -191,6 +195,8 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 			</select>
 			<!-- 选择语言的select 此处需要与自动探测到的结果一致，所以才是 "en-US" "zh-CN" "ja"这种不统一的形式"-->
 			<select
+				name="language"
+				aria-label="language"
 				x-model="i18next.language"
 				@change="i18next.changeLanguage($event.target.value).then(location.reload())"
 				class="panel-control w-full h-10 py-0 mt-auto mb-2 font-semibold border-2 border-gray-500 dark:border-gray-200 rounded bg-base-100 text-accent-content focus:outline-none"

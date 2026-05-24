@@ -6,6 +6,8 @@ templ ReadModeSelect() {
 	<!-- https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLElement/change_event -->
 	<select
 		id="read_mode_select"
+		name="read_mode"
+		aria-label="read mode"
 		x-data="{
 			isShelfReadModeSelectVisible() {
 				const pathname = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
