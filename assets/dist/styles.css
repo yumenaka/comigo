@@ -435,26 +435,37 @@
     --lightningcss-light: initial;
     --lightningcss-dark: ;
     color-scheme: light;
-    --primary: #ef9995;
-    --primary-content: #282425;
-    --secondary: #a4cbb4;
-    --secondary-content: #282425;
-    --accent: #dc8850;
-    --accent-content: #282425;
-    --neutral: #2e282a;
-    --neutral-content: #ede6d4;
-    --base-100: #ece3ca;
-    --base-200: #e4d8b4;
-    --base-300: #dbca9a;
-    --base-content: #282425;
-    --info: #2563eb;
-    --success: #16a34a;
-    --warning: #d97706;
-    --error: #f35248;
-    --rounded-box: .4rem;
-    --rounded-btn: .4rem;
-    --rounded-badge: .4rem;
-    --tab-radius: .4rem;
+    --primary: #1f3f7a;
+    --primary-content: #fff5d5;
+    --secondary: #b7893f;
+    --secondary-content: #21170d;
+    --accent: #8f1d2c;
+    --accent-content: #fff5d5;
+    --neutral: #2a3347;
+    --neutral-content: #f6ecd5;
+    --base-100: #efe3c8;
+    --base-200: #d8c49a;
+    --base-300: #24375f;
+    --base-content: #1e2431;
+    --panel-surface: #ead8ad;
+    --panel-surface-content: #1f2638;
+    --panel-control: #f6ecd5;
+    --panel-control-hover: #fff4d8;
+    --panel-control-active: #b7893f;
+    --panel-control-muted: #c8b07d;
+    --panel-control-content: #1f2638;
+    --panel-border: #8b662f;
+    --panel-control-border: #9b7338;
+    --grid-pattern-color: #f6ecd557;
+    --grid-mosaic-color: #b7893f38;
+    --info: #1f3f7a;
+    --success: #477057;
+    --warning: #b7893f;
+    --error: #8f1d2c;
+    --rounded-box: .35rem;
+    --rounded-btn: .25rem;
+    --rounded-badge: .25rem;
+    --tab-radius: .25rem;
   }
 
   [data-theme="cupcake"] {
@@ -582,47 +593,67 @@
     --lightningcss-light: ;
     --lightningcss-dark: initial;
     color-scheme: dark;
-    --primary: #ff79c6;
-    --primary-content: #282a36;
-    --secondary: #bd93f9;
-    --secondary-content: #282a36;
-    --accent: #50fa7b;
-    --accent-content: #282a36;
-    --neutral: #44475a;
-    --neutral-content: #f8f8f2;
-    --base-100: #282a36;
-    --base-200: #44475a;
-    --base-300: #282a36;
-    --base-content: #f87872;
-    --grid-pattern-color: var(--base-content);
-    --grid-mosaic-color: var(--base-content);
-    --info: #bd93f9;
-    --success: #50fa7b;
-    --warning: #ff79c6;
-    --error: #ff79c6;
+    --primary: #b5162f;
+    --primary-content: #fff1e8;
+    --secondary: #d7c7a5;
+    --secondary-content: #201418;
+    --accent: #f4f0e6;
+    --accent-content: #2a1118;
+    --neutral: #21151b;
+    --neutral-content: #f4f0e6;
+    --base-100: #2a1118;
+    --base-200: #21151b;
+    --base-300: #10090d;
+    --base-content: #f4dfca;
+    --panel-surface: #2a1118;
+    --panel-surface-content: #f4dfca;
+    --panel-control: #3a1b21;
+    --panel-control-hover: #462129;
+    --panel-control-active: #b5162f;
+    --panel-control-muted: #4a2a2f;
+    --panel-control-content: #f4dfca;
+    --panel-border: #8f1025;
+    --panel-control-border: #d7c7a5;
+    --grid-pattern-color: #d7c7a547;
+    --grid-mosaic-color: #b5162f3d;
+    --info: #7a96c2;
+    --success: #6f9b72;
+    --warning: #d7a64a;
+    --error: #b5162f;
   }
 
   [data-theme="valentine"] {
     --lightningcss-light: initial;
     --lightningcss-dark: ;
     color-scheme: light;
-    --primary: #e96d7b;
-    --primary-content: #3a0a14;
-    --secondary: #a991f7;
-    --secondary-content: #21113f;
-    --accent: #66b1b3;
-    --accent-content: #06292a;
-    --neutral: #af4670;
-    --neutral-content: #f0d6e8;
-    --base-100: #fae7f4;
-    --base-200: #f5d7e8;
-    --base-300: #edc4dc;
-    --base-content: #632c3b;
-    --info: #2563eb;
-    --success: #16a34a;
-    --warning: #d97706;
-    --error: #ff6f62;
-    --rounded-btn: 1.9rem;
+    --primary: #e85f9f;
+    --primary-content: #fff6fb;
+    --secondary: #8fc5ff;
+    --secondary-content: #123050;
+    --accent: #ffd166;
+    --accent-content: #4b2d00;
+    --neutral: #6b4774;
+    --neutral-content: #fff6fb;
+    --base-100: #fff0f7;
+    --base-200: #ffd7ea;
+    --base-300: #e7d5ff;
+    --base-content: #4a244e;
+    --panel-surface: #ffe1ef;
+    --panel-surface-content: #4a244e;
+    --panel-control: #fff8fc;
+    --panel-control-hover: #ffeef7;
+    --panel-control-active: #e85f9f;
+    --panel-control-muted: #eeb8d6;
+    --panel-control-content: #4a244e;
+    --panel-border: #d05a95;
+    --panel-control-border: #d46aa1;
+    --grid-pattern-color: #e85f9f38;
+    --grid-mosaic-color: #8fc5ff2e;
+    --info: #4f8ed9;
+    --success: #5f9f78;
+    --warning: #d89930;
+    --error: #d94e78;
+    --rounded-btn: 1.4rem;
     --tab-radius: .7rem;
   }
 
@@ -630,116 +661,173 @@
     --lightningcss-light: initial;
     --lightningcss-dark: ;
     color-scheme: light;
-    --primary: #d90479;
-    --primary-content: #fff1f8;
-    --secondary: #04b2d9;
-    --secondary-content: #03242c;
-    --accent: #67bf63;
-    --accent-content: #0f2a0d;
-    --neutral: #f2421b;
-    --neutral-content: #e0da00;
-    --base-100: #f0f;
-    --base-200: #04b2d9;
-    --base-300: #0ff;
-    --base-content: #ff0;
-    --info: #04b2d9;
-    --success: #67bf63;
-    --warning: #fef501;
-    --error: #f2421b;
+    --primary: #e4005a;
+    --primary-content: #fffaf2;
+    --secondary: #00a7d8;
+    --secondary-content: #061b25;
+    --accent: #f4d400;
+    --accent-content: #211800;
+    --neutral: #17171c;
+    --neutral-content: #fffaf2;
+    --base-100: #fff6e5;
+    --base-200: #ffe0a8;
+    --base-300: #17171c;
+    --base-content: #17171c;
+    --panel-surface: #fff6e5;
+    --panel-surface-content: #17171c;
+    --panel-control: #fff;
+    --panel-control-hover: #fff0c9;
+    --panel-control-active: #e4005a;
+    --panel-control-muted: #f4d400;
+    --panel-control-content: #17171c;
+    --panel-border: #17171c;
+    --panel-control-border: #17171c;
+    --grid-pattern-color: #17171c3d;
+    --grid-mosaic-color: #e4005a33;
+    --info: #00a7d8;
+    --success: #0e9f6e;
+    --warning: #d69e00;
+    --error: #e4005a;
+    --rounded-box: .15rem;
+    --rounded-btn: .1rem;
+    --rounded-badge: .1rem;
+    --tab-radius: .1rem;
   }
 
   [data-theme="halloween"] {
     --lightningcss-light: ;
     --lightningcss-dark: initial;
     color-scheme: dark;
-    --primary: #f0c;
-    --primary-content: #fff;
-    --secondary: #33f;
-    --secondary-content: #fff;
-    --accent: #0fc;
-    --accent-content: #000;
-    --neutral: #000;
-    --neutral-content: #fff;
-    --base-100: #4a2e25;
-    --base-200: #000;
-    --base-300: #e68a63;
-    --base-content: #f7eb9e;
-    --grid-pattern-color: var(--primary);
-    --grid-mosaic-color: var(--primary);
-    --info: #33f;
-    --success: #0fc;
-    --warning: #f0c;
-    --error: #f0c;
+    --primary: #f28c28;
+    --primary-content: #1a1110;
+    --secondary: #b7e35d;
+    --secondary-content: #14210a;
+    --accent: #8e5cff;
+    --accent-content: #f7f1ff;
+    --neutral: #1a1110;
+    --neutral-content: #ffe7b8;
+    --base-100: #26151b;
+    --base-200: #1a1110;
+    --base-300: #09080b;
+    --base-content: #ffe7b8;
+    --panel-surface: #26151b;
+    --panel-surface-content: #ffe7b8;
+    --panel-control: #332026;
+    --panel-control-hover: #3f2730;
+    --panel-control-active: #f28c28;
+    --panel-control-muted: #5a3d2c;
+    --panel-control-content: #ffe7b8;
+    --panel-border: #f28c28;
+    --panel-control-border: #b7e35d;
+    --grid-pattern-color: #f28c2842;
+    --grid-mosaic-color: #b7e35d2e;
+    --info: #8e5cff;
+    --success: #b7e35d;
+    --warning: #f28c28;
+    --error: #d54a30;
   }
 
   [data-theme="coffee"] {
-    --lightningcss-light: ;
-    --lightningcss-dark: initial;
-    color-scheme: dark;
-    --primary: #a67b5b;
-    --primary-content: #261208;
-    --secondary: #6f4e37;
-    --secondary-content: #fff8e1;
-    --accent: tan;
-    --accent-content: #261208;
-    --neutral: #261208;
-    --neutral-content: tan;
-    --base-100: #6f4e37;
-    --base-200: #261208;
-    --base-300: #442618;
-    --base-content: #fff8e1;
-    --info: tan;
-    --success: #a67b5b;
-    --warning: tan;
-    --error: #442618;
+    --lightningcss-light: initial;
+    --lightningcss-dark: ;
+    color-scheme: light;
+    --primary: #7a4d2b;
+    --primary-content: #fff6df;
+    --secondary: #5f8f8a;
+    --secondary-content: #082826;
+    --accent: #d58b45;
+    --accent-content: #2e1b10;
+    --neutral: #3b2b24;
+    --neutral-content: #fff6df;
+    --base-100: #f2dfbf;
+    --base-200: #dcc299;
+    --base-300: #b98758;
+    --base-content: #2e241d;
+    --panel-surface: #efd6ad;
+    --panel-surface-content: #2e241d;
+    --panel-control: #f8e7c9;
+    --panel-control-hover: #fff0d4;
+    --panel-control-active: #5f8f8a;
+    --panel-control-muted: #cfa16e;
+    --panel-control-content: #2e241d;
+    --panel-border: #7a4d2b;
+    --panel-control-border: #8a5a35;
+    --grid-pattern-color: #7a4d2b38;
+    --grid-mosaic-color: #5f8f8a2e;
+    --info: #407f9f;
+    --success: #5f8f62;
+    --warning: #d58b45;
+    --error: #a64232;
   }
 
   [data-theme="winter"] {
     --lightningcss-light: initial;
     --lightningcss-dark: ;
     color-scheme: light;
-    --primary: #7d8e9e;
-    --primary-content: #e3f2fd;
-    --secondary: #9cacbf;
-    --secondary-content: #e3f2fd;
-    --accent: #bbdefb;
-    --accent-content: #5f6d7a;
-    --neutral: #5f6d7a;
-    --neutral-content: #e3f2fd;
-    --base-100: #e3f2fd;
-    --base-200: #bbdefb;
-    --base-300: #9cacbf;
-    --base-content: #1f2d5a;
-    --info: #7d8e9e;
-    --success: #9cacbf;
-    --warning: #bbdefb;
-    --error: #5f6d7a;
+    --primary: #4e7aa4;
+    --primary-content: #f3fbff;
+    --secondary: #d18a4f;
+    --secondary-content: #2d1608;
+    --accent: #f0c66d;
+    --accent-content: #3a2500;
+    --neutral: #3d5368;
+    --neutral-content: #f3fbff;
+    --base-100: #eaf6fb;
+    --base-200: #cfe6f2;
+    --base-300: #a6c6dc;
+    --base-content: #25384a;
+    --panel-surface: #e4f1f7;
+    --panel-surface-content: #25384a;
+    --panel-control: #f6fbfd;
+    --panel-control-hover: #fff;
+    --panel-control-active: #d18a4f;
+    --panel-control-muted: #b8d3e2;
+    --panel-control-content: #25384a;
+    --panel-border: #6b95b5;
+    --panel-control-border: #7da8c4;
+    --grid-pattern-color: #4e7aa433;
+    --grid-mosaic-color: #d18a4f24;
+    --info: #4e7aa4;
+    --success: #658f78;
+    --warning: #d18a4f;
+    --error: #bf5a4a;
   }
 
   [data-theme="nord"] {
     --lightningcss-light: initial;
     --lightningcss-dark: ;
     color-scheme: light;
-    --primary: #374151;
-    --primary-content: #f9fafb;
-    --secondary: #9ca3af;
-    --secondary-content: #111827;
-    --accent: #e5e7eb;
-    --accent-content: #111827;
-    --neutral: #111827;
-    --neutral-content: #e5e7eb;
-    --base-100: #f9fafb;
-    --base-200: #e5e7eb;
-    --base-300: #9ca3af;
-    --base-content: #111827;
-    --info: #374151;
-    --success: #9ca3af;
-    --warning: #e5e7eb;
-    --error: #111827;
+    --primary: #5f7f73;
+    --primary-content: #f6fbf7;
+    --secondary: #8da6bd;
+    --secondary-content: #172432;
+    --accent: #d7c89b;
+    --accent-content: #302714;
+    --neutral: #33424c;
+    --neutral-content: #eef6f1;
+    --base-100: #eef6f1;
+    --base-200: #dce8e3;
+    --base-300: #aebfbd;
+    --base-content: #263338;
+    --panel-surface: #e6f0eb;
+    --panel-surface-content: #263338;
+    --panel-control: #f7fbf8;
+    --panel-control-hover: #fff;
+    --panel-control-active: #5f7f73;
+    --panel-control-muted: #c6d4cf;
+    --panel-control-content: #263338;
+    --panel-border: #7b9188;
+    --panel-control-border: #8fa59c;
+    --grid-pattern-color: #33424c2e;
+    --grid-mosaic-color: #5f7f7329;
+    --info: #638cae;
+    --success: #5f7f73;
+    --warning: #c49a54;
+    --error: #a85c5c;
     --rounded-box: .4rem;
-    --rounded-btn: .2rem;
-    --rounded-badge: .4rem;
-    --tab-radius: .2rem;
+    --rounded-btn: .25rem;
+    --rounded-badge: .35rem;
+    --tab-radius: .25rem;
   }
 
   [data-theme="light"] {
@@ -3729,6 +3817,19 @@
   }
 }
 
+body[data-theme="retro"], body[data-theme="retro"] .grid-line, body[data-theme="retro"] .grid-point, body[data-theme="retro"] .grid-mosaic, body[data-theme="retro"] #ShelfMainArea, body[data-theme="retro"] #settingsMainArea, body[data-theme="retro"] #tab-contents {
+  background-color: var(--base-300);
+  background-image: radial-gradient(circle at 12% 20%, #fff5d5cc 0 1px, #0000 2px), radial-gradient(circle at 72% 28%, #fff5d5b8 0 1px, #0000 2px), radial-gradient(circle at 48% 68%, #b7893f94 0 1px, #0000 2px), linear-gradient(118deg, #0000 0 36%, #b7893f47 36% 37%, #0000 37%), linear-gradient(28deg, #0000 0 58%, #f6ecd529 58% 59%, #0000 59%), radial-gradient(at 78% 18%, #8f1d2c4d, #0000 42%), linear-gradient(#182a52 0%, #24375f 55%, #d8c49a 100%);
+  background-size: 170px 150px, 240px 180px, 210px 190px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+body[data-theme="retro"] .panel-surface {
+  background-image: linear-gradient(90deg, #8b662f29 1px, #0000 1px), linear-gradient(#8b662f1f 1px, #0000 1px);
+  background-size: 28px 28px;
+  background-color: var(--panel-surface) !important;
+}
+
 body[data-theme="cupcake"], body[data-theme="cupcake"] .grid-line, body[data-theme="cupcake"] .grid-point, body[data-theme="cupcake"] .grid-mosaic, body[data-theme="cupcake"] #ShelfMainArea, body[data-theme="cupcake"] #settingsMainArea, body[data-theme="cupcake"] #tab-contents {
   background-color: var(--base-300);
   background-image: radial-gradient(30px 18px at 15px 0, #fff7fd 96%, #0000 100%), repeating-linear-gradient(90deg, #ff98cd 0 24px, #ffd2eb 24px 48px), radial-gradient(150px 42px at 12vw 86px, #ffffffe6 0 62%, #0000 64%), radial-gradient(96px 30px at 19vw 70px, #fff6fce0 0 64%, #0000 66%), radial-gradient(170px 46px at 78vw 118px, #ffffffe0 0 62%, #0000 64%), radial-gradient(112px 32px at 88vw 96px, #fff6fcdb 0 64%, #0000 66%), repeating-linear-gradient(120deg, #0000 0 28px, #ffffff38 28px 31px, #0000 31px 60px), radial-gradient(58vw 156px at 18vw 100%, #aeeea6d1 0 58%, #0000 59%), radial-gradient(52vw 136px at 86vw 100%, #ffc6e6d1 0 58%, #0000 59%);
@@ -4133,6 +4234,94 @@ body[data-theme="red-white-game"] .text-yellow-400 {
   color: var(--accent) !important;
 }
 
+body[data-theme="dracula"], body[data-theme="dracula"] .grid-line, body[data-theme="dracula"] .grid-point, body[data-theme="dracula"] .grid-mosaic, body[data-theme="dracula"] #ShelfMainArea, body[data-theme="dracula"] #settingsMainArea, body[data-theme="dracula"] #tab-contents {
+  background-color: var(--base-300);
+  background-image: linear-gradient(118deg, #0000 0 28%, #b5162f5c 28% 33%, #0000 33%), linear-gradient(64deg, #0000 0 62%, #f4f0e61f 62% 63%, #0000 63%), radial-gradient(at 22% 18%, #b5162f57, #0000 34%), radial-gradient(at 88% 74%, #d7c7a524, #0000 40%), repeating-linear-gradient(90deg, #0000 0 44px, #f4f0e60f 44px 46px, #0000 46px 98px), linear-gradient(#10090d 0%, #21151b 58%, #12080c 100%);
+  background-attachment: fixed;
+}
+
+body[data-theme="dracula"] .panel-surface {
+  background-image: linear-gradient(135deg, #b5162f38 0 18%, #0000 18%), repeating-linear-gradient(0deg, #d7c7a514 0 1px, #0000 1px 18px);
+  background-color: var(--panel-surface) !important;
+}
+
+body[data-theme="valentine"], body[data-theme="valentine"] .grid-line, body[data-theme="valentine"] .grid-point, body[data-theme="valentine"] .grid-mosaic, body[data-theme="valentine"] #ShelfMainArea, body[data-theme="valentine"] #settingsMainArea, body[data-theme="valentine"] #tab-contents {
+  background-color: var(--base-300);
+  background-image: radial-gradient(circle at 50% 0, #fff8fc 0 5px, #0000 6px), radial-gradient(circle at 50% 100%, #fff8fc 0 5px, #0000 6px), radial-gradient(at 18% 20%, #e85f9f57, #0000 36%), radial-gradient(at 84% 34%, #8fc5ff61, #0000 34%), linear-gradient(135deg, #0000 0 42%, #ffd16633 42% 44%, #0000 44%), linear-gradient(#fff0f7 0%, #ffd7ea 56%, #e7d5ff 100%);
+  background-size: 46px 46px, 46px 46px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+body[data-theme="valentine"] .panel-surface {
+  background-image: radial-gradient(circle at 12px 12px, #ffffff94 0 4px, #0000 5px), linear-gradient(135deg, #8fc5ff2e, #0000 48%);
+  background-size: 44px 38px, 100% 100%;
+  background-color: var(--panel-surface) !important;
+}
+
+body[data-theme="cmyk"], body[data-theme="cmyk"] .grid-line, body[data-theme="cmyk"] .grid-point, body[data-theme="cmyk"] .grid-mosaic, body[data-theme="cmyk"] #ShelfMainArea, body[data-theme="cmyk"] #settingsMainArea, body[data-theme="cmyk"] #tab-contents {
+  background-color: var(--base-300);
+  background-image: radial-gradient(circle at 1px 1px, #17171c38 1px, #0000 0), linear-gradient(102deg, #e4005a 0 18%, #0000 18%), linear-gradient(76deg, #0000 0 42%, #00a7d8 42% 56%, #0000 56%), linear-gradient(160deg, #0000 0 62%, #f4d400 62% 82%, #0000 82%), linear-gradient(#fff6e5 0%, #ffe0a8 55%, #fff6e5 100%);
+  background-size: 18px 18px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+body[data-theme="cmyk"] .panel-surface {
+  background-image: linear-gradient(135deg, #e4005a33 0 14%, #0000 14%), linear-gradient(315deg, #00a7d82e 0 16%, #0000 16%);
+  background-color: var(--panel-surface) !important;
+}
+
+body[data-theme="halloween"], body[data-theme="halloween"] .grid-line, body[data-theme="halloween"] .grid-point, body[data-theme="halloween"] .grid-mosaic, body[data-theme="halloween"] #ShelfMainArea, body[data-theme="halloween"] #settingsMainArea, body[data-theme="halloween"] #tab-contents {
+  background-color: var(--base-300);
+  background-image: radial-gradient(circle at 16% 18%, #f6d780 0 54px, #0000 56px), radial-gradient(circle at 19% 15%, #09080b 0 46px, #0000 48px), linear-gradient(128deg, #0000 0 38%, #f28c2847 38% 40%, #0000 40%), radial-gradient(at 80% 78%, #b7e35d33, #0000 38%), repeating-linear-gradient(80deg, #0000 0 36px, #8e5cff1a 36px 38px, #0000 38px 88px), linear-gradient(#09080b 0%, #1a1110 62%, #26151b 100%);
+  background-attachment: fixed;
+}
+
+body[data-theme="halloween"] .panel-surface {
+  background-image: linear-gradient(135deg, #f28c2833, #0000 42%), radial-gradient(circle at 28px 20px, #b7e35d21 0 4px, #0000 5px);
+  background-size: 100% 100%, 56px 48px;
+  background-color: var(--panel-surface) !important;
+}
+
+body[data-theme="coffee"], body[data-theme="coffee"] .grid-line, body[data-theme="coffee"] .grid-point, body[data-theme="coffee"] .grid-mosaic, body[data-theme="coffee"] #ShelfMainArea, body[data-theme="coffee"] #settingsMainArea, body[data-theme="coffee"] #tab-contents {
+  background-color: var(--base-100);
+  background-image: radial-gradient(circle at 14% 22%, #5f8f8a75 0 42px, #0000 44px), repeating-linear-gradient(90deg, #7a4d2b29 0 2px, #0000 2px 18px), repeating-linear-gradient(90deg, #7a4d2b 0 34px, #fff6df 34px 68px), linear-gradient(#0000 0 calc(100% - 96px), #7a4d2b2e calc(100% - 96px)), radial-gradient(at 86% 18%, #d58b4552, #0000 34%), linear-gradient(#f2dfbf 0%, #efd6ad 62%, #dcc299 100%);
+  background-position: 0 0, 0 0, left bottom 58px, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 100% 100%, 28px 28px, 100% 38px, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+body[data-theme="coffee"] .panel-surface {
+  background-image: radial-gradient(circle at 18px 14px, #7a4d2b24 0 3px, #0000 4px), linear-gradient(135deg, #fff6df57, #0000 46%);
+  background-size: 38px 34px, 100% 100%;
+  background-color: var(--panel-surface) !important;
+}
+
+body[data-theme="winter"], body[data-theme="winter"] .grid-line, body[data-theme="winter"] .grid-point, body[data-theme="winter"] .grid-mosaic, body[data-theme="winter"] #ShelfMainArea, body[data-theme="winter"] #settingsMainArea, body[data-theme="winter"] #tab-contents {
+  background-color: var(--base-300);
+  background-image: conic-gradient(from 120deg at 26% 52%, transparent 0 120deg, #4e7aa480 0 180deg, transparent 0), conic-gradient(from 120deg at 68% 56%, transparent 0 120deg, #6b95b56b 0 180deg, transparent 0), radial-gradient(circle at 76% 70%, #f0c66d8c 0 16px, transparent 18px), repeating-linear-gradient(0deg, #ffffff57 0 1px, transparent 1px 22px), linear-gradient(180deg, #eaf6fb 0%, #cfe6f2 58%, #a6c6dc 100%);
+  background-position: left bottom 80px, right bottom 72px, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+  background-size: 420px 260px, 500px 280px, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+body[data-theme="winter"] .panel-surface {
+  background-image: linear-gradient(135deg, #ffffff94, #0000 50%);
+  background-color: var(--panel-surface) !important;
+}
+
+body[data-theme="nord"], body[data-theme="nord"] .grid-line, body[data-theme="nord"] .grid-point, body[data-theme="nord"] .grid-mosaic, body[data-theme="nord"] #ShelfMainArea, body[data-theme="nord"] #settingsMainArea, body[data-theme="nord"] #tab-contents {
+  background-color: var(--base-300);
+  background-image: radial-gradient(at 20% 24%, #d7c89b57, #0000 34%), radial-gradient(at 80% 30%, #8da6bd4d, #0000 36%), repeating-linear-gradient(104deg, #0000 0 48px, #33424c1a 48px 50px, #0000 50px 110px), linear-gradient(#eef6f1 0%, #dce8e3 58%, #aebfbd 100%);
+  background-attachment: fixed;
+}
+
+body[data-theme="nord"] .panel-surface {
+  background-image: linear-gradient(120deg, #ffffff80, #0000 42%), repeating-linear-gradient(90deg, #5f7f7314 0 1px, #0000 1px 24px);
+  background-color: var(--panel-surface) !important;
+}
+
 :root {
   font-synthesis: none;
   text-rendering: optimizelegibility;
@@ -4305,6 +4494,36 @@ input[type="range"]:not(.rangeBar):not(.slider-base)::-moz-range-progress {
 
 .text-error {
   color: var(--error) !important;
+}
+
+.panel-surface {
+  background-color: var(--panel-surface, var(--base-100)) !important;
+  border-color: var(--panel-border, var(--base-300)) !important;
+  color: var(--panel-surface-content, var(--base-content)) !important;
+}
+
+.panel-surface .text-base-content {
+  color: var(--panel-surface-content, var(--base-content)) !important;
+}
+
+.panel-control, select, input[type="search"], input[type="text"], input[type="password"], input[type="number"] {
+  background-color: var(--panel-control, var(--base-100)) !important;
+  border-color: var(--panel-control-border, var(--base-300)) !important;
+  color: var(--panel-control-content, var(--base-content)) !important;
+}
+
+.panel-control:hover:not(:disabled), .panel-control:focus-visible, select:hover, input[type="search"]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hover {
+  background-color: var(--panel-control-hover, var(--base-100)) !important;
+}
+
+select option {
+  background-color: var(--panel-control, var(--base-100));
+  color: var(--panel-control-content, var(--base-content));
+}
+
+:is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
+  background-color: var(--panel-control-active, var(--primary)) !important;
+  color: var(--panel-control-active-content, var(--primary-content)) !important;
 }
 
 @property --tw-translate-x {

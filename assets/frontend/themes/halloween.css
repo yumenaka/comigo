@@ -1,25 +1,62 @@
-/* Halloween 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+/* 南瓜诡夜模板：变量、歪月背景和控件样式集中在这里。 */
 @layer base {
-/* ====================== Halloween ====================== */
+  /* ====================== Halloween ====================== */
   [data-theme="halloween"] {
     color-scheme: dark;
-    --primary: #ff00cc;
-    --primary-content: #ffffff;
-    --secondary: #3333ff;
-    --secondary-content: #ffffff;
-    --accent: #00ffcc;
-    --accent-content: #000000;
-    --neutral: #000000;
-    --neutral-content: #ffffff;
-    --base-100: #4A2E25;
-    --base-200: #000000;
-    --base-300: #E68A63;
-    --base-content: #F7EB9E;
-    --grid-pattern-color: var(--primary);
-    --grid-mosaic-color: var(--primary);
-    --info: #3333ff;
-    --success: #00ffcc;
-    --warning: #ff00cc;
-    --error: #ff00cc;
+    --primary: #f28c28;
+    --primary-content: #1a1110;
+    --secondary: #b7e35d;
+    --secondary-content: #14210a;
+    --accent: #8e5cff;
+    --accent-content: #f7f1ff;
+    --neutral: #1a1110;
+    --neutral-content: #ffe7b8;
+    --base-100: #26151b;
+    --base-200: #1a1110;
+    --base-300: #09080b;
+    --base-content: #ffe7b8;
+    --panel-surface: #26151b;
+    --panel-surface-content: #ffe7b8;
+    --panel-control: #332026;
+    --panel-control-hover: #3f2730;
+    --panel-control-active: #f28c28;
+    --panel-control-muted: #5a3d2c;
+    --panel-control-content: #ffe7b8;
+    --panel-border: #f28c28;
+    --panel-control-border: #b7e35d;
+    --grid-pattern-color: rgba(242, 140, 40, 0.26);
+    --grid-mosaic-color: rgba(183, 227, 93, 0.18);
+    --info: #8e5cff;
+    --success: #b7e35d;
+    --warning: #f28c28;
+    --error: #d54a30;
   }
+}
+
+/* 主背景：弯月、斜影和怪诞绿光构成夜色层次。 */
+body[data-theme="halloween"],
+body[data-theme="halloween"] .grid-line,
+body[data-theme="halloween"] .grid-point,
+body[data-theme="halloween"] .grid-mosaic,
+body[data-theme="halloween"] #ShelfMainArea,
+body[data-theme="halloween"] #settingsMainArea,
+body[data-theme="halloween"] #tab-contents {
+  background-color: var(--base-300);
+  background-image:
+    radial-gradient(circle at 16% 18%, #f6d780 0 54px, transparent 56px),
+    radial-gradient(circle at 19% 15%, #09080b 0 46px, transparent 48px),
+    linear-gradient(128deg, transparent 0 38%, rgba(242, 140, 40, 0.28) 38% 40%, transparent 40%),
+    radial-gradient(ellipse at 80% 78%, rgba(183, 227, 93, 0.2), transparent 38%),
+    repeating-linear-gradient(80deg, transparent 0 36px, rgba(142, 92, 255, 0.1) 36px 38px, transparent 38px 88px),
+    linear-gradient(180deg, #09080b 0%, #1a1110 62%, #26151b 100%);
+  background-attachment: fixed;
+}
+
+/* 面板保留暗紫红，控件稍亮并用橙绿边线区分。 */
+body[data-theme="halloween"] .panel-surface {
+  background-color: var(--panel-surface) !important;
+  background-image:
+    linear-gradient(135deg, rgba(242, 140, 40, 0.2), transparent 42%),
+    radial-gradient(circle at 28px 20px, rgba(183, 227, 93, 0.13) 0 4px, transparent 5px);
+  background-size: 100% 100%, 56px 48px;
 }

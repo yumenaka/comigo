@@ -1,27 +1,63 @@
-/* Nord 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+/* 北境霜蓝模板：变量、静谧旅途背景和控件样式集中在这里。 */
 @layer base {
-/* ====================== Nord ====================== */
+  /* ====================== Nord ====================== */
   [data-theme="nord"] {
     color-scheme: light;
-    --primary: #374151;
-    --primary-content: #F9FAFB;
-    --secondary: #9CA3AF;
-    --secondary-content: #111827;
-    --accent: #E5E7EB;
-    --accent-content: #111827;
-    --neutral: #111827;
-    --neutral-content: #E5E7EB;
-    --base-100: #F9FAFB;
-    --base-200: #E5E7EB;
-    --base-300: #9CA3AF;
-    --base-content: #111827;
-    --info: #374151;
-    --success: #9CA3AF;
-    --warning: #E5E7EB;
-    --error: #111827;
+    --primary: #5f7f73;
+    --primary-content: #f6fbf7;
+    --secondary: #8da6bd;
+    --secondary-content: #172432;
+    --accent: #d7c89b;
+    --accent-content: #302714;
+    --neutral: #33424c;
+    --neutral-content: #eef6f1;
+    --base-100: #eef6f1;
+    --base-200: #dce8e3;
+    --base-300: #aebfbd;
+    --base-content: #263338;
+    --panel-surface: #e6f0eb;
+    --panel-surface-content: #263338;
+    --panel-control: #f7fbf8;
+    --panel-control-hover: #ffffff;
+    --panel-control-active: #5f7f73;
+    --panel-control-muted: #c6d4cf;
+    --panel-control-content: #263338;
+    --panel-border: #7b9188;
+    --panel-control-border: #8fa59c;
+    --grid-pattern-color: rgba(51, 66, 76, 0.18);
+    --grid-mosaic-color: rgba(95, 127, 115, 0.16);
+    --info: #638cae;
+    --success: #5f7f73;
+    --warning: #c49a54;
+    --error: #a85c5c;
     --rounded-box: 0.4rem;
-    --rounded-btn: 0.2rem;
-    --rounded-badge: 0.4rem;
-    --tab-radius: 0.2rem;
+    --rounded-btn: 0.25rem;
+    --rounded-badge: 0.35rem;
+    --tab-radius: 0.25rem;
   }
+}
+
+/* 主背景：淡绿天空、石路和远处光斑，整体保持安静。 */
+body[data-theme="nord"],
+body[data-theme="nord"] .grid-line,
+body[data-theme="nord"] .grid-point,
+body[data-theme="nord"] .grid-mosaic,
+body[data-theme="nord"] #ShelfMainArea,
+body[data-theme="nord"] #settingsMainArea,
+body[data-theme="nord"] #tab-contents {
+  background-color: var(--base-300);
+  background-image:
+    radial-gradient(ellipse at 20% 24%, rgba(215, 200, 155, 0.34), transparent 34%),
+    radial-gradient(ellipse at 80% 30%, rgba(141, 166, 189, 0.3), transparent 36%),
+    repeating-linear-gradient(104deg, transparent 0 48px, rgba(51, 66, 76, 0.1) 48px 50px, transparent 50px 110px),
+    linear-gradient(180deg, #eef6f1 0%, #dce8e3 58%, #aebfbd 100%);
+  background-attachment: fixed;
+}
+
+/* 面板和控件保持低饱和，只有选中状态使用草绿色强调。 */
+body[data-theme="nord"] .panel-surface {
+  background-color: var(--panel-surface) !important;
+  background-image:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.5), transparent 42%),
+    repeating-linear-gradient(90deg, rgba(95, 127, 115, 0.08) 0 1px, transparent 1px 24px);
 }

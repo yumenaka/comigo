@@ -176,3 +176,45 @@ input[type="range"]:not(.rangeBar):not(.slider-base)::-moz-range-progress {
 .text-success    { color: var(--success)          !important; }
 .text-warning    { color: var(--warning)          !important; }
 .text-error      { color: var(--error)            !important; }
+
+/* 主题面板变量的默认映射；复杂模板可在各自 CSS 中用更高优先级覆盖。 */
+.panel-surface {
+  background-color: var(--panel-surface, var(--base-100)) !important;
+  border-color: var(--panel-border, var(--base-300)) !important;
+  color: var(--panel-surface-content, var(--base-content)) !important;
+}
+
+.panel-surface .text-base-content {
+  color: var(--panel-surface-content, var(--base-content)) !important;
+}
+
+.panel-control,
+select,
+input[type="search"],
+input[type="text"],
+input[type="password"],
+input[type="number"] {
+  background-color: var(--panel-control, var(--base-100)) !important;
+  border-color: var(--panel-control-border, var(--base-300)) !important;
+  color: var(--panel-control-content, var(--base-content)) !important;
+}
+
+.panel-control:hover:not(:disabled),
+.panel-control:focus-visible,
+select:hover,
+input[type="search"]:hover,
+input[type="text"]:hover,
+input[type="password"]:hover,
+input[type="number"]:hover {
+  background-color: var(--panel-control-hover, var(--base-100)) !important;
+}
+
+select option {
+  background-color: var(--panel-control, var(--base-100));
+  color: var(--panel-control-content, var(--base-content));
+}
+
+:is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
+  background-color: var(--panel-control-active, var(--primary)) !important;
+  color: var(--panel-control-active-content, var(--primary-content)) !important;
+}
