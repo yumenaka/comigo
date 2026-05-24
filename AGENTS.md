@@ -1,67 +1,50 @@
 # Project Instructions
-ComiGo 是一个漫画/图片阅读器，提供 Web 界面，支持多种压缩包格式和阅读模式。
-使用的主要技术栈包括 Go（后端）、Echo v4（路由）、bun（前端构建）、Alpine.js（前端状态管理）和 TailwindCSS（前端样式）。数据存储默认使用内存加 JSON 持久化，计划支持 SQLite。
+
+ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片目录、PDF、音频和多种阅读模式。主要栈：Go + Echo v4、templ、bun、Alpine.js、TailwindCSS；默认数据存储为内存 + JSON 持久化，SQLite/sqlc 为后续扩展。
 
 ## 关键目录
-- `routers/` - 路由定义（Echo v4），`urls.go` 定义所有路由
-- `cmd/mobile/` - 面向宿主端的导出包，供 `gomobile bind` 生成 Android AAR / iOS / macOS XCFramework
-- `model/` - 业务数据模型（Book, BookInfo, PageInfo, BookMark）。数据默认存储在内存中，并使用本地 json 文件做持久化（当前开发的默认数据存储方式）
-- `sqlc/` - 数据库层 SQLite（sqlc 生成类型安全查询），未来扩展用，通过 model 包里的StoreInterface 与内存存储模式兼容，暂时不作为开发重点。`schema.sql` 定义表结构，`query.sql` 定义查询
-- `config/` - 全局配置（Config 结构体在 `config.go`）
-- `cmd/` - 命令行入口和启动逻辑
-- `tools/` - 工具函数（扫描、图片处理、网络等）
-- `store/` - 书库管理
-- `assets/frontend/stores/` - 需要编译进主包的前端 Alpine.js store
+- `routers/`：Echo 路由，`urls.go` 定义路由；公开/私有组分离，私有组走 JWT。
+- `cmd/`：CLI 与启动逻辑；`cmd/mobile/` 供 `gomobile bind` 导出 Android/iOS/macOS 原生库。
+- `model/`、`store/`：Book/BookInfo/PageInfo/BookMark 与书库管理，默认内存 + JSON 持久化。
+- `config/`：全局配置；嵌入式模式下配置、缓存、书库路径由宿主显式传入。
+- `tools/`：扫描、图片处理、网络、VFS、系统工具。
+- `sqlc/`：SQLite schema/query 与生成代码，暂非开发重点。
+- `assets/frontend/`：需编译的前端入口、样式、插件、stores、utils。
+- `assets/static/`：不参与主包编译的页面级 JS/CSS/WASM；页面脚本通过 `common.Html(..., insertScripts)` 引入。
+- `assets/dist/`：`bun run dev/build` 生成的主包产物，由 `common.Html()` 自动插入。
+- `assets/locale/`：`en_US.json`、`ja_JP.json`、`zh_CN.json` 国际化文本。
 
-## 前端目录
-- `assets/frontend/` 放需要 Parcel/Tailwind 编译的前端源码入口与依赖（`main.js`、`styles.css`、`plugins/`、`stores/`、`utils/`）。
-- `assets/dist/` 放 `bun run dev` / `bun run build` 生成的主包产物（`main.js`、`styles.css` 与 sourcemap），由 `common.Html()` 自动插入页面。
-- `assets/static/` 放不参与主包编译、由页面按需静态引用的资源：
-  - `assets/static/js/` 放页面级脚本，通过 `common.Html()` 的 `insertScripts` 参数插入，参数路径使用 `static/js/...`。
-  - `assets/static/css/` 放页面级静态样式，例如 flip 模式内联用的 `static/css/flip.css`。
-  - `assets/static/wasm/` 放 reader 解包用 WASM 与 `wasm_exec.js`，构建命令为 `bun run build:wasm`。
-- `assets/locale/` 放国际化的 json 文件，前端通过 i18next 来加载和使用这些翻译字符串。国际化文件修改后也需要重新编译前端。
-- 不要把需要编译的源码放进 `assets/dist/` 或 `assets/static/`；不要把页面静态脚本放进 `assets/frontend/`。
+## 生成产物与构建边界
+- `templ/**/*_templ.go` 是 `*.templ` 的生成产物；`assets/dist/*` 是 `assets/frontend/*` 的编译产物；不要手动编辑生成产物实现业务逻辑。
+- 修改 `*.templ` 后执行 `templ fmt ./templ && templ generate`。
+- 修改 `assets/frontend/*` 或 `assets/locale/*` 后执行 `bun run dev` 或等价构建命令。
+- 提交/review 前分开检查源码和生成产物；生成产物必须能被本轮源码变化解释，不能混入无关 churn。
+- 汇报时说明哪些是源码修改，哪些只是同步生成产物。
 
-## Code Style
-- 保持代码简洁，不做过度复杂的拆分抽象，除非明确要求，也不需要向前兼容
-- 前端与后端代码，都应有必要的中文注释，尤其是函数和重点逻辑部分
-- 当一次修改的新增代码行数超过删除代码行数 1.5 倍时，必须额外 review 是否引入了不必要抽象、重复实现或过于啰嗦的实现方式。
-- 分析、审计、调研、临时计划类 Markdown 文档默认只保留在本地(docs/)，不提交到仓库；如需长期保存，先征得用户明确确认。
-- 除非明确要求，代码与文档里面不要包含特定本地文件或路径或书籍ID
+## 代码与提交规则
+- 保持代码简洁，不做过度复杂的拆分抽象；除非明确要求，不需要额外向前兼容。
+- 关键代码与函数写中文注释；前端、后端都适用。
+- 一次修改中新增行数超过删除行数 1.5 倍时，额外 review 是否引入不必要抽象、重复实现或啰嗦写法。
+- 分析、审计、调研、临时计划类 Markdown 默认只保留在本地 `docs/`，不提交；长期保存需用户确认。
+- 除非明确要求，代码和文档不要包含特定本地路径、文件或书籍 ID。
+- 国际化展示文本和日志尽量使用 locale：Go/templ 用 `locale.GetString("key")`，前端用 `i18next.t("key")`。
 
-## 架构
-- 后端：Go + Echo v4（路由分公开组和私有组，私有组需 JWT 认证）
-- 嵌入式宿主：Android / iOS / macOS 侧通过 `gomobile bind` 将 `cmd/mobile/` 打包为原生库，由宿主 App 启动本地 HTTP 服务
-- 前端：bun + JavaScript + Alpine.js（+persist 插件）+ TailwindCSS
-- 数据存储：默认内存+json持久化，`sqlc generate` 用于生成 SQLite 查询（未来扩展）
-- 模板：templ，`*_templ.go` 是生成文件，修改 `*.templ` 后执行 `templ fmt ./templ && templ generate`
-- 国际化：`assets/locale/` 下的 json 文件，log一般不会硬编码文字，而是修改（en_US.json, ja_JP.json, zh_CN.json）这三个文件来添加或修改文本内容。修改前端或后端时，尽量同步做好展示文字与log的国际化。
-  - go后端与templ模板使用翻译字符串：`locale.GetString("key")`
-  - 前端使用翻译字符串：`i18next.t('key')`
-- 前端状态：Alpine.js store 持久化键名格式 `模块.配置项`（如 `flip.autoHideToolbar`）
+## 架构约束
+- 后端：Go + Echo v4；路由层提供 `/healthz` 供宿主等待服务就绪。
+- 前端状态：Alpine.js store 持久化键名格式 `模块.配置项`，如 `flip.autoHideToolbar`。
+- `cmd/mobile/mobile.go` 导出 `Start`、`Stop`、`GetServerInfo` 等接口，签名保持 `gomobile bind` 兼容，优先使用基础类型。
+- `routers.StartWebServer()` / `StartEcho()` 在嵌入式模式下应返回错误，不能依赖 `os.Exit`、`logger.Fatalf` 结束宿主进程。
+- 嵌入式接入优先保持 Tailscale、桌面托盘、Windows 特有逻辑与启动链路解耦。
+
+## 常用命令
+- 模板生成：`templ fmt ./templ && templ generate`
 - 前端构建：`bun run dev`
-- 运行指令：`templ fmt ./templ && templ generate && go run main.go`
-- 如果运行 `go test` / `go run` 时遇到类似 `open /Users/.../Library/Caches/go-build/...: operation not permitted` 的 Go build cache 权限问题，通常不是代码编译错误。可临时把 Go 构建缓存切到项目可写目录，例如：`GOCACHE=/tmp/cvgo-go-build-cache go test ./...`，或针对当前包执行 `GOCACHE=/tmp/cvgo-go-build-cache go test ./templ/pages/reader`。
-- 有热重载工具 air 的时候，可以在项目根目录开发指令：`air -c .air.toml`，会自动监听前后端文件变化并重启服务，如果默认端口被占用，会自动切换到一个随机可用端口
-- 更改太频繁的时候，air 可能会启动失败，可以杀死air进程后重试，或者直接使用 `go run main.go` 来启动服务
-- 嵌入式 Android 构建：由主仓库执行 `scripts/build_android_go.sh`，实际对 `cvgo/cmd/mobile` 运行 `gomobile bind`
-- 嵌入式 iOS 构建：由主仓库执行 `scripts/build_ios_go.sh`，实际对 `cvgo/cmd/mobile` 运行 `gomobile bind`
-- 嵌入式 macOS 构建：由主仓库执行 `scripts/build_macos_go.sh`，实际对 `cvgo/cmd/mobile` 运行 `gomobile bind`
-- 开发时假设 CLI 工具与依赖已安装
+- 本地运行：`templ fmt ./templ && templ generate && go run main.go`
+- 热重载：`air -c .air.toml`；频繁改动导致失败时可杀掉 air 后重试，或改用 `go run main.go`。
+- Go cache 权限问题可用：`GOCACHE=/tmp/cvgo-go-build-cache go test ./...`
+- 移动端构建由主仓库脚本触发：`scripts/build_android_go.sh`、`scripts/build_ios_go.sh`、`scripts/build_macos_go.sh`，实际对 `cvgo/cmd/mobile` 执行 `gomobile bind`。
 
-## 移动端嵌入式约束
-- `cmd/mobile/mobile.go` 提供宿主调用的 `Start`、`Stop`、`GetServerInfo` 等导出接口，接口签名必须保持 `gomobile bind` 兼容，优先使用基础类型。
-- 路由层提供 `/healthz` 健康检查入口，供宿主等待本地 HTTP 服务就绪后再加载 WebView。
-- `routers.StartWebServer()` / `StartEcho()` 在嵌入式模式下应返回错误，不能依赖 `os.Exit`、`logger.Fatalf` 这类直接结束整个宿主进程的路径。
-- 嵌入式模式下的配置目录、缓存目录、书库路径由宿主显式传入，不依赖 CLI 的当前工作目录或 `os.Executable()` 推导。
-- 涉及宿主端接入时，优先保持 Tailscale、桌面托盘、Windows 特有逻辑与嵌入式启动链路解耦。
-
-## 插件系统
-- 内置插件：`templ/plugins/`
-- 用户插件：`configDir/plugins/`
-- 作用域：`global`（全局）、`shelf`/`flip`/`scroll`（特定页面）、`flip/{bookID}`（特定书籍）
-
-
-## TUI 终端图片兼容
-- TUI 终端图片细节以 `cmd/tui/AGENTS.md` 为准；自动模式当前按终端局部策略选择 iTerm2、Kitty 或 ANSI/Halfblocks，避免把某个终端的 workaround 扩散到其它终端。
+## 插件与 TUI
+- 内置插件：`templ/plugins/`；用户插件：`configDir/plugins/`。
+- 插件作用域：`global`、`shelf`、`flip`、`scroll`、`flip/{bookID}`。
+- TUI 终端图片细节以 `cmd/tui/AGENTS.md` 为准；终端 workaround 不要扩散到全局。

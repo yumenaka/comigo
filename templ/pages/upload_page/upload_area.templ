@@ -65,7 +65,9 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 
 		function showStoreSettingsWarning() {
 			clearNode(storeWarning);
-			storeWarning.append(document.createTextNode(i18next.t("no_available_stores") + " "));
+			storeWarning.append(
+				document.createTextNode(i18next.t("no_available_stores") + " "),
+			);
 			const link = document.createElement("a");
 			link.href = window.ComiGoPath("/settings");
 			link.className = "text-blue-500 underline hover:text-blue-700";

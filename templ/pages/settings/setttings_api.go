@@ -79,6 +79,30 @@ func renderArrayConfigComponent(configName string, values []string) templ.Compon
 	return StringArrayConfig(configName, values, configName+"_Description")
 }
 
+// ensureWritableConfig 统一拦截只读模式下的设置写操作。
+func ensureWritableConfig() error {
+	if config.GetCfg().ReadOnlyMode {
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	}
+	return nil
+}
+
+// jsonBadRequest 统一 JSON 解析失败响应，避免每个 handler 重复拼错误。
+func jsonBadRequest(err error) error {
+	if err == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_invalid_json_request"))
+	}
+	return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("%s: %v", locale.GetString("err_invalid_json_request"), err))
+}
+
+// writeConfigAndApply 写入配置后应用变更副作用；写入失败沿用旧行为，只记录日志不中断响应。
+func writeConfigAndApply(oldConfig config.Config) {
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+	}
+	beforeConfigUpdate(oldConfig, config.GetCfg())
+}
+
 // -------------------------
 // 各类配置的更新 PageHandler
 // -------------------------
@@ -108,22 +132,15 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 		return "", "", setErr
 	}
 
-	// 写入配置文件
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
-	}
-
-	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(oldConfig, config.GetCfg())
+	writeConfigAndApply(oldConfig)
 
 	return request.Name, request.Value, nil
 }
 
 // UpdateStringConfigHandler 处理 String 类型的 JSON API
 func UpdateStringConfigHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 	// 调用通用逻辑更新配置
 	name, newValue, err := updateStringConfigFromJSON(c)
@@ -171,22 +188,15 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 		return "", false, setErr
 	}
 
-	// 写入配置文件
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
-	}
-
-	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(oldConfig, config.GetCfg())
+	writeConfigAndApply(oldConfig)
 
 	return request.Name, request.Value, nil
 }
 
 // UpdateBoolConfigHandler 处理 Bool 类型的 JSON API
 func UpdateBoolConfigHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 
 	name, boolVal, err := updateBoolConfigFromJSON(c)
@@ -234,7 +244,7 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, er
 		return "", 0, nil, setErr
 	}
 
-	// 写入配置文件
+	// 端口变更需要延迟应用副作用，因此这里只写文件，不走 writeConfigAndApply。
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
@@ -243,9 +253,8 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, er
 
 // UpdateNumberConfigHandler 处理 Number 类型的配置
 func UpdateNumberConfigHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 	// 调用通用逻辑更新配置
 	name, intVal, oldConfig, err := updateNumberConfigFromJSON(c)
@@ -332,22 +341,15 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	cfg.Username = effectiveUsername
 	cfg.Password = effectivePassword
 
-	// 写入配置文件
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
-	}
-
-	// 根据配置的变化，做相应操作
-	beforeConfigUpdate(oldConfig, config.GetCfg())
+	writeConfigAndApply(oldConfig)
 
 	return nil
 }
 
 // UpdateLoginSettingsHandler 处理登录设置的 JSON API
 func UpdateLoginSettingsHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 
 	if err := updateLoginSettingsFromJSON(c); err != nil {
@@ -360,9 +362,8 @@ func UpdateLoginSettingsHandler(c echo.Context) error {
 
 // UpdateTailscaleConfigHandler 处理Tailscale配置更新的JSON API
 func UpdateTailscaleConfigHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 	// 解析请求体（JSON格式）
 	var request struct {
@@ -374,7 +375,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 		FunnelLoginCheck  bool   `json:"FunnelLoginCheck"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+		return jsonBadRequest(err)
 	}
 	//fmt.Printf("Received Tailscale config update: %+v\n", request)
 
@@ -403,13 +404,7 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	config.GetCfg().TailscalePort = request.TailscalePort
 	config.GetCfg().FunnelTunnel = request.FunnelTunnel
 	config.GetCfg().FunnelLoginCheck = request.FunnelLoginCheck
-	// 写入配置文件
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
-	}
-
-	// 根据配置的变化，做相应操作
-	beforeConfigUpdate(oldConfig, config.GetCfg())
+	writeConfigAndApply(oldConfig)
 
 	// 返回成功响应
 	return c.NoContent(http.StatusOK)
@@ -417,9 +412,8 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 
 // AddArrayConfigHandler 处理添加数组元素的 JSON API
 func AddArrayConfigHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 
 	// 解析 JSON 请求体
@@ -428,7 +422,7 @@ func AddArrayConfigHandler(c echo.Context) error {
 		AddValue   string `json:"addValue"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+		return jsonBadRequest(err)
 	}
 
 	if request.ConfigName == "" {
@@ -477,20 +471,14 @@ func doAdd(configName, addValue string) ([]string, error) {
 		logger.Errorf(locale.GetString("err_failed_to_add_config_value"), err)
 		return nil, err
 	}
-	// 写入配置文件
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
-	}
-	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(oldConfig, config.GetCfg())
+	writeConfigAndApply(oldConfig)
 	return values, nil
 }
 
 // EnablePluginHandler 处理启用插件的 JSON API
 func EnablePluginHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 
 	// 解析 JSON 请求体
@@ -498,7 +486,7 @@ func EnablePluginHandler(c echo.Context) error {
 		PluginName string `json:"pluginName"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+		return jsonBadRequest(err)
 	}
 
 	if request.PluginName == "" {
@@ -539,9 +527,8 @@ func EnablePluginHandler(c echo.Context) error {
 
 // DisablePluginHandler 处理禁用插件的 JSON API
 func DisablePluginHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 
 	// 解析 JSON 请求体
@@ -549,7 +536,7 @@ func DisablePluginHandler(c echo.Context) error {
 		PluginName string `json:"pluginName"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+		return jsonBadRequest(err)
 	}
 
 	if request.PluginName == "" {
@@ -578,9 +565,8 @@ func DisablePluginHandler(c echo.Context) error {
 
 // DeleteArrayConfigHandler 处理删除数组元素的 JSON API
 func DeleteArrayConfigHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 
 	// 解析 JSON 请求体
@@ -589,7 +575,7 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 		DeleteValue string `json:"deleteValue"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+		return jsonBadRequest(err)
 	}
 
 	if request.ConfigName == "" {
@@ -636,12 +622,7 @@ func doDelete(configName string, deleteValue string) ([]string, error) {
 		return nil, err
 	}
 
-	// 写入配置文件
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
-	}
-	// 根据配置的变化，做相应操作。比如打开浏览器,重新扫描等
-	beforeConfigUpdate(oldConfig, config.GetCfg())
+	writeConfigAndApply(oldConfig)
 	return values, nil
 }
 
@@ -656,9 +637,8 @@ func renderTemplToString(ctx context.Context, component templ.Component) (string
 
 // HandleConfigSave 处理 /api/config-save 的 JSON API
 func HandleConfigSave(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 
 	// 解析 JSON 请求体
@@ -666,7 +646,7 @@ func HandleConfigSave(c echo.Context) error {
 		SelectedDir string `json:"selectedDir"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+		return jsonBadRequest(err)
 	}
 
 	if request.SelectedDir == "" {
@@ -696,9 +676,8 @@ func HandleConfigSave(c echo.Context) error {
 
 // HandleConfigDelete 处理 /api/config-delete 的 JSON API
 func HandleConfigDelete(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 
 	// 解析 JSON 请求体
@@ -706,7 +685,7 @@ func HandleConfigDelete(c echo.Context) error {
 		SelectedDir string `json:"selectedDir"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+		return jsonBadRequest(err)
 	}
 
 	if request.SelectedDir == "" {
@@ -736,9 +715,8 @@ func HandleConfigDelete(c echo.Context) error {
 
 // RescanStoreHandler 处理重新扫描书库的 JSON API
 func RescanStoreHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 
 	// 解析 JSON 请求体
@@ -746,7 +724,7 @@ func RescanStoreHandler(c echo.Context) error {
 		StoreUrl string `json:"storeUrl"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+		return jsonBadRequest(err)
 	}
 
 	if request.StoreUrl == "" {
@@ -796,9 +774,8 @@ func RescanStoreHandler(c echo.Context) error {
 
 // DeleteStoreHandler 处理删除书库的 JSON API
 func DeleteStoreHandler(c echo.Context) error {
-	// 如果配置被锁定
-	if config.GetCfg().ReadOnlyMode {
-		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_config_locked"))
+	if err := ensureWritableConfig(); err != nil {
+		return err
 	}
 
 	// 解析 JSON 请求体
@@ -806,7 +783,7 @@ func DeleteStoreHandler(c echo.Context) error {
 		StoreUrl string `json:"storeUrl"`
 	}
 	if err := c.Bind(&request); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid JSON request")
+		return jsonBadRequest(err)
 	}
 
 	if request.StoreUrl == "" {

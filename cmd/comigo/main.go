@@ -72,7 +72,7 @@ func main() {
 		releaseSingleInstance = tools.CleanupSingleInstance
 	}
 	// 设置系统托盘并启动服务器
-	system_tray.SetupSystray(
+	exitCode := system_tray.SetupSystray(
 		startServer,
 		shutdownServer,
 		getServerURL,
@@ -83,6 +83,9 @@ func main() {
 		getTailscaleEnabled,
 		releaseSingleInstance,
 	)
+	if exitCode >= 0 {
+		os.Exit(exitCode)
+	}
 }
 
 // startServer 启动服务器

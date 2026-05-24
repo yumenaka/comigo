@@ -108,7 +108,7 @@ func WsHandler(c echo.Context) error {
 			break
 		} else {
 			if isWsDebug() {
-				logger.Infof(locale.GetString("log_websocket_server_received")+"\n", msg)
+				logger.Infof(locale.GetString("log_websocket_server_received"), msg)
 			}
 			msgWithClientID := MessageWithClientID{Msg: msg, ClientID: clientID, Client: wsConn}
 			// Send the newly received message to the broadcast channel

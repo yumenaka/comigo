@@ -96,12 +96,19 @@ func GetIPList() (IPList []string, err error) {
 }
 
 // GetOutboundIP 获取本机的首选出站IP
-// Get preferred outbound ip of this machine
+// 失败时回退到可用网卡或 127.0.0.1，避免工具层直接退出宿主进程。
 func GetOutboundIP() net.IP {
 	ip, err := LookupOutboundIP()
 	if err != nil {
-		time.Sleep(3 * time.Second)
-		logger.Fatal(err)
+		logger.Infof(locale.GetString("get_ip_error")+" %v", err)
+		if ipList, listErr := GetIPList(); listErr == nil {
+			for _, candidate := range ipList {
+				if parsed := net.ParseIP(candidate); parsed != nil {
+					return parsed
+				}
+			}
+		}
+		return net.IPv4(127, 0, 0, 1)
 	}
 	return ip
 }

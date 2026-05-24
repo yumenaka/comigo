@@ -51,10 +51,16 @@ func SetShutdownHandler() {
 	// 只能通过http.Server.Shutdown()/http.Server.Close()等http包里的方法去实现,没办法自己实现.
 	// 因为这样的设计即使你给自定义Server接口的实现类设计了Shutdown()方法,也调用不到.
 	// 本质上还是因为从端口启动开始,后续的所有工作都是http包来完成的,我们无法干涉这其中的步骤
+	if config.Server == nil {
+		logger.Info("Comigo Server exit.")
+		return
+	}
 	if err := config.Server.Shutdown(ctx); err != nil {
-		// logger.Infof("Comigo Server forced to shutdown: ", err)
-		// time.Sleep(3 * time.Second)
-		logger.Fatal("Comigo Server forced to shutdown: ", err)
+		// Shutdown 失败时只记录并尝试强制关闭，避免信号处理路径直接结束宿主进程。
+		logger.Infof(locale.GetString("err_server_shutdown_failed")+": %v", err)
+		if closeErr := config.Server.Close(); closeErr != nil {
+			logger.Infof(locale.GetString("err_server_shutdown_failed")+": %v", closeErr)
+		}
 	}
 	logger.Info("Comigo Server exit.")
 }

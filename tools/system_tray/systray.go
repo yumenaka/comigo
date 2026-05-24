@@ -5,9 +5,9 @@ package system_tray
 import (
 	"embed"
 	"fmt"
-	"os"
 	"os/exec"
 	"runtime"
+	"sync/atomic"
 
 	"github.com/atotto/clipboard"
 	"github.com/energye/systray"
@@ -33,6 +33,7 @@ var (
 	setLanguageFunc           func(string) error
 	getTailscaleEnabledFunc   func() bool
 	releaseSingleInstanceFunc func()
+	requestedExitCode         atomic.Int32
 	// 菜单项引用，用于语言切换时更新
 	menuItems struct {
 		mOpenBrowser           *systray.MenuItem
@@ -55,6 +56,8 @@ var (
 	}
 )
 
+const noRequestedExitCode int32 = -1
+
 // SetupSystray 设置系统托盘
 // startServer: 启动服务器的函数
 // shutdownServer: 清理服务器的函数
@@ -65,6 +68,7 @@ var (
 // setLanguage: 设置语言的函数
 // getTailscaleEnabled: 获取Tailscale是否启用的函数
 // releaseSingleInstance: 升级重启前释放单实例锁（未启用单实例时传 nil）
+// 返回值：托盘流程要求入口退出时返回退出码；普通退出返回 -1，由入口自然结束。
 func SetupSystray(
 	startServer, shutdownServer func(),
 	getURL func() string,
@@ -74,7 +78,7 @@ func SetupSystray(
 	setLanguage func(string) error,
 	getTailscaleEnabled func() bool,
 	releaseSingleInstance func(),
-) {
+) int {
 	startServerFunc = startServer
 	shutdownServerFunc = shutdownServer
 	getURLFunc = getURL
@@ -84,9 +88,11 @@ func SetupSystray(
 	setLanguageFunc = setLanguage
 	getTailscaleEnabledFunc = getTailscaleEnabled
 	releaseSingleInstanceFunc = releaseSingleInstance
+	requestedExitCode.Store(noRequestedExitCode)
 
 	// 在主线程运行 systray
 	systray.Run(onReady, onExit)
+	return int(requestedExitCode.Load())
 }
 
 // onReady 系统托盘就绪时的回调
@@ -172,8 +178,9 @@ func initMenuItems() {
 				logger.Infof(locale.GetString("upgrade_tray_restart_failed"), err)
 				return
 			}
+			// 工具层只请求退出，真正的 os.Exit 由桌面入口统一处理。
+			requestedExitCode.Store(0)
 			systray.Quit()
-			os.Exit(0)
 		}()
 	})
 
