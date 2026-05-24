@@ -103,10 +103,17 @@ func TestStoreBookPersistsMetaAfterInMemoryStore(t *testing.T) {
 	}
 }
 
-func TestBookInfoJSONHidesLocalPathsButMetadataKeepsThem(t *testing.T) {
+func TestPublicJSONHidesLocalPathsButMetadataKeepsThem(t *testing.T) {
 	storeURL := filepath.Join(t.TempDir(), "books")
 	book := newStoreGroupTestBook(storeURL, "book-private-fields")
 	book.RemoteURL = "sftp://user:password@example.com:22/books"
+	pagePath := filepath.Join(storeURL, "001.jpg")
+	book.PageInfos = model.PageInfos{{
+		Name: "001.jpg",
+		Path: pagePath,
+		Url:  "/api/get-file?id=book-private-fields&filename=001.jpg",
+	}}
+	book.Cover = book.PageInfos[0]
 
 	publicJSON, err := json.Marshal(book)
 	if err != nil {
@@ -115,7 +122,8 @@ func TestBookInfoJSONHidesLocalPathsButMetadataKeepsThem(t *testing.T) {
 	if strings.Contains(string(publicJSON), "book_path") ||
 		strings.Contains(string(publicJSON), "store_url") ||
 		strings.Contains(string(publicJSON), "remote_url") ||
-		strings.Contains(string(publicJSON), book.RemoteURL) {
+		strings.Contains(string(publicJSON), book.RemoteURL) ||
+		strings.Contains(string(publicJSON), pagePath) {
 		t.Fatalf("普通 JSON 不应输出内部路径字段: %s", publicJSON)
 	}
 
@@ -128,6 +136,9 @@ func TestBookInfoJSONHidesLocalPathsButMetadataKeepsThem(t *testing.T) {
 		!strings.Contains(metaText, `"store_url"`) ||
 		!strings.Contains(metaText, `"remote_url"`) {
 		t.Fatalf("metadata JSON 必须保留内部路径字段: %s", metaText)
+	}
+	if !strings.Contains(metaText, pagePath) {
+		t.Fatalf("metadata JSON 必须保留页面真实路径: %s", metaText)
 	}
 
 	var restored model.Book
@@ -144,6 +155,22 @@ func TestBookInfoJSONHidesLocalPathsButMetadataKeepsThem(t *testing.T) {
 			restored.StoreUrl,
 			restored.RemoteURL,
 		)
+	}
+	if len(restored.PageInfos) != 1 || restored.PageInfos[0].Path != pagePath || restored.Cover.Path != pagePath {
+		t.Fatalf("metadata 页面路径恢复失败: pages=%#v cover=%#v", restored.PageInfos, restored.Cover)
+	}
+
+	shelfJSON, err := json.Marshal(model.StoreBookInfo{
+		StoreUrl:     storeURL,
+		DisplayName:  filepath.Base(storeURL),
+		ChildBookNum: 1,
+		BookInfos:    model.BookInfos{book.BookInfo},
+	})
+	if err != nil {
+		t.Fatalf("marshal store book info json: %v", err)
+	}
+	if strings.Contains(string(shelfJSON), "store_url") || strings.Contains(string(shelfJSON), storeURL) {
+		t.Fatalf("书架分组普通 JSON 不应输出书库真实路径: %s", shelfJSON)
 	}
 }
 

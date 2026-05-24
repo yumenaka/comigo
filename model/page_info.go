@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -17,4 +18,22 @@ type PageInfo struct {
 	Width      int       `json:"-"`        // 图片宽度，仅运行时分析使用
 	ImgType    string    `json:"-"`        // 这个字段不解析
 	InsertHtml string    `json:"-"`        // 这个字段不解析
+}
+
+// MarshalJSON 只输出浏览器需要的页面信息；Path 是本机或远程存储内部路径，不能暴露给普通页面 JSON。
+func (p PageInfo) MarshalJSON() ([]byte, error) {
+	type publicPageInfo struct {
+		Name    string    `json:"name"`
+		Size    int64     `json:"size"`
+		ModTime time.Time `json:"mod_time"`
+		Url     string    `json:"url"`
+		PageNum int       `json:"page_num"`
+	}
+	return json.Marshal(publicPageInfo{
+		Name:    p.Name,
+		Size:    p.Size,
+		ModTime: p.ModTime,
+		Url:     p.Url,
+		PageNum: p.PageNum,
+	})
 }

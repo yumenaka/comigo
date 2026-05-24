@@ -151,7 +151,7 @@ func SaveMetaJson(book *model.Book) error {
 }
 
 // marshalBookMetaJSON 专用于本地 metadata 持久化。
-// BookPath/StoreUrl/RemoteURL 在普通 JSON 响应中会被隐藏，但 metadata 必须保留这些内部字段。
+// BookPath/StoreUrl/RemoteURL/PageInfo.Path 在普通 JSON 响应中会被隐藏，但 metadata 必须保留这些内部字段。
 func marshalBookMetaJSON(book *model.Book) ([]byte, error) {
 	rawData, err := json.Marshal(book)
 	if err != nil {
@@ -169,7 +169,28 @@ func marshalBookMetaJSON(book *model.Book) ([]byte, error) {
 	if book.ParentFolder != "" {
 		payload["parent_folder"] = book.ParentFolder
 	}
+	keepBookMetaPagePaths(payload, book)
 	return json.MarshalIndent(payload, "", "  ")
+}
+
+// keepBookMetaPagePaths 把页面真实路径补回 metadata；普通页面 JSON 不应拿到这些内部路径。
+func keepBookMetaPagePaths(payload map[string]any, book *model.Book) {
+	if cover, ok := payload["cover"].(map[string]any); ok && book.Cover.Path != "" {
+		cover["path"] = book.Cover.Path
+	}
+	pages, ok := payload["PageInfos"].([]any)
+	if !ok {
+		return
+	}
+	for i := range book.PageInfos {
+		if i >= len(pages) {
+			return
+		}
+		page, ok := pages[i].(map[string]any)
+		if ok && book.PageInfos[i].Path != "" {
+			page["path"] = book.PageInfos[i].Path
+		}
+	}
 }
 
 // restoreBookMetaPrivateFields 从 metadata JSON 读回普通响应中隐藏的内部字段。
