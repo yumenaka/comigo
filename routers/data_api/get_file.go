@@ -45,7 +45,7 @@ type getFileRequest struct {
 func GetFile(c echo.Context) error {
 	req, err := parseGetFileRequest(c)
 	if err != nil {
-		return err
+		return writeValidationError(c, err)
 	}
 
 	// 如果启用了本地缓存
@@ -73,21 +73,53 @@ func GetFile(c echo.Context) error {
 }
 
 func parseGetFileRequest(c echo.Context) (getFileRequest, error) {
+	resizeWidth, err := parseOptionalBoundedInt(c, "resize_width", 0, 1, imageQueryMaxDimension)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	resizeHeight, err := parseOptionalBoundedInt(c, "resize_height", 0, 1, imageQueryMaxDimension)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	autoCrop, err := parseOptionalBoundedInt(c, "auto_crop", 0, 0, imageQueryMaxAutoCrop)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	resizeMaxWidth, err := parseOptionalBoundedInt(c, "resize_max_width", 0, 1, imageQueryMaxDimension)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	resizeMaxHeight, err := parseOptionalBoundedInt(c, "resize_max_height", 0, 1, imageQueryMaxDimension)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	blurhash, err := parseOptionalBoundedInt(c, "blurhash", 0, 0, imageQueryMaxBlurComponents)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	blurhashImage, err := parseOptionalBoundedInt(c, "blurhash_image", 0, 0, imageQueryMaxBlurComponents)
+	if err != nil {
+		return getFileRequest{}, err
+	}
 	req := getFileRequest{
 		bookID:          c.QueryParam("id"),
 		fileName:        c.QueryParam("filename"),
 		disableCache:    getBoolQueryParam(c, "no-cache", false),
-		resizeWidth:     getIntQueryParam(c, "resize_width", 0),
-		resizeHeight:    getIntQueryParam(c, "resize_height", 0),
-		autoCrop:        getIntQueryParam(c, "auto_crop", 0),
-		resizeMaxWidth:  getIntQueryParam(c, "resize_max_width", 0),
-		resizeMaxHeight: getIntQueryParam(c, "resize_max_height", 0),
-		blurhash:        getIntQueryParam(c, "blurhash", 0),
-		blurhashImage:   getIntQueryParam(c, "blurhash_image", 0),
+		resizeWidth:     resizeWidth,
+		resizeHeight:    resizeHeight,
+		autoCrop:        autoCrop,
+		resizeMaxWidth:  resizeMaxWidth,
+		resizeMaxHeight: resizeMaxHeight,
+		blurhash:        blurhash,
+		blurhashImage:   blurhashImage,
 		gray:            getBoolQueryParam(c, "gray", false),
 	}
 	if req.bookID == "" || req.fileName == "" {
-		return req, apiresp.BadRequest(c, "missing_param", "id and filename are required", []string{"id", "filename"})
+		return req, requestValidationError{
+			code:    "missing_param",
+			message: "id and filename are required",
+			details: []string{"id", "filename"},
+		}
 	}
 	if hasImageTransform(req) {
 		req.disableCache = true
@@ -157,19 +189,6 @@ func savePictureCache(c echo.Context, req getFileRequest, book *model.Book, imgD
 	); err != nil {
 		logger.Infof(locale.GetString("log_save_file_to_cache_error"), err)
 	}
-}
-
-// getIntQueryParam 从查询参数中获取整数值，带默认值
-func getIntQueryParam(c echo.Context, key string, defaultValue int) int {
-	valueStr := c.QueryParam(key)
-	if valueStr == "" {
-		return defaultValue
-	}
-	value, err := strconv.Atoi(valueStr)
-	if err != nil {
-		return defaultValue
-	}
-	return value
 }
 
 // getBoolQueryParam 从查询参数中获取布尔值，带默认值

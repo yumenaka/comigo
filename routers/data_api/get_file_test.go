@@ -42,6 +42,55 @@ func TestParseGetFileRequestDisablesCacheForNoCacheAndTransforms(t *testing.T) {
 	}
 }
 
+func TestParseGetFileRequestRejectsInvalidImageParams(t *testing.T) {
+	e := echo.New()
+	cases := []string{
+		"/api/get-file?id=book1&filename=page.jpg&resize_width=abc",
+		"/api/get-file?id=book1&filename=page.jpg&resize_width=-1",
+		"/api/get-file?id=book1&filename=page.jpg&resize_width=4097",
+		"/api/get-file?id=book1&filename=page.jpg&auto_crop=101",
+		"/api/get-file?id=book1&filename=page.jpg&blurhash=3",
+	}
+
+	for _, query := range cases {
+		t.Run(query, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, query, nil)
+			rec := httptest.NewRecorder()
+			if _, err := parseGetFileRequest(e.NewContext(req, rec)); err == nil {
+				t.Fatalf("invalid image query should return validation error")
+			}
+		})
+	}
+}
+
+func TestGetFileRejectsInvalidImageParamBeforeBookLookup(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/api/get-file?id=book1&filename=page.jpg&resize_width=4097", nil)
+	rec := httptest.NewRecorder()
+	if err := GetFile(e.NewContext(req, rec)); err != nil {
+		t.Fatalf("GetFile returned transport error: %v", err)
+	}
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("invalid image param should return 400 before book lookup, got %d", rec.Code)
+	}
+}
+
+func TestParseCoverRequestRejectsUnsafeResizeHeight(t *testing.T) {
+	e := echo.New()
+	for _, query := range []string{
+		"/api/get-cover?id=book1&resize_height=0",
+		"/api/get-cover?id=book1&resize_height=4097",
+	} {
+		t.Run(query, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, query, nil)
+			rec := httptest.NewRecorder()
+			if _, err := parseCoverRequest(e.NewContext(req, rec)); err == nil {
+				t.Fatalf("invalid cover resize_height should return validation error")
+			}
+		})
+	}
+}
+
 func TestServeCachedPictureSkipsCacheWhenNoCacheQuerySet(t *testing.T) {
 	cfg := config.GetCfg()
 	oldUseCache := cfg.UseCache

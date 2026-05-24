@@ -182,6 +182,7 @@ templ StoreConfigJavaScript() {
 						if (container && container.parentNode) {
 							// 创建临时元素来解析 HTML
 							const temp = document.createElement("div");
+							// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。
 							temp.innerHTML = data.html;
 							const newContainer = temp.querySelector(
 								"#" + configName + "-store-config",
@@ -321,6 +322,7 @@ templ StoreConfigJavaScript() {
 						if (container && container.parentNode) {
 							// 创建临时元素来解析 HTML
 							const temp = document.createElement("div");
+							// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。
 							temp.innerHTML = data.html;
 							const newContainer = temp.querySelector(
 								"#" + configName + "-store-config",

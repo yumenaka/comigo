@@ -25,7 +25,7 @@ type coverRequest struct {
 func GetCover(c echo.Context) error {
 	req, err := parseCoverRequest(c)
 	if err != nil {
-		return err
+		return writeValidationError(c, err)
 	}
 	result, err := coverutil.GetBookCover(coverutil.Request{BookID: req.bookID, ResizeHeight: req.resizeHeight})
 	if err != nil {
@@ -41,12 +41,20 @@ func GetCover(c echo.Context) error {
 
 // parseCoverRequest 解析 HTTP 查询参数，并保持 get-cover 原有默认高度。
 func parseCoverRequest(c echo.Context) (coverRequest, error) {
+	resizeHeight, err := parseOptionalBoundedInt(c, "resize_height", 352, 1, imageQueryMaxDimension)
+	if err != nil {
+		return coverRequest{}, err
+	}
 	req := coverRequest{
 		bookID:       c.QueryParam("id"),
-		resizeHeight: getIntQueryParam(c, "resize_height", 352),
+		resizeHeight: resizeHeight,
 	}
 	if req.bookID == "" {
-		return req, apiresp.BadRequest(c, "missing_param", "id is required", map[string]string{"param": "id"})
+		return req, requestValidationError{
+			code:    "missing_param",
+			message: "id is required",
+			details: map[string]string{"param": "id"},
+		}
 	}
 	return req, nil
 }

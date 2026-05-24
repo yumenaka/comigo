@@ -58,6 +58,45 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 		// localStorage key，与 $persist 的命名风格保持一致
 		const LAST_STORE_KEY = "_x_upload.lastSelectedStore";
 
+		// 上传页会展示服务端返回的文件名和错误文案，动态文本统一用 textContent 写入。
+		function clearNode(node) {
+			node.replaceChildren();
+		}
+
+		function showStoreSettingsWarning() {
+			clearNode(storeWarning);
+			storeWarning.append(document.createTextNode(i18next.t("no_available_stores") + " "));
+			const link = document.createElement("a");
+			link.href = window.ComiGoPath("/settings");
+			link.className = "text-blue-500 underline hover:text-blue-700";
+			link.textContent = i18next.t("settings_stores");
+			storeWarning.appendChild(link);
+			storeWarning.classList.remove("hidden");
+		}
+
+		function renderUploadSuccess(uploadedFiles) {
+			clearNode(resultDiv);
+			const message = document.createElement("p");
+			message.className = "text-green-500 text-lg text-center";
+			message.textContent = i18next.t("file_uploaded_successfully");
+			const list = document.createElement("ul");
+			list.className = "text-gray-700 list-disc list-inside";
+			uploadedFiles.forEach((file) => {
+				const item = document.createElement("li");
+				item.textContent = file;
+				list.appendChild(item);
+			});
+			resultDiv.append(message, list);
+		}
+
+		function renderUploadError(message) {
+			clearNode(resultDiv);
+			const error = document.createElement("p");
+			error.className = "text-red-500";
+			error.textContent = message;
+			resultDiv.appendChild(error);
+		}
+
 		// 获取上次选择的书库
 		function getLastSelectedStore() {
 			try {
@@ -83,7 +122,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 				.then((response) => response.json())
 				.then((data) => {
 					const stores = data.stores || [];
-					storeSelect.innerHTML = ""; // 清空加载提示
+					clearNode(storeSelect); // 清空加载提示
 					availableStores = []; // 重置可用书库列表
 
 					if (stores.length === 0) {
@@ -94,14 +133,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 						option.disabled = true;
 						storeSelect.appendChild(option);
 						// 显示更详细的提示，引导用户去设置书库
-						storeWarning.innerHTML =
-							i18next.t("no_available_stores") +
-							' <a href="' +
-							window.ComiGoPath("/settings") +
-							'" class="text-blue-500 underline hover:text-blue-700">' +
-							i18next.t("settings_stores") +
-							"</a>";
-						storeWarning.classList.remove("hidden");
+						showStoreSettingsWarning();
 						// 禁用拖拽区域和上传按钮
 						uploadButton.disabled = true;
 						dropArea.classList.add("opacity-50", "pointer-events-none");
@@ -131,14 +163,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 					// 检查是否有可用书库
 					if (availableStores.length === 0) {
 						// 所有书库路径都不存在
-						storeWarning.innerHTML =
-							i18next.t("no_available_stores") +
-							' <a href="' +
-							window.ComiGoPath("/settings") +
-							'" class="text-blue-500 underline hover:text-blue-700">' +
-							i18next.t("settings_stores") +
-							"</a>";
-						storeWarning.classList.remove("hidden");
+						showStoreSettingsWarning();
 						uploadButton.disabled = true;
 						dropArea.classList.add("opacity-50", "pointer-events-none");
 					} else {
@@ -161,7 +186,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 				})
 				.catch((error) => {
 					console.error("获取书库列表失败:", error);
-					storeSelect.innerHTML = "";
+					clearNode(storeSelect);
 					const option = document.createElement("option");
 					option.value = "";
 					option.textContent = i18next.t("upload_failed_network_error");
@@ -295,7 +320,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 			const removeBtn = document.createElement("button");
 			removeBtn.className =
 				"panel-control px-2 py-1 text-red-500 hover:text-red-700 rounded";
-			removeBtn.innerHTML = "&#10005;"; // × 符号
+			removeBtn.textContent = "×";
 			removeBtn.addEventListener("click", () => {
 				filesToUpload = filesToUpload.filter((f) => f !== file);
 				li.remove();
@@ -362,16 +387,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 			xhr.onload = function () {
 				if (xhr.status === 200) {
 					const data = JSON.parse(xhr.responseText);
-					let filesList = "";
-					data.files.forEach((file) => {
-						filesList += "<li>" + file + "</li>";
-					});
-					resultDiv.innerHTML =
-						'<p class="text-green-500 text-lg text-center">' +
-						i18next.t("file_uploaded_successfully") +
-						'</p><ul class="text-gray-700 list-disc list-inside">' +
-						filesList +
-						"</ul>";
+					renderUploadSuccess(data.files || []);
 
 					// 提示上传成功
 					showMessage({
@@ -386,13 +402,9 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 					});
 					// 清空文件列表
 					filesToUpload = [];
-					fileList.innerHTML = "";
+					clearNode(fileList);
 				} else {
-					const errorData = JSON.parse(xhr.responseText);
-					resultDiv.innerHTML =
-						`<p class="text-red-500">` +
-						i18next.t("upload_failed_network_error") +
-						`</p>`;
+					renderUploadError(i18next.t("upload_failed_network_error"));
 				}
 				// 重置上传按钮和进度条
 				uploadButton.disabled = filesToUpload.length === 0;
@@ -402,10 +414,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 			};
 			// 上传失败: 网络错误
 			xhr.onerror = function () {
-				resultDiv.innerHTML =
-					`<p class="text-red-500">` +
-					i18next.t("upload_failed_network_error") +
-					`</p>`;
+				renderUploadError(i18next.t("upload_failed_network_error"));
 				uploadButton.disabled = filesToUpload.length === 0;
 				uploadButton.textContent = i18next.t("upload_file");
 				progressBar.style.width = "0%";
