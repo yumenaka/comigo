@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/yumenaka/comigo/tools"
@@ -37,6 +38,30 @@ func TestUpdateConfigFileCreatesTargetAndTracksConfigFile(t *testing.T) {
 	}
 }
 
+func TestUpdateConfigFilePersistsEnabledPluginList(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	cfg.ConfigFile = filepath.Join(t.TempDir(), "config.toml")
+	cfg.EnablePlugin = true
+	cfg.EnabledPluginList = []string{"clock"}
+
+	if err := UpdateConfigFile(); err != nil {
+		t.Fatalf("UpdateConfigFile 返回错误: %v", err)
+	}
+
+	content, err := os.ReadFile(cfg.ConfigFile)
+	if err != nil {
+		t.Fatalf("读取生成的配置文件失败: %v", err)
+	}
+	if !strings.Contains(string(content), "EnabledPluginList") || !strings.Contains(string(content), "clock") {
+		t.Fatalf("启用插件列表未写入配置文件:\n%s", string(content))
+	}
+}
+
 func TestGetConfigDirUsesExplicitConfigPathWhenFileDoesNotExist(t *testing.T) {
 	oldCfg := cfg
 	t.Cleanup(func() {
@@ -56,6 +81,27 @@ func TestGetConfigDirUsesExplicitConfigPathWhenFileDoesNotExist(t *testing.T) {
 	}
 	if _, err := os.Stat(targetDir); err != nil {
 		t.Fatalf("显式配置目录未创建: %v", err)
+	}
+}
+
+func TestUpdateConfigByJsonUpdatesGlobalConfig(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	cfg.Debug = false
+	cfg.MinImageNum = 3
+
+	if err := UpdateConfigByJson(`{"Debug":true,"MinImageNum":1}`); err != nil {
+		t.Fatalf("UpdateConfigByJson 返回错误: %v", err)
+	}
+	if !cfg.Debug {
+		t.Fatal("Debug 未按 JSON 更新为 true")
+	}
+	if cfg.MinImageNum != 1 {
+		t.Fatalf("MinImageNum 未按 JSON 更新: got %d want 1", cfg.MinImageNum)
 	}
 }
 

@@ -41,11 +41,12 @@ var RootCmd = &cobra.Command{
 		}
 		// 默认启用几个内置插件
 		if cfg.EnablePlugin {
-			cfg.EnabledPluginList = append(cfg.EnabledPluginList, "auto_flip", "auto_scroll")
+			_ = cfg.AddPlugin("auto_flip")
+			_ = cfg.AddPlugin("auto_scroll")
 		}
 		if cfg.EnablePlugin && cfg.Debug {
 			if strings.Contains(cfg.Host, "comigo.xyz") {
-				cfg.EnabledPluginList = append(cfg.EnabledPluginList, "comigo_xyz")
+				_ = cfg.AddPlugin("comigo_xyz")
 			}
 			logger.Infof(locale.GetString("log_cfg_host_enabled_plugin_list"), cfg.Host, cfg.EnabledPluginList)
 		}

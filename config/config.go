@@ -30,7 +30,7 @@ type Config struct {
 	PluginDirectory           string         `json:"-" toml:"-"  comment:"插件存放目录"`
 	BuildInPluginList         []string       `json:"-" toml:"-"  comment:"内置插件列表"`
 	UserPluginList            []string       `json:"-" toml:"-"  comment:"用户自定义插件列表"`
-	EnabledPluginList         []string       `json:"-" toml:"-"  comment:"已启用插件列表"`
+	EnabledPluginList         []string       `json:"-" comment:"已启用插件列表"`
 	CustomPlugins             []CustomPlugin `json:"-" toml:"-"  comment:"用户自定义插件内容列表"`
 	DisableLAN                bool           `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
 	EnableDatabase            bool           `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
@@ -507,8 +507,8 @@ func UpdateConfigByJson(jsonString string) error {
 		return err
 	}
 
-	v := reflect.ValueOf(cfg).Elem()
-	t := v.Type()
+	// cfg 是结构体值，反射更新必须先取地址，避免配置 API 写入时 panic。
+	v := reflect.ValueOf(&cfg).Elem()
 
 	for key, value := range updates {
 		if key == "BasePath" {
@@ -528,9 +528,6 @@ func UpdateConfigByJson(jsonString string) error {
 			logger.Infof(locale.GetString("log_failed_to_set_field"), key, err)
 			continue
 		}
-
-		// 特殊处理：Language 字段更新后的附加逻辑可在此处理
-		_ = t // 避免未使用警告
 	}
 	return nil
 }

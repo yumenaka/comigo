@@ -440,12 +440,12 @@ templ DrawerSlot(c echo.Context) {
 			<span x-text="autoScrollEnabled ? i18next.t('auto_flip_pause_scroll') : i18next.t('auto_flip_start_scroll')"></span>
 		</button>
 		<div class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
-			<label class="block w-full mb-0 font-medium" x-text="i18next.t('auto_flip_interval') + ' ' + intervalSeconds + ' ' + i18next.t('auto_flip_seconds')"></label>
-			<input type="range" min="1" max="60" x-model.number="intervalSeconds" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
+			<label for="ReaderAutoScrollInterval" class="block w-full mb-0 font-medium" x-text="i18next.t('auto_flip_interval') + ' ' + intervalSeconds + ' ' + i18next.t('auto_flip_seconds')"></label>
+			<input id="ReaderAutoScrollInterval" type="range" min="1" max="60" x-model.number="intervalSeconds" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 		</div>
 		<div class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
-			<label class="block w-full mb-0 font-medium" x-text="i18next.t('auto_scroll_distance') + ' ' + scrollPercent + '%'"></label>
-			<input type="range" min="50" max="150" x-model.number="scrollPercent" step="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
+			<label for="ReaderAutoScrollDistance" class="block w-full mb-0 font-medium" x-text="i18next.t('auto_scroll_distance') + ' ' + scrollPercent + '%'"></label>
+			<input id="ReaderAutoScrollDistance" type="range" min="50" max="150" x-model.number="scrollPercent" step="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 		</div>
 	</div>
 	<div x-show="$store.global.readMode === 'flip'" class="w-full">
@@ -492,12 +492,12 @@ templ DrawerSlot(c echo.Context) {
 		<span class="font-medium ms-3" x-text="i18next.t('show_page_num')"></span>
 	</label>
 	<div x-show="$store.global.readMode === 'scroll'" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
-		<label class="block w-full mb-0 font-medium" x-text="i18next.t('margin_bottom_on_scroll_mode') + $store.scroll.marginBottomOnScrollMode+'px'"></label>
-		<input type="range" min="0" max="100" x-model="$store.scroll.marginBottomOnScrollMode" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 range-lg"/>
+		<label for="ReaderScrollMarginBottom" class="block w-full mb-0 font-medium" x-text="i18next.t('margin_bottom_on_scroll_mode') + $store.scroll.marginBottomOnScrollMode+'px'"></label>
+		<input id="ReaderScrollMarginBottom" type="range" min="0" max="100" x-model="$store.scroll.marginBottomOnScrollMode" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 range-lg"/>
 	</div>
 	<div x-show="$store.global.readMode === 'scroll' && $store.global.isPortrait" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
-		<label class="block w-full mb-0 font-medium" x-text="i18next.t('portrait_width_percent') + $store.scroll.portraitWidthPercent+'%'"></label>
-		<input type="range" min="10" max="100" x-model="$store.scroll.portraitWidthPercent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
+		<label for="ReaderScrollPortraitWidthPercent" class="block w-full mb-0 font-medium" x-text="i18next.t('portrait_width_percent') + $store.scroll.portraitWidthPercent+'%'"></label>
+		<input id="ReaderScrollPortraitWidthPercent" type="range" min="10" max="100" x-model="$store.scroll.portraitWidthPercent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
 	<label x-show="$store.global.readMode === 'scroll' && $store.global.isLandscape" class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<input type="checkbox" x-model="$store.scroll.widthUseFixedValue" class="sr-only peer" checked/>
@@ -505,19 +505,19 @@ templ DrawerSlot(c echo.Context) {
 		<span class="font-medium ms-3" x-text="$store.scroll.widthUseFixedValue?i18next.t('width_use_fixed_value'):i18next.t('width_use_percent')"></span>
 	</label>
 	<div x-show="$store.global.readMode === 'scroll' && $store.global.isLandscape && !$store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
-		<label class="block w-full mb-0 font-medium" x-text="i18next.t('single_page_width') + $store.scroll.singlePageWidth_Percent+'%'"></label>
-		<input type="range" min="10" max="100" x-model="$store.scroll.singlePageWidth_Percent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
+		<label for="ReaderScrollSinglePageWidthPercent" class="block w-full mb-0 font-medium" x-text="i18next.t('single_page_width') + $store.scroll.singlePageWidth_Percent+'%'"></label>
+		<input id="ReaderScrollSinglePageWidthPercent" type="range" min="10" max="100" x-model="$store.scroll.singlePageWidth_Percent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
 	<div x-show="$store.global.readMode === 'scroll' && $store.global.isLandscape && !$store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
-		<label class="block w-full mb-0 font-medium" x-text="i18next.t('double_page_width') + $store.scroll.doublePageWidth_Percent+'%'"></label>
-		<input type="range" min="10" max="100" x-model="$store.scroll.doublePageWidth_Percent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
+		<label for="ReaderScrollDoublePageWidthPercent" class="block w-full mb-0 font-medium" x-text="i18next.t('double_page_width') + $store.scroll.doublePageWidth_Percent+'%'"></label>
+		<input id="ReaderScrollDoublePageWidthPercent" type="range" min="10" max="100" x-model="$store.scroll.doublePageWidth_Percent" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
 	<div x-show="$store.global.readMode === 'scroll' && $store.global.isLandscape && $store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
-		<label class="block w-full mb-0 font-medium" x-text="i18next.t('single_page_width') + $store.scroll.singlePageWidth_PX+' px'"></label>
-		<input type="range" min="100" max="1600" x-model="$store.scroll.singlePageWidth_PX" step="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
+		<label for="ReaderScrollSinglePageWidthPx" class="block w-full mb-0 font-medium" x-text="i18next.t('single_page_width') + $store.scroll.singlePageWidth_PX+' px'"></label>
+		<input id="ReaderScrollSinglePageWidthPx" type="range" min="100" max="1600" x-model="$store.scroll.singlePageWidth_PX" step="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
 	<div x-show="$store.global.readMode === 'scroll' && $store.global.isLandscape && $store.scroll.widthUseFixedValue" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
-		<label class="block w-full mb-0 font-medium" x-text="i18next.t('double_page_width') + $store.scroll.doublePageWidth_PX+' px'"></label>
-		<input type="range" min="100" max="1600" x-model="$store.scroll.doublePageWidth_PX" step="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
+		<label for="ReaderScrollDoublePageWidthPx" class="block w-full mb-0 font-medium" x-text="i18next.t('double_page_width') + $store.scroll.doublePageWidth_PX+' px'"></label>
+		<input id="ReaderScrollDoublePageWidthPx" type="range" min="100" max="1600" x-model="$store.scroll.doublePageWidth_PX" step="20" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"/>
 	</div>
 }
