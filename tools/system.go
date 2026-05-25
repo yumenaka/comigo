@@ -171,9 +171,9 @@ func OpenBrowserByURL(uri string) {
 	)
 	if err != nil {
 		logger.Infof(locale.GetString("log_api_health_check_failed"), err)
-		return
+	} else {
+		logger.Info(locale.GetString("log_api_healthy_ready"))
 	}
-	logger.Info(locale.GetString("log_api_healthy_ready"))
 
 	// 打开浏览器（Windows 使用 ShellExecute，避免闪黑框）
 	logger.Infof(locale.GetString("log_opening_browser"), uri)

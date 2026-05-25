@@ -299,12 +299,17 @@ func GetQrcodeURL() string {
 	return protocol + OutIP + ":" + strconv.Itoa(int(cfg.Port)) + PrefixPath("/")
 }
 
+// GetLocalBrowserURL 返回本机浏览器入口，避免托盘打开时受局域网 IP、Host 或 0.0.0.0 影响。
+func GetLocalBrowserURL() string {
+	protocol := "http://"
+	if cfg.EnableTLS {
+		protocol = "https://"
+	}
+	return protocol + "127.0.0.1:" + strconv.Itoa(cfg.Port) + PrefixPath("/")
+}
+
 func OpenBrowserIfNeeded() {
 	if cfg.OpenBrowser == true {
-		protocol := "http://"
-		if cfg.EnableTLS {
-			protocol = "https://"
-		}
-		go tools.OpenBrowserByURL(protocol + "127.0.0.1:" + strconv.Itoa(cfg.Port) + PrefixPath("/"))
+		go tools.OpenBrowserByURL(GetLocalBrowserURL())
 	}
 }

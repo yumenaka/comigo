@@ -76,6 +76,7 @@ func main() {
 		startServer,
 		shutdownServer,
 		getServerURL,
+		getBrowserURL,
 		config.GetConfigDir,
 		getStoreUrls,
 		toggleTailscale,
@@ -115,6 +116,11 @@ func startServer() {
 // getServerURL 获取服务器URL
 func getServerURL() string {
 	return config.GetQrcodeURL()
+}
+
+// getBrowserURL 获取托盘打开浏览器使用的本机 URL，避免局域网地址或自定义 Host 在本机不可访问。
+func getBrowserURL() string {
+	return config.GetLocalBrowserURL()
 }
 
 // getStoreUrls 获取书库URL列表

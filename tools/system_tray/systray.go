@@ -27,6 +27,7 @@ var (
 	startServerFunc           func()
 	shutdownServerFunc        func()
 	getURLFunc                func() string
+	getBrowserURLFunc         func() string
 	getConfigDirFunc          func() (string, error)
 	getStoreUrlsFunc          func() []string
 	toggleTailscaleFunc       func() error
@@ -62,6 +63,7 @@ const noRequestedExitCode int32 = -1
 // startServer: 启动服务器的函数
 // shutdownServer: 清理服务器的函数
 // getURL: 获取服务器URL的函数
+// getBrowserURL: 获取本机浏览器URL的函数
 // getConfigDir: 获取配置目录的函数
 // getStoreUrls: 获取书库URL列表的函数
 // toggleTailscale: 切换Tailscale状态的函数
@@ -72,6 +74,7 @@ const noRequestedExitCode int32 = -1
 func SetupSystray(
 	startServer, shutdownServer func(),
 	getURL func() string,
+	getBrowserURL func() string,
 	getConfigDir func() (string, error),
 	getStoreUrls func() []string,
 	toggleTailscale func() error,
@@ -82,6 +85,7 @@ func SetupSystray(
 	startServerFunc = startServer
 	shutdownServerFunc = shutdownServer
 	getURLFunc = getURL
+	getBrowserURLFunc = getBrowserURL
 	getConfigDirFunc = getConfigDir
 	getStoreUrlsFunc = getStoreUrls
 	toggleTailscaleFunc = toggleTailscale
@@ -142,8 +146,8 @@ func initMenuItems() {
 	// 创建菜单项
 	menuItems.mOpenBrowser = systray.AddMenuItem(locale.GetString("systray_open_browser"), locale.GetString("systray_open_browser_tooltip"))
 	menuItems.mOpenBrowser.Click(func() {
-		if getURLFunc != nil {
-			url := getURLFunc()
+		if getBrowserURLFunc != nil {
+			url := getBrowserURLFunc()
 			go tools.OpenBrowserByURL(url)
 			logger.Infof(locale.GetString("log_opening_browser"), url)
 		}
