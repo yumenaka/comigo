@@ -3,6 +3,7 @@ package routers
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -31,6 +32,17 @@ func TestRealtimeAPIRequiresAuthWhenPasswordConfigured(t *testing.T) {
 				t.Fatalf("%s status = %d, want %d", path, rec.Code, http.StatusUnauthorized)
 			}
 		})
+	}
+}
+
+func TestRenderReaderServiceWorkerUsesComigoVersion(t *testing.T) {
+	got := string(renderReaderServiceWorker([]byte("const CACHE_NAME = __COMIGO_READER_PWA_CACHE_NAME__")))
+
+	if !strings.Contains(got, `const CACHE_NAME = "comigo-reader-pwa-`+config.GetVersion()+`"`) {
+		t.Fatalf("service worker cache name 未使用 Comigo 版本: %s", got)
+	}
+	if strings.Contains(got, "__COMIGO_READER_PWA_CACHE_NAME__") {
+		t.Fatalf("service worker cache name 占位符未替换: %s", got)
 	}
 }
 

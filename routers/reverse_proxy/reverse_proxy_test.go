@@ -1,9 +1,14 @@
 package reverse_proxy
 
 import (
+	"bytes"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 )
 
@@ -36,5 +41,35 @@ func TestShouldNotReplaceLatestWithVersionForOtherRepositories(t *testing.T) {
 		if shouldReplaceLatestWithVersion(target) {
 			t.Fatalf("非 github.com/yumenaka/comigo release 下载地址不应替换 latest: %s", target)
 		}
+	}
+}
+
+func TestWriteUpstreamResponseKeepsDownloadHeaders(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/download", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+
+	resp := &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     make(http.Header),
+		Body:       io.NopCloser(bytes.NewBufferString("dmg bytes")),
+	}
+	resp.Header.Set("Content-Disposition", "attachment; filename=Comigo_v1.2.34.dmg")
+	resp.Header.Set("Content-Type", "application/octet-stream")
+	resp.Header.Set("Connection", "close")
+
+	if err := writeUpstreamResponse(ctx, resp); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := rec.Header().Get("Content-Disposition"); got != "attachment; filename=Comigo_v1.2.34.dmg" {
+		t.Fatalf("Content-Disposition = %q", got)
+	}
+	if got := rec.Header().Get("Content-Type"); got != "application/octet-stream" {
+		t.Fatalf("Content-Type = %q", got)
+	}
+	if got := rec.Header().Get("Connection"); got != "" {
+		t.Fatalf("hop-by-hop header should be filtered, got %q", got)
 	}
 }

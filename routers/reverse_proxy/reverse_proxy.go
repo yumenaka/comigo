@@ -179,12 +179,13 @@ func fetchAndStream(c echo.Context, target string) error {
 		return c.Redirect(resp.StatusCode, redir)
 	}
 
-	// 非跳转：开始回传
-	// 状态码
-	c.Response().WriteHeader(resp.StatusCode)
+	return writeUpstreamResponse(c, resp)
+}
 
-	// 复制响应头（过滤掉一些 hop-by-hop）
+// writeUpstreamResponse 写回上游响应。必须先复制响应头，再写状态码，否则下载头不会发给浏览器。
+func writeUpstreamResponse(c echo.Context, resp *http.Response) error {
 	copyResponseHeader(c.Response().Header(), resp.Header)
+	c.Response().WriteHeader(resp.StatusCode)
 
 	// 直接流式拷贝（支持大文件）
 	_, copyErr := io.Copy(c.Response().Writer, resp.Body)

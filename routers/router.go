@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -195,9 +196,22 @@ func EmbedStaticFiles() {
 		return c.Blob(http.StatusOK, "application/manifest+json", renderPwaManifest(data))
 	})
 	// PWA Service Worker 必须挂在根路径，才能覆盖 /reader 页面。
-	engine.FileFS(config.PrefixPath("/reader-sw.js"), "pwa/reader-sw.js", assets.Pwa)
+	engine.GET(config.PrefixPath("/reader-sw.js"), func(c echo.Context) error {
+		data, err := fs.ReadFile(assets.Pwa, "pwa/reader-sw.js")
+		if err != nil {
+			return err
+		}
+		c.Response().Header().Set("Cache-Control", "no-cache")
+		return c.Blob(http.StatusOK, "text/javascript; charset=utf-8", renderReaderServiceWorker(data))
+	})
 	// 暴露 robots.txt，供搜索引擎按标准路径读取
 	engine.FileFS(config.PrefixPath("/robots.txt"), "robots.txt", assets.Robots)
+}
+
+func renderReaderServiceWorker(data []byte) []byte {
+	// reader PWA 缓存名跟随 Comigo 版本，避免模板或前端资源更新后继续命中旧 app shell。
+	cacheName := strconv.Quote("comigo-reader-pwa-" + config.GetVersion())
+	return []byte(strings.ReplaceAll(string(data), "__COMIGO_READER_PWA_CACHE_NAME__", cacheName))
 }
 
 func renderPwaManifest(data []byte) []byte {
