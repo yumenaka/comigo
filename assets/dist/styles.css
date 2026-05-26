@@ -3789,7 +3789,7 @@
   }
 }
 
-body[data-theme="cupcake"], body[data-theme="cupcake"] .grid-line, body[data-theme="cupcake"] .grid-point, body[data-theme="cupcake"] .grid-mosaic, body[data-theme="cupcake"] #ShelfMainArea, body[data-theme="cupcake"] #settingsMainArea, body[data-theme="cupcake"] #tab-contents {
+body[data-theme="cupcake"], body[data-theme="cupcake"] .grid-line, body[data-theme="cupcake"] .grid-point, body[data-theme="cupcake"] .grid-mosaic, body[data-theme="cupcake"] #ShelfMainArea, body[data-theme="cupcake"] #settingsMainArea, body[data-theme="cupcake"] #tab-contents, body[data-theme="cupcake"] #ReaderRoot, body[data-theme="cupcake"] #ReaderShell, body[data-theme="cupcake"] #ScrollMainArea, body[data-theme="cupcake"] #ReaderFlipArea, body[data-theme="cupcake"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image: radial-gradient(30px 18px at 15px 0, #fff7fd 96%, #0000 100%), repeating-linear-gradient(90deg, #ff98cd 0 24px, #ffd2eb 24px 48px), radial-gradient(150px 42px at 12vw 86px, #ffffffe6 0 62%, #0000 64%), radial-gradient(96px 30px at 19vw 70px, #fff6fce0 0 64%, #0000 66%), radial-gradient(170px 46px at 78vw 118px, #ffffffe0 0 62%, #0000 64%), radial-gradient(112px 32px at 88vw 96px, #fff6fcdb 0 64%, #0000 66%), repeating-linear-gradient(120deg, #0000 0 28px, #ffffff38 28px 31px, #0000 31px 60px), radial-gradient(58vw 156px at 18vw 100%, #aeeea6d1 0 58%, #0000 59%), radial-gradient(52vw 136px at 86vw 100%, #ffc6e6d1 0 58%, #0000 59%);
   background-position: left bottom 72px, 0 100%, 0 0, 0 0, 0 0, 0 0, 0 0, left bottom 58px, right bottom 58px;
@@ -3892,7 +3892,7 @@ body[data-theme="cupcake"] .text-yellow-400 {
   initial-value: 0;
 }
 
-body[data-theme="cyberpunk"], body[data-theme="cyberpunk"] .grid-line, body[data-theme="cyberpunk"] .grid-point, body[data-theme="cyberpunk"] .grid-mosaic, body[data-theme="cyberpunk"] #ShelfMainArea, body[data-theme="cyberpunk"] #settingsMainArea, body[data-theme="cyberpunk"] #tab-contents, body[data-theme="cyberpunk"] #ScrollMainArea, body[data-theme="cyberpunk"] #FlipMainArea, body[data-theme="cyberpunk"] #ReaderShell, body[data-theme="cyberpunk"] #ReaderFlipArea, body[data-theme="cyberpunk"] #ReaderPDFArea {
+body[data-theme="cyberpunk"], body[data-theme="cyberpunk"] .grid-line, body[data-theme="cyberpunk"] .grid-point, body[data-theme="cyberpunk"] .grid-mosaic, body[data-theme="cyberpunk"] #ShelfMainArea, body[data-theme="cyberpunk"] #settingsMainArea, body[data-theme="cyberpunk"] #tab-contents, body[data-theme="cyberpunk"] #ReaderRoot, body[data-theme="cyberpunk"] #ScrollMainArea, body[data-theme="cyberpunk"] #FlipMainArea, body[data-theme="cyberpunk"] #ReaderShell, body[data-theme="cyberpunk"] #ReaderFlipArea, body[data-theme="cyberpunk"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image: linear-gradient(rgba(252, 238, 9, var(--cyber-flash)) 0 0), repeating-linear-gradient(90deg, transparent 0 24px, #100e16f0 24px 68px, transparent 68px 126px, #0c0b11f5 126px 146px, transparent 146px 226px, #120f18f0 226px 292px, transparent 292px 356px, #0a0a0ff5 356px 418px, transparent 418px 520px), repeating-linear-gradient(90deg, transparent 0 18px, #1e1d2d9e 18px 58px, transparent 58px 83px, #14162285 83px 129px, transparent 129px 166px, #261f3080 166px 232px, transparent 232px 276px, #1718268a 276px 316px, transparent 316px 380px), linear-gradient(transparent 0 0), repeating-linear-gradient(0deg, transparent 0 31px, #fcee091a 31px 32px, transparent 32px 57px, #00f0ff17 57px 58px), repeating-linear-gradient(90deg, #07070cfa 0 46px, transparent 46px 68px, #100e18f5 68px 112px, transparent 112px 147px, #181420f0 147px 220px, transparent 220px 249px, #090a12fa 249px 304px, transparent 304px 352px, #13111cf5 352px 418px, transparent 418px 520px), linear-gradient(transparent 0 0), repeating-linear-gradient(0deg, transparent 0 29px, #00f0ff21 29px 30px, transparent 30px 47px, #fcee0914 47px 48px), linear-gradient(to top, #00f0ff3d, transparent 74px), conic-gradient(from var(--cyber-spot-a) at 14% 100%, transparent 0deg 5deg, #fcee093d 10deg 22deg, transparent 28deg 360deg), conic-gradient(from var(--cyber-spot-b) at 72% 100%, transparent 0deg 5deg, #00f0ff2e 10deg 24deg, transparent 30deg 360deg), conic-gradient(from var(--cyber-spot-c) at 56% 100%, transparent 0deg 5deg, #ff2a6d42 10deg 22deg, transparent 33deg 360deg), radial-gradient(ellipse 620px 280px at 82% 18%, #ff2a6d42, transparent 64%), radial-gradient(ellipse 520px 240px at 18% 48%, #00f0ff33, transparent 62%), linear-gradient(180deg, #17151b 0%, #08070b 74%);
   background-position: 0 0, 0 100%, 0 100%, 0 100%, 0 100%, 0 100%, 0 100%, 0 100%, 0 100%, 0 0, right -10vw top, -18vw 0, 0 0, 0 0, 0 0;
@@ -3909,8 +3909,9 @@ body[data-theme="cyberpunk"] footer.footer.panel-surface {
 }
 
 body[data-theme="cyberpunk"] footer.footer.panel-surface a {
-  text-shadow: 0 1px #fcee097a;
-  color: var(--primary-content) !important;
+  mix-blend-mode: difference;
+  text-shadow: none;
+  color: #fff !important;
 }
 
 body[data-theme="cyberpunk"] :is(#ScrollMainArea, #FlipMainArea, #ReaderRoot, #ReaderShell, #ReaderFlipArea, #ReaderPDFArea), body[data-theme="cyberpunk"]:has(#ScrollMainArea), body[data-theme="cyberpunk"]:has(#FlipMainArea), body[data-theme="cyberpunk"]:has(#ReaderRoot) {
@@ -3950,9 +3951,19 @@ body[data-theme="cyberpunk"] :is(.panel-control:focus-visible, select:hover, inp
   background-color: var(--panel-control-hover) !important;
 }
 
+body[data-theme="cyberpunk"] select.text-base-content, body[data-theme="cyberpunk"] select.bg-base-100.text-base-content, body[data-theme="cyberpunk"] #settingsMainArea select.bg-base-100.text-base-content, body[data-theme="cyberpunk"] #drawer-right select.bg-base-100.text-base-content, body[data-theme="cyberpunk"] .panel-surface select.text-base-content {
+  background-color: var(--panel-surface) !important;
+  color: var(--panel-control) !important;
+}
+
 body[data-theme="cyberpunk"] select option {
   background-color: var(--panel-control);
   color: var(--panel-control-content);
+}
+
+body[data-theme="cyberpunk"] select option:hover, body[data-theme="cyberpunk"] select option:checked, body[data-theme="cyberpunk"] select option:focus {
+  background-color: var(--panel-control-hover) !important;
+  color: var(--panel-control-content) !important;
 }
 
 body[data-theme="cyberpunk"] :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600), body[data-theme="cyberpunk"] .panel-control:is(.bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
@@ -4079,12 +4090,12 @@ body[data-theme="cyberpunk"] .text-yellow-400 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body[data-theme="cyberpunk"], body[data-theme="cyberpunk"] .grid-line, body[data-theme="cyberpunk"] .grid-point, body[data-theme="cyberpunk"] .grid-mosaic, body[data-theme="cyberpunk"] #ShelfMainArea, body[data-theme="cyberpunk"] #settingsMainArea, body[data-theme="cyberpunk"] #tab-contents {
+  body[data-theme="cyberpunk"], body[data-theme="cyberpunk"] .grid-line, body[data-theme="cyberpunk"] .grid-point, body[data-theme="cyberpunk"] .grid-mosaic, body[data-theme="cyberpunk"] #ShelfMainArea, body[data-theme="cyberpunk"] #settingsMainArea, body[data-theme="cyberpunk"] #tab-contents, body[data-theme="cyberpunk"] #ReaderRoot, body[data-theme="cyberpunk"] #ScrollMainArea, body[data-theme="cyberpunk"] #FlipMainArea, body[data-theme="cyberpunk"] #ReaderShell, body[data-theme="cyberpunk"] #ReaderFlipArea, body[data-theme="cyberpunk"] #ReaderPDFArea {
     animation: none;
   }
 }
 
-body[data-theme="red-white-game"], body[data-theme="red-white-game"] .grid-line, body[data-theme="red-white-game"] .grid-point, body[data-theme="red-white-game"] .grid-mosaic, body[data-theme="red-white-game"] #ShelfMainArea, body[data-theme="red-white-game"] #settingsMainArea, body[data-theme="red-white-game"] #tab-contents {
+body[data-theme="red-white-game"], body[data-theme="red-white-game"] .grid-line, body[data-theme="red-white-game"] .grid-point, body[data-theme="red-white-game"] .grid-mosaic, body[data-theme="red-white-game"] #ShelfMainArea, body[data-theme="red-white-game"] #settingsMainArea, body[data-theme="red-white-game"] #tab-contents, body[data-theme="red-white-game"] #ReaderRoot, body[data-theme="red-white-game"] #ReaderShell, body[data-theme="red-white-game"] #ScrollMainArea, body[data-theme="red-white-game"] #ReaderFlipArea, body[data-theme="red-white-game"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image: linear-gradient(#fff7df 0 0), linear-gradient(#fff7df 0 0), linear-gradient(#fff7df 0 0), linear-gradient(#f6deaee6 0 0), linear-gradient(#fff7dfeb 0 0), linear-gradient(#fff7dfeb 0 0), linear-gradient(#fff7dfeb 0 0), linear-gradient(#efd4a6b8 0 0), repeating-linear-gradient(90deg, #5b321cb8 0 3px, transparent 3px 48px), repeating-linear-gradient(90deg, transparent 0 24px, #5b321ca8 24px 27px, transparent 27px 48px), repeating-linear-gradient(90deg, #5b321c99 0 3px, transparent 3px 48px), repeating-linear-gradient(to bottom, #5b321cc7 0 3px, transparent 3px 24px), repeating-linear-gradient(135deg, transparent 0 21px, #ffd24a38 21px 24px, transparent 24px 48px), linear-gradient(#c9782c 0 0), conic-gradient(from 120deg at 50% 0%, #279745e6 0 120deg, transparent 0), conic-gradient(from 120deg at 50% 0%, #48b54adb 0 120deg, transparent 0);
   background-position: 10vw 78px, 13vw 58px, 17vw 76px, 11vw 108px, right 16vw top 54px, right 11vw top 40px, right 8vw top 58px, right 11vw top 86px, left 0 bottom 48px, left 24px bottom 24px, left 0 bottom 0, 0 100%, 0 100%, 0 100%, left 6vw bottom 72px, right 10vw bottom 72px;
@@ -4174,7 +4185,7 @@ body[data-theme="red-white-game"] .text-yellow-400 {
   color: var(--accent) !important;
 }
 
-body[data-theme="dracula"], body[data-theme="dracula"] .grid-line, body[data-theme="dracula"] .grid-point, body[data-theme="dracula"] .grid-mosaic, body[data-theme="dracula"] #ShelfMainArea, body[data-theme="dracula"] #settingsMainArea, body[data-theme="dracula"] #tab-contents {
+body[data-theme="dracula"], body[data-theme="dracula"] .grid-line, body[data-theme="dracula"] .grid-point, body[data-theme="dracula"] .grid-mosaic, body[data-theme="dracula"] #ShelfMainArea, body[data-theme="dracula"] #settingsMainArea, body[data-theme="dracula"] #tab-contents, body[data-theme="dracula"] #ReaderRoot, body[data-theme="dracula"] #ReaderShell, body[data-theme="dracula"] #ScrollMainArea, body[data-theme="dracula"] #ReaderFlipArea, body[data-theme="dracula"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image: radial-gradient(circle at 79% 15%, #09070b 0 50px, #0000 52px), radial-gradient(circle at 77% 17%, #ffd0b8 0 58px, #0000 60px), radial-gradient(circle at 13% 16%, #f4f0e6e0 0 1px, #0000 2px), radial-gradient(circle at 28% 9%, #f4dfcabd 0 1px, #0000 2px), radial-gradient(circle at 45% 22%, #f4f0e6b3 0 1px, #0000 2px), radial-gradient(circle at 62% 12%, #f4dfcaa3 0 1px, #0000 2px), radial-gradient(circle at 88% 31%, #f4f0e680 0 1px, #0000 2px), radial-gradient(80% 22% at 24% 102%, #000000b8, #0000 70%), radial-gradient(92% 30% at 76% 106%, #1a0b10e0, #0000 72%), linear-gradient(#0000 66%, #2a1118c2 84%, #0a0609f5 100%), radial-gradient(at 76% 18%, #b5162f42, #0000 36%), linear-gradient(#09070b 0%, #10090d 48%, #21151b 100%);
   background-size: 100% 100%, 100% 100%, 180px 150px, 220px 170px, 260px 190px, 210px 180px, 240px 210px, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
@@ -4186,7 +4197,7 @@ body[data-theme="dracula"] .panel-surface {
   background-color: var(--panel-surface) !important;
 }
 
-body[data-theme="valentine"], body[data-theme="valentine"] .grid-line, body[data-theme="valentine"] .grid-point, body[data-theme="valentine"] .grid-mosaic, body[data-theme="valentine"] #ShelfMainArea, body[data-theme="valentine"] #settingsMainArea, body[data-theme="valentine"] #tab-contents {
+body[data-theme="valentine"], body[data-theme="valentine"] .grid-line, body[data-theme="valentine"] .grid-point, body[data-theme="valentine"] .grid-mosaic, body[data-theme="valentine"] #ShelfMainArea, body[data-theme="valentine"] #settingsMainArea, body[data-theme="valentine"] #tab-contents, body[data-theme="valentine"] #ReaderRoot, body[data-theme="valentine"] #ReaderShell, body[data-theme="valentine"] #ScrollMainArea, body[data-theme="valentine"] #ReaderFlipArea, body[data-theme="valentine"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image: radial-gradient(circle at 50% 0, #fff8fc 0 5px, #0000 6px), radial-gradient(circle at 50% 100%, #fff8fc 0 5px, #0000 6px), radial-gradient(at 18% 20%, #e85f9f57, #0000 36%), radial-gradient(at 84% 34%, #8fc5ff61, #0000 34%), linear-gradient(135deg, #0000 0 42%, #ffd16633 42% 44%, #0000 44%), linear-gradient(#fff0f7 0%, #ffd7ea 56%, #e7d5ff 100%);
   background-size: 46px 46px, 46px 46px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
@@ -4199,7 +4210,7 @@ body[data-theme="valentine"] .panel-surface {
   background-color: var(--panel-surface) !important;
 }
 
-body[data-theme="cmyk"], body[data-theme="cmyk"] .grid-line, body[data-theme="cmyk"] .grid-point, body[data-theme="cmyk"] .grid-mosaic, body[data-theme="cmyk"] #ShelfMainArea, body[data-theme="cmyk"] #settingsMainArea, body[data-theme="cmyk"] #tab-contents {
+body[data-theme="cmyk"], body[data-theme="cmyk"] .grid-line, body[data-theme="cmyk"] .grid-point, body[data-theme="cmyk"] .grid-mosaic, body[data-theme="cmyk"] #ShelfMainArea, body[data-theme="cmyk"] #settingsMainArea, body[data-theme="cmyk"] #tab-contents, body[data-theme="cmyk"] #ReaderRoot, body[data-theme="cmyk"] #ReaderShell, body[data-theme="cmyk"] #ScrollMainArea, body[data-theme="cmyk"] #ReaderFlipArea, body[data-theme="cmyk"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image: radial-gradient(circle at 1px 1px, #17171c38 1px, #0000 0), linear-gradient(102deg, #e4005a 0 18%, #0000 18%), linear-gradient(76deg, #0000 0 42%, #00a7d8 42% 56%, #0000 56%), linear-gradient(160deg, #0000 0 62%, #f4d400 62% 82%, #0000 82%), linear-gradient(#fff6e5 0%, #ffe0a8 55%, #fff6e5 100%);
   background-size: 18px 18px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
@@ -4211,12 +4222,12 @@ body[data-theme="cmyk"] .panel-surface {
   background-color: var(--panel-surface) !important;
 }
 
-body[data-theme="halloween"], body[data-theme="halloween"] .grid-line, body[data-theme="halloween"] .grid-point, body[data-theme="halloween"] .grid-mosaic, body[data-theme="halloween"] #ShelfMainArea, body[data-theme="halloween"] #settingsMainArea, body[data-theme="halloween"] #tab-contents {
+body[data-theme="halloween"], body[data-theme="halloween"] .grid-line, body[data-theme="halloween"] .grid-point, body[data-theme="halloween"] .grid-mosaic, body[data-theme="halloween"] #ShelfMainArea, body[data-theme="halloween"] #settingsMainArea, body[data-theme="halloween"] #tab-contents, body[data-theme="halloween"] #ReaderRoot, body[data-theme="halloween"] #ReaderShell, body[data-theme="halloween"] #ScrollMainArea, body[data-theme="halloween"] #ReaderFlipArea, body[data-theme="halloween"] #ReaderPDFArea {
   background-color: var(--base-300);
-  background-image: radial-gradient(circle at 60px 98px, #09080b 0 1.5px, #0000 2.5px), radial-gradient(circle at 60px 98px, #fff8d5 0 4px, #0000 5px), radial-gradient(circle at 60px 98px, #2d1820 0 7px, #0000 8px), radial-gradient(circle at 60px 98px, #d0a23a 0 10px, #0000 11px), radial-gradient(circle at 145px 68px, #09080b 0 76px, #0000 78px), radial-gradient(circle at 112px 108px, #f6d780 0 72px, #d0a23a 73px 80px, #0000 82px), radial-gradient(circle at 12% 12%, #ffe7b8bf 0 1px, #0000 2px), radial-gradient(circle at 32% 18%, #ffe7b894 0 1px, #0000 2px), radial-gradient(circle at 78% 24%, #b7e35d6b 0 1px, #0000 2px), radial-gradient(80% 24% at 40% 104%, #0000009e, #0000 72%), radial-gradient(96% 30% at 88% 106%, #1a1110cc, #0000 74%), linear-gradient(#09080b 0%, #1a1110 62%, #26151b 100%);
-  background-position: 42px 48px, 42px 48px, 42px 48px, 42px 48px, 42px 48px, 42px 48px, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat, repeat, no-repeat, no-repeat, no-repeat;
-  background-size: 260px 220px, 260px 220px, 260px 220px, 260px 220px, 260px 220px, 260px 220px, 170px 140px, 220px 170px, 260px 210px, 100% 100%, 100% 100%, 100% 100%;
+  background-image: conic-gradient(from 72deg at 0% 50%, #09080b 0 36deg, transparent 37deg 360deg), conic-gradient(from 235deg at 100% 50%, #f6d780 0 70deg, transparent 71deg 360deg), radial-gradient(circle at 56px 98px, #09080b 0 1.5px, transparent 2.5px), radial-gradient(circle at 56px 98px, #fff8d5 0 4px, transparent 5px), radial-gradient(circle at 56px 98px, #2d1820 0 7px, transparent 8px), radial-gradient(circle at 56px 98px, #d0a23a 0 10px, transparent 11px), radial-gradient(circle at 145px 68px, #09080b 0 76px, transparent 78px), radial-gradient(circle at 112px 108px, #f6d780 0 72px, #d0a23a 73px 80px, transparent 82px), radial-gradient(circle at 12% 12%, #ffe7b8bf 0 1px, transparent 2px), radial-gradient(circle at 32% 18%, #ffe7b894 0 1px, transparent 2px), radial-gradient(circle at 78% 24%, #b7e35d6b 0 1px, transparent 2px), radial-gradient(ellipse 80% 24% at 40% 104%, #0000009e, transparent 72%), radial-gradient(ellipse 96% 30% at 88% 106%, #1a1110cc, transparent 74%), linear-gradient(180deg, #09080b 0%, #1a1110 62%, #26151b 100%);
+  background-position: 108px 168px, 112px 139px, 42px 48px, 42px 48px, 42px 48px, 42px 48px, 42px 48px, 42px 48px, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat, repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 34px 16px, 24px 18px, 260px 220px, 260px 220px, 260px 220px, 260px 220px, 260px 220px, 260px 220px, 170px 140px, 220px 170px, 260px 210px, 100% 100%, 100% 100%, 100% 100%;
   background-attachment: fixed;
 }
 
@@ -4226,7 +4237,7 @@ body[data-theme="halloween"] .panel-surface {
   background-color: var(--panel-surface) !important;
 }
 
-body[data-theme="coffee"], body[data-theme="coffee"] .grid-line, body[data-theme="coffee"] .grid-point, body[data-theme="coffee"] .grid-mosaic, body[data-theme="coffee"] #ShelfMainArea, body[data-theme="coffee"] #settingsMainArea, body[data-theme="coffee"] #tab-contents {
+body[data-theme="coffee"], body[data-theme="coffee"] .grid-line, body[data-theme="coffee"] .grid-point, body[data-theme="coffee"] .grid-mosaic, body[data-theme="coffee"] #ShelfMainArea, body[data-theme="coffee"] #settingsMainArea, body[data-theme="coffee"] #tab-contents, body[data-theme="coffee"] #ReaderRoot, body[data-theme="coffee"] #ReaderShell, body[data-theme="coffee"] #ScrollMainArea, body[data-theme="coffee"] #ReaderFlipArea, body[data-theme="coffee"] #ReaderPDFArea {
   background-color: var(--base-100);
   background-image: radial-gradient(circle at 14% 22%, #5f8f8a75 0 42px, #0000 44px), repeating-linear-gradient(90deg, #7a4d2b29 0 2px, #0000 2px 18px), repeating-linear-gradient(90deg, #7a4d2b 0 34px, #fff6df 34px 68px), linear-gradient(#0000 0 calc(100% - 96px), #7a4d2b2e calc(100% - 96px)), radial-gradient(at 86% 18%, #d58b4552, #0000 34%), linear-gradient(#f2dfbf 0%, #efd6ad 62%, #dcc299 100%);
   background-position: 0 0, 0 0, 0 100%, 0 0, 0 0, 0 0;
@@ -4241,7 +4252,7 @@ body[data-theme="coffee"] .panel-surface {
   background-color: var(--panel-surface) !important;
 }
 
-body[data-theme="winter"], body[data-theme="winter"] .grid-line, body[data-theme="winter"] .grid-point, body[data-theme="winter"] .grid-mosaic, body[data-theme="winter"] #ShelfMainArea, body[data-theme="winter"] #settingsMainArea, body[data-theme="winter"] #tab-contents {
+body[data-theme="winter"], body[data-theme="winter"] .grid-line, body[data-theme="winter"] .grid-point, body[data-theme="winter"] .grid-mosaic, body[data-theme="winter"] #ShelfMainArea, body[data-theme="winter"] #settingsMainArea, body[data-theme="winter"] #tab-contents, body[data-theme="winter"] #ReaderRoot, body[data-theme="winter"] #ReaderShell, body[data-theme="winter"] #ScrollMainArea, body[data-theme="winter"] #ReaderFlipArea, body[data-theme="winter"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image: conic-gradient(from 120deg at 26% 52%, transparent 0 120deg, #4e7aa480 0 180deg, transparent 0), conic-gradient(from 120deg at 68% 56%, transparent 0 120deg, #6b95b56b 0 180deg, transparent 0), radial-gradient(circle at 76% 70%, #f0c66d8c 0 16px, transparent 18px), repeating-linear-gradient(0deg, #ffffff57 0 1px, transparent 1px 22px), linear-gradient(180deg, #eaf6fb 0%, #cfe6f2 58%, #a6c6dc 100%);
   background-position: left bottom 80px, right bottom 72px, 0 0, 0 0, 0 0;
@@ -4255,7 +4266,7 @@ body[data-theme="winter"] .panel-surface {
   background-color: var(--panel-surface) !important;
 }
 
-body[data-theme="nord"], body[data-theme="nord"] .grid-line, body[data-theme="nord"] .grid-point, body[data-theme="nord"] .grid-mosaic, body[data-theme="nord"] #ShelfMainArea, body[data-theme="nord"] #settingsMainArea, body[data-theme="nord"] #tab-contents {
+body[data-theme="nord"], body[data-theme="nord"] .grid-line, body[data-theme="nord"] .grid-point, body[data-theme="nord"] .grid-mosaic, body[data-theme="nord"] #ShelfMainArea, body[data-theme="nord"] #settingsMainArea, body[data-theme="nord"] #tab-contents, body[data-theme="nord"] #ReaderRoot, body[data-theme="nord"] #ReaderShell, body[data-theme="nord"] #ScrollMainArea, body[data-theme="nord"] #ReaderFlipArea, body[data-theme="nord"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image: radial-gradient(at 20% 24%, #d7c89b57, #0000 34%), radial-gradient(at 80% 30%, #8da6bd4d, #0000 36%), repeating-linear-gradient(104deg, #0000 0 48px, #33424c1a 48px 50px, #0000 50px 110px), linear-gradient(#eef6f1 0%, #dce8e3 58%, #aebfbd 100%);
   background-attachment: fixed;
@@ -4466,6 +4477,11 @@ body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white
 body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) select option {
   background-color: var(--panel-control);
   color: var(--panel-control-content);
+}
+
+body[data-theme="cyberpunk"] select, body[data-theme="cyberpunk"] select:hover, body[data-theme="cyberpunk"] select:focus-visible, body[data-theme="cyberpunk"] select option {
+  background-color: var(--panel-surface) !important;
+  color: var(--panel-control) !important;
 }
 
 body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {

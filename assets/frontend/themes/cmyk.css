@@ -42,7 +42,12 @@ body[data-theme="cmyk"] .grid-point,
 body[data-theme="cmyk"] .grid-mosaic,
 body[data-theme="cmyk"] #ShelfMainArea,
 body[data-theme="cmyk"] #settingsMainArea,
-body[data-theme="cmyk"] #tab-contents {
+body[data-theme="cmyk"] #tab-contents,
+body[data-theme="cmyk"] #ReaderRoot,
+body[data-theme="cmyk"] #ReaderShell,
+body[data-theme="cmyk"] #ScrollMainArea,
+body[data-theme="cmyk"] #ReaderFlipArea,
+body[data-theme="cmyk"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image:
     radial-gradient(circle at 1px 1px, rgba(23, 23, 28, 0.22) 1px, transparent 0),

@@ -38,7 +38,12 @@ body[data-theme="dracula"] .grid-point,
 body[data-theme="dracula"] .grid-mosaic,
 body[data-theme="dracula"] #ShelfMainArea,
 body[data-theme="dracula"] #settingsMainArea,
-body[data-theme="dracula"] #tab-contents {
+body[data-theme="dracula"] #tab-contents,
+body[data-theme="dracula"] #ReaderRoot,
+body[data-theme="dracula"] #ReaderShell,
+body[data-theme="dracula"] #ScrollMainArea,
+body[data-theme="dracula"] #ReaderFlipArea,
+body[data-theme="dracula"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image:
     radial-gradient(circle at 79% 15%, #09070b 0 50px, transparent 52px),

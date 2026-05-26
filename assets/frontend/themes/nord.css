@@ -42,7 +42,12 @@ body[data-theme="nord"] .grid-point,
 body[data-theme="nord"] .grid-mosaic,
 body[data-theme="nord"] #ShelfMainArea,
 body[data-theme="nord"] #settingsMainArea,
-body[data-theme="nord"] #tab-contents {
+body[data-theme="nord"] #tab-contents,
+body[data-theme="nord"] #ReaderRoot,
+body[data-theme="nord"] #ReaderShell,
+body[data-theme="nord"] #ScrollMainArea,
+body[data-theme="nord"] #ReaderFlipArea,
+body[data-theme="nord"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image:
     radial-gradient(ellipse at 20% 24%, rgba(215, 200, 155, 0.34), transparent 34%),

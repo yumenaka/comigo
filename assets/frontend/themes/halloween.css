@@ -38,13 +38,21 @@ body[data-theme="halloween"] .grid-point,
 body[data-theme="halloween"] .grid-mosaic,
 body[data-theme="halloween"] #ShelfMainArea,
 body[data-theme="halloween"] #settingsMainArea,
-body[data-theme="halloween"] #tab-contents {
+body[data-theme="halloween"] #tab-contents,
+body[data-theme="halloween"] #ReaderRoot,
+body[data-theme="halloween"] #ReaderShell,
+body[data-theme="halloween"] #ScrollMainArea,
+body[data-theme="halloween"] #ReaderFlipArea,
+body[data-theme="halloween"] #ReaderPDFArea {
   background-color: var(--base-300);
+  /* 月亮表情图层排在月亮本体前面：黑色尖笑、同色黄色鼻子、左移后的眼睛。 */
   background-image:
-    radial-gradient(circle at 60px 98px, #09080b 0 1.5px, transparent 2.5px),
-    radial-gradient(circle at 60px 98px, #fff8d5 0 4px, transparent 5px),
-    radial-gradient(circle at 60px 98px, #2d1820 0 7px, transparent 8px),
-    radial-gradient(circle at 60px 98px, #d0a23a 0 10px, transparent 11px),
+    conic-gradient(from 72deg at 0% 50%, #09080b 0 36deg, transparent 37deg 360deg),
+    conic-gradient(from 235deg at 100% 50%, #f6d780 0 70deg, transparent 71deg 360deg),
+    radial-gradient(circle at 56px 98px, #09080b 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 56px 98px, #fff8d5 0 4px, transparent 5px),
+    radial-gradient(circle at 56px 98px, #2d1820 0 7px, transparent 8px),
+    radial-gradient(circle at 56px 98px, #d0a23a 0 10px, transparent 11px),
     radial-gradient(circle at 145px 68px, #09080b 0 76px, transparent 78px),
     radial-gradient(circle at 112px 108px, #f6d780 0 72px, #d0a23a 73px 80px, transparent 82px),
     radial-gradient(circle at 12% 12%, rgba(255, 231, 184, 0.75) 0 1px, transparent 2px),
@@ -54,6 +62,8 @@ body[data-theme="halloween"] #tab-contents {
     radial-gradient(ellipse 96% 30% at 88% 106%, rgba(26, 17, 16, 0.8), transparent 74%),
     linear-gradient(180deg, #09080b 0%, #1a1110 62%, #26151b 100%);
   background-size:
+    34px 16px,
+    24px 18px,
     260px 220px,
     260px 220px,
     260px 220px,
@@ -67,6 +77,8 @@ body[data-theme="halloween"] #tab-contents {
     100% 100%,
     100% 100%;
   background-position:
+    108px 168px,
+    112px 139px,
     42px 48px,
     42px 48px,
     42px 48px,
@@ -80,6 +92,8 @@ body[data-theme="halloween"] #tab-contents {
     0 0,
     0 0;
   background-repeat:
+    no-repeat,
+    no-repeat,
     no-repeat,
     no-repeat,
     no-repeat,

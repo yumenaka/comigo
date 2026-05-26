@@ -40,7 +40,12 @@ body[data-theme="valentine"] .grid-point,
 body[data-theme="valentine"] .grid-mosaic,
 body[data-theme="valentine"] #ShelfMainArea,
 body[data-theme="valentine"] #settingsMainArea,
-body[data-theme="valentine"] #tab-contents {
+body[data-theme="valentine"] #tab-contents,
+body[data-theme="valentine"] #ReaderRoot,
+body[data-theme="valentine"] #ReaderShell,
+body[data-theme="valentine"] #ScrollMainArea,
+body[data-theme="valentine"] #ReaderFlipArea,
+body[data-theme="valentine"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image:
     radial-gradient(circle at 50% 0, #fff8fc 0 5px, transparent 6px),

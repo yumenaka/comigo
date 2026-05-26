@@ -41,7 +41,12 @@ body[data-theme="cupcake"] .grid-point,
 body[data-theme="cupcake"] .grid-mosaic,
 body[data-theme="cupcake"] #ShelfMainArea,
 body[data-theme="cupcake"] #settingsMainArea,
-body[data-theme="cupcake"] #tab-contents {
+body[data-theme="cupcake"] #tab-contents,
+body[data-theme="cupcake"] #ReaderRoot,
+body[data-theme="cupcake"] #ReaderShell,
+body[data-theme="cupcake"] #ScrollMainArea,
+body[data-theme="cupcake"] #ReaderFlipArea,
+body[data-theme="cupcake"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image:
     radial-gradient(30px 18px at 15px 0, #fff7fd 96%, transparent 100%),

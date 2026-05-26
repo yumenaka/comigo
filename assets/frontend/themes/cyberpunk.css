@@ -76,6 +76,7 @@ body[data-theme="cyberpunk"] .grid-mosaic,
 body[data-theme="cyberpunk"] #ShelfMainArea,
 body[data-theme="cyberpunk"] #settingsMainArea,
 body[data-theme="cyberpunk"] #tab-contents,
+body[data-theme="cyberpunk"] #ReaderRoot,
 body[data-theme="cyberpunk"] #ScrollMainArea,
 body[data-theme="cyberpunk"] #FlipMainArea,
 body[data-theme="cyberpunk"] #ReaderShell,
@@ -161,8 +162,10 @@ body[data-theme="cyberpunk"] footer.footer.panel-surface {
 }
 
 body[data-theme="cyberpunk"] footer.footer.panel-surface a {
-  color: var(--primary-content) !important;
-  text-shadow: 0 1px 0 rgba(252, 238, 9, 0.48);
+  /* 页脚文字跨过警戒条纹时用差值混合反色，避免落在黑条上丢失。 */
+  color: #ffffff !important;
+  mix-blend-mode: difference;
+  text-shadow: none;
 }
 
 /* 阅读页保持静态初始光效，避免背景动画干扰看图。 */
@@ -215,9 +218,27 @@ body[data-theme="cyberpunk"] :is(.panel-control:focus-visible, select:hover, inp
   background-color: var(--panel-control-hover) !important;
 }
 
+/* select 自身常带 text-base-content，需要比面板文字色更具体，避免亮黄底上出现浅色文字。 */
+body[data-theme="cyberpunk"] select.text-base-content,
+body[data-theme="cyberpunk"] select.bg-base-100.text-base-content,
+body[data-theme="cyberpunk"] #settingsMainArea select.bg-base-100.text-base-content,
+body[data-theme="cyberpunk"] #drawer-right select.bg-base-100.text-base-content,
+body[data-theme="cyberpunk"] .panel-surface select.text-base-content {
+  background-color: var(--panel-surface) !important;
+  color: var(--panel-control) !important;
+}
+
 body[data-theme="cyberpunk"] select option {
   background-color: var(--panel-control);
   color: var(--panel-control-content);
+}
+
+/* 原生 option 悬停态可能继承亮黄色文字，这里只修正赛博朋克下拉菜单的高亮项。 */
+body[data-theme="cyberpunk"] select option:hover,
+body[data-theme="cyberpunk"] select option:checked,
+body[data-theme="cyberpunk"] select option:focus {
+  background-color: var(--panel-control-hover) !important;
+  color: var(--panel-control-content) !important;
 }
 
 body[data-theme="cyberpunk"] :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600),
@@ -339,7 +360,13 @@ body[data-theme="cyberpunk"] .text-yellow-400 {
   body[data-theme="cyberpunk"] .grid-mosaic,
   body[data-theme="cyberpunk"] #ShelfMainArea,
   body[data-theme="cyberpunk"] #settingsMainArea,
-  body[data-theme="cyberpunk"] #tab-contents {
+  body[data-theme="cyberpunk"] #tab-contents,
+  body[data-theme="cyberpunk"] #ReaderRoot,
+  body[data-theme="cyberpunk"] #ScrollMainArea,
+  body[data-theme="cyberpunk"] #FlipMainArea,
+  body[data-theme="cyberpunk"] #ReaderShell,
+  body[data-theme="cyberpunk"] #ReaderFlipArea,
+  body[data-theme="cyberpunk"] #ReaderPDFArea {
     animation: none;
   }
 }

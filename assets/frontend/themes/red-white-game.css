@@ -46,7 +46,12 @@ body[data-theme="red-white-game"] .grid-point,
 body[data-theme="red-white-game"] .grid-mosaic,
 body[data-theme="red-white-game"] #ShelfMainArea,
 body[data-theme="red-white-game"] #settingsMainArea,
-body[data-theme="red-white-game"] #tab-contents {
+body[data-theme="red-white-game"] #tab-contents,
+body[data-theme="red-white-game"] #ReaderRoot,
+body[data-theme="red-white-game"] #ReaderShell,
+body[data-theme="red-white-game"] #ScrollMainArea,
+body[data-theme="red-white-game"] #ReaderFlipArea,
+body[data-theme="red-white-game"] #ReaderPDFArea {
   background-color: var(--base-300);
   /* 红白游戏背景只用 CSS 色块绘制，保持云、山、地面分层可控。 */
   background-image:

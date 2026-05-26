@@ -38,7 +38,12 @@ body[data-theme="winter"] .grid-point,
 body[data-theme="winter"] .grid-mosaic,
 body[data-theme="winter"] #ShelfMainArea,
 body[data-theme="winter"] #settingsMainArea,
-body[data-theme="winter"] #tab-contents {
+body[data-theme="winter"] #tab-contents,
+body[data-theme="winter"] #ReaderRoot,
+body[data-theme="winter"] #ReaderShell,
+body[data-theme="winter"] #ScrollMainArea,
+body[data-theme="winter"] #ReaderFlipArea,
+body[data-theme="winter"] #ReaderPDFArea {
   background-color: var(--base-300);
   background-image:
     conic-gradient(from 120deg at 26% 52%, transparent 0 120deg, rgba(78, 122, 164, 0.5) 0 180deg, transparent 0),

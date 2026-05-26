@@ -38,8 +38,10 @@ templ ThemeCustomConfig() {
 				<label class="w-full py-0 text-left" x-text="i18next.t('settings_custom_theme_selector')">主题</label>
 				<select
 					x-model="$store.global.theme"
+					@change="$store.global.setTheme($event.target.value)"
 					class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm bg-base-100 text-base-content"
 				>
+					<option value="random" x-text="i18next.t('theme_option_random')">Random theme</option>
 					<option value="retro" x-text="i18next.t('theme_option_retro')">Retro</option>
 					<option value="cupcake" x-text="i18next.t('theme_option_cupcake')">Cupcake</option>
 					<option value="cyberpunk" x-text="i18next.t('theme_option_cyberpunk')">Cyberpunk</option>

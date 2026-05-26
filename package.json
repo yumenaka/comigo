@@ -18,7 +18,7 @@
     "@alpinejs/morph": "3.15.12",
     "@alpinejs/persist": "3.15.12",
     "alpinejs": "3.15.12",
-    "i18next": "26.0.10",
+    "i18next": "26.3.0",
     "i18next-browser-languagedetector": "8.2.1",
     "screenfull": "latest",
     "tailwindcss": "4.3.0"

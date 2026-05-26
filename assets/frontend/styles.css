@@ -206,6 +206,15 @@ body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white
   color: var(--panel-control-content);
 }
 
+/* 赛博朋克主题的 select 使用深底亮字，避免原生 select 把浅底和黄字混在一起导致不可读。 */
+body[data-theme="cyberpunk"] select,
+body[data-theme="cyberpunk"] select:hover,
+body[data-theme="cyberpunk"] select:focus-visible,
+body[data-theme="cyberpunk"] select option {
+  background-color: var(--panel-surface) !important;
+  color: var(--panel-control) !important;
+}
+
 body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
   background-color: var(--panel-control-active) !important;
   color: var(--panel-control-active-content) !important;

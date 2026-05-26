@@ -38,7 +38,12 @@ body[data-theme="coffee"] .grid-point,
 body[data-theme="coffee"] .grid-mosaic,
 body[data-theme="coffee"] #ShelfMainArea,
 body[data-theme="coffee"] #settingsMainArea,
-body[data-theme="coffee"] #tab-contents {
+body[data-theme="coffee"] #tab-contents,
+body[data-theme="coffee"] #ReaderRoot,
+body[data-theme="coffee"] #ReaderShell,
+body[data-theme="coffee"] #ScrollMainArea,
+body[data-theme="coffee"] #ReaderFlipArea,
+body[data-theme="coffee"] #ReaderPDFArea {
   background-color: var(--base-100);
   background-image:
     radial-gradient(circle at 14% 22%, rgba(95, 143, 138, 0.46) 0 42px, transparent 44px),

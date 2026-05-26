@@ -94,6 +94,9 @@ func InitFlags() {
 	// 不启动 TUI（不绑定 viper，避免配置文件或环境变量影响默认交互入口）
 	RootCmd.PersistentFlags().BoolVarP(&cfg.NoTUI, "no-tui", "n", false, locale.GetString("no_tui"))
 
+	// 强制前端选择随机模板（不绑定 viper，避免配置文件或环境变量覆盖用户主题选择）
+	RootCmd.PersistentFlags().BoolVar(&cfg.RandomTheme, "random-theme", false, locale.GetString("random_theme"))
+
 	// 不对局域网开放
 	RootCmd.PersistentFlags().BoolVar(&cfg.DisableLAN, "local", false, locale.GetString("disable_lan"))
 	runtimeViper.BindPFlag("DisableLAN", RootCmd.PersistentFlags().Lookup("local"))
