@@ -241,6 +241,17 @@ body[data-theme="cyberpunk"] select option:focus {
   color: var(--panel-control-content) !important;
 }
 
+/* 抽屉里的 select 保持静态文字色；原生下拉 hover 不再把文字切成另一套高亮色。 */
+body[data-theme="cyberpunk"] #drawer-right select,
+body[data-theme="cyberpunk"] #drawer-right select:hover,
+body[data-theme="cyberpunk"] #drawer-right select:focus-visible,
+body[data-theme="cyberpunk"] #drawer-right select option:hover,
+body[data-theme="cyberpunk"] #drawer-right select option:checked,
+body[data-theme="cyberpunk"] #drawer-right select option:focus {
+  background-color: var(--panel-surface) !important;
+  color: var(--panel-control) !important;
+}
+
 body[data-theme="cyberpunk"] :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600),
 body[data-theme="cyberpunk"] .panel-control:is(.bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
   background-color: var(--panel-control-active) !important;
