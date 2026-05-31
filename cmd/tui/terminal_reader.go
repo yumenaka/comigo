@@ -464,10 +464,6 @@ func renderTerminalReaderImage(state *terminalReaderState, data []byte, img imag
 		return
 	}
 	renderW, renderH := termImageRenderSizeForProtocol(imageW, imageH, protocol)
-	termImage := termimg.New(img).
-		Protocol(protocol).
-		Size(renderW, renderH).
-		Scale(termimg.ScaleFit)
 	if protocol == termimg.Kitty {
 		// Kitty 系列终端用 Unicode placeholder，让图片跟随 Bubble Tea 文本行一起刷新，避免图层和页码不同步。
 		setup, lines, err := renderKittyUnicodeImage(img, renderW, renderH)
@@ -481,7 +477,7 @@ func renderTerminalReaderImage(state *terminalReaderState, data []byte, img imag
 		debugTUIPlaceholderLayout("reader", protocol, state.Width, state.Height, imageW, imageH, state.Lines, len(state.Setup))
 		return
 	}
-	rendered, err := termImage.Render()
+	rendered, err := renderTUIImageWithoutQuery(img, protocol, renderW, renderH)
 	if err != nil {
 		state.ErrText = err.Error()
 		return

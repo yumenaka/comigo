@@ -241,11 +241,7 @@ func loadCoverPreviewCmd(requestID int, bookID string, title string, width int, 
 			debugTUIPlaceholderLayout("cover", protocol, width, height, imageW, imageH, state.Lines, len(state.Setup))
 			return coverPreviewMsg{requestID: requestID, state: state}
 		}
-		termImage := termimg.New(img).
-			Protocol(protocol).
-			Size(renderW, renderH).
-			Scale(termimg.ScaleFit)
-		rendered, err := termImage.Render()
+		rendered, err := renderTUIImageWithoutQuery(img, protocol, renderW, renderH)
 		if err != nil {
 			state.ErrText = err.Error()
 			return coverPreviewMsg{requestID: requestID, state: state}
@@ -259,6 +255,22 @@ func loadCoverPreviewCmd(requestID int, bookID string, title string, width int, 
 		debugTUIImageRender("cover", protocol, img.Bounds(), width, height, imageW, imageH, len(state.Lines), len(state.Setup))
 		return coverPreviewMsg{requestID: requestID, state: state}
 	}
+}
+
+// renderTUIImageWithoutQuery 避免 ANSI/Halfblocks 路径触发 go-termimg 的终端能力查询。
+func renderTUIImageWithoutQuery(img image.Image, protocol tuiImageProtocol, width int, height int) (string, error) {
+	if protocol == termimg.Halfblocks {
+		return (&termimg.HalfblocksRenderer{}).Render(img, termimg.RenderOptions{
+			Width:     width,
+			Height:    height,
+			ScaleMode: termimg.ScaleFit,
+		})
+	}
+	termImage := termimg.New(img).
+		Protocol(protocol).
+		Size(width, height).
+		Scale(termimg.ScaleFit)
+	return termImage.Render()
 }
 
 // renderITerm2InlineImage 按 iTerm2 官方协议用字符格单位指定尺寸，避免 Retina 像素单位导致封面偏小。

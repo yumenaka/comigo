@@ -306,6 +306,25 @@ func TestHalfblocksRenderSizeCompensatesMosaicCells(t *testing.T) {
 	}
 }
 
+func TestHalfblocksRenderDoesNotEmitTerminalQueries(t *testing.T) {
+	rendered, err := renderTUIImageWithoutQuery(image.NewRGBA(image.Rect(0, 0, 4, 4)), termimg.Halfblocks, 4, 4)
+	if err != nil {
+		t.Fatalf("renderTUIImageWithoutQuery() error = %v", err)
+	}
+	if rendered == "" {
+		t.Fatal("rendered halfblocks image should not be empty")
+	}
+	for _, query := range []string{
+		"\x1b]1337;ReportCellSize",
+		"\x1b_Gi=42",
+		"\x1b[?1;1;0S",
+	} {
+		if strings.Contains(rendered, query) {
+			t.Fatalf("halfblocks output should not contain terminal query %q", query)
+		}
+	}
+}
+
 func TestSplitRenderedImageLinesSeparatesKittySetup(t *testing.T) {
 	rendered := "\x1b_Ga=T,i=1\x1b\\\x1b_Ga=p,U=1,i=1,c=2,r=2\x1b\\" +
 		"\x1b[38;2;0;0;1m" + termimg.PLACEHOLDER_CHAR + termimg.PLACEHOLDER_CHAR + "\x1b[39m\n" +

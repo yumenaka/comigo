@@ -2,7 +2,11 @@
 
 package tools
 
-import "testing"
+import (
+	"errors"
+	"sync"
+	"testing"
+)
 
 func TestAverageCPUPercent(t *testing.T) {
 	tests := []struct {
@@ -42,4 +46,22 @@ func TestAverageCPUPercent(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestLogSystemMetricErrorOnceIgnoresNotImplemented(t *testing.T) {
+	systemMetricLoggedErrors = sync.Map{}
+
+	logSystemMetricErrorOnce("cpu", errors.New("not implemented yet"))
+	if hasLoggedSystemMetricErrors() {
+		t.Fatal("not implemented metric errors should be ignored")
+	}
+}
+
+func hasLoggedSystemMetricErrors() bool {
+	hasAny := false
+	systemMetricLoggedErrors.Range(func(_, _ any) bool {
+		hasAny = true
+		return false
+	})
+	return hasAny
 }
