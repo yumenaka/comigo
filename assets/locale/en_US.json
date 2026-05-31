@@ -113,6 +113,7 @@
   "ctrl_c_hint": "Press CTRL-C to quit",
   "current_dir_scope": "When run in the current directory (local scope)",
   "current_password": "Current Password",
+  "err_current_password_incorrect": "Current password is incorrect",
   "current_user_scope": "Effective for logged-in user (global scope)",
   "debug": "Turn on Debug mode",
   "debug_description": "Enable Debug to print more debugging information and check some settings related to unfinished hidden features.",

@@ -113,6 +113,7 @@
   "ctrl_c_hint": "按 CTRL-C 退出",
   "current_dir_scope": "在当前目录运行时（局部有效）",
   "current_password": "当前密码",
+  "err_current_password_incorrect": "当前密码不正确",
   "current_user_scope": "当前登录用户有效（全局有效）",
   "debug": "开启Debug模式",
   "debug_description": "启用Debug,打印更多调试信息。并查看一些未完成的隐藏功能相关设置。",

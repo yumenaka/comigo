@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cloudsoda/go-smb2"
@@ -29,7 +28,6 @@ type SMBFS struct {
 	server    string // 服务器地址（host:port）
 	options   Options
 	cache     *FileCache
-	mu        sync.RWMutex
 }
 
 // NewSMBFS 创建 SMB 文件系统实例

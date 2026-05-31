@@ -310,14 +310,15 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 
 	// 仅在修改账号密码登录设置时校验当前密码。
 	if existingPasswordLogin && passwordLoginChanged && cfg.Password != request.CurrentPassword {
-		return errors.New("Current Password is incorrect")
+		return errors.New(locale.GetString("err_current_password_incorrect"))
 	}
 
-	effectiveUsername := cfg.Username
-	effectivePassword := cfg.Password
 	if request.Password != request.ReEnterPassword {
-		return errors.New("Password do not match")
+		return errors.New(locale.GetString("err_password_mismatch"))
 	}
+
+	var effectiveUsername string
+	var effectivePassword string
 	if request.Username == "" {
 		if request.Password != "" || request.ReEnterPassword != "" {
 			return errors.New(locale.GetString("prompt_set_username"))

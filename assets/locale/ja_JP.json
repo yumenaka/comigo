@@ -113,6 +113,7 @@
   "ctrl_c_hint": "CTRL-Cを押して終了します",
   "current_dir_scope": "今のディレクトリで実行した場合（ローカル適用）",
   "current_password": "現在のパスワード",
+  "err_current_password_incorrect": "現在のパスワードが正しくありません",
   "current_user_scope": "ログインユーザーに対して有効（グローバル適用）",
   "debug": "デバッグモードをオンにする",
   "debug_description": "Debugを有効にすると、より多くのデバッグ情報が出力され、未完成の隠し機能に関する設定を確認できます。",

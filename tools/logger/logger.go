@@ -34,7 +34,6 @@ var (
 // 全局 logger
 var (
 	logger         *logrus.Logger
-	logLevel       = logrus.DebugLevel
 	ReportCaller   bool
 	baseOutput     io.Writer
 	mirrorOutput   io.Writer

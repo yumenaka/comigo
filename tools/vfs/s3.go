@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -28,7 +27,6 @@ type S3FS struct {
 	endpoint string // S3 endpoint 地址
 	options  Options
 	cache    *FileCache
-	mu       sync.RWMutex
 }
 
 // NewS3FS 创建 S3 文件系统实例

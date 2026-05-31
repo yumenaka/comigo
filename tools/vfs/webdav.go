@@ -23,7 +23,6 @@ type WebDAVFS struct {
 	basePath string // WebDAV 服务器上的基础路径
 	options  Options
 	cache    *FileCache
-	mu       sync.RWMutex
 }
 
 // NewWebDAVFS 创建 WebDAV 文件系统实例

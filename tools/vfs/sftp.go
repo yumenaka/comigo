@@ -10,7 +10,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/pkg/sftp"
@@ -27,7 +26,6 @@ type SFTPFS struct {
 	basePath   string
 	options    Options
 	cache      *FileCache
-	mu         sync.RWMutex
 }
 
 // NewSFTPFS 创建 SFTP 文件系统实例
