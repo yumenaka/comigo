@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/service"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
@@ -50,6 +50,10 @@ func getTranslations(value string) string {
 func GetStoreBookCounts() map[string]int {
 	counts := make(map[string]int)
 
+	// 设置页数量必须和首页一致：先清理已移除书库和源文件不存在的书籍。
+	model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
+	model.ClearBookNotExist()
+
 	// 获取所有书籍
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
@@ -61,16 +65,24 @@ func GetStoreBookCounts() map[string]int {
 	for _, book := range allBooks {
 		// 只统计非书籍组的实际书籍
 		if book.Type != model.TypeBooksGroup {
-			// 将书库路径转换为绝对路径以便匹配
-			storePathAbs, err := filepath.Abs(book.StoreUrl)
-			if err != nil {
-				storePathAbs = book.StoreUrl
-			}
-			counts[storePathAbs]++
+			counts[storeBookCountKey(book.StoreUrl)]++
 		}
 	}
 
 	return counts
+}
+
+// storeBookCountKey 统一设置页“配置路径”和“书籍 StoreUrl”的统计 key。
+// 本地路径转绝对 clean；远程 URL 保持原样，避免 filepath.Clean 破坏 URL。
+func storeBookCountKey(storeURL string) string {
+	normalized, remote, err := tools.NormalizeStoreURLForCompare(storeURL)
+	if err != nil {
+		return storeURL
+	}
+	if remote {
+		return storeURL
+	}
+	return normalized
 }
 
 // PageHandler 设定页面

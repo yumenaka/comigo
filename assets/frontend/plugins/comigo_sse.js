@@ -60,7 +60,7 @@ function showReloadPrompt(reason) {
         buttons: 'confirm_cancel',
         onConfirm: () => {
             window.__comigoReloadPromptOpen = false
-            window.location.reload()
+            reloadComigoPage()
         },
         onCancel: () => {
             window.__comigoReloadPromptOpen = false
@@ -72,8 +72,26 @@ function autoReloadAfterLibraryRescan() {
     if (!shouldShowUISuggestReloadPrompt() || window.__comigoAutoReloadQueued) {
         return
     }
+    // 若本页正在发起重扫请求(rescan POST)，先别 reload：
+    // 否则 location.reload() 会把这个还没返回的 fetch 直接 abort 掉，
+    // Firefox 报 “TypeError: NetworkError when attempting to fetch resource”，
+    // 让明明扫描成功的操作弹出“网络错误，请重试”。
+    // 改为挂起，等该 fetch 在自己的 finally 里结束后再刷新。
+    if (window.__comigoRescanInFlight) {
+        window.__comigoReloadPending = true
+        return
+    }
     window.__comigoAutoReloadQueued = true
-    window.location.reload()
+    reloadComigoPage()
+}
+
+// 由发起重扫的页面在 fetch 结束(finally)后调用：执行被挂起的整页刷新。
+function comigoRunPendingReload() {
+    if (window.__comigoReloadPending && !window.__comigoAutoReloadQueued) {
+        window.__comigoReloadPending = false
+        window.__comigoAutoReloadQueued = true
+        reloadComigoPage()
+    }
 }
 
 function appendSharedLog(line) {
@@ -82,13 +100,40 @@ function appendSharedLog(line) {
     }
 }
 
+// 取消尚未执行的延迟连接，页面即将卸载时不能再新建 EventSource。
+function clearQueuedComigoSSEStart() {
+    if (window.__comigoSSEStartTimer) {
+        clearTimeout(window.__comigoSSEStartTimer)
+        window.__comigoSSEStartTimer = null
+    }
+    window.__comigoSSEStartQueued = false
+}
+
+// 主动关闭当前 SSE；由 reload/pagehide 共用，避免卸载时遗留被浏览器标记为中断的长连接。
+function closeComigoSSE() {
+    clearQueuedComigoSSEStart()
+    if (!window.__comigoSSEInstance) {
+        return
+    }
+    try {
+        window.__comigoSSEInstance.close()
+    } catch (_) {}
+    window.__comigoSSEInstance = null
+}
+
+function reloadComigoPage() {
+    closeComigoSSE()
+    window.location.reload()
+}
+
 function queueComigoSSEStart() {
     if (window.__comigoSSEStartQueued) {
         return
     }
     window.__comigoSSEStartQueued = true
     const start = () => {
-        setTimeout(() => {
+        window.__comigoSSEStartTimer = setTimeout(() => {
+            window.__comigoSSEStartTimer = null
             window.__comigoSSEStartQueued = false
             comigoSSEInit()
         }, 1000)
@@ -165,6 +210,13 @@ function comigoSSEInit() {
         return null
     }
     if (window.__comigoSSEInstance) {
+        if (window.__comigoSSEInstance.readyState === EventSource.CLOSED) {
+            window.__comigoSSEInstance = null
+        } else {
+            return window.__comigoSSEInstance
+        }
+    }
+    if (window.__comigoSSEStartQueued) {
         return window.__comigoSSEInstance
     }
     // 页面初次加载时稍后再连，避免浏览器把 SSE 长连接误报为加载中断。
@@ -180,4 +232,20 @@ function comigoSSEInit() {
 }
 
 window.__comigoSSEInit = comigoSSEInit
+window.__comigoRunPendingReload = comigoRunPendingReload
+
+// 全局启动 SSE；具体事件处理仍由上面的路径判断决定，阅读页不会被重扫通知打断。
+queueComigoSSEStart()
+
+// 页面卸载时主动关闭 SSE，并取消尚未执行的延迟启动，避免卸载过程中创建/留下
+// 被中断(aborted)的 /api/sse 请求。
+if (typeof window.addEventListener === 'function') {
+    window.addEventListener('pagehide', () => {
+        closeComigoSSE()
+    })
+    window.addEventListener('pageshow', () => {
+        queueComigoSSEStart()
+    })
+}
+
 window.dispatchEvent(new Event('comigo:sse-ready'))
