@@ -67,6 +67,27 @@ func TestBuildConfigChangeActionIgnoresEquivalentBasePath(t *testing.T) {
 	}
 }
 
+func TestBuildConfigChangeActionIgnoresDatabaseRuntimeSwitch(t *testing.T) {
+	oldCfg := &config.Config{
+		EnableDatabase: false,
+		DBType:         "sqlite",
+		DBDSN:          "",
+	}
+	newCfg := &config.Config{
+		EnableDatabase: true,
+		DBType:         "postgres",
+		DBDSN:          "postgres://example/test",
+	}
+
+	action := BuildConfigChangeAction(*oldCfg, newCfg)
+	if action.ReScanStores {
+		t.Fatalf("expected ReScanStores=false")
+	}
+	if action.ReStartWebServer || action.StartTailscale || action.StopTailscale || action.ReStartTailscale || action.UpdateAutoRescan {
+		t.Fatalf("expected no runtime action for database backend change, got %#v", action)
+	}
+}
+
 func TestBuildConfigChangeActionStartTailscale(t *testing.T) {
 	oldCfg := &config.Config{
 		EnableTailscale:   false,

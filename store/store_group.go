@@ -531,28 +531,28 @@ func (ramStore *StoreInRam) StoreBookMark(mark *model.BookMark) error {
 	switch mark.Type {
 	case model.UserMark:
 		// 用户书签的处理逻辑(用户书签可以有多个，但同一页只能有一个用户书签）
-		exits := false
+		exists := false
 		for i, existingMark := range b.BookMarks {
 			if existingMark.Type == mark.Type && existingMark.PageIndex == mark.PageIndex {
 				// 更新现有书签
 				b.BookMarks[i] = *mark
-				exits = true
+				exists = true
 			}
 		}
-		if !exits {
+		if !exists {
 			b.BookMarks = append(b.BookMarks, *mark)
 		}
 	case model.AutoMark:
 		// 自动书签的处理逻辑（每本书只有一个自动书签）
-		exits := false
+		exists := false
 		for i, existingMark := range b.BookMarks {
 			if existingMark.Type == mark.Type {
 				// 更新现有书签
 				b.BookMarks[i] = *mark
-				exits = true
+				exists = true
 			}
 		}
-		if !exits {
+		if !exists {
 			b.BookMarks = append(b.BookMarks, *mark)
 		}
 	default:

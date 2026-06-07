@@ -10,10 +10,14 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
+// GetCfg 返回当前进程的全局配置指针。
+// 调用方可以通过返回值读取或修改配置；并发写入时需要遵守 config.Mutex 的保护约定。
 func GetCfg() *Config {
 	return &cfg
 }
 
+// CopyCfg 返回当前全局配置的值拷贝。
+// 返回值用于变更前后对比，不会随全局配置后续修改而自动更新。
 func CopyCfg() Config {
 	return cfg
 }

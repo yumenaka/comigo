@@ -23,26 +23,20 @@ type Book struct {
 
 // GuestCover 猜测书籍的封面
 func (b *Book) GuestCover() (cover PageInfo) {
-	// 封面图片的命名规则
+	// 按 cover/0/1 的常见命名优先猜测封面，找不到时回退到第一页。
 	for i := range b.PageInfos {
-		// 先转换为小写
 		filenameLower := strings.ToLower(b.PageInfos[i].Name)
-		// 再去掉后缀名
 		filenameWithoutExt := strings.TrimSuffix(filenameLower, filepath.Ext(filenameLower))
-		// 再去掉前置的0 ，例如00001 -> 1, 0 -> ""
 		filenameTrimmed := strings.TrimLeft(filenameWithoutExt, "0")
-		// 对原始不带前导0的文件名包含 "cover" 的检查
-		// 检查文件名（去除后缀和前导0）是否包含 "cover" 或等于 "" (原为 "0") 或 "1"
 		if strings.Contains(filenameWithoutExt, "cover") || filenameTrimmed == "" || filenameTrimmed == "1" {
-			cover = b.PageInfos[i] // 获取实际元素的指针
-			return cover           // 找到封面，停止循环
+			cover = b.PageInfos[i]
+			return cover
 		}
 	}
-	// 如果通过名称规则没有找到封面，并且书至少有一页，则使用第一页作为封面
 	if len(b.PageInfos) > 0 {
 		cover = b.PageInfos[0]
 	}
-	return cover // 返回找到的封面或空值
+	return cover
 }
 
 // NewBook 初始化 Book，设置文件路径、书名、BookID 等

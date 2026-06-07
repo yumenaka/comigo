@@ -35,6 +35,8 @@ type Config struct {
 	CustomPlugins             []CustomPlugin `json:"-" toml:"-"  comment:"用户自定义插件内容列表"`
 	DisableLAN                bool           `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
 	EnableDatabase            bool           `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
+	DBType                    string         `json:"DBType" comment:"数据库类型：sqlite 或 postgres。仅启用数据库时生效。"`
+	DBDSN                     string         `json:"DBDSN" comment:"PostgreSQL 连接字符串。仅 DBType=postgres 时生效。"`
 	EnableTLS                 bool           `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
 	AutoTLSCertificate        bool           `json:"AutoTLSCertificate" comment:"自动申请、签发 HTTPS 证书（Let's Encrypt）"`
 	BasePath                  string         `json:"BasePath" comment:"反向代理基础路径，例如 /some/path。留空表示服务挂载在根路径 /"`

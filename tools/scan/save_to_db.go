@@ -3,6 +3,8 @@
 package scan
 
 import (
+	"errors"
+
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/sqlc"
 	"github.com/yumenaka/comigo/store"
@@ -11,6 +13,9 @@ import (
 
 // SaveBooksToDatabase 4，保存扫描结果到数据库
 func SaveBooksToDatabase(cfg ConfigInterface) error {
+	if sqlc.DbStore == nil {
+		return errors.New("database store is not initialized")
+	}
 	InitConfig(cfg)
 	allBooks, err := store.RamStore.ListBooks()
 	if err != nil {

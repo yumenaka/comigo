@@ -6,9 +6,7 @@ import (
 	"github.com/yumenaka/comigo/tools"
 )
 
-// PageInfos 定义页面列表，排序用
-// 在 Go 中，方法接收器必须是命名类型，这是为了确保类型具有一个唯一的标识和类型身份，从而可以在包级作用域中明确地定义和调用这些方法。
-// 使用类型别名 PageInfos []PageInfo 来提供排序方法，这样可以确保 PageInfos 具有明确的类型身份，并且可以在包级作用域中使用和扩展。
+// PageInfos 定义页面列表，并提供漫画页排序方法。
 type PageInfos []PageInfo
 
 // SortImages 根据 sortBy 参数对 PageInfos 进行排序

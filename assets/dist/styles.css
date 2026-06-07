@@ -1785,8 +1785,8 @@
     width: calc(var(--spacing) * 24);
   }
 
-  .w-26 {
-    width: calc(var(--spacing) * 26);
+  .w-28 {
+    width: calc(var(--spacing) * 28);
   }
 
   .w-32 {
@@ -2960,6 +2960,10 @@
     }
   }
 
+  .text-blue-900 {
+    color: var(--color-blue-900);
+  }
+
   .text-gray-300 {
     color: var(--color-gray-300);
   }
@@ -3703,6 +3707,10 @@
   @media (prefers-color-scheme: dark) {
     .dark\:border-gray-200 {
       border-color: var(--color-gray-200);
+    }
+
+    .dark\:border-gray-500 {
+      border-color: var(--color-gray-500);
     }
 
     .dark\:border-gray-600 {

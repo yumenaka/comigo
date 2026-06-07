@@ -17,7 +17,7 @@ type uiSuggestPayload struct {
 	Reason string `json:"reason"`
 }
 
-// BroadcastUISuggestReload 通知浏览器：建议用户确认后刷新整页（SSE event: ui_suggest_reload）。
+// BroadcastUISuggestReload 通知浏览器根据 reason 刷新整页或提示用户确认（SSE event: ui_suggest_reload）。
 func BroadcastUISuggestReload(reason string) {
 	if MessageHub == nil || reason == "" {
 		return

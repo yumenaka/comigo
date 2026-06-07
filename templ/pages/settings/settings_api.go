@@ -74,7 +74,7 @@ func reloadHintForNumberConfig(name string) (saveSuccessHint bool, reason string
 
 func renderArrayConfigComponent(configName string, values []string) templ.Component {
 	if configName == "StoreUrls" {
-		return StoreConfig(configName, values, configName+"_Description", GetStoreBookCounts())
+		return StoreConfig(configName, values, configName+"_Description", GetStoreBookCounts(), true)
 	}
 	return StringArrayConfig(configName, values, configName+"_Description")
 }
@@ -93,6 +93,17 @@ func jsonBadRequest(err error) error {
 		return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("err_invalid_json_request"))
 	}
 	return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("%s: %v", locale.GetString("err_invalid_json_request"), err))
+}
+
+// rejectRuntimeDatabaseConfig 拦截数据库后端相关设置。
+// 数据库只在启动时打开，不支持通过设置页 API 在运行中启用、关闭或切换后端。
+func rejectRuntimeDatabaseConfig(name string) error {
+	switch name {
+	case "EnableDatabase", "DBType", "DBDSN":
+		return errors.New("database settings require restart")
+	default:
+		return nil
+	}
 }
 
 // writeConfigAndApply 写入配置后应用变更副作用；写入失败沿用旧行为，只记录日志不中断响应。
@@ -120,6 +131,9 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 
 	if request.Name == "" {
 		return "", "", errors.New("name is required")
+	}
+	if err := rejectRuntimeDatabaseConfig(request.Name); err != nil {
+		return "", "", err
 	}
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name)
@@ -173,6 +187,9 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 
 	if request.Name == "" {
 		return "", false, errors.New("name is required")
+	}
+	if err := rejectRuntimeDatabaseConfig(request.Name); err != nil {
+		return "", false, err
 	}
 
 	// 将 bool 转换为 string
@@ -736,14 +753,26 @@ func RescanStoreHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is not valid base64url")
 	}
+	return rescanOneStore(c, storeUrl)
+}
+
+// RescanAllStoresHandler 处理重新扫描全部书库的 JSON API。
+func RescanAllStoresHandler(c echo.Context) error {
+	if err := ensureWritableConfig(); err != nil {
+		return err
+	}
+	return rescanAllStores(c)
+}
+
+// rescanOneStore 重新扫描单个书库。
+func rescanOneStore(c echo.Context, storeUrl string) error {
 	logger.Infof(locale.GetString("log_rescan_store")+"\n", storeUrl)
 
 	// 记录扫描前的书籍数量
 	beforeCount := model.GetAllBooksNumber()
 
 	// 调用扫描功能
-	err = scan.InitStore(storeUrl, config.GetCfg())
-	if err != nil {
+	if err := scan.InitStore(storeUrl, config.GetCfg()); err != nil {
 		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
 	}
@@ -766,6 +795,41 @@ func RescanStoreHandler(c echo.Context) error {
 	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount)
 
 	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonSingleStoreRescan)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"success":       true,
+		"newBooksCount": newBooksCount,
+		"message":       locale.GetString("rescan_store_success"),
+	})
+}
+
+// rescanAllStores 重新扫描配置中的全部书库，用于设置页的全量重扫按钮。
+func rescanAllStores(c echo.Context) error {
+	if len(config.GetCfg().StoreUrls) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "no store urls configured")
+	}
+
+	beforeCount := model.GetAllBooksNumber()
+
+	if err := scan.InitAllStore(config.GetCfg()); err != nil {
+		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
+	}
+	if config.GetCfg().EnableDatabase {
+		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
+			logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
+			return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
+		}
+	}
+
+	afterCount := model.GetAllBooksNumber()
+	newBooksCount := afterCount - beforeCount
+	if newBooksCount < 0 {
+		newBooksCount = 0
+	}
+
+	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount)
+
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonLibraryRescan)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success":       true,
 		"newBooksCount": newBooksCount,
@@ -843,7 +907,7 @@ func DeleteStoreHandler(c echo.Context) error {
 	}
 
 	// 渲染更新后的 HTML
-	updatedHTML := StoreConfig("StoreUrls", values, "StoreUrls_Description", GetStoreBookCounts())
+	updatedHTML := StoreConfig("StoreUrls", values, "StoreUrls_Description", GetStoreBookCounts(), true)
 	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
 	if renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")

@@ -205,6 +205,7 @@ func bindSettingsAPI(group *echo.Group) {
 	group.POST("/add-array-config", settings.AddArrayConfigHandler)
 	// 书库管理
 	group.POST("/rescan-store", settings.RescanStoreHandler)
+	group.POST("/rescan-all-stores", settings.RescanAllStoresHandler)
 	group.POST("/delete-store", settings.DeleteStoreHandler)
 	// 插件管理
 	group.POST("/enable-plugin", settings.EnablePluginHandler)

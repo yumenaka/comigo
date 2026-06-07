@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: query.sql
 
-package sqlc
+package postgres
 
 import (
 	"context"
@@ -29,7 +29,7 @@ func (q *Queries) CountBooks(ctx context.Context) (int64, error) {
 const countBooksByType = `-- name: CountBooksByType :one
 SELECT COUNT(*)
 FROM books
-WHERE type = ?
+WHERE type = $1
   AND deleted = FALSE
 `
 
@@ -44,7 +44,7 @@ func (q *Queries) CountBooksByType(ctx context.Context, type_ string) (int64, er
 const countPageInfosByBookID = `-- name: CountPageInfosByBookID :one
 SELECT COUNT(*)
 FROM page_infos
-WHERE book_id = ?
+WHERE book_id = $1
 `
 
 // Count media files for a book
@@ -71,7 +71,7 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 const countUsersByRole = `-- name: CountUsersByRole :one
 SELECT COUNT(*)
 FROM users
-WHERE role = ?
+WHERE role = $1
 `
 
 // Count users by role
@@ -87,7 +87,7 @@ INSERT INTO books (title, book_id, owner, book_path, store_url, type,
                    child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size,
                    author, isbn, press, published_at, extract_path, extract_num, book_complete,
                    init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
 RETURNING id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 `
 
@@ -187,7 +187,7 @@ func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, e
 
 const createBookmark = `-- name: CreateBookmark :one
 INSERT INTO bookmarks (type, book_id, book_store_id, page_index, description, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, ?)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING id, type, book_id, book_store_id, page_index, description, created_at, updated_at
 `
 
@@ -228,8 +228,8 @@ func (q *Queries) CreateBookmark(ctx context.Context, arg CreateBookmarkParams) 
 
 const createPageInfo = `-- name: CreatePageInfo :one
 INSERT INTO page_infos (book_id, name, path, size, mod_time, url, page_num,
-                         blurhash, height, width, img_type, insert_html)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        blurhash, height, width, img_type, insert_html)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 RETURNING id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
 `
 
@@ -285,8 +285,8 @@ func (q *Queries) CreatePageInfo(ctx context.Context, arg CreatePageInfoParams) 
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, password, role, email, key, expires_at)
-VALUES (?, ?, ?, ?, ?, ?)
-RETURNING id, username, password, role, email, "key", expires_at, created_at, updated_at
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, username, password, role, email, key, expires_at, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -326,7 +326,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 const deleteBook = `-- name: DeleteBook :exec
 DELETE
 FROM books
-WHERE book_id = ?
+WHERE book_id = $1
 `
 
 // Delete book
@@ -338,8 +338,8 @@ func (q *Queries) DeleteBook(ctx context.Context, bookID string) error {
 const deleteBookmarkByBookIDAndType = `-- name: DeleteBookmarkByBookIDAndType :exec
 DELETE
 FROM bookmarks
-WHERE book_id = ?
-  AND type = ?
+WHERE book_id = $1
+  AND type = $2
 `
 
 type DeleteBookmarkByBookIDAndTypeParams struct {
@@ -356,7 +356,7 @@ func (q *Queries) DeleteBookmarkByBookIDAndType(ctx context.Context, arg DeleteB
 const deleteBookmarksByBookID = `-- name: DeleteBookmarksByBookID :exec
 DELETE
 FROM bookmarks
-WHERE book_id = ?
+WHERE book_id = $1
 `
 
 // Delete all bookmarks for a book
@@ -368,7 +368,7 @@ func (q *Queries) DeleteBookmarksByBookID(ctx context.Context, bookID string) er
 const deletePageInfosByBookID = `-- name: DeletePageInfosByBookID :exec
 DELETE
 FROM page_infos
-WHERE book_id = ?
+WHERE book_id = $1
 `
 
 // Delete all media files for a book
@@ -380,7 +380,7 @@ func (q *Queries) DeletePageInfosByBookID(ctx context.Context, bookID string) er
 const deleteUser = `-- name: DeleteUser :exec
 DELETE
 FROM users
-WHERE id = ?
+WHERE id = $1
 `
 
 // Delete user
@@ -392,7 +392,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 const getBookByBookPath = `-- name: GetBookByBookPath :one
 SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
-WHERE book_path = ?
+WHERE book_path = $1
 LIMIT 1
 `
 
@@ -438,7 +438,7 @@ const getBookByID = `-- name: GetBookByID :one
 
 SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
-WHERE book_id = ?
+WHERE book_id = $1
 LIMIT 1
 `
 
@@ -484,8 +484,8 @@ func (q *Queries) GetBookByID(ctx context.Context, bookID string) (Book, error) 
 const getPageInfoByBookIDAndPage = `-- name: GetPageInfoByBookIDAndPage :one
 SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
 FROM page_infos
-WHERE book_id = ?
-  AND page_num = ?
+WHERE book_id = $1
+  AND page_num = $2
 LIMIT 1
 `
 
@@ -520,7 +520,7 @@ const getPageInfosByBookID = `-- name: GetPageInfosByBookID :many
 
 SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
 FROM page_infos
-WHERE book_id = ?
+WHERE book_id = $1
 ORDER BY page_num
 `
 
@@ -564,9 +564,9 @@ func (q *Queries) GetPageInfosByBookID(ctx context.Context, bookID string) ([]Pa
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at
+SELECT id, username, password, role, email, key, expires_at, created_at, updated_at
 FROM users
-WHERE email = ?
+WHERE email = $1
 LIMIT 1
 `
 
@@ -589,9 +589,9 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (Use
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at
+SELECT id, username, password, role, email, key, expires_at, created_at, updated_at
 FROM users
-WHERE id = ?
+WHERE id = $1
 LIMIT 1
 `
 
@@ -615,9 +615,9 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at
+SELECT id, username, password, role, email, key, expires_at, created_at, updated_at
 FROM users
-WHERE username = ?
+WHERE username = $1
 LIMIT 1
 `
 
@@ -673,7 +673,7 @@ const listBookmarksByBookID = `-- name: ListBookmarksByBookID :many
 
 SELECT id, type, book_id, book_store_id, page_index, description, created_at, updated_at
 FROM bookmarks
-WHERE book_id = ?
+WHERE book_id = $1
 ORDER BY created_at DESC
 `
 
@@ -775,7 +775,7 @@ func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 const listBooksByStorePath = `-- name: ListBooksByStorePath :many
 SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
-WHERE store_url = ?
+WHERE store_url = $1
   AND deleted = FALSE
 ORDER BY modified_time DESC
 `
@@ -837,7 +837,7 @@ func (q *Queries) ListBooksByStorePath(ctx context.Context, storeUrl string) ([]
 const listBooksByType = `-- name: ListBooksByType :many
 SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
-WHERE type = ?
+WHERE type = $1
   AND deleted = FALSE
 ORDER BY modified_time DESC
 `
@@ -897,7 +897,7 @@ func (q *Queries) ListBooksByType(ctx context.Context, type_ string) ([]Book, er
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, username, password, role, email, "key", expires_at, created_at, updated_at
+SELECT id, username, password, role, email, key, expires_at, created_at, updated_at
 FROM users
 ORDER BY created_at DESC
 `
@@ -938,9 +938,9 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 
 const markBookAsDeleted = `-- name: MarkBookAsDeleted :exec
 UPDATE books
-SET deleted       = TRUE,
+SET deleted = TRUE,
     modified_time = CURRENT_TIMESTAMP
-WHERE book_id = ?
+WHERE book_id = $1
 `
 
 // Mark book as deleted (soft delete)
@@ -952,7 +952,7 @@ func (q *Queries) MarkBookAsDeleted(ctx context.Context, bookID string) error {
 const searchBooksByTitle = `-- name: SearchBooksByTitle :many
 SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
 FROM books
-WHERE title LIKE '%' || ? || '%'
+WHERE title ILIKE '%' || $1 || '%'
   AND deleted = FALSE
 ORDER BY modified_time DESC
 `
@@ -1013,33 +1013,33 @@ func (q *Queries) SearchBooksByTitle(ctx context.Context, dollar_1 sql.NullStrin
 
 const updateBook = `-- name: UpdateBook :exec
 UPDATE books
-SET title             = ?,
-    owner             = ?,
-    book_path         = ?,
-    store_url         = ?,
-    type              = ?,
-    child_books_num   = ?,
-    child_books_id    = ?,
-    depth             = ?,
-    parent_folder     = ?,
-    page_count        = ?,
-    last_read_page    = ?,
-    file_size         = ?,
-    author            = ?,
-    isbn              = ?,
-    press             = ?,
-    published_at      = ?,
-    extract_path      = ?,
-    extract_num       = ?,
-    book_complete     = ?,
-    init_complete     = ?,
-    non_utf8zip       = ?,
-    zip_text_encoding = ?,
-    created_by_version = ?,
-    is_remote         = ?,
-    remote_url        = ?,
-    modified_time     = CURRENT_TIMESTAMP
-WHERE book_id = ?
+SET title              = $1,
+    owner              = $2,
+    book_path          = $3,
+    store_url          = $4,
+    type               = $5,
+    child_books_num    = $6,
+    child_books_id     = $7,
+    depth              = $8,
+    parent_folder      = $9,
+    page_count         = $10,
+    last_read_page     = $11,
+    file_size          = $12,
+    author             = $13,
+    isbn               = $14,
+    press              = $15,
+    published_at       = $16,
+    extract_path       = $17,
+    extract_num        = $18,
+    book_complete      = $19,
+    init_complete      = $20,
+    non_utf8zip        = $21,
+    zip_text_encoding  = $22,
+    created_by_version = $23,
+    is_remote          = $24,
+    remote_url         = $25,
+    modified_time      = CURRENT_TIMESTAMP
+WHERE book_id = $26
 `
 
 type UpdateBookParams struct {
@@ -1106,10 +1106,10 @@ func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
 
 const updateBookmark = `-- name: UpdateBookmark :exec
 UPDATE bookmarks
-SET description = ?,
-    page_index  = ?,
-    updated_at  = CURRENT_TIMESTAMP
-WHERE book_id = ? and type = ?
+SET description = $1,
+    page_index = $2,
+    updated_at = CURRENT_TIMESTAMP
+WHERE book_id = $3 and type = $4
 `
 
 type UpdateBookmarkParams struct {
@@ -1132,10 +1132,10 @@ func (q *Queries) UpdateBookmark(ctx context.Context, arg UpdateBookmarkParams) 
 
 const updateLastReadPage = `-- name: UpdateLastReadPage :exec
 UPDATE bookmarks
-SET page_index = ?,
-    type  = ?,
-    updated_at  = CURRENT_TIMESTAMP
-WHERE book_id = ?
+SET page_index = $1,
+    type = $2,
+    updated_at = CURRENT_TIMESTAMP
+WHERE book_id = $3
 `
 
 type UpdateLastReadPageParams struct {
@@ -1152,18 +1152,18 @@ func (q *Queries) UpdateLastReadPage(ctx context.Context, arg UpdateLastReadPage
 
 const updatePageInfo = `-- name: UpdatePageInfo :exec
 UPDATE page_infos
-SET name        = ?,
-    path        = ?,
-    size        = ?,
-    mod_time    = ?,
-    url         = ?,
-    blurhash    = ?,
-    height      = ?,
-    width       = ?,
-    img_type    = ?,
-    insert_html = ?
-WHERE book_id = ?
-  AND page_num = ?
+SET name        = $1,
+    path        = $2,
+    size        = $3,
+    mod_time    = $4,
+    url         = $5,
+    blurhash    = $6,
+    height      = $7,
+    width       = $8,
+    img_type    = $9,
+    insert_html = $10
+WHERE book_id = $11
+  AND page_num = $12
 `
 
 type UpdatePageInfoParams struct {
@@ -1202,14 +1202,14 @@ func (q *Queries) UpdatePageInfo(ctx context.Context, arg UpdatePageInfoParams) 
 
 const updateUser = `-- name: UpdateUser :exec
 UPDATE users
-SET username   = ?,
-    password   = ?,
-    role       = ?,
-    email      = ?,
-    key        = ?,
-    expires_at = ?,
+SET username = $1,
+    password = $2,
+    role = $3,
+    email = $4,
+    key = $5,
+    expires_at = $6,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = ?
+WHERE id = $7
 `
 
 type UpdateUserParams struct {
@@ -1238,10 +1238,10 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 
 const updateUserKey = `-- name: UpdateUserKey :exec
 UPDATE users
-SET key        = ?,
-    expires_at = ?,
+SET key = $1,
+    expires_at = $2,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = ?
+WHERE id = $3
 `
 
 type UpdateUserKeyParams struct {
@@ -1258,9 +1258,9 @@ func (q *Queries) UpdateUserKey(ctx context.Context, arg UpdateUserKeyParams) er
 
 const updateUserPassword = `-- name: UpdateUserPassword :exec
 UPDATE users
-SET password   = ?,
+SET password = $1,
     updated_at = CURRENT_TIMESTAMP
-WHERE id = ?
+WHERE id = $2
 `
 
 type UpdateUserPasswordParams struct {

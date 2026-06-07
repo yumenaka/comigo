@@ -114,7 +114,7 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 					x-text="i18next.t('no_books_library_path_notice')"
 					class="panel-surface flex flex-col justify-start w-full p-2 m-1 text-normal font-semibold border rounded-md shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 				></div>
-				@settings.StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", settings.GetStoreBookCounts())
+				@settings.StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", settings.GetStoreBookCounts(), false)
 				<!-- 服务器日志 -->
 				@settings.LogPanel()
 			</div>

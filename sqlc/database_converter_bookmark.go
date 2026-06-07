@@ -89,10 +89,9 @@ func ToSQLCUpdateBookmarkParams(bookID string, bookmark model.BookMark) UpdateBo
 	}
 	description := sql.NullString{String: bookmark.Description, Valid: bookmark.Description != ""}
 	return UpdateBookmarkParams{
-		Description:   description,
-		PageIndex:     int64(bookmark.PageIndex),
-		Description_2: description,
-		BookID:        resolvedBookID,
-		Type:          string(markType),
+		Description: description,
+		PageIndex:   int64(bookmark.PageIndex),
+		BookID:      resolvedBookID,
+		Type:        string(markType),
 	}
 }

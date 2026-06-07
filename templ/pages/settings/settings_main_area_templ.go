@@ -82,7 +82,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", GetStoreBookCounts()).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", GetStoreBookCounts(), true).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -275,20 +275,12 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = BoolConfig("EnableDatabase", config.GetCfg().EnableDatabase, "EnableDatabase_Description").Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 			templ_7745c5c3_Err = StringConfig("ZipFileTextEncoding", config.GetCfg().ZipFileTextEncoding, "ZipFileTextEncoding_Description").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div></div><!-- 配置文件管理 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div></div><!-- 配置文件管理 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -298,7 +290,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

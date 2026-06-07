@@ -55,6 +55,14 @@ func InitFlags() {
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableDatabase, "database", false, locale.GetString("enable_database"))
 	runtimeViper.BindPFlag("EnableDatabase", RootCmd.PersistentFlags().Lookup("database"))
 
+	// 数据库类型。未启用数据库时该配置会被忽略。
+	RootCmd.PersistentFlags().StringVar(&cfg.DBType, "db-type", "sqlite", locale.GetString("db_type"))
+	runtimeViper.BindPFlag("DBType", RootCmd.PersistentFlags().Lookup("db-type"))
+
+	// PostgreSQL 连接字符串。SQLite 模式不使用。
+	RootCmd.PersistentFlags().StringVar(&cfg.DBDSN, "db-dsn", "", locale.GetString("db_dsn"))
+	runtimeViper.BindPFlag("DBDSN", RootCmd.PersistentFlags().Lookup("db-dsn"))
+
 	// 服务端口
 	RootCmd.PersistentFlags().IntVarP(&cfg.Port, "port", "p", 1234, locale.GetString("port"))
 	runtimeViper.BindPFlag("Port", RootCmd.PersistentFlags().Lookup("port"))

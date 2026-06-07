@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -49,6 +50,24 @@ func TestConfigureSQLitePragmasEnablesIncrementalAutoVacuum(t *testing.T) {
 	}
 	if autoVacuum != 2 {
 		t.Fatalf("auto_vacuum = %d, want 2 (INCREMENTAL)", autoVacuum)
+	}
+}
+
+func TestOpenDatabaseRejectsImplicitCompatibilityTypes(t *testing.T) {
+	tests := []struct {
+		name    string
+		dbType  string
+		wantErr string
+	}{
+		{name: "empty type", dbType: "", wantErr: "unsupported database type"},
+		{name: "postgresql alias", dbType: "postgresql", wantErr: "unsupported database type"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := OpenDatabase(DBOptions{Type: tt.dbType}); err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("OpenDatabase(%q) error = %v, want containing %q", tt.dbType, err, tt.wantErr)
+			}
+		})
 	}
 }
 

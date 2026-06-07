@@ -43,9 +43,6 @@ func BuildConfigChangeAction(oldConfig config.Config, newConfig *config.Config) 
 	if !reflect.DeepEqual(oldConfig.ExcludePath, newConfig.ExcludePath) {
 		action.ReScanStores = true
 	}
-	if oldConfig.EnableDatabase != newConfig.EnableDatabase {
-		action.ReScanStores = true
-	}
 	if oldConfig.Port != newConfig.Port {
 		action.ReStartWebServer = true
 	}

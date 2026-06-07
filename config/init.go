@@ -16,6 +16,8 @@ func newDefaultConfig() Config {
 		DisableLAN:            false,
 		EnableUpload:          true,
 		EnableDatabase:        false,
+		DBType:                "sqlite",
+		DBDSN:                 "",
 		EnableTLS:             false,
 		EnablePlugin:          false,
 		ExcludePath:           []string{"$RECYCLE.BIN", "System Volume Information", "node_modules"},

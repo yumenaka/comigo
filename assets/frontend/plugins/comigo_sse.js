@@ -1,5 +1,5 @@
 /**
- * 全局 SSE：接收 ui_suggest_reload（整页刷新建议）并转发 log 到设置页日志面板。
+ * 全局 SSE：接收 ui_suggest_reload（整页刷新通知）并转发 log 到设置页日志面板。
  */
 function shouldEnableComigoSSE() {
     if (typeof window === 'undefined' || typeof EventSource === 'undefined') {
@@ -10,7 +10,13 @@ function shouldEnableComigoSSE() {
     return pathname !== '/login'
 }
 
-// 仅在书架与设置页弹出「建议刷新」；阅读页（flip/scroll 等）不打断
+const libraryRescanReloadReasons = new Set([
+    'library_rescan_done',
+    'auto_library_rescan_done',
+    'single_store_rescan_done',
+])
+
+// 仅在书架与设置页处理整页刷新；阅读页（flip/scroll 等）不打断
 function shouldShowUISuggestReloadPrompt() {
     const p = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname
     if (p === '/settings') {
@@ -23,6 +29,10 @@ function shouldShowUISuggestReloadPrompt() {
         return true
     }
     return false
+}
+
+function isLibraryRescanReloadReason(reason) {
+    return libraryRescanReloadReasons.has(reason)
 }
 
 function getReloadPromptMessage(reason) {
@@ -58,6 +68,14 @@ function showReloadPrompt(reason) {
     })
 }
 
+function autoReloadAfterLibraryRescan() {
+    if (!shouldShowUISuggestReloadPrompt() || window.__comigoAutoReloadQueued) {
+        return
+    }
+    window.__comigoAutoReloadQueued = true
+    window.location.reload()
+}
+
 function appendSharedLog(line) {
     if (typeof window.__comigoLogAppend === 'function') {
         window.__comigoLogAppend(line)
@@ -91,6 +109,10 @@ function comigoAttachSSEListeners(es) {
                 reason = data.reason
             }
         } catch (_) {}
+        if (isLibraryRescanReloadReason(reason)) {
+            autoReloadAfterLibraryRescan()
+            return
+        }
         showReloadPrompt(reason)
     })
 

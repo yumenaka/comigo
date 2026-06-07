@@ -21,9 +21,14 @@ func LoadMetadata() {
 			model.IStore = store.RamStore
 			return
 		}
-		if err := sqlc.OpenDatabase(configDir); err != nil {
+		if err := sqlc.OpenDatabase(sqlc.DBOptions{
+			Type:      config.GetCfg().DBType,
+			DSN:       config.GetCfg().DBDSN,
+			ConfigDir: configDir,
+		}); err != nil {
 			logger.Infof(locale.GetString("log_open_database_error"), err)
 			model.IStore = store.RamStore
+			config.GetCfg().EnableDatabase = false
 		} else {
 			model.IStore = sqlc.DbStore
 		}
@@ -50,7 +55,7 @@ func SaveMetadata() {
 		}
 	}
 	// 启用数据库的时候，同步书籍元数据到RamStore
-	if config.GetCfg().EnableDatabase {
+	if config.GetCfg().EnableDatabase && sqlc.DbStore != nil {
 		allBooks, err := sqlc.DbStore.ListBooks()
 		if err != nil {
 			logger.Infof(locale.GetString("log_error_listing_books_from_database"), err)
@@ -63,7 +68,7 @@ func SaveMetadata() {
 		}
 	}
 	// 启用数据库的时候，保存书籍元数据到到数据库
-	if config.GetCfg().EnableDatabase {
+	if config.GetCfg().EnableDatabase && sqlc.DbStore != nil {
 		err := scan.SaveBooksToDatabase(config.GetCfg())
 		if err != nil {
 			logger.Infof(locale.GetString("log_failed_savebookstodatabase"), err)
