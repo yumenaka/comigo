@@ -37,7 +37,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- 下载按钮组件，便携模式不可见 --><div x-show=\"$store.global.onlineBook\" class=\"w-full mt-2 mb-2 pb-1 flex flex-row flex-wrap justify-center items-center border-2 border-gray-500 dark:border-gray-200 rounded relative\"><!-- 下载 --><span class=\"panel-surface absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content\" x-text=\"i18next.t('download')\">下载</span><!-- 【下载原始文件】按钮 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- 下载按钮组件，便携模式不可见 --><div x-cloak x-show=\"$store.global.onlineBook\" class=\"w-full mt-2 mb-2 pb-1 flex flex-row flex-wrap justify-center items-center border-2 border-gray-500 dark:border-gray-200 rounded relative\"><!-- 下载 --><span class=\"panel-surface absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content\" x-text=\"i18next.t('download')\">下载</span><!-- 【下载原始文件】按钮 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -49,7 +49,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var2 templ.SafeURL
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/raw/%v/%v", book.BookID, book.BookInfo.Title))))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 27, Col: 108}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 28, Col: 108}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -62,7 +62,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(book.BookInfo.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 28, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 29, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
@@ -85,7 +85,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var4 templ.SafeURL
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/download-zip?id=%v", book.BookID))))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 39, Col: 96}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 40, Col: 96}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -98,7 +98,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(book.BookInfo.Title + ".zip")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 40, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 41, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -121,7 +121,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var6 templ.SafeURL
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/download-epub?id=%v", book.BookID))))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 51, Col: 97}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 52, Col: 97}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -134,7 +134,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(getEpubFileName(book.BookInfo.Title))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 52, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 53, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
@@ -152,7 +152,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 		var templ_7745c5c3_Var8 templ.SafeURL
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 62, Col: 100}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 63, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -165,7 +165,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(book.BookInfo.Title + ".html")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 63, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 64, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {

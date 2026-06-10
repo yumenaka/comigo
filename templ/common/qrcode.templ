@@ -9,7 +9,7 @@ templ QRCode() {
 			class="relative w-64 h-64 p-1 m-1"
 			x-data="{ qrcodeSrc: '', qrcodeImageSrc: '' }"
 			x-init="
-			if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+			if ($store.global.serverReachable) {
 				qrcodeSrc = window.location.origin + window.ComiGoPath('/api/qrcode.png') + '?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
 				// 使用 fetch 加载二维码
 				fetch(qrcodeSrc)

@@ -18,7 +18,8 @@ templ ReadingHistoryWithLimit(limit int) {
 	<!-- ReadingHistory 阅读历史记录列表组件 -->
 	<div
 		x-data={ getReadingHistoryXData(limit) }
-		x-show="isOnline()"
+		x-cloak
+		x-show="$store.global.serverReachable"
 		x-init={ getReadingHistoryXInit(limit) }
 		@refresh-reading-history.window="refresh()"
 		class="flex flex-col w-full my-1 max-h-128"
@@ -136,12 +137,12 @@ func getReadingHistoryXData(limit int) string {
 		loading: false,
 		limit: ` + strconv.Itoa(limit) + `,
 		totalCount: 0,
-		isOnline() {
+		isServerReachable() {
 			// 便携 HTML 以 file:// 打开时不能请求后端 API。
-			return window.location.protocol === 'http:' || window.location.protocol === 'https:';
+			return Alpine.store('global')?.serverReachable === true;
 		},
 		async refresh() {
-			if (!this.isOnline()) return;
+			if (!this.isServerReachable()) return;
 			this.loading = true;
 			try {
 				const response = await fetch(window.ComiGoPath('/api/reading-history') + '?limit=` + strconv.Itoa(limit) + `');

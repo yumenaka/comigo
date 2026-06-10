@@ -255,14 +255,14 @@ func ReturnButton(returnUrl string) templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<a x-show=\"!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<a x-cloak x-show=\"!$store.global.localBook\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 templ.SafeURL
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath(returnUrl)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 66, Col: 157}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 66, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -306,7 +306,7 @@ func FullScreenOfflineButton() templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"FullScreenIcon\" x-show=\"window.location.href.startsWith('file://') || window.location.href.startsWith('content://')\" onclick=\"window.ComiGoToggleFullscreen ? window.ComiGoToggleFullscreen() : (Screenfull.isEnabled ? Screenfull.toggle() : showToast(i18next.t('not_support_fullscreen')))\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div id=\"FullScreenIcon\" x-cloak x-show=\"$store.global.localBook\" onclick=\"window.ComiGoToggleFullscreen ? window.ComiGoToggleFullscreen() : (Screenfull.isEnabled ? Screenfull.toggle() : showToast(i18next.t('not_support_fullscreen')))\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -344,14 +344,14 @@ func ServerSettingsButton() templ.Component {
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<a x-show=\"$store.global.onlineBook\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<a x-cloak x-show=\"$store.global.onlineBook\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 templ.SafeURL
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath("/settings")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 87, Col: 90}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 88, Col: 98}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -395,14 +395,14 @@ func UploadButton() templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<a x-show=\"$store.global.onlineBook\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<a x-cloak x-show=\"$store.global.onlineBook\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 templ.SafeURL
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath("/upload")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 94, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 95, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -446,14 +446,14 @@ func ReaderButton() templ.Component {
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<a x-show=\"$store.global.onlineBook\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<a x-cloak x-show=\"$store.global.onlineBook\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 templ.SafeURL
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath("/reader")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 101, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 102, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -497,7 +497,7 @@ func HeaderPlaceholder() templ.Component {
 			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"place_holder w-10 h-10 mx-1 hidden md:flex\" x-show=\"$store.global.onlineBook\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"place_holder w-10 h-10 mx-1 hidden md:flex\" x-cloak x-show=\"$store.global.onlineBook\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -527,7 +527,7 @@ func QRCodeButton() templ.Component {
 			templ_7745c5c3_Var16 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<!-- 图标：点击显示二维码 --><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" x-show=\"$store.global.onlineBook || (window.ComiGoReaderMode && (window.location.protocol === 'http:' || window.location.protocol === 'https:'))\" class=\"hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<!-- 图标：点击显示二维码 --><div data-modal-target=\"qrcode-modal\" data-modal-toggle=\"qrcode-modal\" x-cloak x-show=\"$store.global.onlineBook || (window.ComiGoReaderMode && $store.global.serverReachable)\" class=\"hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -565,7 +565,7 @@ func FullScreenOnlineButton() templ.Component {
 			templ_7745c5c3_Var17 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div id=\"FullScreenIcon\" x-show=\"$store.global.onlineBook || (window.ComiGoReaderMode && !window.location.href.startsWith('file://') && !window.location.href.startsWith('content://'))\" onclick=\"window.ComiGoToggleFullscreen ? window.ComiGoToggleFullscreen() : (Screenfull.isEnabled ? Screenfull.toggle() : showToast(i18next.t('not_support_fullscreen')))\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div id=\"FullScreenIcon\" x-cloak x-show=\"$store.global.onlineBook || (window.ComiGoReaderMode && !$store.global.localBook)\" onclick=\"window.ComiGoToggleFullscreen ? window.ComiGoToggleFullscreen() : (Screenfull.isEnabled ? Screenfull.toggle() : showToast(i18next.t('not_support_fullscreen')))\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -701,14 +701,14 @@ func HeaderTitle(title string, downloadLink string) templ.Component {
 			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<div class=\"flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate\"><span x-show=\"window.location.toString().endsWith('.html')\" class=\"text-lg font-semibold\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<div class=\"flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate\"><span x-cloak x-show=\"$store.global.staticHtmlBook\" class=\"text-lg font-semibold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 156, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 159, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -726,20 +726,20 @@ func HeaderTitle(title string, downloadLink string) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 159, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 162, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" id=\"headerTitle\" class=\"text-lg font-semibold text-blue-700/90 hover:underline\" x-data=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" id=\"headerTitle\" x-cloak x-show=\"!$store.global.staticHtmlBook\" class=\"text-lg font-semibold text-blue-700/90 hover:underline\" x-data=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 162, Col: 76}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 167, Col: 76}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 			if templ_7745c5c3_Err != nil {
@@ -752,7 +752,7 @@ func HeaderTitle(title string, downloadLink string) templ.Component {
 			var templ_7745c5c3_Var25 templ.SafeURL
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(downloadLink))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 166, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 171, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -770,7 +770,7 @@ func HeaderTitle(title string, downloadLink string) templ.Component {
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 168, Col: 20}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 173, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
 				if templ_7745c5c3_Err != nil {
@@ -788,7 +788,7 @@ func HeaderTitle(title string, downloadLink string) templ.Component {
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 170, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 175, Col: 12}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -806,20 +806,20 @@ func HeaderTitle(title string, downloadLink string) templ.Component {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 174, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 179, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var28)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" id=\"headerTitle\" x-show=\"!window.location.toString().endsWith('.html')\" class=\"text-lg font-semibold\" x-data=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" id=\"headerTitle\" x-cloak x-show=\"!$store.global.staticHtmlBook\" class=\"text-lg font-semibold\" x-data=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 178, Col: 76}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 184, Col: 76}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var29)
 			if templ_7745c5c3_Err != nil {
@@ -837,7 +837,7 @@ func HeaderTitle(title string, downloadLink string) templ.Component {
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 181, Col: 19}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 187, Col: 19}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var30)
 				if templ_7745c5c3_Err != nil {
@@ -855,7 +855,7 @@ func HeaderTitle(title string, downloadLink string) templ.Component {
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 183, Col: 11}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 189, Col: 11}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {
@@ -925,14 +925,14 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 			templ_7745c5c3_Var33 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<div class=\"flex min-w-0 flex-1 items-center justify-center p-0 m-0 font-semibold text-center\"><span x-show=\"!$store.global.onlineBook\" title=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<div class=\"flex min-w-0 flex-1 items-center justify-center p-0 m-0 font-semibold text-center\"><span x-cloak x-show=\"!$store.global.onlineBook\" title=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 195, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 201, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var34)
 		if templ_7745c5c3_Err != nil {
@@ -945,7 +945,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 		var templ_7745c5c3_Var35 string
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 195, Col: 113}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 201, Col: 121}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -956,14 +956,14 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 			return templ_7745c5c3_Err
 		}
 		if view.HasSwitchTarget() {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<div x-show=\"$store.global.onlineBook\" x-data=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<div x-cloak x-show=\"$store.global.onlineBook\" x-data=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var36 string
 			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.ResolveAttributeValue(BookSwitchXData(""))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 199, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 206, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var36)
 			if templ_7745c5c3_Err != nil {
@@ -976,7 +976,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 			var templ_7745c5c3_Var37 string
 			templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 204, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 211, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var37)
 			if templ_7745c5c3_Err != nil {
@@ -989,7 +989,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 			var templ_7745c5c3_Var38 string
 			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.ResolveAttributeValue(BookSwitchLabel())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 207, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 214, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var38)
 			if templ_7745c5c3_Err != nil {
@@ -1007,7 +1007,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 				var templ_7745c5c3_Var39 string
 				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.ResolveAttributeValue(item.BookID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 210, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 217, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var39)
 				if templ_7745c5c3_Err != nil {
@@ -1030,7 +1030,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 				var templ_7745c5c3_Var40 string
 				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(item.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 210, Col: 75}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 217, Col: 75}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 				if templ_7745c5c3_Err != nil {
@@ -1046,14 +1046,14 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<span x-show=\"$store.global.onlineBook\" title=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<span x-cloak x-show=\"$store.global.onlineBook\" title=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var41 string
 			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 215, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 222, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var41)
 			if templ_7745c5c3_Err != nil {
@@ -1066,7 +1066,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 			var templ_7745c5c3_Var42 string
 			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 215, Col: 113}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 222, Col: 121}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 			if templ_7745c5c3_Err != nil {
@@ -1107,7 +1107,7 @@ func ReSortIcon() templ.Component {
 			templ_7745c5c3_Var43 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "<!-- 文件重排序 Dropdown Menu，data-dropdown-trigger=\"{hover|click}\" 二选一。 --><svg x-show=\"$store.global.onlineBook && !window.location.href.includes('settings') && !window.location.href.includes('upload')\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\" id=\"ResortButton\" data-dropdown-toggle=\"ReSortDropdownMenu\" data-dropdown-trigger=\"hover\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path d=\"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z\" fill=\"currentColor\"></path></svg><div id=\"ReSortDropdownMenu\" x-show=\"$store.global.onlineBook\" x-data=\"{\n                    getCurrentSortBy() {\n                        // 根据URL路径决定使用哪个cookie参数名\n                        let paramName = '';\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        if (currentUrl.includes('/flip/')) {\n                            paramName = 'FlipSortBy';\n                        } else if (currentUrl.includes('/scroll/')) {\n                            paramName = 'ScrollSortBy';\n                        } else {\n                            paramName = 'ShelfSortBy';\n                        }\n\n                        // 获取cookie\n                        const cookies = document.cookie.split(';');\n                        for (let i = 0; i < cookies.length; i++) {\n                            const cookie = cookies[i].trim();\n                            if (cookie.startsWith(paramName + '=')) {\n                                return decodeURIComponent(cookie.substring(paramName.length + 1));\n                            }\n                        }\n                        return ''; // 默认值\n                    },\n                    isShelfSortMenu() {\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        return !currentUrl.includes('/flip/') && !currentUrl.includes('/scroll/');\n                    },\n                    setCookie(value) {\n                        // 根据URL路径决定使用哪个cookie参数名\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        if (currentUrl.includes('/flip/')) {\n                            paramName = 'FlipSortBy';\n                        } else if (currentUrl.includes('/scroll/')) {\n                            paramName = 'ScrollSortBy';\n                        } else {\n                            paramName = 'ShelfSortBy';\n                        }\n                        // 设置cookie，过期时间为365天\n                        const expirationDate = new Date();\n                        expirationDate.setDate(expirationDate.getDate() + 365);\n                        document.cookie = paramName + '=' + encodeURIComponent(value) + '; expires=' + expirationDate.toUTCString() + '; path=/; SameSite=Lax';\n                        window.location.reload();\n                    }\n                }\" class=\"panel-surface z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700\" x-init=\"currentSortBy = getCurrentSortBy()\"><ul class=\"py-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"ResortButton\"><li><a href=\"#\" @click.prevent=\"setCookie('filename')\" x-text=\"i18next.t('sort_by_filename')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('modify_time')\" x-text=\"i18next.t('sort_by_modify_time')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filesize')\" x-text=\"i18next.t('sort_by_filesize')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li x-show=\"isShelfSortMenu()\"><a href=\"#\" @click.prevent=\"setCookie('last_read')\" x-text=\"i18next.t('sort_by_last_read')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'last_read'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filename_reverse')\" x-text=\"i18next.t('sort_by_filename_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename_reverse'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('modify_time_reverse')\" x-text=\"i18next.t('sort_by_modify_time_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time_reverse'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filesize_reverse')\" x-text=\"i18next.t('sort_by_filesize_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize_reverse'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li></ul></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "<!-- 文件重排序 Dropdown Menu，data-dropdown-trigger=\"{hover|click}\" 二选一。 --><svg x-cloak x-show=\"$store.global.onlineBook && !window.location.href.includes('settings') && !window.location.href.includes('upload')\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\" id=\"ResortButton\" data-dropdown-toggle=\"ReSortDropdownMenu\" data-dropdown-trigger=\"hover\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 24 24\"><path d=\"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z\" fill=\"currentColor\"></path></svg><div id=\"ReSortDropdownMenu\" x-cloak x-show=\"$store.global.onlineBook\" x-data=\"{\n                    getCurrentSortBy() {\n                        // 根据URL路径决定使用哪个cookie参数名\n                        let paramName = '';\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        if (currentUrl.includes('/flip/')) {\n                            paramName = 'FlipSortBy';\n                        } else if (currentUrl.includes('/scroll/')) {\n                            paramName = 'ScrollSortBy';\n                        } else {\n                            paramName = 'ShelfSortBy';\n                        }\n\n                        // 获取cookie\n                        const cookies = document.cookie.split(';');\n                        for (let i = 0; i < cookies.length; i++) {\n                            const cookie = cookies[i].trim();\n                            if (cookie.startsWith(paramName + '=')) {\n                                return decodeURIComponent(cookie.substring(paramName.length + 1));\n                            }\n                        }\n                        return ''; // 默认值\n                    },\n                    isShelfSortMenu() {\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        return !currentUrl.includes('/flip/') && !currentUrl.includes('/scroll/');\n                    },\n                    setCookie(value) {\n                        // 根据URL路径决定使用哪个cookie参数名\n                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;\n                        if (currentUrl.includes('/flip/')) {\n                            paramName = 'FlipSortBy';\n                        } else if (currentUrl.includes('/scroll/')) {\n                            paramName = 'ScrollSortBy';\n                        } else {\n                            paramName = 'ShelfSortBy';\n                        }\n                        // 设置cookie，过期时间为365天\n                        const expirationDate = new Date();\n                        expirationDate.setDate(expirationDate.getDate() + 365);\n                        document.cookie = paramName + '=' + encodeURIComponent(value) + '; expires=' + expirationDate.toUTCString() + '; path=/; SameSite=Lax';\n                        window.location.reload();\n                    }\n                }\" class=\"panel-surface z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700\" x-init=\"currentSortBy = getCurrentSortBy()\"><ul class=\"py-0 text-sm text-gray-700 dark:text-gray-200\" aria-labelledby=\"ResortButton\"><li><a href=\"#\" @click.prevent=\"setCookie('filename')\" x-text=\"i18next.t('sort_by_filename')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('modify_time')\" x-text=\"i18next.t('sort_by_modify_time')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filesize')\" x-text=\"i18next.t('sort_by_filesize')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li x-show=\"isShelfSortMenu()\"><a href=\"#\" @click.prevent=\"setCookie('last_read')\" x-text=\"i18next.t('sort_by_last_read')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'last_read'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filename_reverse')\" x-text=\"i18next.t('sort_by_filename_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename_reverse'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('modify_time_reverse')\" x-text=\"i18next.t('sort_by_modify_time_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time_reverse'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li><li><a href=\"#\" @click.prevent=\"setCookie('filesize_reverse')\" x-text=\"i18next.t('sort_by_filesize_reverse')\" :class=\"{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize_reverse'}\" class=\"panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white\"></a></li></ul></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

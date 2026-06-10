@@ -21,7 +21,7 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 		<div class="w-full h-12 flex flex-row justify-center items-center px-1 py-1 m-0 border-b-2 border-slate-400 dark:border-slate-200">
 			<!-- 返回图标 -->
 			if showReturnIcon {
-				<a x-show="!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')" href={ templ.SafeURL(config.PrefixPath(returnUrl)) }>
+				<a x-cloak x-show="!$store.global.localBook" href={ templ.SafeURL(config.PrefixPath(returnUrl)) }>
 					<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 						@svg.Return()
 					</div>
@@ -112,11 +112,12 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 			<div class="flex-1 w-full place-holder"></div>
 			<!-- 二维码 -->
 			<div
-				x-show="$store.global.onlineBook || (window.ComiGoReaderMode && (window.location.protocol === 'http:' || window.location.protocol === 'https:'))"
+				x-cloak
+				x-show="$store.global.onlineBook || (window.ComiGoReaderMode && $store.global.serverReachable)"
 				class="w-32 h-32 p-0 mt-2 mb-2"
 				x-data="{ qrcodeSrc: '', qrcodeImageSrc: '' }"
 				x-init="
-					if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+					if ($store.global.serverReachable) {
 						qrcodeSrc = window.location.origin + window.ComiGoPath('/api/qrcode.png') + '?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
 						// 使用 fetch 加载二维码
 						fetch(qrcodeSrc)

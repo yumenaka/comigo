@@ -11,6 +11,7 @@ import (
 templ DownloadButton(c echo.Context, book *model.Book) {
 	<!-- 下载按钮组件，便携模式不可见 -->
 	<div
+		x-cloak
 		x-show="$store.global.onlineBook"
 		class="w-full mt-2 mb-2 pb-1 flex flex-row flex-wrap justify-center items-center border-2 border-gray-500 dark:border-gray-200 rounded relative"
 	>

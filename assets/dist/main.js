@@ -6763,6 +6763,14 @@ const $8def34bab28fb2bd$var$comigoRelativePath = (pathname)=>window.ComiGoRelati
 const $8def34bab28fb2bd$var$randomThemeName = 'random';
 // 持久化值可能为空或历史异常值，统一转字符串避免 toString 抛错。
 const $8def34bab28fb2bd$var$themeToString = (theme)=>theme === undefined || theme === null ? '' : theme.toString();
+const $8def34bab28fb2bd$var$url = new URL(window.location.href);
+const $8def34bab28fb2bd$var$currentRelativePath = $8def34bab28fb2bd$var$comigoRelativePath($8def34bab28fb2bd$var$url.pathname);
+// 运行环境状态集中在这里计算，模板只读取 store，避免各处重复解析 URL。
+const $8def34bab28fb2bd$var$serverReachable = $8def34bab28fb2bd$var$url.protocol === 'http:' || $8def34bab28fb2bd$var$url.protocol === 'https:';
+const $8def34bab28fb2bd$var$localBook = $8def34bab28fb2bd$var$url.protocol === 'file:' || $8def34bab28fb2bd$var$url.protocol === 'content:';
+const $8def34bab28fb2bd$var$staticHtmlBook = window.location.toString().endsWith('.html');
+const $8def34bab28fb2bd$var$readerPage = window.ComiGoReaderMode || $8def34bab28fb2bd$var$currentRelativePath.includes('/reader');
+const $8def34bab28fb2bd$var$onlineBook = !$8def34bab28fb2bd$var$readerPage && $8def34bab28fb2bd$var$serverReachable && !$8def34bab28fb2bd$var$staticHtmlBook;
 if (window.ComiGoForceRandomTheme) try {
     // Alpine Persist 当前使用无前缀 key；保留旧前缀 key 兼容历史数据。
     localStorage.setItem('global.theme', JSON.stringify($8def34bab28fb2bd$var$randomThemeName));
@@ -6788,7 +6796,14 @@ const $8def34bab28fb2bd$var$initClientID = `Client_${$8def34bab28fb2bd$var$rando
 Alpine.store('global', {
     nowPageNum: 1,
     allPageNum: 1,
-    onlineBook: true,
+    // 在线书籍模式：可访问后端，且不是本地 reader 或静态 HTML。
+    onlineBook: $8def34bab28fb2bd$var$onlineBook,
+    // 本地便携模式：file:// 或 Android content:// 打开。
+    localBook: $8def34bab28fb2bd$var$localBook,
+    // 静态 HTML 导出模式：用于控制便携 HTML 标题等显示。
+    staticHtmlBook: $8def34bab28fb2bd$var$staticHtmlBook,
+    // 当前页面是否可访问 HTTP 后端能力，例如二维码和阅读历史。
+    serverReachable: $8def34bab28fb2bd$var$serverReachable,
     // 播放器：音量（0~100）
     playerVolume: Alpine.$persist(100).as('global.playerVolume'),
     // 播放器：是否静音
@@ -7103,13 +7118,8 @@ if (![
 document.addEventListener('alpine:initialized', ()=>{
     Alpine.store('global').init();
 });
-const $8def34bab28fb2bd$var$url = new URL(window.location.href);
-const $8def34bab28fb2bd$var$currentRelativePath = $8def34bab28fb2bd$var$comigoRelativePath($8def34bab28fb2bd$var$url.pathname);
 if ($8def34bab28fb2bd$var$currentRelativePath.includes('/flip/')) Alpine.store('global').readMode = 'flip';
 else if ($8def34bab28fb2bd$var$currentRelativePath.includes('/scroll/')) Alpine.store('global').readMode = 'scroll';
-if (window.ComiGoReaderMode || $8def34bab28fb2bd$var$currentRelativePath.includes('/reader')) Alpine.store('global').onlineBook = false;
-else if (($8def34bab28fb2bd$var$url.protocol === 'http:' || $8def34bab28fb2bd$var$url.protocol === 'https:') && !window.location.toString().endsWith('.html')) Alpine.store('global').onlineBook = true;
-else Alpine.store('global').onlineBook = false;
 
 
 // BookShelf 书架设置

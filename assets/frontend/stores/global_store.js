@@ -63,6 +63,14 @@ const comigoRelativePath = (pathname) => (window.ComiGoRelativePath ? window.Com
 const randomThemeName = 'random';
 // 持久化值可能为空或历史异常值，统一转字符串避免 toString 抛错。
 const themeToString = (theme) => (theme === undefined || theme === null ? '' : theme.toString());
+const url = new URL(window.location.href);
+const currentRelativePath = comigoRelativePath(url.pathname);
+// 运行环境状态集中在这里计算，模板只读取 store，避免各处重复解析 URL。
+const serverReachable = url.protocol === 'http:' || url.protocol === 'https:';
+const localBook = url.protocol === 'file:' || url.protocol === 'content:';
+const staticHtmlBook = window.location.toString().endsWith('.html');
+const readerPage = window.ComiGoReaderMode || currentRelativePath.includes('/reader');
+const onlineBook = !readerPage && serverReachable && !staticHtmlBook;
 
 if (window.ComiGoForceRandomTheme) {
     try {
@@ -97,7 +105,14 @@ const initClientID = `Client_${randomString}_${system}_${browser}`;
 Alpine.store('global', {
     nowPageNum: 1,
     allPageNum: 1,
-    onlineBook: true,
+    // 在线书籍模式：可访问后端，且不是本地 reader 或静态 HTML。
+    onlineBook: onlineBook,
+    // 本地便携模式：file:// 或 Android content:// 打开。
+    localBook: localBook,
+    // 静态 HTML 导出模式：用于控制便携 HTML 标题等显示。
+    staticHtmlBook: staticHtmlBook,
+    // 当前页面是否可访问 HTTP 后端能力，例如二维码和阅读历史。
+    serverReachable: serverReachable,
     // 播放器：音量（0~100）
     playerVolume: Alpine.$persist(100).as('global.playerVolume'),
     // 播放器：是否静音
@@ -410,19 +425,8 @@ document.addEventListener('alpine:initialized', () => {
     Alpine.store('global').init();
 });
 
-const url = new URL(window.location.href);
-const currentRelativePath = comigoRelativePath(url.pathname);
-
 if (currentRelativePath.includes('/flip/')) {
     Alpine.store('global').readMode = 'flip';
 } else if (currentRelativePath.includes('/scroll/')) {
     Alpine.store('global').readMode = 'scroll';
-}
-
-if (window.ComiGoReaderMode || currentRelativePath.includes('/reader')) {
-    Alpine.store('global').onlineBook = false;
-} else if ((url.protocol === 'http:' || url.protocol === 'https:') && !window.location.toString().endsWith('.html')) {
-    Alpine.store('global').onlineBook = true;
-} else {
-    Alpine.store('global').onlineBook = false;
 }

@@ -81,14 +81,14 @@ func ReadingHistoryWithLimit(limit int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" x-show=\"isOnline()\" x-init=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" x-cloak x-show=\"$store.global.serverReachable\" x-init=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(getReadingHistoryXInit(limit))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/reading_history.templ`, Line: 22, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/reading_history.templ`, Line: 23, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -101,7 +101,7 @@ func ReadingHistoryWithLimit(limit int) templ.Component {
 		var templ_7745c5c3_Var5 templ.SafeURL
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath("/settings#reading_history")))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/reading_history.templ`, Line: 122, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/reading_history.templ`, Line: 123, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -123,12 +123,12 @@ func getReadingHistoryXData(limit int) string {
 		loading: false,
 		limit: ` + strconv.Itoa(limit) + `,
 		totalCount: 0,
-		isOnline() {
+		isServerReachable() {
 			// 便携 HTML 以 file:// 打开时不能请求后端 API。
-			return window.location.protocol === 'http:' || window.location.protocol === 'https:';
+			return Alpine.store('global')?.serverReachable === true;
 		},
 		async refresh() {
-			if (!this.isOnline()) return;
+			if (!this.isServerReachable()) return;
 			this.loading = true;
 			try {
 				const response = await fetch(window.ComiGoPath('/api/reading-history') + '?limit=` + strconv.Itoa(limit) + `');

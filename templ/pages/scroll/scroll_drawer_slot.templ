@@ -12,6 +12,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	<!-- 添加书签按钮 -->
 	if book != nil {
 		<button
+			x-cloak
 			x-show="$store.global.onlineBook"
 			x-data="{ adding: false }"
 			@click="
@@ -56,6 +57,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	@common.DownloadButton(c, book)
 	<!-- 远程同步阅读页码 -->
 	<label
+		x-cloak
 		x-show="$store.global.onlineBook"
 		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
@@ -98,6 +100,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	</div>
 	<!-- 【自动切边】 -->
 	<label
+		x-cloak
 		x-show="$store.global.onlineBook"
 		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
@@ -114,6 +117,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	</label>
 	<!-- 【切边阈值】 -->
 	<div
+		x-cloak
 		x-show="$store.global.onlineBook&&$store.global.autoCrop"
 		x-transition
 		class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
@@ -231,6 +235,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 	</div>
 	<!-- 【压缩图片】 -->
 	<label
+		x-cloak
 		x-show="$store.global.onlineBook"
 		class="inline-flex items-center w-full my-1 cursor-pointer border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
@@ -246,7 +251,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 		<span class="font-medium ms-3" x-text="i18next.t('compress_image')"></span>
 	</label>
 	<!-- 【压缩图片:宽度】 -->
-	<div x-show="$store.global.autoResize" x-transition class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-cloak x-show="$store.global.autoResize && $store.global.onlineBook" x-transition class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label
 			for="autoResizeWidth"
 			class="block w-full mb-0 font-medium"
@@ -267,7 +272,7 @@ templ DrawerSlot(c echo.Context, book *model.Book) {
 // ScrollLoadModeControls 是 scroll 页面放在阅读历史上方的加载策略控件。
 templ ScrollLoadModeControls() {
 	<!-- 【卷轴加载策略】 -->
-	<div x-show="$store.global.onlineBook" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
+	<div x-cloak x-show="$store.global.onlineBook" class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5">
 		<label
 			for="scrollLoadMode"
 			class="block w-full mb-1 font-medium"
@@ -286,7 +291,8 @@ templ ScrollLoadModeControls() {
 	</div>
 	<!-- 【页数上限】 -->
 	<div
-		x-show="$store.scroll.loadMode === 'lazy' || $store.scroll.loadMode === 'paged'"
+		x-cloak
+		x-show="$store.global.onlineBook && ($store.scroll.loadMode === 'lazy' || $store.scroll.loadMode === 'paged')"
 		x-transition
 		class="relative w-full my-2 border-2 border-gray-500 dark:border-gray-200 rounded px-2 py-1.5"
 	>
