@@ -115,7 +115,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 						<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
 					</label>
-					<div x-text={ getTranslations("enable_tailscale_description") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
+					<div x-text={ getTranslations("enable_tailscale_description") } class="w-auto py-1 text-xs text-base-content wrap-break-word"></div>
 				</div>
 				<!-- Tailscale服务主机名-->
 				<div
@@ -133,7 +133,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 					/>
 					<div
-						class="w-full py-1 text-xs text-base-content wrap-break-word"
+						class="w-auto py-1 text-xs text-base-content wrap-break-word"
 						x-text={ getTranslations("tailscale_hostname_description") }
 					></div>
 					<div class="bg-red-600"></div>
@@ -155,7 +155,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						max={ strconv.Itoa(65535) }
 						min={ strconv.Itoa(0) }
 					/>
-					<div class="w-full py-1 text-xs text-base-content wrap-break-word" x-text={ getTranslations("tailscale_port_description") }></div>
+					<div class="w-auto py-1 text-xs text-base-content wrap-break-word" x-text={ getTranslations("tailscale_port_description") }></div>
 					<div class="bg-red-600"></div>
 				</div>
 				<!-- Tailscale预授权密钥 -->
@@ -174,7 +174,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 					/>
 					<div
-						class="w-full py-1 text-xs text-blue-500 hover:text-blue-600 underline wrap-break-word"
+						class="w-auto py-1 text-xs text-blue-500 hover:text-blue-600 underline wrap-break-word"
 					><a href="https://login.tailscale.com/admin/settings/keys" target="_blank" x-text={ getTranslations("tailscale_auth_key_description") } class="wrap-break-word"></a></div>
 					<div class="bg-red-600"></div>
 				</div>
@@ -217,7 +217,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 						<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
 					</label>
-					<div x-text={ getTranslations("funnel_login_check_description") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
+					<div x-text={ getTranslations("funnel_login_check_description") } class="w-auto py-1 text-xs text-base-content wrap-break-word"></div>
 				</div>
 				<!-- Funnel模式（公网访问） -->
 				<div
@@ -257,7 +257,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
 						<span class="absolute inset-y-0 inset-s-0 w-6 h-6 m-1 transition-all bg-white rounded-full peer-checked:inset-s-6"></span>
 					</label>
-					<div x-text={ getTranslations("funnel_tunnel_description") } class="w-full py-1 text-xs text-base-content wrap-break-word"></div>
+					<div x-text={ getTranslations("funnel_tunnel_description") } class="w-auto py-1 text-xs text-base-content wrap-break-word"></div>
 				</div>
 				<!-- 帮助面板：如何设置Funnel ACL 权限 -->
 				<div

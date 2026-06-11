@@ -33,7 +33,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 		<!-- 进度条背景 显示与隐藏有过渡效果，不可点击。-->
 		<div id="progress-bar" class="absolute pointer-events-none top-0 left-0 h-full transition-opacity duration-500 bg-blue-500/30" style="width: 0%;"></div>
 		<!-- 上传按钮 -->
-		<button type="button" id="upload-button" class="panel-control w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300 font-semibold disabled:cursor-not-allowed" disabled x-text="i18next.t('upload_file')">上传文件</button>
+		<button type="button" id="upload-button" class="panel-control w-full py-2 mt-6 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed" disabled x-text="i18next.t('upload_file')">上传文件</button>
 		<!-- 上传结果显示区域 -->
 		<div id="result" class="mt-4"></div>
 	</div>

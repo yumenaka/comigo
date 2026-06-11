@@ -30,7 +30,7 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 			disabled?={ config.GetCfg().ReadOnlyMode }
 			@change={ "updateNumberConfig('" + name + "', $event.target.value, " + strconv.Itoa(min) + ", " + strconv.Itoa(max) + ")" }
 		/>
-		<div class="w-full py-1 text-left text-xs text-base-content" x-text={ getTranslations(description) }></div>
+		<div class="w-auto py-1 text-left text-xs text-base-content" x-text={ getTranslations(description) }></div>
 		<div class="bg-red-600"></div>
 	</div>
 }

@@ -2960,10 +2960,6 @@
     }
   }
 
-  .text-blue-900 {
-    color: var(--color-blue-900);
-  }
-
   .text-gray-300 {
     color: var(--color-gray-300);
   }
@@ -3543,10 +3539,6 @@
 
   .disabled\:cursor-not-allowed:disabled {
     cursor: not-allowed;
-  }
-
-  .disabled\:bg-blue-300:disabled {
-    background-color: var(--color-blue-300);
   }
 
   .disabled\:opacity-50:disabled {
@@ -4177,22 +4169,6 @@ body[data-theme="red-white-game"] select option {
   color: var(--panel-control-content);
 }
 
-body[data-theme="red-white-game"] button.bg-blue-200, body[data-theme="red-white-game"] a.bg-blue-200, body[data-theme="red-white-game"] button.bg-blue-300, body[data-theme="red-white-game"] a.bg-blue-300, body[data-theme="red-white-game"] button.bg-blue-400, body[data-theme="red-white-game"] a.bg-blue-400, body[data-theme="red-white-game"] button.bg-blue-500, body[data-theme="red-white-game"] a.bg-blue-500, body[data-theme="red-white-game"] button.bg-blue-600, body[data-theme="red-white-game"] a.bg-blue-600, body[data-theme="red-white-game"] button.bg-cyan-200, body[data-theme="red-white-game"] a.bg-cyan-200, body[data-theme="red-white-game"] button.bg-green-300, body[data-theme="red-white-game"] a.bg-green-300, body[data-theme="red-white-game"] button.bg-green-500, body[data-theme="red-white-game"] a.bg-green-500, body[data-theme="red-white-game"] button.bg-green-600, body[data-theme="red-white-game"] a.bg-green-600, body[data-theme="red-white-game"] .panel-control {
-  background-image: linear-gradient(#fff7df2e 50%, #0000 50%);
-  background-size: 100% 8px;
-  box-shadow: inset 0 0 0 2px #fff7df2e, 0 3px #5b321cb8;
-  background-color: var(--panel-control) !important;
-  color: var(--panel-control-content) !important;
-}
-
-body[data-theme="red-white-game"] button.bg-blue-200:hover, body[data-theme="red-white-game"] a.bg-blue-200:hover, body[data-theme="red-white-game"] button.bg-blue-300:hover, body[data-theme="red-white-game"] a.bg-blue-300:hover, body[data-theme="red-white-game"] button.bg-blue-400:hover, body[data-theme="red-white-game"] a.bg-blue-400:hover, body[data-theme="red-white-game"] button.bg-blue-500:hover, body[data-theme="red-white-game"] a.bg-blue-500:hover, body[data-theme="red-white-game"] button.bg-blue-600:hover, body[data-theme="red-white-game"] a.bg-blue-600:hover, body[data-theme="red-white-game"] button.bg-cyan-200:hover, body[data-theme="red-white-game"] a.bg-cyan-200:hover, body[data-theme="red-white-game"] button.bg-green-300:hover, body[data-theme="red-white-game"] a.bg-green-300:hover, body[data-theme="red-white-game"] button.bg-green-500:hover, body[data-theme="red-white-game"] a.bg-green-500:hover, body[data-theme="red-white-game"] button.bg-green-600:hover, body[data-theme="red-white-game"] a.bg-green-600:hover {
-  background-color: var(--panel-control-hover) !important;
-}
-
-body[data-theme="red-white-game"] .panel-control.bg-blue-400, body[data-theme="red-white-game"] .panel-control.bg-blue-500, body[data-theme="red-white-game"] .panel-control.bg-blue-600, body[data-theme="red-white-game"] .panel-control.bg-cyan-200, body[data-theme="red-white-game"] .panel-control.bg-green-300, body[data-theme="red-white-game"] .panel-control.bg-green-500, body[data-theme="red-white-game"] .panel-control.bg-green-600 {
-  background-color: var(--panel-control-active) !important;
-}
-
 body[data-theme="red-white-game"] input[type="checkbox"].peer + div, body[data-theme="red-white-game"] input[type="checkbox"].peer + span {
   background-color: var(--panel-control-muted) !important;
 }
@@ -4519,11 +4495,6 @@ body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white
 body[data-theme="cyberpunk"] select, body[data-theme="cyberpunk"] select:hover, body[data-theme="cyberpunk"] select:focus-visible, body[data-theme="cyberpunk"] select option {
   background-color: var(--panel-surface) !important;
   color: var(--panel-control) !important;
-}
-
-body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
-  background-color: var(--panel-control-active) !important;
-  color: var(--panel-control-active-content) !important;
 }
 
 :is(button, a.panel-control, [role="button"], [data-drawer-target], [data-drawer-show], [data-drawer-hide], [data-modal-target], [data-modal-toggle], [onclick]):hover:not(:disabled) {

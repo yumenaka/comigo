@@ -248,7 +248,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\"> <span class=\"absolute top-0 -right-20 place-content-center text-black\"><button x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\"> <span class=\"absolute top-0 -right-20 place-content-center\"><button x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -297,7 +297,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"panel-control w-16 h-10.5 mx-2 my-0 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed\">添加</button></span></div></div><div x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"panel-control w-16 h-10.5 mx-2 my-0 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\">添加</button></span></div></div><div x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -310,7 +310,7 @@ func StringArrayConfig(name string, values []string, description string) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"w-full py-1 text-left mx-2 text-xs text-base-content\"></div><div class=\"bg-red-600\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"w-auto py-1 text-left mx-2 text-xs text-base-content\"></div><div class=\"bg-red-600\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

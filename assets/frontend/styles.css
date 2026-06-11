@@ -215,11 +215,6 @@ body[data-theme="cyberpunk"] select option {
   color: var(--panel-control) !important;
 }
 
-body:is([data-theme="cupcake"], [data-theme="cyberpunk"], [data-theme="red-white-game"], [data-theme="dracula"], [data-theme="valentine"], [data-theme="cmyk"], [data-theme="halloween"], [data-theme="coffee"], [data-theme="winter"], [data-theme="nord"]) :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
-  background-color: var(--panel-control-active) !important;
-  color: var(--panel-control-active-content) !important;
-}
-
 /* 按钮保留各自 Tailwind hover 色，再按主题明暗做轻微亮度提示。 */
 :is(button, a.panel-control, [role="button"], [data-drawer-target], [data-drawer-show], [data-drawer-hide], [data-modal-target], [data-modal-toggle], [onclick]):hover:not(:disabled) {
   filter: var(--button-hover-filter);

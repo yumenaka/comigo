@@ -103,7 +103,7 @@ func UserInfoConfig() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"w-full py-1 text-left text-xs text-base-content\"></div></div><div class=\"grid grid-cols-1 gap-3\"><div><label x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"w-auto py-1 text-left text-xs text-base-content\"></div></div><div class=\"grid grid-cols-1 gap-3\"><div><label x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -269,7 +269,7 @@ func UserInfoConfig() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" x-text=\"saving ? i18next.t('saving') : i18next.t('save')\">SAVE</button></div><div class=\"w-full py-1 text-xs text-base-content\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" x-text=\"saving ? i18next.t('saving') : i18next.t('save')\">SAVE</button></div><div class=\"w-auto py-1 text-xs text-base-content\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

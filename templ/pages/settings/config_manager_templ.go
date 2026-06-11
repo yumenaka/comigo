@@ -173,7 +173,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 			return templ_7745c5c3_Err
 		}
 		if HomeDirectoryConfig != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div id=\"HomeDirectoryConfigDiv\" class=\"panel-control w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div id=\"HomeDirectoryConfigDiv\" class=\"w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -348,7 +348,7 @@ func ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirecto
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\">DELETE</button></div><!-- 设置管理功能的说明 --><div class=\"w-full py-1 text-xs text-base-content\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\">DELETE</button></div><!-- 设置管理功能的说明 --><div class=\"w-auto py-1 text-xs text-base-content\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

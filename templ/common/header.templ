@@ -201,7 +201,6 @@ templ HeaderQuickJumpTitleView(title string, view BookSwitchView) {
 		<span x-cloak x-show="!$store.global.onlineBook" title={ title } class="min-w-0 truncate text-lg font-semibold">{ title }</span>
 		if view.HasSwitchTarget() {
 			<div
-				x-cloak
 				x-show="$store.global.onlineBook"
 				x-data={ BookSwitchXData("") }
 				class="flex min-w-0 max-w-full flex-1 items-center justify-center"
@@ -219,7 +218,7 @@ templ HeaderQuickJumpTitleView(title string, view BookSwitchView) {
 				</select>
 			</div>
 		} else {
-			<span x-cloak x-show="$store.global.onlineBook" title={ title } class="min-w-0 truncate text-lg font-semibold">{ title }</span>
+			<span x-show="$store.global.onlineBook" title={ title } class="min-w-0 truncate text-lg font-semibold">{ title }</span>
 		}
 	</div>
 }

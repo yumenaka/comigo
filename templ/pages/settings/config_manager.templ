@@ -79,7 +79,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 					if HomeDirectoryConfig != "" {
 						<div
 							id="HomeDirectoryConfigDiv"
-							class="panel-control w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15"
+							class="w-2/3 flex items-center justify-center mx-1 my-1 text-xs line-clamp-2 bg-blue-300 rounded min-h-15"
 						>
 							{ HomeDirectoryConfig }
 						</div>
@@ -148,7 +148,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				</button>
 			</div>
 			<!-- 设置管理功能的说明 -->
-			<div class="w-full py-1 text-xs text-base-content" x-text={ getTranslations("config_manager_description") }>
+			<div class="w-auto py-1 text-xs text-base-content" x-text={ getTranslations("config_manager_description") }>
 				点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。
 			</div>
 		</div>

@@ -956,14 +956,14 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 			return templ_7745c5c3_Err
 		}
 		if view.HasSwitchTarget() {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<div x-cloak x-show=\"$store.global.onlineBook\" x-data=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<div x-show=\"$store.global.onlineBook\" x-data=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var36 string
 			templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.ResolveAttributeValue(BookSwitchXData(""))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 206, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 205, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var36)
 			if templ_7745c5c3_Err != nil {
@@ -976,7 +976,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 			var templ_7745c5c3_Var37 string
 			templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 211, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 210, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var37)
 			if templ_7745c5c3_Err != nil {
@@ -989,7 +989,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 			var templ_7745c5c3_Var38 string
 			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.ResolveAttributeValue(BookSwitchLabel())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 214, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 213, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var38)
 			if templ_7745c5c3_Err != nil {
@@ -1007,7 +1007,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 				var templ_7745c5c3_Var39 string
 				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.ResolveAttributeValue(item.BookID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 217, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 216, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var39)
 				if templ_7745c5c3_Err != nil {
@@ -1030,7 +1030,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 				var templ_7745c5c3_Var40 string
 				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(item.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 217, Col: 75}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 216, Col: 75}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 				if templ_7745c5c3_Err != nil {
@@ -1046,14 +1046,14 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<span x-cloak x-show=\"$store.global.onlineBook\" title=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<span x-show=\"$store.global.onlineBook\" title=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var41 string
 			templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.ResolveAttributeValue(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 222, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 221, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var41)
 			if templ_7745c5c3_Err != nil {
@@ -1066,7 +1066,7 @@ func HeaderQuickJumpTitleView(title string, view BookSwitchView) templ.Component
 			var templ_7745c5c3_Var42 string
 			templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 222, Col: 121}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/header.templ`, Line: 221, Col: 113}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 			if templ_7745c5c3_Err != nil {

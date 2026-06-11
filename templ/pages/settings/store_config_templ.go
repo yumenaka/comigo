@@ -195,7 +195,7 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"panel-control shrink-0 ml-2 inline-flex h-8 w-8 items-center justify-center border rounded shadow font-semibold focus:outline-none focus:ring bg-blue-100 text-blue-900 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed\"><svg aria-hidden=\"true\" class=\"h-4 w-4\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 12a9 9 0 1 1-2.64-6.36\"></path> <path d=\"M21 3v6h-6\"></path></svg></button> <button x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"panel-control shrink-0 ml-2 inline-flex h-8 w-8 items-center justify-center border rounded shadow font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\"><svg aria-hidden=\"true\" class=\"h-4 w-4\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 12a9 9 0 1 1-2.64-6.36\"></path> <path d=\"M21 3v6h-6\"></path></svg></button> <button x-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -264,7 +264,7 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " @click=\"rescanAllStores()\" class=\"panel-control w-28 h-10 px-2 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed\">重新扫描</button></div><hr class=\"my-2 mx-4 border-gray-400 border-dashed dark:border-gray-500\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " @click=\"rescanAllStores()\" class=\"panel-control w-28 h-10 px-2 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\">重新扫描</button></div><hr class=\"my-2 mx-4 border-gray-400 border-dashed dark:border-gray-500\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -393,7 +393,7 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" class=\"panel-control w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold text-black focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed\">添加</button></div></div><div x-html=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" class=\"panel-control w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\">添加</button></div></div><div x-html=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -406,7 +406,7 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" class=\"w-full py-1 text-left mx-2 text-xs text-base-content\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" class=\"w-auto py-1 text-left mx-2 text-xs text-base-content\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

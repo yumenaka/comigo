@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -19,7 +21,7 @@ const scanFailureCacheFileName = "scan_failures.json"
 var scanFailureCacheMu sync.Mutex
 
 // ScanFailureRecord 记录压缩文件扫描失败时的文件指纹。
-// 后续扫描仅在软件版本、文件大小或修改时间变化后才会再次尝试。
+// 后续扫描仅在文件变化，或版本跨度足够大时才会再次尝试。
 type ScanFailureRecord struct {
 	StoreURL         string    `json:"store_url"`
 	FilePath         string    `json:"file_path"`
@@ -117,8 +119,7 @@ func shouldSkipFailedArchiveFile(storeURL, filePath string, size int64, modTime 
 		return false
 	}
 
-	currentVersion := config.GetVersion()
-	if record.CreatedByVersion != currentVersion ||
+	if shouldRetryFailedArchiveByVersion(record.CreatedByVersion, config.GetVersion()) ||
 		record.FileSize != size ||
 		record.ModifiedUnixNano != modTime.UnixNano() {
 		logger.Infof(locale.GetString("log_scan_failure_cache_retry"), filePath)
@@ -127,6 +128,41 @@ func shouldSkipFailedArchiveFile(storeURL, filePath string, size int64, modTime 
 
 	logger.Infof(locale.GetString("log_scan_failure_cache_skip"), filePath, record.Error)
 	return true
+}
+
+// shouldRetryFailedArchiveByVersion 判断旧版本失败缓存是否需要在当前版本重试。
+// 同一主/次版本下，小幅 patch 升级继续沿用失败缓存；patch 跨度超过 10 才重新尝试。
+func shouldRetryFailedArchiveByVersion(recordVersion, currentVersion string) bool {
+	if recordVersion == currentVersion {
+		return false
+	}
+	recordMajor, recordMinor, recordPatch, okRecord := parseSemanticVersion(recordVersion)
+	currentMajor, currentMinor, currentPatch, okCurrent := parseSemanticVersion(currentVersion)
+	if !okRecord || !okCurrent {
+		return true
+	}
+	if recordMajor != currentMajor || recordMinor != currentMinor {
+		return true
+	}
+	return currentPatch-recordPatch > 10 || currentPatch < recordPatch
+}
+
+// parseSemanticVersion 解析项目使用的 vX.Y.Z 版本号，只关心前三段数字。
+func parseSemanticVersion(version string) (major int, minor int, patch int, ok bool) {
+	version = strings.TrimPrefix(strings.TrimSpace(version), "v")
+	parts := strings.Split(version, ".")
+	if len(parts) != 3 {
+		return 0, 0, 0, false
+	}
+	values := make([]int, 3)
+	for i, part := range parts {
+		value, err := strconv.Atoi(part)
+		if err != nil {
+			return 0, 0, 0, false
+		}
+		values[i] = value
+	}
+	return values[0], values[1], values[2], true
 }
 
 func recordArchiveScanFailure(storeURL, filePath string, size int64, modTime time.Time, isRemote bool, scanErr error) {
