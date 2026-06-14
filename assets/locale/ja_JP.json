@@ -970,6 +970,8 @@
   "upgrade_tray_no_asset": "この環境向けのトレイ版インストーラが見つかりません。",
   "upgrade_tray_restart_failed": "アップデート後の再起動に失敗: %v",
   "upgrade_unsupported_arch": "この OS/アーキテクチャでは self-upgrade に未対応です: %s/%s",
+  "remote_comigo_version_older_warning": "リモート Comigo のバージョンが古いです（リモート %s、ローカル %s）。書庫は追加しましたが、互換性問題を避けるためリモートサービスの更新を推奨します。",
+  "log_remote_comigo_version_check_failed": "リモート Comigo バージョンの確認に失敗しました: %v",
   "upload_disable_hint": "ファイルアップロード機能は無効です",
   "upload_create_file_failed": "ファイル %s を作成できません",
   "upload_file_too_large": "ファイル %s はサイズ制限を超えています",

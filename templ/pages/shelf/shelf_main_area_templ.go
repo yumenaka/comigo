@@ -266,7 +266,7 @@ func MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookIn
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = settings.StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", settings.GetStoreBookCounts(), false).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = settings.StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", settings.GetStoreBookCounts(), false, true).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

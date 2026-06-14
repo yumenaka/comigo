@@ -17,9 +17,12 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/comigo_remote"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
 	"github.com/yumenaka/comigo/tools/sse_hub"
+	"golang.org/x/mod/semver"
 )
 
 // decodeBase64URLStrict 将 base64url（RawURLEncoding，无 padding）解码为原始字符串。
@@ -74,7 +77,7 @@ func reloadHintForNumberConfig(name string) (saveSuccessHint bool, reason string
 
 func renderArrayConfigComponent(configName string, values []string) templ.Component {
 	if configName == "StoreUrls" {
-		return StoreConfig(configName, values, configName+"_Description", GetStoreBookCounts(), true)
+		return StoreConfig(configName, values, configName+"_Description", GetStoreBookCounts(), true, false)
 	}
 	return StringArrayConfig(configName, values, configName+"_Description")
 }
@@ -458,8 +461,9 @@ func AddArrayConfigHandler(c echo.Context) error {
 	logger.Infof(locale.GetString("log_add_array_config_handler"), decodedConfigName)
 
 	var values []string
+	warningMessage := ""
 	if decodedConfigName == "StoreUrls" {
-		values, err = doAddStoreURL(decodedAddValue)
+		values, warningMessage, err = doAddStoreURL(decodedAddValue)
 	} else {
 		values, err = doAdd(decodedConfigName, decodedAddValue)
 	}
@@ -481,8 +485,15 @@ func AddArrayConfigHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"saveSuccessHint": saveSuccessHint,
+		"warningMessage":  warningMessage,
 		"html":            htmlString,
 	})
+}
+
+// renderStoreConfigHTML 渲染当前书库设置片段，供增删重扫后局部替换设置页 UI。
+func renderStoreConfigHTML(ctx context.Context) (string, error) {
+	component := StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", GetStoreBookCounts(), true, false)
+	return renderTemplToString(ctx, component)
 }
 
 func doAdd(configName, addValue string) ([]string, error) {
@@ -499,11 +510,11 @@ func doAdd(configName, addValue string) ([]string, error) {
 }
 
 // doAddStoreURL 只扫描本次新增的书库，避免新增远程书库时重扫所有既有远程服务。
-func doAddStoreURL(storeURL string) ([]string, error) {
+func doAddStoreURL(storeURL string) ([]string, string, error) {
 	values, err := config.GetCfg().AddStringArrayConfig("StoreUrls", storeURL)
 	if err != nil {
 		logger.Errorf(locale.GetString("err_failed_to_add_config_value"), err)
-		return nil, err
+		return nil, "", err
 	}
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
@@ -519,8 +530,58 @@ func doAddStoreURL(storeURL string) ([]string, error) {
 			}
 		}
 	}
-	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonSingleStoreRescan)
+	return values, remoteComigoVersionWarning(storeURL), nil
+}
+
+// doDeleteStoreURL 删除书库配置但不触发通用配置重扫；当前 handler 已自行清理书籍并回传局部 UI。
+func doDeleteStoreURL(storeURL string) ([]string, error) {
+	values, err := config.GetCfg().DeleteStringArrayConfig("StoreUrls", storeURL)
+	if err != nil {
+		return nil, err
+	}
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+	}
 	return values, nil
+}
+
+// remoteComigoVersionWarning 检查远端 Comigo 版本；只返回提醒，不阻止添加书库。
+func remoteComigoVersionWarning(storeURL string) string {
+	if tools.DetectStoreURL(storeURL).Type != tools.StoreBackendComigo {
+		return ""
+	}
+	client, err := comigo_remote.NewClient(storeURL, config.GetCfg().TimeoutLimitForScan)
+	if err != nil {
+		logger.Infof(locale.GetString("log_remote_comigo_version_check_failed"), err)
+		return ""
+	}
+	remoteVersion, err := client.GetServerVersion()
+	if err != nil {
+		logger.Infof(locale.GetString("log_remote_comigo_version_check_failed"), err)
+		return ""
+	}
+	remoteTag, localTag := canonicalSemverTag(remoteVersion), canonicalSemverTag(config.GetVersion())
+	if remoteTag == "" || localTag == "" {
+		return ""
+	}
+	if semver.Compare(remoteTag, localTag) >= 0 {
+		return ""
+	}
+	return fmt.Sprintf(locale.GetString("remote_comigo_version_older_warning"), remoteVersion, config.GetVersion())
+}
+
+func canonicalSemverTag(version string) string {
+	version = strings.TrimSpace(version)
+	if version == "" {
+		return ""
+	}
+	if !strings.HasPrefix(version, "v") {
+		version = "v" + version
+	}
+	if !semver.IsValid(version) {
+		return ""
+	}
+	return version
 }
 
 // EnablePluginHandler 处理启用插件的 JSON API
@@ -823,11 +884,16 @@ func rescanOneStore(c echo.Context, storeUrl string) error {
 
 	logger.Infof(locale.GetString("log_rescan_store_completed_new_books"), newBooksCount, removedBooksCount)
 
-	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonSingleStoreRescan)
+	htmlString, renderErr := renderStoreConfigHTML(c.Request().Context())
+	if renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
+	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success":           true,
 		"newBooksCount":     newBooksCount,
 		"removedBooksCount": removedBooksCount,
+		"html":              htmlString,
 		"message":           locale.GetString("rescan_store_success"),
 	})
 }
@@ -860,11 +926,16 @@ func rescanAllStores(c echo.Context) error {
 
 	logger.Infof(locale.GetString("log_rescan_store_completed_new_books"), newBooksCount, removedBooksCount)
 
-	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonLibraryRescan)
+	htmlString, renderErr := renderStoreConfigHTML(c.Request().Context())
+	if renderErr != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
+	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"success":           true,
 		"newBooksCount":     newBooksCount,
 		"removedBooksCount": removedBooksCount,
+		"html":              htmlString,
 		"message":           locale.GetString("rescan_store_success"),
 	})
 }
@@ -956,9 +1027,8 @@ func DeleteStoreHandler(c echo.Context) error {
 
 	logger.Infof(locale.GetString("log_deleted_books_count"), deletedCount)
 
-	// 从配置中移除该书库 URL
-	values, err := doDelete("StoreUrls", storeUrl)
-	if err != nil {
+	// 从配置中移除该书库 URL；删除书库已在本 handler 内完成局部清理，不能再触发通用全量重扫。
+	if _, err := doDeleteStoreURL(storeUrl); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_store_failed"))
 	}
 
@@ -967,9 +1037,7 @@ func DeleteStoreHandler(c echo.Context) error {
 		logger.Infof(locale.GetString("log_error_initializing_main_folder"), err)
 	}
 
-	// 渲染更新后的 HTML
-	updatedHTML := StoreConfig("StoreUrls", values, "StoreUrls_Description", GetStoreBookCounts(), true)
-	htmlString, renderErr := renderTemplToString(c.Request().Context(), updatedHTML)
+	htmlString, renderErr := renderStoreConfigHTML(c.Request().Context())
 	if renderErr != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to render template")
 	}

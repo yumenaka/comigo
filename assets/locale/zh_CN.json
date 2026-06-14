@@ -970,6 +970,8 @@
   "upgrade_tray_no_asset": "未找到与本机托盘版对应的安装包。",
   "upgrade_tray_restart_failed": "升级后重启进程失败：%v",
   "upgrade_unsupported_arch": "当前系统/架构不支持通过此命令自升级：%s/%s",
+  "remote_comigo_version_older_warning": "远程 Comigo 版本较旧（远程 %s，本机 %s）。已添加书库，但建议升级远程服务以避免兼容问题。",
+  "log_remote_comigo_version_check_failed": "检查远程 Comigo 版本失败：%v",
   "upload_disable_hint": "上传功能已禁用",
   "upload_create_file_failed": "无法创建文件 %s",
   "upload_file_too_large": "文件 %s 超过大小限制",

@@ -2,8 +2,11 @@ package settings
 
 import (
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/yumenaka/comigo/config"
@@ -147,4 +150,37 @@ func TestGetStoreRealBookCountOnlyCountsTargetStore(t *testing.T) {
 	if got := getStoreRealBookCount(storeDir); got != 1 {
 		t.Fatalf("target store count = %d, want 1", got)
 	}
+}
+
+func TestRemoteComigoVersionWarningWhenRemoteOlder(t *testing.T) {
+	server := newServerInfoTestServer(t, `{"Version":"v0.1.0","ServerName":"Comigo v0.1.0"}`)
+
+	warning := remoteComigoVersionWarning(server.URL)
+	if warning == "" {
+		t.Fatal("expected warning for older remote Comigo version")
+	}
+	if !strings.Contains(warning, "v0.1.0") || !strings.Contains(warning, config.GetVersion()) {
+		t.Fatalf("warning = %q, want both remote and local version", warning)
+	}
+}
+
+func TestRemoteComigoVersionWarningAllowsNewerRemote(t *testing.T) {
+	server := newServerInfoTestServer(t, `{"Version":"v99.0.0","ServerName":"Comigo v99.0.0"}`)
+
+	if warning := remoteComigoVersionWarning(server.URL); warning != "" {
+		t.Fatalf("warning = %q, want empty for newer remote Comigo", warning)
+	}
+}
+
+func newServerInfoTestServer(t *testing.T, body string) *httptest.Server {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/server-info" {
+			http.NotFound(w, r)
+			return
+		}
+		_, _ = w.Write([]byte(body))
+	}))
+	t.Cleanup(server.Close)
+	return server
 }

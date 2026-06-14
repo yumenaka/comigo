@@ -26,7 +26,7 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 		<!-- 预览选中文件列表 -->
 		<div id="preview" class="mt-6">
 			<h3 class="mb-4 text-lg font-semibold text-base-content" x-text="i18next.t('selected_file')">选择的文件</h3>
-			<ul class="divide-y divide-gray-200" id="file-list">
+			<ul class="border-2 border-gray-400 border-dashed rounded p-2 flex flex-col gap-2" id="file-list">
 				<!-- 动态插入文件项 -->
 			</ul>
 		</div>
@@ -285,7 +285,8 @@ templ UploadPanel(wrapperClass string, showSpacer bool) {
 		function addFileToList(file) {
 			// 创建文件项
 			const li = document.createElement("li");
-			li.className = "py-2 flex items-center justify-between";
+			li.className =
+				"border-2 border-gray-400 border-dashed rounded px-3 py-2 flex items-center justify-between";
 			// 文件信息
 			const infoDiv = document.createElement("div");
 			infoDiv.className = "flex items-center";

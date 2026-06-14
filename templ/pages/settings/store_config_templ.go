@@ -14,8 +14,8 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// StoreConfig 书库配置组件
-func StoreConfig(name string, values []string, description string, bookCounts map[string]int, showRescanAll bool) templ.Component {
+// StoreConfig 书库配置组件。reloadAfterAdd 用于空书架页：添加书库后需要整页刷新以渲染书架。
+func StoreConfig(name string, values []string, description string, bookCounts map[string]int, showRescanAll bool, reloadAfterAdd bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -53,360 +53,373 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{}\"><label class=\"w-full py-0 text-left\" for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" data-reload-after-add=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations(name))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("%t", reloadAfterAdd))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 17, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 14, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400\" x-data=\"{}\"><label class=\"w-full py-0 text-left\" for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations(name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 17, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 18, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"></label><div class=\"flex flex-col w-full\"><!-- 书库列表 --><div class=\"flex flex-col w-full my-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" x-text=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations(name))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 18, Col: 99}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"></label><div class=\"flex flex-col w-full\"><!-- 书库列表 --><div class=\"flex flex-col w-full my-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, value := range values {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div data-storeb64=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(base64.RawURLEncoding.EncodeToString([]byte(value)))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 23, Col: 73}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" data-store-value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div data-storeb64=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(value)
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(base64.RawURLEncoding.EncodeToString([]byte(value)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 24, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 24, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"panel-control flex flex-row items-center mx-0 mb-2 px-3 py-2 text-sm border font-medium rounded transition-colors bg-blue-200 border-gray-500 dark:border-gray-200 text-black hover:bg-blue-300\"><span class=\"flex-1 truncate min-w-0\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" data-store-value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(value)
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 28, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 25, Col: 30}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"panel-control flex flex-row items-center mx-0 mb-2 px-3 py-2 text-sm border font-medium rounded transition-colors bg-blue-200 border-gray-500 dark:border-gray-200 text-black hover:bg-blue-300\"><span class=\"flex-1 truncate min-w-0\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(value)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 29, Col: 14}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if count, ok := bookCounts[storeBookCountKey(value)]; ok && count > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<span class=\"shrink-0 ml-1 opacity-75\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<span class=\"shrink-0 ml-1 opacity-75\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("(x%d)", count))
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("(x%d)", count))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 31, Col: 75}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 32, Col: 75}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<button type=\"button\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<button type=\"button\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if config.GetCfg().ReadOnlyMode {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " disabled")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " disabled")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " @click.stop=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue("rescanStore('" + base64.RawURLEncoding.EncodeToString([]byte(value)) + "')")
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 36, Col: 97}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" :aria-label=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " @click.stop=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("rescan_store"))
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue("rescanStore('" + base64.RawURLEncoding.EncodeToString([]byte(value)) + "')")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 37, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 37, Col: 97}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" :title=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" :aria-label=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("rescan_store"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 38, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 38, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"panel-control shrink-0 ml-2 inline-flex h-8 w-8 items-center justify-center border rounded shadow font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\"><svg aria-hidden=\"true\" class=\"h-4 w-4\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 12a9 9 0 1 1-2.64-6.36\"></path> <path d=\"M21 3v6h-6\"></path></svg></button> <button x-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" :title=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("delete_store"))
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("rescan_store"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 47, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 39, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" type=\"button\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if config.GetCfg().ReadOnlyMode {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " disabled")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " @click.stop=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"panel-control shrink-0 ml-2 inline-flex h-8 w-8 items-center justify-center border rounded shadow font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\"><svg aria-hidden=\"true\" class=\"h-4 w-4\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 12a9 9 0 1 1-2.64-6.36\"></path> <path d=\"M21 3v6h-6\"></path></svg></button> <button x-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue("deleteStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "', '" + base64.RawURLEncoding.EncodeToString([]byte(value)) + "')")
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("delete_store"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 50, Col: 159}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 48, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" class=\"panel-control shrink-0 h-8 ml-2 px-2 border rounded shadow font-semibold focus:outline-none focus:ring bg-red-200 text-black transition delay-150 duration-300 ease-in-out hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed\">删除书库</button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" type=\"button\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if showRescanAll && len(values) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<!-- 全量重扫只在已配置书库时显示，避免空配置下触发无意义请求。 --> <div class=\"flex justify-center w-full py-1 text-black\"><button x-text=\"")
+			if config.GetCfg().ReadOnlyMode {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " disabled")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " @click.stop=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("rescan_all_stores"))
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue("deleteStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "', '" + base64.RawURLEncoding.EncodeToString([]byte(value)) + "')")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 62, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 51, Col: 159}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" type=\"button\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" class=\"panel-control shrink-0 h-8 ml-2 px-2 border rounded shadow font-semibold focus:outline-none focus:ring bg-red-200 text-black transition delay-150 duration-300 ease-in-out hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed\">删除书库</button></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if showRescanAll && len(values) > 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<!-- 全量重扫只在已配置书库时显示，避免空配置下触发无意义请求。 --> <div class=\"flex justify-center w-full py-1 text-black\"><button x-text=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var15 string
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("rescan_all_stores"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 63, Col: 51}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" type=\"button\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if config.GetCfg().ReadOnlyMode {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, " disabled")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " disabled")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " @click=\"rescanAllStores()\" class=\"panel-control w-28 h-10 px-2 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\">重新扫描</button></div><hr class=\"my-2 mx-4 border-gray-400 border-dashed dark:border-gray-500\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " @click=\"rescanAllStores()\" class=\"panel-control w-28 h-10 px-2 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\">重新扫描</button></div><hr class=\"my-2 mx-4 border-gray-400 border-dashed dark:border-gray-500\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<!-- 添加书库区域 --><div class=\"flex flex-row items-center pb-1\"><label for=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 75, Col: 80}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"sr-only\" x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<!-- 添加书库区域 --><div class=\"flex flex-row items-center pb-1\"><label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("type_or_paste_content"))
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 75, Col: 148}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 76, Col: 80}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\"></label> <input type=\"text\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" class=\"sr-only\" x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.ResolveAttributeValue(base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput")
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("type_or_paste_content"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 78, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 76, Col: 148}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" :placeholder=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\"></label> <input type=\"text\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("type_or_paste_content"))
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.ResolveAttributeValue(base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 79, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 79, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if config.GetCfg().ReadOnlyMode {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, " disabled")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, " class=\"panel-control max-w-2/3 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50\" @keydown=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" :placeholder=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.ResolveAttributeValue("if ($event.key === 'Enter') { addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "'); }")
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("type_or_paste_content"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 82, Col: 121}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 80, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\"> <button x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if config.GetCfg().ReadOnlyMode {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, " disabled")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, " class=\"panel-control max-w-2/3 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50\" @keydown=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("add"))
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue("if ($event.key === 'Enter') { addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "'); }")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 85, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 83, Col: 121}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" type=\"button\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\"> <button x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(base64.RawURLEncoding.EncodeToString([]byte(name)) + "StoreAddButton")
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("add"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 87, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 86, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if config.GetCfg().ReadOnlyMode {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, " disabled")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, " @click=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" type=\"button\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue("addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')")
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue(base64.RawURLEncoding.EncodeToString([]byte(name)) + "StoreAddButton")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 89, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 88, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" class=\"panel-control w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\">添加</button></div></div><div x-html=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if config.GetCfg().ReadOnlyMode {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, " disabled")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, " @click=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var23 string
-		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations(description))
+		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue("addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 96, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 90, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" class=\"w-auto py-1 text-left mx-2 text-xs text-base-content\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" class=\"panel-control w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\">添加</button></div></div><div x-html=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var24 string
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations(description))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 97, Col: 44}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"w-auto py-1 text-left mx-2 text-xs text-base-content\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -434,12 +447,12 @@ func StoreConfigJavaScript() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var24 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var24 == nil {
-			templ_7745c5c3_Var24 = templ.NopComponent
+		templ_7745c5c3_Var25 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var25 == nil {
+			templ_7745c5c3_Var25 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var25 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var26 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -451,13 +464,13 @@ func StoreConfigJavaScript() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<script>\n\t\t\t// base64UrlEncodeUtf8: 用于安全传输 Windows 路径（含反斜杠/中文）\n\t\t\t// 说明：使用 base64url（RawURLEncoding 风格，无 padding），与后端解码逻辑一致\n\t\t\tif (!window.base64UrlEncodeUtf8) {\n\t\t\t\twindow.base64UrlEncodeUtf8 = (str) => {\n\t\t\t\t\tconst bytes = new TextEncoder().encode(str);\n\t\t\t\t\tlet binary = \"\";\n\t\t\t\t\tfor (let i = 0; i < bytes.length; i++)\n\t\t\t\t\t\tbinary += String.fromCharCode(bytes[i]);\n\t\t\t\t\treturn btoa(binary)\n\t\t\t\t\t\t.replace(/\\+/g, \"-\")\n\t\t\t\t\t\t.replace(/\\//g, \"_\")\n\t\t\t\t\t\t.replace(/=+$/g, \"\");\n\t\t\t\t};\n\t\t\t}\n\n\t\t\t// beginStoreMutationReloadGuard 阻止书库变更触发的 SSE 刷新抢先中断当前 fetch。\n\t\t\tfunction beginStoreMutationReloadGuard() {\n\t\t\t\twindow.__comigoRescanInFlight = true;\n\t\t\t}\n\n\t\t\t// finishStoreMutationReloadGuard 在 fetch 完整结束后执行被挂起的刷新。\n\t\t\tfunction finishStoreMutationReloadGuard() {\n\t\t\t\twindow.__comigoRescanInFlight = false;\n\t\t\t\tif (typeof window.__comigoRunPendingReload === \"function\") {\n\t\t\t\t\twindow.__comigoRunPendingReload();\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 添加书库\n\t\t\tasync function addStore(configName) {\n\t\t\t\tconst addInput = document.getElementById(configName + \"AddInput\");\n\t\t\t\tif (!addInput) return;\n\t\t\t\tconst addValue = addInput.value.trim();\n\n\t\t\t\t// 验证：如果为空，显示错误提示\n\t\t\t\tif (addValue === \"\") {\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"content_empty_please_enter_before_submit\"),\n\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t});\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\t// 验证：如果已经有这个值了，显示错误提示\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (container) {\n\t\t\t\t\tconst existingStores =\n\t\t\t\t\t\tcontainer.querySelectorAll(\"[data-store-value]\");\n\t\t\t\t\tfor (const node of existingStores) {\n\t\t\t\t\t\tconst nodeText = node.dataset.storeValue || \"\";\n\t\t\t\t\t\tif (nodeText === addValue) {\n\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\tmessage: i18next.t(\"value_already_exists_do_not_add_again\"),\n\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// 发送添加请求到服务器\n\t\t\t\tbeginStoreMutationReloadGuard();\n\t\t\t\ttry {\n\t\t\t\t\tconst addValueB64 = window.base64UrlEncodeUtf8(addValue);\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/add-array-config\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\t\tconfigName: configName,\n\t\t\t\t\t\t\t\taddValue: addValueB64,\n\t\t\t\t\t\t\t}),\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_add_config_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示保存提示；书库扫描完成后由 SSE 触发页面自动刷新。\n\t\t\t\t\tif (data.saveSuccessHint) {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"info\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"success\");\n\t\t\t\t\t}\n\n\t\t\t\t\t// 更新 UI：替换整个容器\n\t\t\t\t\tif (data.html) {\n\t\t\t\t\t\tconst container = document.getElementById(\n\t\t\t\t\t\t\tconfigName + \"-store-config\",\n\t\t\t\t\t\t);\n\t\t\t\t\t\tif (container && container.parentNode) {\n\t\t\t\t\t\t\t// 创建临时元素来解析 HTML\n\t\t\t\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t\t\t\t// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。\n\t\t\t\t\t\t\ttemp.innerHTML = data.html;\n\t\t\t\t\t\t\tconst newContainer = temp.querySelector(\n\t\t\t\t\t\t\t\t\"#\" + configName + \"-store-config\",\n\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\tif (newContainer) {\n\t\t\t\t\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\t\t\t\t\t// 重新初始化 Alpine.js\n\t\t\t\t\t\t\t\tif (window.Alpine) {\n\t\t\t\t\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t// 清空输入框\n\t\t\t\t\t\t\t\tconst newInput = newContainer.querySelector(\n\t\t\t\t\t\t\t\t\t\"#\" + configName + \"AddInput\",\n\t\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\t\tif (newInput) {\n\t\t\t\t\t\t\t\t\tnewInput.value = \"\";\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"添加书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t} finally {\n\t\t\t\t\tfinishStoreMutationReloadGuard();\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 重新扫描全部书库\n\t\t\tasync function rescanAllStores() {\n\t\t\t\tshowToast(i18next.t(\"rescan_store_in_progress\"), \"info\");\n\n\t\t\t\tbeginStoreMutationReloadGuard();\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/rescan-all-stores\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_rescan_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\tconst message = rescanStoreSuccessMessage(data);\n\t\t\t\t\tshowToast(message, \"success\");\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"重新扫描全部书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t} finally {\n\t\t\t\t\tfinishStoreMutationReloadGuard();\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 重新扫描书库\n\t\t\tasync function rescanStore(storeUrlB64) {\n\t\t\t\t// 显示扫描中提示\n\t\t\t\tshowToast(i18next.t(\"rescan_store_in_progress\"), \"info\");\n\n\t\t\t\tbeginStoreMutationReloadGuard();\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(window.ComiGoPath(\"/api/rescan-store\"), {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tstoreUrl: storeUrlB64,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_rescan_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tconst message = rescanStoreSuccessMessage(data);\n\t\t\t\t\tshowToast(message, \"success\");\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"重新扫描书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t} finally {\n\t\t\t\t\tfinishStoreMutationReloadGuard();\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// rescanStoreSuccessMessage 统一格式化重扫结果，显示净新增和净减少数量。\n\t\t\tfunction rescanStoreSuccessMessage(data) {\n\t\t\t\treturn i18next\n\t\t\t\t\t.t(\"rescan_store_success\")\n\t\t\t\t\t.replace(\"{0}\", data.newBooksCount || 0)\n\t\t\t\t\t.replace(\"{1}\", data.removedBooksCount || 0);\n\t\t\t}\n\n\t\t\t// 删除书库\n\t\t\tasync function deleteStore(configName, storeUrlB64) {\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (!container) return;\n\n\t\t\t\t// 删除书库会移除该路径下的书籍记录，必须经过已有的模态确认。\n\t\t\t\tconst confirmed = await new Promise((resolve) => {\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"confirm_delete_store\"),\n\t\t\t\t\t\tbuttons: \"confirm_cancel\",\n\t\t\t\t\t\tonConfirm: () => resolve(true),\n\t\t\t\t\t\tonCancel: () => resolve(false),\n\t\t\t\t\t});\n\t\t\t\t});\n\n\t\t\t\tif (!confirmed) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tbeginStoreMutationReloadGuard();\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(window.ComiGoPath(\"/api/delete-store\"), {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tstoreUrl: storeUrlB64,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_delete_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tshowToast(i18next.t(\"delete_store_success\"), \"success\");\n\n\t\t\t\t\t// 更新 UI：替换整个容器\n\t\t\t\t\tif (data.html) {\n\t\t\t\t\t\tconst container = document.getElementById(\n\t\t\t\t\t\t\tconfigName + \"-store-config\",\n\t\t\t\t\t\t);\n\t\t\t\t\t\tif (container && container.parentNode) {\n\t\t\t\t\t\t\t// 创建临时元素来解析 HTML\n\t\t\t\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t\t\t\t// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。\n\t\t\t\t\t\t\ttemp.innerHTML = data.html;\n\t\t\t\t\t\t\tconst newContainer = temp.querySelector(\n\t\t\t\t\t\t\t\t\"#\" + configName + \"-store-config\",\n\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\tif (newContainer) {\n\t\t\t\t\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\t\t\t\t\t// 重新初始化 Alpine.js\n\t\t\t\t\t\t\t\tif (window.Alpine) {\n\t\t\t\t\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"删除书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t} finally {\n\t\t\t\t\tfinishStoreMutationReloadGuard();\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<script>\n\t\t\t// base64UrlEncodeUtf8: 用于安全传输 Windows 路径（含反斜杠/中文）\n\t\t\t// 说明：使用 base64url（RawURLEncoding 风格，无 padding），与后端解码逻辑一致\n\t\t\tif (!window.base64UrlEncodeUtf8) {\n\t\t\t\twindow.base64UrlEncodeUtf8 = (str) => {\n\t\t\t\t\tconst bytes = new TextEncoder().encode(str);\n\t\t\t\t\tlet binary = \"\";\n\t\t\t\t\tfor (let i = 0; i < bytes.length; i++)\n\t\t\t\t\t\tbinary += String.fromCharCode(bytes[i]);\n\t\t\t\t\treturn btoa(binary)\n\t\t\t\t\t\t.replace(/\\+/g, \"-\")\n\t\t\t\t\t\t.replace(/\\//g, \"_\")\n\t\t\t\t\t\t.replace(/=+$/g, \"\");\n\t\t\t\t};\n\t\t\t}\n\n\t\t\t// replaceStoreConfigHTML 使用后端渲染的书库设置片段局部替换当前列表。\n\t\t\tfunction replaceStoreConfigHTML(configName, html, clearInput = false) {\n\t\t\t\tif (!html) return;\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (!container || !container.parentNode) return;\n\n\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。\n\t\t\t\ttemp.innerHTML = html;\n\t\t\t\tconst newContainer = temp.querySelector(\n\t\t\t\t\t\"#\" + configName + \"-store-config\",\n\t\t\t\t);\n\t\t\t\tif (!newContainer) return;\n\n\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\tif (window.Alpine) {\n\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t}\n\t\t\t\tif (clearInput) {\n\t\t\t\t\tconst newInput = newContainer.querySelector(\n\t\t\t\t\t\t\"#\" + configName + \"AddInput\",\n\t\t\t\t\t);\n\t\t\t\t\tif (newInput) newInput.value = \"\";\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// shouldReloadAfterStoreAdd 区分空书架页和设置页：前者添加后要重载书架，后者只局部更新。\n\t\t\tfunction shouldReloadAfterStoreAdd(configName) {\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\treturn container?.dataset.reloadAfterAdd === \"true\";\n\t\t\t}\n\n\t\t\t// 添加书库\n\t\t\tasync function addStore(configName) {\n\t\t\t\tconst addInput = document.getElementById(configName + \"AddInput\");\n\t\t\t\tif (!addInput) return;\n\t\t\t\tconst addValue = addInput.value.trim();\n\n\t\t\t\t// 验证：如果为空，显示错误提示\n\t\t\t\tif (addValue === \"\") {\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"content_empty_please_enter_before_submit\"),\n\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t});\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\t// 验证：如果已经有这个值了，显示错误提示\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (container) {\n\t\t\t\t\tconst existingStores =\n\t\t\t\t\t\tcontainer.querySelectorAll(\"[data-store-value]\");\n\t\t\t\t\tfor (const node of existingStores) {\n\t\t\t\t\t\tconst nodeText = node.dataset.storeValue || \"\";\n\t\t\t\t\t\tif (nodeText === addValue) {\n\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\tmessage: i18next.t(\"value_already_exists_do_not_add_again\"),\n\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// 发送添加请求到服务器\n\t\t\t\ttry {\n\t\t\t\t\tconst addValueB64 = window.base64UrlEncodeUtf8(addValue);\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/add-array-config\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\t\tconfigName: configName,\n\t\t\t\t\t\t\t\taddValue: addValueB64,\n\t\t\t\t\t\t\t}),\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_add_config_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示保存提示；书库列表会在本请求内局部更新。\n\t\t\t\t\tif (data.saveSuccessHint) {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"info\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"success\");\n\t\t\t\t\t}\n\t\t\t\t\tif (data.warningMessage) {\n\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\tmessage: data.warningMessage,\n\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\n\t\t\t\t\tif (shouldReloadAfterStoreAdd(configName)) {\n\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\treplaceStoreConfigHTML(configName, data.html, true);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"添加书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 重新扫描全部书库\n\t\t\tasync function rescanAllStores() {\n\t\t\t\tshowToast(i18next.t(\"rescan_store_in_progress\"), \"info\");\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/rescan-all-stores\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_rescan_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\tconst message = rescanStoreSuccessMessage(data);\n\t\t\t\t\tshowToast(message, \"success\");\n\t\t\t\t\treplaceStoreConfigHTML(\n\t\t\t\t\t\twindow.base64UrlEncodeUtf8(\"StoreUrls\"),\n\t\t\t\t\t\tdata.html,\n\t\t\t\t\t);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"重新扫描全部书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 重新扫描书库\n\t\t\tasync function rescanStore(storeUrlB64) {\n\t\t\t\t// 显示扫描中提示\n\t\t\t\tshowToast(i18next.t(\"rescan_store_in_progress\"), \"info\");\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(window.ComiGoPath(\"/api/rescan-store\"), {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tstoreUrl: storeUrlB64,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_rescan_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tconst message = rescanStoreSuccessMessage(data);\n\t\t\t\t\tshowToast(message, \"success\");\n\t\t\t\t\treplaceStoreConfigHTML(\n\t\t\t\t\t\twindow.base64UrlEncodeUtf8(\"StoreUrls\"),\n\t\t\t\t\t\tdata.html,\n\t\t\t\t\t);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"重新扫描书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// rescanStoreSuccessMessage 统一格式化重扫结果，显示净新增和净减少数量。\n\t\t\tfunction rescanStoreSuccessMessage(data) {\n\t\t\t\treturn i18next\n\t\t\t\t\t.t(\"rescan_store_success\")\n\t\t\t\t\t.replace(\"{0}\", data.newBooksCount || 0)\n\t\t\t\t\t.replace(\"{1}\", data.removedBooksCount || 0);\n\t\t\t}\n\n\t\t\t// 删除书库\n\t\t\tasync function deleteStore(configName, storeUrlB64) {\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (!container) return;\n\n\t\t\t\t// 删除书库会移除该路径下的书籍记录，必须经过已有的模态确认。\n\t\t\t\tconst confirmed = await new Promise((resolve) => {\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"confirm_delete_store\"),\n\t\t\t\t\t\tbuttons: \"confirm_cancel\",\n\t\t\t\t\t\tonConfirm: () => resolve(true),\n\t\t\t\t\t\tonCancel: () => resolve(false),\n\t\t\t\t\t});\n\t\t\t\t});\n\n\t\t\t\tif (!confirmed) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(window.ComiGoPath(\"/api/delete-store\"), {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tstoreUrl: storeUrlB64,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_delete_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tshowToast(i18next.t(\"delete_store_success\"), \"success\");\n\n\t\t\t\t\treplaceStoreConfigHTML(configName, data.html);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"删除书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = storeConfigScriptHandle.Once().Render(templ.WithChildren(ctx, templ_7745c5c3_Var25), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = storeConfigScriptHandle.Once().Render(templ.WithChildren(ctx, templ_7745c5c3_Var26), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

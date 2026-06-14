@@ -2180,10 +2180,6 @@
     border-color: var(--color-gray-100);
   }
 
-  :where(.divide-gray-200 > :not(:last-child)) {
-    border-color: var(--color-gray-200);
-  }
-
   .self-center {
     align-self: center;
   }

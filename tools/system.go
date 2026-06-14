@@ -214,6 +214,7 @@ func GetSystemStatus() SystemStatus {
 // ServerStatus 服务器当前状况
 type ServerStatus struct {
 	ServerName            string       // 服务器描述
+	Version               string       // Comigo 版本号
 	ServerHost            string       // ServerHost 服务器主机或 IP 地址。
 	ServerPort            uint16       // ServerPort 服务运行的端口号。
 	TailscaleAuthURL      string       // Tailscale身份验证URL（如果适用）
@@ -255,6 +256,7 @@ func GetServerInfo(params ServerInfoParams) *ServerStatus {
 	}
 	serverStatus := ServerStatus{
 		ServerName:            serverName,
+		Version:               params.Version,
 		ServerHost:            host,
 		ServerPort:            uint16(port),
 		SupportUploadFile:     enableUpload,

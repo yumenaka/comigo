@@ -970,6 +970,8 @@
   "upgrade_tray_no_asset": "No tray installer found for this platform.",
   "upgrade_tray_restart_failed": "Failed to restart after upgrade: %v",
   "upgrade_unsupported_arch": "Self-upgrade is not supported on this OS/arch: %s/%s",
+  "remote_comigo_version_older_warning": "The remote Comigo version is older (remote %s, local %s). The library was added, but upgrading the remote service is recommended to avoid compatibility issues.",
+  "log_remote_comigo_version_check_failed": "Failed to check remote Comigo version: %v",
   "upload_disable_hint": "File upload feature has been disabled",
   "upload_create_file_failed": "Unable to create file %s",
   "upload_file_too_large": "File %s exceeds the size limit",

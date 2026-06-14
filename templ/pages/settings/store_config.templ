@@ -6,11 +6,12 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// StoreConfig 书库配置组件
-templ StoreConfig(name string, values []string, description string, bookCounts map[string]int, showRescanAll bool) {
+// StoreConfig 书库配置组件。reloadAfterAdd 用于空书架页：添加书库后需要整页刷新以渲染书架。
+templ StoreConfig(name string, values []string, description string, bookCounts map[string]int, showRescanAll bool, reloadAfterAdd bool) {
 	@StoreConfigJavaScript()
 	<div
 		id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "-store-config" }
+		data-reload-after-add={ fmt.Sprintf("%t", reloadAfterAdd) }
 		class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		x-data="{}"
 	>
@@ -119,17 +120,36 @@ templ StoreConfigJavaScript() {
 				};
 			}
 
-			// beginStoreMutationReloadGuard 阻止书库变更触发的 SSE 刷新抢先中断当前 fetch。
-			function beginStoreMutationReloadGuard() {
-				window.__comigoRescanInFlight = true;
+			// replaceStoreConfigHTML 使用后端渲染的书库设置片段局部替换当前列表。
+			function replaceStoreConfigHTML(configName, html, clearInput = false) {
+				if (!html) return;
+				const container = document.getElementById(configName + "-store-config");
+				if (!container || !container.parentNode) return;
+
+				const temp = document.createElement("div");
+				// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。
+				temp.innerHTML = html;
+				const newContainer = temp.querySelector(
+					"#" + configName + "-store-config",
+				);
+				if (!newContainer) return;
+
+				container.parentNode.replaceChild(newContainer, container);
+				if (window.Alpine) {
+					window.Alpine.initTree(newContainer);
+				}
+				if (clearInput) {
+					const newInput = newContainer.querySelector(
+						"#" + configName + "AddInput",
+					);
+					if (newInput) newInput.value = "";
+				}
 			}
 
-			// finishStoreMutationReloadGuard 在 fetch 完整结束后执行被挂起的刷新。
-			function finishStoreMutationReloadGuard() {
-				window.__comigoRescanInFlight = false;
-				if (typeof window.__comigoRunPendingReload === "function") {
-					window.__comigoRunPendingReload();
-				}
+			// shouldReloadAfterStoreAdd 区分空书架页和设置页：前者添加后要重载书架，后者只局部更新。
+			function shouldReloadAfterStoreAdd(configName) {
+				const container = document.getElementById(configName + "-store-config");
+				return container?.dataset.reloadAfterAdd === "true";
 			}
 
 			// 添加书库
@@ -165,7 +185,6 @@ templ StoreConfigJavaScript() {
 				}
 
 				// 发送添加请求到服务器
-				beginStoreMutationReloadGuard();
 				try {
 					const addValueB64 = window.base64UrlEncodeUtf8(addValue);
 					const response = await fetch(
@@ -191,47 +210,28 @@ templ StoreConfigJavaScript() {
 					// 解析响应数据
 					const data = await response.json();
 
-					// 显示保存提示；书库扫描完成后由 SSE 触发页面自动刷新。
+					// 显示保存提示；书库列表会在本请求内局部更新。
 					if (data.saveSuccessHint) {
 						showToast(i18next.t("save_success_hint"), "info");
 					} else {
 						showToast(i18next.t("save_success_hint"), "success");
 					}
-
-					// 更新 UI：替换整个容器
-					if (data.html) {
-						const container = document.getElementById(
-							configName + "-store-config",
-						);
-						if (container && container.parentNode) {
-							// 创建临时元素来解析 HTML
-							const temp = document.createElement("div");
-							// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。
-							temp.innerHTML = data.html;
-							const newContainer = temp.querySelector(
-								"#" + configName + "-store-config",
-							);
-							if (newContainer) {
-								container.parentNode.replaceChild(newContainer, container);
-								// 重新初始化 Alpine.js
-								if (window.Alpine) {
-									window.Alpine.initTree(newContainer);
-								}
-								// 清空输入框
-								const newInput = newContainer.querySelector(
-									"#" + configName + "AddInput",
-								);
-								if (newInput) {
-									newInput.value = "";
-								}
-							}
-						}
+					if (data.warningMessage) {
+						showMessage({
+							message: data.warningMessage,
+							buttons: "confirm",
+						});
 					}
+
+					if (shouldReloadAfterStoreAdd(configName)) {
+						window.location.reload();
+						return;
+					}
+
+					replaceStoreConfigHTML(configName, data.html, true);
 				} catch (error) {
 					console.error("添加书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
-				} finally {
-					finishStoreMutationReloadGuard();
 				}
 			}
 
@@ -239,7 +239,6 @@ templ StoreConfigJavaScript() {
 			async function rescanAllStores() {
 				showToast(i18next.t("rescan_store_in_progress"), "info");
 
-				beginStoreMutationReloadGuard();
 				try {
 					const response = await fetch(
 						window.ComiGoPath("/api/rescan-all-stores"),
@@ -256,11 +255,13 @@ templ StoreConfigJavaScript() {
 					const data = await response.json();
 					const message = rescanStoreSuccessMessage(data);
 					showToast(message, "success");
+					replaceStoreConfigHTML(
+						window.base64UrlEncodeUtf8("StoreUrls"),
+						data.html,
+					);
 				} catch (error) {
 					console.error("重新扫描全部书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
-				} finally {
-					finishStoreMutationReloadGuard();
 				}
 			}
 
@@ -269,7 +270,6 @@ templ StoreConfigJavaScript() {
 				// 显示扫描中提示
 				showToast(i18next.t("rescan_store_in_progress"), "info");
 
-				beginStoreMutationReloadGuard();
 				try {
 					const response = await fetch(window.ComiGoPath("/api/rescan-store"), {
 						method: "POST",
@@ -293,11 +293,13 @@ templ StoreConfigJavaScript() {
 					// 显示成功提示
 					const message = rescanStoreSuccessMessage(data);
 					showToast(message, "success");
+					replaceStoreConfigHTML(
+						window.base64UrlEncodeUtf8("StoreUrls"),
+						data.html,
+					);
 				} catch (error) {
 					console.error("重新扫描书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
-				} finally {
-					finishStoreMutationReloadGuard();
 				}
 			}
 
@@ -328,7 +330,6 @@ templ StoreConfigJavaScript() {
 					return;
 				}
 
-				beginStoreMutationReloadGuard();
 				try {
 					const response = await fetch(window.ComiGoPath("/api/delete-store"), {
 						method: "POST",
@@ -352,33 +353,10 @@ templ StoreConfigJavaScript() {
 					// 显示成功提示
 					showToast(i18next.t("delete_store_success"), "success");
 
-					// 更新 UI：替换整个容器
-					if (data.html) {
-						const container = document.getElementById(
-							configName + "-store-config",
-						);
-						if (container && container.parentNode) {
-							// 创建临时元素来解析 HTML
-							const temp = document.createElement("div");
-							// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。
-							temp.innerHTML = data.html;
-							const newContainer = temp.querySelector(
-								"#" + configName + "-store-config",
-							);
-							if (newContainer) {
-								container.parentNode.replaceChild(newContainer, container);
-								// 重新初始化 Alpine.js
-								if (window.Alpine) {
-									window.Alpine.initTree(newContainer);
-								}
-							}
-						}
-					}
+					replaceStoreConfigHTML(configName, data.html);
 				} catch (error) {
 					console.error("删除书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
-				} finally {
-					finishStoreMutationReloadGuard();
 				}
 			}
 		</script>

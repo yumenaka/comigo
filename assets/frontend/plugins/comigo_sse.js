@@ -72,26 +72,8 @@ function autoReloadAfterLibraryRescan() {
     if (!shouldShowUISuggestReloadPrompt() || window.__comigoAutoReloadQueued) {
         return
     }
-    // 若本页正在发起书库变更请求，先别 reload：
-    // 否则 location.reload() 会把这个还没返回的 fetch 直接 abort 掉，
-    // Firefox 报 “TypeError: NetworkError when attempting to fetch resource”，
-    // 让明明扫描成功的操作弹出“网络错误，请重试”。
-    // 改为挂起，等该 fetch 在自己的 finally 里结束后再刷新。
-    if (window.__comigoRescanInFlight) {
-        window.__comigoReloadPending = true
-        return
-    }
     window.__comigoAutoReloadQueued = true
     reloadComigoPage()
-}
-
-// 由发起重扫的页面在 fetch 结束(finally)后调用：执行被挂起的整页刷新。
-function comigoRunPendingReload() {
-    if (window.__comigoReloadPending && !window.__comigoAutoReloadQueued) {
-        window.__comigoReloadPending = false
-        window.__comigoAutoReloadQueued = true
-        reloadComigoPage()
-    }
 }
 
 function appendSharedLog(line) {
@@ -232,7 +214,6 @@ function comigoSSEInit() {
 }
 
 window.__comigoSSEInit = comigoSSEInit
-window.__comigoRunPendingReload = comigoRunPendingReload
 
 // 全局启动 SSE；具体事件处理仍由上面的路径判断决定，阅读页不会被重扫通知打断。
 queueComigoSSEStart()
