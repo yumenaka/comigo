@@ -122,7 +122,7 @@ func SetMiddleware() {
 func gzipSkipper(c echo.Context) bool {
 	urlPath := config.StripBasePath(c.Request().URL.Path)
 	// SSE 与 WebSocket 是长连接，跳过 gzip 避免缓冲或握手异常；其他响应继续由 gzip 中间件判断是否压缩。
-	return urlPath == "/api/sse" || urlPath == "/api/ws"
+	return urlPath == "/api/sse" || urlPath == "/api/tailscale-status-sse" || urlPath == "/api/ws"
 }
 
 func corsConfig() middleware.CORSConfig {

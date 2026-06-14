@@ -138,6 +138,7 @@ func bindServerAPI(group *echo.Group) {
 	group.POST("/upload", upload_api.UploadFile)
 	// 获取 tailscale 状态
 	group.GET("/tailscale-status", data_api.GetTailscaleStatus)
+	group.GET("/tailscale-status-sse", data_api.GetTailscaleStatusSSE)
 }
 
 // bindBookAPI 注册书籍读取、封面、下载和缓存相关 API。

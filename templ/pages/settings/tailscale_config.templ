@@ -403,18 +403,9 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 												),
 												buttons: "confirm",
 												onConfirm: function () {
-													// 提交后，定时刷新Tailscale状态面板，最多刷新10次
-													if (typeof UpdateTailscaleStatus === "function") {
-														let __tsRefreshCount = 0;
-														const __tsRefreshTimer = setInterval(() => {
-															try {
-																UpdateTailscaleStatus();
-															} catch (_) {}
-															__tsRefreshCount++;
-															if (__tsRefreshCount >= 10) {
-																clearInterval(__tsRefreshTimer);
-															}
-														}, 1500);
+													// 提交后重新连接状态流，让服务端主动推送最新状态
+													if (typeof StartTailscaleStatusSSE === "function") {
+														StartTailscaleStatusSSE(true);
 													}
 												},
 											});
@@ -444,65 +435,6 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 	<div
 		id="tailscale_status_panel"
-		x-init="
-			// 初始化时立即更新一次状态
-			UpdateTailscaleStatus();
-			// 设置自动刷新定时器，当页面可见且启用 Tailscale 时，每 1.5 秒刷新一次
-			let refreshInterval = null;
-			const getEnableTailscale = () => {
-				const checkbox = document.getElementById('EnableTailscale');
-				return checkbox ? checkbox.checked : false;
-			};
-			// 开始自动刷新
-			let count = 0;
-			const startAutoRefresh = () => {
-				if (refreshInterval) return;
-				refreshInterval = setInterval(() => {
-					if (document.visibilityState === 'visible' && getEnableTailscale()) {
-					    if (!collapsed){
-					        UpdateTailscaleStatus();
-					    }
-						count++;
-					}
-					if (count >= 10) {
-                        // 自动刷新10次后停止
-                        clearInterval(refreshInterval);
-                        refreshInterval = null;
-                        count = 0;
-                    }
-				}, 1500);
-			};
-			// 停止自动刷新
-			const stopAutoRefresh = () => {
-				if (refreshInterval) {
-					clearInterval(refreshInterval);
-					refreshInterval = null;
-				}
-			};
-			// 监听页面可见性变化
-			document.addEventListener('visibilitychange', () => {
-				if (document.visibilityState === 'visible' && getEnableTailscale()) {
-					startAutoRefresh();
-				} else {
-					stopAutoRefresh();
-				}
-			});
-			// 监听 EnableTailscale checkbox 变化
-			const enableCheckbox = document.getElementById('EnableTailscale');
-			if (enableCheckbox) {
-				enableCheckbox.addEventListener('change', () => {
-					if (enableCheckbox.checked && document.visibilityState === 'visible') {
-						startAutoRefresh();
-					} else {
-						stopAutoRefresh();
-					}
-				});
-			}
-			// 初始启动（如果条件满足）
-			if (getEnableTailscale() && document.visibilityState === 'visible') {
-				setTimeout(() => startAutoRefresh(), 1000);
-			}
-		"
 		class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<div class="flex flex-row w-full mb-2 justify-center items-center" @click="UpdateTailscaleStatus">
@@ -598,6 +530,243 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 		</div>
 	</div>
 	<script>
+		// ApplyTailscaleStatus 只负责把状态数据渲染到面板，供 SSE 与手动刷新共用。
+		function ApplyTailscaleStatus(data) {
+			try {
+				const panel = document.getElementById("tailscale_status_panel");
+				if (!panel) {
+					return;
+				}
+				const setText = (selector, text) => {
+					const el = panel.querySelector(selector);
+					if (el) {
+						el.textContent = text == null ? "" : String(text);
+					}
+				};
+				// AuthURL row
+				const authRow = panel.querySelector("#ts-auth-row");
+				if (authRow) {
+					const link = authRow.querySelector("#ts-auth-link");
+					if (data.AuthURL) {
+						authRow.style.display = "";
+						if (link) {
+							link.href = data.AuthURL;
+							link.textContent = data.AuthURL;
+						}
+					} else {
+						authRow.style.display = "none";
+						if (link) {
+							link.href = "";
+							link.textContent = "";
+						}
+					}
+				}
+				// Basic fields
+				setText("#ts-state", data.BackendState || "");
+				let clientsCount = 0;
+				if (Array.isArray(data.Clients)) {
+					clientsCount = data.Clients.length;
+				} else if (data.Clients && typeof data.Clients === "object") {
+					try {
+						clientsCount = Object.keys(data.Clients).length;
+					} catch (_) {
+						clientsCount = 0;
+					}
+				}
+				setText("#ts-clients", clientsCount);
+				setText("#ts-os", data.OS || "");
+				setText(
+					"#ts-online",
+					data.Online ? i18next.t("connected") : i18next.t("not_connected"),
+				);
+				// IP: show first IPv4 if possible, else first entry
+				let ipText = "";
+				if (Array.isArray(data.TailscaleIPs) && data.TailscaleIPs.length > 0) {
+					const ipv4 = data.TailscaleIPs.find(
+						(x) => typeof x === "string" && x.indexOf(":") === -1,
+					);
+					ipText = ipv4 || data.TailscaleIPs[0];
+				}
+				setText("#ts-ip", ipText);
+				setText("#ts-version", data.Version || "");
+
+				// ts-funnel-mode
+				const funnelModeEl = panel.querySelector("#ts-funnel-mode");
+				if (funnelModeEl) {
+					funnelModeEl.textContent = document.getElementById("FunnelTunnel")
+						.checked
+						? i18next.t("enable")
+						: i18next.t("disable");
+				}
+				// FQDN row/link
+				const fqdnRow = panel.querySelector("#ts-fqdn-row");
+				const fqdnLink = panel.querySelector("#ts-fqdn-link");
+				const qrcodeRow = panel.querySelector("#ts-qrcode-row");
+				const qrcodeContainer = panel.querySelector("#ts-qrcode-container");
+				const qrcodeImg = panel.querySelector("#ts-qrcode-img");
+				if (data.FQDN) {
+					if (fqdnRow) fqdnRow.style.display = "";
+					if (fqdnLink) {
+						const portInput = document.getElementById("TailscalePort");
+						const port = portInput ? parseInt(portInput.value, 10) : 0;
+						const isHttps =
+							port === 443 || document.getElementById("FunnelTunnel").checked;
+						const proto = isHttps ? "https://" : "http://";
+						let href = proto + data.FQDN;
+						if (port !== 443 && port !== 80) {
+							href += ":" + port;
+						}
+						//console.log('Setting FQDN link to:', href);
+						fqdnLink.href = href;
+						fqdnLink.textContent = href;
+						// 更新二维码：当 Online 为 true 且 FQDN 不为空时显示
+						if (data.Online && href) {
+							if (qrcodeRow) qrcodeRow.style.display = "";
+							if (qrcodeImg) {
+								const qrcodeUrl =
+									window.location.origin +
+									window.ComiGoPath("/api/qrcode.png") +
+									"?base64=true&qrcode_str=" +
+									encodeURIComponent(href);
+								fetch(qrcodeUrl)
+									.then((response) => response.text())
+									.then((data) => {
+										if (qrcodeImg) {
+											qrcodeImg.src = data;
+										}
+									})
+									.catch((error) => {
+										console.error("加载二维码失败:", error);
+									});
+							}
+						} else {
+							if (qrcodeRow) qrcodeRow.style.display = "none";
+						}
+					}
+				} else {
+					if (fqdnRow) fqdnRow.style.display = "none";
+					if (fqdnLink) {
+						fqdnLink.href = "";
+						fqdnLink.textContent = "";
+					}
+					if (qrcodeRow) qrcodeRow.style.display = "none";
+				}
+				// FunnelCapability
+				const funnelRow = panel.querySelector("#ts-funnel-capability-row");
+				if (funnelRow) {
+					if (data.FunnelCapability) {
+						funnelRow.style.display = "";
+						const funnelCapEl = panel.querySelector("#ts-funnel-capability");
+						if (funnelCapEl) {
+							if (data.FunnelCapability === "true") {
+								funnelCapEl.textContent = i18next.t("funnel_setup_done");
+							}
+							if (data.FunnelCapability === "false") {
+								funnelCapEl.textContent = i18next.t("funnel_setup_not_done");
+							}
+							if (data.FunnelCapability === "unknown") {
+								funnelCapEl.textContent = "???";
+							}
+						}
+					} else {
+						funnelRow.style.display = "none";
+						const funnelCapEl = panel.querySelector("#ts-funnel-capability");
+						if (funnelCapEl) {
+							funnelCapEl.textContent = "";
+						}
+					}
+
+					// 控制 Funnel 模块遮罩层显示与否
+					const overlay = document.getElementById("funnel-acl-overlay");
+					if (overlay) {
+						if (data.FunnelCapability === "false") {
+							overlay.style.display = "";
+						}
+						if (
+							data.FunnelCapability === "true" ||
+							data.FunnelCapability === "unknown"
+						) {
+							overlay.style.display = "none";
+						}
+					}
+					const enforce_password_overlay = document.getElementById(
+						"funnel_password_protection_overlay",
+					);
+					if (enforce_password_overlay) {
+						if (data.FunnelCapability === "false") {
+							enforce_password_overlay.style.display = "";
+						}
+						if (
+							data.FunnelCapability === "true" ||
+							data.FunnelCapability === "unknown"
+						) {
+							enforce_password_overlay.style.display = "none";
+						}
+					}
+					// 控制 Funnel 提示模块显示与否
+					const hint = document.getElementById("funnel-acl-hint");
+					if (hint) {
+						if (data.FunnelCapability === "false") {
+							hint.style.display = "";
+						}
+						if (
+							data.FunnelCapability === "true" ||
+							data.FunnelCapability === "unknown"
+						) {
+							hint.style.display = "none";
+						}
+					}
+				}
+				// Update embedded JSON for other components if present
+				const scriptEl = document.getElementById("tsStatus");
+				if (scriptEl) {
+					try {
+						scriptEl.textContent = JSON.stringify(data);
+					} catch (_) {}
+				}
+			} catch (err) {
+				console.error("ApplyTailscaleStatus error:", err);
+			}
+		}
+
+		// StartTailscaleStatusSSE 打开状态流，避免设置页用定时轮询刷新 Tailscale 面板。
+		function StartTailscaleStatusSSE(forceRestart) {
+			if (typeof EventSource === "undefined") {
+				UpdateTailscaleStatus();
+				return;
+			}
+			if (window.__tailscaleStatusSSE) {
+				if (
+					!forceRestart &&
+					window.__tailscaleStatusSSE.readyState !== EventSource.CLOSED
+				) {
+					return;
+				}
+				window.__tailscaleStatusSSE.close();
+			}
+			const source = new EventSource(
+				window.ComiGoPath("/api/tailscale-status-sse"),
+			);
+			window.__tailscaleStatusSSE = source;
+			source.addEventListener("tailscale_status", function (event) {
+				try {
+					ApplyTailscaleStatus(JSON.parse(event.data || "{}"));
+				} catch (err) {
+					console.error("TailscaleStatusSSE parse failed:", err);
+				}
+			});
+			source.addEventListener("tailscale_status_error", function (event) {
+				console.error("TailscaleStatusSSE status error:", event.data);
+			});
+		}
+
+		window.addEventListener("pagehide", function () {
+			if (window.__tailscaleStatusSSE) {
+				window.__tailscaleStatusSSE.close();
+				window.__tailscaleStatusSSE = null;
+			}
+		});
+
 		// 更新Tailscale状态面板
 		function UpdateTailscaleStatus(e) {
 			try {
@@ -673,199 +842,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 						if (!res.ok) throw new Error("HTTP " + res.status);
 						return res.json();
 					})
-					.then((data) => {
-						// AuthURL row
-						const authRow = panel.querySelector("#ts-auth-row");
-						if (authRow) {
-							const link = authRow.querySelector("#ts-auth-link");
-							if (data.AuthURL) {
-								authRow.style.display = "";
-								if (link) {
-									link.href = data.AuthURL;
-									link.textContent = data.AuthURL;
-								}
-							} else {
-								authRow.style.display = "none";
-								if (link) {
-									link.href = "";
-									link.textContent = "";
-								}
-							}
-						}
-						// Basic fields
-						setText("#ts-state", data.BackendState || "");
-						let clientsCount = 0;
-						if (Array.isArray(data.Clients)) {
-							clientsCount = data.Clients.length;
-						} else if (data.Clients && typeof data.Clients === "object") {
-							try {
-								clientsCount = Object.keys(data.Clients).length;
-							} catch (_) {
-								clientsCount = 0;
-							}
-						}
-						setText("#ts-clients", clientsCount);
-						setText("#ts-os", data.OS || "");
-						setText(
-							"#ts-online",
-							data.Online ? i18next.t("connected") : i18next.t("not_connected"),
-						);
-						// IP: show first IPv4 if possible, else first entry
-						let ipText = "";
-						if (
-							Array.isArray(data.TailscaleIPs) &&
-							data.TailscaleIPs.length > 0
-						) {
-							const ipv4 = data.TailscaleIPs.find(
-								(x) => typeof x === "string" && x.indexOf(":") === -1,
-							);
-							ipText = ipv4 || data.TailscaleIPs[0];
-						}
-						setText("#ts-ip", ipText);
-						setText("#ts-version", data.Version || "");
-
-						// ts-funnel-mode
-						const funnelModeEl = panel.querySelector("#ts-funnel-mode");
-						if (funnelModeEl) {
-							funnelModeEl.textContent = document.getElementById("FunnelTunnel")
-								.checked
-								? i18next.t("enable")
-								: i18next.t("disable");
-						}
-						// FQDN row/link
-						const fqdnRow = panel.querySelector("#ts-fqdn-row");
-						const fqdnLink = panel.querySelector("#ts-fqdn-link");
-						const qrcodeRow = panel.querySelector("#ts-qrcode-row");
-						const qrcodeContainer = panel.querySelector("#ts-qrcode-container");
-						const qrcodeImg = panel.querySelector("#ts-qrcode-img");
-						if (data.FQDN) {
-							if (fqdnRow) fqdnRow.style.display = "";
-							if (fqdnLink) {
-								const portInput = document.getElementById("TailscalePort");
-								const port = portInput ? parseInt(portInput.value, 10) : 0;
-								const isHttps =
-									port === 443 ||
-									document.getElementById("FunnelTunnel").checked;
-								const proto = isHttps ? "https://" : "http://";
-								let href = proto + data.FQDN;
-								if (port !== 443 && port !== 80) {
-									href += ":" + port;
-								}
-								//console.log('Setting FQDN link to:', href);
-								fqdnLink.href = href;
-								fqdnLink.textContent = href;
-								// 更新二维码：当 Online 为 true 且 FQDN 不为空时显示
-								if (data.Online && href) {
-									if (qrcodeRow) qrcodeRow.style.display = "";
-									if (qrcodeImg) {
-										const qrcodeUrl =
-											window.location.origin +
-											window.ComiGoPath("/api/qrcode.png") +
-											"?base64=true&qrcode_str=" +
-											encodeURIComponent(href);
-										fetch(qrcodeUrl)
-											.then((response) => response.text())
-											.then((data) => {
-												if (qrcodeImg) {
-													qrcodeImg.src = data;
-												}
-											})
-											.catch((error) => {
-												console.error("加载二维码失败:", error);
-											});
-									}
-								} else {
-									if (qrcodeRow) qrcodeRow.style.display = "none";
-								}
-							}
-						} else {
-							if (fqdnRow) fqdnRow.style.display = "none";
-							if (fqdnLink) {
-								fqdnLink.href = "";
-								fqdnLink.textContent = "";
-							}
-							if (qrcodeRow) qrcodeRow.style.display = "none";
-						}
-						// FunnelCapability
-						const funnelRow = panel.querySelector("#ts-funnel-capability-row");
-						if (funnelRow) {
-							if (data.FunnelCapability) {
-								funnelRow.style.display = "";
-								const funnelCapEl = panel.querySelector(
-									"#ts-funnel-capability",
-								);
-								if (funnelCapEl) {
-									if (data.FunnelCapability === "true") {
-										funnelCapEl.textContent = i18next.t("funnel_setup_done");
-									}
-									if (data.FunnelCapability === "false") {
-										funnelCapEl.textContent = i18next.t(
-											"funnel_setup_not_done",
-										);
-									}
-									if (data.FunnelCapability === "unknown") {
-										funnelCapEl.textContent = "???";
-									}
-								}
-							} else {
-								funnelRow.style.display = "none";
-								const funnelCapEl = panel.querySelector(
-									"#ts-funnel-capability",
-								);
-								if (funnelCapEl) {
-									funnelCapEl.textContent = "";
-								}
-							}
-
-							// 控制 Funnel 模块遮罩层显示与否
-							const overlay = document.getElementById("funnel-acl-overlay");
-							if (overlay) {
-								if (data.FunnelCapability === "false") {
-									overlay.style.display = "";
-								}
-								if (
-									data.FunnelCapability === "true" ||
-									data.FunnelCapability === "unknown"
-								) {
-									overlay.style.display = "none";
-								}
-							}
-							const enforce_password_overlay = document.getElementById(
-								"funnel_password_protection_overlay",
-							);
-							if (enforce_password_overlay) {
-								if (data.FunnelCapability === "false") {
-									enforce_password_overlay.style.display = "";
-								}
-								if (
-									data.FunnelCapability === "true" ||
-									data.FunnelCapability === "unknown"
-								) {
-									enforce_password_overlay.style.display = "none";
-								}
-							}
-							// 控制 Funnel 提示模块显示与否
-							const hint = document.getElementById("funnel-acl-hint");
-							if (hint) {
-								if (data.FunnelCapability === "false") {
-									hint.style.display = "";
-								}
-								if (
-									data.FunnelCapability === "true" ||
-									data.FunnelCapability === "unknown"
-								) {
-									hint.style.display = "none";
-								}
-							}
-						}
-						// Update embedded JSON for other components if present
-						const scriptEl = document.getElementById("tsStatus");
-						if (scriptEl) {
-							try {
-								scriptEl.textContent = JSON.stringify(data);
-							} catch (_) {}
-						}
-					})
+					.then(ApplyTailscaleStatus)
 					.catch((err) => {
 						// Optionally report in console; keep UI silent
 						console.error("UpdateTailscaleStatus failed:", err);
@@ -873,6 +850,15 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 			} catch (err) {
 				console.error("UpdateTailscaleStatus error:", err);
 			}
+		}
+
+		// 函数定义完成后再启动 SSE，避免 x-init 早于脚本执行导致状态流未建立。
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", function () {
+				StartTailscaleStatusSSE();
+			});
+		} else {
+			StartTailscaleStatusSSE();
 		}
 	</script>
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/vfs"
 )
@@ -31,10 +32,14 @@ type Store struct {
 
 // GenerateBookGroup 分析书库中已有书籍的路径，生成书籍组信息
 func (store *Store) GenerateBookGroup() error {
-	// 遍历 BookMap ，清理所有 BooksGroup 类型的书籍
+	if tools.DetectStoreURL(store.BackendURL).Type == tools.StoreBackendComigo {
+		// Comigo 远程书库直接使用远端返回的书组拓扑，避免本地按路径再生成一份重复书组。
+		return nil
+	}
+	// 遍历 BookMap，清理本地生成的 BooksGroup；远端 Comigo 原本返回的书组带 RemoteBookID，不能删。
 	for _, value := range store.BookMap.Range {
 		b := value.(*model.Book)
-		if b.Type == model.TypeBooksGroup {
+		if b.Type == model.TypeBooksGroup && b.RemoteBookID == "" {
 			store.BookMap.Delete(b.BookID)
 		}
 	}

@@ -27,7 +27,7 @@
 - 🔄 **Sync Reading**: Synchronized page-turning across different devices
 - 🔌 **Plugin System**: Built-in plugins like auto page-turn and clock, with custom plugin support
 - 🎬 **Media Playback**: Built-in audio and video player
-- 📥 **Flexible Download**: Batch download image folders, convert and download as EPUB format
+- 📥 **Flexible Use**: Supports remote Comigo libraries, batch image-folder downloads, and EPUB conversion
 - 📜 **Reading History**: Automatic reading history tracking for easy continuation
 
 PC/Mobile Sync:   

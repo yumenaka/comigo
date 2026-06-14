@@ -197,24 +197,35 @@ func TestDeleteStaleComigoRemoteBooksRemovesGeneratedGroups(t *testing.T) {
 		IsRemote:       true,
 		RemoteStoreKey: "remote-key",
 	}}
+	originalRemoteGroup := &model.Book{BookInfo: model.BookInfo{
+		BookID:         "original-remote-group",
+		StoreUrl:       remoteStore,
+		Type:           model.TypeBooksGroup,
+		IsRemote:       true,
+		RemoteBookID:   "remote-group",
+		RemoteStoreKey: "remote-key",
+	}}
 	localGroup := &model.Book{BookInfo: model.BookInfo{
 		BookID:   "local-group",
 		StoreUrl: "/local/books",
 		Type:     model.TypeBooksGroup,
 	}}
-	for _, book := range []*model.Book{currentBook, missingBook, generatedGroup, localGroup} {
+	for _, book := range []*model.Book{currentBook, missingBook, generatedGroup, originalRemoteGroup, localGroup} {
 		if err := model.IStore.StoreBook(book); err != nil {
 			t.Fatalf("StoreBook(%s): %v", book.BookID, err)
 		}
 	}
 
-	deleteStaleComigoRemoteBooks(remoteStore, map[string]bool{"current": true})
+	deleteStaleComigoRemoteBooks(remoteStore, map[string]bool{"current": true, "original-remote-group": true})
 
 	if _, err := model.IStore.GetBook("current"); err != nil {
 		t.Fatalf("当前远程书被误删: %v", err)
 	}
 	if _, err := model.IStore.GetBook("local-group"); err != nil {
 		t.Fatalf("本地书组被误删: %v", err)
+	}
+	if _, err := model.IStore.GetBook("original-remote-group"); err != nil {
+		t.Fatalf("远端原始书组被误删: %v", err)
 	}
 	if _, err := model.IStore.GetBook("missing"); err == nil {
 		t.Fatal("缺失的远程书没有被删除")

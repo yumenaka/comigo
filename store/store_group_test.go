@@ -299,7 +299,7 @@ func TestTopOfShelfInfoSplitsRemoteComigoShelves(t *testing.T) {
 }
 
 func TestGeneratedRemoteBookGroupInheritsRemoteFields(t *testing.T) {
-	const remoteStore = "https://example.com"
+	const remoteStore = "sftp://example.com/manga"
 	childA := bookForFolderTest("child-a", "/remote/album/a.cbz", remoteStore, model.TypeZip)
 	childA.Depth = 1
 	childA.IsRemote = true
@@ -335,6 +335,48 @@ func TestGeneratedRemoteBookGroupInheritsRemoteFields(t *testing.T) {
 	}
 	if !group.IsRemote || group.RemoteStoreKey != "remote-key" || group.RemoteShelfKey != "shelf-a" {
 		t.Fatalf("远程书组没有继承远端字段: %#v", group.BookInfo)
+	}
+}
+
+func TestGenerateBookGroupKeepsRemoteComigoOriginalGroup(t *testing.T) {
+	const remoteStore = "https://example.com"
+	child := bookForFolderTest("child", "/remote/album/a.cbz", remoteStore, model.TypeZip)
+	child.Depth = 1
+	child.IsRemote = true
+	child.RemoteURL = remoteStore
+	child.RemoteBookID = "remote-child"
+	child.RemoteStoreKey = "remote-key"
+	child.RemoteShelfKey = "shelf-a"
+	child.RemoteShelfName = "Shelf A"
+	remoteGroup := bookForFolderTest("remote-group", "/remote/album", remoteStore, model.TypeBooksGroup)
+	remoteGroup.Depth = 0
+	remoteGroup.IsRemote = true
+	remoteGroup.RemoteURL = remoteStore
+	remoteGroup.RemoteBookID = "remote-group"
+	remoteGroup.RemoteStoreKey = "remote-key"
+	remoteGroup.RemoteShelfKey = "shelf-a"
+	remoteGroup.RemoteShelfName = "Shelf A"
+	remoteGroup.ChildBooksID = []string{child.BookID}
+	setFakeBooks(t, remoteGroup, child)
+
+	store := &Store{StoreInfo: StoreInfo{BackendURL: remoteStore}}
+	store.BookMap.Store(remoteGroup.BookID, remoteGroup)
+	store.BookMap.Store(child.BookID, child)
+	if err := store.GenerateBookGroup(); err != nil {
+		t.Fatalf("GenerateBookGroup error: %v", err)
+	}
+	if _, ok := store.BookMap.Load(remoteGroup.BookID); !ok {
+		t.Fatal("远端 Comigo 原本返回的书组被本地书组生成流程删除")
+	}
+	groupCount := 0
+	for _, value := range store.BookMap.Range {
+		book := value.(*model.Book)
+		if book.Type == model.TypeBooksGroup {
+			groupCount++
+		}
+	}
+	if groupCount != 1 {
+		t.Fatalf("Comigo 远端书组不应被本地路径规则重复生成: got %d want 1", groupCount)
 	}
 }
 

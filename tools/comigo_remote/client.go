@@ -15,8 +15,10 @@ import (
 	"time"
 
 	"github.com/jxskiss/base62"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 const RemoteStoreQuery = "remote_store"
@@ -116,7 +118,7 @@ func NewClient(storeURL string, timeoutSeconds int) (*Client, error) {
 	}
 	timeout := time.Duration(timeoutSeconds) * time.Second
 	if timeout <= 0 {
-		timeout = 30 * time.Second
+		timeout = 20 * time.Second
 	}
 	client := &Client{
 		baseURL: baseURL,
@@ -247,7 +249,9 @@ func (c *Client) doOnce(method string, apiPath string, query url.Values, body []
 		return nil, "", 0, err
 	}
 	defer resp.Body.Close()
+	stopBodyLog := c.startWaitLog(method, apiPath+" body", time.Now())
 	data, readErr := io.ReadAll(resp.Body)
+	stopBodyLog()
 	if readErr != nil {
 		return nil, "", resp.StatusCode, readErr
 	}
@@ -270,7 +274,7 @@ func (c *Client) doRequest(method string, apiPath string, query url.Values, body
 			req.Header.Add(key, value)
 		}
 	}
-	return c.http.Do(req)
+	return c.doHTTP(req, method, apiPath)
 }
 
 func (c *Client) login() error {
@@ -282,7 +286,7 @@ func (c *Client) login() error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	resp, err := c.http.Do(req)
+	resp, err := c.doHTTP(req, http.MethodPost, "/api/login")
 	if err != nil {
 		return err
 	}
@@ -291,6 +295,38 @@ func (c *Client) login() error {
 		return fmt.Errorf("remote Comigo login failed: %s", resp.Status)
 	}
 	return nil
+}
+
+// doHTTP 在等待远端 Comigo 响应时定期打印进度，避免长超时看起来像卡死。
+func (c *Client) doHTTP(req *http.Request, method string, apiPath string) (*http.Response, error) {
+	stopLog := c.startWaitLog(method, apiPath, time.Now())
+	defer stopLog()
+	return c.http.Do(req)
+}
+
+// startWaitLog 每 2 秒输出一次远端等待状态，stop 函数可重复调用。
+func (c *Client) startWaitLog(method string, apiPath string, start time.Time) func() {
+	done := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(2 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				logger.Infof(locale.GetString("log_remote_comigo_waiting"), method, apiPath, c.baseURL.String(), time.Since(start).Round(time.Second), c.http.Timeout)
+			case <-done:
+				return
+			}
+		}
+	}()
+	var stopped bool
+	return func() {
+		if stopped {
+			return
+		}
+		stopped = true
+		close(done)
+	}
 }
 
 func (c *Client) apiURL(apiPath string, query url.Values) string {

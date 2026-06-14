@@ -49,6 +49,18 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 
 	fetched := map[string]bool{}
 	var books []*model.Book
+	scanStart := time.Now()
+	lastProgressLog := scanStart.Add(-2 * time.Second)
+	// 每 2 秒输出一次远端扫描进度；大量小请求不会触发 timeout 等待日志，也要让用户看到进展。
+	logProgress := func(stage string) {
+		if time.Since(lastProgressLog) < 2*time.Second {
+			return
+		}
+		logger.Infof(locale.GetString("log_scan_remote_comigo_progress"), storeURL, len(fetched), len(books), stage, time.Since(scanStart).Round(time.Second))
+		lastProgressLog = time.Now()
+	}
+	logProgress("top-shelf")
+
 	var fetchBook func(remoteBookID string, shelfKey string, shelfName string, topLevel bool) error
 	fetchBook = func(remoteBookID string, shelfKey string, shelfName string, topLevel bool) error {
 		localBookID := comigo_remote.LocalBookID(storeURL, remoteBookID)
@@ -66,6 +78,7 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 		}
 		fetched[localBook.BookID] = true
 		books = append(books, localBook)
+		logProgress(remoteBook.Title)
 		for _, childRemoteID := range remoteBook.ChildBooksID {
 			if err := fetchBook(childRemoteID, shelfKey, shelfName, false); err != nil {
 				logger.Infof(locale.GetString("log_get_book_error"), err)
