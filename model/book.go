@@ -21,8 +21,8 @@ type Book struct {
 	PageInfos // 书籍内所有页面的信息
 }
 
-// GuestCover 猜测书籍的封面
-func (b *Book) GuestCover() (cover PageInfo) {
+// GuessCover 猜测书籍的封面
+func (b *Book) GuessCover() (cover PageInfo) {
 	// 按 cover/0/1 的常见命名优先猜测封面，找不到时回退到第一页。
 	for i := range b.PageInfos {
 		filenameLower := strings.ToLower(b.PageInfos[i].Name)
@@ -209,7 +209,7 @@ func ClearBookNotExist() {
 			}
 			if changed {
 				book.setPageNum()
-				book.Cover = book.GuestCover()
+				book.Cover = book.GuessCover()
 				if err := IStore.StoreBook(book); err != nil {
 					logger.Infof(locale.GetString("log_error_adding_book"), book.BookID, err)
 				}

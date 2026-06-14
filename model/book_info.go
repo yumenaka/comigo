@@ -228,7 +228,7 @@ func (b *BookInfo) GetCover() PageInfo {
 		if err != nil || len(tempBook.PageInfos) == 0 {
 			return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
 		}
-		return tempBook.GuestCover()
+		return tempBook.GuessCover()
 	case TypePDF:
 		return PageInfo{Name: "1.jpg", Url: "/api/get-file?id=" + b.BookID + "&filename=" + "1.jpg"}
 	case TypeVideo:
