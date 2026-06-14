@@ -1,6 +1,9 @@
 package scan
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -9,6 +12,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
+	"github.com/yumenaka/comigo/tools/comigo_remote"
 )
 
 // testCfgScan 仅用于扫描相关的单元测试
@@ -166,6 +170,95 @@ func TestInitStoreRescansChangedDirectoryBook(t *testing.T) {
 	}
 }
 
+func TestInitComigoStoreSkipsNestedRemoteBooks(t *testing.T) {
+	// 模拟远端 Comigo 里同时存在本地书、远程书和混合书组，覆盖嵌套远程书过滤。
+	remoteBooks := map[string]model.Book{
+		"local": {BookInfo: model.BookInfo{
+			BookID: "local",
+			Title:  "Local Book",
+			Type:   model.TypeZip,
+			Depth:  0,
+		}, PageInfos: model.PageInfos{
+			{Name: "001.jpg", Url: "/api/get-file?id=local&filename=001.jpg"},
+			{Name: "002.jpg", Url: "/api/get-file?id=local&filename=002.jpg"},
+		}},
+		"nested-remote": {BookInfo: model.BookInfo{
+			BookID:         "nested-remote",
+			Title:          "Nested Remote Book",
+			Type:           model.TypeZip,
+			Depth:          0,
+			IsRemote:       true,
+			RemoteStoreKey: "remote-key",
+		}, PageInfos: model.PageInfos{
+			{Name: "001.jpg", Url: "/api/get-file?id=nested-remote&filename=001.jpg"},
+			{Name: "002.jpg", Url: "/api/get-file?id=nested-remote&filename=002.jpg"},
+		}},
+		"group": {BookInfo: model.BookInfo{
+			BookID:       "group",
+			Title:        "Mixed Group",
+			Type:         model.TypeBooksGroup,
+			Depth:        0,
+			ChildBooksID: []string{"local", "nested-remote"},
+		}},
+	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/top-shelf":
+			_ = json.NewEncoder(w).Encode([]model.StoreBookInfo{{
+				DisplayName: "Remote Shelf",
+				BookInfos: model.BookInfos{
+					remoteBooks["local"].BookInfo,
+					remoteBooks["nested-remote"].BookInfo,
+					remoteBooks["group"].BookInfo,
+				},
+			}})
+		case "/api/get-book":
+			book, ok := remoteBooks[r.URL.Query().Get("id")]
+			if !ok {
+				http.NotFound(w, r)
+				return
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"data": book})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	oldStore := model.IStore
+	oldCfg := config.CopyCfg()
+	model.IStore = &store.StoreInRam{}
+	// AddBooksToStore 读取全局 MinImageNum；测试里固定成 1，避免本机配置影响断言。
+	config.GetCfg().MinImageNum = 1
+	t.Cleanup(func() {
+		model.IStore = oldStore
+		*config.GetCfg() = oldCfg
+	})
+
+	scanCfg := &testCfgScan{timeoutLimitForSc: 5}
+	if err := InitStore(server.URL, scanCfg); err != nil {
+		t.Fatalf("InitStore remote Comigo: %v", err)
+	}
+
+	localID := localComigoBookID(t, server.URL, "local")
+	groupID := localComigoBookID(t, server.URL, "group")
+	nestedRemoteID := localComigoBookID(t, server.URL, "nested-remote")
+	if _, err := model.IStore.GetBook(localID); err != nil {
+		t.Fatalf("本地书没有导入: %v", err)
+	}
+	group, err := model.IStore.GetBook(groupID)
+	if err != nil {
+		t.Fatalf("本地书组没有导入: %v", err)
+	}
+	if _, err := model.IStore.GetBook(nestedRemoteID); err == nil {
+		t.Fatal("嵌套远程书被误导入")
+	}
+	// 混合书组应同步移除被跳过的远程子书，避免前端拿到不存在的 ChildBooksID。
+	if len(group.ChildBooksID) != 1 || group.ChildBooksID[0] != localID {
+		t.Fatalf("书组子书 ID = %v，期望只保留 %q", group.ChildBooksID, localID)
+	}
+}
+
 func TestDeleteStaleComigoRemoteBooksRemovesGeneratedGroups(t *testing.T) {
 	oldStore := model.IStore
 	model.IStore = &store.StoreInRam{}
@@ -233,6 +326,11 @@ func TestDeleteStaleComigoRemoteBooksRemovesGeneratedGroups(t *testing.T) {
 	if _, err := model.IStore.GetBook("generated-group"); err == nil {
 		t.Fatal("本地生成的远程书组没有被删除")
 	}
+}
+
+func localComigoBookID(t *testing.T, storeURL string, remoteBookID string) string {
+	t.Helper()
+	return comigo_remote.LocalBookID(storeURL, remoteBookID)
 }
 
 func mustFindBookByPath(t *testing.T, bookPath string) *model.Book {

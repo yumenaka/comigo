@@ -61,15 +61,27 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 	}
 	logProgress("top-shelf")
 
-	var fetchBook func(remoteBookID string, shelfKey string, shelfName string, topLevel bool) error
-	fetchBook = func(remoteBookID string, shelfKey string, shelfName string, topLevel bool) error {
+	// skipped 记录远端里本身就是远程书库的条目；它们不进入 fetched，重扫时会清掉旧的嵌套代理数据。
+	skipped := map[string]bool{}
+	// fetchBook 返回该远端书是否实际导入；父书组据此过滤 ChildBooksID，避免留下指向被跳过书籍的子项。
+	var fetchBook func(remoteBookID string, shelfKey string, shelfName string, topLevel bool) (bool, error)
+	fetchBook = func(remoteBookID string, shelfKey string, shelfName string, topLevel bool) (bool, error) {
 		localBookID := comigo_remote.LocalBookID(storeURL, remoteBookID)
 		if fetched[localBookID] {
-			return nil
+			return true, nil
+		}
+		if skipped[localBookID] {
+			return false, nil
 		}
 		remoteBook, err := client.GetBook(remoteBookID, "default")
 		if err != nil {
-			return err
+			return false, err
+		}
+		// 远端 Comigo 中的远程书籍只属于远端服务本身，本机不再套一层远程代理。
+		if !shouldImportRemoteComigoBook(remoteBook) {
+			skipped[localBookID] = true
+			logProgress(remoteBook.Title)
+			return false, nil
 		}
 		localBook := comigo_remote.LocalizeBookInShelf(storeURL, remoteBook, shelfKey, shelfName)
 		if topLevel {
@@ -79,19 +91,27 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 		fetched[localBook.BookID] = true
 		books = append(books, localBook)
 		logProgress(remoteBook.Title)
+		// 重新生成子书列表，只保留本轮已经导入的非远程子书。
+		childBookIDs := make([]string, 0, len(remoteBook.ChildBooksID))
 		for _, childRemoteID := range remoteBook.ChildBooksID {
-			if err := fetchBook(childRemoteID, shelfKey, shelfName, false); err != nil {
+			imported, err := fetchBook(childRemoteID, shelfKey, shelfName, false)
+			if err != nil {
 				logger.Infof(locale.GetString("log_get_book_error"), err)
+				continue
+			}
+			if imported {
+				childBookIDs = append(childBookIDs, comigo_remote.LocalBookID(storeURL, childRemoteID))
 			}
 		}
-		return nil
+		localBook.ChildBooksID = childBookIDs
+		return true, nil
 	}
 
 	for shelfIndex, shelf := range shelves {
 		shelfKey := comigo_remote.ShelfKey(storeURL, shelf, shelfIndex)
 		shelfName := shelf.DisplayName
 		for _, bookInfo := range shelf.BookInfos {
-			if err := fetchBook(bookInfo.BookID, shelfKey, shelfName, true); err != nil {
+			if _, err := fetchBook(bookInfo.BookID, shelfKey, shelfName, true); err != nil {
 				logger.Infof(locale.GetString("log_get_book_error"), err)
 			}
 		}
@@ -101,6 +121,11 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 	AddBooksToStore(books)
 	model.GenerateBookGroup()
 	return nil
+}
+
+// shouldImportRemoteComigoBook 避免导入远端服务中的远程书籍，防止 WebDAV/另一台 Comigo 等书库被二次嵌套代理。
+func shouldImportRemoteComigoBook(remoteBook *model.Book) bool {
+	return remoteBook != nil && !remoteBook.IsRemote
 }
 
 // deleteStaleComigoRemoteBooks 删除本次远端 Comigo 扫描后已经过期的本地条目。
