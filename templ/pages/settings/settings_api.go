@@ -457,7 +457,12 @@ func AddArrayConfigHandler(c echo.Context) error {
 	}
 	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", decodedConfigName)
 
-	values, err := doAdd(decodedConfigName, decodedAddValue)
+	var values []string
+	if decodedConfigName == "StoreUrls" {
+		values, err = doAddStoreURL(decodedAddValue)
+	} else {
+		values, err = doAdd(decodedConfigName, decodedAddValue)
+	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_add_config_failed"))
 	}
@@ -490,6 +495,31 @@ func doAdd(configName, addValue string) ([]string, error) {
 		return nil, err
 	}
 	writeConfigAndApply(oldConfig)
+	return values, nil
+}
+
+// doAddStoreURL 只扫描本次新增的书库，避免新增远程书库时重扫所有既有远程服务。
+func doAddStoreURL(storeURL string) ([]string, error) {
+	values, err := config.GetCfg().AddStringArrayConfig("StoreUrls", storeURL)
+	if err != nil {
+		logger.Errorf(locale.GetString("err_failed_to_add_config_value"), err)
+		return nil, err
+	}
+	if writeErr := config.UpdateConfigFile(); writeErr != nil {
+		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+	}
+
+	if scanErr := scan.InitStore(storeURL, config.GetCfg()); scanErr != nil {
+		logger.Infof(locale.GetString("scan_error")+" path:%s %s", storeURL, scanErr)
+	} else {
+		model.GenerateBookGroup()
+		if config.GetCfg().EnableDatabase {
+			if saveErr := scan.SaveBooksToDatabase(config.GetCfg()); saveErr != nil {
+				logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), saveErr)
+			}
+		}
+	}
+	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonSingleStoreRescan)
 	return values, nil
 }
 
@@ -769,13 +799,16 @@ func rescanOneStore(c echo.Context, storeUrl string) error {
 	logger.Infof(locale.GetString("log_rescan_store")+"\n", storeUrl)
 
 	// 记录扫描前的书籍数量
-	beforeCount := model.GetAllBooksNumber()
+	beforeCount := getStoreRealBookCount(storeUrl)
 
 	// 调用扫描功能
 	if err := scan.InitStore(storeUrl, config.GetCfg()); err != nil {
 		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
 	}
+
+	// 扫描只会发现现存书籍，缺失的旧记录需要在保存和统计前主动清理。
+	model.ClearBookNotExist()
 
 	// 如果启用数据库，保存扫描结果
 	if config.GetCfg().EnableDatabase {
@@ -785,20 +818,17 @@ func rescanOneStore(c echo.Context, storeUrl string) error {
 		}
 	}
 
-	// 计算新增的书籍数量
-	afterCount := model.GetAllBooksNumber()
-	newBooksCount := afterCount - beforeCount
-	if newBooksCount < 0 {
-		newBooksCount = 0
-	}
+	afterCount := getStoreRealBookCount(storeUrl)
+	newBooksCount, removedBooksCount := rescanBookDelta(beforeCount, afterCount)
 
-	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount)
+	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount, removedBooksCount)
 
 	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonSingleStoreRescan)
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success":       true,
-		"newBooksCount": newBooksCount,
-		"message":       locale.GetString("rescan_store_success"),
+		"success":           true,
+		"newBooksCount":     newBooksCount,
+		"removedBooksCount": removedBooksCount,
+		"message":           locale.GetString("rescan_store_success"),
 	})
 }
 
@@ -814,6 +844,10 @@ func rescanAllStores(c echo.Context) error {
 		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
 	}
+
+	// 扫描结束后清理已经消失的书籍，才能保存并统计真实减少数量。
+	model.ClearBookNotExist()
+
 	if config.GetCfg().EnableDatabase {
 		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
 			logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
@@ -822,19 +856,46 @@ func rescanAllStores(c echo.Context) error {
 	}
 
 	afterCount := model.GetAllBooksNumber()
-	newBooksCount := afterCount - beforeCount
-	if newBooksCount < 0 {
-		newBooksCount = 0
-	}
+	newBooksCount, removedBooksCount := rescanBookDelta(beforeCount, afterCount)
 
-	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount)
+	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount, removedBooksCount)
 
 	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonLibraryRescan)
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"success":       true,
-		"newBooksCount": newBooksCount,
-		"message":       locale.GetString("rescan_store_success"),
+		"success":           true,
+		"newBooksCount":     newBooksCount,
+		"removedBooksCount": removedBooksCount,
+		"message":           locale.GetString("rescan_store_success"),
 	})
+}
+
+// rescanBookDelta 根据扫描前后总数计算净新增和净减少，避免负数透传到前端。
+func rescanBookDelta(beforeCount, afterCount int) (newBooksCount int, removedBooksCount int) {
+	if afterCount >= beforeCount {
+		return afterCount - beforeCount, 0
+	}
+	return 0, beforeCount - afterCount
+}
+
+// getStoreRealBookCount 统计单个书库的实际书籍数量，不包含自动生成的书组。
+func getStoreRealBookCount(storeUrl string) int {
+	targetKey := storeBookCountKey(storeUrl)
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
+		return 0
+	}
+
+	count := 0
+	for _, book := range allBooks {
+		if book.Type == model.TypeBooksGroup {
+			continue
+		}
+		if storeBookCountKey(book.StoreUrl) == targetKey {
+			count++
+		}
+	}
+	return count
 }
 
 // DeleteStoreHandler 处理删除书库的 JSON API

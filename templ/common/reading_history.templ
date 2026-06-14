@@ -71,7 +71,7 @@ templ ReadingHistoryWithLimit(limit int) {
 			<!-- 书签列表 -->
 			<template x-for="(item, index) in bookmarks" :key="item.book_info?.id + '_' + item.book_mark?.mark_type + '_' + item.book_mark?.page_index + '_' + index">
 				<a
-					:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)"
+					:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index, item.book_info.remote_store || '')"
 					class="panel-control flex flex-col gap-2 p-2 rounded border-2 border-gray-500 dark:border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
 				>
 					<div class="flex items-center gap-3">

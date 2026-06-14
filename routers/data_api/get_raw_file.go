@@ -3,6 +3,7 @@ package data_api
 import (
 	"mime"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,6 +18,27 @@ import (
 
 func GetRawFile(c echo.Context) error {
 	bookID := c.Param("book_id")
+	if localBook, client, _, ok, err := remoteComigoBookFromRequest(c, bookID); ok {
+		if err != nil {
+			return rawFileNotFound(c)
+		}
+		fileName := c.Param("file_name")
+		headers := http.Header{}
+		if rangeHeader := c.Request().Header.Get("Range"); rangeHeader != "" {
+			headers.Set("Range", rangeHeader)
+		}
+		resp, err := client.GetResponse("/api/raw/"+url.PathEscape(localBook.RemoteBookID)+"/"+url.PathEscape(fileName), nil, headers)
+		if err != nil {
+			return rawFileNotFound(c)
+		}
+		defer resp.Body.Close()
+		contentType := resp.Header.Get(echo.HeaderContentType)
+		setRawFileHeaders(c, contentType)
+		copyRemoteRawHeader(c, resp, echo.HeaderContentLength)
+		copyRemoteRawHeader(c, resp, "Content-Range")
+		copyRemoteRawHeader(c, resp, "Accept-Ranges")
+		return c.Stream(resp.StatusCode, contentType, resp.Body)
+	}
 	b, err := model.IStore.GetBook(bookID)
 	// 打印文件名
 	if err != nil {
@@ -117,6 +139,13 @@ func setRawFileHeaders(c echo.Context, contentType string) {
 	// 对音视频尽量 inline，避免被当成附件下载导致无法播放。
 	if strings.HasPrefix(contentType, "audio/") || strings.HasPrefix(contentType, "video/") {
 		c.Response().Header().Set(echo.HeaderContentDisposition, "inline")
+	}
+}
+
+// copyRemoteRawHeader 透传远端原始文件响应头，保证音视频 Range 播放能继续工作。
+func copyRemoteRawHeader(c echo.Context, resp *http.Response, headerName string) {
+	if value := resp.Header.Get(headerName); value != "" {
+		c.Response().Header().Set(headerName, value)
 	}
 }
 

@@ -150,6 +150,15 @@ func (store *Store) GenerateBookGroup() error {
 				continue
 			}
 			newBookGroup := tempBook
+			if len(sameParentBookList) > 0 && sameParentBookList[0].IsRemote {
+				// 远程书组由本地扫描生成，必须继承子书的远端定位信息，阅读链接才会带 remote_store。
+				firstBook := sameParentBookList[0]
+				newBookGroup.IsRemote = true
+				newBookGroup.RemoteURL = firstBook.RemoteURL
+				newBookGroup.RemoteStoreKey = firstBook.RemoteStoreKey
+				newBookGroup.RemoteShelfKey = firstBook.RemoteShelfKey
+				newBookGroup.RemoteShelfName = firstBook.RemoteShelfName
+			}
 			// 书名设置为目录名（更符合“文件夹/书组”语义）
 			var parentName string
 			if isRemote {

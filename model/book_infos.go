@@ -120,6 +120,7 @@ func compareByFileSize(a, b BookInfo) bool {
 type StoreBookInfo struct {
 	StoreUrl     string    `json:"-"` // 书库真实路径只用于服务端分组匹配，普通 JSON 不输出
 	DisplayName  string    `json:"display_name"`
+	IsRemote     bool      `json:"is_remote"`
 	ChildBookNum int       `json:"child_book_num"`
 	BookInfos    BookInfos `json:"book_infos"`
 }

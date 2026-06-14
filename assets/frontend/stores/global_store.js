@@ -65,6 +65,7 @@ const randomThemeName = 'random';
 const themeToString = (theme) => (theme === undefined || theme === null ? '' : theme.toString());
 const url = new URL(window.location.href);
 const currentRelativePath = comigoRelativePath(url.pathname);
+const currentRemoteStore = url.searchParams.get('remote_store') || '';
 // 运行环境状态集中在这里计算，模板只读取 store，避免各处重复解析 URL。
 const serverReachable = url.protocol === 'http:' || url.protocol === 'https:';
 const localBook = url.protocol === 'file:' || url.protocol === 'content:';
@@ -279,14 +280,18 @@ Alpine.store('global', {
             window.location.href = this.getReadURL(book_id, this.nowPageNum);
         }
     },
-    getReadURL(book_id, start_index) {
+    getReadURL(book_id, start_index, remote_store = '') {
         const url = new URL(window.location.href);
         const pageNum = Math.max(1, parseInt(start_index, 10) || 1);
+        const remoteStore = remote_store || currentRemoteStore;
         // 翻页阅读
         if (this.readMode === 'flip') {
             let new_url = new URL(comigoPath(`/flip/${book_id}`), url.origin);
             if (pageNum > 1) {
                 new_url.searchParams.set("start", pageNum.toString());
+            }
+            if (remoteStore) {
+                new_url.searchParams.set("remote_store", remoteStore);
             }
             return new_url.href;
         }
@@ -300,6 +305,9 @@ Alpine.store('global', {
                 const page = Math.floor((pageNum - 1) / pageLimit) + 1;
                 new_url.searchParams.set("page", page.toString());
                 new_url.searchParams.set("limit", pageLimit.toString());
+            }
+            if (remoteStore) {
+                new_url.searchParams.set("remote_store", remoteStore);
             }
             return new_url.href;
         }
@@ -316,7 +324,8 @@ Alpine.store('global', {
             return comigoPath(rawCoverURL);
         }
 
-        const coverURL = setURLQueryParam(rawCoverURL, "resize_height", resizeHeight);
+        let coverURL = setURLQueryParam(rawCoverURL, "resize_height", resizeHeight);
+        coverURL = setURLQueryParam(coverURL, "remote_store", bookInfo?.remote_store || currentRemoteStore);
         return comigoPath(coverURL);
     },
     // 竖屏模式
@@ -378,7 +387,12 @@ Alpine.store('global', {
             page_index: pageIndex,
             description: description
         };
-        const response = await fetch(comigoPath('/api/store-bookmark'), {
+        let bookmarkURL = '/api/store-bookmark';
+        const remoteStore = currentRemoteStore;
+        if (remoteStore) {
+            bookmarkURL = setURLQueryParam(bookmarkURL, 'remote_store', remoteStore);
+        }
+        const response = await fetch(comigoPath(bookmarkURL), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

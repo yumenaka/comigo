@@ -13,6 +13,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
+	"github.com/yumenaka/comigo/tools/comigo_remote"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -36,10 +37,20 @@ type PlayerData struct {
 func PlayerModeHandler(c echo.Context) error {
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
-	book, err := model.IStore.GetBook(bookID)
-	if err != nil {
-		logger.Infof(locale.GetString("log_getbook_error_scroll"), err)
-		return renderPlayerNotFound(c)
+	var book *model.Book
+	if remoteBook, ok, remoteErr := comigo_remote.ResolveBook(config.GetCfg().StoreUrls, c.QueryParam(comigo_remote.RemoteStoreQuery), bookID, "default", config.GetCfg().TimeoutLimitForScan); ok {
+		if remoteErr != nil {
+			logger.Infof(locale.GetString("log_getbook_error_scroll"), remoteErr)
+			return renderPlayerNotFound(c)
+		}
+		book = remoteBook
+	} else {
+		var err error
+		book, err = model.IStore.GetBook(bookID)
+		if err != nil {
+			logger.Infof(locale.GetString("log_getbook_error_scroll"), err)
+			return renderPlayerNotFound(c)
+		}
 	}
 	if !isMediaBook(book.BookInfo) {
 		return renderPlayerNotFound(c)
@@ -134,7 +145,11 @@ func isMediaBook(book model.BookInfo) bool {
 
 // playerCoverURL 统一生成播放器封面 URL，避免前端依赖本地路径。
 func playerCoverURL(book model.BookInfo) string {
-	return config.PrefixPath("/api/get-cover?id=" + url.QueryEscape(book.BookID) + "&resize_height=352")
+	coverURL := config.PrefixPath("/api/get-cover?id=" + url.QueryEscape(book.BookID) + "&resize_height=352")
+	if book.RemoteStoreKey != "" {
+		coverURL += "&remote_store=" + url.QueryEscape(book.RemoteStoreKey)
+	}
+	return coverURL
 }
 
 // mediaMimeType 根据标题扩展名生成浏览器 source type，减少音视频探测失败。

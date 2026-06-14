@@ -47,6 +47,16 @@ func GetFile(c echo.Context) error {
 	if err != nil {
 		return writeValidationError(c, err)
 	}
+	if localBook, client, _, ok, err := remoteComigoBookFromRequest(c, req.bookID); ok {
+		if err != nil {
+			return writeRemoteComigoError(c, err)
+		}
+		imgData, contentType, err := client.GetBytes("/api/get-file", remoteComigoQuery(c, localBook.RemoteBookID))
+		if err != nil {
+			return writeRemoteComigoError(c, err)
+		}
+		return c.Blob(http.StatusOK, contentType, imgData)
+	}
 
 	// 如果启用了本地缓存
 	if handled, err := serveCachedPicture(c, req); handled || err != nil {

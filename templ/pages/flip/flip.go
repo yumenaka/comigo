@@ -5,9 +5,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
+	"github.com/yumenaka/comigo/tools/comigo_remote"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -23,17 +25,23 @@ func FlipModeHandler(c echo.Context) error {
 		sortBy = sortBookBy.Value
 	}
 	// 读取url参数，获取书籍ID
-	book, err := model.IStore.GetBook(bookID)
-	if err != nil {
-		logger.Infof(locale.GetString("log_get_book_error"), err)
-		// 没有找到书，显示 HTTP 404 错误
-		indexHtml := common.Html(
-			c,
-			error_page.NotFound404(c),
-			[]string{},
-		)
-		// 渲染 404 页面
-		return common.RenderHTML(c, indexHtml)
+	var book *model.Book
+	if remoteBook, ok, remoteErr := comigo_remote.ResolveBook(config.GetCfg().StoreUrls, c.QueryParam(comigo_remote.RemoteStoreQuery), bookID, sortBy, config.GetCfg().TimeoutLimitForScan); ok {
+		if remoteErr != nil {
+			logger.Infof(locale.GetString("log_get_book_error"), remoteErr)
+			return renderFlipNotFound(c)
+		}
+		book = remoteBook
+	} else {
+		var err error
+		book, err = model.IStore.GetBook(bookID)
+		if err != nil {
+			logger.Infof(locale.GetString("log_get_book_error"), err)
+			return renderFlipNotFound(c)
+		}
+	}
+	if book == nil {
+		return renderFlipNotFound(c)
 	}
 	// HTML 单文件书籍直接返回源文件，避免翻页模板包裹后破坏原页面结构和脚本。
 	if book.Type == model.TypeHTML {
@@ -74,5 +82,14 @@ func FlipModeHandler(c echo.Context) error {
 			})
 	}
 	// 渲染翻页阅读页面
+	return common.RenderHTML(c, indexHtml)
+}
+
+func renderFlipNotFound(c echo.Context) error {
+	indexHtml := common.Html(
+		c,
+		error_page.NotFound404(c),
+		[]string{},
+	)
 	return common.RenderHTML(c, indexHtml)
 }

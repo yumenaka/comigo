@@ -55,7 +55,7 @@ func PlayerPage(c echo.Context, book *model.Book, playerData PlayerData) templ.C
 		if book != nil {
 			templ_7745c5c3_Err = common.Header(
 				common.HeaderBackLeft(common.GetReturnUrl(book.BookInfo.BookID)),
-				common.HeaderTextTitle(common.GetBookTitle(book.BookInfo.BookID)),
+				common.HeaderTextTitleRemote(common.GetBookTitle(book.BookInfo.BookID), book.BookInfo.IsRemote),
 				common.HeaderDefaultRight(),
 			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {

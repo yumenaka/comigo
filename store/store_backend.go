@@ -7,14 +7,15 @@ import (
 	"github.com/yumenaka/comigo/tools"
 )
 
-// Backend 文件后端。 可能是 1: 本地文件系统，2: SMB共享，3: SFTP服务器，4: WebDAV服务器，5: S3存储，6: FTP服务器
+// Backend 文件后端。 可能是 1: 本地文件系统，2: SMB共享，3: SFTP服务器，4: WebDAV服务器，5: S3存储，6: FTP服务器，7: Comigo服务
 // 可能用到的字段都放进一个结构体；调用方只填需要字段
 // 核心配置是“URL”，其余大多数参数都解析此URL生成。
 // 本地书库为文件路径（/home/pi/books C:\Users\用户名\books或  file://some_path/books），
 // 其他类型的书库是对应文件服务的 url 形式，
 // 如 smb://workgroup;user:password@server/share/folder/books
 // 或 sftp://<user>:<password>@<host>/<path>
-// 或 webdav://192.168.1.100/books  <scheme>://[<username>[:<password>]@]<host>[:<port>]/<base-path>/<resource-path> scheme 为 http 或 https（也接受 dav:// 与 davs:// 作为同义写法）
+// 或 webdav://192.168.1.100/books  <scheme>://[<username>[:<password>]@]<host>[:<port>]/<base-path>/<resource-path>（也接受 dav:// 与 davs:// 作为同义写法）
+// 或 https://user:password@example.com/comigo-base 另一个 Comigo 服务主页
 // 或 ftp://<user>:<password>@<host>:<port>/<dir1>  ftps://<user>:<password>@<host>:<port>/<dir1>
 // 或 s3://<S3_endpoint>[:<port>]/<bucket_name>/[<S3_prefix>] [region=<S3_region>] [config=<config_file_location> | config_server=<url>] [section=<section_name>]
 type Backend struct {
@@ -34,7 +35,8 @@ type Backend struct {
 // - 本地文件: file:///path/to/books 或 /path/to/books (Unix路径) 或 C:\path\to\books  D:\path\to\books E:\path\to\books (Windows路径)
 // - SMB: smb://workgroup;user:password@server/share/folder/books
 // - SFTP: sftp://user:password@host/path
-// - WebDAV: webdav://host/path 或 http://host/path 或 https://host/path
+// - WebDAV: webdav://host/path 或 dav://host/path 或 davs://host/path
+// - Comigo: http://host/base 或 https://user:password@host/base
 // - FTP: ftp://user:password@host:port/dir 或 ftps://user:password@host:port/dir
 // - S3: s3://endpoint/bucket/prefix
 func (backend *Backend) ParseStoreURL(urlStr string) error {
@@ -118,6 +120,8 @@ func backendTypeFromTools(backendType tools.StoreBackendType) BackendType {
 		return S3
 	case tools.StoreBackendFTP:
 		return FTP
+	case tools.StoreBackendComigo:
+		return ComigoRemote
 	default:
 		return LocalDisk
 	}

@@ -150,25 +150,43 @@ templ HeaderEmptyTitle() {
 }
 
 templ HeaderTextTitle(title string) {
-	@HeaderTitle(title, "")
+	@HeaderTitle(title, "", false)
+}
+
+templ HeaderTextTitleRemote(title string, isRemote bool) {
+	@HeaderTitle(title, "", isRemote)
+}
+
+// HeaderRemoteTitleIcon 给远程书籍标题添加云朵标记，便于在阅读界面区分本地与远程书。
+templ HeaderRemoteTitleIcon(isRemote bool) {
+	if isRemote {
+		<svg class="h-5 w-5 shrink-0 text-sky-400 drop-shadow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+			<path d="M6.5 20a5.5 5.5 0 0 1-.46-10.98A7.5 7.5 0 0 1 20.7 11.6A4.5 4.5 0 0 1 19.5 20h-13Z"></path>
+		</svg>
+	}
 }
 
 // HeaderTitle 保留原普通标题行为：离线文件显示标题，在线模式同步 document.title。
-templ HeaderTitle(title string, downloadLink string) {
+templ HeaderTitle(title string, downloadLink string, isRemote bool) {
 	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
-		<span x-cloak x-show="$store.global.staticHtmlBook" class="text-lg font-semibold">{ title }</span>
+		<span x-cloak x-show="$store.global.staticHtmlBook" class="inline-flex min-w-0 items-center gap-1 text-lg font-semibold">
+			@HeaderRemoteTitleIcon(isRemote)
+			<span data-header-title-text class="min-w-0 truncate">{ title }</span>
+		</span>
 		if (downloadLink!="") {
 			<span
 				title={ title }
 				id="headerTitle"
 				x-cloak
 				x-show="!$store.global.staticHtmlBook"
-				class="text-lg font-semibold text-blue-700/90 hover:underline"
+				class="inline-flex min-w-0 items-center gap-1 text-lg font-semibold text-blue-700/90 hover:underline"
 				x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 				x-init="$nextTick(() => {document.title = $el.innerText + version});"
 			>
+				@HeaderRemoteTitleIcon(isRemote)
 				<a
 					href={ templ.URL(downloadLink) }
+					data-header-title-text
 					if strings.HasPrefix(title,"i18next") {
 						x-text={ title }
 					}
@@ -180,31 +198,42 @@ templ HeaderTitle(title string, downloadLink string) {
 				id="headerTitle"
 				x-cloak
 				x-show="!$store.global.staticHtmlBook"
-				class="text-lg font-semibold"
+				class="inline-flex min-w-0 items-center gap-1 text-lg font-semibold"
 				x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 				x-init="$nextTick(() => {document.title = $el.innerText + version});"
 				if strings.HasPrefix(title,"i18next") {
 					x-text={ title }
 				}
-			>{ title }</span>
+			>
+				@HeaderRemoteTitleIcon(isRemote)
+				<span data-header-title-text class="min-w-0 truncate">{ title }</span>
+			</span>
 		}
 	</div>
 }
 
 // HeaderQuickJumpTitle 定义阅读页标题区；有同级可切换书籍时显示居中的有限宽 select。
 templ HeaderQuickJumpTitle(title string, currentBookID string, books *model.BookInfos) {
-	@HeaderQuickJumpTitleView(title, NewBookSwitchView(currentBookID, books))
+	@HeaderQuickJumpTitleView(title, NewBookSwitchView(currentBookID, books), false)
 }
 
-templ HeaderQuickJumpTitleView(title string, view BookSwitchView) {
+templ HeaderQuickJumpTitleRemote(title string, currentBookID string, books *model.BookInfos, isRemote bool) {
+	@HeaderQuickJumpTitleView(title, NewBookSwitchView(currentBookID, books), isRemote)
+}
+
+templ HeaderQuickJumpTitleView(title string, view BookSwitchView, isRemote bool) {
 	<div class="flex min-w-0 flex-1 items-center justify-center p-0 m-0 font-semibold text-center">
-		<span x-cloak x-show="!$store.global.onlineBook" title={ title } class="min-w-0 truncate text-lg font-semibold">{ title }</span>
+		<span x-cloak x-show="!$store.global.onlineBook" title={ title } class="inline-flex min-w-0 items-center gap-1 text-lg font-semibold">
+			@HeaderRemoteTitleIcon(isRemote)
+			<span data-header-title-text class="min-w-0 truncate">{ title }</span>
+		</span>
 		if view.HasSwitchTarget() {
 			<div
 				x-show="$store.global.onlineBook"
 				x-data={ BookSwitchXData("") }
-				class="flex min-w-0 max-w-full flex-1 items-center justify-center"
+				class="flex min-w-0 max-w-full flex-1 items-center justify-center gap-1"
 			>
+				@HeaderRemoteTitleIcon(isRemote)
 				<select
 					id="HeaderBookSwitchSelect"
 					title={ title }
@@ -218,7 +247,10 @@ templ HeaderQuickJumpTitleView(title string, view BookSwitchView) {
 				</select>
 			</div>
 		} else {
-			<span x-show="$store.global.onlineBook" title={ title } class="min-w-0 truncate text-lg font-semibold">{ title }</span>
+			<span x-show="$store.global.onlineBook" title={ title } class="inline-flex min-w-0 items-center gap-1 text-lg font-semibold">
+				@HeaderRemoteTitleIcon(isRemote)
+				<span data-header-title-text class="min-w-0 truncate">{ title }</span>
+			</span>
 		}
 	</div>
 }

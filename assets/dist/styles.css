@@ -112,6 +112,7 @@
     --color-sky-50: oklch(97.7% .013 236.62);
     --color-sky-200: oklch(90.1% .058 230.902);
     --color-sky-300: oklch(82.8% .111 230.318);
+    --color-sky-400: oklch(74.6% .16 232.661);
     --color-sky-500: oklch(68.5% .169 237.323);
     --color-sky-700: oklch(50% .134 242.749);
     --color-sky-900: oklch(39.1% .09 240.876);
@@ -1203,6 +1204,10 @@
     top: calc(var(--spacing) * 6);
   }
 
+  .top-9 {
+    top: calc(var(--spacing) * 9);
+  }
+
   .top-\[6\.5rem\] {
     top: 6.5rem;
   }
@@ -1289,6 +1294,10 @@
 
   .z-10 {
     z-index: 10;
+  }
+
+  .z-20 {
+    z-index: 20;
   }
 
   .z-40 {
@@ -2976,10 +2985,6 @@
     color: var(--color-gray-700);
   }
 
-  .text-gray-800 {
-    color: var(--color-gray-800);
-  }
-
   .text-gray-900 {
     color: var(--color-gray-900);
   }
@@ -3014,6 +3019,14 @@
 
   .text-red-700 {
     color: var(--color-red-700);
+  }
+
+  .text-sky-400 {
+    color: var(--color-sky-400);
+  }
+
+  .text-sky-500 {
+    color: var(--color-sky-500);
   }
 
   .text-sky-900 {
@@ -3124,6 +3137,12 @@
 
   .outline-offset-4 {
     outline-offset: 4px;
+  }
+
+  .drop-shadow {
+    --tw-drop-shadow-size: drop-shadow(0 1px 2px var(--tw-drop-shadow-color, #0000001a)) drop-shadow(0 1px 1px var(--tw-drop-shadow-color, #0000000f));
+    --tw-drop-shadow: drop-shadow(0 1px 2px #0000001a) drop-shadow(0 1px 1px #0000000f);
+    filter: var(--tw-blur, ) var(--tw-brightness, ) var(--tw-contrast, ) var(--tw-grayscale, ) var(--tw-hue-rotate, ) var(--tw-invert, ) var(--tw-saturate, ) var(--tw-sepia, ) var(--tw-drop-shadow, );
   }
 
   .drop-shadow-lg {

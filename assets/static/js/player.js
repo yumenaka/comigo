@@ -166,9 +166,9 @@
         if (!el) return;
         try {
           el.setAttribute('title', name);
-          const a = el.querySelector('a');
-          if (a) {
-            a.textContent = name;
+          const titleText = el.querySelector('[data-header-title-text]') || el.querySelector('a');
+          if (titleText) {
+            titleText.textContent = name;
           } else {
             el.textContent = name;
           }

@@ -96,7 +96,11 @@ func RawBookInfoURL(book model.BookInfo) string {
 	if fileName == "" {
 		fileName = filepath.Base(book.BookPath)
 	}
-	return config.PrefixPath("/api/raw/" + url.PathEscape(book.BookID) + "/" + url.PathEscape(fileName))
+	rawURL := config.PrefixPath("/api/raw/" + url.PathEscape(book.BookID) + "/" + url.PathEscape(fileName))
+	if book.RemoteStoreKey != "" {
+		rawURL += "?remote_store=" + url.QueryEscape(book.RemoteStoreKey)
+	}
+	return rawURL
 }
 
 func GetFileBase64Text(bookID string, fileName string) string {

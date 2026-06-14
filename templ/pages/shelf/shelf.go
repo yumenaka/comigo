@@ -13,12 +13,74 @@ import (
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
+	"github.com/yumenaka/comigo/tools/comigo_remote"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-func GetBookmarks(bookID string) model.BookMarks {
-	bookMarks, _ := model.IStore.GetBookMarks(bookID)
+// BookmarkResolver 在一次书架渲染中复用远端书签，避免每张卡片重复请求远端服务。
+type BookmarkResolver struct {
+	remoteMarks map[string]map[string]model.BookMarks
+}
+
+func NewBookmarkResolver(storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) *BookmarkResolver {
+	resolver := &BookmarkResolver{remoteMarks: map[string]map[string]model.BookMarks{}}
+	remoteStoreKeys := map[string]bool{}
+	for _, storeBooks := range storeBookInfos {
+		for _, book := range storeBooks.BookInfos {
+			if book.RemoteStoreKey != "" {
+				remoteStoreKeys[book.RemoteStoreKey] = true
+			}
+		}
+	}
+	for _, book := range childBookInfos {
+		if book.RemoteStoreKey != "" {
+			remoteStoreKeys[book.RemoteStoreKey] = true
+		}
+	}
+	for remoteStoreKey := range remoteStoreKeys {
+		resolver.remoteMarks[remoteStoreKey] = loadRemoteComigoBookmarks(remoteStoreKey)
+	}
+	return resolver
+}
+
+// Get 返回书籍对应的本地或远端书签，远端书签只使用本次渲染已拉取的数据。
+func (resolver *BookmarkResolver) Get(book model.BookInfo) model.BookMarks {
+	if book.RemoteBookID != "" && book.RemoteStoreKey != "" {
+		if resolver != nil && resolver.remoteMarks[book.RemoteStoreKey] != nil {
+			return resolver.remoteMarks[book.RemoteStoreKey][book.RemoteBookID]
+		}
+		return nil
+	}
+	bookMarks, err := model.IStore.GetBookMarks(book.BookID)
+	if err != nil || bookMarks == nil {
+		return nil
+	}
 	return *bookMarks
+}
+
+// loadRemoteComigoBookmarks 实时拉取一个远端书库的全部书签，并按远端 BookID 归组。
+func loadRemoteComigoBookmarks(remoteStoreKey string) map[string]model.BookMarks {
+	bookMarksByRemoteID := map[string]model.BookMarks{}
+	storeURL, err := comigo_remote.MatchStoreByKey(config.GetCfg().StoreUrls, remoteStoreKey)
+	if err != nil {
+		logger.Infof("%s", err)
+		return bookMarksByRemoteID
+	}
+	client, err := comigo_remote.NewClient(storeURL, config.GetCfg().TimeoutLimitForScan)
+	if err != nil {
+		logger.Infof("%s", err)
+		return bookMarksByRemoteID
+	}
+	remoteMarks, err := client.GetAllBookmarks()
+	if err != nil {
+		logger.Infof("%s", err)
+		return bookMarksByRemoteID
+	}
+	for _, item := range remoteMarks {
+		mark := item.BookMark
+		bookMarksByRemoteID[item.BookInfo.BookID] = append(bookMarksByRemoteID[item.BookInfo.BookID], mark)
+	}
+	return bookMarksByRemoteID
 }
 
 // ShelfHandler 书架页面的处理程序。
@@ -245,18 +307,34 @@ func getShelfReturnURL(c echo.Context) string {
 }
 
 func generateReadURL(book model.BookInfo, lastReadPage int) string {
+	remoteStoreArg := "undefined"
+	if book.RemoteStoreKey != "" {
+		remoteStoreArg = fmt.Sprintf("%q", book.RemoteStoreKey)
+	}
 	// 如果是书籍组，就跳转到子书架
 	if book.Type == model.TypeBooksGroup {
-		return fmt.Sprintf("%q", config.PrefixPath("/shelf/"+book.BookID))
+		shelfURL := config.PrefixPath("/shelf/" + book.BookID)
+		if book.RemoteStoreKey != "" {
+			shelfURL += "?remote_store=" + url.QueryEscape(book.RemoteStoreKey)
+		}
+		return fmt.Sprintf("%q", shelfURL)
 	}
 	// 如果是视频、音频，跳转到播放器页面
 	if book.Type == model.TypeVideo || book.Type == model.TypeAudio {
-		return fmt.Sprintf("%q", config.PrefixPath("/player/"+book.BookID))
+		playerURL := config.PrefixPath("/player/" + book.BookID)
+		if book.RemoteStoreKey != "" {
+			playerURL += "?remote_store=" + url.QueryEscape(book.RemoteStoreKey)
+		}
+		return fmt.Sprintf("%q", playerURL)
 	}
 	// 如果是 HTML、未知文件，就在新窗口打开原始文件
 	if book.Type == model.TypeHTML || book.Type == model.TypeUnknownFile {
-		return fmt.Sprintf("%q", config.PrefixPath("/api/raw/"+book.BookID+"/"+url.QueryEscape(book.Title)))
+		rawURL := config.PrefixPath("/api/raw/" + book.BookID + "/" + url.QueryEscape(book.Title))
+		if book.RemoteStoreKey != "" {
+			rawURL += "?remote_store=" + url.QueryEscape(book.RemoteStoreKey)
+		}
+		return fmt.Sprintf("%q", rawURL)
 	}
 	// 其他情况，跳转到阅读页面，类似 /scroll/4cTOjFm?page=1
-	return fmt.Sprintf("$store.global.getReadURL(\"%s\",%d)", book.BookID, lastReadPage)
+	return fmt.Sprintf("$store.global.getReadURL(\"%s\",%d,%s)", book.BookID, lastReadPage, remoteStoreArg)
 }

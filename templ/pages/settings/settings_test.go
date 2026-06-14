@@ -104,3 +104,47 @@ func TestGetStoreBookCountsCleansMissingBooks(t *testing.T) {
 		t.Fatalf("DeleteBook calls = %d, want 1", testStore.deleteCalls)
 	}
 }
+
+func TestRescanBookDeltaReportsRemovedBooks(t *testing.T) {
+	newBooksCount, removedBooksCount := rescanBookDelta(5, 3)
+	if newBooksCount != 0 || removedBooksCount != 2 {
+		t.Fatalf("delta = new %d removed %d, want new 0 removed 2", newBooksCount, removedBooksCount)
+	}
+}
+
+func TestGetStoreRealBookCountOnlyCountsTargetStore(t *testing.T) {
+	oldStore := model.IStore
+	t.Cleanup(func() {
+		model.IStore = oldStore
+	})
+
+	storeDir := t.TempDir()
+	otherStoreDir := t.TempDir()
+	model.IStore = &storeBookCountsTestStore{books: map[string]*model.Book{
+		"target": {
+			BookInfo: model.BookInfo{
+				BookID:   "target",
+				StoreUrl: storeDir,
+				Type:     model.TypeZip,
+			},
+		},
+		"group": {
+			BookInfo: model.BookInfo{
+				BookID:   "group",
+				StoreUrl: storeDir,
+				Type:     model.TypeBooksGroup,
+			},
+		},
+		"other": {
+			BookInfo: model.BookInfo{
+				BookID:   "other",
+				StoreUrl: otherStoreDir,
+				Type:     model.TypeZip,
+			},
+		},
+	}}
+
+	if got := getStoreRealBookCount(storeDir); got != 1 {
+		t.Fatalf("target store count = %d, want 1", got)
+	}
+}

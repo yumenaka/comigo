@@ -27,8 +27,12 @@ type BookInfo struct {
 	StoreUrl     string `json:"-"` // 在哪个子书库, JSON 不解析
 
 	// ===== 远程存储 =====
-	IsRemote  bool   `json:"is_remote"` // 是否为远程书籍（WebDAV 等）
-	RemoteURL string `json:"-"`         // 远程存储的基础 URL，JSON 不解析
+	IsRemote        bool   `json:"is_remote"`              // 是否为远程书籍（WebDAV、Comigo 等）
+	RemoteURL       string `json:"-"`                      // 远程存储的基础 URL，JSON 不解析
+	RemoteBookID    string `json:"-"`                      // 远端 Comigo 中的原始 BookID，JSON 不解析
+	RemoteStoreKey  string `json:"remote_store,omitempty"` // 远端 Comigo 书库公开标识，用于前端链接参数
+	RemoteShelfKey  string `json:"-"`                      // 远端 Comigo 顶级书库内部标识，JSON 不解析
+	RemoteShelfName string `json:"-"`                      // 远端 Comigo 顶级书库显示名，JSON 不解析
 
 	// ===== 文件属性 =====
 	FileSize  int64     `json:"file_size"`     // 文件大小

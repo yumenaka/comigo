@@ -45,9 +45,12 @@ templ ReadingHistoryPanel() {
 				const key = item.book_info.id + '_' + item.book_mark.mark_type + '_' + item.book_mark.page_index;
 				this.deleting[key] = true;
 				try {
-					const url = window.ComiGoPath('/api/delete-bookmark') + '?book_id=' + encodeURIComponent(item.book_info.id) +
+					let url = window.ComiGoPath('/api/delete-bookmark') + '?book_id=' + encodeURIComponent(item.book_info.id) +
 						'&mark_type=' + encodeURIComponent(item.book_mark.mark_type) +
 						'&page_index=' + item.book_mark.page_index;
+					if (item.book_info.remote_store) {
+						url += '&remote_store=' + encodeURIComponent(item.book_info.remote_store);
+					}
 					const response = await fetch(url, { method: 'DELETE' });
 					if (response.ok) {
 						// 从列表中移除
@@ -225,7 +228,7 @@ templ ReadingHistoryPanel() {
 							<div class="hidden sm:flex flex-col gap-2 shrink-0">
 								<!-- 继续阅读按钮 -->
 								<a
-									:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)"
+									:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index, item.book_info.remote_store || '')"
 									class="panel-control flex h-10 items-center justify-center gap-1 px-3 py-1.5 text-sm border shadow-lg text-black font-semibold focus:ring rounded bg-blue-200  hover:bg-indigo-300 transition-colors"
 								>
 									<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -250,7 +253,7 @@ templ ReadingHistoryPanel() {
 						<div class="flex sm:hidden gap-2 mt-3 pt-3 border-t border-gray-300 dark:border-gray-600">
 							<!-- 继续阅读按钮 -->
 							<a
-								:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index)"
+								:href="$store.global.getReadURL(item.book_info.id, item.book_mark.page_index, item.book_info.remote_store || '')"
 								class="panel-control flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
 							>
 								<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">

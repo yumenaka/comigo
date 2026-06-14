@@ -257,6 +257,87 @@ func TestDisplayStoreNameUsesRemoteHost(t *testing.T) {
 	}
 }
 
+func TestTopOfShelfInfoSplitsRemoteComigoShelves(t *testing.T) {
+	oldCfg := config.CopyCfg()
+	t.Cleanup(func() {
+		*config.GetCfg() = oldCfg
+	})
+	const remoteStore = "https://example.com"
+	config.GetCfg().StoreUrls = []string{remoteStore}
+
+	remoteBookA := bookForFolderTest("remote-a", "/remote/a.cbz", remoteStore, model.TypeZip)
+	remoteBookA.Depth = 0
+	remoteBookA.IsRemote = true
+	remoteBookA.RemoteURL = remoteStore
+	remoteBookA.RemoteBookID = "a"
+	remoteBookA.RemoteStoreKey = "remote-key"
+	remoteBookA.RemoteShelfKey = "shelf-a"
+	remoteBookA.RemoteShelfName = "Shelf A"
+	remoteBookB := bookForFolderTest("remote-b", "/remote/b.cbz", remoteStore, model.TypeZip)
+	remoteBookB.Depth = 0
+	remoteBookB.IsRemote = true
+	remoteBookB.RemoteURL = remoteStore
+	remoteBookB.RemoteBookID = "b"
+	remoteBookB.RemoteStoreKey = "remote-key"
+	remoteBookB.RemoteShelfKey = "shelf-b"
+	remoteBookB.RemoteShelfName = "Shelf B"
+	setFakeBooks(t, remoteBookA, remoteBookB)
+
+	got, err := TopOfShelfInfo("filename")
+	if err != nil {
+		t.Fatalf("TopOfShelfInfo error: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("远端顶级书库数量 = %d, want 2: %#v", len(got), got)
+	}
+	if got[0].DisplayName != "Shelf A" || got[1].DisplayName != "Shelf B" {
+		t.Fatalf("远端顶级书库显示名不正确: %#v", got)
+	}
+	if got[0].ChildBookNum != 1 || got[1].ChildBookNum != 1 {
+		t.Fatalf("远端顶级书库计数不正确: %#v", got)
+	}
+}
+
+func TestGeneratedRemoteBookGroupInheritsRemoteFields(t *testing.T) {
+	const remoteStore = "https://example.com"
+	childA := bookForFolderTest("child-a", "/remote/album/a.cbz", remoteStore, model.TypeZip)
+	childA.Depth = 1
+	childA.IsRemote = true
+	childA.RemoteURL = remoteStore
+	childA.RemoteStoreKey = "remote-key"
+	childA.RemoteShelfKey = "shelf-a"
+	childA.RemoteShelfName = "Shelf A"
+	childB := bookForFolderTest("child-b", "/remote/album/b.cbz", remoteStore, model.TypeZip)
+	childB.Depth = 1
+	childB.IsRemote = true
+	childB.RemoteURL = remoteStore
+	childB.RemoteStoreKey = "remote-key"
+	childB.RemoteShelfKey = "shelf-a"
+	childB.RemoteShelfName = "Shelf A"
+	setFakeBooks(t, childA, childB)
+
+	store := &Store{StoreInfo: StoreInfo{BackendURL: remoteStore}}
+	store.BookMap.Store(childA.BookID, childA)
+	store.BookMap.Store(childB.BookID, childB)
+	if err := store.GenerateBookGroup(); err != nil {
+		t.Fatalf("GenerateBookGroup error: %v", err)
+	}
+
+	var group *model.Book
+	for _, value := range store.BookMap.Range {
+		book := value.(*model.Book)
+		if book.Type == model.TypeBooksGroup {
+			group = book
+		}
+	}
+	if group == nil {
+		t.Fatal("未生成远程书组")
+	}
+	if !group.IsRemote || group.RemoteStoreKey != "remote-key" || group.RemoteShelfKey != "shelf-a" {
+		t.Fatalf("远程书组没有继承远端字段: %#v", group.BookInfo)
+	}
+}
+
 func TestGetBookInfoListByBookFolderUsesRealLocalParentPath(t *testing.T) {
 	tmp := t.TempDir()
 	rootA := filepath.Join(tmp, "root-a")

@@ -193,6 +193,8 @@ func backendTypeFromTools(backendType tools.StoreBackendType) BackendType {
 		return S3
 	case tools.StoreBackendFTP:
 		return FTP
+	case tools.StoreBackendComigo:
+		return ComigoRemote
 	default:
 		return LocalDisk
 	}

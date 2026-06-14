@@ -32,11 +32,18 @@ func TestParseStoreURLCommon(t *testing.T) {
 			wantPort: 2222,
 		},
 		{
-			name:     "WebDAV HTTPS",
+			name:     "Comigo HTTPS",
 			storeURL: "https://user:password@host/path",
-			wantType: StoreBackendWebDAV,
+			wantType: StoreBackendComigo,
 			wantHost: "host",
 			wantPort: 443,
+		},
+		{
+			name:     "WebDAV 显式协议",
+			storeURL: "webdav://user:password@host/path",
+			wantType: StoreBackendWebDAV,
+			wantHost: "host",
+			wantPort: 80,
 		},
 	}
 

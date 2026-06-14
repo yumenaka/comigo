@@ -1,6 +1,7 @@
 package data_api
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -14,6 +15,26 @@ func StoreBookmark(c echo.Context) error {
 	request, err := parseStoreBookmarkRequest(c)
 	if err != nil {
 		return err
+	}
+	if localBook, client, _, ok, err := remoteComigoBookFromRequest(c, request.BookID); ok {
+		if err != nil {
+			logger.Infof("%s", err)
+			return writeRemoteComigoError(c, err)
+		}
+		payload, err := json.Marshal(storeBookmarkPayload{
+			Type:        string(request.MarkType),
+			BookID:      localBook.RemoteBookID,
+			PageIndex:   request.PageIndex,
+			Description: request.Description,
+		})
+		if err != nil {
+			return err
+		}
+		if _, _, err := client.PostJSON("/api/store-bookmark", payload); err != nil {
+			logger.Infof(locale.GetString("log_failed_to_store_bookmark"), err)
+			return writeRemoteComigoError(c, err)
+		}
+		return apiresp.Success(c, "ok", locale.GetString("bookmark_updated_successfully"), nil)
 	}
 	book, err := requireBookmarkBook(c, request.BookID)
 	if err != nil {

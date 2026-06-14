@@ -149,10 +149,10 @@ func TestParseStoreURL(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "WebDAV URL - HTTP",
+			name: "Comigo URL - HTTP",
 			url:  `http://host/path`,
 			want: &Backend{
-				Type:       WebDAV,
+				Type:       ComigoRemote,
 				URL:        `http://host/path`,
 				ServerHost: "host",
 				ServerPort: 80,
@@ -161,13 +161,27 @@ func TestParseStoreURL(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "WebDAV URL - HTTPS带认证",
+			name: "Comigo URL - HTTPS带认证",
 			url:  `https://user:password@host:8443/path`,
 			want: &Backend{
-				Type:         WebDAV,
+				Type:         ComigoRemote,
 				URL:          `https://user:password@host:8443/path`,
 				ServerHost:   "host",
 				ServerPort:   8443,
+				NeedAuth:     true,
+				AuthUsername: "user",
+				AuthPassword: "password",
+			},
+			wantErr: false,
+		},
+		{
+			name: "WebDAV URL - 显式协议",
+			url:  `webdav://user:password@host/path`,
+			want: &Backend{
+				Type:         WebDAV,
+				URL:          `webdav://user:password@host/path`,
+				ServerHost:   "host",
+				ServerPort:   80,
 				NeedAuth:     true,
 				AuthUsername: "user",
 				AuthPassword: "password",

@@ -12,6 +12,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/comigo_remote"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/vfs"
 )
@@ -21,6 +22,10 @@ import (
 func InitStore(storePath string, cfg ConfigInterface) error {
 	InitConfig(cfg)
 
+	if tools.DetectStoreURL(storePath).Type == tools.StoreBackendComigo {
+		return initComigoStore(storePath, cfg)
+	}
+
 	// 判断是否为远程 URL
 	isRemote := store.IsRemoteURL(storePath)
 
@@ -28,6 +33,81 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 		return initRemoteStore(storePath, cfg)
 	}
 	return initLocalStore(storePath, cfg)
+}
+
+// initComigoStore 扫描另一个 Comigo 服务，只保存远端元数据和代理定位信息。
+func initComigoStore(storeURL string, cfg ConfigInterface) error {
+	logger.Infof(locale.GetString("log_scan_remote_store_start"), storeURL)
+	client, err := comigo_remote.NewClient(storeURL, cfg.GetTimeoutLimitForScan())
+	if err != nil {
+		return err
+	}
+	shelves, err := client.GetTopShelf("default")
+	if err != nil {
+		return err
+	}
+
+	fetched := map[string]bool{}
+	var books []*model.Book
+	var fetchBook func(remoteBookID string, shelfKey string, shelfName string, topLevel bool) error
+	fetchBook = func(remoteBookID string, shelfKey string, shelfName string, topLevel bool) error {
+		localBookID := comigo_remote.LocalBookID(storeURL, remoteBookID)
+		if fetched[localBookID] {
+			return nil
+		}
+		remoteBook, err := client.GetBook(remoteBookID, "default")
+		if err != nil {
+			return err
+		}
+		localBook := comigo_remote.LocalizeBookInShelf(storeURL, remoteBook, shelfKey, shelfName)
+		if topLevel {
+			// 远端顶层列表才知道它属于哪个顶级书库；旧版详情 API 不暴露远端 StoreUrl。
+			localBook.Depth = 0
+		}
+		fetched[localBook.BookID] = true
+		books = append(books, localBook)
+		for _, childRemoteID := range remoteBook.ChildBooksID {
+			if err := fetchBook(childRemoteID, shelfKey, shelfName, false); err != nil {
+				logger.Infof(locale.GetString("log_get_book_error"), err)
+			}
+		}
+		return nil
+	}
+
+	for shelfIndex, shelf := range shelves {
+		shelfKey := comigo_remote.ShelfKey(storeURL, shelf, shelfIndex)
+		shelfName := shelf.DisplayName
+		for _, bookInfo := range shelf.BookInfos {
+			if err := fetchBook(bookInfo.BookID, shelfKey, shelfName, true); err != nil {
+				logger.Infof(locale.GetString("log_get_book_error"), err)
+			}
+		}
+	}
+
+	deleteMissingComigoRemoteBooks(storeURL, fetched)
+	AddBooksToStore(books)
+	model.GenerateBookGroup()
+	return nil
+}
+
+// deleteMissingComigoRemoteBooks 删除本次远端 Comigo 扫描没有返回的旧书籍。
+func deleteMissingComigoRemoteBooks(storeURL string, current map[string]bool) {
+	allBooks, err := model.IStore.ListBooks()
+	if err != nil {
+		logger.Infof(locale.GetString("log_error_listing_books"), err)
+		return
+	}
+	for _, book := range allBooks {
+		if book.StoreUrl != storeURL || book.RemoteBookID == "" {
+			continue
+		}
+		if current[book.BookID] {
+			continue
+		}
+		if err := model.IStore.DeleteBook(book.BookID); err != nil {
+			logger.Infof(locale.GetString("log_error_deleting_book"), book.BookID, err)
+		}
+	}
 }
 
 // initLocalStore 扫描本地路径

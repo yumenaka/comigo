@@ -239,9 +239,7 @@ templ StoreConfigJavaScript() {
 					}
 
 					const data = await response.json();
-					const message = i18next
-						.t("rescan_store_success")
-						.replace("{0}", data.newBooksCount || 0);
+					const message = rescanStoreSuccessMessage(data);
 					showToast(message, "success");
 				} catch (error) {
 					console.error("重新扫描全部书库失败:", error);
@@ -283,9 +281,7 @@ templ StoreConfigJavaScript() {
 					const data = await response.json();
 
 					// 显示成功提示
-					const message = i18next
-						.t("rescan_store_success")
-						.replace("{0}", data.newBooksCount || 0);
+					const message = rescanStoreSuccessMessage(data);
 					showToast(message, "success");
 				} catch (error) {
 					console.error("重新扫描书库失败:", error);
@@ -297,6 +293,14 @@ templ StoreConfigJavaScript() {
 						window.__comigoRunPendingReload();
 					}
 				}
+			}
+
+			// rescanStoreSuccessMessage 统一格式化重扫结果，显示净新增和净减少数量。
+			function rescanStoreSuccessMessage(data) {
+				return i18next
+					.t("rescan_store_success")
+					.replace("{0}", data.newBooksCount || 0)
+					.replace("{1}", data.removedBooksCount || 0);
 			}
 
 			// 删除书库

@@ -5,6 +5,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/apiresp"
+	"github.com/yumenaka/comigo/tools/comigo_remote"
 	"github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -21,6 +22,18 @@ func GetBook(c echo.Context) error {
 	id := c.QueryParam("id")
 	if id == "" {
 		return apiresp.BadRequest(c, "missing_param", "not set id param", map[string]string{"param": "id"})
+	}
+	if localBook, client, storeURL, ok, err := remoteComigoBookFromRequest(c, id); ok {
+		if err != nil {
+			logger.Infof("%s", err)
+			return writeRemoteComigoError(c, err)
+		}
+		remoteBook, err := client.GetBook(localBook.RemoteBookID, sortBy)
+		if err != nil {
+			logger.Infof("%s", err)
+			return writeRemoteComigoError(c, err)
+		}
+		return apiresp.Success(c, "ok", "book retrieved", comigo_remote.LocalizeBookInShelf(storeURL, remoteBook, localBook.RemoteShelfKey, localBook.RemoteShelfName))
 	}
 	model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
 	model.ClearBookNotExist()

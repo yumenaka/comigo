@@ -26,7 +26,7 @@ type WebDAVFS struct {
 }
 
 // NewWebDAVFS 创建 WebDAV 文件系统实例
-// urlStr 格式: webdav://user:pass@host:port/path 或 http://user:pass@host:port/path
+// urlStr 格式: webdav://user:pass@host:port/path 或 davs://user:pass@host:port/path
 func NewWebDAVFS(urlStr string, opts ...Options) (*WebDAVFS, error) {
 	// 解析 URL
 	parsedURL, err := url.Parse(urlStr)

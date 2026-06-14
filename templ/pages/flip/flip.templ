@@ -21,7 +21,7 @@ templ FlipPage(c echo.Context, book *model.Book) {
 	if book != nil {
 		@common.Header(
 			common.HeaderBackSortLeft(common.GetReturnUrl(book.BookInfo.BookID)),
-			common.HeaderQuickJumpTitle(common.GetBookTitle(book.BookInfo.BookID), book.BookInfo.BookID, common.QuickJumpBarBooks(book)),
+			common.HeaderQuickJumpTitleRemote(common.GetBookTitle(book.BookInfo.BookID), book.BookInfo.BookID, common.QuickJumpBarBooks(book), book.BookInfo.IsRemote),
 			common.HeaderDefaultRight(),
 		)
 		@MainArea(book)

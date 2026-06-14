@@ -139,9 +139,11 @@ func TestParseStoreURL(t *testing.T) {
 		{"D:/Books", LocalDisk},
 		{"file:///home/user/books", LocalDisk},
 
+		// Comigo 远程服务
+		{"http://localhost/webdav", ComigoRemote},
+		{"https://example.com/dav", ComigoRemote},
+
 		// WebDAV URL
-		{"http://localhost/webdav", WebDAV},
-		{"https://example.com/dav", WebDAV},
 		{"webdav://192.168.1.1/books", WebDAV},
 		{"dav://server/path", WebDAV},
 		{"davs://secure-server/path", WebDAV},

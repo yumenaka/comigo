@@ -150,6 +150,10 @@ func ClearBookNotExist() {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, book := range allBooks {
+		if book.RemoteBookID != "" || book.RemoteStoreKey != "" {
+			// Comigo 远端书籍和本地生成的远端书组由重扫时对比远端书架清理，不通过 VFS 检查。
+			continue
+		}
 		var exists bool
 		if book.IsRemote {
 			// 远程书籍：使用 VFS 检查文件是否存在

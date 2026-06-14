@@ -38,6 +38,7 @@ templ ShelfSearchBar(c echo.Context) {
 // MainArea 书架页面主体部分
 // 为了避免特殊编码，showBook的persist key使用了Base64编码
 templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) {
+	{{ bookmarkResolver := NewBookmarkResolver(storeBookInfos, childBookInfos) }}
 	<!-- 不包括Header与Footer的【书架主体部分】 -->
 	if nowBookNum != 0 && getShelfParentID(c) == "" {
 		<div
@@ -58,6 +59,11 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 							<svg class="shrink-0 w-3 h-6 transition-transform" :class="{ '-rotate-90': !showBook }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
 								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
 							</svg>
+							if storeBooks.IsRemote {
+								<svg class="shrink-0 w-5 h-5 ml-2 text-sky-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+									<path d="M6.5 20a5.5 5.5 0 0 1-.46-10.98A7.5 7.5 0 0 1 20.7 11.6A4.5 4.5 0 0 1 19.5 20h-13Z"></path>
+								</svg>
+							}
 							<span class="flex-1 mx-2 truncate min-w-0">
 								{ storeBooks.DisplayName }
 							</span>
@@ -70,7 +76,7 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 						</span>
 					</button>
 					for _, book := range storeBooks.BookInfos {
-						@BookCard(c, book, GetBookmarks(book.BookID))
+						@BookCard(c, book, bookmarkResolver.Get(book))
 					}
 				</div>
 			}
@@ -84,7 +90,7 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 		>
 			<div id="book-shelf" class="flex flex-row flex-wrap content-start justify-center flex-1 w-full h-full overflow-y-auto text-base-content">
 				for _, book := range childBookInfos {
-					@BookCard(c, book, GetBookmarks(book.BookID))
+					@BookCard(c, book, bookmarkResolver.Get(book))
 				}
 			</div>
 		</div>

@@ -10,6 +10,7 @@ const (
 	WebDAV
 	S3
 	FTP
+	ComigoRemote
 )
 
 func (f BackendType) String() string {
@@ -26,6 +27,8 @@ func (f BackendType) String() string {
 		return "S3 Storage"
 	case FTP:
 		return "FTP Server"
+	case ComigoRemote:
+		return "Comigo Server"
 	default:
 		return "Unknown Backend Type"
 	}

@@ -18,6 +18,7 @@ const (
 	StoreBackendWebDAV
 	StoreBackendS3
 	StoreBackendFTP
+	StoreBackendComigo
 )
 
 // StoreURLInfo 保存解析后的 store URL 信息，避免各包重复解析同一套规则。
@@ -91,6 +92,8 @@ func ParseStoreURL(storeURL string) (StoreURLInfo, error) {
 		return parseFTPStoreURL(parsedURL)
 	case StoreBackendS3:
 		return parseS3StoreURL(parsedURL)
+	case StoreBackendComigo:
+		return parseComigoStoreURL(parsedURL)
 	default:
 		return StoreURLInfo{}, fmt.Errorf("unsupported URL scheme: %s", parsedURL.Scheme)
 	}
@@ -219,8 +222,10 @@ func parseFileStoreURLPath(fileURL string) string {
 
 func remoteStoreBackendTypeFromScheme(scheme string) (StoreBackendType, bool) {
 	switch strings.ToLower(scheme) {
-	case "webdav", "dav", "davs", "http", "https":
+	case "webdav", "dav", "davs":
 		return StoreBackendWebDAV, true
+	case "http", "https":
+		return StoreBackendComigo, true
 	case "smb":
 		return StoreBackendSMB, true
 	case "sftp":
@@ -232,6 +237,29 @@ func remoteStoreBackendTypeFromScheme(scheme string) (StoreBackendType, bool) {
 	default:
 		return StoreBackendLocalDisk, false
 	}
+}
+
+func parseComigoStoreURL(parsedURL *url.URL) (StoreURLInfo, error) {
+	if parsedURL.Host == "" {
+		return StoreURLInfo{}, fmt.Errorf("Comigo URL requires a host")
+	}
+
+	defaultPort := 80
+	scheme := strings.ToLower(parsedURL.Scheme)
+	if scheme == "https" {
+		defaultPort = 443
+	}
+
+	info := StoreURLInfo{
+		URL:        parsedURL.String(),
+		Scheme:     scheme,
+		Type:       StoreBackendComigo,
+		ServerHost: parsedURL.Hostname(),
+		ServerPort: parseStoreURLPort(parsedURL.Port(), defaultPort),
+		RemotePath: strings.Trim(parsedURL.Path, "/"),
+	}
+	applyStoreURLAuth(&info, parsedURL)
+	return info, nil
 }
 
 func parseSMBStoreURL(parsedURL *url.URL) (StoreURLInfo, error) {

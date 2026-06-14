@@ -14,6 +14,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -166,6 +167,18 @@ func marshalBookMetaJSON(book *model.Book) ([]byte, error) {
 	if book.RemoteURL != "" {
 		payload["remote_url"] = book.RemoteURL
 	}
+	if book.RemoteBookID != "" {
+		payload["remote_book_id"] = book.RemoteBookID
+	}
+	if book.RemoteStoreKey != "" {
+		payload["remote_store_key"] = book.RemoteStoreKey
+	}
+	if book.RemoteShelfKey != "" {
+		payload["remote_shelf_key"] = book.RemoteShelfKey
+	}
+	if book.RemoteShelfName != "" {
+		payload["remote_shelf_name"] = book.RemoteShelfName
+	}
 	if book.ParentFolder != "" {
 		payload["parent_folder"] = book.ParentFolder
 	}
@@ -196,10 +209,14 @@ func keepBookMetaPagePaths(payload map[string]any, book *model.Book) {
 // restoreBookMetaPrivateFields 从 metadata JSON 读回普通响应中隐藏的内部字段。
 func restoreBookMetaPrivateFields(jsonData []byte, book *model.Book) error {
 	var privateFields struct {
-		BookPath     string `json:"book_path"`
-		StoreUrl     string `json:"store_url"`
-		RemoteURL    string `json:"remote_url"`
-		ParentFolder string `json:"parent_folder"`
+		BookPath        string `json:"book_path"`
+		StoreUrl        string `json:"store_url"`
+		RemoteURL       string `json:"remote_url"`
+		RemoteBookID    string `json:"remote_book_id"`
+		RemoteStoreKey  string `json:"remote_store_key"`
+		RemoteShelfKey  string `json:"remote_shelf_key"`
+		RemoteShelfName string `json:"remote_shelf_name"`
+		ParentFolder    string `json:"parent_folder"`
 	}
 	if err := json.Unmarshal(jsonData, &privateFields); err != nil {
 		return err
@@ -207,6 +224,10 @@ func restoreBookMetaPrivateFields(jsonData []byte, book *model.Book) error {
 	book.BookPath = privateFields.BookPath
 	book.StoreUrl = privateFields.StoreUrl
 	book.RemoteURL = privateFields.RemoteURL
+	book.RemoteBookID = privateFields.RemoteBookID
+	book.RemoteStoreKey = privateFields.RemoteStoreKey
+	book.RemoteShelfKey = privateFields.RemoteShelfKey
+	book.RemoteShelfName = privateFields.RemoteShelfName
 	if privateFields.ParentFolder != "" {
 		book.ParentFolder = privateFields.ParentFolder
 	}
@@ -647,9 +668,14 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 			}
 			storeID = storePathAbs
 		}
+		if tools.DetectStoreURL(storeUrl).Type == tools.StoreBackendComigo {
+			storeBookInfoList = append(storeBookInfoList, remoteComigoShelfInfos(storeID, topBookList, allBooks, sortBy)...)
+			continue
+		}
 		newStoreBookInfo := model.StoreBookInfo{
 			StoreUrl:    storeID,
 			DisplayName: displayStoreName(storeID),
+			IsRemote:    IsRemoteURL(storeID),
 		}
 		for _, topBook := range topBookList {
 			if topBook.StoreUrl == storeID {
@@ -672,6 +698,69 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 	}
 	// 没找到任何书
 	return nil, errors.New(locale.GetString("err_cannot_find_book_topofshelf"))
+}
+
+// remoteComigoShelfInfos 按远端 Comigo 顶级书库拆分首页展示。
+// 旧版远端 API 不输出真实 StoreUrl，本地扫描时保存的 RemoteShelfKey 是这里的分组依据。
+func remoteComigoShelfInfos(storeID string, topBookList model.BookInfos, allBooks []*model.Book, sortBy string) []model.StoreBookInfo {
+	shelfOrder := []string{}
+	shelfNames := map[string]string{}
+	ensureShelf := func(key string, name string) {
+		if key == "" {
+			key = storeID
+		}
+		if _, ok := shelfNames[key]; ok {
+			return
+		}
+		if name == "" {
+			name = displayStoreName(storeID)
+		}
+		shelfOrder = append(shelfOrder, key)
+		shelfNames[key] = name
+	}
+
+	for _, topBook := range topBookList {
+		if topBook.StoreUrl == storeID {
+			ensureShelf(topBook.RemoteShelfKey, topBook.RemoteShelfName)
+		}
+	}
+	for _, book := range allBooks {
+		if book.StoreUrl == storeID {
+			ensureShelf(book.RemoteShelfKey, book.RemoteShelfName)
+		}
+	}
+	if len(shelfOrder) == 0 {
+		ensureShelf("", "")
+	}
+
+	storeBookInfoList := make([]model.StoreBookInfo, 0, len(shelfOrder))
+	for _, shelfKey := range shelfOrder {
+		newStoreBookInfo := model.StoreBookInfo{
+			StoreUrl:    storeID + "\x00" + shelfKey,
+			DisplayName: shelfNames[shelfKey],
+			IsRemote:    true,
+		}
+		for _, topBook := range topBookList {
+			if topBook.StoreUrl == storeID && remoteShelfKeyOrDefault(topBook.RemoteShelfKey, storeID) == shelfKey {
+				newStoreBookInfo.BookInfos = append(newStoreBookInfo.BookInfos, topBook)
+			}
+		}
+		newStoreBookInfo.BookInfos.SortBooks(sortBy)
+		for _, b := range allBooks {
+			if b.StoreUrl == storeID && b.Type != model.TypeBooksGroup && remoteShelfKeyOrDefault(b.RemoteShelfKey, storeID) == shelfKey {
+				newStoreBookInfo.ChildBookNum++
+			}
+		}
+		storeBookInfoList = append(storeBookInfoList, newStoreBookInfo)
+	}
+	return storeBookInfoList
+}
+
+func remoteShelfKeyOrDefault(shelfKey string, storeID string) string {
+	if shelfKey == "" {
+		return storeID
+	}
+	return shelfKey
 }
 
 // displayStoreName 生成首页展示用书库名，避免把本机绝对路径直接暴露到页面。
