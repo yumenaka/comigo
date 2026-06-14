@@ -67,6 +67,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 						<!-- 上传入口放在书库设置中，复用 /api/upload 的书库校验，避免独立页面与设置状态脱节。 -->
 						@upload_page.SettingsUploadArea()
 					}
+					@NumberConfig("TimeoutLimitForScan", config.GetCfg().TimeoutLimitForScan, "TimeoutLimitForScan_Description", 1, 3600)
 					@NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535)
 					@StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description")
 				</div>

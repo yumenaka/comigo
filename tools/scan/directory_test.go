@@ -166,6 +166,64 @@ func TestInitStoreRescansChangedDirectoryBook(t *testing.T) {
 	}
 }
 
+func TestDeleteStaleComigoRemoteBooksRemovesGeneratedGroups(t *testing.T) {
+	oldStore := model.IStore
+	model.IStore = &store.StoreInRam{}
+	t.Cleanup(func() {
+		model.IStore = oldStore
+	})
+
+	const remoteStore = "http://example.com"
+	currentBook := &model.Book{BookInfo: model.BookInfo{
+		BookID:         "current",
+		StoreUrl:       remoteStore,
+		Type:           model.TypeZip,
+		IsRemote:       true,
+		RemoteBookID:   "remote-current",
+		RemoteStoreKey: "remote-key",
+	}}
+	missingBook := &model.Book{BookInfo: model.BookInfo{
+		BookID:         "missing",
+		StoreUrl:       remoteStore,
+		Type:           model.TypeZip,
+		IsRemote:       true,
+		RemoteBookID:   "remote-missing",
+		RemoteStoreKey: "remote-key",
+	}}
+	generatedGroup := &model.Book{BookInfo: model.BookInfo{
+		BookID:         "generated-group",
+		StoreUrl:       remoteStore,
+		Type:           model.TypeBooksGroup,
+		IsRemote:       true,
+		RemoteStoreKey: "remote-key",
+	}}
+	localGroup := &model.Book{BookInfo: model.BookInfo{
+		BookID:   "local-group",
+		StoreUrl: "/local/books",
+		Type:     model.TypeBooksGroup,
+	}}
+	for _, book := range []*model.Book{currentBook, missingBook, generatedGroup, localGroup} {
+		if err := model.IStore.StoreBook(book); err != nil {
+			t.Fatalf("StoreBook(%s): %v", book.BookID, err)
+		}
+	}
+
+	deleteStaleComigoRemoteBooks(remoteStore, map[string]bool{"current": true})
+
+	if _, err := model.IStore.GetBook("current"); err != nil {
+		t.Fatalf("当前远程书被误删: %v", err)
+	}
+	if _, err := model.IStore.GetBook("local-group"); err != nil {
+		t.Fatalf("本地书组被误删: %v", err)
+	}
+	if _, err := model.IStore.GetBook("missing"); err == nil {
+		t.Fatal("缺失的远程书没有被删除")
+	}
+	if _, err := model.IStore.GetBook("generated-group"); err == nil {
+		t.Fatal("本地生成的远程书组没有被删除")
+	}
+}
+
 func mustFindBookByPath(t *testing.T, bookPath string) *model.Book {
 	t.Helper()
 	absBookPath, err := filepath.Abs(bookPath)

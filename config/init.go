@@ -26,6 +26,7 @@ func newDefaultConfig() Config {
 		LogToFile:             false,
 		MaxScanDepth:          4,
 		MinImageNum:           3,
+		TimeoutLimitForScan:   30,
 		OpenBrowser:           true,
 		Port:                  1234,
 		Password:              "",

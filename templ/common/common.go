@@ -11,6 +11,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
+	"github.com/yumenaka/comigo/tools/comigo_remote"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -110,6 +111,9 @@ func GetFileBase64Text(bookID string, fileName string) string {
 		logger.Infof(locale.GetString("log_getbook_error_common"), err)
 		return ""
 	}
+	if bookByID.RemoteBookID != "" && bookByID.RemoteStoreKey != "" {
+		return getRemoteComigoFileBase64Text(bookByID, fileName)
+	}
 
 	// 获取图片数据的选项
 	option := fileutil.GetPictureDataOption{
@@ -137,4 +141,33 @@ func GetFileBase64Text(bookID string, fileName string) string {
 	dataURI := "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(imgData)
 
 	return dataURI
+}
+
+// getRemoteComigoFileBase64Text 实时从远端 Comigo 拉取图片，用于生成便携网页。
+func getRemoteComigoFileBase64Text(book *model.Book, fileName string) string {
+	storeURL, err := comigo_remote.MatchStoreByKey(config.GetCfg().StoreUrls, book.RemoteStoreKey)
+	if err != nil {
+		logger.Infof("%s", err)
+		return ""
+	}
+	client, err := comigo_remote.NewClient(storeURL, config.GetCfg().TimeoutLimitForScan)
+	if err != nil {
+		logger.Infof("%s", err)
+		return ""
+	}
+	query := url.Values{}
+	query.Set("id", book.RemoteBookID)
+	query.Set("filename", fileName)
+	imgData, contentType, err := client.GetBytes("/api/get-file", query)
+	if err != nil {
+		logger.Infof(locale.GetString("log_getpicturedata_error"), err)
+		return ""
+	}
+	if contentType == "" {
+		contentType = mime.TypeByExtension(filepath.Ext(fileName))
+	}
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	return "data:" + contentType + ";base64," + base64.StdEncoding.EncodeToString(imgData)
 }

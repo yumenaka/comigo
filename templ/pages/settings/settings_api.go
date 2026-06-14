@@ -455,7 +455,7 @@ func AddArrayConfigHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "addValue is not valid base64url")
 	}
-	logger.Infof(locale.GetString("log_add_array_config_handler")+"\n", decodedConfigName)
+	logger.Infof(locale.GetString("log_add_array_config_handler"), decodedConfigName)
 
 	var values []string
 	if decodedConfigName == "StoreUrls" {
@@ -541,7 +541,7 @@ func EnablePluginHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "pluginName is required")
 	}
 
-	logger.Infof(locale.GetString("log_plugin_enabled")+"\n", request.PluginName)
+	logger.Infof(locale.GetString("log_plugin_enabled"), request.PluginName)
 
 	// 互斥逻辑：auto_flip 和 sketch_practice 不能同时启用
 	if request.PluginName == "sketch_practice" && config.GetCfg().IsPluginEnabled("auto_flip") {
@@ -591,7 +591,7 @@ func DisablePluginHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "pluginName is required")
 	}
 
-	logger.Infof(locale.GetString("log_plugin_disabled")+"\n", request.PluginName)
+	logger.Infof(locale.GetString("log_plugin_disabled"), request.PluginName)
 
 	// 禁用插件
 	err := config.GetCfg().DisablePlugin(request.PluginName)
@@ -642,7 +642,7 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "deleteValue is not valid base64url")
 	}
-	logger.Infof(locale.GetString("log_delete_array_config_handler")+"\n", decodedConfigName)
+	logger.Infof(locale.GetString("log_delete_array_config_handler"), decodedConfigName)
 
 	values, err := doDelete(decodedConfigName, decodedDeleteValue)
 	if err != nil {
@@ -796,7 +796,7 @@ func RescanAllStoresHandler(c echo.Context) error {
 
 // rescanOneStore 重新扫描单个书库。
 func rescanOneStore(c echo.Context, storeUrl string) error {
-	logger.Infof(locale.GetString("log_rescan_store")+"\n", storeUrl)
+	logger.Infof(locale.GetString("log_rescan_store"), storeUrl)
 
 	// 记录扫描前的书籍数量
 	beforeCount := getStoreRealBookCount(storeUrl)
@@ -821,7 +821,7 @@ func rescanOneStore(c echo.Context, storeUrl string) error {
 	afterCount := getStoreRealBookCount(storeUrl)
 	newBooksCount, removedBooksCount := rescanBookDelta(beforeCount, afterCount)
 
-	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount, removedBooksCount)
+	logger.Infof(locale.GetString("log_rescan_store_completed_new_books"), newBooksCount, removedBooksCount)
 
 	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonSingleStoreRescan)
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -858,7 +858,7 @@ func rescanAllStores(c echo.Context) error {
 	afterCount := model.GetAllBooksNumber()
 	newBooksCount, removedBooksCount := rescanBookDelta(beforeCount, afterCount)
 
-	logger.Infof(locale.GetString("log_rescan_store_completed_new_books")+"\n", newBooksCount, removedBooksCount)
+	logger.Infof(locale.GetString("log_rescan_store_completed_new_books"), newBooksCount, removedBooksCount)
 
 	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonLibraryRescan)
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -920,7 +920,7 @@ func DeleteStoreHandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is not valid base64url")
 	}
-	logger.Infof(locale.GetString("log_delete_store")+"\n", storeUrl)
+	logger.Infof(locale.GetString("log_delete_store"), storeUrl)
 
 	// 先删除该书库的所有书籍数据
 	targetStoreAbs, err := filepath.Abs(storeUrl)
@@ -954,7 +954,7 @@ func DeleteStoreHandler(c echo.Context) error {
 		}
 	}
 
-	logger.Infof(locale.GetString("log_deleted_books_count")+"\n", deletedCount)
+	logger.Infof(locale.GetString("log_deleted_books_count"), deletedCount)
 
 	// 从配置中移除该书库 URL
 	values, err := doDelete("StoreUrls", storeUrl)

@@ -72,7 +72,7 @@ function autoReloadAfterLibraryRescan() {
     if (!shouldShowUISuggestReloadPrompt() || window.__comigoAutoReloadQueued) {
         return
     }
-    // 若本页正在发起重扫请求(rescan POST)，先别 reload：
+    // 若本页正在发起书库变更请求，先别 reload：
     // 否则 location.reload() 会把这个还没返回的 fetch 直接 abort 掉，
     // Firefox 报 “TypeError: NetworkError when attempting to fetch resource”，
     // 让明明扫描成功的操作弹出“网络错误，请重试”。

@@ -105,6 +105,14 @@ func TestUpdateConfigByJsonUpdatesGlobalConfig(t *testing.T) {
 	}
 }
 
+// TestDefaultConfigHasRemoteTimeout 确认远程书库和扫描共享的超时有明确默认值。
+func TestDefaultConfigHasRemoteTimeout(t *testing.T) {
+	c := newDefaultConfig()
+	if c.TimeoutLimitForScan != 30 {
+		t.Fatalf("默认扫描/远程书库超时不正确: got %d want 30", c.TimeoutLimitForScan)
+	}
+}
+
 // TestIsPathOverlapping 测试路径重合检测
 func TestIsPathOverlapping(t *testing.T) {
 	// 创建一个测试配置

@@ -84,24 +84,31 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 		}
 	}
 
-	deleteMissingComigoRemoteBooks(storeURL, fetched)
+	deleteStaleComigoRemoteBooks(storeURL, fetched)
 	AddBooksToStore(books)
 	model.GenerateBookGroup()
 	return nil
 }
 
-// deleteMissingComigoRemoteBooks 删除本次远端 Comigo 扫描没有返回的旧书籍。
-func deleteMissingComigoRemoteBooks(storeURL string, current map[string]bool) {
+// deleteStaleComigoRemoteBooks 删除本次远端 Comigo 扫描后已经过期的本地条目。
+// 本地生成的远程书组没有 RemoteBookID，必须在重新生成前整批清掉，否则远端书库删除后会残留旧书组。
+func deleteStaleComigoRemoteBooks(storeURL string, current map[string]bool) {
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 		return
 	}
 	for _, book := range allBooks {
-		if book.StoreUrl != storeURL || book.RemoteBookID == "" {
+		if book.StoreUrl != storeURL {
 			continue
 		}
-		if current[book.BookID] {
+		if book.Type == model.TypeBooksGroup && book.RemoteBookID == "" && book.RemoteStoreKey != "" {
+			if err := model.IStore.DeleteBook(book.BookID); err != nil {
+				logger.Infof(locale.GetString("log_error_deleting_book"), book.BookID, err)
+			}
+			continue
+		}
+		if book.RemoteBookID == "" || current[book.BookID] {
 			continue
 		}
 		if err := model.IStore.DeleteBook(book.BookID); err != nil {

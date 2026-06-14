@@ -96,6 +96,10 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
+		templ_7745c5c3_Err = NumberConfig("TimeoutLimitForScan", config.GetCfg().TimeoutLimitForScan, "TimeoutLimitForScan_Description", 1, 3600).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -183,7 +187,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("other_settings"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 147, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 148, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -228,7 +232,7 @@ func MainArea(tsStatus *tailscale_plugin.TailscaleStatus) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("settings_extra"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 190, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/settings_main_area.templ`, Line: 191, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {

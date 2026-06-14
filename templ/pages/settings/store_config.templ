@@ -119,6 +119,19 @@ templ StoreConfigJavaScript() {
 				};
 			}
 
+			// beginStoreMutationReloadGuard 阻止书库变更触发的 SSE 刷新抢先中断当前 fetch。
+			function beginStoreMutationReloadGuard() {
+				window.__comigoRescanInFlight = true;
+			}
+
+			// finishStoreMutationReloadGuard 在 fetch 完整结束后执行被挂起的刷新。
+			function finishStoreMutationReloadGuard() {
+				window.__comigoRescanInFlight = false;
+				if (typeof window.__comigoRunPendingReload === "function") {
+					window.__comigoRunPendingReload();
+				}
+			}
+
 			// 添加书库
 			async function addStore(configName) {
 				const addInput = document.getElementById(configName + "AddInput");
@@ -152,6 +165,7 @@ templ StoreConfigJavaScript() {
 				}
 
 				// 发送添加请求到服务器
+				beginStoreMutationReloadGuard();
 				try {
 					const addValueB64 = window.base64UrlEncodeUtf8(addValue);
 					const response = await fetch(
@@ -216,6 +230,8 @@ templ StoreConfigJavaScript() {
 				} catch (error) {
 					console.error("添加书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
+				} finally {
+					finishStoreMutationReloadGuard();
 				}
 			}
 
@@ -223,8 +239,7 @@ templ StoreConfigJavaScript() {
 			async function rescanAllStores() {
 				showToast(i18next.t("rescan_store_in_progress"), "info");
 
-				// 标记本页正在重扫：阻止 SSE 在 fetch 返回前触发 reload 把请求 abort 掉。
-				window.__comigoRescanInFlight = true;
+				beginStoreMutationReloadGuard();
 				try {
 					const response = await fetch(
 						window.ComiGoPath("/api/rescan-all-stores"),
@@ -245,11 +260,7 @@ templ StoreConfigJavaScript() {
 					console.error("重新扫描全部书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
 				} finally {
-					// fetch 已结束，恢复标记并执行被挂起的整页刷新（若 SSE 已通知）。
-					window.__comigoRescanInFlight = false;
-					if (typeof window.__comigoRunPendingReload === "function") {
-						window.__comigoRunPendingReload();
-					}
+					finishStoreMutationReloadGuard();
 				}
 			}
 
@@ -258,8 +269,7 @@ templ StoreConfigJavaScript() {
 				// 显示扫描中提示
 				showToast(i18next.t("rescan_store_in_progress"), "info");
 
-				// 标记本页正在重扫：阻止 SSE 在 fetch 返回前触发 reload 把请求 abort 掉。
-				window.__comigoRescanInFlight = true;
+				beginStoreMutationReloadGuard();
 				try {
 					const response = await fetch(window.ComiGoPath("/api/rescan-store"), {
 						method: "POST",
@@ -287,11 +297,7 @@ templ StoreConfigJavaScript() {
 					console.error("重新扫描书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
 				} finally {
-					// fetch 已结束，恢复标记并执行被挂起的整页刷新（若 SSE 已通知）。
-					window.__comigoRescanInFlight = false;
-					if (typeof window.__comigoRunPendingReload === "function") {
-						window.__comigoRunPendingReload();
-					}
+					finishStoreMutationReloadGuard();
 				}
 			}
 
@@ -322,6 +328,7 @@ templ StoreConfigJavaScript() {
 					return;
 				}
 
+				beginStoreMutationReloadGuard();
 				try {
 					const response = await fetch(window.ComiGoPath("/api/delete-store"), {
 						method: "POST",
@@ -370,6 +377,8 @@ templ StoreConfigJavaScript() {
 				} catch (error) {
 					console.error("删除书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
+				} finally {
+					finishStoreMutationReloadGuard();
 				}
 			}
 		</script>

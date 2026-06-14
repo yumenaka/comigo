@@ -10,6 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"net/url"
+
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -47,9 +49,9 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 templ.SafeURL
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/raw/%v/%v", book.BookID, book.BookInfo.Title))))
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(RawBookURL(book)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 28, Col: 108}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 30, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -62,7 +64,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(book.BookInfo.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 29, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 31, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
@@ -85,7 +87,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var4 templ.SafeURL
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/download-zip?id=%v", book.BookID))))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 40, Col: 96}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 42, Col: 96}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -98,7 +100,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(book.BookInfo.Title + ".zip")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 41, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 43, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -119,9 +121,9 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 templ.SafeURL
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/download-epub?id=%v", book.BookID))))
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(downloadEpubURL(book)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 52, Col: 97}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 54, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -134,7 +136,7 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(getEpubFileName(book.BookInfo.Title))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 53, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 55, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
@@ -145,33 +147,43 @@ func DownloadButton(c echo.Context, book *model.Book) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<!-- 下载【便携网页】按钮--><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<!-- 下载【便携网页】按钮-->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 templ.SafeURL
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 63, Col: 100}
+		if book != nil {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 templ.SafeURL
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(portableBookURL(c, book)))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 66, Col: 50}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" download=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(book.BookInfo.Title + ".html")
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 67, Col: 44}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-1 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\">便携网页</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" download=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(book.BookInfo.Title + ".html")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/common/download_button.templ`, Line: 64, Col: 43}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-1 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300\" :title=\"i18next.t('download_portable_web_file')\" x-text=\"i18next.t('download_portable_web_file')\">便携网页</a></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -198,6 +210,26 @@ func getEpubFileName(title string) string {
 		}
 	}
 	return title + ".epub"
+}
+
+// downloadEpubURL 生成 EPUB 下载链接，远程书籍必须保留 remote_store 才能走远端代理。
+func downloadEpubURL(book *model.Book) string {
+	query := url.Values{}
+	query.Set("id", book.BookID)
+	if book.RemoteStoreKey != "" {
+		query.Set("remote_store", book.RemoteStoreKey)
+	}
+	return config.PrefixPath("/api/download-epub?" + query.Encode())
+}
+
+// portableBookURL 生成便携网页下载链接，远程书籍静态化时也要保留 remote_store。
+func portableBookURL(c echo.Context, book *model.Book) string {
+	query := url.Values{}
+	query.Set("static", book.BookInfo.Title+".html")
+	if book.RemoteStoreKey != "" {
+		query.Set("remote_store", book.RemoteStoreKey)
+	}
+	return c.Request().URL.Path + "?" + query.Encode()
 }
 
 var _ = templruntime.GeneratedTemplate

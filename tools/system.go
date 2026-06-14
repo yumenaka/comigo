@@ -17,7 +17,7 @@ import (
 // 使用时只需要写一行：defer TrackTIme(time.Now())
 func TrackTIme(pre time.Time) time.Duration {
 	elapsed := time.Since(pre)
-	logger.Infof(locale.GetString("log_time_elapsed")+"\n", elapsed)
+	logger.Infof(locale.GetString("log_time_elapsed"), elapsed)
 	return elapsed
 }
 

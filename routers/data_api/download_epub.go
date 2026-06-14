@@ -18,6 +18,20 @@ import (
 // 相关参数：
 // id：书籍的ID，必须参数  &id=2b17a13
 func DownloadEpub(c echo.Context) error {
+	if localBook, client, _, ok, err := remoteComigoBookFromRequest(c, c.QueryParam("id")); ok {
+		if err != nil {
+			logger.Infof("%s", err)
+			return writeRemoteComigoError(c, err)
+		}
+		resp, err := client.GetResponse("/api/download-epub", remoteComigoQuery(c, localBook.RemoteBookID), nil)
+		if err != nil {
+			logger.Infof("%s", err)
+			return writeRemoteComigoError(c, err)
+		}
+		defer resp.Body.Close()
+		return streamRemoteDownload(c, resp)
+	}
+
 	book, handled, err := requireBookByQueryID(c)
 	if handled || err != nil {
 		return err
@@ -106,4 +120,15 @@ func DownloadEpub(c echo.Context) error {
 	}
 
 	return nil
+}
+
+// streamRemoteDownload 透传远端下载响应头和内容，让本地只做代理不保留原始文件。
+func streamRemoteDownload(c echo.Context, resp *http.Response) error {
+	contentType := resp.Header.Get(echo.HeaderContentType)
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	copyRemoteRawHeader(c, resp, echo.HeaderContentDisposition)
+	copyRemoteRawHeader(c, resp, echo.HeaderContentLength)
+	return c.Stream(resp.StatusCode, contentType, resp.Body)
 }

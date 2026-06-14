@@ -72,7 +72,7 @@ func Login(c echo.Context) error {
 	}
 	// 如果密码错误，则不生成 JWT
 	if username != config.GetCfg().Username || password != config.GetCfg().Password {
-		logger.Infof(locale.GetString("log_login_failed")+"\n", username)
+		logger.Infof(locale.GetString("log_login_failed"), username)
 		return echo.ErrUnauthorized
 	}
 	if err := issueLoginCookie(c, username); err != nil {

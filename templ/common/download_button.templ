@@ -2,6 +2,8 @@ package common
 
 import (
 	"fmt"
+	"net/url"
+
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -25,7 +27,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 		<!-- 【下载原始文件】按钮 -->
 		if book != nil && book.Type != model.TypeDir {
 			<a
-				href={ templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/raw/%v/%v", book.BookID, book.BookInfo.Title))) }
+				href={ templ.SafeURL(RawBookURL(book)) }
 				download={ book.BookInfo.Title }
 				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
 				:title="i18next.t('download_raw_archive')"
@@ -49,7 +51,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 		<!-- 【下载为EPUB】按钮，对图片类书籍（TypeDir）显示 -->
 		if book != nil && canDownloadAsEpub(book.Type) {
 			<a
-				href={ templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/download-epub?id=%v", book.BookID))) }
+				href={ templ.SafeURL(downloadEpubURL(book)) }
 				download={ getEpubFileName(book.BookInfo.Title) }
 				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
 				:title="i18next.t('download_as_epub')"
@@ -59,15 +61,17 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 			</a>
 		}
 		<!-- 下载【便携网页】按钮-->
-		<a
-			href={ templ.SafeURL(fmt.Sprintf("%s?static="+book.BookInfo.Title+".html", c.Request().URL.Path)) }
-			download={ book.BookInfo.Title + ".html" }
-			class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-1 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
-			:title="i18next.t('download_portable_web_file')"
-			x-text="i18next.t('download_portable_web_file')"
-		>
-			便携网页
-		</a>
+		if book != nil {
+			<a
+				href={ templ.SafeURL(portableBookURL(c, book)) }
+				download={ book.BookInfo.Title + ".html" }
+				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-1 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				:title="i18next.t('download_portable_web_file')"
+				x-text="i18next.t('download_portable_web_file')"
+			>
+				便携网页
+			</a>
+		}
 	</div>
 }
 
@@ -90,4 +94,24 @@ func getEpubFileName(title string) string {
 		}
 	}
 	return title + ".epub"
+}
+
+// downloadEpubURL 生成 EPUB 下载链接，远程书籍必须保留 remote_store 才能走远端代理。
+func downloadEpubURL(book *model.Book) string {
+	query := url.Values{}
+	query.Set("id", book.BookID)
+	if book.RemoteStoreKey != "" {
+		query.Set("remote_store", book.RemoteStoreKey)
+	}
+	return config.PrefixPath("/api/download-epub?" + query.Encode())
+}
+
+// portableBookURL 生成便携网页下载链接，远程书籍静态化时也要保留 remote_store。
+func portableBookURL(c echo.Context, book *model.Book) string {
+	query := url.Values{}
+	query.Set("static", book.BookInfo.Title+".html")
+	if book.RemoteStoreKey != "" {
+		query.Set("remote_store", book.RemoteStoreKey)
+	}
+	return c.Request().URL.Path + "?" + query.Encode()
 }

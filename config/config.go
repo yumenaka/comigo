@@ -60,7 +60,7 @@ type Config struct {
 	SupportMediaType          []string       `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
 	SupportTemplateFile       []string       `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
 	Timeout                   int            `json:"Timeout" comment:"cookie过期的时间。单位为分钟。默认60*24*30分钟后过期。"`
-	TimeoutLimitForScan       int            `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
+	TimeoutLimitForScan       int            `json:"TimeoutLimitForScan" comment:"扫描文件或访问远程书库时，超过几秒钟就放弃，避免卡在特殊文件或远端服务上"`
 	UseCache                  bool           `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
 	Username                  string         `json:"Username" comment:"登录界用的用户名。"`
 	EnableTailscale           bool           `json:"EnableTailscale" comment:"启用Tailscale网络支持"`
