@@ -961,6 +961,10 @@ func buildBaseURL() string {
 				host = "127.0.0.1"
 			}
 		}
+	} else {
+		if tools.IsLoopbackHost(host) {
+			host = tools.GetOutboundIP().String()
+		}
 	}
 	if cfg.AutoTLSCertificate {
 		return protocol + host

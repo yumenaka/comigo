@@ -5,6 +5,7 @@ import (
 	"net"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -54,6 +55,16 @@ func GetFreePort() (int, error) {
 		}
 	}(l)
 	return l.Addr().(*net.TCPAddr).Port, nil
+}
+
+// IsLoopbackHost 判断主机名是否只指向本机；二维码遇到这类地址时需要改用现有 GetOutboundIP。
+func IsLoopbackHost(host string) bool {
+	host = strings.Trim(strings.TrimSpace(host), "[]")
+	if host == "" || strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }
 
 // GetIPList 获取本机IP列表

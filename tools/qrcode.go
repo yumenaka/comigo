@@ -41,6 +41,9 @@ func PrintAllReaderURL(Port int, PrintAllPossibleQRCode bool, ServerHost string,
 func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string, protocol string, customTLS bool, autoTLS bool, etcStr string) {
 	// 打印指定的服务器地址
 	if ServerHost != "" {
+		if IsLoopbackHost(ServerHost) {
+			ServerHost = GetOutboundIP().String()
+		}
 		readURL := protocol + ServerHost + ":" + strconv.Itoa(port) + etcStr
 		// 自定义 TLS 时，如果是 443 端口，则不需要加端口号
 		if customTLS && port == 443 {

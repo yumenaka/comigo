@@ -252,6 +252,18 @@ body[data-theme="cyberpunk"] #drawer-right select option:focus {
   color: var(--panel-control) !important;
 }
 
+/* 上传目标书库下拉列表保持静态高对比色，避免 option 悬停变亮后文字难以辨认。 */
+body[data-theme="cyberpunk"] #store-select,
+body[data-theme="cyberpunk"] #store-select:hover,
+body[data-theme="cyberpunk"] #store-select:focus-visible,
+body[data-theme="cyberpunk"] #store-select option,
+body[data-theme="cyberpunk"] #store-select option:hover,
+body[data-theme="cyberpunk"] #store-select option:checked,
+body[data-theme="cyberpunk"] #store-select option:focus {
+  background-color: var(--panel-surface) !important;
+  color: var(--panel-control) !important;
+}
+
 body[data-theme="cyberpunk"] :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600),
 body[data-theme="cyberpunk"] .panel-control:is(.bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
   background-color: var(--panel-control-active) !important;

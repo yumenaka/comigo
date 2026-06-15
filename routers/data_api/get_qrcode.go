@@ -16,6 +16,7 @@ func GetQrcode(c echo.Context) error {
 	qrcodeStr := c.QueryParam("qrcode_str")
 	base64Encode := getBoolQueryParam(c, "base64", false)
 	if qrcodeStr != "" {
+		qrcodeStr = config.ToQrcodePublicURL(qrcodeStr)
 		png, err := qrcode.Encode(qrcodeStr, qrcode.Medium, 256)
 		if err != nil {
 			logger.Infof("%s", err)

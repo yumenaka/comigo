@@ -3,11 +3,13 @@ package config
 import (
 	"errors"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/pelletier/go-toml/v2"
@@ -291,15 +293,34 @@ func GetQrcodeURL() string {
 	if enableTLS {
 		protocol = "https://"
 	}
-	if cfg.Host != "" {
-		return protocol + cfg.Host + ":" + strconv.Itoa(int(cfg.Port)) + PrefixPath("/")
+	if host := strings.TrimSpace(cfg.Host); host != "" {
+		if tools.IsLoopbackHost(host) {
+			host = tools.GetOutboundIP().String()
+		}
+		return protocol + host + ":" + strconv.Itoa(int(cfg.Port)) + PrefixPath("/")
 	}
 	// 取得本机的首选出站IP
 	OutIP := tools.GetOutboundIP().String()
 	return protocol + OutIP + ":" + strconv.Itoa(int(cfg.Port)) + PrefixPath("/")
 }
 
-// GetLocalBrowserURL 返回本机浏览器入口，避免托盘打开时受局域网 IP、Host 或 0.0.0.0 影响。
+// ToQrcodePublicURL 将页面 URL 中的 localhost/127.0.0.1 替换为二维码公开地址。
+// 非 URL 文本或非本机地址保持原样，避免二维码接口误改普通文本。
+func ToQrcodePublicURL(rawURL string) string {
+	pageURL, err := url.Parse(rawURL)
+	if err != nil || !pageURL.IsAbs() || pageURL.Hostname() == "" || !tools.IsLoopbackHost(pageURL.Hostname()) {
+		return rawURL
+	}
+	publicURL, err := url.Parse(GetQrcodeURL())
+	if err != nil || publicURL.Host == "" {
+		return rawURL
+	}
+	pageURL.Scheme = publicURL.Scheme
+	pageURL.Host = publicURL.Host
+	return pageURL.String()
+}
+
+// GetLocalBrowserURL 返回启动时自动打开浏览器使用的本机入口，避免本机启动流程受 Host 或 0.0.0.0 影响。
 func GetLocalBrowserURL() string {
 	protocol := "http://"
 	if cfg.EnableTLS {
