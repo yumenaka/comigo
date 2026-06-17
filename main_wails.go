@@ -1,7 +1,7 @@
 //go:build wails && !js && !bindings
 
 //go:generate go install -v github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-//go:generate goversioninfo -icon=icon.ico -manifest=goversioninfo.exe.manifest
+//go:generate goversioninfo -icon=build/windows/icon.ico -manifest=goversioninfo.exe.manifest
 
 package main
 
@@ -38,7 +38,8 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Handler: http.HandlerFunc(serveWailsAsset),
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		BackgroundColour:         &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		EnableDefaultContextMenu: false,
 		OnStartup: func(ctx context.Context) {
 			app.startup(ctx)
 			routers.SetWailsContext(ctx)

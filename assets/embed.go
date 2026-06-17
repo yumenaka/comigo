@@ -93,6 +93,12 @@ window.ComiGoElectronAction = function(action) {
 window.ComiGoIsWails = function() {
   return !!window.ComiGoWails || window.location.protocol === 'wails:';
 };
+if (window.ComiGoWails) {
+  // Wails dev/debug 默认会放开右键菜单，这里只在桌面壳内统一禁用。
+  window.addEventListener('contextmenu', function(event) {
+    event.preventDefault();
+  }, { capture: true });
+}
 window.ComiGoShareURL = function(currentURL, publicBaseURL) {
   const target = new URL(currentURL || window.location.href);
   const publicBase = new URL(publicBaseURL || window.location.origin + '/');
@@ -108,6 +114,22 @@ window.ComiGoShareURL = function(currentURL, publicBaseURL) {
     target.host = publicBase.host;
   }
   return target.toString();
+};
+// Wails WebView 内的新窗口链接由宿主打开，普通浏览器保留 window.open 行为。
+window.ComiGoOpenExternalURL = async function(targetURL) {
+  if (!targetURL) return;
+  if (window.ComiGoWails) {
+    try {
+      const response = await fetch(window.ComiGoPath('/api/wails/open-url'), {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: targetURL }),
+      });
+      if (response.ok) return;
+    } catch (_) {}
+  }
+  window.open(targetURL, '_blank', 'noopener');
 };
 window.ComiGoToggleFullscreen = async function() {
   if (window.ComiGoElectronAction('toggle-fullscreen')) return;

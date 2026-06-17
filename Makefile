@@ -36,6 +36,7 @@
 ##
 ## 【其他】
 ##   make -n <target>      - 打印编译命令而不实际执行（用于调试）
+##   make wails-build      - 编译 Wails 桌面版到 bin/Comigo
 ##   make clean            - 清理构建文件（不含 Docker 镜像）
 ##
 ## ============================================================================
@@ -75,6 +76,25 @@ endif
 
 # 导出 VERSION 变量，供子 Makefile 使用
 export VERSION
+
+## ============================================================================
+## Wails 桌面版
+## ============================================================================
+
+.PHONY: wails-prepare wails-dev wails-build
+
+wails-prepare:
+	@mkdir -p build/windows bin
+	@cp assets/icon.png build/appicon.png
+	@cp icon.ico build/windows/icon.ico
+
+wails-dev: wails-prepare
+	@wails dev -m -nosyncgomod -skipembedcreate
+
+# Wails 固定输出到 build/bin；构建后把最终产物移到项目根 bin/。
+wails-build: wails-prepare
+	@wails build -m -nosyncgomod -skipembedcreate
+	@find build/bin -mindepth 1 -maxdepth 1 ! -name '.DS_Store' -exec sh -c 'for path do name=$$(basename "$$path"); rm -rf "bin/$$name"; mv "$$path" bin/; done' sh {} +
 
 ## ============================================================================
 ## 引入子 Makefile
