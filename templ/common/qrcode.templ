@@ -13,15 +13,7 @@ templ QRCode() {
 			x-data="{ qrcodeImageSrc: '', qrcodeTargetURL: window.location.toString() }"
 			x-init="
 			if ($store.global.serverReachable) {
-				const publicBase = new URL($el.dataset.qrcodeBase);
-				const target = new URL(window.location.toString());
-				const host = target.hostname;
-				// 只有本机地址才替换，反向代理或远程域名保持当前访问来源。
-				if (host === 'localhost' || host === '::1' || host === '[::1]' || host.startsWith('127.')) {
-					target.protocol = publicBase.protocol;
-					target.host = publicBase.host;
-				}
-				qrcodeTargetURL = target.toString();
+				qrcodeTargetURL = window.ComiGoShareURL(window.location.toString(), $el.dataset.qrcodeBase);
 				const qrcodeSrc = window.location.origin + window.ComiGoPath('/api/qrcode.png') + '?base64=true&qrcode_str=' + encodeURIComponent(qrcodeTargetURL);
 				fetch(qrcodeSrc)
 					.then(response => response.text())

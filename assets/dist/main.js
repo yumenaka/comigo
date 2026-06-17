@@ -6767,8 +6767,9 @@ const $8def34bab28fb2bd$var$url = new URL(window.location.href);
 const $8def34bab28fb2bd$var$currentRelativePath = $8def34bab28fb2bd$var$comigoRelativePath($8def34bab28fb2bd$var$url.pathname);
 const $8def34bab28fb2bd$var$currentRemoteStore = $8def34bab28fb2bd$var$url.searchParams.get('remote_store') || '';
 // 运行环境状态集中在这里计算，模板只读取 store，避免各处重复解析 URL。
-const $8def34bab28fb2bd$var$serverReachable = $8def34bab28fb2bd$var$url.protocol === 'http:' || $8def34bab28fb2bd$var$url.protocol === 'https:';
-const $8def34bab28fb2bd$var$localBook = $8def34bab28fb2bd$var$url.protocol === 'file:' || $8def34bab28fb2bd$var$url.protocol === 'content:';
+const $8def34bab28fb2bd$var$wailsBook = window.ComiGoIsWails ? window.ComiGoIsWails() : $8def34bab28fb2bd$var$url.protocol === 'wails:';
+const $8def34bab28fb2bd$var$serverReachable = $8def34bab28fb2bd$var$wailsBook || $8def34bab28fb2bd$var$url.protocol === 'http:' || $8def34bab28fb2bd$var$url.protocol === 'https:';
+const $8def34bab28fb2bd$var$localBook = !$8def34bab28fb2bd$var$wailsBook && ($8def34bab28fb2bd$var$url.protocol === 'file:' || $8def34bab28fb2bd$var$url.protocol === 'content:');
 const $8def34bab28fb2bd$var$staticHtmlBook = window.location.toString().endsWith('.html');
 const $8def34bab28fb2bd$var$readerPage = window.ComiGoReaderMode || $8def34bab28fb2bd$var$currentRelativePath.includes('/reader');
 const $8def34bab28fb2bd$var$onlineBook = !$8def34bab28fb2bd$var$readerPage && $8def34bab28fb2bd$var$serverReachable && !$8def34bab28fb2bd$var$staticHtmlBook;
@@ -6805,6 +6806,8 @@ Alpine.store('global', {
     staticHtmlBook: $8def34bab28fb2bd$var$staticHtmlBook,
     // 当前页面是否可访问 HTTP 后端能力，例如二维码和阅读历史。
     serverReachable: $8def34bab28fb2bd$var$serverReachable,
+    // Wails 桌面壳使用自定义协议，但资源仍由内嵌服务处理。
+    wailsBook: $8def34bab28fb2bd$var$wailsBook,
     // 播放器：音量（0~100）
     playerVolume: Alpine.$persist(100).as('global.playerVolume'),
     // 播放器：是否静音

@@ -45,8 +45,10 @@ func GetCSS(oneFileMode bool) (cssString string) {
 // GetBasePathScript 暴露前端路径工具，供静态 JS 与模板内联脚本统一处理反向代理基础路径。
 func GetBasePathScript() string {
 	basePath, _ := json.Marshal(config.GetBasePath())
+	wailsBuild, _ := json.Marshal(isWailsBuild())
 	return `<script>
 window.ComiGoBasePath = ` + string(basePath) + `;
+window.ComiGoWails = ` + string(wailsBuild) + `;
 window.ComiGoPath = function(path) {
   const base = window.ComiGoBasePath || '';
   if (!path) return base ? base + '/' : '/';
@@ -88,10 +90,38 @@ window.ComiGoElectronAction = function(action) {
   window.location.href = 'comigo-electron://' + encodeURIComponent(normalizedAction);
   return true;
 };
-window.ComiGoToggleFullscreen = function() {
+window.ComiGoIsWails = function() {
+  return !!window.ComiGoWails || window.location.protocol === 'wails:';
+};
+window.ComiGoShareURL = function(currentURL, publicBaseURL) {
+  const target = new URL(currentURL || window.location.href);
+  const publicBase = new URL(publicBaseURL || window.location.origin + '/');
+  if (!publicBase.pathname.endsWith('/')) publicBase.pathname += '/';
+  if (window.ComiGoIsWails() || target.protocol === 'wails:') {
+    const relative = window.ComiGoRelativePath(target.pathname).replace(/^\/+/, '') + target.search + target.hash;
+    return new URL(relative, publicBase).toString();
+  }
+  const host = target.hostname;
+  // 只有本机地址才替换，反向代理或远程域名保持当前访问来源。
+  if (host === 'localhost' || host === '::1' || host === '[::1]' || host.startsWith('127.')) {
+    target.protocol = publicBase.protocol;
+    target.host = publicBase.host;
+  }
+  return target.toString();
+};
+window.ComiGoToggleFullscreen = async function() {
   if (window.ComiGoElectronAction('toggle-fullscreen')) return;
-  if (Screenfull.isEnabled) {
-    Screenfull.toggle();
+  if (window.ComiGoWails) {
+    try {
+      const response = await fetch(window.ComiGoPath('/api/wails/toggle-fullscreen'), {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+      if (response.ok) return;
+    } catch (_) {}
+  }
+  if (window.Screenfull && window.Screenfull.isEnabled) {
+    window.Screenfull.toggle();
   } else {
     showToast(i18next.t('not_support_fullscreen'));
   }

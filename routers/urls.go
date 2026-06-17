@@ -130,6 +130,7 @@ func bindProtectedAPI(group *echo.Group) {
 
 // bindServerAPI 注册服务状态、上传和书库管理等服务级 API。
 func bindServerAPI(group *echo.Group) {
+	bindWailsAPI(group)
 	// 服务器状态
 	group.GET("/server-info", data_api.GetServerInfoHandler)
 	// 获取书库列表

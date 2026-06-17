@@ -67,8 +67,9 @@ const url = new URL(window.location.href);
 const currentRelativePath = comigoRelativePath(url.pathname);
 const currentRemoteStore = url.searchParams.get('remote_store') || '';
 // 运行环境状态集中在这里计算，模板只读取 store，避免各处重复解析 URL。
-const serverReachable = url.protocol === 'http:' || url.protocol === 'https:';
-const localBook = url.protocol === 'file:' || url.protocol === 'content:';
+const wailsBook = window.ComiGoIsWails ? window.ComiGoIsWails() : url.protocol === 'wails:';
+const serverReachable = wailsBook || url.protocol === 'http:' || url.protocol === 'https:';
+const localBook = !wailsBook && (url.protocol === 'file:' || url.protocol === 'content:');
 const staticHtmlBook = window.location.toString().endsWith('.html');
 const readerPage = window.ComiGoReaderMode || currentRelativePath.includes('/reader');
 const onlineBook = !readerPage && serverReachable && !staticHtmlBook;
@@ -114,6 +115,8 @@ Alpine.store('global', {
     staticHtmlBook: staticHtmlBook,
     // 当前页面是否可访问 HTTP 后端能力，例如二维码和阅读历史。
     serverReachable: serverReachable,
+    // Wails 桌面壳使用自定义协议，但资源仍由内嵌服务处理。
+    wailsBook: wailsBook,
     // 播放器：音量（0~100）
     playerVolume: Alpine.$persist(100).as('global.playerVolume'),
     // 播放器：是否静音

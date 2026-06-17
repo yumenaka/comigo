@@ -115,10 +115,11 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 				x-cloak
 				x-show="$store.global.onlineBook || (window.ComiGoReaderMode && $store.global.serverReachable)"
 				class="w-32 h-32 p-0 mt-2 mb-2"
+				data-qrcode-base={ config.GetQrcodeURL() }
 				x-data="{ qrcodeSrc: '', qrcodeImageSrc: '' }"
 				x-init="
 					if ($store.global.serverReachable) {
-						qrcodeSrc = window.location.origin + window.ComiGoPath('/api/qrcode.png') + '?base64=true&qrcode_str='+ encodeURIComponent(window.location.toString());
+						qrcodeSrc = window.location.origin + window.ComiGoPath('/api/qrcode.png') + '?base64=true&qrcode_str='+ encodeURIComponent(window.ComiGoShareURL ? window.ComiGoShareURL(window.location.toString(), $el.dataset.qrcodeBase) : window.location.toString());
 						// 使用 fetch 加载二维码
 						fetch(qrcodeSrc)
 							.then(response => response.text())
