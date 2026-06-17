@@ -1,0 +1,68 @@
+/* 四色印象模板：变量、拼贴背景和控件样式集中在这里。 */
+@layer base {
+  /* ====================== Cmyk ====================== */
+  [data-theme="cmyk"] {
+    color-scheme: light;
+    --primary: #e4005a;
+    --primary-content: #fffaf2;
+    --secondary: #00a7d8;
+    --secondary-content: #061b25;
+    --accent: #f4d400;
+    --accent-content: #211800;
+    --neutral: #17171c;
+    --neutral-content: #fffaf2;
+    --base-100: #fff6e5;
+    --base-200: #ffe0a8;
+    --base-300: #17171c;
+    --base-content: #17171c;
+    --panel-surface: #fff6e5;
+    --panel-surface-content: #17171c;
+    --panel-control: #ffffff;
+    --panel-control-hover: #fff0c9;
+    --panel-control-active: #f1ef76;
+    --panel-control-muted: #f4d400;
+    --panel-control-content: #17171c;
+    --grid-pattern-color: rgba(23, 23, 28, 0.24);
+    --grid-mosaic-color: rgba(228, 0, 90, 0.2);
+    --info: #00a7d8;
+    --success: #f1ef76;
+    --warning: #d69e00;
+    --error: #e4005a;
+    --rounded-box: 0.15rem;
+    --rounded-btn: 0.1rem;
+    --rounded-badge: 0.1rem;
+    --tab-radius: 0.1rem;
+  }
+}
+
+/* 主背景：大面积纯色块、网点和斜切构图，形成高对比拼贴感。 */
+body[data-theme="cmyk"],
+body[data-theme="cmyk"] .grid-line,
+body[data-theme="cmyk"] .grid-point,
+body[data-theme="cmyk"] .grid-mosaic,
+body[data-theme="cmyk"] #ShelfMainArea,
+body[data-theme="cmyk"] #settingsMainArea,
+body[data-theme="cmyk"] #tab-contents,
+body[data-theme="cmyk"] #ReaderRoot,
+body[data-theme="cmyk"] #ReaderShell,
+body[data-theme="cmyk"] #ScrollMainArea,
+body[data-theme="cmyk"] #ReaderFlipArea,
+body[data-theme="cmyk"] #ReaderPDFArea {
+  background-color: var(--base-300);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(23, 23, 28, 0.22) 1px, transparent 0),
+    linear-gradient(102deg, #e4005a 0 18%, transparent 18%),
+    linear-gradient(76deg, transparent 0 42%, #00a7d8 42% 56%, transparent 56%),
+    linear-gradient(160deg, transparent 0 62%, #f4d400 62% 82%, transparent 82%),
+    linear-gradient(180deg, #fff6e5 0%, #ffe0a8 55%, #fff6e5 100%);
+  background-size: 18px 18px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+/* 面板用纸色承载内容，黑色边框和角标色块强化图形感。 */
+body[data-theme="cmyk"] .panel-surface {
+  background-color: var(--panel-surface) !important;
+  background-image:
+    linear-gradient(135deg, rgba(228, 0, 90, 0.2) 0 14%, transparent 14%),
+    linear-gradient(315deg, rgba(0, 167, 216, 0.18) 0 16%, transparent 16%);
+}

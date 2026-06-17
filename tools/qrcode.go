@@ -10,18 +10,29 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// PrintAllReaderURL 打印阅读链接
-func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bool, ServerHost string, DisableLAN bool, customTLS bool, autoTLS bool, etcStr string) {
+func readerURLProtocol(customTLS bool, autoTLS bool) string {
 	protocol := "http://"
 	if customTLS || autoTLS {
 		protocol = "https://"
 	}
-	localURL := protocol + "127.0.0.1:" + strconv.Itoa(Port) + etcStr
+	return protocol
+}
+
+// LocalReaderURL 生成本机阅读地址，供二维码打印和浏览器打开分别复用。
+func LocalReaderURL(port int, customTLS bool, autoTLS bool, etcStr string) string {
+	return readerURLProtocol(customTLS, autoTLS) + "127.0.0.1:" + strconv.Itoa(port) + etcStr
+}
+
+// OpenLocalReaderURL 只负责打开本机阅读地址，不和二维码打印逻辑耦合。
+func OpenLocalReaderURL(port int, customTLS bool, autoTLS bool, etcStr string) {
+	go OpenBrowserByURL(LocalReaderURL(port, customTLS, autoTLS, etcStr))
+}
+
+// PrintAllReaderURL 打印阅读链接与二维码，不负责打开浏览器。
+func PrintAllReaderURL(Port int, PrintAllPossibleQRCode bool, ServerHost string, DisableLAN bool, customTLS bool, autoTLS bool, etcStr string) {
+	protocol := readerURLProtocol(customTLS, autoTLS)
+	localURL := LocalReaderURL(Port, customTLS, autoTLS, etcStr)
 	logger.Info(locale.GetString("local_reading") + localURL)
-	// 打开浏览器
-	if OpenBrowserFlag {
-		go OpenBrowserByURL(localURL)
-	}
 	if !DisableLAN {
 		printURLAndQRCode(Port, PrintAllPossibleQRCode, ServerHost, protocol, customTLS, autoTLS, etcStr)
 	}
@@ -30,6 +41,9 @@ func PrintAllReaderURL(Port int, OpenBrowserFlag bool, PrintAllPossibleQRCode bo
 func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string, protocol string, customTLS bool, autoTLS bool, etcStr string) {
 	// 打印指定的服务器地址
 	if ServerHost != "" {
+		if IsLoopbackHost(ServerHost) {
+			ServerHost = GetOutboundIP().String()
+		}
 		readURL := protocol + ServerHost + ":" + strconv.Itoa(port) + etcStr
 		// 自定义 TLS 时，如果是 443 端口，则不需要加端口号
 		if customTLS && port == 443 {
@@ -65,6 +79,9 @@ func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string,
 }
 
 func PrintQRCode(text string) {
+	if logger.IsStdoutSuppressed != nil && logger.IsStdoutSuppressed() {
+		return
+	}
 	// or https://github.com/mdp/qrterminal
 	obj := qrcodeTerminal.New()
 	obj.Get(text).Print()

@@ -8,13 +8,17 @@ root = "."
 tmp_dir = "test/.temp"
 
 [build]
-pre_cmd = ["bun run dev", "bun run build:wasm"]
-cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/.temp/comi ./cmd/comigo/main.go"
+pre_cmd = [
+    "bun run dev",
+    # "bun run build:wasm",
+]
+# Wails 分支使用独立 build tag，避免热重载改动普通 CLI/托盘入口。
+cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -tags wails -o ./test/.temp/comi ."
 # Array of commands to run after ^C
 post_cmd = []
 ## 运行的时候，需要传给二进制文件的参数。
 # args_bin = ["./test","--tailscale","--debug", "--config-locked"]
-## 可配置远程书库 
+## 可配置远程书库
 
 # sftp://user:pass@host:port/path  (openssh-server)                       推荐
 # ftp://user:pass@host/path/to/books (nas)                                内存占用很高，不推荐
@@ -22,7 +26,7 @@ post_cmd = []
 # dav://user:pass@host:port/path   (caddy2 with webdav plugin)            大量缓存文件，需要优化
 # s3://accessKey:secretKey@endpoint/bucket/prefix (minio, aws s3)         未测试
 # args_bin = ["https://test:test@localhost/dav/","sftp://test:test@192.168.1.1/path/to/books","smb://guest@192.168.1.1:445/some/path","--tailscale","--debug"]
-args_bin = ["./test","--tailscale","--debug"]
+args_bin = ["./test","--debug"]
 #二进制文件 Binary file yields from 'cmd', will be deprecated soon, recommend using entrypoint.
 # bin = "./test/.temp/comi"
 entrypoint = ["./test/.temp/comi"]

@@ -72,10 +72,11 @@ func main() {
 		releaseSingleInstance = tools.CleanupSingleInstance
 	}
 	// 设置系统托盘并启动服务器
-	system_tray.SetupSystray(
+	exitCode := system_tray.SetupSystray(
 		startServer,
 		shutdownServer,
 		getServerURL,
+		getBrowserURL,
 		config.GetConfigDir,
 		getStoreUrls,
 		toggleTailscale,
@@ -83,6 +84,9 @@ func main() {
 		getTailscaleEnabled,
 		releaseSingleInstance,
 	)
+	if exitCode >= 0 {
+		os.Exit(exitCode)
+	}
 }
 
 // startServer 启动服务器
@@ -112,6 +116,11 @@ func startServer() {
 // getServerURL 获取服务器URL
 func getServerURL() string {
 	return config.GetQrcodeURL()
+}
+
+// getBrowserURL 获取托盘打开浏览器使用的本机 URL，避免局域网地址或自定义 Host 在本机不可访问。
+func getBrowserURL() string {
+	return config.GetLocalBrowserURL()
 }
 
 // getStoreUrls 获取书库URL列表
@@ -181,42 +190,3 @@ func shutdownServer() {
 	}
 	log.Println("Comigo Server exit.")
 }
-
-// // tui实验
-// func RunTui() {
-// 	// 判断是否在终端中运行
-// 	if term.IsTerminal(os.Stdout.Fd()) {
-// 		// 1. 初始化自定义的日志缓冲区
-// 		logBuffer := tui.NewLogBuffer()
-// 		// 将标准日志的输出重定向到 logBuffer
-// 		logger.SetOutput(logBuffer)
-
-// 		// 2. 创建 Bubble Tea 程序的模型
-// 		model := tui.InitialModel(logBuffer)
-// 		// 创建一个bubbletea的应用对象
-// 		program := tea.NewProgram(model)
-
-// 		// Comigo 服务器的初始化(初始化 Comigo 命令行flag与args，环境变量与配置文件)
-// 		cmd.Execute()
-// 		// 启动网页服务器（不阻塞）
-// 		routers.StartWebServer()
-// 		// 扫描书库（命令行指定）
-// 		cmd.ScanStore(cmd.Args)
-
-// 		// 3. 调用 Bubble Tea 对象的Start()方法开始执行，运行 TUI 程序
-// 		if _, err := program.Run(); err != nil {
-// 			logger.Errorf("Error running tui interface: %v", err)
-// 		}
-// 	} else {
-// 		// 初始化命令行flag与args，环境变量与配置文件
-// 		cmd.Execute()
-// 		// 启动网页服务器（不阻塞）
-// 		routers.StartWebServer()
-// 		// 扫描书库（命令行指定）
-// 		cmd.ScanStore(cmd.Args)
-// 		// 在命令行显示QRCode
-// 		cmd.ShowQRCode()
-// 		// 退出时清理临时文件的处理函数
-// 		cmd.SetShutdownHandler()
-// 	}
-// }

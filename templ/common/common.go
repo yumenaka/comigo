@@ -4,12 +4,14 @@ import (
 	"encoding/base64"
 	"fmt"
 	"mime"
+	"net/url"
 	"path/filepath"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
+	"github.com/yumenaka/comigo/tools/comigo_remote"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -68,12 +70,38 @@ func GetReturnUrl(BookID string) string {
 }
 
 func QuickJumpBarBooks(b *model.Book) (list *model.BookInfos) {
-	list, err := store.GetBookInfoListByParentFolder(b.ParentFolder)
+	list, err := store.GetBookInfoListByBookFolder(b)
 	if err != nil {
 		logger.Infof("%s", err)
 		return nil
 	}
 	return list
+}
+
+// RawBookURL 生成单文件书籍的原始文件访问地址。
+// HTML/音视频这类单文件内容不需要阅读模板时，应跳转到该地址交给 raw API 返回源文件。
+func RawBookURL(book *model.Book) string {
+	if book == nil {
+		return config.PrefixPath("/")
+	}
+	return RawBookInfoURL(book.BookInfo)
+}
+
+// RawBookInfoURL 根据 BookInfo 生成原始文件访问地址。
+// 前端播放器、HTML 直出等场景只需要稳定的公开 URL，不需要知道本地 BookPath。
+func RawBookInfoURL(book model.BookInfo) string {
+	if book.BookID == "" {
+		return config.PrefixPath("/")
+	}
+	fileName := book.Title
+	if fileName == "" {
+		fileName = filepath.Base(book.BookPath)
+	}
+	rawURL := config.PrefixPath("/api/raw/" + url.PathEscape(book.BookID) + "/" + url.PathEscape(fileName))
+	if book.RemoteStoreKey != "" {
+		rawURL += "?remote_store=" + url.QueryEscape(book.RemoteStoreKey)
+	}
+	return rawURL
 }
 
 func GetFileBase64Text(bookID string, fileName string) string {
@@ -82,6 +110,9 @@ func GetFileBase64Text(bookID string, fileName string) string {
 	if err != nil {
 		logger.Infof(locale.GetString("log_getbook_error_common"), err)
 		return ""
+	}
+	if bookByID.RemoteBookID != "" && bookByID.RemoteStoreKey != "" {
+		return getRemoteComigoFileBase64Text(bookByID, fileName)
 	}
 
 	// 获取图片数据的选项
@@ -110,4 +141,33 @@ func GetFileBase64Text(bookID string, fileName string) string {
 	dataURI := "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(imgData)
 
 	return dataURI
+}
+
+// getRemoteComigoFileBase64Text 实时从远端 Comigo 拉取图片，用于生成便携网页。
+func getRemoteComigoFileBase64Text(book *model.Book, fileName string) string {
+	storeURL, err := comigo_remote.MatchStoreByKey(config.GetCfg().StoreUrls, book.RemoteStoreKey)
+	if err != nil {
+		logger.Infof("%s", err)
+		return ""
+	}
+	client, err := comigo_remote.NewClient(storeURL, config.GetCfg().TimeoutLimitForScan)
+	if err != nil {
+		logger.Infof("%s", err)
+		return ""
+	}
+	query := url.Values{}
+	query.Set("id", book.RemoteBookID)
+	query.Set("filename", fileName)
+	imgData, contentType, err := client.GetBytes("/api/get-file", query)
+	if err != nil {
+		logger.Infof(locale.GetString("log_getpicturedata_error"), err)
+		return ""
+	}
+	if contentType == "" {
+		contentType = mime.TypeByExtension(filepath.Ext(fileName))
+	}
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	return "data:" + contentType + ";base64," + base64.StdEncoding.EncodeToString(imgData)
 }

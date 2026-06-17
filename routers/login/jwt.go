@@ -27,7 +27,7 @@ const (
 func newClaims(username string) *JwtCustomClaims {
 	return &JwtCustomClaims{
 		Username: username,
-		Admin:    true, // 账号管理（未实现）
+		Admin:    true, // 当前是单管理员模型，已通过配置页维护管理员账号密码。
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(config.GetCfg().Timeout))),
 		},
@@ -47,7 +47,7 @@ func setTokenCookie(c echo.Context, token string) {
 	cookie.Value = token
 	cookie.Expires = time.Now().Add(24 * time.Hour * 30) // 30天有效期
 	cookie.Path = "/"
-	cookie.HttpOnly = false                                         // 防止JavaScript访问的话需要设置为true
+	cookie.HttpOnly = true                                          // JWT 不再暴露给前端 JS，退出登录统一走 /api/logout。
 	cookie.Secure = c.Scheme() == "https" || c.Request().TLS != nil // 如果是HTTPS则设置Secure
 	cookie.SameSite = http.SameSiteLaxMode
 	c.SetCookie(cookie)
@@ -72,7 +72,7 @@ func Login(c echo.Context) error {
 	}
 	// 如果密码错误，则不生成 JWT
 	if username != config.GetCfg().Username || password != config.GetCfg().Password {
-		logger.Infof(locale.GetString("log_login_failed")+"\n", username, config.GetCfg().Username, config.GetCfg().Password, password)
+		logger.Infof(locale.GetString("log_login_failed"), username)
 		return echo.ErrUnauthorized
 	}
 	if err := issueLoginCookie(c, username); err != nil {
@@ -95,7 +95,7 @@ func Logout(c echo.Context) error {
 	cookie.Expires = time.Now().Add(-1 * time.Hour) // 设置为过期
 	cookie.Path = "/"
 	cookie.HttpOnly = true
-	cookie.Secure = c.Request().TLS != nil
+	cookie.Secure = c.Scheme() == "https" || c.Request().TLS != nil
 	cookie.SameSite = http.SameSiteLaxMode
 	c.SetCookie(cookie)
 

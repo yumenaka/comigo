@@ -61,6 +61,9 @@ func GetReadingHistory(c echo.Context) error {
 	// 收集阅读历史（过滤 page_index > 0 的书签）
 	readingHistory := []model.BookinfoWithBookMark{}
 	for _, book := range allBooks {
+		if book.RemoteBookID != "" {
+			continue
+		}
 		for _, mark := range book.BookMarks {
 			// 只收集有阅读记录的书签（page_index > 0）
 			if mark.PageIndex > 0 {
@@ -73,6 +76,7 @@ func GetReadingHistory(c echo.Context) error {
 			}
 		}
 	}
+	readingHistory = append(readingHistory, remoteComigoReadingHistory(allBooks)...)
 
 	// 排序规则：手动书签（user）优先于自动书签（auto），同类型按更新时间降序
 	sort.Slice(readingHistory, func(i, j int) bool {
@@ -133,4 +137,47 @@ func GetReadingHistory(c echo.Context) error {
 		PageSize:   pageSize,
 		TotalPages: totalPages,
 	})
+}
+
+// remoteComigoReadingHistory 实时汇总远端 Comigo 阅读进度，并映射回本地远程书籍 ID。
+func remoteComigoReadingHistory(allBooks []*model.Book) []model.BookinfoWithBookMark {
+	booksByStore := map[string]map[string]*model.Book{}
+	for _, book := range allBooks {
+		if book.RemoteBookID == "" || book.RemoteStoreKey == "" {
+			continue
+		}
+		if booksByStore[book.RemoteStoreKey] == nil {
+			booksByStore[book.RemoteStoreKey] = map[string]*model.Book{}
+		}
+		booksByStore[book.RemoteStoreKey][book.RemoteBookID] = book
+	}
+
+	var history []model.BookinfoWithBookMark
+	for remoteStoreKey, remoteBooks := range booksByStore {
+		client, _, err := remoteComigoClientByKey(remoteStoreKey)
+		if err != nil {
+			logger.Infof("%s", err)
+			continue
+		}
+		remoteMarks, err := client.GetAllBookmarks()
+		if err != nil {
+			logger.Infof("%s", err)
+			continue
+		}
+		for _, item := range remoteMarks {
+			localBook := remoteBooks[item.BookInfo.BookID]
+			if localBook == nil || item.BookMark.PageIndex <= 0 {
+				continue
+			}
+			localBookInfo := localBook.BookInfo
+			localBookInfo.Cover = localBook.GetCover()
+			item.BookMark.BookID = localBook.BookID
+			item.BookMark.BookStoreID = localBook.GetStoreID()
+			history = append(history, model.BookinfoWithBookMark{
+				BookInfo: localBookInfo,
+				BookMark: item.BookMark,
+			})
+		}
+	}
+	return history
 }

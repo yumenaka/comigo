@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -16,63 +15,28 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// isRemoteStoreURL 判断是否为远程存储 URL（WebDAV、SMB、SFTP等）
-// 这是一个简单的检查，避免循环导入 store 包
-func isRemoteStoreURL(storeURL string) bool {
-	// 检查是否为本地绝对路径
-	if strings.HasPrefix(storeURL, "/") ||
-		(len(storeURL) > 2 && storeURL[1] == ':' && (storeURL[2] == '\\' || storeURL[2] == '/')) ||
-		strings.HasPrefix(storeURL, "\\\\") {
-		return false
-	}
-
-	// 检查是否为 file:// 协议
-	if strings.HasPrefix(storeURL, "file://") {
-		return false
-	}
-
-	// 尝试解析为 URL
-	u, err := url.Parse(storeURL)
-	if err != nil {
-		return false
-	}
-
-	// 检查 scheme 是否为远程协议
-	switch strings.ToLower(u.Scheme) {
-	case "webdav", "dav", "davs", "http", "https", "smb", "sftp", "ftp", "ftps", "s3":
-		return true
-	default:
-		return false
-	}
-}
-
-// getRemoteStoreHost 获取远程存储的主机名
-func getRemoteStoreHost(storeURL string) string {
-	u, err := url.Parse(storeURL)
-	if err != nil {
-		return ""
-	}
-	return u.Hostname()
-}
-
 // Config Comigo全局配置
 type Config struct {
 	AutoRescanIntervalMinutes int            `json:"AutoRescanIntervalMinutes" comment:"定期扫描书库间隔。单位为分钟。默认为 0，表示禁用自动定期扫描。"`
 	CacheDir                  string         `json:"CacheDir" comment:"本地图片缓存位置，默认系统临时文件夹"`
 	ClearCacheExit            bool           `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	ClearDatabaseWhenExit     bool           `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
-	ConfigFile                string         `json:"-" toml:"-" comment:"用户指定的的yaml设置文件路径"`
+	ConfigFile                string         `json:"-" toml:"-" comment:"用户指定的 toml 设置文件路径"`
 	SelfUpgrade               bool           `json:"-" toml:"-" comment:"CLI：检测并下载新版本替换当前可执行文件（仅命令行使用，不写入配置文件）"`
+	NoTUI                     bool           `json:"-" toml:"-" comment:"CLI：不启动 TUI，直接按普通服务模式运行（仅命令行使用，不写入配置文件）"`
+	RandomTheme               bool           `json:"-" toml:"-" comment:"CLI：强制前端选择随机模板（仅命令行使用，不写入配置文件）"`
 	ReadOnlyMode              bool           `json:"ReadOnlyMode" comment:"只读模式。禁止网页端更改配置或上传文件。"`
 	Debug                     bool           `json:"Debug" comment:"开启Debug模式"`
 	EnablePlugin              bool           `json:"EnablePlugin" comment:"启用插件系统"`
 	PluginDirectory           string         `json:"-" toml:"-"  comment:"插件存放目录"`
 	BuildInPluginList         []string       `json:"-" toml:"-"  comment:"内置插件列表"`
 	UserPluginList            []string       `json:"-" toml:"-"  comment:"用户自定义插件列表"`
-	EnabledPluginList         []string       `json:"-" toml:"-"  comment:"已启用插件列表"`
+	EnabledPluginList         []string       `json:"-" comment:"已启用插件列表"`
 	CustomPlugins             []CustomPlugin `json:"-" toml:"-"  comment:"用户自定义插件内容列表"`
 	DisableLAN                bool           `json:"DisableLAN" comment:"只在本机提供阅读服务，不对外共享"`
 	EnableDatabase            bool           `json:"EnableDatabase" comment:"启用本地数据库，保存扫描到的书籍数据。"`
+	DBType                    string         `json:"DBType" comment:"数据库类型：sqlite 或 postgres。仅启用数据库时生效。"`
+	DBDSN                     string         `json:"DBDSN" comment:"PostgreSQL 连接字符串。仅 DBType=postgres 时生效。"`
 	EnableTLS                 bool           `json:"EnableTLS" comment:"是否启用HTTPS协议。需要设置证书于key文件。"`
 	AutoTLSCertificate        bool           `json:"AutoTLSCertificate" comment:"自动申请、签发 HTTPS 证书（Let's Encrypt）"`
 	BasePath                  string         `json:"BasePath" comment:"反向代理基础路径，例如 /some/path。留空表示服务挂载在根路径 /"`
@@ -96,7 +60,7 @@ type Config struct {
 	SupportMediaType          []string       `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
 	SupportTemplateFile       []string       `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
 	Timeout                   int            `json:"Timeout" comment:"cookie过期的时间。单位为分钟。默认60*24*30分钟后过期。"`
-	TimeoutLimitForScan       int            `json:"TimeoutLimitForScan" comment:"扫描文件时，超过几秒钟，就放弃扫描这个文件，避免卡在特殊文件上"`
+	TimeoutLimitForScan       int            `json:"TimeoutLimitForScan" comment:"扫描文件或访问远程书库时，超过几秒钟就放弃，避免卡在特殊文件或远端服务上"`
 	UseCache                  bool           `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
 	Username                  string         `json:"Username" comment:"登录界用的用户名。"`
 	EnableTailscale           bool           `json:"EnableTailscale" comment:"启用Tailscale网络支持"`
@@ -182,36 +146,18 @@ func (c *Config) GetClearDatabaseWhenExit() bool {
 // - conflictPath: 冲突的已有路径
 // - message: 错误消息
 func (c *Config) IsPathOverlapping(newPath string) (overlapping bool, conflictPath string, message string) {
-	// 判断新路径是否为远程 URL
-	isNewRemote := isRemoteStoreURL(newPath)
-
-	var newPathNormalized string
-	if isNewRemote {
-		// 远程 URL 直接使用原始 URL（已在 AddStoreUrl 中标准化）
-		newPathNormalized = newPath
-	} else {
-		// 本地路径使用统一的路径标准化函数
-		var err error
-		newPathNormalized, err = tools.NormalizeAbsPath(newPath)
-		if err != nil {
-			return true, "", fmt.Sprintf(locale.GetString("err_invalid_store_path"), newPath)
-		}
+	// 远程 URL 使用原始 URL；本地路径转为绝对路径后比较。
+	newPathNormalized, isNewRemote, err := tools.NormalizeStoreURLForCompare(newPath)
+	if err != nil {
+		return true, "", fmt.Sprintf(locale.GetString("err_invalid_store_path"), newPath)
 	}
 
 	// 检查是否与已有路径冲突
 	for _, existingUrl := range c.StoreUrls {
-		isExistingRemote := isRemoteStoreURL(existingUrl)
-
-		var existingNormalized string
-		if isExistingRemote {
-			existingNormalized = existingUrl
-		} else {
-			var err error
-			existingNormalized, err = tools.NormalizeAbsPath(existingUrl)
-			if err != nil {
-				// 如果现有路径无法转换，跳过检查
-				continue
-			}
+		existingNormalized, isExistingRemote, err := tools.NormalizeStoreURLForCompare(existingUrl)
+		if err != nil {
+			// 如果现有路径无法转换，跳过检查
+			continue
 		}
 
 		// 1. 检查是否完全相同
@@ -223,12 +169,12 @@ func (c *Config) IsPathOverlapping(newPath string) (overlapping bool, conflictPa
 		// 远程 URL 之间或远程与本地之间不需要检查父子关系
 		if !isNewRemote && !isExistingRemote {
 			// 检查新路径是否是已有路径的子目录
-			if isSubPath(existingNormalized, newPathNormalized) {
+			if tools.IsSubPath(existingNormalized, newPathNormalized) {
 				return true, existingUrl, fmt.Sprintf(locale.GetString("err_store_path_is_subdir_of_existing"), newPath, existingUrl)
 			}
 
 			// 检查新路径是否是已有路径的父目录
-			if isSubPath(newPathNormalized, existingNormalized) {
+			if tools.IsSubPath(newPathNormalized, existingNormalized) {
 				return true, existingUrl, fmt.Sprintf(locale.GetString("err_store_path_is_parent_of_existing"), newPath, existingUrl)
 			}
 		}
@@ -237,59 +183,25 @@ func (c *Config) IsPathOverlapping(newPath string) (overlapping bool, conflictPa
 	return false, "", ""
 }
 
-// isSubPath 检查 child 是否是 parent 的子路径
-// parent 和 child 应该都是已经清理过的绝对路径
-func isSubPath(parent, child string) bool {
-	// 使用 filepath.Rel 计算相对路径
-	rel, err := filepath.Rel(parent, child)
-	if err != nil {
-		return false
-	}
-
-	// 如果相对路径是 "."，说明两个路径相同（这种情况在调用前已经检查过）
-	if rel == "." {
-		return false
-	}
-
-	// 如果相对路径以 ".." 开头，说明 child 不在 parent 内
-	// 如果相对路径不以 ".." 开头，说明 child 在 parent 内
-	return !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && rel != ".."
-}
-
-// StoreUrlIsExits 检查书库URL是否可添加（已弃用，使用 IsPathOverlapping 代替）
-func (c *Config) StoreUrlIsExits(url string) bool {
-	// 检查书库URL是否已存在
-	for _, storeUrl := range c.StoreUrls {
-		if storeUrl == url {
-			if c.Debug {
-				logger.Infof(locale.GetString("log_store_url_already_exists"), storeUrl)
-			}
-			return true
-		}
-	}
-	return false
-}
-
 // AddStoreUrl 添加书库（支持本地路径和远程 URL）
 // 本地路径会将相对路径转换为绝对路径，并检查路径冲突
 // 远程 URL（WebDAV 等）会在扫描时验证连接
 func (c *Config) AddStoreUrl(storeURL string) error {
 	var normalizedURL string
 
-	if isRemoteStoreURL(storeURL) {
-		// 远程 URL 处理（WebDAV, SMB, SFTP 等）
-		// 验证 URL 格式
-		u, err := url.Parse(storeURL)
+	if tools.IsRemoteStoreURL(storeURL) {
+		// 远程 URL 处理（WebDAV, SMB, SFTP 等），扫描时再验证连接。
+		info, err := tools.ParseStoreURL(storeURL)
 		if err != nil {
 			return fmt.Errorf(locale.GetString("err_invalid_store_path")+": %w", err)
 		}
 
-		if u.Host == "" {
+		if info.ServerHost == "" {
 			return fmt.Errorf(locale.GetString("err_invalid_store_path")+": 缺少主机名", storeURL)
 		}
 
 		if c.Debug {
-			logger.Infof(locale.GetString("log_add_remote_store"), storeURL, u.Scheme, u.Host)
+			logger.Infof(locale.GetString("log_add_remote_store"), storeURL, info.Scheme, info.ServerHost)
 		}
 
 		// 使用原始 URL（保留认证信息）
@@ -370,9 +282,9 @@ func (c *Config) GetTopStoreName() string {
 	storeUrls := make([]string, len(c.StoreUrls))
 	for i, storeUrl := range c.StoreUrls {
 		// 判断是否为远程 URL
-		if isRemoteStoreURL(storeUrl) {
+		if tools.IsRemoteStoreURL(storeUrl) {
 			// 远程 URL：尝试提取主机名
-			host := getRemoteStoreHost(storeUrl)
+			host := tools.StoreURLHost(storeUrl)
 			if host != "" {
 				storeUrls[i] = host
 			} else {
@@ -598,8 +510,8 @@ func UpdateConfigByJson(jsonString string) error {
 		return err
 	}
 
-	v := reflect.ValueOf(cfg).Elem()
-	t := v.Type()
+	// cfg 是结构体值，反射更新必须先取地址，避免配置 API 写入时 panic。
+	v := reflect.ValueOf(&cfg).Elem()
 
 	for key, value := range updates {
 		if key == "BasePath" {
@@ -619,9 +531,6 @@ func UpdateConfigByJson(jsonString string) error {
 			logger.Infof(locale.GetString("log_failed_to_set_field"), key, err)
 			continue
 		}
-
-		// 特殊处理：Language 字段更新后的附加逻辑可在此处理
-		_ = t // 避免未使用警告
 	}
 	return nil
 }

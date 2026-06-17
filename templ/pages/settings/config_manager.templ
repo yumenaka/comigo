@@ -7,7 +7,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 	@ConfigManagerJavaScript()
 	<div
 		id="config-container"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 		x-data={ "{ collapsed: $persist(false).as('settings_config_manager_collapsed'), selectedDir: '" + initSaveTo + "',initinitSaveTo:'" + initSaveTo + "'}" }
 	>
 		<!-- 折叠/展开按钮 -->
@@ -129,7 +129,8 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				<button
 					id="saveConfigButton"
 					type="button"
-					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+					disabled?={ config.GetCfg().ReadOnlyMode }
+					class="panel-control w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
 					x-text={ getTranslations("save") }
 					@click={ "saveConfig(selectedDir)" }
 				>
@@ -138,7 +139,8 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				<button
 					id="deleteConfigButton"
 					type="button"
-					class="w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-red-200 transition delay-150 duration-300 ease-in-out  hover:bg-red-400"
+					disabled?={ config.GetCfg().ReadOnlyMode }
+					class="panel-control w-24 h-10 mx-2 my-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring bg-red-200 transition delay-150 duration-300 ease-in-out hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
 					x-text={ getTranslations("delete") }
 					@click={ "deleteConfig(selectedDir)" }
 				>
@@ -146,7 +148,7 @@ templ ConfigManager(initSaveTo string, WorkingDirectoryConfig string, HomeDirect
 				</button>
 			</div>
 			<!-- 设置管理功能的说明 -->
-			<div class="w-full py-1 text-xs text-base-content" x-text={ getTranslations("config_manager_description") }>
+			<div class="w-auto py-1 text-xs text-base-content" x-text={ getTranslations("config_manager_description") }>
 				点击Save，会将当前配置上传到服务器，并覆盖已经存在的设定文件。
 			</div>
 		</div>
@@ -219,6 +221,7 @@ templ ConfigManagerJavaScript() {
 						if (container && container.parentNode) {
 							// 创建临时元素来解析 HTML
 							const temp = document.createElement("div");
+							// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。
 							temp.innerHTML = data.html;
 							const newContainer = temp.querySelector("#config-container");
 							if (newContainer) {
@@ -289,6 +292,7 @@ templ ConfigManagerJavaScript() {
 						if (container && container.parentNode) {
 							// 创建临时元素来解析 HTML
 							const temp = document.createElement("div");
+							// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。
 							temp.innerHTML = data.html;
 							const newContainer = temp.querySelector("#config-container");
 							if (newContainer) {

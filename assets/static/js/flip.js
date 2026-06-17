@@ -59,10 +59,10 @@ const getConfig = () => ({
 })
 
 // ============ 导入纯工具模块(utils) ============
-// 获取翻页模式分页与边界判断工具。?. 是可选链语法，避免对象不存在时报错。
+// 获取翻页阅读分页与边界判断工具。?. 是可选链语法，避免对象不存在时报错。
 const getFlipPaginationUtils = () => window.ComiGoFlip?.pagination
-// 获取翻页模式交互几何判断工具 ?. 是可选链语法，避免对象不存在时报错。
-const getFlipInteractionUtils = () => window.ComiGoFlip?.interaction
+// 获取通用阅读交互几何判断工具；保留旧命名入口兼容已有页面。
+const getFlipInteractionUtils = () => window.ComiGoInteraction || window.ComiGoFlip?.interaction
 
 // ============ 工具函数 ============
 /**
@@ -172,10 +172,13 @@ let startTime = 0
 let animationID = 0
 
 // 设置图片资源，预加载等
-// 需要 HTTP 响应头中允许缓存（没有使用 Cache-Control: no-cache），也就是 gin 不能用htmx/router/server.go 里面的noCache 中间件。
+// 需要 HTTP 响应头中允许缓存（没有使用 Cache-Control: no-cache），避免预加载资源被 no-cache 中间件影响。
 // 在预加载用到的图片资源 URL
 let preloadedImages = new Set()
 
+// 页面级脚本插在 body 后面执行，此时阅读区节点已经存在。
+// 先建立 DOM 缓存，再设置图片，避免双页模式首次进入时左右图节点没有 src。
+initDOMCache()
 // 首次加载时设置图片
 setImageSrc()
 
@@ -186,7 +189,7 @@ if (params.has('start')) {
     // 优先使用URL参数中的页码
     let pageNum = parseInt(params.get('start'))
     jumpPageNum(pageNum, false); // 使用跳转函数更新页面
-    // 翻页模式自动跳转后删除start查询参数
+    // 翻页阅读自动跳转后删除 start 查询参数
     params.delete('start');
     if (params.toString() !== '') {
         const newUrl = `${url.origin}${url.pathname}?${params.toString()}`;
@@ -203,10 +206,6 @@ if (params.has('start')) {
         jumpPageNum(pageNum, false); // 使用跳转函数更新页面
     });
 }
-
-
-//判断当前浏览器是不是Safari，暂时没啥用
-// const isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1
 
 /**
  * 获取图片源 URL
@@ -239,6 +238,24 @@ function GetImageSrc(index) {
 }
 
 /**
+ * 计算双页模式当前屏幕左右两侧应该显示的图片索引。
+ * 约定：第一页作为封面单独显示；从第 2 页开始才与下一页组成双页。
+ * @param {number} nowPageNum - 当前页码（从 1 开始）
+ * @param {number} allPageNum - 总页数
+ * @param {boolean} mangaMode - 日漫右开本模式
+ * @returns {{leftIndex: number, rightIndex: number}} - 无图一侧使用 -1
+ */
+function getDoublePageIndexes(nowPageNum, allPageNum, mangaMode) {
+    const currentIndex = nowPageNum - 1
+    const nextIndex = nowPageNum > 1 && nowPageNum < allPageNum ? nowPageNum : -1
+
+    return {
+        leftIndex: mangaMode ? nextIndex : currentIndex,
+        rightIndex: mangaMode ? currentIndex : nextIndex,
+    }
+}
+
+/**
  * 加载图片资源
  */
 function setImageSrc() {
@@ -254,42 +271,37 @@ function setImageSrc() {
         return
     }
     
+    const currentImgSrc = GetImageSrc(nowPageNum - 1)
+
     // 加载当前图片
     if (DOM.singleNowImage) {
-        DOM.singleNowImage.src = GetImageSrc(nowPageNum - 1)
+        DOM.singleNowImage.src = currentImgSrc
     }
-    
-    // 根据漫画模式设置双页图片
-    if (mangaMode) {
-        if (DOM.doubleNowImageRight) {
-            DOM.doubleNowImageRight.src = GetImageSrc(nowPageNum - 1)
-        }
-    } else {
-        if (DOM.doubleNowImageLeft) {
-            DOM.doubleNowImageLeft.src = GetImageSrc(nowPageNum - 1)
+
+    // 双页模式按“封面单页 + 后续跨页”的规则设置左右图。
+    const {leftIndex, rightIndex} = getDoublePageIndexes(nowPageNum, allPageNum, mangaMode)
+    if (DOM.doubleNowImageLeft) {
+        if (leftIndex >= 0) {
+            DOM.doubleNowImageLeft.src = GetImageSrc(leftIndex)
+        } else {
+            DOM.doubleNowImageLeft.removeAttribute('src')
         }
     }
-    
-    preloadedImages.add(GetImageSrc(nowPageNum - 1))
+    if (DOM.doubleNowImageRight) {
+        if (rightIndex >= 0) {
+            DOM.doubleNowImageRight.src = GetImageSrc(rightIndex)
+        } else {
+            DOM.doubleNowImageRight.removeAttribute('src')
+        }
+    }
+
+    preloadedImages.add(currentImgSrc)
+    if (leftIndex >= 0) preloadedImages.add(GetImageSrc(leftIndex))
+    if (rightIndex >= 0) preloadedImages.add(GetImageSrc(rightIndex))
     
     // 更新滑动容器图片
     updateSliderImages(nowPageNum)
-    
-    // 为双页模式预加载下一张图片
-    if (nowPageNum < allPageNum) {
-        const nextImgSrc = GetImageSrc(nowPageNum)
-        if (mangaMode) {
-            if (DOM.doubleNowImageLeft) {
-                DOM.doubleNowImageLeft.src = nextImgSrc
-            }
-        } else {
-            if (DOM.doubleNowImageRight) {
-                DOM.doubleNowImageRight.src = nextImgSrc
-            }
-        }
-        preloadedImages.add(nextImgSrc)
-    }
-    
+
     // 预加载前后图片
     const preloadRange = config.preloadRange
     for (let i = nowPageNum - 2; i <= nowPageNum + preloadRange; i++) {
@@ -371,38 +383,46 @@ function updateSliderImages(nowPageNum) {
     
     // ========== 双页模式 ==========
     if (doublePageMode) {
+        const paginationUtils = getFlipPaginationUtils()
+        const previousStep = paginationUtils?.getPreviousPageStep
+            ? paginationUtils.getPreviousPageStep(true, nowPageNum)
+            : (nowPageNum <= 1 ? 0 : (nowPageNum === 2 || nowPageNum % 2 === 1 ? -1 : -2))
+        const nextStep = paginationUtils?.getNextPageStep
+            ? paginationUtils.getNextPageStep(true, nowPageNum, allPageNum)
+            : (nowPageNum >= allPageNum ? 0 : (nowPageNum === 1 ? 1 : (nowPageNum + 1 >= allPageNum ? 0 : 2)))
+
+        // 双页相邻屏也遵守“第一页单独、后续成对”的页组规则，避免 2/3 页书籍滑动时出现空屏。
+        const appendDoubleScreen = (container, pageNum) => {
+            if (pageNum < 1 || pageNum > allPageNum) return
+
+            const hasSecondPage = pageNum > 1 && pageNum < allPageNum
+            if (!hasSecondPage) {
+                const singleImg = createImageElement(GetImageSrc(pageNum - 1), singleImgClass)
+                container.appendChild(singleImg)
+                return
+            }
+
+            const currentImg = createImageElement(GetImageSrc(pageNum - 1), doublePageClass)
+            const nextImg = createImageElement(GetImageSrc(pageNum), doublePageClass)
+            if (mangaMode) {
+                container.appendChild(nextImg)
+                container.appendChild(currentImg)
+            } else {
+                container.appendChild(currentImg)
+                container.appendChild(nextImg)
+            }
+        }
+
         // 前一屏图片
         DOM.leftSlide.innerHTML = ''
-        if (nowPageNum === 2) {
-            const prevImg = createImageElement(GetImageSrc(nowPageNum - 2), singleImgClass)
-            DOM.leftSlide.appendChild(prevImg)
-        } else if (nowPageNum >= 3) {
-            const prevImg_1 = createImageElement(GetImageSrc(nowPageNum - 2), doublePageClass)
-            const prevImg_2 = createImageElement(GetImageSrc(nowPageNum - 3), doublePageClass)
-            if (mangaMode) {
-                DOM.leftSlide.appendChild(prevImg_1)
-                DOM.leftSlide.appendChild(prevImg_2)
-            } else {
-                DOM.leftSlide.appendChild(prevImg_2)
-                DOM.leftSlide.appendChild(prevImg_1)
-            }
+        if (previousStep !== 0) {
+            appendDoubleScreen(DOM.leftSlide, nowPageNum + previousStep)
         }
         
         // 后一屏图片
         DOM.rightSlide.innerHTML = ''
-        if (nowPageNum === allPageNum - 3) {
-            const nextImg = createImageElement(GetImageSrc(nowPageNum - 2), singleImgClass)
-            DOM.rightSlide.appendChild(nextImg)
-        } else if (nowPageNum < allPageNum - 3) {
-            const nextImg_1 = createImageElement(GetImageSrc(nowPageNum + 1), doublePageClass)
-            const nextImg_2 = createImageElement(GetImageSrc(nowPageNum + 2), doublePageClass)
-            if (mangaMode) {
-                DOM.rightSlide.appendChild(nextImg_2)
-                DOM.rightSlide.appendChild(nextImg_1)
-            } else {
-                DOM.rightSlide.appendChild(nextImg_1)
-                DOM.rightSlide.appendChild(nextImg_2)
-            }
+        if (nextStep !== 0) {
+            appendDoubleScreen(DOM.rightSlide, nowPageNum + nextStep)
         }
     }
 
@@ -444,11 +464,12 @@ function touchStart(e) {
  */
 function shouldBlockScroll(diffX) {
     const mangaMode = Alpine.store('flip').mangaMode
+    const doublePageMode = Alpine.store('flip').doublePageMode
     const nowPageNum = Alpine.store('global').nowPageNum
     const allPageNum = Alpine.store('global').allPageNum
     const paginationUtils = getFlipPaginationUtils()
     if (paginationUtils?.shouldBlockScrollBoundary) {
-        return paginationUtils.shouldBlockScrollBoundary(diffX, mangaMode, nowPageNum, allPageNum)
+        return paginationUtils.shouldBlockScrollBoundary(diffX, mangaMode, nowPageNum, allPageNum, doublePageMode)
     }
     return false
 }
@@ -724,9 +745,11 @@ function toNextPage() {
     const step = paginationUtils?.getNextPageStep
         ? paginationUtils.getNextPageStep(doublePageMode, nowPageNum, allPageNum)
         : 1
-    if (step !== 0) {
-        addPageNum(step)
+    if (step === 0) {
+        showToast(i18next.t('hint_last_page'), 'warning')
+        return
     }
+    addPageNum(step)
 }
 
 // 翻页函数，前一页
@@ -741,9 +764,11 @@ function toPreviousPage() {
     const step = paginationUtils?.getPreviousPageStep
         ? paginationUtils.getPreviousPageStep(doublePageMode, nowPageNum)
         : -1
-    if (step !== 0) {
-        addPageNum(step)
+    if (step === 0) {
+        showToast(i18next.t('hint_first_page'), 'warning')
+        return
     }
+    addPageNum(step)
 }
 
 
@@ -758,7 +783,7 @@ function getInSetArea(e) {
     return false
 }
 
-// 翻页模式功能：显示工具栏时，点击设置区域，自动漫画区域居中。
+// 翻页阅读功能：显示工具栏时，点击设置区域，自动漫画区域居中。
 function scrollToMangaMain() {
     if (!Alpine.store('flip').autoHideToolbar) {
         // 将 slider_container 顶部对齐到浏览器可见区域顶部
@@ -1010,7 +1035,7 @@ function sendFlipData() {
     window.ComiGoWS.send('flip_mode_sync_page', {
         book_id: book.id,
         now_page_num: Alpine.store('global').nowPageNum,
-    }, '翻页模式，发送数据')
+    }, '翻页阅读，发送数据')
 }
 
 // 设置标签页标题
@@ -1193,21 +1218,7 @@ addEventListener("keydown", e => handle(e, true));
 // keyup 松开时触发
 addEventListener("keyup", e => handle(e, false));
 
-// // 2 手柄方向键 (Gamepad API) TODO
-// // https://developer.mozilla.org/zh-CN/docs/Web/API/Gamepad_API/Using_the_Gamepad_API
-// const gamepads = {};          // 按 index 存储 Gamepad 对象
-//
-// window.addEventListener("gamepadconnected",   e => {
-// 	gamepads[e.gamepad.index] = e.gamepad;
-// 	console.log("已连接:", e.gamepad.id);
-// });
-//
-// window.addEventListener("gamepaddisconnected", e => {
-// 	delete gamepads[e.gamepad.index];
-// 	console.log("已断开:", e.gamepad.id);
-// });
-
-// ============ 鼠标滚轮翻页功能 ============
+	// ============ 鼠标滚轮翻页功能 ============
 let wheelThrottleTimer = null
 
 /**
@@ -1293,10 +1304,10 @@ function initFlipMode() {
         }
         
         if (Alpine.store('global').debugMode) {
-            console.log('翻页模式初始化完成')
+            console.log('翻页阅读初始化完成')
         }
     } catch (error) {
-        console.error('翻页模式初始化失败:', error)
+        console.error('翻页阅读初始化失败:', error)
     }
 }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'comigo-reader-pwa-v1'
+const CACHE_NAME = __COMIGO_READER_PWA_CACHE_NAME__
 
 const BASE_PATH = (() => {
   const scopePath = new URL(self.registration.scope).pathname

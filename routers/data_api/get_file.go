@@ -8,9 +8,24 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
 )
+
+type getFileRequest struct {
+	bookID          string
+	fileName        string
+	disableCache    bool
+	resizeWidth     int
+	resizeHeight    int
+	autoCrop        int
+	resizeMaxWidth  int
+	resizeMaxHeight int
+	blurhash        int
+	blurhashImage   int
+	gray            bool
+}
 
 // GetFile 示例 URL： 127.0.0.1:1234/get_file?id=2b17a13&filename=1.jpg
 // 缩放文件，会转化为jpeg：http://127.0.0.1:1234/api/get-file?id=2b17a13&resize_width=300&resize_height=400&id=597e06&filename=01.jpeg
@@ -28,59 +43,126 @@ import (
 // blurhash_image:获取对应图片的blurhash图片，不是原始图片  	    &blurhash_image=3
 // base64:返回Base64编码的图片								    &base64=true
 func GetFile(c echo.Context) error {
-	id := c.QueryParam("id")
-	needFile := c.QueryParam("filename")
-	// 必须指定 id 和 filename
-	if id == "" || needFile == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id and filename are required"})
+	req, err := parseGetFileRequest(c)
+	if err != nil {
+		return writeValidationError(c, err)
 	}
-
-	// 读取查询参数
-	disableCache := getBoolQueryParam(c, "no-cache", false)
-
-	// 读取图片处理参数
-	resizeWidth := getIntQueryParam(c, "resize_width", 0)
-	resizeHeight := getIntQueryParam(c, "resize_height", 0)
-	autoCrop := getIntQueryParam(c, "auto_crop", 0)
-	resizeMaxWidth := getIntQueryParam(c, "resize_max_width", 0)
-	resizeMaxHeight := getIntQueryParam(c, "resize_max_height", 0)
-	blurhash := getIntQueryParam(c, "blurhash", 0)
-	blurhashImage := getIntQueryParam(c, "blurhash_image", 0)
-	gray := getBoolQueryParam(c, "gray", false)
-
-	// 当有任何图片处理参数生效时，禁用缓存，避免后续返回错误的缓存结果
-	if resizeWidth > 0 || resizeHeight > 0 || autoCrop > 0 ||
-		resizeMaxWidth > 0 || resizeMaxHeight > 0 ||
-		blurhash > 0 || blurhashImage > 0 || gray {
-		disableCache = true
+	if localBook, client, _, ok, err := remoteComigoBookFromRequest(c, req.bookID); ok {
+		if err != nil {
+			return writeRemoteComigoError(c, err)
+		}
+		imgData, contentType, err := client.GetBytes("/api/get-file", remoteComigoQuery(c, localBook.RemoteBookID))
+		if err != nil {
+			return writeRemoteComigoError(c, err)
+		}
+		return c.Blob(http.StatusOK, contentType, imgData)
 	}
 
 	// 如果启用了本地缓存
-	if config.GetCfg().UseCache && !disableCache {
-		// 获取所有的参数键值对
-		query := c.Request().URL.Query()
-		// 如果有缓存，读取本地获取缓存文件并返回
-		cacheData, ct, err := fileutil.GetFileFromCache(
-			id,
-			needFile,
-			fileutil.GetQueryString(query),
-			config.GetCfg().CacheDir,
-			config.GetCfg().Debug,
-		)
-		if err == nil && cacheData != nil {
-			return c.Blob(http.StatusOK, ct, cacheData)
-		}
+	if handled, err := serveCachedPicture(c, req); handled || err != nil {
+		return err
 	}
 	// 获取书籍信息
-	book, err := model.IStore.GetBook(id)
+	book, err := model.IStore.GetBook(req.bookID)
 	if err != nil {
 		logger.Infof(locale.GetString("log_getbook_error_common"), err)
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Book not found"})
+		return apiresp.Error(c, http.StatusNotFound, "book_not_found", "Book not found", map[string]string{"id": req.bookID})
 	}
 
-	// 获取图片数据的选项
-	option := fileutil.GetPictureDataOption{
-		PictureName:      needFile,
+	// 获取图片数据
+	imgData, contentType, err := fileutil.GetPictureData(buildGetPictureDataOption(req, book))
+	if err != nil {
+		logger.Infof(locale.GetString("log_get_file_error"), err)
+		return apiresp.BadRequest(c, "get_file_failed", "Get file error: "+err.Error(), nil)
+	}
+
+	// 缓存文件到本地，避免重复解压。如果书中的图片，来自本地目录，就不需要缓存。
+	savePictureCache(c, req, book, imgData, contentType)
+	// 返回图片数据
+	return c.Blob(http.StatusOK, contentType, imgData)
+}
+
+func parseGetFileRequest(c echo.Context) (getFileRequest, error) {
+	resizeWidth, err := parseOptionalBoundedInt(c, "resize_width", 0, 1, imageQueryMaxDimension)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	resizeHeight, err := parseOptionalBoundedInt(c, "resize_height", 0, 1, imageQueryMaxDimension)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	autoCrop, err := parseOptionalBoundedInt(c, "auto_crop", 0, 0, imageQueryMaxAutoCrop)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	resizeMaxWidth, err := parseOptionalBoundedInt(c, "resize_max_width", 0, 1, imageQueryMaxDimension)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	resizeMaxHeight, err := parseOptionalBoundedInt(c, "resize_max_height", 0, 1, imageQueryMaxDimension)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	blurhash, err := parseOptionalBoundedInt(c, "blurhash", 0, 0, imageQueryMaxBlurComponents)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	blurhashImage, err := parseOptionalBoundedInt(c, "blurhash_image", 0, 0, imageQueryMaxBlurComponents)
+	if err != nil {
+		return getFileRequest{}, err
+	}
+	req := getFileRequest{
+		bookID:          c.QueryParam("id"),
+		fileName:        c.QueryParam("filename"),
+		disableCache:    getBoolQueryParam(c, "no-cache", false),
+		resizeWidth:     resizeWidth,
+		resizeHeight:    resizeHeight,
+		autoCrop:        autoCrop,
+		resizeMaxWidth:  resizeMaxWidth,
+		resizeMaxHeight: resizeMaxHeight,
+		blurhash:        blurhash,
+		blurhashImage:   blurhashImage,
+		gray:            getBoolQueryParam(c, "gray", false),
+	}
+	if req.bookID == "" || req.fileName == "" {
+		return req, requestValidationError{
+			code:    "missing_param",
+			message: "id and filename are required",
+			details: []string{"id", "filename"},
+		}
+	}
+	if hasImageTransform(req) {
+		req.disableCache = true
+	}
+	return req, nil
+}
+
+func hasImageTransform(req getFileRequest) bool {
+	return req.resizeWidth > 0 || req.resizeHeight > 0 || req.autoCrop > 0 ||
+		req.resizeMaxWidth > 0 || req.resizeMaxHeight > 0 ||
+		req.blurhash > 0 || req.blurhashImage > 0 || req.gray
+}
+
+func serveCachedPicture(c echo.Context, req getFileRequest) (bool, error) {
+	if !config.GetCfg().UseCache || req.disableCache {
+		return false, nil
+	}
+	cacheData, contentType, err := fileutil.GetFileFromCache(
+		req.bookID,
+		req.fileName,
+		fileutil.GetQueryString(c.Request().URL.Query()),
+		config.GetCfg().CacheDir,
+		config.GetCfg().Debug,
+	)
+	if err != nil || cacheData == nil {
+		return false, nil
+	}
+	return true, c.Blob(http.StatusOK, contentType, cacheData)
+}
+
+func buildGetPictureDataOption(req getFileRequest, book *model.Book) fileutil.GetPictureDataOption {
+	return fileutil.GetPictureDataOption{
+		PictureName:      req.fileName,
 		BookID:           book.BookID,
 		BookIsPDF:        book.Type == model.TypePDF,
 		BookIsDir:        book.Type == model.TypeDir,
@@ -88,58 +170,35 @@ func GetFile(c echo.Context) error {
 		BookPath:         book.BookPath,
 		Debug:            config.GetCfg().Debug,
 		UseCache:         config.GetCfg().UseCache,
-		ResizeWidth:      resizeWidth,
-		ResizeHeight:     resizeHeight,
-		ResizeMaxWidth:   resizeMaxWidth,
-		ResizeMaxHeight:  resizeMaxHeight,
-		AutoCrop:         autoCrop,
-		Gray:             gray,
-		BlurHash:         blurhash,
-		BlurHashImage:    blurhashImage,
+		ResizeWidth:      req.resizeWidth,
+		ResizeHeight:     req.resizeHeight,
+		ResizeMaxWidth:   req.resizeMaxWidth,
+		ResizeMaxHeight:  req.resizeMaxHeight,
+		AutoCrop:         req.autoCrop,
+		Gray:             req.gray,
+		BlurHash:         req.blurhash,
+		BlurHashImage:    req.blurhashImage,
 		// 远程书籍支持
 		IsRemote:  book.IsRemote,
 		RemoteURL: book.RemoteURL,
 	}
-
-	// 获取图片数据
-	imgData, contentType, err := fileutil.GetPictureData(option)
-	if err != nil {
-		logger.Infof(locale.GetString("log_get_file_error"), err)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Get file error: " + err.Error()})
-	}
-
-	// 缓存文件到本地，避免重复解压。如果书中的图片，来自本地目录，就不需要缓存。
-	if config.GetCfg().UseCache && !disableCache && book.Type != model.TypeDir {
-		// 获取所有的参数键值对
-		query := c.Request().URL.Query()
-		errSave := fileutil.SaveFileToCache(
-			id,
-			needFile,
-			imgData,
-			fileutil.GetQueryString(query),
-			contentType,
-			config.GetCfg().CacheDir,
-			config.GetCfg().Debug,
-		)
-		if errSave != nil {
-			logger.Infof(locale.GetString("log_save_file_to_cache_error"), errSave)
-		}
-	}
-	// 返回图片数据
-	return c.Blob(http.StatusOK, contentType, imgData)
 }
 
-// getIntQueryParam 从查询参数中获取整数值，带默认值
-func getIntQueryParam(c echo.Context, key string, defaultValue int) int {
-	valueStr := c.QueryParam(key)
-	if valueStr == "" {
-		return defaultValue
+func savePictureCache(c echo.Context, req getFileRequest, book *model.Book, imgData []byte, contentType string) {
+	if !config.GetCfg().UseCache || req.disableCache || book.Type == model.TypeDir {
+		return
 	}
-	value, err := strconv.Atoi(valueStr)
-	if err != nil {
-		return defaultValue
+	if err := fileutil.SaveFileToCache(
+		req.bookID,
+		req.fileName,
+		imgData,
+		fileutil.GetQueryString(c.Request().URL.Query()),
+		contentType,
+		config.GetCfg().CacheDir,
+		config.GetCfg().Debug,
+	); err != nil {
+		logger.Infof(locale.GetString("log_save_file_to_cache_error"), err)
 	}
-	return value
 }
 
 // getBoolQueryParam 从查询参数中获取布尔值，带默认值

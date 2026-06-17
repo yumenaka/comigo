@@ -7,8 +7,10 @@ const readerState = {
     // book 是 WASM 返回的轻量元数据；真实图片按页读取后转成 object URL。
     book: null,
     fileName: '',
+    pdfObjectURL: '',
+    imageFiles: [],
     objectURLs: new Map(),
-    // 卷轴模式的懒加载与当前页计算状态。
+    // 卷轴阅读的懒加载与当前页计算状态。
     observer: null,
     centerUpdateRaf: null,
     lastPageNum: 0,
@@ -16,7 +18,7 @@ const readerState = {
     scrollDownFlag: false,
     showBackTopFlag: false,
     backTopButton: null,
-    // 翻页模式的交互状态。这里不放进 Alpine store，避免高频 touchmove 触发响应式更新。
+    // 翻页阅读的交互状态。这里不放进 Alpine store，避免高频 touchmove 触发响应式更新。
     flip: {
         initialized: false,
         touchStartX: 0,
@@ -33,6 +35,37 @@ const readerState = {
         wheelThrottleTimer: null,
         toolbarHideTimer: null,
     },
+}
+
+function getReaderRuntimeInfo() {
+    // 打开本地文件失败时带上运行环境，方便区分 localhost、局域网 IP、file:// 等场景。
+    return {
+        href: window.location.href,
+        protocol: window.location.protocol,
+        origin: window.location.origin,
+        isSecureContext: window.isSecureContext,
+        preferFileReader: shouldReadReaderFileWithFileReader(),
+        hasCrypto: Boolean(globalThis.crypto),
+        hasGetRandomValues: Boolean(globalThis.crypto?.getRandomValues),
+        hasStaticWasm: Boolean(window.ComiGoReaderStaticWasmBase64),
+    }
+}
+
+function isReaderPDF(file) {
+    const name = (file?.name || '').toLowerCase()
+    return file?.type === 'application/pdf' || name.endsWith('.pdf')
+}
+
+function isReaderImage(file) {
+    if (!file) return false
+    const name = (file.name || '').toLowerCase()
+    if (file.type && file.type.startsWith('image/')) return true
+    return ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tif', '.tiff', '.svg', '.avif', '.heic', '.heif'].some((ext) => name.endsWith(ext))
+}
+
+function sortReaderImageFiles(files) {
+    const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+    return [...files].sort((a, b) => collator.compare(a.name || '', b.name || ''))
 }
 
 function readerText(key, fallback) {
@@ -160,16 +193,58 @@ function loadScript(src) {
     })
 }
 
+function isReaderLoopbackHostname(hostname) {
+    const host = (hostname || '').toLowerCase()
+    return host === 'localhost' || host.endsWith('.localhost') || host === '127.0.0.1' || host === '[::1]' || host === '::1'
+}
+
+function shouldReadReaderFileWithFileReader() {
+    // 非 loopback 的 HTTP IP 不是浏览器的本机可信来源；这里直接使用兼容性更稳的 FileReader。
+    return window.location.protocol === 'http:' && !isReaderLoopbackHostname(window.location.hostname)
+}
+
+function readReaderFileByFileReader(file) {
+    // 少数浏览器在非 localhost 的 HTTP 地址下会让 File.arrayBuffer() abort；
+    // FileReader 兼容性更稳，用作本地压缩包读取的兜底路径。
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = () => reject(reader.error || new Error('FileReader failed'))
+        reader.onabort = () => reject(reader.error || new DOMException('The operation was aborted.', 'AbortError'))
+        reader.readAsArrayBuffer(file)
+    })
+}
+
+async function readReaderFileArrayBuffer(file) {
+    if (!file) return new ArrayBuffer(0)
+    if (shouldReadReaderFileWithFileReader()) {
+        return readReaderFileByFileReader(file)
+    }
+    // localhost/127.0.0.1 等本机可信来源优先使用现代 API，异常时仍退回 FileReader。
+    if (typeof file.arrayBuffer === 'function') {
+        try {
+            return await file.arrayBuffer()
+        } catch (error) {
+            console.warn('[reader] File.arrayBuffer failed, retrying with FileReader:', error, getReaderRuntimeInfo())
+        }
+    }
+    return readReaderFileByFileReader(file)
+}
+
 async function openReaderArchive(file) {
     if (!file) return
     // 每次打开新压缩包前都释放旧 object URL，防止大图阅读时持续占用内存。
     cleanupReaderBook()
     readerState.fileName = file.name || ''
+    if (isReaderPDF(file)) {
+        openReaderPDF(file)
+        return
+    }
     setReaderStatus(readerText('reader_loading_wasm', 'Loading reader core...'))
     try {
         const archive = await loadArchiveWasm()
         setReaderStatus(readerText('reader_reading_archive', 'Reading archive...'))
-        const book = await archive.open(await file.arrayBuffer(), file.name, {
+        const book = await archive.open(await readReaderFileArrayBuffer(file), file.name, {
             sortBy: 'default',
         })
         if (!book || !Array.isArray(book.PageInfos) || book.PageInfos.length === 0) {
@@ -183,11 +258,81 @@ async function openReaderArchive(file) {
             showToast(readerText('reader_archive_ready', 'Archive ready'), 'success')
         }
     } catch (error) {
-        console.error('[reader] open archive failed:', error)
+        console.error('[reader] open archive failed:', error, getReaderRuntimeInfo())
         setReaderStatus(String(error?.message || error), 'error')
         if (typeof showToast === 'function') {
             showToast(readerText('reader_archive_failed', 'Failed to open archive'), 'error')
         }
+    }
+}
+
+function openReaderFiles(fileList) {
+    const files = Array.from(fileList || []).filter(Boolean)
+    if (files.length === 0) return
+
+    if (files.every(isReaderImage)) {
+        openReaderImages(files)
+        return
+    }
+
+    if (files.length > 1 && typeof showToast === 'function') {
+        showToast(readerText('reader_first_file_only', 'Multiple files selected; opening the first file only.'), 'info')
+    }
+
+    const firstFile = files[0]
+    if (isReaderImage(firstFile)) {
+        openReaderImages([firstFile])
+        return
+    }
+    openReaderArchive(firstFile)
+}
+
+function openReaderImages(files) {
+    const imageFiles = sortReaderImageFiles(files)
+    cleanupReaderBook()
+    readerState.imageFiles = imageFiles
+    const displayName = imageFiles.length === 1
+        ? imageFiles[0].name
+        : readerText('reader_image_files_title', 'Image files').replace('{{count}}', String(imageFiles.length))
+    const signature = imageFiles.map((file) => `${file.name || 'image'}:${file.size || 0}:${file.lastModified || 0}`).join('|')
+    const book = {
+        id: `reader-images-${imageFiles.length}-${signature}`,
+        title: displayName,
+        type: '.image',
+        page_count: imageFiles.length,
+        PageInfos: imageFiles.map((file, index) => ({
+            name: file.name || `Page ${index + 1}`,
+            index,
+        })),
+        reader_only: true,
+        local_images: true,
+    }
+    readerState.book = book
+    readerState.fileName = displayName
+    renderReaderBook(book)
+    setReaderStatus('')
+    if (typeof showToast === 'function') {
+        showToast(readerText('reader_images_ready', 'Images ready'), 'success')
+    }
+}
+
+function openReaderPDF(file) {
+    readerState.fileName = file.name || ''
+    readerState.pdfObjectURL = URL.createObjectURL(file)
+    const book = {
+        id: `reader-pdf-${file.name || 'local'}-${file.size || 0}-${file.lastModified || 0}`,
+        title: file.name || readerText('reader_title', 'Local Reader'),
+        type: '.pdf',
+        page_count: 0,
+        PageInfos: [],
+        reader_only: true,
+        pdf_only: true,
+    }
+    readerState.book = book
+    renderReaderPDF(book)
+    setReaderStatus('')
+    if (typeof showToast === 'function') {
+        showToast(readerText('reader_pdf_ready', 'PDF ready'), 'success')
     }
 }
 
@@ -197,9 +342,14 @@ function cleanupReaderBook() {
         URL.revokeObjectURL(url)
     }
     readerState.objectURLs.clear()
+    if (readerState.pdfObjectURL) {
+        URL.revokeObjectURL(readerState.pdfObjectURL)
+        readerState.pdfObjectURL = ''
+    }
     cleanupReaderView()
     readerState.book = null
     readerState.fileName = ''
+    readerState.imageFiles = []
     if (window.ComiGoArchive && typeof window.ComiGoArchive.close === 'function') {
         window.ComiGoArchive.close()
     }
@@ -213,6 +363,12 @@ function cleanupReaderView() {
     const mainArea = document.getElementById('ScrollMainArea')
     if (mainArea) {
         mainArea.innerHTML = ''
+    }
+    const pdfArea = document.getElementById('ReaderPDFArea')
+    if (pdfArea) {
+        pdfArea.innerHTML = ''
+        pdfArea.classList.add('hidden')
+        pdfArea.classList.remove('flex')
     }
     readerState.lastPageNum = 0
     readerState.scrollTopSave = 0
@@ -246,12 +402,64 @@ function renderReaderBook(book) {
     renderReaderCurrentMode(book)
 }
 
+function renderReaderPDF(book) {
+    Alpine.store('global').onlineBook = false
+    Alpine.store('global').nowPageNum = 1
+    Alpine.store('global').allPageNum = 1
+    Alpine.store('scroll').allPageNum = 1
+
+    const picker = document.getElementById('ReaderFilePicker')
+    const shell = document.getElementById('ReaderShell')
+    const mainArea = document.getElementById('ScrollMainArea')
+    const flipArea = document.getElementById('ReaderFlipArea')
+    const flipSteps = document.getElementById('ReaderFlipStepsRangeArea')
+    const pdfArea = document.getElementById('ReaderPDFArea')
+    if (!shell || !pdfArea || !readerState.pdfObjectURL) return
+
+    cleanupReaderView()
+    if (picker) picker.classList.add('hidden')
+    shell.classList.remove('hidden')
+    shell.classList.add('flex')
+    setReaderHeaderTitle(readerState.fileName, book)
+
+    if (mainArea) {
+        mainArea.classList.add('hidden')
+        mainArea.classList.remove('flex')
+    }
+    if (flipArea) {
+        flipArea.classList.add('hidden')
+        flipArea.classList.remove('flex')
+    }
+    if (flipSteps) {
+        flipSteps.classList.add('hidden')
+    }
+    restoreReaderPageLayout()
+    restoreReaderHeaderToolbar()
+
+    // PDF 查看器由浏览器原生 iframe 承载，容器高度用内联样式兜底，避免 Tailwind 未扫描运行时类时退回默认高度。
+    pdfArea.style.height = 'calc(100dvh - 4rem)'
+    pdfArea.style.minHeight = 'calc(100dvh - 4rem)'
+
+    const frame = document.createElement('iframe')
+    frame.className = 'w-full h-full min-h-0 flex-1 border-0 bg-base-100'
+    frame.title = readerState.fileName || readerText('reader_title', 'Local Reader')
+    frame.src = readerState.pdfObjectURL
+    pdfArea.innerHTML = ''
+    pdfArea.appendChild(frame)
+    pdfArea.classList.remove('hidden')
+    pdfArea.classList.add('flex')
+}
+
 function renderReaderCurrentMode(book = readerState.book) {
     if (!book) return
+    if (book.pdf_only) {
+        renderReaderPDF(book)
+        return
+    }
     // 模式切换时先清空当前视图，避免卷轴/翻页 DOM 与事件状态互相影响。
     cleanupReaderView()
     normalizeReaderReadMode()
-    if (Alpine.store('global').readMode === 'page_flip') {
+    if (Alpine.store('global').readMode === 'flip') {
         renderReaderFlipBook(book)
         return
     }
@@ -286,7 +494,7 @@ function renderReaderScrollBook(book) {
     })
     mainArea.appendChild(fragment)
     Alpine.initTree(mainArea)
-    // 卷轴模式先生成空 img，再由 IntersectionObserver 近屏加载图片，减少大压缩包首屏等待。
+    // 卷轴阅读先生成空 img，再由 IntersectionObserver 近屏加载图片，减少大压缩包首屏等待。
     initReaderLazyLoading()
     initReaderGestures()
     restoreReaderProgress(book)
@@ -352,10 +560,16 @@ async function getReaderPageObjectURL(index) {
         return readerState.objectURLs.get(index)
     }
     try {
-        // 图片数据只从 WASM 按需读取一次，之后通过 object URL 复用。
-        const bytes = await window.ComiGoArchive.readPage(index)
         const page = readerState.book.PageInfos[index]
-        const blob = new Blob([bytes], { type: guessMimeType(page?.name || '') })
+        let blob
+        if (readerState.book?.local_images) {
+            blob = readerState.imageFiles[index]
+        } else {
+            // 图片数据只从 WASM 按需读取一次，之后通过 object URL 复用。
+            const bytes = await window.ComiGoArchive.readPage(index)
+            blob = new Blob([bytes], { type: guessMimeType(page?.name || '') })
+        }
+        if (!blob) return ''
         const objectURL = URL.createObjectURL(blob)
         readerState.objectURLs.set(index, objectURL)
         return objectURL
@@ -445,21 +659,21 @@ function restoreReaderProgress(book) {
 
 function normalizeReaderReadMode() {
     const mode = Alpine.store('global').readMode
-    if (mode === 'flip_page') {
-        Alpine.store('global').readMode = 'page_flip'
-        return
-    }
-    if (mode !== 'page_flip' && mode !== 'infinite_scroll') {
-        Alpine.store('global').readMode = 'infinite_scroll'
+    if (mode !== 'flip' && mode !== 'scroll') {
+        Alpine.store('global').readMode = 'scroll'
     }
 }
 
 function setReaderReadMode(mode) {
-    // reader 只提供本地无限卷轴和本地翻页，旧的 flip_page 值统一兼容为 page_flip。
-    Alpine.store('global').readMode = mode === 'page_flip' || mode === 'flip_page' ? 'page_flip' : 'infinite_scroll'
+    // reader 只提供本地卷轴阅读和翻页阅读，不引入在线卷轴加载策略。
+    Alpine.store('global').readMode = mode === 'flip' ? 'flip' : 'scroll'
+    if (readerState.book?.pdf_only) {
+        renderReaderPDF(readerState.book)
+        return
+    }
     if (readerState.book) {
         renderReaderCurrentMode(readerState.book)
-    } else if (Alpine.store('global').readMode !== 'page_flip') {
+    } else if (Alpine.store('global').readMode !== 'flip') {
         restoreReaderPageLayout()
         restoreReaderHeaderToolbar()
     }
@@ -495,7 +709,7 @@ function renderReaderFlipBook(book) {
         backTop.style.display = 'none'
     }
 
-    // 翻页模式不保留卷轴滚动位置，恢复的是最后阅读页码。
+    // 翻页阅读不保留卷轴滚动位置，恢复的是最后阅读页码。
     Alpine.store('global').nowPageNum = getReaderStoredPage(book)
     initReaderFlipListeners()
     syncReaderFlipToolbar()
@@ -523,7 +737,7 @@ function getReaderFlipPaginationUtils() {
 }
 
 function getReaderFlipInteractionUtils() {
-    return window.ComiGoFlip?.interaction
+    return window.ComiGoInteraction || window.ComiGoFlip?.interaction
 }
 
 function createReaderFlipImage(className) {
@@ -562,7 +776,7 @@ function getReaderFlipStepPrevious() {
 }
 
 async function updateReaderFlipImages() {
-    if (!readerState.book || Alpine.store('global').readMode !== 'page_flip') return
+    if (!readerState.book || Alpine.store('global').readMode !== 'flip') return
     const elements = getReaderFlipElements()
     const nowPageNum = parseInt(Alpine.store('global').nowPageNum, 10)
     const allPageNum = Alpine.store('global').allPageNum
@@ -602,35 +816,46 @@ async function updateReaderFlipImages() {
             adjacentLoads.push(setImageElementSrc(next, nowPageNum))
         }
     } else {
-        const leftIndex = mangaMode ? nowPageNum : nowPageNum - 1
-        const rightIndex = mangaMode ? nowPageNum - 1 : nowPageNum
+        // 双页模式与 /flip 页面保持一致：第一页作为封面单独显示，
+        // 第 2 页起才与下一页组成跨页，避免首次进入时把第二页误塞进封面屏。
+        const hasSecondPage = nowPageNum > 1 && nowPageNum < allPageNum
+        const leftIndex = mangaMode ? (hasSecondPage ? nowPageNum : -1) : nowPageNum - 1
+        const rightIndex = mangaMode ? nowPageNum - 1 : (hasSecondPage ? nowPageNum : -1)
         await setImageElementSrc(elements.doubleLeft, leftIndex)
         await setImageElementSrc(elements.doubleRight, rightIndex)
         elements.leftSlide.innerHTML = ''
         elements.rightSlide.innerHTML = ''
-        const prevStart = Math.max(0, nowPageNum + getReaderFlipStepPrevious() - 1)
-        if (nowPageNum > 1) {
-            const useSinglePrev = nowPageNum === 2
-            const prevA = createReaderFlipImage(useSinglePrev ? singleImgClass : doublePageClass)
-            elements.leftSlide.appendChild(prevA)
-            adjacentLoads.push(setImageElementSrc(prevA, useSinglePrev ? nowPageNum - 2 : (mangaMode ? prevStart + 1 : prevStart)))
-            if (!useSinglePrev) {
-                const prevB = createReaderFlipImage(doublePageClass)
-                elements.leftSlide.appendChild(prevB)
-                adjacentLoads.push(setImageElementSrc(prevB, mangaMode ? prevStart : prevStart + 1))
+
+        const appendReaderDoubleScreen = (container, pageNum) => {
+            if (pageNum < 1 || pageNum > allPageNum) return
+            const screenHasSecondPage = pageNum > 1 && pageNum < allPageNum
+            if (!screenHasSecondPage) {
+                const img = createReaderFlipImage(singleImgClass)
+                container.appendChild(img)
+                adjacentLoads.push(setImageElementSrc(img, pageNum - 1))
+                return
             }
+
+            const currentImg = createReaderFlipImage(doublePageClass)
+            const nextImg = createReaderFlipImage(doublePageClass)
+            if (mangaMode) {
+                container.appendChild(nextImg)
+                container.appendChild(currentImg)
+            } else {
+                container.appendChild(currentImg)
+                container.appendChild(nextImg)
+            }
+            adjacentLoads.push(setImageElementSrc(currentImg, pageNum - 1))
+            adjacentLoads.push(setImageElementSrc(nextImg, pageNum))
         }
-        const nextStart = nowPageNum + getReaderFlipStepNext() - 1
-        if (nextStart < allPageNum) {
-            const useSingleNext = nextStart === allPageNum - 1
-            const nextA = createReaderFlipImage(useSingleNext ? singleImgClass : doublePageClass)
-            elements.rightSlide.appendChild(nextA)
-            adjacentLoads.push(setImageElementSrc(nextA, useSingleNext ? nextStart : (mangaMode ? nextStart + 1 : nextStart)))
-            if (!useSingleNext) {
-                const nextB = createReaderFlipImage(doublePageClass)
-                elements.rightSlide.appendChild(nextB)
-                adjacentLoads.push(setImageElementSrc(nextB, mangaMode ? nextStart : nextStart + 1))
-            }
+
+        const previousStep = getReaderFlipStepPrevious()
+        if (previousStep !== 0) {
+            appendReaderDoubleScreen(elements.leftSlide, nowPageNum + previousStep)
+        }
+        const nextStep = getReaderFlipStepNext()
+        if (nextStep !== 0) {
+            appendReaderDoubleScreen(elements.rightSlide, nowPageNum + nextStep)
         }
     }
 
@@ -684,12 +909,20 @@ function addReaderFlipPage(step) {
 
 function toNextReaderFlipPage() {
     const step = getReaderFlipStepNext()
-    if (step !== 0) addReaderFlipPage(step)
+    if (step === 0) {
+        if (typeof showToast === 'function') showToast(i18next.t('hint_last_page'), 'warning')
+        return
+    }
+    addReaderFlipPage(step)
 }
 
 function toPreviousReaderFlipPage() {
     const step = getReaderFlipStepPrevious()
-    if (step !== 0) addReaderFlipPage(step)
+    if (step === 0) {
+        if (typeof showToast === 'function') showToast(i18next.t('hint_first_page'), 'warning')
+        return
+    }
+    addReaderFlipPage(step)
 }
 
 function resetReaderFlipSlider() {
@@ -797,13 +1030,14 @@ function readerFlipShouldBlock(diffX) {
             Alpine.store('flip').mangaMode,
             Alpine.store('global').nowPageNum,
             Alpine.store('global').allPageNum,
+            Alpine.store('flip').doublePageMode === true,
         )
     }
     return false
 }
 
 function readerFlipTouchStart(event) {
-    if (Alpine.store('global').readMode !== 'page_flip' || !Alpine.store('flip').swipeTurn || readerState.flip.isAnimating) return
+    if (Alpine.store('global').readMode !== 'flip' || !Alpine.store('flip').swipeTurn || readerState.flip.isAnimating) return
     const point = getReaderPointerPoint(event)
     readerState.flip.startTime = Date.now()
     readerState.flip.isSwiping = true
@@ -886,7 +1120,7 @@ function onReaderFlipClick(event) {
 }
 
 function onReaderFlipWheel(event) {
-    if (!Alpine.store('flip').wheelFlip || Alpine.store('global').readMode !== 'page_flip') return
+    if (!Alpine.store('flip').wheelFlip || Alpine.store('global').readMode !== 'flip') return
     if (event.deltaY === 0 || readerState.flip.wheelThrottleTimer || readerState.flip.isAnimating) return
     event.preventDefault()
     readerState.flip.wheelThrottleTimer = setTimeout(() => {
@@ -900,7 +1134,7 @@ function onReaderFlipWheel(event) {
 }
 
 function onReaderFlipMouseMove(event) {
-    if (Alpine.store('global').readMode !== 'page_flip') return
+    if (Alpine.store('global').readMode !== 'flip') return
     const elements = getReaderFlipElements()
     const x = event.clientX
     const y = event.clientY
@@ -978,7 +1212,7 @@ function getReaderLayoutElements() {
 }
 
 function isReaderFlipModeActive() {
-    return Alpine.store('global').readMode === 'page_flip'
+    return !readerState.book?.pdf_only && Alpine.store('global').readMode === 'flip'
 }
 
 function clearReaderFlipToolbarTimer() {
@@ -1003,7 +1237,7 @@ function restoreReaderHeaderToolbar() {
 
 function applyReaderFlipLayout() {
     const { header, footer, root, shell, flipArea } = getReaderLayoutElements()
-    // 翻页模式需要占满视口；底部 footer 会挤压图片，因此进入翻页时隐藏。
+    // 翻页阅读需要占满视口；底部 footer 会挤压图片，因此进入翻页时隐藏。
     if (footer) {
         footer.style.setProperty('display', 'none', 'important')
     }
@@ -1039,7 +1273,7 @@ function applyReaderFlipLayout() {
 
 function restoreReaderPageLayout() {
     const { header, footer, root, shell, flipArea } = getReaderLayoutElements()
-    // 退出翻页模式时撤销所有内联样式，避免影响卷轴模式和普通页面布局。
+    // 退出翻页阅读时撤销所有内联样式，避免影响卷轴阅读和普通页面布局。
     if (footer) {
         footer.style.removeProperty('display')
     }
@@ -1097,7 +1331,7 @@ function syncReaderFlipToolbar() {
     applyReaderFlipLayout()
     showReaderFlipToolbar()
     if (Alpine.store('flip').autoHideToolbar) {
-        // 自动隐藏只作用于翻页模式，卷轴模式继续使用普通 header/footer。
+        // 自动隐藏只作用于翻页阅读，卷轴阅读继续使用普通 header/footer。
         readerState.flip.toolbarHideTimer = setTimeout(hideReaderFlipToolbar, 1000)
     }
 }
@@ -1121,28 +1355,13 @@ function onReaderFlipDocumentMouseMove(event) {
     }
 }
 
-// 判断点击位置是否位于屏幕中央设置区域，逻辑与 scroll 阅读页保持一致。
+// 判断点击位置是否位于屏幕中央设置区域；只复用公共几何判断，保留 reader 自己的响应行为。
 function getInReaderSettingArea(event) {
     const pointer = event.touches ? event.touches[0] : event
     if (!pointer) return false
 
-    const clickX = pointer.clientX
-    const clickY = pointer.clientY
-    const innerWidth = window.innerWidth
-    const innerHeight = window.innerHeight
-    const setArea = 0.15
-
-    let minY = innerHeight * (0.5 - setArea)
-    let maxY = innerHeight * (0.5 + setArea)
-    let minX = innerWidth * 0.5 - (maxY - minY) * 0.5
-    let maxX = innerWidth * 0.5 + (maxY - minY) * 0.5
-    if (innerWidth < innerHeight) {
-        minX = innerWidth * (0.5 - setArea)
-        maxX = innerWidth * (0.5 + setArea)
-        minY = innerHeight * 0.5 - (maxX - minX) * 0.5
-        maxY = innerHeight * 0.5 + (maxX - minX) * 0.5
-    }
-    return clickX > minX && clickX < maxX && clickY > minY && clickY < maxY
+    const util = getReaderFlipInteractionUtils()
+    return Boolean(util?.isInSetArea?.(pointer.clientX, pointer.clientY, window.innerWidth, window.innerHeight, 0.15))
 }
 
 function openReaderSettings() {
@@ -1167,7 +1386,7 @@ function initReaderGestures() {
     if (!mainArea || mainArea.dataset.readerGesturesReady === 'true') return
 
     mainArea.dataset.readerGesturesReady = 'true'
-    // 卷轴模式保留中间区域打开设置的交互，和 scroll 阅读页保持一致。
+    // 卷轴阅读保留中间区域打开设置的交互，和在线 scroll 阅读页保持一致。
     mainArea.addEventListener('mousemove', onReaderMouseMove)
     mainArea.addEventListener('click', onReaderClick)
     mainArea.addEventListener('touchstart', onReaderClick, { passive: true })
@@ -1197,7 +1416,7 @@ function initReaderInput() {
     const dropArea = document.getElementById('ReaderDropArea')
     if (!input || !dropArea) return
 
-    input.addEventListener('change', () => openReaderArchive(input.files?.[0]))
+    input.addEventListener('change', () => openReaderFiles(input.files))
     const headerTitle = getReaderHeaderTitle()
     if (headerTitle) {
         headerTitle.addEventListener('click', () => {
@@ -1219,7 +1438,7 @@ function initReaderInput() {
         })
     }
     dropArea.addEventListener('drop', (event) => {
-        openReaderArchive(event.dataTransfer?.files?.[0])
+        openReaderFiles(event.dataTransfer?.files)
     })
 }
 
@@ -1267,7 +1486,7 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 window.addEventListener('keydown', (event) => {
-    if (Alpine.store('global').readMode !== 'page_flip' || !readerState.book) return
+    if (Alpine.store('global').readMode !== 'flip' || !readerState.book) return
     const key = event.key.toLowerCase()
     if (key === 'arrowleft' || key === 'h' || key === ',' || key === '<' || key === 'pageup') {
         event.preventDefault()

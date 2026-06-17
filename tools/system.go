@@ -2,10 +2,10 @@ package tools
 
 import (
 	"context"
-	"log"
 	"net"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -18,7 +18,7 @@ import (
 // 使用时只需要写一行：defer TrackTIme(time.Now())
 func TrackTIme(pre time.Time) time.Duration {
 	elapsed := time.Since(pre)
-	logger.Infof(locale.GetString("log_time_elapsed")+"\n", elapsed)
+	logger.Infof(locale.GetString("log_time_elapsed"), elapsed)
 	return elapsed
 }
 
@@ -51,10 +51,20 @@ func GetFreePort() (int, error) {
 	defer func(l *net.TCPListener) {
 		err := l.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Infof("%s", err)
 		}
 	}(l)
 	return l.Addr().(*net.TCPAddr).Port, nil
+}
+
+// IsLoopbackHost 判断主机名是否只指向本机；二维码遇到这类地址时需要改用现有 GetOutboundIP。
+func IsLoopbackHost(host string) bool {
+	host = strings.Trim(strings.TrimSpace(host), "[]")
+	if host == "" || strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }
 
 // GetIPList 获取本机IP列表
@@ -97,12 +107,28 @@ func GetIPList() (IPList []string, err error) {
 }
 
 // GetOutboundIP 获取本机的首选出站IP
-// Get preferred outbound ip of this machine
+// 失败时回退到可用网卡或 127.0.0.1，避免工具层直接退出宿主进程。
 func GetOutboundIP() net.IP {
+	ip, err := LookupOutboundIP()
+	if err != nil {
+		logger.Infof(locale.GetString("get_ip_error")+" %v", err)
+		if ipList, listErr := GetIPList(); listErr == nil {
+			for _, candidate := range ipList {
+				if parsed := net.ParseIP(candidate); parsed != nil {
+					return parsed
+				}
+			}
+		}
+		return net.IPv4(127, 0, 0, 1)
+	}
+	return ip
+}
+
+// LookupOutboundIP 获取本机的首选出站 IP，并把失败交给调用方决定是否回退。
+func LookupOutboundIP() (net.IP, error) {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		time.Sleep(3 * time.Second)
-		log.Fatal(err)
+		return nil, err
 	}
 	defer func(conn net.Conn) {
 		err := conn.Close()
@@ -110,7 +136,7 @@ func GetOutboundIP() net.IP {
 		}
 	}(conn)
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
-	return localAddr.IP
+	return localAddr.IP, nil
 }
 
 func OpenBrowser(isHTTPS bool, host string, port int) {
@@ -156,9 +182,9 @@ func OpenBrowserByURL(uri string) {
 	)
 	if err != nil {
 		logger.Infof(locale.GetString("log_api_health_check_failed"), err)
-		return
+	} else {
+		logger.Info(locale.GetString("log_api_healthy_ready"))
 	}
-	logger.Info(locale.GetString("log_api_healthy_ready"))
 
 	// 打开浏览器（Windows 使用 ShellExecute，避免闪黑框）
 	logger.Infof(locale.GetString("log_opening_browser"), uri)
@@ -193,44 +219,13 @@ func GetSystemStatus() SystemStatus {
 		MemoryUsedPercent: 0,
 	}
 	populateSystemMetrics(&sys)
-	// // almost every return value is a struct
-	// logger.Infof("Total: %v, Free:%v, UsedPercent:%f%%\n", v.Total, v.Free, v.UsedPercent)
-	// // convert to JSON. String() is also implemented
-	// logger.Infof(v)
-
-	// hostname, err := os.Hostname()
-	// if err == nil {
-	//	logger.Infof(hostname)
-	// }
 	return sys
 }
-
-// // 获取mac地址列表,暂时用不着
-// func GetMacAddrList() (macAddrList []string) {
-//	netInterfaces, err := net.Interfaces()
-//	if err != nil {
-//		logger.Infof(locale.GetString("check_mac_error")+": %v", err)
-//		return macAddrList
-//	}
-//	//for _, netInterface := range netInterfaces {
-//	//	macAddr := netInterface.HardwareAddr.String()
-//	//	if len(macAddr) == 0 {
-//	//		continue
-//	//	}
-//	//	macAddrList = append(macAddrList, macAddr)
-//	//}
-//	for _, netInterface := range netInterfaces {
-//		flags := netInterface.Flags.String()
-//		if strings.Contains(flags, "up") && strings.Contains(flags, "broadcast") {
-//			macAddrList = append(macAddrList, netInterface.HardwareAddr.String())
-//		}
-//	}
-//	return macAddrList
-// }
 
 // ServerStatus 服务器当前状况
 type ServerStatus struct {
 	ServerName            string       // 服务器描述
+	Version               string       // Comigo 版本号
 	ServerHost            string       // ServerHost 服务器主机或 IP 地址。
 	ServerPort            uint16       // ServerPort 服务运行的端口号。
 	TailscaleAuthURL      string       // Tailscale身份验证URL（如果适用）
@@ -272,6 +267,7 @@ func GetServerInfo(params ServerInfoParams) *ServerStatus {
 	}
 	serverStatus := ServerStatus{
 		ServerName:            serverName,
+		Version:               params.Version,
 		ServerHost:            host,
 		ServerPort:            uint16(port),
 		SupportUploadFile:     enableUpload,

@@ -15,12 +15,13 @@ templ Toast() {
 
 		// 创建并显示 Toast
 		function showToast(message, type = "info") {
+			const toastMessage = String(message ?? "");
 			// 检查是否已经存在相同的 toast
 			const isDuplicate = activeToasts.some(
-				(toast) => toast.message === message && toast.type === type,
+				(toast) => toast.message === toastMessage && toast.type === type,
 			);
 			// 如果是重复的 toast，则只在控制台输出
-			console.log(`Toast (${type}): ${message}`);
+			console.log(`Toast (${type}): ${toastMessage}`);
 			if (isDuplicate) {
 				return;
 			}
@@ -50,14 +51,21 @@ templ Toast() {
 			toast.id = id;
 			toast.className = `flex items-center ${bgColor} text-white px-4 py-3 rounded shadow-lg transition transform duration-300 ease-in-out`;
 
-			// Toast 内容
-			toast.innerHTML = `<span class="flex-1">${message}</span> <button class="ml-4 ${bgColor} text-white focus:outline-none">&times;</button>`;
+			// Toast 文本可能来自服务端错误或文件名，只能用 textContent 写入。
+			const messageSpan = document.createElement("span");
+			messageSpan.className = "flex-1";
+			messageSpan.textContent = toastMessage;
+			const closeButton = document.createElement("button");
+			closeButton.type = "button";
+			closeButton.className = `ml-4 ${bgColor} text-white focus:outline-none`;
+			closeButton.textContent = "×";
+			toast.append(messageSpan, closeButton);
 
 			// 添加到 Toast 容器
 			toastContainer.appendChild(toast);
 
 			// 将新 toast 添加到活动列表中
-			activeToasts.push({ id, message, type });
+			activeToasts.push({ id, message: toastMessage, type });
 
 			// 自动消失的定时器
 			const timeout = setTimeout(() => {
@@ -65,7 +73,7 @@ templ Toast() {
 			}, 3000);
 
 			// 点击关闭按钮时移除 Toast
-			toast.querySelector("button").addEventListener("click", () => {
+			closeButton.addEventListener("click", () => {
 				clearTimeout(timeout);
 				removeToast(id);
 			});

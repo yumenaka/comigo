@@ -26,7 +26,18 @@ func ImageSrc(Url string) string {
 	return fmt.Sprintf(`'%s' + (%s) + (%s) + (%s)`, Url, autoCrop, autoResize, noCache)
 }
 
-var PAGED_SIZE = 32
+func shouldRenderScrollPage(loadMode string, pageIndex int, pageLimit int, key int, staticMode bool) bool {
+	if staticMode {
+		return true
+	}
+	if pageLimit < 1 {
+		pageLimit = defaultScrollPageLimit
+	}
+	if loadMode != scrollLoadModePaged {
+		return true
+	}
+	return key/pageLimit+1 == pageIndex
+}
 
 // ScrollMainArea 定义 BodyHTML
 // 需要更复杂的屏幕状态判断的时候，可以参考：https://developer.mozilla.org/zh-CN/docs/Web/API/Screen/orientation
@@ -34,7 +45,7 @@ var PAGED_SIZE = 32
 // tips：使用 alpine.js 的 x-init 和 fetch API 来加载 HTML 内容
 // tips： Alpine.js 动态CSS，只支持内联写法
 // min-h-16 是为了图片未加载时，图片高度为0，导致页面不美观。极端设置下会导致图片变形。  text-center：居中 alert文字，因为需要等待css加载，所以现在没设置alt文字。
-templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int, startIndex int) {
+templ MainArea(c echo.Context, book *model.Book, loadMode string, pagedIndex int, pageLimit int) {
 	<div
 		id="ScrollMainArea"
 		x-data="{
@@ -48,49 +59,21 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
             if (counter > 1) {
                 clearInterval(stoper);
             }
-        }, 1000);"
+	        }, 1000);"
 		class="flex flex-col items-center justify-center flex-1 w-full max-w-full pt-0 text-base-content"
 	>
-		if readMode == "paged_scroll" && book.PageCount/PAGED_SIZE + 1 != 1 {
-			@ScrollPagination(book, pagedIndex)
+		if loadMode == scrollLoadModePaged && scrollTotalPages(book, pageLimit) > 1 {
+			@ScrollPagination(book, pagedIndex, pageLimit)
 		}
-		if (readMode == "infinite_scroll" && startIndex > 0) {
-			if (startIndex < book.PageCount) {
-				<div
-					class="w-full my-2 text-sm font-semibold text-center page_hint "
-					x-data={ fmt.Sprintf("{skipPageNum : %d}", startIndex-1) }
-					x-text="i18next.t('skip_and_load_full').replace('%d', skipPageNum)"
-				></div>
-			}
-			if (startIndex == book.PageCount) {
-				<div
-					class="w-full my-2 text-sm font-semibold text-center page_hint "
-					x-data={ fmt.Sprintf("{skipPageNum : %d}", startIndex-1) }
-					x-text="i18next.t('completed_and_load_full')"
-				></div>
-			}
-			<button
-				class="px-4 py-2 mb-4 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600"
-				@click="$store.global.infiniteScrollLoadAllPage();"
-				x-text="i18next.t('load_all_pages')"
-			>Load All</button>
-		}
-		if (readMode == "paged_scroll" && pagedIndex >= 1) {
+		if (loadMode == scrollLoadModePaged && pagedIndex >= 1) {
 			<template
 				class="hidden"
-				x-data={ fmt.Sprintf(`{ pagedIndex: %d,PAGED_SIZE: %d}`, pagedIndex, PAGED_SIZE) }
-				x-init="$nextTick(() => { $store.global.nowPageNum = (pagedIndex-1)*PAGED_SIZE+1})"
-			></template>
-		}
-		if (readMode == "infinite_scroll" && startIndex >= 1) {
-			<template
-				class="hidden"
-				x-data={ fmt.Sprintf(`{ startIndex: %d,PAGED_SIZE: %d}`, startIndex, PAGED_SIZE) }
-				x-init="$nextTick(() => { $store.global.nowPageNum = startIndex})"
+				x-data={ fmt.Sprintf(`{ pagedIndex: %d,pageLimit: %d}`, pagedIndex, pageLimit) }
+				x-init="$nextTick(() => { $store.global.nowPageNum = (pagedIndex-1)*pageLimit+1})"
 			></template>
 		}
 		for key, image := range book.PageInfos {
-			if (readMode == "paged_scroll" && key/PAGED_SIZE + 1 == pagedIndex) || (readMode == "infinite_scroll" && (key >= startIndex || key+1 == book.GetPageCount())) {
+			if shouldRenderScrollPage(loadMode, pagedIndex, pageLimit, key, c != nil && c.QueryParam("static") != "") {
 				<div
 					class="flex flex-col justify-start w-full max-w-full  m-0 rounded item-center"
 					:style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"
@@ -110,7 +93,9 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 								x-data={ ImageXData(image.Url) }
 								class="w-full manga_image min-h-16 text-center select-none"
 								draggable="false"
-								:src={ ImageSrc(image.Url) }
+								:data-scroll-lazy={ fmt.Sprintf("$store.scroll.loadMode === 'lazy' && %d >= $store.scroll.pageLimit ? 'true' : null", key) }
+								:data-scroll-src={ ImageSrc(image.Url) }
+								:src={ fmt.Sprintf("$store.scroll.loadMode === 'lazy' && %d >= $store.scroll.pageLimit ? null : %s", key, ImageSrc(image.Url)) }
 								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;loaded = true;"
 								@error="loaded = false"
 								x-intersect:leave={ intersectScript(key + 1) }
@@ -134,11 +119,14 @@ templ MainArea(c echo.Context, book *model.Book, readMode string, pagedIndex int
 				</div>
 			}
 		}
-		if readMode == "paged_scroll" && book.PageCount/PAGED_SIZE+1 != 1 {
-			@ScrollPagination(book, pagedIndex)
+		if loadMode == scrollLoadModePaged && scrollTotalPages(book, pageLimit) > 1 {
+			@ScrollPagination(book, pagedIndex, pageLimit)
+		}
+		if c != nil && c.QueryParam("static") == "" {
+			@ScrollBookSwitch(common.NewBookSwitchView(book.BookInfo.BookID, common.QuickJumpBarBooks(book)))
 		}
 	</div>
-	<button id="BackTopButton" style="display: none" class="fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
+	<button id="BackTopButton" style="display: none" class="panel-control fixed flex items-center justify-center w-10 h-10 text-white bg-blue-500 rounded-full shadow-lg bottom-4 right-4">
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 48C141.13 48 48 141.13 48 256s93.13 208 208 208s208-93.13 208-208S370.87 48 256 48zm96 270.63l-96-96l-96 96L137.37 296L256 177.37L374.63 296z" fill="currentColor"></path></svg>
 	</button>
 	<style>

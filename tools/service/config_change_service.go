@@ -2,7 +2,7 @@ package service
 
 import (
 	"encoding/json"
-	"reflect"
+	"slices"
 	"strconv"
 	"time"
 
@@ -25,51 +25,22 @@ type ConfigChangeAction struct {
 
 // BuildConfigChangeAction 比较新旧配置，计算后续需要执行的动作。
 func BuildConfigChangeAction(oldConfig config.Config, newConfig *config.Config) (action ConfigChangeAction) {
-	if !reflect.DeepEqual(oldConfig.StoreUrls, newConfig.StoreUrls) {
-		action.ReScanStores = true
-	}
-	if oldConfig.MaxScanDepth != newConfig.MaxScanDepth {
-		action.ReScanStores = true
-	}
-	if !reflect.DeepEqual(oldConfig.SupportMediaType, newConfig.SupportMediaType) {
-		action.ReScanStores = true
-	}
-	if !reflect.DeepEqual(oldConfig.SupportFileType, newConfig.SupportFileType) {
-		action.ReScanStores = true
-	}
-	if oldConfig.MinImageNum != newConfig.MinImageNum {
-		action.ReScanStores = true
-	}
-	if !reflect.DeepEqual(oldConfig.ExcludePath, newConfig.ExcludePath) {
-		action.ReScanStores = true
-	}
-	if oldConfig.EnableDatabase != newConfig.EnableDatabase {
-		action.ReScanStores = true
-	}
-	if oldConfig.Port != newConfig.Port {
-		action.ReStartWebServer = true
-	}
-	if oldConfig.Username != newConfig.Username {
-		action.ReStartWebServer = true
-	}
-	if oldConfig.Password != newConfig.Password {
-		action.ReStartWebServer = true
-	}
-	if oldConfig.Host != newConfig.Host {
-		action.ReStartWebServer = true
-	}
-	if config.NormalizeBasePath(oldConfig.BasePath) != config.NormalizeBasePath(newConfig.BasePath) {
-		action.ReStartWebServer = true
-	}
-	if oldConfig.Timeout != newConfig.Timeout {
-		action.ReStartWebServer = true
-	}
-	if oldConfig.DisableLAN != newConfig.DisableLAN {
-		action.ReStartWebServer = true
-	}
-	if oldConfig.AutoRescanIntervalMinutes != newConfig.AutoRescanIntervalMinutes {
-		action.UpdateAutoRescan = true
-	}
+	action.ReScanStores = !slices.Equal(oldConfig.StoreUrls, newConfig.StoreUrls) ||
+		oldConfig.MaxScanDepth != newConfig.MaxScanDepth ||
+		!slices.Equal(oldConfig.SupportMediaType, newConfig.SupportMediaType) ||
+		!slices.Equal(oldConfig.SupportFileType, newConfig.SupportFileType) ||
+		oldConfig.MinImageNum != newConfig.MinImageNum ||
+		!slices.Equal(oldConfig.ExcludePath, newConfig.ExcludePath)
+
+	action.ReStartWebServer = oldConfig.Port != newConfig.Port ||
+		oldConfig.Username != newConfig.Username ||
+		oldConfig.Password != newConfig.Password ||
+		oldConfig.Host != newConfig.Host ||
+		config.NormalizeBasePath(oldConfig.BasePath) != config.NormalizeBasePath(newConfig.BasePath) ||
+		oldConfig.Timeout != newConfig.Timeout ||
+		oldConfig.DisableLAN != newConfig.DisableLAN
+
+	action.UpdateAutoRescan = oldConfig.AutoRescanIntervalMinutes != newConfig.AutoRescanIntervalMinutes
 
 	if oldConfig.EnableTailscale != newConfig.EnableTailscale && newConfig.EnableTailscale {
 		action.StartTailscale = true

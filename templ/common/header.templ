@@ -12,8 +12,8 @@ import (
 templ Header(left templ.Component, center templ.Component, right templ.Component) {
 	<header
 		id="header"
-		class="z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400"
-		:class="{ 'absolute top-0 ': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.flip.autoHideToolbar && $store.global.readMode === 'page_flip','mx-auto bg-base-100/50': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.global.readMode === 'page_flip'}"
+		class="panel-surface z-10 toolbar flex flex-row justify-between w-full h-12 p-1 border-b bg-base-100 text-base-content border-slate-400"
+		:class="{ 'absolute top-0 ': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.flip.autoHideToolbar && $store.global.readMode === 'flip','mx-auto bg-base-100/50': ((window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname).startsWith(`/flip`) || window.ComiGoReaderMode) && $store.global.readMode === 'flip'}"
 	>
 		<div class="flex flex-row">
 			if left != nil {
@@ -53,18 +53,17 @@ templ HeaderBackSortLeft(returnUrl string) {
 	@ReSortIcon()
 }
 
-// HeaderSettingsLeft 是设置页左侧区域：返回 + 离线全屏 + 上传/本地阅读入口 + 占位。
+// HeaderSettingsLeft 是设置页左侧区域：返回 + 离线全屏 + 本地阅读入口 + 占位。
 templ HeaderSettingsLeft(returnUrl string) {
 	@ReturnButton(returnUrl)
 	@FullScreenOfflineButton()
 	@ReaderButton()
-	@UploadButton()
 	@HeaderPlaceholder()
 }
 
 //  返回箭头,点击返回上一页
 templ ReturnButton(returnUrl string) {
-	<a x-show="!window.location.href.startsWith('file://') && !window.location.href.startsWith('content://')" href={ templ.SafeURL(returnUrl) }>
+	<a x-cloak x-show="!$store.global.localBook" href={ templ.SafeURL(config.PrefixPath(returnUrl)) }>
 		<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 			@svg.Return()
 		</div>
@@ -75,8 +74,9 @@ templ ReturnButton(returnUrl string) {
 templ FullScreenOfflineButton() {
 	<div
 		id="FullScreenIcon"
-		x-show="window.location.href.startsWith('file://') || window.location.href.startsWith('content://')"
-		onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+		x-cloak
+		x-show="$store.global.localBook"
+		onclick="window.ComiGoToggleFullscreen ? window.ComiGoToggleFullscreen() : (Screenfull.isEnabled ? Screenfull.toggle() : showToast(i18next.t('not_support_fullscreen')))"
 		class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 	>
 		@svg.FullScreen()
@@ -85,28 +85,28 @@ templ FullScreenOfflineButton() {
 
 // 服务器设置按钮，点击进入Comigo设置页面
 templ ServerSettingsButton() {
-	<a x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/settings")) } class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
+	<a x-cloak x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/settings")) } class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring">
 		@svg.ServerDisk()
 	</a>
 }
 
 // 上传按钮，点击进入上传页面
 templ UploadButton() {
-	<a x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/upload")) } class="w-10 mx-1 my-0 rounded hover:ring ">
+	<a x-cloak x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/upload")) } class="w-10 mx-1 my-0 rounded hover:ring ">
 		@svg.Upload()
 	</a>
 }
 
 // 本地解析工具按钮，点击本地解析阅读页面
 templ ReaderButton() {
-	<a x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/reader")) } class="w-10 mx-1 my-0 rounded hover:ring ">
+	<a x-cloak x-show="$store.global.onlineBook" href={ templ.SafeURL(config.PrefixPath("/reader")) } class="hidden md:flex w-10 mx-1 my-0 rounded hover:ring ">
 		@svg.CloudOffline()
 	</a>
 }
 
 // 使标题居中的占位符
 templ HeaderPlaceholder() {
-	<div class="place_holder w-10 h-10 mx-1 hidden md:flex" x-show="$store.global.onlineBook"></div>
+	<div class="place_holder w-10 h-10 mx-1 hidden md:flex" x-cloak x-show="$store.global.onlineBook"></div>
 }
 
 // QRCodeButton
@@ -115,7 +115,8 @@ templ QRCodeButton() {
 	<div
 		data-modal-target="qrcode-modal"
 		data-modal-toggle="qrcode-modal"
-		x-show="$store.global.onlineBook || (window.ComiGoReaderMode && (window.location.protocol === 'http:' || window.location.protocol === 'https:'))"
+		x-cloak
+		x-show="$store.global.onlineBook || (window.ComiGoReaderMode && $store.global.serverReachable)"
 		class="hidden md:flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 	>
 		@svg.QRCode()
@@ -126,8 +127,9 @@ templ QRCodeButton() {
 templ FullScreenOnlineButton() {
 	<div
 		id="FullScreenIcon"
-		x-show="$store.global.onlineBook || (window.ComiGoReaderMode && !window.location.href.startsWith('file://') && !window.location.href.startsWith('content://'))"
-		onclick="if (Screenfull.isEnabled) {Screenfull.toggle()} else {showToast(i18next.t('not_support_fullscreen'))}"
+		x-cloak
+		x-show="$store.global.onlineBook || (window.ComiGoReaderMode && !$store.global.localBook)"
+		onclick="window.ComiGoToggleFullscreen ? window.ComiGoToggleFullscreen() : (Screenfull.isEnabled ? Screenfull.toggle() : showToast(i18next.t('not_support_fullscreen')))"
 		class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 	>
 		@svg.FullScreen()
@@ -135,8 +137,7 @@ templ FullScreenOnlineButton() {
 }
 
 // 阅读器设定,点击屏幕中央也可以打开  可自定义方向 -->
-// data-drawer-body-scrolling="true"  允许鼠标穿透，滚动下面的页面，设置此项有个好处，就是打开抽屉时背景不抖动 -->
-// https://flowbite.com/docs/components/drawer/#body-scrolling -->
+// data-drawer-body-scrolling="true" 允许打开抽屉时继续滚动底层页面，避免背景布局抖动。
 templ SettingDrawerButton() {
 	<div class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring" id="OpenSettingButton" data-drawer-target="drawer-right" data-drawer-show="drawer-right" aria-controls="drawer-right" data-drawer-placement="right" data-drawer-body-scrolling="true">
 		@svg.Setting()
@@ -149,23 +150,43 @@ templ HeaderEmptyTitle() {
 }
 
 templ HeaderTextTitle(title string) {
-	@HeaderTitle(title, "")
+	@HeaderTitle(title, "", false)
+}
+
+templ HeaderTextTitleRemote(title string, isRemote bool) {
+	@HeaderTitle(title, "", isRemote)
+}
+
+// HeaderRemoteTitleIcon 给远程书籍标题添加云朵标记，便于在阅读界面区分本地与远程书。
+templ HeaderRemoteTitleIcon(isRemote bool) {
+	if isRemote {
+		<svg class="h-5 w-5 shrink-0 text-sky-400 drop-shadow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+			<path d="M6.5 20a5.5 5.5 0 0 1-.46-10.98A7.5 7.5 0 0 1 20.7 11.6A4.5 4.5 0 0 1 19.5 20h-13Z"></path>
+		</svg>
+	}
 }
 
 // HeaderTitle 保留原普通标题行为：离线文件显示标题，在线模式同步 document.title。
-templ HeaderTitle(title string, downloadLink string) {
+templ HeaderTitle(title string, downloadLink string, isRemote bool) {
 	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
-		<span x-show="window.location.toString().endsWith('.html')" class="text-lg font-semibold">{ title }</span>
+		<span x-cloak x-show="$store.global.staticHtmlBook" class="inline-flex min-w-0 items-center gap-1 text-lg font-semibold">
+			@HeaderRemoteTitleIcon(isRemote)
+			<span data-header-title-text class="min-w-0 truncate">{ title }</span>
+		</span>
 		if (downloadLink!="") {
 			<span
 				title={ title }
 				id="headerTitle"
-				class="text-lg font-semibold text-blue-700/90 hover:underline"
+				x-cloak
+				x-show="!$store.global.staticHtmlBook"
+				class="inline-flex min-w-0 items-center gap-1 text-lg font-semibold text-blue-700/90 hover:underline"
 				x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 				x-init="$nextTick(() => {document.title = $el.innerText + version});"
 			>
+				@HeaderRemoteTitleIcon(isRemote)
 				<a
 					href={ templ.URL(downloadLink) }
+					data-header-title-text
 					if strings.HasPrefix(title,"i18next") {
 						x-text={ title }
 					}
@@ -175,71 +196,70 @@ templ HeaderTitle(title string, downloadLink string) {
 			<span
 				title={ title }
 				id="headerTitle"
-				x-show="!window.location.toString().endsWith('.html')"
-				class="text-lg font-semibold"
+				x-cloak
+				x-show="!$store.global.staticHtmlBook"
+				class="inline-flex min-w-0 items-center gap-1 text-lg font-semibold"
 				x-data={ fmt.Sprintf("{ version: ' - Comigo %s' }", config.GetVersion()) }
 				x-init="$nextTick(() => {document.title = $el.innerText + version});"
 				if strings.HasPrefix(title,"i18next") {
 					x-text={ title }
 				}
-			>{ title }</span>
+			>
+				@HeaderRemoteTitleIcon(isRemote)
+				<span data-header-title-text class="min-w-0 truncate">{ title }</span>
+			</span>
 		}
 	</div>
 }
 
-// HeaderQuickJumpTitle 定义了一个标题组件，显示当前书籍的标题，并在在线模式下提供一个下拉菜单，允许用户快速跳转到同一层级的其他书籍。
-// 下拉菜单的内容根据传入的 books 参数动态生成，点击不同的书籍链接会跳转到相应的页面。
-templ HeaderQuickJumpTitle(title string, books *model.BookInfos) {
-	<div class="flex flex-col items-center justify-center flex-1 p-0 m-0 font-semibold text-center truncate">
-		<span x-show="!$store.global.onlineBook" class="text-lg font-semibold">{ title }</span>
-		<button
-			id="quickJumpBarDropdownButton"
-			title={ title }
-			x-show="$store.global.onlineBook"
-			data-dropdown-toggle="QuickJumpDropdown"
-			data-dropdown-trigger="click"
-			class="max-w-fit px-5 py-2.5 inline-flex  hover:bg-gray-400 rounded-lg font-semibold text-center items-center"
-			type="button"
-		>
-			{ title }
-			@svg.ArrowDown()
-		</button>
-		<!-- 下拉菜单，同一阶层的其他书籍 -->
-		<div
-			id="QuickJumpDropdown"
-			x-show="$store.global.onlineBook"
-			class="max-w-full md:max-w-2xl md:truncate z-10 hidden divide-y divide-gray-100 rounded-lg shadow bg-white/90  dark:bg-gray-700"
-		>
-			<ul class="py-2 mt-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="quickJumpBarDropdownButton">
-				if books != nil {
-					for _, book := range *books {
-						if book.Type == model.TypeBooksGroup {
-							<li>
-								<a href={ templ.SafeURL(config.PrefixPath("/shelf/" + book.BookID)) } class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
-							</li>
-						}
-						if book.Type != model.TypeBooksGroup {
-							<li x-data={ BookURL(book.BookID) }>
-								<a :href="BookURL" class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white">{ book.Title }</a>
-							</li>
-						}
-					}
-				}
-			</ul>
-		</div>
-	</div>
+// HeaderQuickJumpTitle 定义阅读页标题区；有同级可切换书籍时显示居中的有限宽 select。
+templ HeaderQuickJumpTitle(title string, currentBookID string, books *model.BookInfos) {
+	@HeaderQuickJumpTitleView(title, NewBookSwitchView(currentBookID, books), false)
 }
 
-// 根据阅读模式生成书籍链接，如果是“{}”，templ 可能会把 { something } 解析成模板语法，而不是输出字面量。用 `` 来包裹就不会报错了
-func BookURL(bookID string) string {
-	return fmt.Sprintf(`{BookURL: $store.global.readMode === 'page_flip' ? window.ComiGoPath("/flip/%s") : window.ComiGoPath("/scroll/%s")}`, bookID, bookID)
+templ HeaderQuickJumpTitleRemote(title string, currentBookID string, books *model.BookInfos, isRemote bool) {
+	@HeaderQuickJumpTitleView(title, NewBookSwitchView(currentBookID, books), isRemote)
+}
+
+templ HeaderQuickJumpTitleView(title string, view BookSwitchView, isRemote bool) {
+	<div class="flex min-w-0 flex-1 items-center justify-center p-0 m-0 font-semibold text-center">
+		<span x-cloak x-show="!$store.global.onlineBook" title={ title } class="inline-flex min-w-0 items-center gap-1 text-lg font-semibold">
+			@HeaderRemoteTitleIcon(isRemote)
+			<span data-header-title-text class="min-w-0 truncate">{ title }</span>
+		</span>
+		if view.HasSwitchTarget() {
+			<div
+				x-show="$store.global.onlineBook"
+				x-data={ BookSwitchXData("") }
+				class="flex min-w-0 max-w-full flex-1 items-center justify-center gap-1"
+			>
+				@HeaderRemoteTitleIcon(isRemote)
+				<select
+					id="HeaderBookSwitchSelect"
+					title={ title }
+					@change="go($event.target.value)"
+					class="panel-control h-10 w-full min-w-0 max-w-full rounded border-2 border-gray-500 bg-base-100 px-2 py-0 text-center font-semibold text-accent-content focus:outline-none dark:border-gray-200 md:max-w-2xl"
+					aria-label={ BookSwitchLabel() }
+				>
+					for _, item := range view.Items {
+						<option value={ item.BookID } selected?={ item.Current }>{ item.Title }</option>
+					}
+				</select>
+			</div>
+		} else {
+			<span x-show="$store.global.onlineBook" title={ title } class="inline-flex min-w-0 items-center gap-1 text-lg font-semibold">
+				@HeaderRemoteTitleIcon(isRemote)
+				<span data-header-title-text class="min-w-0 truncate">{ title }</span>
+			</span>
+		}
+	</div>
 }
 
 // ReSortIcon 定义了一个排序图标，点击后会显示一个下拉菜单，允许用户选择不同的排序方式。根据当前URL路径，菜单会设置不同的cookie参数名来保存用户的选择，并在页面加载时读取该cookie以确定当前的排序方式。
 templ ReSortIcon() {
-	<!-- 文件重排序 Dropdown Menu： https://flowbite.com/docs/components/dropdowns/ -->
-	<!-- data-dropdown-trigger="{hover|click}"  二选一-->
+	<!-- 文件重排序 Dropdown Menu，data-dropdown-trigger="{hover|click}" 二选一。 -->
 	<svg
+		x-cloak
 		x-show="$store.global.onlineBook && !window.location.href.includes('settings') && !window.location.href.includes('upload')"
 		class="flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring"
 		id="ResortButton"
@@ -253,6 +273,7 @@ templ ReSortIcon() {
 	</svg>
 	<div
 		id="ReSortDropdownMenu"
+		x-cloak
 		x-show="$store.global.onlineBook"
 		x-data="{
                     getCurrentSortBy() {
@@ -277,6 +298,10 @@ templ ReSortIcon() {
                         }
                         return ''; // 默认值
                     },
+                    isShelfSortMenu() {
+                        const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
+                        return !currentUrl.includes('/flip/') && !currentUrl.includes('/scroll/');
+                    },
                     setCookie(value) {
                         // 根据URL路径决定使用哪个cookie参数名
                         const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
@@ -294,7 +319,7 @@ templ ReSortIcon() {
                         window.location.reload();
                     }
                 }"
-		class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700"
+		class="panel-surface z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700"
 		x-init="currentSortBy = getCurrentSortBy()"
 	>
 		<ul class="py-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="ResortButton">
@@ -304,7 +329,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('filename')"
 					x-text="i18next.t('sort_by_filename')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white "
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white "
 				></a>
 			</li>
 			<li>
@@ -313,7 +338,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('modify_time')"
 					x-text="i18next.t('sort_by_modify_time')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 			<li>
@@ -322,7 +347,16 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('filesize')"
 					x-text="i18next.t('sort_by_filesize')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+				></a>
+			</li>
+			<li x-show="isShelfSortMenu()">
+				<a
+					href="#"
+					@click.prevent="setCookie('last_read')"
+					x-text="i18next.t('sort_by_last_read')"
+					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'last_read'}"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 			<li>
@@ -331,7 +365,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('filename_reverse')"
 					x-text="i18next.t('sort_by_filename_reverse')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filename_reverse'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 			<li>
@@ -340,7 +374,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('modify_time_reverse')"
 					x-text="i18next.t('sort_by_modify_time_reverse')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'modify_time_reverse'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 			<li>
@@ -349,7 +383,7 @@ templ ReSortIcon() {
 					@click.prevent="setCookie('filesize_reverse')"
 					x-text="i18next.t('sort_by_filesize_reverse')"
 					:class="{'bg-gray-300 dark:bg-gray-600 font-bold border rounded': currentSortBy === 'filesize_reverse'}"
-					class="block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
+					class="panel-control block px-4 py-2 hover:bg-blue-300 dark:hover:bg-gray-600 dark:hover:text-white"
 				></a>
 			</li>
 		</ul>

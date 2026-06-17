@@ -1108,17 +1108,15 @@ const updateBookmark = `-- name: UpdateBookmark :exec
 UPDATE bookmarks
 SET description = ?,
     page_index  = ?,
-    description = ?,
     updated_at  = CURRENT_TIMESTAMP
 WHERE book_id = ? and type = ?
 `
 
 type UpdateBookmarkParams struct {
-	Description   sql.NullString
-	PageIndex     int64
-	Description_2 sql.NullString
-	BookID        string
-	Type          string
+	Description sql.NullString
+	PageIndex   int64
+	BookID      string
+	Type        string
 }
 
 // Update a bookmark (by book_id, type)
@@ -1126,7 +1124,6 @@ func (q *Queries) UpdateBookmark(ctx context.Context, arg UpdateBookmarkParams) 
 	_, err := q.db.ExecContext(ctx, updateBookmark,
 		arg.Description,
 		arg.PageIndex,
-		arg.Description_2,
 		arg.BookID,
 		arg.Type,
 	)

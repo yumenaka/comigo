@@ -1,35 +1,45 @@
 package upload_page
 
 templ UploadArea() {
-	<div class="relative w-full max-w-2xl p-8 bg-base-100 rounded shadow-md">
+	@UploadPanel("panel-surface relative w-full max-w-2xl p-8 bg-base-100 rounded shadow-md", true)
+}
+
+templ SettingsUploadArea() {
+	@UploadPanel("relative w-full px-2 py-4", false)
+}
+
+templ UploadPanel(wrapperClass string, showSpacer bool) {
+	<div class={ wrapperClass }>
 		<!-- 书库选择下拉框 -->
 		<div class="mb-6">
-			<label class="block mb-2 text-sm font-medium text-base-content" x-text="i18next.t('select_upload_target_store')">选择上传目标书库</label>
-			<select id="store-select" class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+			<label for="store-select" class="block mb-2 text-sm font-medium text-base-content" x-text="i18next.t('select_upload_target_store')">选择上传目标书库</label>
+			<select id="store-select" name="store_url" class="panel-control w-full px-4 py-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
 				<option value="" x-text="i18next.t('loading')">加载中...</option>
 			</select>
 			<p id="store-warning" class="mt-2 text-sm text-red-500 hidden"></p>
 		</div>
 		<!-- 文件选择与拖拽区域 -->
 		<div id="drop-area" class="px-6 py-24 text-center transition duration-300 border-4 border-gray-400 border-dashed rounded cursor-pointer hover:border-blue-500">
-			<p class="text-base-content" x-text="i18next.t('drag_or_click_to_upload')">>将文件拖拽到此处或点击选择文件</p>
-			<input type="file" id="file-input" multiple class="hidden"/>
+			<p id="drop-area-label" class="text-base-content" x-text="i18next.t('drag_or_click_to_upload')">>将文件拖拽到此处或点击选择文件</p>
+			<input type="file" id="file-input" name="files" aria-labelledby="drop-area-label" multiple class="hidden"/>
 		</div>
 		<!-- 预览选中文件列表 -->
 		<div id="preview" class="mt-6">
 			<h3 class="mb-4 text-lg font-semibold text-base-content" x-text="i18next.t('selected_file')">选择的文件</h3>
-			<ul class="divide-y divide-gray-200" id="file-list">
+			<ul class="border-2 border-gray-400 border-dashed rounded p-2 flex flex-col gap-2" id="file-list">
 				<!-- 动态插入文件项 -->
 			</ul>
 		</div>
 		<!-- 进度条背景 显示与隐藏有过渡效果，不可点击。-->
 		<div id="progress-bar" class="absolute pointer-events-none top-0 left-0 h-full transition-opacity duration-500 bg-blue-500/30" style="width: 0%;"></div>
 		<!-- 上传按钮 -->
-		<button id="upload-button" class="w-full py-2 mt-6 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300 font-semibold disabled:cursor-not-allowed" disabled x-text="i18next.t('upload_file')">上传文件</button>
+		<button type="button" id="upload-button" class="panel-control w-full py-2 mt-6 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed" disabled x-text="i18next.t('upload_file')">上传文件</button>
 		<!-- 上传结果显示区域 -->
 		<div id="result" class="mt-4"></div>
 	</div>
-	<div class="grow bg-gray-400 place-holder"></div>
+	if showSpacer {
+		<div class="grow bg-gray-400 place-holder"></div>
+	}
 	<script>
 		// 获取元素
 		const dropArea = document.getElementById("drop-area");
@@ -47,6 +57,47 @@ templ UploadArea() {
 
 		// localStorage key，与 $persist 的命名风格保持一致
 		const LAST_STORE_KEY = "_x_upload.lastSelectedStore";
+
+		// 上传页会展示服务端返回的文件名和错误文案，动态文本统一用 textContent 写入。
+		function clearNode(node) {
+			node.replaceChildren();
+		}
+
+		function showStoreSettingsWarning() {
+			clearNode(storeWarning);
+			storeWarning.append(
+				document.createTextNode(i18next.t("no_available_stores") + " "),
+			);
+			const link = document.createElement("a");
+			link.href = window.ComiGoPath("/settings");
+			link.className = "text-blue-500 underline hover:text-blue-700";
+			link.textContent = i18next.t("settings_stores");
+			storeWarning.appendChild(link);
+			storeWarning.classList.remove("hidden");
+		}
+
+		function renderUploadSuccess(uploadedFiles) {
+			clearNode(resultDiv);
+			const message = document.createElement("p");
+			message.className = "text-green-500 text-lg text-center";
+			message.textContent = i18next.t("file_uploaded_successfully");
+			const list = document.createElement("ul");
+			list.className = "text-gray-700 list-disc list-inside";
+			uploadedFiles.forEach((file) => {
+				const item = document.createElement("li");
+				item.textContent = file;
+				list.appendChild(item);
+			});
+			resultDiv.append(message, list);
+		}
+
+		function renderUploadError(message) {
+			clearNode(resultDiv);
+			const error = document.createElement("p");
+			error.className = "text-red-500";
+			error.textContent = message;
+			resultDiv.appendChild(error);
+		}
 
 		// 获取上次选择的书库
 		function getLastSelectedStore() {
@@ -73,7 +124,7 @@ templ UploadArea() {
 				.then((response) => response.json())
 				.then((data) => {
 					const stores = data.stores || [];
-					storeSelect.innerHTML = ""; // 清空加载提示
+					clearNode(storeSelect); // 清空加载提示
 					availableStores = []; // 重置可用书库列表
 
 					if (stores.length === 0) {
@@ -84,14 +135,7 @@ templ UploadArea() {
 						option.disabled = true;
 						storeSelect.appendChild(option);
 						// 显示更详细的提示，引导用户去设置书库
-						storeWarning.innerHTML =
-							i18next.t("no_available_stores") +
-							' <a href="' +
-							window.ComiGoPath("/settings") +
-							'" class="text-blue-500 underline hover:text-blue-700">' +
-							i18next.t("settings_stores") +
-							"</a>";
-						storeWarning.classList.remove("hidden");
+						showStoreSettingsWarning();
 						// 禁用拖拽区域和上传按钮
 						uploadButton.disabled = true;
 						dropArea.classList.add("opacity-50", "pointer-events-none");
@@ -121,14 +165,7 @@ templ UploadArea() {
 					// 检查是否有可用书库
 					if (availableStores.length === 0) {
 						// 所有书库路径都不存在
-						storeWarning.innerHTML =
-							i18next.t("no_available_stores") +
-							' <a href="' +
-							window.ComiGoPath("/settings") +
-							'" class="text-blue-500 underline hover:text-blue-700">' +
-							i18next.t("settings_stores") +
-							"</a>";
-						storeWarning.classList.remove("hidden");
+						showStoreSettingsWarning();
 						uploadButton.disabled = true;
 						dropArea.classList.add("opacity-50", "pointer-events-none");
 					} else {
@@ -151,7 +188,7 @@ templ UploadArea() {
 				})
 				.catch((error) => {
 					console.error("获取书库列表失败:", error);
-					storeSelect.innerHTML = "";
+					clearNode(storeSelect);
 					const option = document.createElement("option");
 					option.value = "";
 					option.textContent = i18next.t("upload_failed_network_error");
@@ -248,7 +285,8 @@ templ UploadArea() {
 		function addFileToList(file) {
 			// 创建文件项
 			const li = document.createElement("li");
-			li.className = "py-2 flex items-center justify-between";
+			li.className =
+				"border-2 border-gray-400 border-dashed rounded px-3 py-2 flex items-center justify-between";
 			// 文件信息
 			const infoDiv = document.createElement("div");
 			infoDiv.className = "flex items-center";
@@ -283,8 +321,9 @@ templ UploadArea() {
 			li.appendChild(infoDiv);
 			// 删除文件按钮
 			const removeBtn = document.createElement("button");
-			removeBtn.className = "text-red-500 hover:text-red-700";
-			removeBtn.innerHTML = "&#10005;"; // × 符号
+			removeBtn.className =
+				"panel-control px-2 py-1 text-red-500 hover:text-red-700 rounded";
+			removeBtn.textContent = "×";
 			removeBtn.addEventListener("click", () => {
 				filesToUpload = filesToUpload.filter((f) => f !== file);
 				li.remove();
@@ -351,16 +390,7 @@ templ UploadArea() {
 			xhr.onload = function () {
 				if (xhr.status === 200) {
 					const data = JSON.parse(xhr.responseText);
-					let filesList = "";
-					data.files.forEach((file) => {
-						filesList += "<li>" + file + "</li>";
-					});
-					resultDiv.innerHTML =
-						'<p class="text-green-500 text-lg text-center">' +
-						i18next.t("file_uploaded_successfully") +
-						'</p><ul class="text-gray-700 list-disc list-inside">' +
-						filesList +
-						"</ul>";
+					renderUploadSuccess(data.files || []);
 
 					// 提示上传成功
 					showMessage({
@@ -375,13 +405,9 @@ templ UploadArea() {
 					});
 					// 清空文件列表
 					filesToUpload = [];
-					fileList.innerHTML = "";
+					clearNode(fileList);
 				} else {
-					const errorData = JSON.parse(xhr.responseText);
-					resultDiv.innerHTML =
-						`<p class="text-red-500">` +
-						i18next.t("upload_failed_network_error") +
-						`</p>`;
+					renderUploadError(i18next.t("upload_failed_network_error"));
 				}
 				// 重置上传按钮和进度条
 				uploadButton.disabled = filesToUpload.length === 0;
@@ -391,10 +417,7 @@ templ UploadArea() {
 			};
 			// 上传失败: 网络错误
 			xhr.onerror = function () {
-				resultDiv.innerHTML =
-					`<p class="text-red-500">` +
-					i18next.t("upload_failed_network_error") +
-					`</p>`;
+				renderUploadError(i18next.t("upload_failed_network_error"));
 				uploadButton.disabled = filesToUpload.length === 0;
 				uploadButton.textContent = i18next.t("upload_file");
 				progressBar.style.width = "0%";

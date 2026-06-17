@@ -1,0 +1,395 @@
+/* 赛博朋克模板：动画变量、背景建筑和控件样式集中在这里。 */
+@property --cyber-spot-a {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 4deg;
+}
+
+@property --cyber-spot-b {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: -18deg;
+}
+
+@property --cyber-spot-c {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: -42deg;
+}
+
+@property --cyber-flash {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@layer base {
+  /* ====================== Cyberpunk ====================== */
+  [data-theme="cyberpunk"] {
+    color-scheme: dark;
+    --fontFamily: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
+    --primary: #fcee09;
+    --primary-content: #111015;
+    --secondary: #00f0ff;
+    --secondary-content: #061a22;
+    --accent: #ff2a6d;
+    --accent-content: #fff8fb;
+    --neutral: #111015;
+    --neutral-content: #fcee09;
+    --base-100: #17151b;
+    --base-200: #0f0d13;
+    --base-300: #08070b;
+    --base-content: #f7f3d0;
+    --panel-surface: #17151b;
+    --panel-surface-content: #f7f3d0;
+    --panel-control: #fcee09;
+    --panel-control-hover: #fff45c;
+    --panel-control-active: #0eadb5;
+    --panel-control-muted: #2b2833;
+    --panel-control-content: #111015;
+    --grid-pattern-color: rgba(252, 238, 9, 0.36);
+    --grid-mosaic-color: rgba(0, 240, 255, 0.18);
+    --info: #00f0ff;
+    --success: #2dfc52;
+    --warning: #fcee09;
+    --error: #ff2a6d;
+    --rounded-box: 0.15rem;
+    --rounded-btn: 0.05rem;
+    --rounded-badge: 0.05rem;
+    --tab-radius: 0.05rem;
+    --animation-btn: 0;
+    --animation-input: 0;
+    --btn-focus-scale: 1;
+    --cyber-spot-a: 4deg;
+    --cyber-spot-b: -18deg;
+    --cyber-spot-c: -42deg;
+    --cyber-flash: 0;
+  }
+
+}
+
+/* 主背景层：从上到下分别是闪光、楼体、探照灯和远景光晕。 */
+body[data-theme="cyberpunk"],
+body[data-theme="cyberpunk"] .grid-line,
+body[data-theme="cyberpunk"] .grid-point,
+body[data-theme="cyberpunk"] .grid-mosaic,
+body[data-theme="cyberpunk"] #ShelfMainArea,
+body[data-theme="cyberpunk"] #settingsMainArea,
+body[data-theme="cyberpunk"] #tab-contents,
+body[data-theme="cyberpunk"] #ReaderRoot,
+body[data-theme="cyberpunk"] #ScrollMainArea,
+body[data-theme="cyberpunk"] #FlipMainArea,
+body[data-theme="cyberpunk"] #ReaderShell,
+body[data-theme="cyberpunk"] #ReaderFlipArea,
+body[data-theme="cyberpunk"] #ReaderPDFArea {
+  background-color: var(--base-300);
+  background-image:
+    linear-gradient(rgba(252, 238, 9, var(--cyber-flash)) 0 0),
+    repeating-linear-gradient(90deg, transparent 0 24px, rgba(16, 14, 22, 0.94) 24px 68px, transparent 68px 126px, rgba(12, 11, 17, 0.96) 126px 146px, transparent 146px 226px, rgba(18, 15, 24, 0.94) 226px 292px, transparent 292px 356px, rgba(10, 10, 15, 0.96) 356px 418px, transparent 418px 520px),
+    repeating-linear-gradient(90deg, transparent 0 18px, rgba(30, 29, 45, 0.62) 18px 58px, transparent 58px 83px, rgba(20, 22, 34, 0.52) 83px 129px, transparent 129px 166px, rgba(38, 31, 48, 0.5) 166px 232px, transparent 232px 276px, rgba(23, 24, 38, 0.54) 276px 316px, transparent 316px 380px),
+    linear-gradient(transparent 0 0),
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(252, 238, 9, 0.1) 31px 32px, transparent 32px 57px, rgba(0, 240, 255, 0.09) 57px 58px),
+    repeating-linear-gradient(90deg, rgba(7, 7, 12, 0.98) 0 46px, transparent 46px 68px, rgba(16, 14, 24, 0.96) 68px 112px, transparent 112px 147px, rgba(24, 20, 32, 0.94) 147px 220px, transparent 220px 249px, rgba(9, 10, 18, 0.98) 249px 304px, transparent 304px 352px, rgba(19, 17, 28, 0.96) 352px 418px, transparent 418px 520px),
+    linear-gradient(transparent 0 0),
+    repeating-linear-gradient(0deg, transparent 0 29px, rgba(0, 240, 255, 0.13) 29px 30px, transparent 30px 47px, rgba(252, 238, 9, 0.08) 47px 48px),
+    linear-gradient(to top, rgba(0, 240, 255, 0.24), transparent 74px),
+    conic-gradient(from var(--cyber-spot-a) at 14% 100%, transparent 0deg 5deg, rgba(252, 238, 9, 0.24) 10deg 22deg, transparent 28deg 360deg),
+    conic-gradient(from var(--cyber-spot-b) at 72% 100%, transparent 0deg 5deg, rgba(0, 240, 255, 0.18) 10deg 24deg, transparent 30deg 360deg),
+    conic-gradient(from var(--cyber-spot-c) at 56% 100%, transparent 0deg 5deg, rgba(255, 42, 109, 0.26) 10deg 22deg, transparent 33deg 360deg),
+    radial-gradient(ellipse 620px 280px at 82% 18%, rgba(255, 42, 109, 0.26), transparent 64%),
+    radial-gradient(ellipse 520px 240px at 18% 48%, rgba(0, 240, 255, 0.2), transparent 62%),
+    linear-gradient(180deg, #17151b 0%, #08070b 74%);
+  background-position:
+    left top,
+    left bottom,
+    left bottom,
+    left bottom,
+    left bottom,
+    left bottom,
+    left bottom,
+    left bottom,
+    left bottom,
+    left top,
+    right -10vw top,
+    left -18vw top,
+    left top,
+    left top,
+    left top;
+  background-size:
+    100% 100%,
+    680px 110px,
+    460px 220px,
+    460px 220px,
+    460px 220px,
+    680px 254px,
+    680px 254px,
+    680px 254px,
+    100% 180px,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  background-repeat:
+    no-repeat,
+    repeat-x,
+    repeat-x,
+    no-repeat,
+    repeat-x,
+    repeat-x,
+    no-repeat,
+    repeat-x,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat;
+  background-attachment: fixed;
+  animation:
+    cyber-spot-a-sweep 29s cubic-bezier(0.45, 0, 0.2, 1) -5s infinite,
+    cyber-spot-b-sweep 37s cubic-bezier(0.45, 0, 0.2, 1) -16s infinite,
+    cyber-spot-c-sweep 43s cubic-bezier(0.45, 0, 0.2, 1) -27s infinite,
+    cyber-lightning 53s steps(1, end) infinite;
+}
+
+/* 页脚使用警戒色块，主背景保持建筑和探照灯为主。 */
+body[data-theme="cyberpunk"] footer.footer.panel-surface {
+  background-color: var(--primary) !important;
+  background-image: repeating-linear-gradient(135deg, rgba(17, 16, 21, 0.96) 0 18px, rgba(252, 238, 9, 0.92) 18px 36px) !important;
+  color: var(--primary-content) !important;
+}
+
+body[data-theme="cyberpunk"] footer.footer.panel-surface a {
+  /* 页脚文字跨过警戒条纹时用差值混合反色，避免落在黑条上丢失。 */
+  color: #ffffff !important;
+  mix-blend-mode: difference;
+  text-shadow: none;
+}
+
+/* 阅读页保持静态初始光效，避免背景动画干扰看图。 */
+body[data-theme="cyberpunk"]:has(#ScrollMainArea),
+body[data-theme="cyberpunk"]:has(#FlipMainArea),
+body[data-theme="cyberpunk"]:has(#ReaderRoot),
+body[data-theme="cyberpunk"] :is(#ScrollMainArea, #FlipMainArea, #ReaderRoot, #ReaderShell, #ReaderFlipArea, #ReaderPDFArea) {
+  --cyber-spot-a: 4deg;
+  --cyber-spot-b: -18deg;
+  --cyber-spot-c: -42deg;
+  --cyber-flash: 0;
+  animation: none !important;
+}
+
+/* 面板采用低亮度网格，避免和背景探照灯抢视觉层级。 */
+body[data-theme="cyberpunk"] :is(.bg-base-100, .bg-base-100\/50, .bg-base-100\/70, .bg-base-100\/95, .panel-surface) {
+  background-color: var(--panel-surface) !important;
+  background-image:
+    linear-gradient(135deg, rgba(252, 238, 9, 0.22) 0 10%, transparent 10% 72%, rgba(0, 240, 255, 0.14) 72%),
+    repeating-linear-gradient(90deg, rgba(252, 238, 9, 0.2) 0 1px, transparent 1px 18px),
+    repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.16) 0 1px, transparent 1px 18px);
+  background-size: 100% 100%, 18px 18px, 18px 18px;
+}
+
+body[data-theme="cyberpunk"] :is(.bg-base-100.text-base-content, .bg-base-100\/50.text-base-content, .bg-base-100\/70.text-base-content, .bg-base-100\/95.text-base-content, .panel-surface, #header, #drawer-right),
+body[data-theme="cyberpunk"] .panel-surface .text-base-content {
+  color: var(--panel-surface-content) !important;
+}
+
+/* 控件使用高对比色块，保证在深色背景和半透明面板上都可读。 */
+body[data-theme="cyberpunk"] :is(.panel-control, select, input[type="search"], input[type="text"], input[type="password"], input[type="number"]) {
+  background-color: var(--panel-control) !important;
+  background-image: linear-gradient(110deg, transparent 0 72%, rgba(255, 42, 109, 0.28) 72% 84%, transparent 84%);
+  color: var(--panel-control-content) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(17, 16, 21, 0.5),
+    4px 4px 0 rgba(255, 42, 109, 0.72),
+    -3px -3px 0 rgba(0, 240, 255, 0.55);
+}
+
+body[data-theme="cyberpunk"] .panel-control .text-base-content {
+  color: var(--panel-control-content) !important;
+}
+
+body[data-theme="cyberpunk"] :is(.panel-control, input[type="search"], input[type="text"], input[type="password"], input[type="number"])::placeholder {
+  color: rgba(17, 16, 21, 0.68) !important;
+}
+
+body[data-theme="cyberpunk"] :is(.panel-control:focus-visible, select:hover, input[type="search"]:hover, input[type="text"]:hover, input[type="password"]:hover, input[type="number"]:hover) {
+  background-color: var(--panel-control-hover) !important;
+}
+
+/* select 自身常带 text-base-content，需要比面板文字色更具体，避免亮黄底上出现浅色文字。 */
+body[data-theme="cyberpunk"] select.text-base-content,
+body[data-theme="cyberpunk"] select.bg-base-100.text-base-content,
+body[data-theme="cyberpunk"] #settingsMainArea select.bg-base-100.text-base-content,
+body[data-theme="cyberpunk"] #drawer-right select.bg-base-100.text-base-content,
+body[data-theme="cyberpunk"] .panel-surface select.text-base-content {
+  background-color: var(--panel-surface) !important;
+  color: var(--panel-control) !important;
+}
+
+body[data-theme="cyberpunk"] select option {
+  background-color: var(--panel-control);
+  color: var(--panel-control-content);
+}
+
+/* 原生 option 悬停态可能继承亮黄色文字，这里只修正赛博朋克下拉菜单的高亮项。 */
+body[data-theme="cyberpunk"] select option:hover,
+body[data-theme="cyberpunk"] select option:checked,
+body[data-theme="cyberpunk"] select option:focus {
+  background-color: var(--panel-control-hover) !important;
+  color: var(--panel-control-content) !important;
+}
+
+/* 抽屉里的 select 保持静态文字色；原生下拉 hover 不再把文字切成另一套高亮色。 */
+body[data-theme="cyberpunk"] #drawer-right select,
+body[data-theme="cyberpunk"] #drawer-right select:hover,
+body[data-theme="cyberpunk"] #drawer-right select:focus-visible,
+body[data-theme="cyberpunk"] #drawer-right select option:hover,
+body[data-theme="cyberpunk"] #drawer-right select option:checked,
+body[data-theme="cyberpunk"] #drawer-right select option:focus {
+  background-color: var(--panel-surface) !important;
+  color: var(--panel-control) !important;
+}
+
+/* 上传目标书库下拉列表保持静态高对比色，避免 option 悬停变亮后文字难以辨认。 */
+body[data-theme="cyberpunk"] #store-select,
+body[data-theme="cyberpunk"] #store-select:hover,
+body[data-theme="cyberpunk"] #store-select:focus-visible,
+body[data-theme="cyberpunk"] #store-select option,
+body[data-theme="cyberpunk"] #store-select option:hover,
+body[data-theme="cyberpunk"] #store-select option:checked,
+body[data-theme="cyberpunk"] #store-select option:focus {
+  background-color: var(--panel-surface) !important;
+  color: var(--panel-control) !important;
+}
+
+body[data-theme="cyberpunk"] :is(button, a):is(.bg-blue-200, .bg-blue-300, .bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600),
+body[data-theme="cyberpunk"] .panel-control:is(.bg-blue-400, .bg-blue-500, .bg-blue-600, .bg-cyan-200, .bg-green-300, .bg-green-500, .bg-green-600) {
+  background-color: var(--panel-control-active) !important;
+  color: var(--secondary-content) !important;
+}
+
+body[data-theme="cyberpunk"] input[type="checkbox"].peer + :is(div, span) {
+  background-color: var(--panel-control-muted) !important;
+}
+
+body[data-theme="cyberpunk"] input[type="checkbox"].peer:checked + :is(div, span) {
+  background-color: var(--primary) !important;
+}
+
+body[data-theme="cyberpunk"] a[title][class*="bg-cover"] {
+  border-radius: 0;
+  box-shadow:
+    5px 5px 0 rgba(255, 42, 109, 0.72),
+    -4px -4px 0 rgba(0, 240, 255, 0.6);
+}
+
+body[data-theme="cyberpunk"] a[title][class*="bg-cover"]:hover {
+  box-shadow:
+    5px 5px 0 var(--accent),
+    -4px -4px 0 var(--secondary);
+}
+
+body[data-theme="cyberpunk"] a[title][class*="bg-cover"] > div[x-show="$store.shelf.showFilename"] {
+  background-color: rgba(23, 21, 27, 0.92) !important;
+  color: var(--primary) !important;
+}
+
+body[data-theme="cyberpunk"] .text-yellow-400 {
+  color: var(--primary) !important;
+}
+
+/* 三组探照灯分别控制一个角度变量，周期和延迟不同，避免同步摆动。 */
+@keyframes cyber-spot-a-sweep {
+  0% {
+    --cyber-spot-a: 2deg;
+  }
+  19% {
+    --cyber-spot-a: 18deg;
+  }
+  37% {
+    --cyber-spot-a: -8deg;
+  }
+  58% {
+    --cyber-spot-a: 24deg;
+  }
+  78% {
+    --cyber-spot-a: 7deg;
+  }
+  100% {
+    --cyber-spot-a: 2deg;
+  }
+}
+
+@keyframes cyber-spot-b-sweep {
+  0% {
+    --cyber-spot-b: -22deg;
+  }
+  23% {
+    --cyber-spot-b: -4deg;
+  }
+  51% {
+    --cyber-spot-b: -36deg;
+  }
+  76% {
+    --cyber-spot-b: 6deg;
+  }
+  100% {
+    --cyber-spot-b: -22deg;
+  }
+}
+
+@keyframes cyber-spot-c-sweep {
+  0% {
+    --cyber-spot-c: -48deg;
+  }
+  29% {
+    --cyber-spot-c: -30deg;
+  }
+  54% {
+    --cyber-spot-c: -64deg;
+  }
+  81% {
+    --cyber-spot-c: -38deg;
+  }
+  100% {
+    --cyber-spot-c: -48deg;
+  }
+}
+
+@keyframes cyber-lightning {
+  0%, 67.5%, 68.45%, 69.15%, 100% {
+    --cyber-flash: 0;
+  }
+  67.8% {
+    --cyber-flash: 0.08;
+  }
+  68.05% {
+    --cyber-flash: 0.025;
+  }
+  68.28% {
+    --cyber-flash: 0.13;
+  }
+  68.8% {
+    --cyber-flash: 0.055;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-theme="cyberpunk"],
+  body[data-theme="cyberpunk"] .grid-line,
+  body[data-theme="cyberpunk"] .grid-point,
+  body[data-theme="cyberpunk"] .grid-mosaic,
+  body[data-theme="cyberpunk"] #ShelfMainArea,
+  body[data-theme="cyberpunk"] #settingsMainArea,
+  body[data-theme="cyberpunk"] #tab-contents,
+  body[data-theme="cyberpunk"] #ReaderRoot,
+  body[data-theme="cyberpunk"] #ScrollMainArea,
+  body[data-theme="cyberpunk"] #FlipMainArea,
+  body[data-theme="cyberpunk"] #ReaderShell,
+  body[data-theme="cyberpunk"] #ReaderFlipArea,
+  body[data-theme="cyberpunk"] #ReaderPDFArea {
+    animation: none;
+  }
+}

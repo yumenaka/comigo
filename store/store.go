@@ -10,6 +10,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/vfs"
 )
@@ -19,7 +20,6 @@ type StoreInfo struct {
 	BackendURL  string // 本地书库文件夹路径，或远程书库URL
 	Name        string
 	Description string
-	Backend
 }
 
 // Store 对应某个扫描路径的子书库，目前只支持本地书库
@@ -31,10 +31,14 @@ type Store struct {
 
 // GenerateBookGroup 分析书库中已有书籍的路径，生成书籍组信息
 func (store *Store) GenerateBookGroup() error {
-	// 遍历 BookMap ，清理所有 BooksGroup 类型的书籍
+	if tools.DetectStoreURL(store.BackendURL).Type == tools.StoreBackendComigo {
+		// Comigo 远程书库直接使用远端返回的书组拓扑，避免本地按路径再生成一份重复书组。
+		return nil
+	}
+	// 遍历 BookMap，清理本地生成的 BooksGroup；远端 Comigo 原本返回的书组带 RemoteBookID，不能删。
 	for _, value := range store.BookMap.Range {
 		b := value.(*model.Book)
-		if b.Type == model.TypeBooksGroup {
+		if b.Type == model.TypeBooksGroup && b.RemoteBookID == "" {
 			store.BookMap.Delete(b.BookID)
 		}
 	}
@@ -96,7 +100,7 @@ func (store *Store) GenerateBookGroup() error {
 			// 新建一本书,类型是书籍组
 			// 获取父目录信息（作为书组的时间信息来源）
 			var modTime time.Time
-			isRemote := vfs.IsRemoteURL(store.BackendURL)
+			isRemote := tools.IsRemoteStoreURL(store.BackendURL)
 			if isRemote {
 				// 远程书库：使用 VFS 获取文件信息
 				vfsInstance, err := vfs.GetOrCreate(store.BackendURL, vfs.Options{
@@ -150,6 +154,15 @@ func (store *Store) GenerateBookGroup() error {
 				continue
 			}
 			newBookGroup := tempBook
+			if len(sameParentBookList) > 0 && sameParentBookList[0].IsRemote {
+				// 远程书组由本地扫描生成，必须继承子书的远端定位信息，阅读链接才会带 remote_store。
+				firstBook := sameParentBookList[0]
+				newBookGroup.IsRemote = true
+				newBookGroup.RemoteURL = firstBook.RemoteURL
+				newBookGroup.RemoteStoreKey = firstBook.RemoteStoreKey
+				newBookGroup.RemoteShelfKey = firstBook.RemoteShelfKey
+				newBookGroup.RemoteShelfName = firstBook.RemoteShelfName
+			}
 			// 书名设置为目录名（更符合“文件夹/书组”语义）
 			var parentName string
 			if isRemote {

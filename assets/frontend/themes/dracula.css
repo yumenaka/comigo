@@ -1,0 +1,83 @@
+/* 夜魅古堡模板：变量、暗红背景和控件样式集中在这里。 */
+@layer base {
+  /* ====================== Dracula ====================== */
+  [data-theme="dracula"] {
+    color-scheme: dark;
+    --primary: #b5162f;
+    --primary-content: #fff1e8;
+    --secondary: #d7c7a5;
+    --secondary-content: #201418;
+    --accent: #f4f0e6;
+    --accent-content: #2a1118;
+    --neutral: #21151b;
+    --neutral-content: #f4f0e6;
+    --base-100: #2a1118;
+    --base-200: #21151b;
+    --base-300: #10090d;
+    --base-content: #f4dfca;
+    --panel-surface: #2a1118;
+    --panel-surface-content: #f4dfca;
+    --panel-control: #3a1b21;
+    --panel-control-hover: #462129;
+    --panel-control-active: #b5162f;
+    --panel-control-muted: #4a2a2f;
+    --panel-control-content: #f4dfca;
+    --grid-pattern-color: rgba(215, 199, 165, 0.28);
+    --grid-mosaic-color: rgba(181, 22, 47, 0.24);
+    --info: #7a96c2;
+    --success: #6f9b72;
+    --warning: #d7a64a;
+    --error: #b5162f;
+  }
+}
+
+/* 主背景：血色月光、星点和底部浓雾共同形成暗夜层次。 */
+body[data-theme="dracula"],
+body[data-theme="dracula"] .grid-line,
+body[data-theme="dracula"] .grid-point,
+body[data-theme="dracula"] .grid-mosaic,
+body[data-theme="dracula"] #ShelfMainArea,
+body[data-theme="dracula"] #settingsMainArea,
+body[data-theme="dracula"] #tab-contents,
+body[data-theme="dracula"] #ReaderRoot,
+body[data-theme="dracula"] #ReaderShell,
+body[data-theme="dracula"] #ScrollMainArea,
+body[data-theme="dracula"] #ReaderFlipArea,
+body[data-theme="dracula"] #ReaderPDFArea {
+  background-color: var(--base-300);
+  background-image:
+    radial-gradient(circle at 79% 15%, #09070b 0 50px, transparent 52px),
+    radial-gradient(circle at 77% 17%, #ffd0b8 0 58px, transparent 60px),
+    radial-gradient(circle at 13% 16%, rgba(244, 240, 230, 0.88) 0 1px, transparent 2px),
+    radial-gradient(circle at 28% 9%, rgba(244, 223, 202, 0.74) 0 1px, transparent 2px),
+    radial-gradient(circle at 45% 22%, rgba(244, 240, 230, 0.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 62% 12%, rgba(244, 223, 202, 0.64) 0 1px, transparent 2px),
+    radial-gradient(circle at 88% 31%, rgba(244, 240, 230, 0.5) 0 1px, transparent 2px),
+    radial-gradient(ellipse 80% 22% at 24% 102%, rgba(0, 0, 0, 0.72), transparent 70%),
+    radial-gradient(ellipse 92% 30% at 76% 106%, rgba(26, 11, 16, 0.88), transparent 72%),
+    linear-gradient(to top, rgba(10, 6, 9, 0.96) 0%, rgba(42, 17, 24, 0.76) 16%, transparent 34%),
+    radial-gradient(ellipse at 76% 18%, rgba(181, 22, 47, 0.26), transparent 36%),
+    linear-gradient(180deg, #09070b 0%, #10090d 48%, #21151b 100%);
+  background-size:
+    100% 100%,
+    100% 100%,
+    180px 150px,
+    220px 170px,
+    260px 190px,
+    210px 180px,
+    240px 210px,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  background-attachment: fixed;
+}
+
+/* 面板使用深酒红，控件略亮，保证层级和可读性。 */
+body[data-theme="dracula"] .panel-surface {
+  background-color: var(--panel-surface) !important;
+  background-image:
+    linear-gradient(135deg, rgba(181, 22, 47, 0.22) 0 18%, transparent 18%),
+    repeating-linear-gradient(0deg, rgba(215, 199, 165, 0.08) 0 1px, transparent 1px 18px);
+}

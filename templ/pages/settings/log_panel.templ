@@ -5,7 +5,7 @@ templ LogPanel() {
 	<div
 		id="settings_log"
 		x-data="{ collapsed: $persist(true).as('settings_log_collapsed_shelf') }"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<!-- 折叠/展开按钮 -->
 		<button
@@ -40,21 +40,6 @@ templ LogPanel() {
 				class="w-full h-[400px] p-4 mt-1 bg-gray-900 text-sm text-white rounded overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-all"
 			>
 				<!-- 日志内容将通过 JavaScript 动态插入 -->
-			</div>
-			<!-- 发送信息按钮，目前用不着，隐藏 -->
-			<div class="hidden items-center justify-center w-full px-2 pt-3">
-				<input
-					id="msg"
-					placeholder="输入广播消息"
-					x-bind:placeholder="i18next.t('settings_log_broadcast_placeholder')"
-					class="flex-1 min-w-0 px-2 py-1 h-10 rounded text-black bg-base-200 border border-base-300"
-				/>
-				<button
-					id="send"
-					class="ml-2 p-1 h-10 w-24 text-center text-gray-700 transition border border-gray-500 rounded bg-sky-300 active:bg-sky-500 hover:text-gray-900"
-				>
-					<span x-text="i18next.t('settings_log_broadcast_send')">POST</span>
-				</button>
 			</div>
 		</div>
 	</div>
@@ -146,21 +131,5 @@ templ LogPanel() {
 		window.__comigoLogAppend = log;
 		ensureSharedSSE();
 		window.addEventListener("comigo:sse-ready", ensureSharedSSE);
-
-		// 发送消息按钮的点击事件
-		const sendButton = document.getElementById("send");
-		if (sendButton) {
-			sendButton.onclick = async () => {
-				const message =
-					document.getElementById("msg").value ||
-					i18next.t("settings_log_broadcast_default_message");
-				await fetch(window.ComiGoPath("/api/push"), {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ message }),
-				});
-				console.log("[send] " + message);
-			};
-		}
 	</script>
 }

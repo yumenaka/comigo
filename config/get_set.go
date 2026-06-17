@@ -10,10 +10,14 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
+// GetCfg 返回当前进程的全局配置指针。
+// 调用方可以通过返回值读取或修改配置；并发写入时需要遵守 config.Mutex 的保护约定。
 func GetCfg() *Config {
 	return &cfg
 }
 
+// CopyCfg 返回当前全局配置的值拷贝。
+// 返回值用于变更前后对比，不会随全局配置后续修改而自动更新。
 func CopyCfg() Config {
 	return cfg
 }
@@ -21,9 +25,16 @@ func CopyCfg() Config {
 // GetConfigDir 获取配置文件所在目录
 // 优先级：1. 用户指定的配置文件路径 2. COMIGO_CONFIG_DIR 环境变量 3. 用户主目录 4. 临时目录
 func GetConfigDir() (dir string, err error) {
-	// 如果配置文件存在
-	if cfg.ConfigFile != "" && tools.PathExists(cfg.ConfigFile) {
-		return filepath.Dir(cfg.ConfigFile), nil
+	// 如果用户显式指定配置文件，则以该文件所在目录作为配置目录。
+	// 配置文件可能尚未创建，不能因此回退到用户主目录。
+	if cfg.ConfigFile != "" {
+		configDir := filepath.Dir(cfg.ConfigFile)
+		err = os.MkdirAll(configDir, os.ModePerm)
+		if err != nil {
+			logger.Infof(locale.GetString("log_failed_to_create_config_dir"), err)
+			return "", err
+		}
+		return configDir, nil
 	}
 
 	// 检查 COMIGO_CONFIG_DIR 环境变量（适用于 Docker 等容器环境）
@@ -66,7 +77,7 @@ func GetConfigDir() (dir string, err error) {
 
 func AutoSetCacheDir() {
 	// 手动设置的临时文件夹
-	if cfg.CacheDir != "" && tools.IsExist(cfg.CacheDir) && tools.ChickIsDir(cfg.CacheDir) {
+	if cfg.CacheDir != "" && tools.IsExist(cfg.CacheDir) && tools.CheckIsDir(cfg.CacheDir) {
 		cfg.CacheDir = filepath.Join(cfg.CacheDir)
 	} else {
 		cfg.CacheDir = filepath.Join(os.TempDir(), "comigo_cache") // 使用系统文件夹

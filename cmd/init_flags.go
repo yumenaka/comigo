@@ -55,6 +55,14 @@ func InitFlags() {
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableDatabase, "database", false, locale.GetString("enable_database"))
 	runtimeViper.BindPFlag("EnableDatabase", RootCmd.PersistentFlags().Lookup("database"))
 
+	// 数据库类型。未启用数据库时该配置会被忽略。
+	RootCmd.PersistentFlags().StringVar(&cfg.DBType, "db-type", "sqlite", locale.GetString("db_type"))
+	runtimeViper.BindPFlag("DBType", RootCmd.PersistentFlags().Lookup("db-type"))
+
+	// PostgreSQL 连接字符串。SQLite 模式不使用。
+	RootCmd.PersistentFlags().StringVar(&cfg.DBDSN, "db-dsn", "", locale.GetString("db_dsn"))
+	runtimeViper.BindPFlag("DBDSN", RootCmd.PersistentFlags().Lookup("db-dsn"))
+
 	// 服务端口
 	RootCmd.PersistentFlags().IntVarP(&cfg.Port, "port", "p", 1234, locale.GetString("port"))
 	runtimeViper.BindPFlag("Port", RootCmd.PersistentFlags().Lookup("port"))
@@ -64,7 +72,7 @@ func InitFlags() {
 	runtimeViper.BindPFlag("Host", RootCmd.PersistentFlags().Lookup("host"))
 
 	// 反向代理基础路径，留空时服务挂载在根路径。
-	RootCmd.PersistentFlags().StringVar(&cfg.BasePath, "base-path", "", locale.GetString("base_path"))
+	RootCmd.PersistentFlags().StringVar(&cfg.BasePath, "base-path", "", locale.GetString("base_path_description"))
 	runtimeViper.BindPFlag("BasePath", RootCmd.PersistentFlags().Lookup("base-path"))
 
 	// TLS设定
@@ -90,6 +98,12 @@ func InitFlags() {
 	// 打开浏览器
 	RootCmd.PersistentFlags().BoolVarP(&cfg.OpenBrowser, "open-browser", "o", false, locale.GetString("open_browser"))
 	runtimeViper.BindPFlag("OpenBrowser", RootCmd.PersistentFlags().Lookup("open-browser"))
+
+	// 不启动 TUI（不绑定 viper，避免配置文件或环境变量影响默认交互入口）
+	RootCmd.PersistentFlags().BoolVarP(&cfg.NoTUI, "no-tui", "n", false, locale.GetString("no_tui"))
+
+	// 强制前端选择随机模板（不绑定 viper，避免配置文件或环境变量覆盖用户主题选择）
+	RootCmd.PersistentFlags().BoolVar(&cfg.RandomTheme, "random-theme", false, locale.GetString("random_theme"))
 
 	// 不对局域网开放
 	RootCmd.PersistentFlags().BoolVar(&cfg.DisableLAN, "local", false, locale.GetString("disable_lan"))
@@ -196,9 +210,9 @@ func InitFlags() {
 //
 //   - 阅读模式：
 //
-//   - "flip" → 设置为翻页模式
+//   - "flip" → 设置为翻页阅读
 //
-//   - "scroll" → 设置为滚动模式
+//   - "scroll" → 设置为卷轴阅读
 //
 //   - 布尔值配置项（文件名包含关键词时启用）：
 //
@@ -255,7 +269,7 @@ func SetByExecutableFilename() {
 	filenameLower := strings.ToLower(filename)
 	cfg := config.GetCfg()
 	// Windows 默认打开浏览器
-	if runtime.GOOS == "windows" || filenameLower == "comigo" {
+	if runtime.GOOS == "windows" {
 		cfg.OpenBrowser = true
 	}
 	// 打开浏览器

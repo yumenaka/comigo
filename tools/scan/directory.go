@@ -4,18 +4,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sync"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/vfs"
-)
-
-// 全局变量：标记是否正在扫描，避免并发扫描
-var (
-	scanning  bool       // 标记是否正在扫描，避免并发扫描
-	scanMutex sync.Mutex // 保护 scanning 标志的锁
 )
 
 // DirNode 表示目录树节点，用于表示文件系统中的目录结构。

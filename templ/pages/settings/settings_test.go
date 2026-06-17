@@ -1,0 +1,186 @@
+package settings
+
+import (
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
+)
+
+type storeBookCountsTestStore struct {
+	books         map[string]*model.Book
+	deleteCalls   int
+	generateCalls int
+}
+
+func (s *storeBookCountsTestStore) StoreBook(b *model.Book) error {
+	s.books[b.BookID] = b
+	return nil
+}
+
+func (s *storeBookCountsTestStore) GetBook(id string) (*model.Book, error) {
+	if b, ok := s.books[id]; ok {
+		return b, nil
+	}
+	return nil, errors.New("book not found")
+}
+
+func (s *storeBookCountsTestStore) DeleteBook(id string) error {
+	s.deleteCalls++
+	delete(s.books, id)
+	return nil
+}
+
+func (s *storeBookCountsTestStore) ListBooks() ([]*model.Book, error) {
+	books := make([]*model.Book, 0, len(s.books))
+	for _, book := range s.books {
+		books = append(books, book)
+	}
+	return books, nil
+}
+
+func (s *storeBookCountsTestStore) GenerateBookGroup() error {
+	s.generateCalls++
+	return nil
+}
+
+func (s *storeBookCountsTestStore) StoreBookMark(mark *model.BookMark) error { return nil }
+
+func (s *storeBookCountsTestStore) GetBookMarks(bookID string) (*model.BookMarks, error) {
+	marks := model.BookMarks{}
+	return &marks, nil
+}
+
+func (s *storeBookCountsTestStore) DeleteBookMark(bookID string, markType model.MarkType, pageIndex int) error {
+	return nil
+}
+
+func TestGetStoreBookCountsCleansMissingBooks(t *testing.T) {
+	oldCfg := config.CopyCfg()
+	t.Cleanup(func() {
+		*config.GetCfg() = oldCfg
+	})
+	oldStore := model.IStore
+	t.Cleanup(func() {
+		model.IStore = oldStore
+	})
+
+	storeDir := t.TempDir()
+	existingPath := filepath.Join(storeDir, "exists.zip")
+	if err := os.WriteFile(existingPath, []byte("zip"), 0o644); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	missingPath := filepath.Join(storeDir, "missing.zip")
+	config.GetCfg().StoreUrls = []string{storeDir}
+
+	testStore := &storeBookCountsTestStore{books: map[string]*model.Book{
+		"existing": {
+			BookInfo: model.BookInfo{
+				BookID:   "existing",
+				BookPath: existingPath,
+				StoreUrl: storeDir,
+				Type:     model.TypeZip,
+			},
+		},
+		"missing": {
+			BookInfo: model.BookInfo{
+				BookID:   "missing",
+				BookPath: missingPath,
+				StoreUrl: storeDir,
+				Type:     model.TypeZip,
+			},
+		},
+	}}
+	model.IStore = testStore
+
+	counts := GetStoreBookCounts()
+	if got := counts[storeBookCountKey(storeDir)]; got != 1 {
+		t.Fatalf("store count = %d, want 1 after missing book cleanup", got)
+	}
+	if testStore.deleteCalls != 1 {
+		t.Fatalf("DeleteBook calls = %d, want 1", testStore.deleteCalls)
+	}
+}
+
+func TestRescanBookDeltaReportsRemovedBooks(t *testing.T) {
+	newBooksCount, removedBooksCount := rescanBookDelta(5, 3)
+	if newBooksCount != 0 || removedBooksCount != 2 {
+		t.Fatalf("delta = new %d removed %d, want new 0 removed 2", newBooksCount, removedBooksCount)
+	}
+}
+
+func TestGetStoreRealBookCountOnlyCountsTargetStore(t *testing.T) {
+	oldStore := model.IStore
+	t.Cleanup(func() {
+		model.IStore = oldStore
+	})
+
+	storeDir := t.TempDir()
+	otherStoreDir := t.TempDir()
+	model.IStore = &storeBookCountsTestStore{books: map[string]*model.Book{
+		"target": {
+			BookInfo: model.BookInfo{
+				BookID:   "target",
+				StoreUrl: storeDir,
+				Type:     model.TypeZip,
+			},
+		},
+		"group": {
+			BookInfo: model.BookInfo{
+				BookID:   "group",
+				StoreUrl: storeDir,
+				Type:     model.TypeBooksGroup,
+			},
+		},
+		"other": {
+			BookInfo: model.BookInfo{
+				BookID:   "other",
+				StoreUrl: otherStoreDir,
+				Type:     model.TypeZip,
+			},
+		},
+	}}
+
+	if got := getStoreRealBookCount(storeDir); got != 1 {
+		t.Fatalf("target store count = %d, want 1", got)
+	}
+}
+
+func TestRemoteComigoVersionWarningWhenRemoteOlder(t *testing.T) {
+	server := newServerInfoTestServer(t, `{"Version":"v0.1.0","ServerName":"Comigo v0.1.0"}`)
+
+	warning := remoteComigoVersionWarning(server.URL)
+	if warning == "" {
+		t.Fatal("expected warning for older remote Comigo version")
+	}
+	if !strings.Contains(warning, "v0.1.0") || !strings.Contains(warning, config.GetVersion()) {
+		t.Fatalf("warning = %q, want both remote and local version", warning)
+	}
+}
+
+func TestRemoteComigoVersionWarningAllowsNewerRemote(t *testing.T) {
+	server := newServerInfoTestServer(t, `{"Version":"v99.0.0","ServerName":"Comigo v99.0.0"}`)
+
+	if warning := remoteComigoVersionWarning(server.URL); warning != "" {
+		t.Fatalf("warning = %q, want empty for newer remote Comigo", warning)
+	}
+}
+
+func newServerInfoTestServer(t *testing.T, body string) *httptest.Server {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/server-info" {
+			http.NotFound(w, r)
+			return
+		}
+		_, _ = w.Write([]byte(body))
+	}))
+	t.Cleanup(server.Close)
+	return server
+}

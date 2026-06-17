@@ -48,6 +48,10 @@ func PrefixPath(urlPath string) string {
 	if basePath == "" {
 		return urlPath
 	}
+	// PrefixPath 可能被通用组件二次调用；已带基础路径的站内 URL 原样返回，避免生成 /base/base/...
+	if urlPath == basePath || strings.HasPrefix(urlPath, basePath+"/") {
+		return urlPath
+	}
 	if urlPath == "/" {
 		return basePath + "/"
 	}

@@ -1,5 +1,5 @@
 /**
- * 全局 SSE：接收 ui_suggest_reload（整页刷新建议）并转发 log 到设置页日志面板。
+ * 全局 SSE：接收 ui_suggest_reload（整页刷新通知）并转发 log 到设置页日志面板。
  */
 function shouldEnableComigoSSE() {
     if (typeof window === 'undefined' || typeof EventSource === 'undefined') {
@@ -10,7 +10,13 @@ function shouldEnableComigoSSE() {
     return pathname !== '/login'
 }
 
-// 仅在书架与设置页弹出「建议刷新」；阅读页（flip/scroll 等）不打断
+const libraryRescanReloadReasons = new Set([
+    'library_rescan_done',
+    'auto_library_rescan_done',
+    'single_store_rescan_done',
+])
+
+// 仅在书架与设置页处理整页刷新；阅读页（flip/scroll 等）不打断
 function shouldShowUISuggestReloadPrompt() {
     const p = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname
     if (p === '/settings') {
@@ -23,6 +29,10 @@ function shouldShowUISuggestReloadPrompt() {
         return true
     }
     return false
+}
+
+function isLibraryRescanReloadReason(reason) {
+    return libraryRescanReloadReasons.has(reason)
 }
 
 function getReloadPromptMessage(reason) {
@@ -50,7 +60,7 @@ function showReloadPrompt(reason) {
         buttons: 'confirm_cancel',
         onConfirm: () => {
             window.__comigoReloadPromptOpen = false
-            window.location.reload()
+            reloadComigoPage()
         },
         onCancel: () => {
             window.__comigoReloadPromptOpen = false
@@ -58,9 +68,62 @@ function showReloadPrompt(reason) {
     })
 }
 
+function autoReloadAfterLibraryRescan() {
+    if (!shouldShowUISuggestReloadPrompt() || window.__comigoAutoReloadQueued) {
+        return
+    }
+    window.__comigoAutoReloadQueued = true
+    reloadComigoPage()
+}
+
 function appendSharedLog(line) {
     if (typeof window.__comigoLogAppend === 'function') {
         window.__comigoLogAppend(line)
+    }
+}
+
+// 取消尚未执行的延迟连接，页面即将卸载时不能再新建 EventSource。
+function clearQueuedComigoSSEStart() {
+    if (window.__comigoSSEStartTimer) {
+        clearTimeout(window.__comigoSSEStartTimer)
+        window.__comigoSSEStartTimer = null
+    }
+    window.__comigoSSEStartQueued = false
+}
+
+// 主动关闭当前 SSE；由 reload/pagehide 共用，避免卸载时遗留被浏览器标记为中断的长连接。
+function closeComigoSSE() {
+    clearQueuedComigoSSEStart()
+    if (!window.__comigoSSEInstance) {
+        return
+    }
+    try {
+        window.__comigoSSEInstance.close()
+    } catch (_) {}
+    window.__comigoSSEInstance = null
+}
+
+function reloadComigoPage() {
+    closeComigoSSE()
+    window.location.reload()
+}
+
+function queueComigoSSEStart() {
+    if (window.__comigoSSEStartQueued) {
+        return
+    }
+    window.__comigoSSEStartQueued = true
+    const start = () => {
+        window.__comigoSSEStartTimer = setTimeout(() => {
+            window.__comigoSSEStartTimer = null
+            window.__comigoSSEStartQueued = false
+            comigoSSEInit()
+        }, 1000)
+    }
+    if (document.readyState === 'complete') {
+        start()
+    } else {
+        window.addEventListener('load', start, { once: true })
     }
 }
 
@@ -73,6 +136,10 @@ function comigoAttachSSEListeners(es) {
                 reason = data.reason
             }
         } catch (_) {}
+        if (isLibraryRescanReloadReason(reason)) {
+            autoReloadAfterLibraryRescan()
+            return
+        }
         showReloadPrompt(reason)
     })
 
@@ -125,7 +192,19 @@ function comigoSSEInit() {
         return null
     }
     if (window.__comigoSSEInstance) {
+        if (window.__comigoSSEInstance.readyState === EventSource.CLOSED) {
+            window.__comigoSSEInstance = null
+        } else {
+            return window.__comigoSSEInstance
+        }
+    }
+    if (window.__comigoSSEStartQueued) {
         return window.__comigoSSEInstance
+    }
+    // 页面初次加载时稍后再连，避免浏览器把 SSE 长连接误报为加载中断。
+    if (document.readyState !== 'complete') {
+        queueComigoSSEStart()
+        return null
     }
     const sseURL = window.ComiGoPath ? window.ComiGoPath('/api/sse') : '/api/sse'
     const es = new EventSource(sseURL, { withCredentials: true })
@@ -135,5 +214,19 @@ function comigoSSEInit() {
 }
 
 window.__comigoSSEInit = comigoSSEInit
+
+// 全局启动 SSE；具体事件处理仍由上面的路径判断决定，阅读页不会被重扫通知打断。
+queueComigoSSEStart()
+
+// 页面卸载时主动关闭 SSE，并取消尚未执行的延迟启动，避免卸载过程中创建/留下
+// 被中断(aborted)的 /api/sse 请求。
+if (typeof window.addEventListener === 'function') {
+    window.addEventListener('pagehide', () => {
+        closeComigoSSE()
+    })
+    window.addEventListener('pageshow', () => {
+        queueComigoSSEStart()
+    })
+}
+
 window.dispatchEvent(new Event('comigo:sse-ready'))
-comigoSSEInit()

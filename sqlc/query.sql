@@ -179,7 +179,6 @@ RETURNING *;
 UPDATE bookmarks
 SET description = ?,
     page_index  = ?,
-    description = ?,
     updated_at  = CURRENT_TIMESTAMP
 WHERE book_id = ? and type = ?;
 

@@ -52,7 +52,7 @@ templ SketchPracticeScript() {
 							}
 						}, 1000);
 
-						// 翻页模式：调用翻页函数
+						// 翻页阅读：调用翻页函数
 						if (typeof toNextPage === "function") {
 							self.sketchInterval = setInterval(() => {
 								const nowPageNum = parseInt(Alpine.store("global").nowPageNum);
@@ -181,7 +181,7 @@ templ SketchPracticeOverlay(c echo.Context) {
 	}
 }
 
-// SketchPracticePlugin 速写练习插件控制面板（仅支持翻页模式）
+// SketchPracticePlugin 速写练习插件控制面板（仅支持翻页阅读）
 // 与自动翻页插件功能相同，但会在画面上显示可拖动的倒计时提示
 templ SketchPracticePlugin(c echo.Context) {
 	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("sketch_practice") && strings.HasPrefix(config.StripBasePath(c.Request().URL.Path), "/flip/") {

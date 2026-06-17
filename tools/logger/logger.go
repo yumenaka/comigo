@@ -19,21 +19,21 @@ import (
 
 // 对外暴露的 log 接口
 var (
-	SetOutput         func(output io.Writer)
-	SetMirrorOutput   func(output io.Writer)
-	SetSuppressStdout func(disable bool)
-	Info              func(args ...interface{})
-	Infof             func(format string, args ...interface{})
-	Error             func(args ...interface{})
-	Errorf            func(format string, args ...interface{})
-	Fatal             func(args ...interface{})
-	Fatalf            func(format string, args ...interface{})
+	SetOutput          func(output io.Writer)
+	SetMirrorOutput    func(output io.Writer)
+	SetSuppressStdout  func(disable bool)
+	IsStdoutSuppressed func() bool
+	Info               func(args ...interface{})
+	Infof              func(format string, args ...interface{})
+	Error              func(args ...interface{})
+	Errorf             func(format string, args ...interface{})
+	Fatal              func(args ...interface{})
+	Fatalf             func(format string, args ...interface{})
 )
 
 // 全局 logger
 var (
 	logger         *logrus.Logger
-	logLevel       = logrus.DebugLevel
 	ReportCaller   bool
 	baseOutput     io.Writer
 	mirrorOutput   io.Writer
@@ -64,6 +64,9 @@ func init() {
 	}
 	SetSuppressStdout = func(disable bool) {
 		suppressStdout = disable
+	}
+	IsStdoutSuppressed = func() bool {
+		return suppressStdout
 	}
 	Info = logger.Info
 	Infof = logger.Infof

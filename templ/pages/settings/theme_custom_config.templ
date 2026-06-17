@@ -4,8 +4,8 @@ package settings
 templ ThemeCustomConfig() {
 	<div
 		id="settings_custom_theme"
-		x-data="{ collapsed: $persist(false).as('settings_custom_theme_collapsed') }"
-		class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		x-data="{ collapsed: $persist(true).as('settings_custom_theme_collapsed') }"
+		class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<!-- 折叠/展开按钮 -->
 		<button
@@ -34,55 +34,57 @@ templ ThemeCustomConfig() {
 		</button>
 		<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<div x-show="!collapsed" x-transition class="flex flex-col justify-start w-full">
-			<div class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
+			<div class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
 				<label class="w-full py-0 text-left" x-text="i18next.t('settings_custom_theme_selector')">主题</label>
 				<select
 					x-model="$store.global.theme"
-					class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm bg-base-100 text-base-content"
+					@change="$store.global.setTheme($event.target.value)"
+					class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm bg-base-100 text-base-content"
 				>
+					<option value="random" x-text="i18next.t('theme_option_random')">Random theme</option>
 					<option value="retro" x-text="i18next.t('theme_option_retro')">Retro</option>
-					<option value="custom" x-text="i18next.t('theme_option_custom')">Custom</option>
-					<option value="light" x-text="i18next.t('theme_option_light')">Light</option>
-					<option value="dark" x-text="i18next.t('theme_option_dark')">Dark</option>
-					<option value="dracula" x-text="i18next.t('theme_option_dracula')">Dracula</option>
 					<option value="cupcake" x-text="i18next.t('theme_option_cupcake')">Cupcake</option>
 					<option value="cyberpunk" x-text="i18next.t('theme_option_cyberpunk')">Cyberpunk</option>
+					<option value="red-white-game" x-text="i18next.t('theme_option_red_white_game')">Red-White Game</option>
+					<option value="dracula" x-text="i18next.t('theme_option_dracula')">Dracula</option>
 					<option value="valentine" x-text="i18next.t('theme_option_valentine')">Valentine</option>
 					<option value="cmyk" x-text="i18next.t('theme_option_cmyk')">CMYK</option>
-					<option value="lofi" x-text="i18next.t('theme_option_lofi')">Lofi</option>
 					<option value="halloween" x-text="i18next.t('theme_option_halloween')">Halloween</option>
 					<option value="coffee" x-text="i18next.t('theme_option_coffee')">Coffee</option>
 					<option value="winter" x-text="i18next.t('theme_option_winter')">Winter</option>
 					<option value="nord" x-text="i18next.t('theme_option_nord')">Nord</option>
+					<option value="light" x-text="i18next.t('theme_option_light')">Light</option>
+					<option value="dark" x-text="i18next.t('theme_option_dark')">Dark</option>
+					<option value="custom" x-text="i18next.t('theme_option_custom')">Custom</option>
 				</select>
 			</div>
-			<div x-show="$store.global.theme.toString() === 'custom'" x-transition class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
+			<div x-show="$store.global.theme.toString() === 'custom'" x-transition class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
 				<label class="w-full py-0 text-left" x-text="i18next.t('settings_custom_theme_component_color')">组件颜色</label>
 				<div class="flex flex-row items-center gap-2 mt-1">
-					<input type="color" x-model="$store.global.customBase100" class="w-14 h-10 p-1 rounded border border-gray-400 bg-base-100 text-black"/>
-					<input type="text" x-model="$store.global.customBase100" class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm font-mono text-black"/>
+					<input type="color" x-model="$store.global.customBase100" class="panel-control w-14 h-10 p-1 rounded border border-gray-400 bg-base-100 text-black"/>
+					<input type="text" x-model="$store.global.customBase100" class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm font-mono text-black"/>
 				</div>
 			</div>
-			<div x-show="$store.global.theme.toString() === 'custom'" x-transition class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
+			<div x-show="$store.global.theme.toString() === 'custom'" x-transition class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
 				<label class="w-full py-0 text-left" x-text="i18next.t('settings_custom_theme_text_color')">文字颜色</label>
 				<div class="flex flex-row items-center gap-2 mt-1">
-					<input type="color" x-model="$store.global.customBaseContent" class="w-14 h-10 p-1 rounded border border-gray-400 bg-base-100 text-black"/>
-					<input type="text" x-model="$store.global.customBaseContent" class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm font-mono text-black"/>
+					<input type="color" x-model="$store.global.customBaseContent" class="panel-control w-14 h-10 p-1 rounded border border-gray-400 bg-base-100 text-black"/>
+					<input type="text" x-model="$store.global.customBaseContent" class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm font-mono text-black"/>
 				</div>
 			</div>
-			<div x-show="$store.global.theme.toString() === 'custom'" x-transition class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
+			<div x-show="$store.global.theme.toString() === 'custom'" x-transition class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
 				<label class="w-full py-0 text-left" x-text="i18next.t('settings_custom_theme_background_color')">背景颜色</label>
 				<div class="flex flex-row items-center gap-2 mt-1">
-					<input type="color" x-model="$store.global.customBase300" class="w-14 h-10 p-1 rounded border border-gray-400 bg-base-100 text-black"/>
-					<input type="text" x-model="$store.global.customBase300" class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm font-mono text-black"/>
+					<input type="color" x-model="$store.global.customBase300" class="panel-control w-14 h-10 p-1 rounded border border-gray-400 bg-base-100 text-black"/>
+					<input type="text" x-model="$store.global.customBase300" class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm font-mono text-black"/>
 				</div>
 			</div>
-			<div class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
+			<div x-show="$store.global.canSelectBgPattern()" x-transition class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400">
 				<label class="w-full py-0 text-left" x-text="i18next.t('settings_custom_theme_pattern')">背景花纹</label>
 				<select
 					x-transition
 					x-model="$store.global.bgPattern"
-					class="px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm bg-base-100 text-base-content"
+					class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm bg-base-100 text-base-content"
 				>
 					<option value="none" x-text="i18next.t('no_pattern')">无花纹</option>
 					<option value="grid-line" x-text="i18next.t('grid_line')">网格线</option>

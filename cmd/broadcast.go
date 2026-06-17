@@ -42,14 +42,6 @@ func RegisterBroadcast(name string) chan string {
 	return ch
 }
 
-// GetBroadcast 返回指定名称的广播通道（只读锁）。
-func GetBroadcast(name string) (chan string, bool) {
-	broadcastMutex.RLock()
-	defer broadcastMutex.RUnlock()
-	ch, ok := broadcastRegistry[name]
-	return ch, ok
-}
-
 func init() {
 	// 初始化默认的广播通道
 	SystemBroadcast = RegisterBroadcast("uploadAPIBroadcast")
@@ -70,7 +62,10 @@ func waitSystemMessages() {
 		// 重启网页服务器
 		case "restart_web_server":
 			logger.Infof(locale.GetString("log_config_changed_restart_web") + "\n")
-			routers.RestartWebServer()
+			if err := routers.RestartWebServer(); err != nil {
+				logger.Errorf(locale.GetString("err_restart_web_server_failed"), err)
+				continue
+			}
 			routers.StartTailscale()
 			// 阻塞等待端口就绪，确保服务可用
 			tools.WaitUntilServerReady("localhost", uint16(config.GetCfg().Port), 15*time.Second)

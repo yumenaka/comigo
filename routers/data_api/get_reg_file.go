@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -17,7 +18,7 @@ func GetRegFile(c echo.Context) error {
 	exePath, err := os.Executable()
 	if err != nil {
 		logger.Infof("%s", err)
-		return c.String(http.StatusInternalServerError, "Error getting executable path")
+		return apiresp.Error(c, http.StatusInternalServerError, "executable_path_failed", "Error getting executable path", err.Error())
 	}
 
 	// 获取当前可执行文件的目录
@@ -49,7 +50,7 @@ func GetRegFile(c echo.Context) error {
 	err = os.WriteFile(regFilePath, []byte(regContent), 0o644)
 	if err != nil {
 		logger.Infof("%s", err)
-		return c.String(http.StatusInternalServerError, "Error writing reg file")
+		return apiresp.Error(c, http.StatusInternalServerError, "write_reg_file_failed", "Error writing reg file", err.Error())
 	}
 
 	// 设置响应头

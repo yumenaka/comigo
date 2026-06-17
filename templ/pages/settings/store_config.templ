@@ -3,16 +3,17 @@ package settings
 import (
 	"encoding/base64"
 	"fmt"
-	"path/filepath"
+	"github.com/yumenaka/comigo/config"
 )
 
-// StoreConfig 书库配置组件
-templ StoreConfig(name string, values []string, description string, bookCounts map[string]int) {
+// StoreConfig 书库配置组件。reloadAfterAdd 用于空书架页：添加书库后需要整页刷新以渲染书架。
+templ StoreConfig(name string, values []string, description string, bookCounts map[string]int, showRescanAll bool, reloadAfterAdd bool) {
 	@StoreConfigJavaScript()
 	<div
 		id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "-store-config" }
-		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
-		x-data="{ selectedStoreB64: '' }"
+		data-reload-after-add={ fmt.Sprintf("%t", reloadAfterAdd) }
+		class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		x-data="{}"
 	>
 		<label class="w-full py-0 text-left" for={ getTranslations(name) } x-text={ getTranslations(name) }></label>
 		<div class="flex flex-col w-full">
@@ -21,20 +22,55 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 				for _, value := range values {
 					<div
 						data-storeb64={ base64.RawURLEncoding.EncodeToString([]byte(value)) }
-						class="flex flex-row items-center mx-0 mb-2 px-3 py-2 text-sm border font-medium rounded cursor-pointer transition-colors"
-						:class={ "selectedStoreB64 === $el.dataset.storeb64 ? 'bg-blue-400 border-blue-600 text-white' : 'bg-blue-200 border-gray-500 dark:border-gray-200 text-black hover:bg-blue-300'" }
-						@click={ "selectedStoreB64 = selectedStoreB64 === $el.dataset.storeb64 ? '' : $el.dataset.storeb64" }
+						data-store-value={ value }
+						class="panel-control flex flex-row items-center mx-0 mb-2 px-3 py-2 text-sm border font-medium rounded transition-colors bg-blue-200 border-gray-500 dark:border-gray-200 text-black hover:bg-blue-300"
 					>
 						<span class="flex-1 truncate min-w-0">
 							{ value }
 						</span>
-						if count, ok := bookCounts[filepath.Clean(value)]; ok && count > 0 {
+						if count, ok := bookCounts[storeBookCountKey(value)]; ok && count > 0 {
 							<span class="shrink-0 ml-1 opacity-75">{ fmt.Sprintf("(x%d)", count) }</span>
 						}
-						<span class="shrink-0 ml-2" x-show={ "selectedStoreB64 === $el.dataset.storeb64" }>✓</span>
+						<button
+							type="button"
+							disabled?={ config.GetCfg().ReadOnlyMode }
+							@click.stop={ "rescanStore('" + base64.RawURLEncoding.EncodeToString([]byte(value)) + "')" }
+							:aria-label={ getTranslations("rescan_store") }
+							:title={ getTranslations("rescan_store") }
+							class="panel-control shrink-0 ml-2 inline-flex h-8 w-8 items-center justify-center border rounded shadow font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							<svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+								<path d="M21 3v6h-6"></path>
+							</svg>
+						</button>
+						<button
+							x-text={ getTranslations("delete_store") }
+							type="button"
+							disabled?={ config.GetCfg().ReadOnlyMode }
+							@click.stop={ "deleteStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "', '" + base64.RawURLEncoding.EncodeToString([]byte(value)) + "')" }
+							class="panel-control shrink-0 h-8 ml-2 px-2 border rounded shadow font-semibold focus:outline-none focus:ring bg-red-200 text-black transition delay-150 duration-300 ease-in-out hover:bg-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							删除书库
+						</button>
 					</div>
 				}
 			</div>
+			if showRescanAll && len(values) > 0 {
+				<!-- 全量重扫只在已配置书库时显示，避免空配置下触发无意义请求。 -->
+				<div class="flex justify-center w-full py-1 text-black">
+					<button
+						x-text={ getTranslations("rescan_all_stores") }
+						type="button"
+						disabled?={ config.GetCfg().ReadOnlyMode }
+						@click="rescanAllStores()"
+						class="panel-control w-28 h-10 px-2 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						重新扫描
+					</button>
+				</div>
+				<hr class="my-2 mx-4 border-gray-400 border-dashed dark:border-gray-500"/>
+			}
 			<!-- 添加书库区域 -->
 			<div class="flex flex-row items-center pb-1">
 				<label for={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput" } class="sr-only" x-text={ getTranslations("type_or_paste_content") }></label>
@@ -42,44 +78,23 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					type="text"
 					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "AddInput" }
 					:placeholder={ getTranslations("type_or_paste_content") }
-					class="max-w-2/3 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+					disabled?={ config.GetCfg().ReadOnlyMode }
+					class="panel-control max-w-2/3 h-10 rounded border-gray-400 py-2.5 px-3 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 					@keydown={ "if ($event.key === 'Enter') { addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "'); }" }
 				/>
 				<button
 					x-text={ getTranslations("add") }
 					type="button"
 					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "StoreAddButton" }
+					disabled?={ config.GetCfg().ReadOnlyMode }
 					@click={ "addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
-					class="w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold text-black focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+					class="panel-control w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					添加
 				</button>
 			</div>
-			<!-- 操作按钮区域（始终显示，未选中时禁用） -->
-			<div class="flex flex-row justify-center w-full text-black">
-				<button
-					x-text={ getTranslations("rescan_store") }
-					type="button"
-					:disabled="selectedStoreB64 === ''"
-					@click={ "rescanStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
-					class="w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
-					:class="selectedStoreB64 === '' ? 'hidden' : 'bg-blue-200  hover:bg-indigo-300'"
-				>
-					重新扫描
-				</button>
-				<button
-					x-text={ getTranslations("delete_store") }
-					type="button"
-					:disabled="selectedStoreB64 === ''"
-					@click={ "deleteStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
-					class="w-26 h-10 mx-2 my-1 px-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out"
-					:class="selectedStoreB64 === '' ? 'hidden' : 'bg-red-200  hover:bg-red-400'"
-				>
-					删除书库
-				</button>
-			</div>
 		</div>
-		<div x-html={ getTranslations(description) } class="w-full py-1 text-left ml-2 text-xs text-base-content"></div>
+		<div x-html={ getTranslations(description) } class="w-auto py-1 text-left mx-2 text-xs text-base-content"></div>
 	</div>
 }
 
@@ -105,6 +120,38 @@ templ StoreConfigJavaScript() {
 				};
 			}
 
+			// replaceStoreConfigHTML 使用后端渲染的书库设置片段局部替换当前列表。
+			function replaceStoreConfigHTML(configName, html, clearInput = false) {
+				if (!html) return;
+				const container = document.getElementById(configName + "-store-config");
+				if (!container || !container.parentNode) return;
+
+				const temp = document.createElement("div");
+				// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。
+				temp.innerHTML = html;
+				const newContainer = temp.querySelector(
+					"#" + configName + "-store-config",
+				);
+				if (!newContainer) return;
+
+				container.parentNode.replaceChild(newContainer, container);
+				if (window.Alpine) {
+					window.Alpine.initTree(newContainer);
+				}
+				if (clearInput) {
+					const newInput = newContainer.querySelector(
+						"#" + configName + "AddInput",
+					);
+					if (newInput) newInput.value = "";
+				}
+			}
+
+			// shouldReloadAfterStoreAdd 区分空书架页和设置页：前者添加后要重载书架，后者只局部更新。
+			function shouldReloadAfterStoreAdd(configName) {
+				const container = document.getElementById(configName + "-store-config");
+				return container?.dataset.reloadAfterAdd === "true";
+			}
+
 			// 添加书库
 			async function addStore(configName) {
 				const addInput = document.getElementById(configName + "AddInput");
@@ -123,12 +170,11 @@ templ StoreConfigJavaScript() {
 				// 验证：如果已经有这个值了，显示错误提示
 				const container = document.getElementById(configName + "-store-config");
 				if (container) {
-					const existingStores = container.querySelectorAll(
-						'[\\@click*="selectedStore"]',
-					);
+					const existingStores =
+						container.querySelectorAll("[data-store-value]");
 					for (const node of existingStores) {
-						const nodeText = node.textContent.trim();
-						if (nodeText === addValue || nodeText.startsWith(addValue + " ")) {
+						const nodeText = node.dataset.storeValue || "";
+						if (nodeText === addValue) {
 							showMessage({
 								message: i18next.t("value_already_exists_do_not_add_again"),
 								buttons: "confirm",
@@ -164,64 +210,63 @@ templ StoreConfigJavaScript() {
 					// 解析响应数据
 					const data = await response.json();
 
-					// 显示成功提示（书库扫描完成后由 SSE 提示是否刷新）
+					// 显示保存提示；书库列表会在本请求内局部更新。
 					if (data.saveSuccessHint) {
 						showToast(i18next.t("save_success_hint"), "info");
 					} else {
 						showToast(i18next.t("save_success_hint"), "success");
 					}
-
-					// 更新 UI：替换整个容器
-					if (data.html) {
-						const container = document.getElementById(
-							configName + "-store-config",
-						);
-						if (container && container.parentNode) {
-							// 创建临时元素来解析 HTML
-							const temp = document.createElement("div");
-							temp.innerHTML = data.html;
-							const newContainer = temp.querySelector(
-								"#" + configName + "-store-config",
-							);
-							if (newContainer) {
-								container.parentNode.replaceChild(newContainer, container);
-								// 重新初始化 Alpine.js
-								if (window.Alpine) {
-									window.Alpine.initTree(newContainer);
-								}
-								// 清空输入框
-								const newInput = newContainer.querySelector(
-									"#" + configName + "AddInput",
-								);
-								if (newInput) {
-									newInput.value = "";
-								}
-							}
-						}
+					if (data.warningMessage) {
+						showMessage({
+							message: data.warningMessage,
+							buttons: "confirm",
+						});
 					}
+
+					if (shouldReloadAfterStoreAdd(configName)) {
+						window.location.reload();
+						return;
+					}
+
+					replaceStoreConfigHTML(configName, data.html, true);
 				} catch (error) {
 					console.error("添加书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
 				}
 			}
 
-			// 重新扫描书库
-			async function rescanStore(configName) {
-				const container = document.getElementById(configName + "-store-config");
-				if (!container) return;
+			// 重新扫描全部书库
+			async function rescanAllStores() {
+				showToast(i18next.t("rescan_store_in_progress"), "info");
 
-				// 获取 Alpine.js 的数据
-				const alpineData = window.Alpine.$data(container);
-				if (!alpineData || !alpineData.selectedStoreB64) {
-					showMessage({
-						message: i18next.t("select_store_to_operate"),
-						buttons: "confirm",
-					});
-					return;
+				try {
+					const response = await fetch(
+						window.ComiGoPath("/api/rescan-all-stores"),
+						{
+							method: "POST",
+						},
+					);
+
+					if (!response.ok) {
+						showToast(i18next.t("err_rescan_store_failed"), "error");
+						return;
+					}
+
+					const data = await response.json();
+					const message = rescanStoreSuccessMessage(data);
+					showToast(message, "success");
+					replaceStoreConfigHTML(
+						window.base64UrlEncodeUtf8("StoreUrls"),
+						data.html,
+					);
+				} catch (error) {
+					console.error("重新扫描全部书库失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
 				}
+			}
 
-				const storeUrlB64 = alpineData.selectedStoreB64;
-
+			// 重新扫描书库
+			async function rescanStore(storeUrlB64) {
 				// 显示扫描中提示
 				showToast(i18next.t("rescan_store_in_progress"), "info");
 
@@ -246,34 +291,32 @@ templ StoreConfigJavaScript() {
 					const data = await response.json();
 
 					// 显示成功提示
-					const message = i18next
-						.t("rescan_store_success")
-						.replace("{0}", data.newBooksCount || 0);
+					const message = rescanStoreSuccessMessage(data);
 					showToast(message, "success");
+					replaceStoreConfigHTML(
+						window.base64UrlEncodeUtf8("StoreUrls"),
+						data.html,
+					);
 				} catch (error) {
 					console.error("重新扫描书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");
 				}
 			}
 
+			// rescanStoreSuccessMessage 统一格式化重扫结果，显示净新增和净减少数量。
+			function rescanStoreSuccessMessage(data) {
+				return i18next
+					.t("rescan_store_success")
+					.replace("{0}", data.newBooksCount || 0)
+					.replace("{1}", data.removedBooksCount || 0);
+			}
+
 			// 删除书库
-			async function deleteStore(configName) {
+			async function deleteStore(configName, storeUrlB64) {
 				const container = document.getElementById(configName + "-store-config");
 				if (!container) return;
 
-				// 获取 Alpine.js 的数据
-				const alpineData = window.Alpine.$data(container);
-				if (!alpineData || !alpineData.selectedStoreB64) {
-					showMessage({
-						message: i18next.t("select_store_to_operate"),
-						buttons: "confirm",
-					});
-					return;
-				}
-
-				const storeUrlB64 = alpineData.selectedStoreB64;
-
-				// 确认删除
+				// 删除书库会移除该路径下的书籍记录，必须经过已有的模态确认。
 				const confirmed = await new Promise((resolve) => {
 					showMessage({
 						message: i18next.t("confirm_delete_store"),
@@ -310,27 +353,7 @@ templ StoreConfigJavaScript() {
 					// 显示成功提示
 					showToast(i18next.t("delete_store_success"), "success");
 
-					// 更新 UI：替换整个容器
-					if (data.html) {
-						const container = document.getElementById(
-							configName + "-store-config",
-						);
-						if (container && container.parentNode) {
-							// 创建临时元素来解析 HTML
-							const temp = document.createElement("div");
-							temp.innerHTML = data.html;
-							const newContainer = temp.querySelector(
-								"#" + configName + "-store-config",
-							);
-							if (newContainer) {
-								container.parentNode.replaceChild(newContainer, container);
-								// 重新初始化 Alpine.js
-								if (window.Alpine) {
-									window.Alpine.initTree(newContainer);
-								}
-							}
-						}
-					}
+					replaceStoreConfigHTML(configName, data.html);
 				} catch (error) {
 					console.error("删除书库失败:", error);
 					showToast(i18next.t("err_network_error"), "error");

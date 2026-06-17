@@ -1,17 +1,8 @@
-// Flip 翻页模式
+// Flip 翻页阅读
 Alpine.store('flip', {
     imageMaxWidth: 400,
     //自动隐藏工具条
     autoHideToolbar: Alpine.$persist(false).as('flip.autoHideToolbar'),
-    // autoHideToolbar: Alpine.$persist((() => {
-    //     const ua = navigator.userAgent || '';
-    //     const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobi/i.test(ua);
-    //     const isTouch = (('ontouchstart' in window) || (navigator.maxTouchPoints > 1));
-    //     //console.log('isMobileUA', isMobileUA);
-    //     //console.log('isTouch', isTouch);
-    //     // return isMobileUA || isTouch;
-    //     return isMobileUA;
-    // })()).as('flip.autoHideToolbar'),
     //自动对齐
     autoAlign: Alpine.$persist(true).as('flip.autoAlignTop'),
     //是否显示页头
@@ -28,10 +19,6 @@ Alpine.store('flip', {
     wheelFlip: Alpine.$persist(false).as('flip.wheelFlip'),
     //双页模式
     doublePageMode: Alpine.$persist(false).as('flip.doublePageMode'),
-    //自动拼合双页(TODO)
-    autoDoublePageMode: Alpine.$persist(false).as(
-        'flip.autoDoublePageModeFlag'
-    ),
     //素描模式标记
     sketchModeFlag: false,
     //是否显示素描提示
@@ -62,4 +49,4 @@ Alpine.store('flip', {
     websocketMaxReconnect: Alpine.$persist(200).as('flip.websocketMaxReconnect'),
     // WebSocket 重连间隔（毫秒）
     websocketReconnectInterval: Alpine.$persist(3000).as('flip.websocketReconnectInterval'),
-}) 
+})

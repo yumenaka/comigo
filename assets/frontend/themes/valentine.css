@@ -1,0 +1,68 @@
+/* 情人蜜语模板：变量、粉彩星形背景和控件样式集中在这里。 */
+@layer base {
+  /* ====================== Valentine ====================== */
+  [data-theme="valentine"] {
+    color-scheme: light;
+    --primary: #e85f9f;
+    --primary-content: #fff6fb;
+    --secondary: #8fc5ff;
+    --secondary-content: #123050;
+    --accent: #ffd166;
+    --accent-content: #4b2d00;
+    --neutral: #6b4774;
+    --neutral-content: #fff6fb;
+    --base-100: #fff0f7;
+    --base-200: #ffd7ea;
+    --base-300: #e7d5ff;
+    --base-content: #4a244e;
+    --panel-surface: #ffe1ef;
+    --panel-surface-content: #4a244e;
+    --panel-control: #fff8fc;
+    --panel-control-hover: #ffeef7;
+    --panel-control-active: #eda0c4;
+    --panel-control-muted: #eeb8d6;
+    --panel-control-content: #4a244e;
+    --grid-pattern-color: rgba(232, 95, 159, 0.22);
+    --grid-mosaic-color: rgba(143, 197, 255, 0.18);
+    --info: #4f8ed9;
+    --success: #5f9f78;
+    --warning: #d89930;
+    --error: #d94e78;
+    --rounded-btn: 1.4rem;
+    --tab-radius: 0.7rem;
+  }
+}
+
+/* 主背景：粉彩天空、星形光点和柔和色带。 */
+body[data-theme="valentine"],
+body[data-theme="valentine"] .grid-line,
+body[data-theme="valentine"] .grid-point,
+body[data-theme="valentine"] .grid-mosaic,
+body[data-theme="valentine"] #ShelfMainArea,
+body[data-theme="valentine"] #settingsMainArea,
+body[data-theme="valentine"] #tab-contents,
+body[data-theme="valentine"] #ReaderRoot,
+body[data-theme="valentine"] #ReaderShell,
+body[data-theme="valentine"] #ScrollMainArea,
+body[data-theme="valentine"] #ReaderFlipArea,
+body[data-theme="valentine"] #ReaderPDFArea {
+  background-color: var(--base-300);
+  background-image:
+    radial-gradient(circle at 50% 0, #fff8fc 0 5px, transparent 6px),
+    radial-gradient(circle at 50% 100%, #fff8fc 0 5px, transparent 6px),
+    radial-gradient(ellipse at 18% 20%, rgba(232, 95, 159, 0.34), transparent 36%),
+    radial-gradient(ellipse at 84% 34%, rgba(143, 197, 255, 0.38), transparent 34%),
+    linear-gradient(135deg, transparent 0 42%, rgba(255, 209, 102, 0.2) 42% 44%, transparent 44%),
+    linear-gradient(180deg, #fff0f7 0%, #ffd7ea 56%, #e7d5ff 100%);
+  background-size: 46px 46px, 46px 46px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+/* 面板更接近浅粉，控件用近白色，避免粉色层级糊在一起。 */
+body[data-theme="valentine"] .panel-surface {
+  background-color: var(--panel-surface) !important;
+  background-image:
+    radial-gradient(circle at 12px 12px, rgba(255, 255, 255, 0.58) 0 4px, transparent 5px),
+    linear-gradient(135deg, rgba(143, 197, 255, 0.18), transparent 48%);
+  background-size: 44px 38px, 100% 100%;
+}

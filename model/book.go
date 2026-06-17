@@ -2,6 +2,7 @@ package model
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -20,28 +21,22 @@ type Book struct {
 	PageInfos // 书籍内所有页面的信息
 }
 
-// GuestCover 猜测书籍的封面
-func (b *Book) GuestCover() (cover PageInfo) {
-	// 封面图片的命名规则
+// GuessCover 猜测书籍的封面
+func (b *Book) GuessCover() (cover PageInfo) {
+	// 按 cover/0/1 的常见命名优先猜测封面，找不到时回退到第一页。
 	for i := range b.PageInfos {
-		// 先转换为小写
 		filenameLower := strings.ToLower(b.PageInfos[i].Name)
-		// 再去掉后缀名
 		filenameWithoutExt := strings.TrimSuffix(filenameLower, filepath.Ext(filenameLower))
-		// 再去掉前置的0 ，例如00001 -> 1, 0 -> ""
 		filenameTrimmed := strings.TrimLeft(filenameWithoutExt, "0")
-		// 对原始不带前导0的文件名包含 "cover" 的检查
-		// 检查文件名（去除后缀和前导0）是否包含 "cover" 或等于 "" (原为 "0") 或 "1"
 		if strings.Contains(filenameWithoutExt, "cover") || filenameTrimmed == "" || filenameTrimmed == "1" {
-			cover = b.PageInfos[i] // 获取实际元素的指针
-			return cover           // 找到封面，停止循环
+			cover = b.PageInfos[i]
+			return cover
 		}
 	}
-	// 如果通过名称规则没有找到封面，并且书至少有一页，则使用第一页作为封面
 	if len(b.PageInfos) > 0 {
 		cover = b.PageInfos[0]
 	}
-	return cover // 返回找到的封面或空值
+	return cover
 }
 
 // NewBook 初始化 Book，设置文件路径、书名、BookID 等
@@ -148,7 +143,6 @@ func GetAllBooksNumber() int {
 // ClearBookNotExist  检查内存中的书的源文件是否存在，不存在就删掉
 func ClearBookNotExist() {
 	logger.Info(locale.GetString("log_checking_book_files_exist"))
-	//return
 	// 遍历所有书籍
 	var deletedBooks []string
 	allBooks, err := IStore.ListBooks()
@@ -156,6 +150,10 @@ func ClearBookNotExist() {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, book := range allBooks {
+		if book.RemoteBookID != "" || book.RemoteStoreKey != "" {
+			// Comigo 远端书籍和本地生成的远端书组由重扫时对比远端书架清理，不通过 VFS 检查。
+			continue
+		}
 		var exists bool
 		if book.IsRemote {
 			// 远程书籍：使用 VFS 检查文件是否存在
@@ -196,8 +194,27 @@ func ClearBookNotExist() {
 			if err != nil {
 				logger.Infof(locale.GetString("log_error_deleting_book"), book.BookID, err)
 			}
+			continue
 		}
-		// TODO：如果是TypeDir类型，则检查所有图片是否存在,并删除不存在的图片，全部不存在则删除书籍
+
+		if book.Type == TypeDir {
+			changed, empty := cleanupMissingDirPages(book)
+			if empty {
+				deletedBooks = append(deletedBooks, book.BookPath)
+				err := IStore.DeleteBook(book.BookID)
+				if err != nil {
+					logger.Infof(locale.GetString("log_error_deleting_book"), book.BookID, err)
+				}
+				continue
+			}
+			if changed {
+				book.setPageNum()
+				book.Cover = book.GuessCover()
+				if err := IStore.StoreBook(book); err != nil {
+					logger.Infof(locale.GetString("log_error_adding_book"), book.BookID, err)
+				}
+			}
+		}
 	}
 	// 重新生成书组
 	if len(deletedBooks) > 0 {
@@ -205,6 +222,73 @@ func ClearBookNotExist() {
 			logger.Infof(locale.GetString("log_error_initializing_main_folder"), err)
 		}
 	}
+}
+
+// cleanupMissingDirPages 清理目录书籍中已经不存在的页面文件。
+// 返回值 changed 表示 PageInfos 有变化；empty 表示页面已全部失效，需要删除整本目录书。
+func cleanupMissingDirPages(book *Book) (changed bool, empty bool) {
+	if book == nil || book.Type != TypeDir {
+		return false, false
+	}
+	if len(book.PageInfos) == 0 {
+		return false, true
+	}
+	remaining := make(PageInfos, 0, len(book.PageInfos))
+	for _, page := range book.PageInfos {
+		exists, err := dirPageExists(book, page)
+		if err != nil {
+			// 权限或网络错误不等同于文件不存在，保守保留页面，避免误删 metadata。
+			if book.IsRemote {
+				logger.Infof(locale.GetString("log_remote_book_existence_check_failed"), pagePathForExistCheck(book, page), err)
+			} else {
+				logger.Infof(locale.GetString("log_local_book_existence_check_failed"), pagePathForExistCheck(book, page), err)
+			}
+			remaining = append(remaining, page)
+			continue
+		}
+		if exists {
+			remaining = append(remaining, page)
+		}
+	}
+	if len(remaining) == len(book.PageInfos) {
+		return false, false
+	}
+	book.PageInfos = remaining
+	return true, len(remaining) == 0
+}
+
+// dirPageExists 按本地/远程目录书籍分别检查页面文件是否存在。
+func dirPageExists(book *Book, page PageInfo) (bool, error) {
+	pagePath := pagePathForExistCheck(book, page)
+	if book.IsRemote {
+		fs, err := vfs.GetOrCreate(book.RemoteURL, vfs.Options{
+			CacheEnabled: false,
+			Timeout:      10,
+		})
+		if err != nil {
+			return false, err
+		}
+		return fs.Exists(pagePath)
+	}
+	_, err := os.Stat(pagePath)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// pagePathForExistCheck 兼容旧 metadata：优先使用 PageInfo.Path，缺失时用书籍目录和页面名拼出路径。
+func pagePathForExistCheck(book *Book, page PageInfo) string {
+	if page.Path != "" {
+		return page.Path
+	}
+	if book.IsRemote {
+		return path.Join(book.BookPath, page.Name)
+	}
+	return filepath.Join(book.BookPath, page.Name)
 }
 
 // ClearBookWhenStoreUrlNotExist 清理书库中不存在的书籍源对应的书籍，传入的是当前存在的书籍源

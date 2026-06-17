@@ -1,9 +1,6 @@
 package reader
 
 import (
-	"net/http"
-
-	"github.com/angelofallars/htmx-go"
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/common"
 )
@@ -13,19 +10,19 @@ import (
 // 后端只负责输出页面、公共脚本以及 reader 专用脚本。static 模式下这些脚本会被内联，
 // 用于生成可离线打开的便携 HTML。
 func PageHandler(c echo.Context) error {
+	insertScripts := []string{
+		"static/wasm/wasm_exec.js",
+		"static/js/flip_modules/pagination_utils.js",
+		"static/js/flip_modules/interaction_utils.js",
+		"static/js/reader.js",
+	}
+	if c.QueryParam("static") == "" {
+		insertScripts = append(insertScripts, "static/js/reader_pwa.js")
+	}
 	indexHtml := common.Html(
 		c,
 		ReaderPage(c),
-		[]string{
-			"static/wasm/wasm_exec.js",
-			"static/js/flip_modules/pagination_utils.js",
-			"static/js/flip_modules/interaction_utils.js",
-			"static/js/reader.js",
-			"static/js/reader_pwa.js",
-		},
+		insertScripts,
 	)
-	if err := htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexHtml); err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	return nil
+	return common.RenderHTML(c, indexHtml)
 }

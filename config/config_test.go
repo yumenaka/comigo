@@ -3,7 +3,10 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"github.com/yumenaka/comigo/tools"
 )
 
 func TestUpdateConfigFileCreatesTargetAndTracksConfigFile(t *testing.T) {
@@ -32,6 +35,81 @@ func TestUpdateConfigFileCreatesTargetAndTracksConfigFile(t *testing.T) {
 	}
 	if len(content) == 0 {
 		t.Fatal("生成的配置文件内容为空")
+	}
+}
+
+func TestUpdateConfigFilePersistsEnabledPluginList(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	cfg.ConfigFile = filepath.Join(t.TempDir(), "config.toml")
+	cfg.EnablePlugin = true
+	cfg.EnabledPluginList = []string{"clock"}
+
+	if err := UpdateConfigFile(); err != nil {
+		t.Fatalf("UpdateConfigFile 返回错误: %v", err)
+	}
+
+	content, err := os.ReadFile(cfg.ConfigFile)
+	if err != nil {
+		t.Fatalf("读取生成的配置文件失败: %v", err)
+	}
+	if !strings.Contains(string(content), "EnabledPluginList") || !strings.Contains(string(content), "clock") {
+		t.Fatalf("启用插件列表未写入配置文件:\n%s", string(content))
+	}
+}
+
+func TestGetConfigDirUsesExplicitConfigPathWhenFileDoesNotExist(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	targetDir := filepath.Join(t.TempDir(), "nested")
+	cfg.ConfigFile = filepath.Join(targetDir, "config.toml")
+
+	got, err := GetConfigDir()
+	if err != nil {
+		t.Fatalf("GetConfigDir 返回错误: %v", err)
+	}
+	if got != targetDir {
+		t.Fatalf("配置目录不正确: got %q want %q", got, targetDir)
+	}
+	if _, err := os.Stat(targetDir); err != nil {
+		t.Fatalf("显式配置目录未创建: %v", err)
+	}
+}
+
+func TestUpdateConfigByJsonUpdatesGlobalConfig(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	cfg.Debug = false
+	cfg.MinImageNum = 3
+
+	if err := UpdateConfigByJson(`{"Debug":true,"MinImageNum":1}`); err != nil {
+		t.Fatalf("UpdateConfigByJson 返回错误: %v", err)
+	}
+	if !cfg.Debug {
+		t.Fatal("Debug 未按 JSON 更新为 true")
+	}
+	if cfg.MinImageNum != 1 {
+		t.Fatalf("MinImageNum 未按 JSON 更新: got %d want 1", cfg.MinImageNum)
+	}
+}
+
+// TestDefaultConfigHasRemoteTimeout 确认远程书库和扫描共享的超时有明确默认值。
+func TestDefaultConfigHasRemoteTimeout(t *testing.T) {
+	c := newDefaultConfig()
+	if c.TimeoutLimitForScan != 20 {
+		t.Fatalf("默认扫描/远程书库超时不正确: got %d want 20", c.TimeoutLimitForScan)
 	}
 }
 
@@ -108,7 +186,7 @@ func TestIsSubPath(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result := isSubPath(filepath.Clean(tt.parent), filepath.Clean(tt.child))
+		result := tools.IsSubPath(filepath.Clean(tt.parent), filepath.Clean(tt.child))
 		if result != tt.expected {
 			t.Errorf("isSubPath(%s, %s) = %v, 期望 %v", tt.parent, tt.child, result, tt.expected)
 		}

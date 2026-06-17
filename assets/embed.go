@@ -62,6 +62,40 @@ window.ComiGoRelativePath = function(pathname) {
   if (path === base) return '/';
   return path.startsWith(base + '/') ? path.slice(base.length) : path;
 };
+window.ComiGoElectron = (function() {
+  const key = 'ComiGoElectron';
+  const params = new URLSearchParams(window.location.search || '');
+  const flag = params.get('comigo_electron');
+  try {
+    if (flag === '1') {
+      window.localStorage.setItem(key, '1');
+      return true;
+    }
+    if (flag === '0') {
+      window.localStorage.removeItem(key);
+      return false;
+    }
+    return window.localStorage.getItem(key) === '1';
+  } catch (_) {
+    return flag === '1';
+  }
+})();
+window.ComiGoElectronAction = function(action) {
+  if (!window.ComiGoElectron || !action) return false;
+  const normalizedAction = String(action).trim();
+  if (!normalizedAction) return false;
+  // Electron 外壳会拦截这个自定义协议，不会真正离开当前页面，也不会给 WebView 暴露 Node 能力。
+  window.location.href = 'comigo-electron://' + encodeURIComponent(normalizedAction);
+  return true;
+};
+window.ComiGoToggleFullscreen = function() {
+  if (window.ComiGoElectronAction('toggle-fullscreen')) return;
+  if (Screenfull.isEnabled) {
+    Screenfull.toggle();
+  } else {
+    showToast(i18next.t('not_support_fullscreen'));
+  }
+};
 </script>
 `
 }
@@ -69,7 +103,7 @@ window.ComiGoRelativePath = function(pathname) {
 // GetJavaScript 在页面中插入需要的js代码
 func GetJavaScript(oneFileMode bool, insertScript []string) (jsString string) {
 	jsString = GetBasePathScript()
-	// <!-- 通用js代码,初始化htmx、Alpine等第三方库  -->
+	// 插入通用 JS 代码，初始化 Alpine 与页面交互等前端基础能力。
 	if oneFileMode {
 		jsString += "<script>" + GetFileStr("dist/main.js") + "</script>\n"
 	} else {
@@ -87,22 +121,22 @@ func GetJavaScript(oneFileMode bool, insertScript []string) (jsString string) {
 	return jsString
 }
 
-// GetFileStr 从Static获取字符串形式的脚本
+// GetFileStr 获取字符串形式的脚本
 func GetFileStr(filePath string) string {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
 	data, err := Frontend.ReadFile(filePath)
 	if err != nil {
 		return "Not Found Script:" + filePath
 	}
-	str := string(data)
 	// 在把文件内容注入模板之前做一次替换,避免</script>或 </body> 提前把 <script> 标签“截断”
+	str := string(data)
 	safe := strings.ReplaceAll(str, "</script", "<\\/script")
-	safe = strings.ReplaceAll(str, "</body", "<\\/body")
+	safe = strings.ReplaceAll(safe, "</body", "<\\/body")
 	// 将内容转换为字符串并返回
 	return safe
 }
 
-// GetImageSrc 从Static获取Base64编码的图片的src属性
+// GetImageSrc 获取Base64编码的图片的src属性
 func GetImageSrc(filePath string) string {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
 	data, err := Frontend.ReadFile(filePath)
@@ -127,7 +161,7 @@ func GetImageSrc(filePath string) string {
 	return src
 }
 
-// GetData 从Static获取字节切片形式的数据
+// GetData 获取字节切片形式的数据
 func GetData(filePath string) []byte {
 	// 使用ReadFile从嵌入文件系统中读取文件内容
 	data, err := Frontend.ReadFile(filePath)

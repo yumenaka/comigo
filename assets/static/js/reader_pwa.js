@@ -77,6 +77,8 @@ function initReaderPWAInstallButton() {
 }
 
 function registerReaderServiceWorker() {
+    // 便携 HTML 以 file:// 打开时没有可注册的 origin，直接跳过 PWA 注册。
+    if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') return
     if (!('serviceWorker' in navigator)) return
     if (!window.isSecureContext) return
 

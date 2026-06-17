@@ -13,6 +13,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/vfs"
 )
@@ -72,28 +73,28 @@ func (db *StoreDatabase) StoreBookMark(mark *model.BookMark) error {
 	switch mark.Type {
 	case model.UserMark:
 		// 用户书签的处理逻辑（用户书签可以有多个，但同一页只能有一个用户书签）
-		exits := false
+		exists := false
 		for i, existingMark := range b.BookMarks {
 			if existingMark.Type == mark.Type && existingMark.PageIndex == mark.PageIndex {
 				// 更新现有书签
 				b.BookMarks[i] = *mark
-				exits = true
+				exists = true
 			}
 		}
-		if !exits {
+		if !exists {
 			b.BookMarks = append(b.BookMarks, *mark)
 		}
 	case model.AutoMark:
 		// 自动书签的处理逻辑（每本书只有一个自动书签）
-		exits := false
+		exists := false
 		for i, existingMark := range b.BookMarks {
 			if existingMark.Type == mark.Type {
 				// 更新现有书签
 				b.BookMarks[i] = *mark
-				exits = true
+				exists = true
 			}
 		}
-		if !exits {
+		if !exists {
 			b.BookMarks = append(b.BookMarks, *mark)
 		}
 	default:
@@ -328,7 +329,7 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 				// 新建一本书,类型是书籍组
 				// 获取父目录信息（作为书组的时间信息来源）
 				var modTime time.Time
-				isRemote := vfs.IsRemoteURL(storeUrl)
+				isRemote := tools.IsRemoteStoreURL(storeUrl)
 				if isRemote {
 					// 远程书库：使用 VFS 获取文件信息
 					vfsInstance, err := vfs.GetOrCreate(storeUrl, vfs.Options{

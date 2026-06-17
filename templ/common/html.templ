@@ -26,16 +26,29 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScripts []string) 
 				<meta name="apple-mobile-web-app-title" content="Comigo Reader"/>
 				<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 			}
-			<link rel="apple-touch-icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) }/>
-			<link rel="shortcut icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.ico")) } type="image/x-icon"/>
-			<link rel="icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) } sizes="any"/>
+			// 静态导出的便携 HTML 以 file:// 打开时不能访问站点根路径资源。
+			if c.QueryParam("static") == "" {
+				<link rel="apple-touch-icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) }/>
+				<link rel="shortcut icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.ico")) } type="image/x-icon"/>
+				<link rel="icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) } sizes="any"/>
+			}
+			// CLI 的 --random-theme 只通过前端启动开关覆盖浏览器本地主题选择，不写入服务端配置。
+			if config.GetCfg().RandomTheme {
+				<script>
+					window.ComiGoForceRandomTheme = true;
+				</script>
+			} else {
+				<script>
+					window.ComiGoForceRandomTheme = false;
+				</script>
+			}
 			@templ.Raw(assets.GetCSS(c.QueryParam("static") != ""))
 		</head>
-		<!-- x-bind: Alpine.js的语法，全局主题从 $store.global.theme 读取 -->
+		<!-- x-bind: Alpine.js的语法，随机模板会解析为实际生效主题 -->
 		<!-- 主题值通过 Alpine Persist 持久化到 localStorage，key 为 global.theme -->
 		<body
 			x-data="{}"
-			x-bind:data-theme="$store.global.theme"
+			x-bind:data-theme="$store.global.getEffectiveTheme()"
 			x-bind:style="'--custom-base-100:' + $store.global.customBase100 + ';--custom-base-300:' + $store.global.customBase300 + ';--custom-base-content:' + $store.global.customBaseContent + ';'"
 			class="text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between  h-full min-h-screen w-full max-w-full p-0 m-0 font-sans"
 			:class="$store.global.getMainAreaBgClass()"
@@ -43,7 +56,7 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScripts []string) 
 			@MessageModal()
 			@bodyContent
 		</body>
-		<!-- 导入js代码,包含htmx、Alpine等第三方库  -->
+		<!-- 导入通用 JS 代码，初始化 Alpine 与页面交互等前端基础能力。 -->
 		@templ.Raw(assets.GetJavaScript(c.QueryParam("static") != "", insertScripts))
 		<!-- 导入 Plugins  -->
 		@plugins.RenderAllPlugins(c)

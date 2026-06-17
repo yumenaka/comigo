@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"path"
@@ -26,7 +25,7 @@ func SetShutdownHandler() {
 	<-ctx.Done()
 	// 恢复中断信号的默认行为并通知用户关机。
 	stop()
-	log.Println(locale.GetString("shutdown_hint"))
+	logger.Info(locale.GetString("shutdown_hint"))
 	// 清理临时文件
 	if config.GetCfg().ClearCacheExit {
 		logger.Infof("\r"+locale.GetString("start_clear_file")+" CacheDir:%s ", config.GetCfg().CacheDir)
@@ -52,10 +51,16 @@ func SetShutdownHandler() {
 	// 只能通过http.Server.Shutdown()/http.Server.Close()等http包里的方法去实现,没办法自己实现.
 	// 因为这样的设计即使你给自定义Server接口的实现类设计了Shutdown()方法,也调用不到.
 	// 本质上还是因为从端口启动开始,后续的所有工作都是http包来完成的,我们无法干涉这其中的步骤
-	if err := config.Server.Shutdown(ctx); err != nil {
-		// logger.Infof("Comigo Server forced to shutdown: ", err)
-		// time.Sleep(3 * time.Second)
-		log.Fatal("Comigo Server forced to shutdown: ", err)
+	if config.Server == nil {
+		logger.Info("Comigo Server exit.")
+		return
 	}
-	log.Println("Comigo Server exit.")
+	if err := config.Server.Shutdown(ctx); err != nil {
+		// Shutdown 失败时只记录并尝试强制关闭，避免信号处理路径直接结束宿主进程。
+		logger.Infof(locale.GetString("err_server_shutdown_failed")+": %v", err)
+		if closeErr := config.Server.Close(); closeErr != nil {
+			logger.Infof(locale.GetString("err_server_shutdown_failed")+": %v", closeErr)
+		}
+	}
+	logger.Info("Comigo Server exit.")
 }

@@ -1,5 +1,7 @@
 package settings
 
+import "github.com/yumenaka/comigo/config"
+
 // stringConfigScriptHandle 用于防止 JS 代码重复渲染
 var stringConfigScriptHandle = templ.NewOnceHandle()
 
@@ -8,7 +10,7 @@ templ StringConfig(name string, value string, description string) {
 	@StringConfigJavascript()
 	<div
 		id={ "stringConfig_" + name }
-		class="flex flex-col justify-start w-full p-2 m-1 font-semibold
+		class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold
             border rounded shadow-md hover:shadow-2xl
             items-left bg-base-100 text-base-content border-slate-400"
 	>
@@ -20,11 +22,12 @@ templ StringConfig(name string, value string, description string) {
 			placeholder={ name }
 			value={ value }
 			data-original-value={ value }
-			class="px-2.5  w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
+			disabled?={ config.GetCfg().ReadOnlyMode }
+			class="panel-control px-2.5  w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 			@change={ "updateStringConfig('" + name + "', $event.target.value)" }
 		/>
 		<div
-			class="w-full py-1 text-xs text-base-content"
+			class="w-auto py-1 text-xs text-base-content"
 			x-text={ getTranslations(description) }
 		></div>
 		<div class="bg-red-600"></div>

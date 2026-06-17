@@ -7,3 +7,11 @@ sql:
       go:
         package: "sqlc"
         out: "sqlc"
+  - engine: "postgresql"
+    queries: "sqlc/postgres/query.sql"
+    schema: "sqlc/postgres/schema.sql"
+    gen:
+      go:
+        package: "postgres"
+        out: "sqlc/postgres"
+        sql_package: "database/sql"

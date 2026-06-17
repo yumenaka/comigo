@@ -1,0 +1,119 @@
+/* 南瓜诡夜模板：变量、半月背景和控件样式集中在这里。 */
+@layer base {
+  /* ====================== Halloween ====================== */
+  [data-theme="halloween"] {
+    color-scheme: dark;
+    --primary: #f28c28;
+    --primary-content: #1a1110;
+    --secondary: #b7e35d;
+    --secondary-content: #14210a;
+    --accent: #8e5cff;
+    --accent-content: #f7f1ff;
+    --neutral: #1a1110;
+    --neutral-content: #ffe7b8;
+    --base-100: #26151b;
+    --base-200: #1a1110;
+    --base-300: #09080b;
+    --base-content: #ffe7b8;
+    --panel-surface: #26151b;
+    --panel-surface-content: #ffe7b8;
+    --panel-control: #332026;
+    --panel-control-hover: #3f2730;
+    --panel-control-active: #f28c28;
+    --panel-control-muted: #5a3d2c;
+    --panel-control-content: #ffe7b8;
+    --grid-pattern-color: rgba(242, 140, 40, 0.26);
+    --grid-mosaic-color: rgba(183, 227, 93, 0.18);
+    --info: #8e5cff;
+    --success: #b7e35d;
+    --warning: #f28c28;
+    --error: #d54a30;
+  }
+}
+
+/* 主背景：半月、星点和暗雾构成夜色层次。 */
+body[data-theme="halloween"],
+body[data-theme="halloween"] .grid-line,
+body[data-theme="halloween"] .grid-point,
+body[data-theme="halloween"] .grid-mosaic,
+body[data-theme="halloween"] #ShelfMainArea,
+body[data-theme="halloween"] #settingsMainArea,
+body[data-theme="halloween"] #tab-contents,
+body[data-theme="halloween"] #ReaderRoot,
+body[data-theme="halloween"] #ReaderShell,
+body[data-theme="halloween"] #ScrollMainArea,
+body[data-theme="halloween"] #ReaderFlipArea,
+body[data-theme="halloween"] #ReaderPDFArea {
+  background-color: var(--base-300);
+  /* 月亮表情图层排在月亮本体前面：黑色尖笑、同色黄色鼻子、左移后的眼睛。 */
+  background-image:
+    conic-gradient(from 72deg at 0% 50%, #09080b 0 36deg, transparent 37deg 360deg),
+    conic-gradient(from 235deg at 100% 50%, #f6d780 0 70deg, transparent 71deg 360deg),
+    radial-gradient(circle at 56px 98px, #09080b 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 56px 98px, #fff8d5 0 4px, transparent 5px),
+    radial-gradient(circle at 56px 98px, #2d1820 0 7px, transparent 8px),
+    radial-gradient(circle at 56px 98px, #d0a23a 0 10px, transparent 11px),
+    radial-gradient(circle at 145px 68px, #09080b 0 76px, transparent 78px),
+    radial-gradient(circle at 112px 108px, #f6d780 0 72px, #d0a23a 73px 80px, transparent 82px),
+    radial-gradient(circle at 12% 12%, rgba(255, 231, 184, 0.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 32% 18%, rgba(255, 231, 184, 0.58) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 24%, rgba(183, 227, 93, 0.42) 0 1px, transparent 2px),
+    radial-gradient(ellipse 80% 24% at 40% 104%, rgba(0, 0, 0, 0.62), transparent 72%),
+    radial-gradient(ellipse 96% 30% at 88% 106%, rgba(26, 17, 16, 0.8), transparent 74%),
+    linear-gradient(180deg, #09080b 0%, #1a1110 62%, #26151b 100%);
+  background-size:
+    34px 16px,
+    24px 18px,
+    260px 220px,
+    260px 220px,
+    260px 220px,
+    260px 220px,
+    260px 220px,
+    260px 220px,
+    170px 140px,
+    220px 170px,
+    260px 210px,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  background-position:
+    108px 168px,
+    112px 139px,
+    42px 48px,
+    42px 48px,
+    42px 48px,
+    42px 48px,
+    42px 48px,
+    42px 48px,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0;
+  background-repeat:
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    repeat,
+    repeat,
+    repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat;
+  background-attachment: fixed;
+}
+
+/* 面板保留暗紫红，控件稍亮并用橙绿边线区分。 */
+body[data-theme="halloween"] .panel-surface {
+  background-color: var(--panel-surface) !important;
+  background-image:
+    linear-gradient(135deg, rgba(242, 140, 40, 0.2), transparent 42%),
+    radial-gradient(circle at 28px 20px, rgba(183, 227, 93, 0.13) 0 4px, transparent 5px);
+  background-size: 100% 100%, 56px 48px;
+}

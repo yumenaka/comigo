@@ -18,9 +18,9 @@ func UpdateConfig(c echo.Context) error {
 	if err != nil {
 		return apiresp.BadRequest(c, "read_body_failed", "Failed to read request body", err.Error())
 	}
-	// 将 JSON 数据转换为字符串并打印
+	// 只记录收到配置更新请求，不输出请求体，避免密码和 token 进入日志。
 	jsonString := string(body)
-	logger.Infof(locale.GetString("log_received_json_data"), jsonString)
+	logger.Infof(locale.GetString("log_received_json_data"))
 	// 如果配置被锁定，返回错误
 	if config.GetCfg().ReadOnlyMode {
 		return apiresp.Forbidden(c, "config_locked", "Config is locked, cannot be modified", nil)

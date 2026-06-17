@@ -2,6 +2,7 @@ package shelf
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -9,10 +10,19 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
-// http://127.0.0.1:1234/api/get-cover?id=2b17a13 获取封面图片的URL
+const shelfCoverResizeHeight = 352
 
-css GetCoverBackgroundCSS(id string) {
-	background-image: { "url(" + config.PrefixPath("/api/get-cover?id="+id) + ")" };
+// getCoverURL 生成书架卡片封面 URL，并显式带上缩略图高度，确保后端按尺寸命中独立缓存。
+func getCoverURL(book model.BookInfo, resizeHeight int) string {
+	coverURL := fmt.Sprintf("/api/get-cover?id=%s&resize_height=%d", url.QueryEscape(book.BookID), resizeHeight)
+	if book.RemoteStoreKey != "" {
+		coverURL += "&remote_store=" + url.QueryEscape(book.RemoteStoreKey)
+	}
+	return config.PrefixPath(coverURL)
+}
+
+css GetCoverBackgroundCSS(book model.BookInfo) {
+	background-image: { "url(" + getCoverURL(book, shelfCoverResizeHeight) + ")" };
 }
 
 templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
@@ -31,8 +41,13 @@ templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
 			target="_blank"
 		}
 		:rel="$store.shelf.openInNewTab ? 'noopener noreferrer' : null"
-		class={ GetCoverBackgroundCSS(book.BookID), "relative w-32 transition-transform duration-200 hover:scale-105 m-2 md:m-3 bg-top bg-cover h-44 rounded drop-shadow-lg ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden" }
+		class={ GetCoverBackgroundCSS(book), "relative w-32 transition-transform duration-200 hover:scale-105 m-2 md:m-3 bg-top bg-cover h-44 rounded drop-shadow-lg ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden" }
 	>
+		if book.IsRemote {
+			<svg class="absolute top-9 left-1 z-20 w-7 h-7 text-sky-400 drop-shadow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+				<path d="M6.5 20a5.5 5.5 0 0 1-.46-10.98A7.5 7.5 0 0 1 20.7 11.6A4.5 4.5 0 0 1 19.5 20h-13Z"></path>
+			</svg>
+		}
 		<!-- 根据书籍类型，选择显示的图标 -->
 		<!-- 虽然此处理论上用 switch 语句更简洁，但是vscode目前无法格式化 templ 的switch语句，所以暂时不用 -->
 		<!-- Zip，Cbz压缩文件 使用 transform 和 scale 实现“元素放大且不影响原有布局”的效果。核心思路是通过 CSS Transform 做放大动画，而不改变其占据的文档流空间。transition-transform duration-200 hover:scale-105 -->

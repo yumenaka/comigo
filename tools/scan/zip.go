@@ -37,22 +37,26 @@ func handleZipAndEpubFiles(filePath string, newBook *model.Book) error {
 	}
 
 	if newBook.Type == model.TypeEpub {
-		imageList, err := file.GetImageListFromEpubFile(newBook.BookPath)
-		if err == nil {
-			newBook.SortPagesByImageList(imageList)
-		} else {
-			logger.Infof(locale.GetString("log_failed_to_get_image_list_from_epub"), newBook.BookPath, err)
-		}
-
-		metaData, err := file.GetEpubMetadata(newBook.BookPath)
-		if err == nil {
-			newBook.Author = metaData.Creator
-			newBook.Press = metaData.Publisher
-		} else {
-			logger.Infof(locale.GetString("log_failed_to_get_metadata_from_epub"), newBook.BookPath, err)
-		}
+		applyEpubInfoFromLocalFile(newBook.BookPath, newBook)
 	}
 	return nil
+}
+
+func applyEpubInfoFromLocalFile(epubPath string, newBook *model.Book) {
+	imageList, err := file.GetImageListFromEpubFile(epubPath)
+	if err == nil {
+		newBook.SortPagesByImageList(imageList)
+	} else {
+		logger.Infof(locale.GetString("log_failed_to_get_image_list_from_epub"), epubPath, err)
+	}
+
+	metaData, err := file.GetEpubMetadata(epubPath)
+	if err == nil {
+		newBook.Author = metaData.Creator
+		newBook.Press = metaData.Publisher
+	} else {
+		logger.Infof(locale.GetString("log_failed_to_get_metadata_from_epub"), epubPath, err)
+	}
 }
 
 // 处理其他类型的压缩文件

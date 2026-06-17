@@ -11,19 +11,6 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// 验证路径是否有效
-func IsValidPath(path string) bool {
-	// 路径不能为空
-	if path == "" {
-		return false
-	}
-	// 路径不能包含特殊字符
-	if strings.ContainsAny(path, "?*<>|\"") {
-		return false
-	}
-	return true
-}
-
 // RemoveExtension 从文件名中去除扩展名
 func RemoveExtension(filename string) string {
 	extension := filepath.Ext(filename)
@@ -63,21 +50,13 @@ func DeleteFileIfExist(filePath string) error {
 	return nil
 }
 
-// ChickIsDir 判断所给路径是否为文件夹
-func ChickIsDir(path string) bool {
+// CheckIsDir 判断所给路径是否为文件夹
+func CheckIsDir(path string) bool {
 	s, err := os.Stat(path)
 	if err != nil {
 		return false
 	}
 	return s.IsDir()
-}
-
-// GetMainName 取得无后缀的文件名
-func GetMainName(filename string) string {
-	base := filepath.Base(filename)
-	ext := filepath.Ext(filename)
-	main := strings.TrimSuffix(base, ext)
-	return main
 }
 
 // GetAbsPath 获取绝对路径
@@ -102,23 +81,6 @@ func PathExists(path string) bool {
 	return true
 }
 
-// IsDir reports whether the named directory exists.
-func IsDir(path string) bool {
-	if path == "" {
-		return false
-	}
-
-	if fi, err := os.Stat(path); err == nil {
-		return fi.IsDir()
-	}
-	return false
-}
-
-// FileExists reports whether the named file or directory exists.
-func FileExists(path string) bool {
-	return IsFile(path)
-}
-
 // IsFile reports whether the named file or directory exists.
 func IsFile(path string) bool {
 	if path == "" {
@@ -129,11 +91,6 @@ func IsFile(path string) bool {
 		return !fi.IsDir()
 	}
 	return false
-}
-
-// IsAbsPath is abs path.
-func IsAbsPath(aPath string) bool {
-	return path.IsAbs(aPath)
 }
 
 // GetContentTypeByFileName https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types

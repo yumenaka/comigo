@@ -7,10 +7,9 @@
 ## 2. 跨平台编译（sample/makefiles/cross-compile.mk）
 ##
 ## 常用命令：
-##   make all              - 编译所有平台（CGO 版本）+App 并生成校验
+##   make all              - 编译所有平台（默认非 CGO）+ App 并生成校验
 ##
 ## 【跨平台编译】
-##   make compileAll_CGO   - 编译所有平台的 CGO 版本
 ##   make compileAll       - 编译所有平台的非 CGO 版本
 ##   make Windows_x86_64   - 编译 Windows 64 位版本
 ##   make Linux_x86_64     - 编译 Linux 64 位版本
@@ -45,7 +44,7 @@
 # mingw32-make all VERSION=v0.9.9
 
 ## 仅编译指定架构
-# make Linux_x86_64_cgo VERSION=v1.1.5
+# make Linux_x86_64 VERSION=v1.1.5
 
 # 应该下载哪个版本？
 #
@@ -99,22 +98,22 @@ DOCKER_PLATFORMS := linux/amd64,linux/arm64,linux/arm/v7
 
 # 构建本地 Docker 镜像（当前平台）
 docker-build:
-	@$(MAKE) -f sample/docker/Makefile.docker docker-build IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION)
+	@$(MAKE) -f sample/docker/Makefile.docker docker-build IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
 
 # 构建并推送多平台 Docker 镜像
 # 注意：多平台镜像无法加载到本地，必须推送到远程仓库
 docker-buildx:
 	@echo "提示：多平台镜像将自动推送到 $(DOCKER_REPO)"
 	@echo "如果只想本地测试，请使用: make docker-build"
-	@$(MAKE) -f sample/docker/Makefile.docker docker-buildx IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION)
+	@$(MAKE) -f sample/docker/Makefile.docker docker-buildx IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
 
 # 本地测试 Docker 镜像
 docker-test:
-	@$(MAKE) -f sample/docker/Makefile.docker docker-test IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION)
+	@$(MAKE) -f sample/docker/Makefile.docker docker-test IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
 
 # 清理 Docker 镜像
 docker-clean:
-	@$(MAKE) -f sample/docker/Makefile.docker docker-clean IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION)
+	@$(MAKE) -f sample/docker/Makefile.docker docker-clean IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
 
 # Docker 帮助信息
 docker-help:

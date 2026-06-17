@@ -1,0 +1,64 @@
+/* 雪境清晨模板：变量、湖面山景背景和控件样式集中在这里。 */
+@layer base {
+  /* ====================== Winter ====================== */
+  [data-theme="winter"] {
+    color-scheme: light;
+    --primary: #4e7aa4;
+    --primary-content: #f3fbff;
+    --secondary: #e6b185;
+    --secondary-content: #2d1608;
+    --accent: #f0c66d;
+    --accent-content: #3a2500;
+    --neutral: #3d5368;
+    --neutral-content: #f3fbff;
+    --base-100: #eaf6fb;
+    --base-200: #cfe6f2;
+    --base-300: #a6c6dc;
+    --base-content: #25384a;
+    --panel-surface: #e4f1f7;
+    --panel-surface-content: #25384a;
+    --panel-control: #f6fbfd;
+    --panel-control-hover: #ffffff;
+    --panel-control-active: #e6b185;
+    --panel-control-muted: #b8d3e2;
+    --panel-control-content: #25384a;
+    --grid-pattern-color: rgba(78, 122, 164, 0.2);
+    --grid-mosaic-color: rgba(209, 138, 79, 0.14);
+    --info: #4e7aa4;
+    --success: #658f78;
+    --warning: #d18a4f;
+    --error: #bf5a4a;
+  }
+}
+
+/* 主背景：远山、湖面和暖色营灯，清冷中保留少量温度。 */
+body[data-theme="winter"],
+body[data-theme="winter"] .grid-line,
+body[data-theme="winter"] .grid-point,
+body[data-theme="winter"] .grid-mosaic,
+body[data-theme="winter"] #ShelfMainArea,
+body[data-theme="winter"] #settingsMainArea,
+body[data-theme="winter"] #tab-contents,
+body[data-theme="winter"] #ReaderRoot,
+body[data-theme="winter"] #ReaderShell,
+body[data-theme="winter"] #ScrollMainArea,
+body[data-theme="winter"] #ReaderFlipArea,
+body[data-theme="winter"] #ReaderPDFArea {
+  background-color: var(--base-300);
+  background-image:
+    conic-gradient(from 120deg at 26% 52%, transparent 0 120deg, rgba(78, 122, 164, 0.5) 0 180deg, transparent 0),
+    conic-gradient(from 120deg at 68% 56%, transparent 0 120deg, rgba(107, 149, 181, 0.42) 0 180deg, transparent 0),
+    radial-gradient(circle at 76% 70%, rgba(240, 198, 109, 0.55) 0 16px, transparent 18px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.34) 0 1px, transparent 1px 22px),
+    linear-gradient(180deg, #eaf6fb 0%, #cfe6f2 58%, #a6c6dc 100%);
+  background-size: 420px 260px, 500px 280px, 100% 100%, 100% 100%, 100% 100%;
+  background-position: left bottom 80px, right bottom 72px, left top, left top, left top;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+  background-attachment: fixed;
+}
+
+/* 面板使用雪白蓝，控件更白，适合长时间阅读。 */
+body[data-theme="winter"] .panel-surface {
+  background-color: var(--panel-surface) !important;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.58), transparent 50%);
+}

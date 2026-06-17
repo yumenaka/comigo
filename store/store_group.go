@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -80,6 +82,7 @@ func (ramStore *StoreInRam) GenerateBookGroup() (e error) {
 	return e
 }
 
+// ListBooks 列出所有书籍
 func (ramStore *StoreInRam) ListBooks() ([]*model.Book, error) {
 	var books []*model.Book
 	// 遍历 ChildStores 中的所有书籍
@@ -93,8 +96,8 @@ func (ramStore *StoreInRam) ListBooks() ([]*model.Book, error) {
 	return books, nil
 }
 
-// SaveBooksToJson  保存书籍信息到本地硬盘（JSON 文件）
-func (ramStore *StoreInRam) SaveBooksToJson() error {
+// SaveAllBooksMetaJson  保存书籍信息到本地硬盘（JSON 文件）
+func (ramStore *StoreInRam) SaveAllBooksMetaJson() error {
 	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return err
@@ -106,9 +109,9 @@ func (ramStore *StoreInRam) SaveBooksToJson() error {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 		return err
 	}
-	// 遍历并保存每本书
+	// 遍历并保存每本书的元数据到 JSON 文件
 	for _, book := range allBooks {
-		err := SaveBookJson(book)
+		err := SaveMetaJson(book)
 		if err != nil {
 			logger.Infof(locale.GetString("log_error_saving_book"), book.BookID, err)
 		}
@@ -117,16 +120,17 @@ func (ramStore *StoreInRam) SaveBooksToJson() error {
 	return nil
 }
 
-// SaveBookJson 将单本书籍信息保存为 JSON 文件
-func SaveBookJson(book *model.Book) error {
+// SaveMetaJson 将单本书籍信息保存为 JSON 文件
+func SaveMetaJson(book *model.Book) error {
 	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return err
 	}
 	// 构造保存路径
 	metaPath := filepath.Join(configDir, "metadata")
-	// 序列化书籍为 JSON 格式
-	jsonData, err := json.MarshalIndent(book, "", "  ")
+	// 序列化书籍为 metadata JSON。普通 API JSON 会隐藏本地路径；
+	// metadata 文件仍必须写入内部路径字段，否则重启后无法定位原始文件。
+	jsonData, err := marshalBookMetaJSON(book)
 	if err != nil {
 		return err
 	}
@@ -147,6 +151,90 @@ func SaveBookJson(book *model.Book) error {
 	return nil
 }
 
+// marshalBookMetaJSON 专用于本地 metadata 持久化。
+// BookPath/StoreUrl/RemoteURL/PageInfo.Path 在普通 JSON 响应中会被隐藏，但 metadata 必须保留这些内部字段。
+func marshalBookMetaJSON(book *model.Book) ([]byte, error) {
+	rawData, err := json.Marshal(book)
+	if err != nil {
+		return nil, err
+	}
+	payload := map[string]any{}
+	if err := json.Unmarshal(rawData, &payload); err != nil {
+		return nil, err
+	}
+	payload["book_path"] = book.BookPath
+	payload["store_url"] = book.StoreUrl
+	if book.RemoteURL != "" {
+		payload["remote_url"] = book.RemoteURL
+	}
+	if book.RemoteBookID != "" {
+		payload["remote_book_id"] = book.RemoteBookID
+	}
+	if book.RemoteStoreKey != "" {
+		payload["remote_store_key"] = book.RemoteStoreKey
+	}
+	if book.RemoteShelfKey != "" {
+		payload["remote_shelf_key"] = book.RemoteShelfKey
+	}
+	if book.RemoteShelfName != "" {
+		payload["remote_shelf_name"] = book.RemoteShelfName
+	}
+	if book.ParentFolder != "" {
+		payload["parent_folder"] = book.ParentFolder
+	}
+	keepBookMetaPagePaths(payload, book)
+	return json.MarshalIndent(payload, "", "  ")
+}
+
+// keepBookMetaPagePaths 把页面真实路径补回 metadata；普通页面 JSON 不应拿到这些内部路径。
+func keepBookMetaPagePaths(payload map[string]any, book *model.Book) {
+	if cover, ok := payload["cover"].(map[string]any); ok && book.Cover.Path != "" {
+		cover["path"] = book.Cover.Path
+	}
+	pages, ok := payload["PageInfos"].([]any)
+	if !ok {
+		return
+	}
+	for i := range book.PageInfos {
+		if i >= len(pages) {
+			return
+		}
+		page, ok := pages[i].(map[string]any)
+		if ok && book.PageInfos[i].Path != "" {
+			page["path"] = book.PageInfos[i].Path
+		}
+	}
+}
+
+// restoreBookMetaPrivateFields 从 metadata JSON 读回普通响应中隐藏的内部字段。
+func restoreBookMetaPrivateFields(jsonData []byte, book *model.Book) error {
+	var privateFields struct {
+		BookPath        string `json:"book_path"`
+		StoreUrl        string `json:"store_url"`
+		RemoteURL       string `json:"remote_url"`
+		RemoteBookID    string `json:"remote_book_id"`
+		RemoteStoreKey  string `json:"remote_store_key"`
+		RemoteShelfKey  string `json:"remote_shelf_key"`
+		RemoteShelfName string `json:"remote_shelf_name"`
+		ParentFolder    string `json:"parent_folder"`
+	}
+	if err := json.Unmarshal(jsonData, &privateFields); err != nil {
+		return err
+	}
+	book.BookPath = privateFields.BookPath
+	book.StoreUrl = privateFields.StoreUrl
+	book.RemoteURL = privateFields.RemoteURL
+	book.RemoteBookID = privateFields.RemoteBookID
+	book.RemoteStoreKey = privateFields.RemoteStoreKey
+	book.RemoteShelfKey = privateFields.RemoteShelfKey
+	book.RemoteShelfName = privateFields.RemoteShelfName
+	if privateFields.ParentFolder != "" {
+		book.ParentFolder = privateFields.ParentFolder
+	}
+	return nil
+}
+
+// DeleteBookJson 删除书籍对应的 JSON 文件
 func DeleteBookJson(book *model.Book) error {
 	configDir, err := config.GetConfigDir()
 	if err != nil {
@@ -183,7 +271,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	for _, storeUrl := range config.GetCfg().StoreUrls {
 		// 计算 StoreID（对于远程 URL 直接使用，本地路径转换为绝对路径）
 		var storeID string
-		if IsRemoteURL(storeUrl) {
+		if tools.IsRemoteStoreURL(storeUrl) {
 			// 远程 URL 直接使用
 			storeID = storeUrl
 		} else {
@@ -249,6 +337,23 @@ func (ramStore *StoreInRam) LoadBooks() error {
 				}
 				continue // 继续处理其他文件
 			}
+			err = restoreBookMetaPrivateFields(jsonData, &book)
+			if err != nil {
+				logger.Infof(locale.GetString("log_warning_corrupted_json_file"), fileName, err)
+				continue
+			}
+			if book.BookPath == "" || book.StoreUrl == "" {
+				// BookPath/StoreUrl 不再走普通 JSON 输出，但 metadata 必须保留。
+				// 遇到缺字段的旧/坏 metadata 时，先暂存书签再删除，让后续扫描重建完整数据。
+				if book.BookID != "" && len(book.BookMarks) > 0 {
+					ramStore.PendingBookmarks.Store(book.BookID, book.BookMarks)
+				}
+				errDel := os.Remove(filePath)
+				if errDel != nil {
+					logger.Infof(locale.GetString("log_error_deleting_orphan_metadata"), fileName, errDel)
+				}
+				continue
+			}
 			// 检查版本号：根据前两段版本号(major.minor)决定处理方式
 			currentVersion := config.GetVersion()
 			bookMajorMinor := getMajorMinorVersion(book.CreatedByVersion)
@@ -310,8 +415,17 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	return nil
 }
 
-// StoreBook 添加一本书
+// StoreBook 添加一本书，并在内存入库成功后持久化 metadata。
 func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
+	if err := ramStore.storeBookInMemory(b); err != nil {
+		return err
+	}
+	return saveBookMeta(b)
+}
+
+// storeBookInMemory 只更新内存 Store，不写 metadata 文件。
+// 持久化必须由 saveBookMeta 显式完成，避免批量入库时重复落盘。
+func (ramStore *StoreInRam) storeBookInMemory(b *model.Book) error {
 	if b.BookID == "" {
 		return errors.New(locale.GetString("err_add_book_empty_bookid"))
 	}
@@ -329,15 +443,20 @@ func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
 			logger.Infof(locale.GetString("log_bookmark_migrated"), b.BookID, len(marks))
 		}
 	}
-	err := SaveBookJson(b)
-	if err != nil {
-		logger.Infof(locale.GetString("log_error_saving_book_to_json"), b.BookID, err)
-	}
-	return ramStore.AddBookToSubStore(b.StoreUrl, b)
+	return ramStore.StoreBookToSubStore(b.StoreUrl, b)
 }
 
-// AddBookToSubStore 将某一本书，放到BookMap里面去
-func (ramStore *StoreInRam) AddBookToSubStore(storeURL string, b *model.Book) error {
+// saveBookMeta 只负责保存单本书 metadata，并统一记录保存失败日志。
+func saveBookMeta(b *model.Book) error {
+	if err := SaveMetaJson(b); err != nil {
+		logger.Infof(locale.GetString("log_error_saving_book_to_json"), b.BookID, err)
+		return err
+	}
+	return nil
+}
+
+// StoreBookToSubStore 将某一本书，放到BookMap里面去
+func (ramStore *StoreInRam) StoreBookToSubStore(storeURL string, b *model.Book) error {
 	if f, ok := ramStore.ChildStores.Load(storeURL); !ok {
 		// 创建一个新子书库，并添加一本书
 		newSubStore := Store{
@@ -358,21 +477,24 @@ func (ramStore *StoreInRam) AddBookToSubStore(storeURL string, b *model.Book) er
 	}
 }
 
-// AddBooks 添加多本书
-func (ramStore *StoreInRam) AddBooks(books []*model.Book) error {
+// StoreBooks 添加多本书
+func (ramStore *StoreInRam) StoreBooks(books []*model.Book) error {
+	var storeErrors []error
 	for _, b := range books {
-		if err := ramStore.StoreBook(b); err != nil {
+		if err := ramStore.storeBookInMemory(b); err != nil {
 			logger.Infof(locale.GetString("log_error_adding_book"), b.BookID, err)
+			storeErrors = append(storeErrors, err)
+			continue
 		}
-		err := SaveBookJson(b)
-		if err != nil {
-			logger.Infof(locale.GetString("log_error_saving_book_to_json"), b.BookID, err)
+		if err := saveBookMeta(b); err != nil {
+			storeErrors = append(storeErrors, err)
 		}
 	}
-	return nil
+	return errors.Join(storeErrors...)
 }
 
-// GetParentBookID 通过子书籍 ID 获取所属书组 ID
+// GetParentBookID 通过子书籍 ID 获取所属书组 ID。
+// 找不到父书组时返回空字符串和错误，调用方应按“没有父级”处理。
 func (ramStore *StoreInRam) GetParentBookID(childID string) (string, error) {
 	allBooks, err := ramStore.ListBooks()
 	if err != nil {
@@ -384,7 +506,7 @@ func (ramStore *StoreInRam) GetParentBookID(childID string) (string, error) {
 		}
 		for _, id := range bookGroup.ChildBooksID {
 			if id == childID {
-				fmt.Println("Found group for book ID:", childID, "Group ID:", bookGroup.BookID)
+				logger.Infof(locale.GetString("log_found_parent_book_group"), childID, bookGroup.BookID)
 				return bookGroup.BookID, nil
 			}
 		}
@@ -430,28 +552,28 @@ func (ramStore *StoreInRam) StoreBookMark(mark *model.BookMark) error {
 	switch mark.Type {
 	case model.UserMark:
 		// 用户书签的处理逻辑(用户书签可以有多个，但同一页只能有一个用户书签）
-		exits := false
+		exists := false
 		for i, existingMark := range b.BookMarks {
 			if existingMark.Type == mark.Type && existingMark.PageIndex == mark.PageIndex {
 				// 更新现有书签
 				b.BookMarks[i] = *mark
-				exits = true
+				exists = true
 			}
 		}
-		if !exits {
+		if !exists {
 			b.BookMarks = append(b.BookMarks, *mark)
 		}
 	case model.AutoMark:
 		// 自动书签的处理逻辑（每本书只有一个自动书签）
-		exits := false
+		exists := false
 		for i, existingMark := range b.BookMarks {
 			if existingMark.Type == mark.Type {
 				// 更新现有书签
 				b.BookMarks[i] = *mark
-				exits = true
+				exists = true
 			}
 		}
-		if !exits {
+		if !exists {
 			b.BookMarks = append(b.BookMarks, *mark)
 		}
 	default:
@@ -536,7 +658,7 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 	for _, storeUrl := range storeUrls {
 		// 对于远程 URL 直接使用，本地路径转换为绝对路径
 		var storeID string
-		if IsRemoteURL(storeUrl) {
+		if tools.IsRemoteStoreURL(storeUrl) {
 			storeID = storeUrl
 		} else {
 			storePathAbs, err := filepath.Abs(storeUrl)
@@ -546,8 +668,14 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 			}
 			storeID = storePathAbs
 		}
+		if tools.DetectStoreURL(storeUrl).Type == tools.StoreBackendComigo {
+			storeBookInfoList = append(storeBookInfoList, remoteComigoShelfInfos(storeID, topBookList, allBooks, sortBy)...)
+			continue
+		}
 		newStoreBookInfo := model.StoreBookInfo{
-			StoreUrl: storeID,
+			StoreUrl:    storeID,
+			DisplayName: displayStoreName(storeID),
+			IsRemote:    tools.IsRemoteStoreURL(storeID),
 		}
 		for _, topBook := range topBookList {
 			if topBook.StoreUrl == storeID {
@@ -570,6 +698,89 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 	}
 	// 没找到任何书
 	return nil, errors.New(locale.GetString("err_cannot_find_book_topofshelf"))
+}
+
+// remoteComigoShelfInfos 按远端 Comigo 顶级书库拆分首页展示。
+// 旧版远端 API 不输出真实 StoreUrl，本地扫描时保存的 RemoteShelfKey 是这里的分组依据。
+func remoteComigoShelfInfos(storeID string, topBookList model.BookInfos, allBooks []*model.Book, sortBy string) []model.StoreBookInfo {
+	shelfOrder := []string{}
+	shelfNames := map[string]string{}
+	ensureShelf := func(key string, name string) {
+		if key == "" {
+			key = storeID
+		}
+		if _, ok := shelfNames[key]; ok {
+			return
+		}
+		if name == "" {
+			name = displayStoreName(storeID)
+		}
+		shelfOrder = append(shelfOrder, key)
+		shelfNames[key] = name
+	}
+
+	for _, topBook := range topBookList {
+		if topBook.StoreUrl == storeID {
+			ensureShelf(topBook.RemoteShelfKey, topBook.RemoteShelfName)
+		}
+	}
+	for _, book := range allBooks {
+		if book.StoreUrl == storeID {
+			ensureShelf(book.RemoteShelfKey, book.RemoteShelfName)
+		}
+	}
+	if len(shelfOrder) == 0 {
+		ensureShelf("", "")
+	}
+
+	storeBookInfoList := make([]model.StoreBookInfo, 0, len(shelfOrder))
+	for _, shelfKey := range shelfOrder {
+		newStoreBookInfo := model.StoreBookInfo{
+			StoreUrl:    storeID + "\x00" + shelfKey,
+			DisplayName: shelfNames[shelfKey],
+			IsRemote:    true,
+		}
+		for _, topBook := range topBookList {
+			if topBook.StoreUrl == storeID && remoteShelfKeyOrDefault(topBook.RemoteShelfKey, storeID) == shelfKey {
+				newStoreBookInfo.BookInfos = append(newStoreBookInfo.BookInfos, topBook)
+			}
+		}
+		newStoreBookInfo.BookInfos.SortBooks(sortBy)
+		for _, b := range allBooks {
+			if b.StoreUrl == storeID && b.Type != model.TypeBooksGroup && remoteShelfKeyOrDefault(b.RemoteShelfKey, storeID) == shelfKey {
+				newStoreBookInfo.ChildBookNum++
+			}
+		}
+		storeBookInfoList = append(storeBookInfoList, newStoreBookInfo)
+	}
+	return storeBookInfoList
+}
+
+func remoteShelfKeyOrDefault(shelfKey string, storeID string) string {
+	if shelfKey == "" {
+		return storeID
+	}
+	return shelfKey
+}
+
+// displayStoreName 生成首页展示用书库名，避免把本机绝对路径直接暴露到页面。
+func displayStoreName(storeID string) string {
+	if storeID == "" {
+		return ""
+	}
+	if tools.IsRemoteStoreURL(storeID) {
+		parsedURL, err := url.Parse(storeID)
+		if err == nil && parsedURL.Host != "" {
+			return parsedURL.Host
+		}
+		return storeID
+	}
+	cleanPath := filepath.Clean(storeID)
+	baseName := filepath.Base(cleanPath)
+	if baseName == "." || baseName == string(filepath.Separator) {
+		return cleanPath
+	}
+	return baseName
 }
 
 // GetChildBooksInfo 根据 ID 获取书籍列表
@@ -595,15 +806,24 @@ func GetChildBooksInfo(BookID string) (*model.BookInfos, error) {
 	}
 }
 
-// GetBookInfoListByParentFolder 根据父文件夹获取书籍列表
-func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfos, error) {
+// GetBookInfoListByBookFolder 根据当前书籍的真实父目录获取同目录书籍列表。
+// ParentFolder 只保存展示用目录名，不能作为分组 key；这里使用 StoreUrl + BookPath 父目录避免同名目录串组。
+func GetBookInfoListByBookFolder(book *model.Book) (*model.BookInfos, error) {
+	if book == nil {
+		return nil, fmt.Errorf(locale.GetString("err_cannot_find_book_parentfolder"), "")
+	}
+	currentFolderKey := bookFolderKey(book.BookInfo)
+	if currentFolderKey == "" {
+		return nil, fmt.Errorf(locale.GetString("err_cannot_find_book_parentfolder"), book.ParentFolder)
+	}
+
 	var infoList model.BookInfos
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, b := range allBooks {
-		if b.ParentFolder == parentFolder {
+		if bookFolderKey(b.BookInfo) == currentFolderKey {
 			infoList = append(infoList, b.BookInfo)
 		}
 	}
@@ -611,5 +831,40 @@ func GetBookInfoListByParentFolder(parentFolder string) (*model.BookInfos, error
 		infoList.SortBooks("filename")
 		return &infoList, nil
 	}
-	return nil, fmt.Errorf(locale.GetString("err_cannot_find_book_parentfolder"), parentFolder)
+	return nil, fmt.Errorf(locale.GetString("err_cannot_find_book_parentfolder"), book.ParentFolder)
+}
+
+func bookFolderKey(book model.BookInfo) string {
+	parentPath := bookParentPath(book)
+	if parentPath == "" {
+		return ""
+	}
+	return book.StoreUrl + "\x00" + parentPath
+}
+
+func bookParentPath(book model.BookInfo) string {
+	bookPath := strings.TrimSpace(book.BookPath)
+	if bookPath == "" {
+		if book.ParentFolder == "" {
+			return ""
+		}
+		// 兼容旧元数据：没有 BookPath 时只能退回到 StoreUrl + ParentFolder，避免跨书库串组。
+		return book.ParentFolder
+	}
+
+	if book.Type == model.TypeDir || book.Type == model.TypeBooksGroup {
+		bookPath = strings.TrimRight(bookPath, "/\\")
+	}
+	if book.IsRemote {
+		bookPath = strings.TrimRight(bookPath, "/\\")
+		lastSlash := strings.LastIndexAny(bookPath, "/\\")
+		if lastSlash >= 0 {
+			return bookPath[:lastSlash]
+		}
+		if book.RemoteURL != "" {
+			return book.RemoteURL
+		}
+		return book.StoreUrl
+	}
+	return filepath.Dir(bookPath)
 }

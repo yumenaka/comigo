@@ -1,0 +1,23 @@
+/* Dark 主题：基础变量独立维护，方便后续单独扩展模板样式。 */
+@layer base {
+/* ====================== Dark ====================== */
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --primary: rgb(116, 128, 255);
+    --primary-content: #060a1f;
+    --secondary: rgb(255, 98, 212);
+    --secondary-content: #2e0622;
+    --accent: rgb(0, 202, 182);
+    --accent-content: #04261f;
+    --neutral: #2a323c;
+    --neutral-content: #A6ADBB;
+    --base-100: #1d232a;
+    --base-200: #191e24;
+    --base-300: #15191e;
+    --base-content: #C6CDCB;
+    --info: #60a5fa;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --error: #f87171;
+  }
+}

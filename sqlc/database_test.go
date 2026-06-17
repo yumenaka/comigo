@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -16,6 +17,9 @@ func newTestStoreDatabase(t *testing.T) (*sql.DB, *StoreDatabase) {
 	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("open sqlite memory database: %v", err)
+	}
+	if err := configureSQLitePragmas(context.Background(), db); err != nil {
+		t.Fatalf("configure sqlite pragmas: %v", err)
 	}
 	if _, err := db.ExecContext(context.Background(), ddl); err != nil {
 		t.Fatalf("create schema: %v", err)
@@ -35,6 +39,36 @@ func newTestStoreDatabase(t *testing.T) (*sql.DB, *StoreDatabase) {
 		_ = db.Close()
 	})
 	return db, store
+}
+
+func TestConfigureSQLitePragmasEnablesIncrementalAutoVacuum(t *testing.T) {
+	db, _ := newTestStoreDatabase(t)
+
+	var autoVacuum int
+	if err := db.QueryRowContext(context.Background(), "PRAGMA auto_vacuum").Scan(&autoVacuum); err != nil {
+		t.Fatalf("query auto_vacuum pragma: %v", err)
+	}
+	if autoVacuum != 2 {
+		t.Fatalf("auto_vacuum = %d, want 2 (INCREMENTAL)", autoVacuum)
+	}
+}
+
+func TestOpenDatabaseRejectsImplicitCompatibilityTypes(t *testing.T) {
+	tests := []struct {
+		name    string
+		dbType  string
+		wantErr string
+	}{
+		{name: "empty type", dbType: "", wantErr: "unsupported database type"},
+		{name: "postgresql alias", dbType: "postgresql", wantErr: "unsupported database type"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := OpenDatabase(DBOptions{Type: tt.dbType}); err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("OpenDatabase(%q) error = %v, want containing %q", tt.dbType, err, tt.wantErr)
+			}
+		})
+	}
 }
 
 func TestStoreBookRoundTripKeepsJSONMetadataFields(t *testing.T) {

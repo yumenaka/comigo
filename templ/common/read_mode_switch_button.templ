@@ -1,36 +1,47 @@
 package common
 
 templ ReadModeSwitchButton() {
-	<!-- 切换【卷轴(无限)/卷轴(分页)/翻页(左右)】的按钮 -->
+	<!-- 阅读页统一在卷轴阅读和翻页阅读之间切换，本地 reader 不改变 URL。 -->
 	<div
 		x-data="{
-			readModeSwitchOptions: {
-				infinite_scroll: ['paged_scroll', 'page_flip'],
-				paged_scroll: ['infinite_scroll', 'page_flip'],
-				page_flip: ['infinite_scroll', 'paged_scroll'],
+			isReadPage() {
+				const pathname = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
+				const firstSegment = pathname.split('/').filter(Boolean)[0];
+				return window.ComiGoReaderMode || ($store.global.onlineBook && (firstSegment === 'scroll' || firstSegment === 'flip'));
+			},
+			switchReadMode() {
+				const nextMode = $store.global.readMode === 'flip' ? 'scroll' : 'flip';
+				if (window.ComiGoReaderMode) {
+					window.ComiGoReader?.setReadMode(nextMode);
+					return;
+				}
+				$store.global.readMode = nextMode;
+				$store.global.onChangeReadMode();
+			},
+			readModeSwitchText() {
+				const isFlip = $store.global.readMode === 'flip';
+				return i18next.t(isFlip ? 'switch_scroll_reading' : 'switch_flip_reading', {
+					defaultValue: isFlip ? '切换卷轴阅读' : '切换翻页阅读',
+				});
 			}
 		}"
-		x-show="$store.global.onlineBook"
-		class="flex flex-row justify-center items-center w-full mt-2 mb-2 pb-1 gap-2 border-2 border-gray-500 dark:border-gray-200 rounded relative"
+		x-cloak
+		x-show="isReadPage()"
+		class="flex flex-row justify-center items-center w-full mt-2 mb-2 pb-1 border-2 border-gray-500 dark:border-gray-200 rounded relative"
 	>
 		<!-- 切换 -->
 		<span
-			class="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content"
+			class="panel-surface absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 px-2 bg-base-100 font-semibold text-xs text-base-content"
 			x-text="i18next.t('switch')"
 		>
 			切换
 		</span>
-		<template
-			x-for="mode in readModeSwitchOptions[$store.global.readMode] ?? []"
-			:key="mode"
-		>
-			<button
-				type="button"
-				class="z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
-				@click="$store.global.readMode = mode; $store.global.onChangeReadMode();"
-				x-text="i18next.t(mode+'_button')"
-				x-bind:aria-label="i18next.t(mode+'_button')"
-			></button>
-		</template>
+		<button
+			type="button"
+			class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
+			@click="switchReadMode()"
+			x-text="readModeSwitchText()"
+			x-bind:aria-label="readModeSwitchText()"
+		></button>
 	</div>
 }

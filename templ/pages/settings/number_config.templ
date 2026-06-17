@@ -1,17 +1,18 @@
 package settings
 
 import "strconv"
+import "github.com/yumenaka/comigo/config"
 
 // NumberConfig 数字类型的配置
 templ NumberConfig(name string, value int, description string, min int, max int) {
 	@NumberConfigJavaScript()
 	<div
 		id={ "numberConfig_" + name }
-		class="flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+		class="panel-surface flex flex-col justify-start w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 	>
 		<label for={ name } class="w-full py-0 text-left" x-text={ getTranslations(name) }></label>
 		<input
-			class="px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black"
+			class="panel-control px-2.5 w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black"
 			id={ name }
 			name={ name }
 			type="number"
@@ -26,9 +27,10 @@ templ NumberConfig(name string, value int, description string, min int, max int)
 			max={ strconv.Itoa(max) }
 			min={ strconv.Itoa(min) }
 			data-original-value={ strconv.Itoa(value) }
+			disabled?={ config.GetCfg().ReadOnlyMode }
 			@change={ "updateNumberConfig('" + name + "', $event.target.value, " + strconv.Itoa(min) + ", " + strconv.Itoa(max) + ")" }
 		/>
-		<div class="w-full py-1 text-left text-xs text-base-content" x-text={ getTranslations(description) }></div>
+		<div class="w-auto py-1 text-left text-xs text-base-content" x-text={ getTranslations(description) }></div>
 		<div class="bg-red-600"></div>
 	</div>
 }

@@ -1,15 +1,24 @@
-// 翻页模式分页与边界判断工具
+// 翻页阅读分页与边界判断工具
 // （立即执行函数）：(function(){...})(...) 
 // 创建一个“一次性、私有”的作用域。作用：避免污染全局作用域，即只暴露api，而不暴露实现细节。
 (function (global) {
     'use strict'
-    // 判断在第一页/最后一页时，当前滑动方向是否应该被“阻断”。
-    function shouldBlockScrollBoundary(diffX, mangaMode, nowPageNum, allPageNum) {
-        if (nowPageNum === 1) {
-            return (diffX < 0 && mangaMode) || (diffX > 0 && !mangaMode)
+    // 判断在第一页/最后一屏时，当前滑动方向是否应该被“阻断”。
+    // 双页模式下第一页作为封面单独显示；从第 2 页开始才按跨页显示，
+    // 因此“最后一屏”可能是 nowPageNum，也可能是 nowPageNum + 1。
+    function shouldBlockScrollBoundary(diffX, mangaMode, nowPageNum, allPageNum, doublePageMode = false) {
+        const toNext = mangaMode ? diffX > 0 : diffX < 0
+        const toPrevious = mangaMode ? diffX < 0 : diffX > 0
+        const isFirstScreen = nowPageNum <= 1
+        const isLastScreen = doublePageMode
+            ? nowPageNum >= allPageNum || (nowPageNum > 1 && nowPageNum + 1 >= allPageNum)
+            : nowPageNum >= allPageNum
+
+        if (isFirstScreen && toPrevious) {
+            return true
         }
-        if (nowPageNum === allPageNum) {
-            return (diffX > 0 && mangaMode) || (diffX < 0 && !mangaMode)
+        if (isLastScreen && toNext) {
+            return true
         }
         return false
     }
@@ -17,13 +26,19 @@
     // 计算“下一次翻页应该加几页”：1 / 2 / 0。
     // 0 表示不该再翻（越界保护）。
     function getNextPageStep(doublePageMode, nowPageNum, allPageNum) {
+        if (nowPageNum >= allPageNum) {
+            return 0
+        }
         if (!doublePageMode) {
-            return nowPageNum <= allPageNum ? 1 : 0
+            return 1
         }
-        if (nowPageNum < allPageNum - 1) {
-            return 2
+        if (nowPageNum === 1) {
+            return 1
         }
-        return 1
+        if (nowPageNum + 1 >= allPageNum) {
+            return 0
+        }
+        return 2
     }
 
     // 计算“上一次翻页应该减几页”：-1 / -2 / 0。
@@ -35,7 +50,11 @@
         if (!doublePageMode) {
             return -1
         }
-        return nowPageNum-2 > 0 ? -2 : -1
+        if (nowPageNum === 2) {
+            return -1
+        }
+        // 正常双页屏从偶数页开始；若当前页是手动跳入的奇数页，回到前一个偶数跨页起点。
+        return nowPageNum % 2 === 1 ? -1 : -2
     }
 
     const api = {

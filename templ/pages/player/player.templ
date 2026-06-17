@@ -9,8 +9,8 @@ import (
 )
 
 // PlayerPage 定义播放器页面主体
-templ PlayerPage(c echo.Context, book *model.Book, playlist *model.BookInfos) {
-	@InsertData(book, playlist, tools.GetServerInfo(
+templ PlayerPage(c echo.Context, book *model.Book, playerData PlayerData) {
+	@InsertData(playerData, tools.GetServerInfo(
 		tools.ServerInfoParams{
 			Cfg:            config.GetCfg(),
 			Version:        config.GetVersion(),
@@ -21,24 +21,21 @@ templ PlayerPage(c echo.Context, book *model.Book, playlist *model.BookInfos) {
 	if book != nil {
 		@common.Header(
 			common.HeaderBackLeft(common.GetReturnUrl(book.BookInfo.BookID)),
-			common.HeaderTextTitle(common.GetBookTitle(book.BookInfo.BookID)),
+			common.HeaderTextTitleRemote(common.GetBookTitle(book.BookInfo.BookID), book.BookInfo.IsRemote),
 			common.HeaderDefaultRight(),
 		)
-		@MainArea(c, book, playlist)
+		@MainArea(c, book, playerData)
 	}
 	if book != nil {
-		@common.Drawer(c, book, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
+		@common.Drawer(c, book, nil, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
 	}
 	@common.QRCode()
 }
 
-// InsertData 插入书籍数据和播放列表到页面
-templ InsertData(bookData any, playlist any, serverStatus any) {
-	if bookData != nil {
-		@templ.JSONScript("NowBook", bookData)
-	}
-	if playlist != nil {
-		@templ.JSONScript("Playlist", playlist)
+// InsertData 插入播放器专用数据到页面，避免把本地 BookPath/StoreUrl 暴露给前端。
+templ InsertData(playerData any, serverStatus any) {
+	if playerData != nil {
+		@templ.JSONScript("PlayerData", playerData)
 	}
 	if serverStatus != nil {
 		@templ.JSONScript("ServerStatus", serverStatus)

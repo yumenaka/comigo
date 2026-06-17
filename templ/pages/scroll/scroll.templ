@@ -8,8 +8,8 @@ import (
 	"github.com/yumenaka/comigo/tools"
 )
 
-// ScrollPage 定义 BodyHTML
-templ ScrollPage(c echo.Context, book *model.Book, readMode string, pagedIndex int, startIndex int) {
+// ScrollPage 定义卷轴阅读页面。
+templ ScrollPage(c echo.Context, book *model.Book, loadMode string, pagedIndex int, pageLimit int) {
 	@InsertData(book, tools.GetServerInfo(
 		tools.ServerInfoParams{
 			Cfg:            config.GetCfg(),
@@ -21,16 +21,16 @@ templ ScrollPage(c echo.Context, book *model.Book, readMode string, pagedIndex i
 	if book != nil {
 		@common.Header(
 			common.HeaderBackSortLeft(common.GetReturnUrl(book.BookInfo.BookID)),
-			common.HeaderQuickJumpTitle(common.GetBookTitle(book.BookInfo.BookID), common.QuickJumpBarBooks(book)),
+			common.HeaderQuickJumpTitleRemote(common.GetBookTitle(book.BookInfo.BookID), book.BookInfo.BookID, common.QuickJumpBarBooks(book), book.BookInfo.IsRemote),
 			common.HeaderDefaultRight(),
 		)
-		@MainArea(c, book, readMode, pagedIndex, startIndex)
+		@MainArea(c, book, loadMode, pagedIndex, pageLimit)
 	}
 	@common.Footer(config.GetVersion())
 	if book != nil {
-		@common.Drawer(c, book, DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
+		@common.Drawer(c, book, ScrollLoadModeControls(), DrawerSlot(c, book), true, common.GetReturnUrl(book.BookInfo.BookID))
 	} else {
-		@common.Drawer(c, book, DrawerSlot(c, book), true, "/")
+		@common.Drawer(c, book, ScrollLoadModeControls(), DrawerSlot(c, book), true, "/")
 	}
 	@common.QRCode()
 }

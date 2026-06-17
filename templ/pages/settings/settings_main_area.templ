@@ -1,8 +1,10 @@
 package settings
 
-import "github.com/yumenaka/comigo/tools/tailscale_plugin"
-
-import "github.com/yumenaka/comigo/config"
+import (
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/templ/pages/upload_page"
+	"github.com/yumenaka/comigo/tools/tailscale_plugin"
+)
 
 func x_data_debug_mode(debug bool) string {
 	if debug {
@@ -20,21 +22,17 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 	>
 		<div class="flex flex-col justify-start w-5/6 md:w-3/5 min-w-[20rem] relative">
 			if config.GetCfg().ReadOnlyMode {
-				<div
-					class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-screen h-full bg-black/30 flex items-start justify-center z-50 pointer-events-auto"
-				>
-					<div class="mt-32 p-2 font-semibold text-center border border-red-600 rounded bg-red-50 shadow-lg">
-						<span class="text-red-500" x-text="i18next.t('read_only_mode_description')">
-							Configuration is locked.
-						</span>
-					</div>
+				<div class="w-full mx-2 my-2 px-3 py-2 text-sm font-semibold text-red-700 bg-red-50 border border-red-500 rounded">
+					<span x-text="i18next.t('read_only_mode_description')">
+						Configuration is locked.
+					</span>
 				</div>
 			}
 			<!-- 书库设置 -->
 			<div
 				id="settings_stores"
 				x-data="{ collapsed: $persist(false).as('settings_stores_collapsed') }"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<!-- 折叠/展开按钮 -->
 				<button
@@ -64,11 +62,51 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 				<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 				<!-- 可折叠内容 -->
 				<div x-show="!collapsed" x-transition>
-					@StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", GetStoreBookCounts())
+					@StoreConfig("StoreUrls", config.GetCfg().StoreUrls, "StoreUrls_Description", GetStoreBookCounts(), true, false)
+					@NumberConfig("TimeoutLimitForScan", config.GetCfg().TimeoutLimitForScan, "TimeoutLimitForScan_Description", 1, 3600)
 					@NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535)
 					@StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description")
 				</div>
 			</div>
+			if config.GetCfg().EnableUpload && !config.GetCfg().ReadOnlyMode {
+				<!-- 上传文件与书库设置同级，仍复用 /api/upload 的书库校验。 -->
+				<div
+					id="settings_upload"
+					x-data="{ collapsed: $persist(true).as('settings_upload_collapsed') }"
+					class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				>
+					<!-- 折叠/展开按钮 -->
+					<button
+						@click="collapsed = !collapsed"
+						class="flex justify-between items-center w-full cursor-pointer px-2 py-1.5"
+					>
+						<svg
+							class="w-5 h-5 transition-transform"
+							:class="{ '-rotate-90': collapsed }"
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 10 6"
+						>
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+						</svg>
+						<span x-text="i18next.t('upload_file')" class="flex-1 text-center font-semibold">上传文件</span>
+						<svg
+							class="w-5 h-5 transition-transform"
+							:class="{ 'rotate-90': collapsed }"
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 10 6"
+						>
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+						</svg>
+					</button>
+					<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+					<!-- 可折叠内容 -->
+					<div x-show="!collapsed" x-transition>
+						@upload_page.SettingsUploadArea()
+					</div>
+				</div>
+			}
 			<!-- 自定义主题 -->
 			@ThemeCustomConfig()
 			<!-- 服务器日志 -->
@@ -83,7 +121,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<div
 				id="settings_network"
 				x-data="{ collapsed: $persist(true).as('settings_network_collapsed') }"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<!-- 折叠/展开按钮 -->
 				<button
@@ -126,7 +164,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<div
 				id="settings_other"
 				x-data="{ collapsed: $persist(true).as('settings_other_collapsed') }"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<!-- 折叠/展开按钮 -->
 				<button
@@ -169,7 +207,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			<div
 				id="settings_labs"
 				x-data="{ collapsed: $persist(true).as('settings_labs_collapsed') }"
-				class="flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
+				class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400"
 			>
 				<!-- 折叠/展开按钮 -->
 				<button
@@ -205,7 +243,6 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 						@BoolConfig("ClearCacheExit", config.GetCfg().ClearCacheExit, "ClearCacheExit_Description")
 						@BoolConfig("LogToFile", config.GetCfg().LogToFile, "LogToFile_Description")
 						@BoolConfig("GenerateMetaData", config.GetCfg().GenerateMetaData, "GenerateMetaData_Description")
-						@BoolConfig("EnableDatabase", config.GetCfg().EnableDatabase, "EnableDatabase_Description")
 						@StringConfig("ZipFileTextEncoding", config.GetCfg().ZipFileTextEncoding, "ZipFileTextEncoding_Description")
 					}
 				</div>

@@ -1,0 +1,68 @@
+/* 咖啡醇香模板：变量、街角纸张背景和控件样式集中在这里。 */
+@layer base {
+  /* ====================== Coffee ====================== */
+  [data-theme="coffee"] {
+    color-scheme: light;
+    --primary: #7a4d2b;
+    --primary-content: #fff6df;
+    --secondary: #5f8f8a;
+    --secondary-content: #082826;
+    --accent: #d58b45;
+    --accent-content: #2e1b10;
+    --neutral: #3b2b24;
+    --neutral-content: #fff6df;
+    --base-100: #f2dfbf;
+    --base-200: #dcc299;
+    --base-300: #b98758;
+    --base-content: #2e241d;
+    --panel-surface: #efd6ad;
+    --panel-surface-content: #2e241d;
+    --panel-control: #f8e7c9;
+    --panel-control-hover: #fff0d4;
+    --panel-control-active: #79bcb7;
+    --panel-control-muted: #cfa16e;
+    --panel-control-content: #2e241d;
+    --grid-pattern-color: rgba(122, 77, 43, 0.22);
+    --grid-mosaic-color: rgba(95, 143, 138, 0.18);
+    --info: #407f9f;
+    --success: #5f8f62;
+    --warning: #d58b45;
+    --error: #a64232;
+  }
+}
+
+/* 主背景：旧纸、店铺遮阳棚和圆形招牌，保持日常漫画封面感。 */
+body[data-theme="coffee"],
+body[data-theme="coffee"] .grid-line,
+body[data-theme="coffee"] .grid-point,
+body[data-theme="coffee"] .grid-mosaic,
+body[data-theme="coffee"] #ShelfMainArea,
+body[data-theme="coffee"] #settingsMainArea,
+body[data-theme="coffee"] #tab-contents,
+body[data-theme="coffee"] #ReaderRoot,
+body[data-theme="coffee"] #ReaderShell,
+body[data-theme="coffee"] #ScrollMainArea,
+body[data-theme="coffee"] #ReaderFlipArea,
+body[data-theme="coffee"] #ReaderPDFArea {
+  background-color: var(--base-100);
+  background-image:
+    radial-gradient(circle at 14% 22%, rgba(95, 143, 138, 0.46) 0 42px, transparent 44px),
+    repeating-linear-gradient(90deg, rgba(122, 77, 43, 0.16) 0 2px, transparent 2px 18px),
+    repeating-linear-gradient(90deg, #7a4d2b 0 34px, #fff6df 34px 68px),
+    linear-gradient(180deg, transparent 0 calc(100% - 96px), rgba(122, 77, 43, 0.18) calc(100% - 96px)),
+    radial-gradient(ellipse at 86% 18%, rgba(213, 139, 69, 0.32), transparent 34%),
+    linear-gradient(180deg, #f2dfbf 0%, #efd6ad 62%, #dcc299 100%);
+  background-position: left top, left top, left bottom, left top, left top, left top;
+  background-size: 100% 100%, 28px 28px, 100% 64px, 100% 100%, 100% 100%, 100% 100%;
+  background-repeat: no-repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed;
+}
+
+/* 面板和控件使用邻近棕色，青绿色只作为少量强调。 */
+body[data-theme="coffee"] .panel-surface {
+  background-color: var(--panel-surface) !important;
+  background-image:
+    radial-gradient(circle at 18px 14px, rgba(122, 77, 43, 0.14) 0 3px, transparent 4px),
+    linear-gradient(135deg, rgba(255, 246, 223, 0.34), transparent 46%);
+  background-size: 38px 34px, 100% 100%;
+}

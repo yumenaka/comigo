@@ -144,11 +144,6 @@ templ ComigoXYZPlugin(c echo.Context) {
 						type: "cli",
 						label: "Linux armv7 (命令行)",
 					},
-					// Android APK：固定为列表最后一项，需用户手动选择，不参与默认平台检测
-					{
-						type: "apk",
-						label: i18next.t("comigo_xyz_platform_android_apk"),
-					},
 				];
 
 				// 检测当前系统并选择默认平台
@@ -183,7 +178,8 @@ templ ComigoXYZPlugin(c echo.Context) {
 				//console.log(`Comigo.xyz插件: 检测到系统 ${currentSystem.os} ${currentSystem.arch}，默认选择平台索引 ${selectedIndex}`,);
 				// 创建主页功能块
 				const homePageBlock = document.createElement("div");
-				homePageBlock.className = "comigo_plugin comigo_xyz_plugin w-full mt-2";
+				homePageBlock.className =
+					"comigo_plugin comigo_xyz_plugin flex justify-center w-full max-w-full min-w-0 mt-2 px-1";
 				homePageBlock.setAttribute(
 					"x-data",
 					`{
@@ -197,9 +193,6 @@ templ ComigoXYZPlugin(c echo.Context) {
 					},
 					getDownloadUrl() {
 						const platform = this.selectedPlatform;
-						if (platform.type === "apk") {
-							return \`\${this.proxyBase}/yumenaka/comigo/releases/download/\${this.version}/app-release.apk\`;
-						}
 						let filename = "";
 
 						if (platform.type === "tray") {
@@ -276,19 +269,19 @@ templ ComigoXYZPlugin(c echo.Context) {
 				);
 
 				homePageBlock.innerHTML = `
-					<div class="flex mt-[-16px] flex-col items-center bg-base-100 border justify-center w-full p-8 rounded-lg">
-						<div class="max-w-4xl w-full space-y-8">
+					<div class="panel-surface flex mt-[-16px] flex-col items-center bg-base-100 border justify-center w-full max-w-4xl min-w-0 p-4 sm:p-8 rounded-lg">
+						<div class="w-full min-w-0 space-y-8">
 							<!-- 标题区域 -->
 							<div class="text-center space-y-4">
 								<p class="text-base text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_description')">在所有设备上看漫画。无论电脑还是手机，Windows还是Linux、MacOS</p>
 							</div>
 							<!-- 下载区域 -->
-							<div class="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
-								<div class="flex flex-col md:flex-row items-center gap-2">
+							<div class="flex flex-col md:flex-row justify-center items-stretch md:items-center gap-4 mt-6 w-full min-w-0">
+								<div class="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto min-w-0">
 									<select
 										x-model.number="selectedIndex"
 										x-init="$nextTick(() => { $el.value = selectedIndex; })"
-										class="px-4 py-3 border bg-base-100 border rounded-lg text-base-content focus:outline-none focus:ring-2 focus:ring-primary"
+										class="panel-control w-full md:w-auto min-w-0 px-4 py-3 border bg-base-100 border rounded-lg text-base-content focus:outline-none focus:ring-2 focus:ring-primary"
 									>
 										<template x-for="(platform, index) in platforms" :key="index">
 											<option :value="index" x-text="platform.label"></option>
@@ -297,7 +290,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 									<a
 										:href="getDownloadUrl()"
 										target="_blank"
-										class="px-6 py-3 border bg-green-500 text-black dark:text-white rounded-lg font-semibold"
+										class="panel-control w-full md:w-auto px-6 py-3 border bg-green-500 text-black dark:text-white rounded-lg font-semibold text-center"
 									>
 										<span x-text="i18next.t('comigo_xyz_download')">⬇️ 下载</span>
 									</a>
@@ -308,18 +301,18 @@ templ ComigoXYZPlugin(c echo.Context) {
 								<div class="space-y-3">
 									<!-- 纯离线 reader / PWA 入口。主页不能直接安装 /reader 的 PWA，跳转后由 reader 页面处理添加。 -->
 									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_no_install_title')">你甚至不用安装：</p>
-									<div class="bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 flex justify-center">
+									<div class="panel-surface bg-base-100 p-4 sm:p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 flex justify-center w-full min-w-0">
 										<a
-											href={ templ.SafeURL(config.PrefixPath("/reader")) }
-											class="inline-flex items-center justify-center px-6 py-3 border bg-green-500 text-black dark:text-white rounded-lg font-semibold"
+											href="${window.ComiGoPath("/reader")}"
+											class="panel-control inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 py-3 border bg-green-500 text-black dark:text-white rounded-lg font-semibold text-center"
 										>
 											<span x-text="i18next.t('comigo_xyz_try_offline_or_add_pwa')">尝试纯离线模式 或 添加为PWA应用</span>
 										</a>
 									</div>
 									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_title')">一键安装命令行版：</p>
 									<!-- 第一个代码块 -->
-									<div class="bg-black relative border border-gray-500 dark:border-gray-200  rounded-lg p-4">
-										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code class="w-full h-full text-center">bash &lt;(curl -s https://comigo.xyz/get.sh)</code></pre>
+									<div class="bg-black relative border border-gray-500 dark:border-gray-200 rounded-lg p-4 w-full max-w-full min-w-0 overflow-hidden">
+										<pre class="text-sm text-white font-mono overflow-x-auto whitespace-pre mb-0 pr-10"><code>bash &lt;(curl -s https://comigo.xyz/get.sh)</code></pre>
 										<button
 											@click="copyToClipboard('bash <(curl -s https://comigo.xyz/get.sh)', 0)"
 											class="absolute top-2 right-2 p-2 text-base-content/70 dark:text-base-content/80 hover:text-base-content dark:hover:text-white transition-colors"
@@ -335,8 +328,8 @@ templ ComigoXYZPlugin(c echo.Context) {
 									</div>
 									<!-- 第二个代码块 -->
 									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_cli_install_cn_desc')">中国大陆用户推荐：</p>
-									<div class="bg-black relative border border-gray-500 dark:border-gray-200  rounded-lg p-4">
-										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code>bash &lt;(curl -s https://comigo.xyz/get.sh) --cn</code></pre>
+									<div class="bg-black relative border border-gray-500 dark:border-gray-200 rounded-lg p-4 w-full max-w-full min-w-0 overflow-hidden">
+										<pre class="text-sm text-white font-mono overflow-x-auto whitespace-pre mb-0 pr-10"><code>bash &lt;(curl -s https://comigo.xyz/get.sh) --cn</code></pre>
 										<button
 											@click="copyToClipboard('bash <(curl -s https://comigo.xyz/get.sh) --cn', 1)"
 											class="absolute top-2 right-2 p-2 text-base-content/70 dark:text-base-content/80 hover:text-base-content dark:hover:text-white transition-colors"
@@ -352,8 +345,8 @@ templ ComigoXYZPlugin(c echo.Context) {
 									</div>
 									<!-- Docker 部署代码块 -->
 									<p class="w-full text-base-content dark:text-white text-left mb-2" x-text="i18next.t('comigo_xyz_docker_deploy_title')">使用Docker部署：</p>
-									<div class="bg-black relative border border-gray-500 dark:border-gray-200 rounded-lg p-4">
-										<pre class="text-sm text-white font-mono overflow-x-auto mb-0"><code>docker run -d --name comigo -p 1234:1234 -v /path/to/books:/data yumenaka/comigo:latest</code></pre>
+									<div class="bg-black relative border border-gray-500 dark:border-gray-200 rounded-lg p-4 w-full max-w-full min-w-0 overflow-hidden">
+										<pre class="text-sm text-white font-mono overflow-x-auto whitespace-pre mb-0 pr-10"><code>docker run -d --name comigo -p 1234:1234 -v /path/to/books:/data yumenaka/comigo:latest</code></pre>
 										<button
 											@click="copyToClipboard('docker run -d --name comigo -p 1234:1234 -v /path/to/books:/data yumenaka/comigo:latest', 2)"
 											class="absolute top-2 right-2 p-2 text-base-content/70 dark:text-base-content/80 hover:text-base-content dark:hover:text-white transition-colors"
@@ -370,10 +363,10 @@ templ ComigoXYZPlugin(c echo.Context) {
 								</div>
 							</div>
 							<!-- 功能特性 - 使用数据驱动方式生成 -->
-							<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6" id="features-grid">
+							<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 w-full min-w-0" id="features-grid">
 							</div>
 							<!-- 使用说明 -->
-							<div class="mt-12 bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200">
+							<div class="panel-surface mt-12 bg-base-100 p-4 sm:p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 w-full min-w-0">
 								<h2 class="text-2xl font-semibold mb-4 text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_quick_start')">快速开始</h2>
 								<ol class="list-decimal list-inside space-y-2 text-base-content dark:text-white">
 									<li x-text="i18next.t('comigo_xyz_quick_start_step1')">下载并运行 Comigo 程序</li>
@@ -382,12 +375,12 @@ templ ComigoXYZPlugin(c echo.Context) {
 								</ol>
 							</div>
 							<!-- GitHub 项目链接 -->
-							<div class="mt-8 flex justify-center">
+							<div class="mt-8 flex justify-center w-full min-w-0">
 								<a
 									href="https://github.com/yumenaka/comigo"
 									target="_blank"
 									rel="noopener noreferrer"
-									class="inline-flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-semibold transition-colors"
+									class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 sm:px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-semibold transition-colors text-center"
 								>
 									<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 										<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
@@ -445,7 +438,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 					features.forEach((feature) => {
 						const card = document.createElement("div");
 						card.className =
-							"bg-base-100 p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200";
+							"panel-surface bg-base-100 p-4 sm:p-6 rounded-lg shadow-lg border border-gray-500 dark:border-gray-200 min-w-0";
 						card.innerHTML =
 							'<h3 class="text-xl font-semibold mb-2 text-base-content dark:text-white">' +
 							i18next.t(feature.title) +

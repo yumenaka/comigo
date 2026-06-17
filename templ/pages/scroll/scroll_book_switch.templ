@@ -1,0 +1,45 @@
+package scroll
+
+import "github.com/yumenaka/comigo/templ/common"
+
+templ ScrollBookSwitch(view common.BookSwitchView) {
+	if view.HasSwitchTarget() {
+		<nav class="w-full px-3 py-0 text-base-content" aria-label={ common.BookSwitchLabel() }>
+			<div
+				x-data={ common.BookSwitchXData("scroll") }
+				class="panel-surface mx-auto flex w-full max-w-full items-center gap-2 rounded border border-gray-300 bg-base-100/95 p-3 shadow-sm dark:border-gray-700 md:max-w-2xl"
+			>
+				<button
+					type="button"
+					disabled?={ view.PrevID == "" }
+					@click={ common.BookSwitchClick(view.PrevID) }
+					class={ common.BookSwitchButtonClass(view.PrevID == "") }
+					title={ common.BookSwitchPrevLabel(view.PrevID == "") }
+					aria-label={ common.BookSwitchPrevLabel(view.PrevID == "") }
+				>
+					@common.BookSwitchLeftIcon()
+				</button>
+				<select
+					id="ScrollBookSwitchSelect"
+					@change="go($event.target.value)"
+					class="panel-control h-10 min-w-0 flex-1 rounded border-2 border-gray-500 bg-base-100 px-2 py-0 font-semibold text-accent-content focus:outline-none dark:border-gray-200"
+					aria-label={ common.BookSwitchLabel() }
+				>
+					for _, item := range view.Items {
+						<option value={ item.BookID } selected?={ item.Current }>{ item.Title }</option>
+					}
+				</select>
+				<button
+					type="button"
+					disabled?={ view.NextID == "" }
+					@click={ common.BookSwitchClick(view.NextID) }
+					class={ common.BookSwitchButtonClass(view.NextID == "") }
+					title={ common.BookSwitchNextLabel(view.NextID == "") }
+					aria-label={ common.BookSwitchNextLabel(view.NextID == "") }
+				>
+					@common.BookSwitchRightIcon()
+				</button>
+			</div>
+		</nav>
+	}
+}

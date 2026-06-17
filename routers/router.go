@@ -4,6 +4,8 @@ import (
 	"errors"
 	"io/fs"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -100,26 +102,9 @@ func SetMiddleware() {
 	// 等级越高，CPU 占用越大、体积越小；通常 3–5 是压缩率与性能的平衡点。
 	// 如果后面还挂了 Nginx / Caddy，并由它们统一做压缩，可以在 Echo 内部关闭 gzip，以免双重压缩。
 	engine.Use(middleware.GzipWithConfig(middleware.GzipConfig{
-		Level: 5, // 取值范围 -2～9；-2=DefaultCompression，0=NoCompression
-		Skipper: func(c echo.Context) bool {
-			// 如果url里面包含了 .js 或者 .css 文件或 base64 这几个关键字
-			// 那么就启用 gzip 压缩
-			url := config.StripBasePath(c.Request().URL.Path)
-			// SSE 与 WebSocket 路由不应启用 gzip，以免长连接阻塞
-			if url == "/api/sse" || url == "/api/ws" {
-				return true
-			}
-			if strings.Contains(url, ".js") || strings.Contains(url, ".css") || strings.Contains(url, ".wasm") || strings.Contains(url, ".htm") || strings.Contains(url, "base64") {
-				// 包含以上关键字，启用 gzip 压缩
-				return false
-			}
-			// 否则就不启用 gzip 压缩
-			return false
-		},
+		Level:   5, // 取值范围 -2～9；-2=DefaultCompression，0=NoCompression
+		Skipper: gzipSkipper,
 	}))
-
-	// 禁止缓存中间件。使用 noCache ，会导强制浏览器每次都重新加载页面。除了测试和调试，一般不启用。
-	// router.Use(noCache())
 
 	// 反向代理中间件。
 	// 反向代理中间件会将请求转发到后端服务器，并将响应返回给客户端。
@@ -131,30 +116,60 @@ func SetMiddleware() {
 	// https://echo.labstack.com/docs/middleware/rate-limiter
 	// e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(20))))
 
-	// CORS 中间件
-	allowOrigins := []string{"*"}
-	allowCredentials := false
-	if config.GetCfg().RequiresAuth() {
-		//port := strconv.Itoa(config.GetCfg().Port)
-		//allowOrigins = []string{
-		//	"http://127.0.0.1:" + port,
-		//	"http://localhost:" + port,
-		//	"https://127.0.0.1:" + port,
-		//	"https://localhost:" + port,
-		//}
-		//if host := strings.TrimSpace(config.GetCfg().Host); host != "" {
-		//	allowOrigins = append(allowOrigins, "http://"+host, "https://"+host)
-		//}
-		allowOrigins = []string{"*"}
-		allowCredentials = true
+	engine.Use(middleware.CORSWithConfig(corsConfig()))
+}
+
+func gzipSkipper(c echo.Context) bool {
+	urlPath := config.StripBasePath(c.Request().URL.Path)
+	// SSE 与 WebSocket 是长连接，跳过 gzip 避免缓冲或握手异常；其他响应继续由 gzip 中间件判断是否压缩。
+	return urlPath == "/api/sse" || urlPath == "/api/tailscale-status-sse" || urlPath == "/api/ws"
+}
+
+func corsConfig() middleware.CORSConfig {
+	cors := middleware.CORSConfig{
+		AllowMethods:  []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodPatch},
+		AllowHeaders:  []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderContentLength, echo.HeaderAcceptEncoding, "X-CSRF-Token", echo.HeaderAuthorization, echo.HeaderXRequestID},
+		ExposeHeaders: []string{echo.HeaderContentLength, echo.HeaderXRequestID},
 	}
-	engine.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     allowOrigins,
-		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodPatch},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderContentLength, echo.HeaderAcceptEncoding, "X-CSRF-Token", echo.HeaderAuthorization, echo.HeaderXRequestID},
-		ExposeHeaders:    []string{echo.HeaderContentLength, echo.HeaderXRequestID},
-		AllowCredentials: allowCredentials,
-	}))
+	if !config.GetCfg().RequiresAuth() {
+		cors.AllowOrigins = []string{"*"}
+		return cors
+	}
+
+	// 认证模式会携带 cookie/JWT，不能使用 "*" + AllowCredentials 的组合。
+	cors.AllowOriginFunc = credentialedCORSOriginAllowed
+	cors.AllowCredentials = true
+	return cors
+}
+
+func credentialedCORSOriginAllowed(origin string) (bool, error) {
+	host := originHost(origin)
+	if host == "" {
+		return false, nil
+	}
+	for _, allowedHost := range []string{"localhost", "127.0.0.1", "::1", originHost(config.GetCfg().Host)} {
+		if allowedHost != "" && strings.EqualFold(host, allowedHost) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func originHost(rawOrigin string) string {
+	origin := strings.TrimSpace(rawOrigin)
+	if origin == "" {
+		return ""
+	}
+	if parsedURL, err := url.Parse(origin); err == nil && parsedURL.Hostname() != "" {
+		return strings.ToLower(parsedURL.Hostname())
+	}
+	if parsedURL, err := url.Parse("//" + origin); err == nil && parsedURL.Hostname() != "" {
+		return strings.ToLower(parsedURL.Hostname())
+	}
+	if strings.HasPrefix(origin, "[") && strings.HasSuffix(origin, "]") {
+		return strings.ToLower(strings.Trim(origin, "[]"))
+	}
+	return strings.ToLower(origin)
 }
 
 // EmbedStaticFiles 绑定静态资源
@@ -178,16 +193,37 @@ func EmbedStaticFiles() {
 		if err != nil {
 			return err
 		}
-		manifest := string(data)
-		manifest = strings.ReplaceAll(manifest, `"start_url": "/reader"`, `"start_url": "`+config.PrefixPath("/reader")+`"`)
-		manifest = strings.ReplaceAll(manifest, `"scope": "/"`, `"scope": "`+config.PrefixPath("/")+`"`)
-		manifest = strings.ReplaceAll(manifest, `"src": "/images/`, `"src": "`+config.PrefixPath("/images/"))
-		return c.Blob(http.StatusOK, "application/manifest+json", []byte(manifest))
+		return c.Blob(http.StatusOK, "application/manifest+json", renderPwaManifest(data))
 	})
 	// PWA Service Worker 必须挂在根路径，才能覆盖 /reader 页面。
-	engine.FileFS(config.PrefixPath("/reader-sw.js"), "pwa/reader-sw.js", assets.Pwa)
+	engine.GET(config.PrefixPath("/reader-sw.js"), func(c echo.Context) error {
+		data, err := fs.ReadFile(assets.Pwa, "pwa/reader-sw.js")
+		if err != nil {
+			return err
+		}
+		c.Response().Header().Set("Cache-Control", "no-cache")
+		return c.Blob(http.StatusOK, "text/javascript; charset=utf-8", renderReaderServiceWorker(data))
+	})
 	// 暴露 robots.txt，供搜索引擎按标准路径读取
 	engine.FileFS(config.PrefixPath("/robots.txt"), "robots.txt", assets.Robots)
+}
+
+func renderReaderServiceWorker(data []byte) []byte {
+	// reader PWA 缓存名跟随 Comigo 版本，避免模板或前端资源更新后继续命中旧 app shell。
+	cacheName := strconv.Quote("comigo-reader-pwa-" + config.GetVersion())
+	return []byte(strings.ReplaceAll(string(data), "__COMIGO_READER_PWA_CACHE_NAME__", cacheName))
+}
+
+func renderPwaManifest(data []byte) []byte {
+	return []byte(rewritePwaManifestPaths(string(data)))
+}
+
+func rewritePwaManifestPaths(manifest string) string {
+	// manifest 中的路径是按根路径编写的；这里统一加上 BasePath，保证反向代理子路径部署时 PWA 仍能定位资源。
+	manifest = strings.ReplaceAll(manifest, `"start_url": "/reader"`, `"start_url": "`+config.PrefixPath("/reader")+`"`)
+	manifest = strings.ReplaceAll(manifest, `"scope": "/"`, `"scope": "`+config.PrefixPath("/")+`"`)
+	manifest = strings.ReplaceAll(manifest, `"src": "/images/`, `"src": "`+config.PrefixPath("/images/"))
+	return manifest
 }
 
 // StartWebServer 启动web服务
@@ -198,15 +234,4 @@ func StartWebServer() error {
 	SetHttpPort()
 	// 监听并启动web服务
 	return StartEcho(engine)
-}
-
-// GetWebServer 获取echo.Echo (实现了 http.Handler 接口)
-func GetWebServer() *echo.Echo {
-	// 设置网页端口
-	SetHttpPort()
-	EmbedStaticFiles()
-	// 设置中间件，绑定资源
-	BindURLs()
-	SetMiddleware()
-	return engine
 }

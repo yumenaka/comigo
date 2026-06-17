@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -28,7 +27,6 @@ type S3FS struct {
 	endpoint string // S3 endpoint 地址
 	options  Options
 	cache    *FileCache
-	mu       sync.RWMutex
 }
 
 // NewS3FS 创建 S3 文件系统实例
@@ -360,11 +358,6 @@ func (s *S3FS) ReadFile(p string) ([]byte, error) {
 	}
 
 	return data, nil
-}
-
-// Type 返回后端类型
-func (s *S3FS) Type() BackendType {
-	return S3
 }
 
 // BaseURL 返回基础 URL

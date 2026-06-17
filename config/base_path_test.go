@@ -29,6 +29,12 @@ func TestPrefixAndStripBasePath(t *testing.T) {
 	if got := PrefixPath("/"); got != "/some/path/" {
 		t.Fatalf("PrefixPath root = %q", got)
 	}
+	if got := PrefixPath("/some/path/"); got != "/some/path/" {
+		t.Fatalf("PrefixPath prefixed root should be idempotent, got %q", got)
+	}
+	if got := PrefixPath("/some/path/settings"); got != "/some/path/settings" {
+		t.Fatalf("PrefixPath prefixed nested path should be idempotent, got %q", got)
+	}
 	if got := StripBasePath("/some/path/flip/book-id"); got != "/flip/book-id" {
 		t.Fatalf("StripBasePath nested = %q", got)
 	}
@@ -63,5 +69,25 @@ func TestGetQrcodeURLIncludesBasePath(t *testing.T) {
 
 	if got, want := GetQrcodeURL(), "http://example.com:1234/proxy/"; got != want {
 		t.Fatalf("GetQrcodeURL() = %q, want %q", got, want)
+	}
+}
+
+func TestToQrcodePublicURLRewritesLoopbackOnly(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() { cfg = oldCfg })
+
+	cfg = newDefaultConfig()
+	cfg.Host = "example.com"
+	cfg.Port = 1234
+
+	got := ToQrcodePublicURL("http://127.0.0.1:1234/flip/book-id?page=2")
+	want := "http://example.com:1234/flip/book-id?page=2"
+	if got != want {
+		t.Fatalf("ToQrcodePublicURL(loopback) = %q, want %q", got, want)
+	}
+
+	rawText := "just text"
+	if got := ToQrcodePublicURL(rawText); got != rawText {
+		t.Fatalf("ToQrcodePublicURL(text) = %q, want %q", got, rawText)
 	}
 }

@@ -16,6 +16,6 @@ templ UploadPage(c echo.Context) {
 	)
 	@UploadArea()
 	@common.Footer(config.GetVersion())
-	@common.Drawer(c, nil, nil, true, config.PrefixPath("/settings"))
+	@common.Drawer(c, nil, nil, nil, true, config.PrefixPath("/settings"))
 	@common.QRCode()
 }
