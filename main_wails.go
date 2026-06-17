@@ -1,4 +1,4 @@
-//go:build wails && !js
+//go:build wails && !js && !bindings
 
 //go:generate go install -v github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 //go:generate goversioninfo -icon=icon.ico -manifest=goversioninfo.exe.manifest
@@ -6,7 +6,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/wailsapp/wails/v2"
@@ -29,10 +31,36 @@ func main() {
 	}
 
 	app := NewApp()
-	cmd.Execute()
-	if err := routers.StartWebServer(); err != nil {
+	err := wails.Run(&options.App{
+		Title:  "Comigo",
+		Width:  1024,
+		Height: 768,
+		AssetServer: &assetserver.Options{
+			Handler: http.HandlerFunc(serveWailsAsset),
+		},
+		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		OnStartup: func(ctx context.Context) {
+			app.startup(ctx)
+			if err := startComigoForWails(); err != nil {
+				_, _ = fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+		},
+		Bind: []interface{}{
+			app,
+		},
+	})
+	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+	}
+}
+
+// startComigoForWails 启动桌面壳内嵌的 Comigo Web 服务。
+func startComigoForWails() error {
+	cmd.Execute()
+	if err := routers.StartWebServer(); err != nil {
+		return err
 	}
 	routers.StartTailscale()
 	cmd.LoadUserPlugins()
@@ -43,22 +71,14 @@ func main() {
 	model.GenerateBookGroup()
 	cmd.SaveMetadata()
 	config.StartOrStopAutoRescan()
+	return nil
+}
 
-	err := wails.Run(&options.App{
-		Title:  "Comigo",
-		Width:  1024,
-		Height: 768,
-		AssetServer: &assetserver.Options{
-			Handler: config.Server.Handler,
-		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup:        app.startup,
-		Bind: []interface{}{
-			app,
-		},
-	})
-	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+// serveWailsAsset 在 Web 服务就绪后把 Wails 的资源请求转给 Echo。
+func serveWailsAsset(w http.ResponseWriter, r *http.Request) {
+	if config.Server == nil || config.Server.Handler == nil {
+		http.NotFound(w, r)
+		return
 	}
+	config.Server.Handler.ServeHTTP(w, r)
 }

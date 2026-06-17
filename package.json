@@ -10,6 +10,7 @@
     "fmt": "prettier --write .",
     "build": "parcel build ./assets/frontend/main.js ./assets/frontend/styles.css --dist-dir assets/dist",
     "dev": "parcel build ./assets/frontend/main.js ./assets/frontend/styles.css --dist-dir assets/dist --no-optimize",
+    "wails:dev": "wails dev -m -nosyncgomod -skipembedcreate",
     "watch": "parcel watch ./assets/frontend/main.js ./assets/frontend/styles.css --dist-dir assets/dist --no-optimize",
     "build:wasm": "GOOS=js GOARCH=wasm go build -o assets/static/wasm/archive.wasm ./cmd/archivewasm"
   },
