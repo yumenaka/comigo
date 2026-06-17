@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/fs"
 	"net/url"
 	"path"
 	"strings"
@@ -157,7 +156,7 @@ func (w *WebDAVFS) Stat(p string) (FileInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("无法获取 WebDAV 文件信息 %s: %w", fullPath, err)
 	}
-	return &webDAVFileInfo{info: info}, nil
+	return info, nil
 }
 
 // ReadDir 读取目录
@@ -170,7 +169,7 @@ func (w *WebDAVFS) ReadDir(p string) ([]DirEntry, error) {
 
 	entries := make([]DirEntry, len(files))
 	for i, f := range files {
-		entries[i] = &webDAVDirEntry{info: &webDAVFileInfo{info: f}}
+		entries[i] = NewDirEntry(f)
 	}
 	return entries, nil
 }
@@ -197,11 +196,6 @@ func (w *WebDAVFS) ReadFile(p string) ([]byte, error) {
 	}
 
 	return data, nil
-}
-
-// Type 返回后端类型
-func (w *WebDAVFS) Type() BackendType {
-	return WebDAV
 }
 
 // BaseURL 返回基础 URL
@@ -532,28 +526,6 @@ func (w *WebDAVFS) OpenReaderAtSeeker(p string) (ReaderAtSeeker, error) {
 func (w *WebDAVFS) GetBasePath() string {
 	return w.basePath
 }
-
-// webDAVFileInfo 实现 FileInfo 接口
-type webDAVFileInfo struct {
-	info fs.FileInfo
-}
-
-func (fi *webDAVFileInfo) Name() string       { return fi.info.Name() }
-func (fi *webDAVFileInfo) Size() int64        { return fi.info.Size() }
-func (fi *webDAVFileInfo) Mode() fs.FileMode  { return fi.info.Mode() }
-func (fi *webDAVFileInfo) ModTime() time.Time { return fi.info.ModTime() }
-func (fi *webDAVFileInfo) IsDir() bool        { return fi.info.IsDir() }
-func (fi *webDAVFileInfo) Sys() any           { return fi.info.Sys() }
-
-// webDAVDirEntry 实现 DirEntry 接口
-type webDAVDirEntry struct {
-	info *webDAVFileInfo
-}
-
-func (de *webDAVDirEntry) Name() string               { return de.info.Name() }
-func (de *webDAVDirEntry) IsDir() bool                { return de.info.IsDir() }
-func (de *webDAVDirEntry) Type() fs.FileMode          { return de.info.Mode().Type() }
-func (de *webDAVDirEntry) Info() (fs.FileInfo, error) { return de.info, nil }
 
 // webDAVFile 实现 File 接口
 type webDAVFile struct {

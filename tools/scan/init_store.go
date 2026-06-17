@@ -10,7 +10,6 @@ import (
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/comigo_remote"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -27,7 +26,7 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 	}
 
 	// 判断是否为远程 URL
-	isRemote := store.IsRemoteURL(storePath)
+	isRemote := tools.IsRemoteStoreURL(storePath)
 
 	if isRemote {
 		return initRemoteStore(storePath, cfg)

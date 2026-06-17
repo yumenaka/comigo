@@ -20,7 +20,6 @@ type StoreInfo struct {
 	BackendURL  string // 本地书库文件夹路径，或远程书库URL
 	Name        string
 	Description string
-	Backend
 }
 
 // Store 对应某个扫描路径的子书库，目前只支持本地书库
@@ -101,7 +100,7 @@ func (store *Store) GenerateBookGroup() error {
 			// 新建一本书,类型是书籍组
 			// 获取父目录信息（作为书组的时间信息来源）
 			var modTime time.Time
-			isRemote := vfs.IsRemoteURL(store.BackendURL)
+			isRemote := tools.IsRemoteStoreURL(store.BackendURL)
 			if isRemote {
 				// 远程书库：使用 VFS 获取文件信息
 				vfsInstance, err := vfs.GetOrCreate(store.BackendURL, vfs.Options{

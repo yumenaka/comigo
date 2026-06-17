@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/fs"
 	"net"
 	"net/url"
 	"path/filepath"
@@ -271,7 +270,7 @@ func (s *SMBFS) Stat(p string) (FileInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("无法获取 SMB 文件信息 %s: %w", fullPath, err)
 	}
-	return &smbFileInfo{info: info}, nil
+	return info, nil
 }
 
 // ReadDir 读取目录
@@ -284,7 +283,7 @@ func (s *SMBFS) ReadDir(p string) ([]DirEntry, error) {
 
 	entries := make([]DirEntry, len(files))
 	for i, f := range files {
-		entries[i] = &smbDirEntry{info: &smbFileInfo{info: f}}
+		entries[i] = NewDirEntry(f)
 	}
 	return entries, nil
 }
@@ -317,11 +316,6 @@ func (s *SMBFS) ReadFile(p string) ([]byte, error) {
 	}
 
 	return data, nil
-}
-
-// Type 返回后端类型
-func (s *SMBFS) Type() BackendType {
-	return SMB
 }
 
 // BaseURL 返回基础 URL
@@ -505,28 +499,6 @@ func (s *SMBFS) OpenReaderAtSeeker(p string) (ReaderAtSeeker, error) {
 func (s *SMBFS) GetBasePath() string {
 	return s.basePath
 }
-
-// smbFileInfo 实现 FileInfo 接口
-type smbFileInfo struct {
-	info fs.FileInfo
-}
-
-func (fi *smbFileInfo) Name() string       { return fi.info.Name() }
-func (fi *smbFileInfo) Size() int64        { return fi.info.Size() }
-func (fi *smbFileInfo) Mode() fs.FileMode  { return fi.info.Mode() }
-func (fi *smbFileInfo) ModTime() time.Time { return fi.info.ModTime() }
-func (fi *smbFileInfo) IsDir() bool        { return fi.info.IsDir() }
-func (fi *smbFileInfo) Sys() any           { return fi.info.Sys() }
-
-// smbDirEntry 实现 DirEntry 接口
-type smbDirEntry struct {
-	info *smbFileInfo
-}
-
-func (de *smbDirEntry) Name() string               { return de.info.Name() }
-func (de *smbDirEntry) IsDir() bool                { return de.info.IsDir() }
-func (de *smbDirEntry) Type() fs.FileMode          { return de.info.Mode().Type() }
-func (de *smbDirEntry) Info() (fs.FileInfo, error) { return de.info, nil }
 
 // smbFile 实现 File 接口
 type smbFile struct {

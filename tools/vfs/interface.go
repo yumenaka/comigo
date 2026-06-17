@@ -7,40 +7,6 @@ import (
 	"time"
 )
 
-// BackendType 文件存储后端类型
-type BackendType int
-
-const (
-	LocalDisk BackendType = 1 + iota
-	SMB
-	SFTP
-	WebDAV
-	S3
-	FTP
-	ComigoRemote
-)
-
-func (f BackendType) String() string {
-	switch f {
-	case LocalDisk:
-		return "Local Disk"
-	case SMB:
-		return "SMB Share"
-	case SFTP:
-		return "SFTP Server"
-	case WebDAV:
-		return "WebDAV Server"
-	case S3:
-		return "S3 Storage"
-	case FTP:
-		return "FTP Server"
-	case ComigoRemote:
-		return "Comigo Server"
-	default:
-		return "Unknown Backend Type"
-	}
-}
-
 // FileSystem 虚拟文件系统接口
 // 提供统一的文件系统操作，支持本地和远程存储
 type FileSystem interface {
@@ -55,9 +21,6 @@ type FileSystem interface {
 
 	// ReadFile 读取整个文件内容
 	ReadFile(path string) ([]byte, error)
-
-	// Type 返回文件系统后端类型
-	Type() BackendType
 
 	// BaseURL 返回文件系统的基础URL或路径
 	BaseURL() string
@@ -108,15 +71,11 @@ type File interface {
 	ReadAt(p []byte, off int64) (n int, err error)
 }
 
-// FileInfo 文件信息接口，兼容 fs.FileInfo
-type FileInfo interface {
-	fs.FileInfo
-}
+// FileInfo 兼容标准库文件信息接口。
+type FileInfo = fs.FileInfo
 
-// DirEntry 目录项接口，兼容 fs.DirEntry
-type DirEntry interface {
-	fs.DirEntry
-}
+// DirEntry 兼容标准库目录项接口。
+type DirEntry = fs.DirEntry
 
 // fileInfo 是 FileInfo 的基础实现
 type fileInfo struct {

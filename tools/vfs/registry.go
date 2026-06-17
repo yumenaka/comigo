@@ -64,61 +64,23 @@ func GetOrCreate(storeURL string, opts ...Options) (FileSystem, error) {
 					wfs.client.SetTimeout(time.Duration(desired.Timeout) * time.Second)
 				}
 
-				// 升级缓存：如果期望启用缓存且当前未初始化缓存，则初始化（内存缓存始终可用）
-				if desired.CacheEnabled && wfs.cache == nil {
-					wfs.options.CacheEnabled = true
-					// 仅在调用方显式传入 CacheDir 时才启用磁盘缓存；否则只用内存缓存，避免落盘
-					if desired.CacheDir != "" {
-						wfs.options.CacheDir = desired.CacheDir
-					}
-					// Debug 取并集：任一处开启 debug 都可以输出缓存命中日志
-					wfs.options.Debug = wfs.options.Debug || desired.Debug
-					wfs.cache = NewFileCache(wfs.options.CacheDir, wfs.options.Debug)
-				}
+				enableCache(&wfs.options, &wfs.cache, desired)
 			} else if sfs, ok := fs.(*SFTPFS); ok {
 				// SFTPFS 配置升级：更新超时和缓存设置
 				// 注意：SSH 连接的超时在创建时设置，无法动态更新
 				// 但可以更新缓存设置
-				if desired.CacheEnabled && sfs.cache == nil {
-					sfs.options.CacheEnabled = true
-					if desired.CacheDir != "" {
-						sfs.options.CacheDir = desired.CacheDir
-					}
-					sfs.options.Debug = sfs.options.Debug || desired.Debug
-					sfs.cache = NewFileCache(sfs.options.CacheDir, sfs.options.Debug)
-				}
+				enableCache(&sfs.options, &sfs.cache, desired)
 			} else if smbfs, ok := fs.(*SMBFS); ok {
 				// SMBFS 配置升级：更新缓存设置
 				// 注意：SMB 连接的超时在创建时设置，无法动态更新
 				// 但可以更新缓存设置
-				if desired.CacheEnabled && smbfs.cache == nil {
-					smbfs.options.CacheEnabled = true
-					if desired.CacheDir != "" {
-						smbfs.options.CacheDir = desired.CacheDir
-					}
-					smbfs.options.Debug = smbfs.options.Debug || desired.Debug
-					smbfs.cache = NewFileCache(smbfs.options.CacheDir, smbfs.options.Debug)
-				}
+				enableCache(&smbfs.options, &smbfs.cache, desired)
 			} else if ftpfs, ok := fs.(*FTPFS); ok {
 				// FTPFS 配置升级：更新缓存设置
-				if desired.CacheEnabled && ftpfs.cache == nil {
-					ftpfs.options.CacheEnabled = true
-					if desired.CacheDir != "" {
-						ftpfs.options.CacheDir = desired.CacheDir
-					}
-					ftpfs.options.Debug = ftpfs.options.Debug || desired.Debug
-					ftpfs.cache = NewFileCache(ftpfs.options.CacheDir, ftpfs.options.Debug)
-				}
+				enableCache(&ftpfs.options, &ftpfs.cache, desired)
 			} else if s3fs, ok := fs.(*S3FS); ok {
 				// S3FS 配置升级：更新缓存设置
-				if desired.CacheEnabled && s3fs.cache == nil {
-					s3fs.options.CacheEnabled = true
-					if desired.CacheDir != "" {
-						s3fs.options.CacheDir = desired.CacheDir
-					}
-					s3fs.options.Debug = s3fs.options.Debug || desired.Debug
-					s3fs.cache = NewFileCache(s3fs.options.CacheDir, s3fs.options.Debug)
-				}
+				enableCache(&s3fs.options, &s3fs.cache, desired)
 			}
 		}
 		return fs, nil
@@ -135,6 +97,19 @@ func GetOrCreate(storeURL string, opts ...Options) (FileSystem, error) {
 	return fs, nil
 }
 
+// enableCache 按调用方传入的最新配置补开缓存；CacheDir 为空时只启用内存缓存。
+func enableCache(options *Options, cache **FileCache, desired Options) {
+	if !desired.CacheEnabled || *cache != nil {
+		return
+	}
+	options.CacheEnabled = true
+	if desired.CacheDir != "" {
+		options.CacheDir = desired.CacheDir
+	}
+	options.Debug = options.Debug || desired.Debug
+	*cache = NewFileCache(options.CacheDir, options.Debug)
+}
+
 // New 根据 URL 创建对应的文件系统实例
 func New(storeURL string, opts ...Options) (FileSystem, error) {
 	// 解析后端类型
@@ -146,22 +121,22 @@ func New(storeURL string, opts ...Options) (FileSystem, error) {
 	}
 
 	switch backendType {
-	case LocalDisk:
+	case tools.StoreBackendLocalDisk:
 		return NewLocalFS(localPath, options)
 
-	case WebDAV:
+	case tools.StoreBackendWebDAV:
 		return NewWebDAVFS(storeURL, options)
 
-	case SMB:
+	case tools.StoreBackendSMB:
 		return NewSMBFS(storeURL, options)
 
-	case SFTP:
+	case tools.StoreBackendSFTP:
 		return NewSFTPFS(storeURL, options)
 
-	case S3:
+	case tools.StoreBackendS3:
 		return NewS3FS(storeURL, options)
 
-	case FTP:
+	case tools.StoreBackendFTP:
 		return NewFTPFS(storeURL, options)
 
 	default:
@@ -170,34 +145,15 @@ func New(storeURL string, opts ...Options) (FileSystem, error) {
 }
 
 // parseStoreURL 解析存储 URL，返回后端类型和路径
-func parseStoreURL(storeURL string) (BackendType, string) {
+func parseStoreURL(storeURL string) (tools.StoreBackendType, string) {
 	info := tools.DetectStoreURL(storeURL)
 	if info.Type == tools.StoreBackendLocalDisk {
 		if info.LocalPath != "" {
-			return LocalDisk, info.LocalPath
+			return tools.StoreBackendLocalDisk, info.LocalPath
 		}
-		return LocalDisk, info.URL
+		return tools.StoreBackendLocalDisk, info.URL
 	}
-	return backendTypeFromTools(info.Type), info.URL
-}
-
-func backendTypeFromTools(backendType tools.StoreBackendType) BackendType {
-	switch backendType {
-	case tools.StoreBackendSMB:
-		return SMB
-	case tools.StoreBackendSFTP:
-		return SFTP
-	case tools.StoreBackendWebDAV:
-		return WebDAV
-	case tools.StoreBackendS3:
-		return S3
-	case tools.StoreBackendFTP:
-		return FTP
-	case tools.StoreBackendComigo:
-		return ComigoRemote
-	default:
-		return LocalDisk
-	}
+	return info.Type, info.URL
 }
 
 // CloseAll 关闭所有注册的文件系统
@@ -221,15 +177,4 @@ func List() []string {
 		keys = append(keys, key)
 	}
 	return keys
-}
-
-// IsRemoteURL 判断 URL 是否为远程存储
-func IsRemoteURL(storeURL string) bool {
-	return tools.IsRemoteStoreURL(storeURL)
-}
-
-// GetBackendType 获取 URL 对应的后端类型
-func GetBackendType(storeURL string) BackendType {
-	backendType, _ := parseStoreURL(storeURL)
-	return backendType
 }

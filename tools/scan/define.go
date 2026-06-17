@@ -3,6 +3,7 @@ package scan
 import (
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/yumenaka/comigo/tools/vfs"
@@ -69,13 +70,8 @@ func IsSupportTemplate(checkPath string) bool {
 	if strings.HasPrefix(filepath.Base(checkPath), ".") {
 		return false
 	}
-	for _, ex := range cfg.GetSupportTemplateFile() {
-		suffix := strings.ToLower(filepath.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
-		if ex == suffix {
-			return true
-		}
-	}
-	return false
+	suffix := strings.ToLower(filepath.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
+	return slices.Contains(cfg.GetSupportTemplateFile(), suffix)
 }
 
 // IsSupportMedia 判断文件是否需要展示
@@ -84,24 +80,14 @@ func IsSupportMedia(checkPath string) bool {
 	if strings.HasPrefix(filepath.Base(checkPath), ".") {
 		return false
 	}
-	for _, ex := range cfg.GetSupportMediaType() {
-		suffix := strings.ToLower(filepath.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
-		if ex == suffix {
-			return true
-		}
-	}
-	return false
+	suffix := strings.ToLower(filepath.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
+	return slices.Contains(cfg.GetSupportMediaType(), suffix)
 }
 
 // IsSupportFile 判断压缩包文件是否是支持的文件类型
 func IsSupportFile(checkPath string) bool {
-	for _, ex := range cfg.GetSupportFileType() {
-		suffix := strings.ToLower(filepath.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
-		if ex == suffix {
-			return true
-		}
-	}
-	return false
+	suffix := strings.ToLower(filepath.Ext(checkPath)) // strings.ToLower():某些文件会用大写文件名
+	return slices.Contains(cfg.GetSupportFileType(), suffix)
 }
 
 // IsSkipDir  检查路径是否应该跳过（排除文件，文件夹列表）。

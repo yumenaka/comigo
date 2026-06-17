@@ -2,7 +2,6 @@ package vfs
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -46,11 +45,7 @@ func (l *LocalFS) resolvePath(path string) string {
 // Open 打开文件
 func (l *LocalFS) Open(path string) (File, error) {
 	fullPath := l.resolvePath(path)
-	file, err := os.Open(fullPath)
-	if err != nil {
-		return nil, err
-	}
-	return &localFile{file: file}, nil
+	return os.Open(fullPath)
 }
 
 // Stat 获取文件信息
@@ -82,11 +77,6 @@ func (l *LocalFS) ReadDir(path string) ([]DirEntry, error) {
 func (l *LocalFS) ReadFile(path string) ([]byte, error) {
 	fullPath := l.resolvePath(path)
 	return os.ReadFile(fullPath)
-}
-
-// Type 返回后端类型
-func (l *LocalFS) Type() BackendType {
-	return LocalDisk
 }
 
 // BaseURL 返回基础路径
@@ -143,36 +133,8 @@ func (l *LocalFS) OpenReaderAtSeeker(path string) (ReaderAtSeeker, error) {
 	return os.Open(fullPath)
 }
 
-// localFile 本地文件实现
-type localFile struct {
-	file *os.File
-}
-
-func (f *localFile) Read(p []byte) (n int, err error) {
-	return f.file.Read(p)
-}
-
-func (f *localFile) Close() error {
-	return f.file.Close()
-}
-
-func (f *localFile) Seek(offset int64, whence int) (int64, error) {
-	return f.file.Seek(offset, whence)
-}
-
-func (f *localFile) Stat() (FileInfo, error) {
-	return f.file.Stat()
-}
-
-func (f *localFile) ReadAt(p []byte, off int64) (n int, err error) {
-	return f.file.ReadAt(p, off)
-}
-
 // 确保 LocalFS 实现了 FileSystem 接口
 var _ FileSystem = (*LocalFS)(nil)
 
-// 确保 os.FileInfo 实现了 FileInfo 接口
-var _ FileInfo = (fs.FileInfo)(nil)
-
-// 确保 os.DirEntry 实现了 DirEntry 接口
-var _ DirEntry = (fs.DirEntry)(nil)
+// 确保 os.File 实现了 File 接口
+var _ File = (*os.File)(nil)

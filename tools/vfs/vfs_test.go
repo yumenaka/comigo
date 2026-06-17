@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/yumenaka/comigo/tools"
 )
 
 // TestLocalFS 测试本地文件系统实现
@@ -34,11 +36,6 @@ func TestLocalFS(t *testing.T) {
 		t.Fatalf("创建 LocalFS 失败: %v", err)
 	}
 	defer fs.Close()
-
-	// 测试 Type()
-	if fs.Type() != LocalDisk {
-		t.Errorf("Type() = %v, 期望 LocalDisk", fs.Type())
-	}
 
 	// 测试 IsRemote()
 	if fs.IsRemote() {
@@ -130,30 +127,30 @@ func TestLocalFS(t *testing.T) {
 func TestParseStoreURL(t *testing.T) {
 	tests := []struct {
 		url          string
-		expectedType BackendType
+		expectedType tools.StoreBackendType
 	}{
 		// 本地路径
-		{"/home/user/books", LocalDisk},
-		{"/Users/test/Documents", LocalDisk},
-		{"C:\\Users\\test\\Documents", LocalDisk},
-		{"D:/Books", LocalDisk},
-		{"file:///home/user/books", LocalDisk},
+		{"/home/user/books", tools.StoreBackendLocalDisk},
+		{"/Users/test/Documents", tools.StoreBackendLocalDisk},
+		{"C:\\Users\\test\\Documents", tools.StoreBackendLocalDisk},
+		{"D:/Books", tools.StoreBackendLocalDisk},
+		{"file:///home/user/books", tools.StoreBackendLocalDisk},
 
 		// Comigo 远程服务
-		{"http://localhost/webdav", ComigoRemote},
-		{"https://example.com/dav", ComigoRemote},
+		{"http://localhost/webdav", tools.StoreBackendComigo},
+		{"https://example.com/dav", tools.StoreBackendComigo},
 
 		// WebDAV URL
-		{"webdav://192.168.1.1/books", WebDAV},
-		{"dav://server/path", WebDAV},
-		{"davs://secure-server/path", WebDAV},
+		{"webdav://192.168.1.1/books", tools.StoreBackendWebDAV},
+		{"dav://server/path", tools.StoreBackendWebDAV},
+		{"davs://secure-server/path", tools.StoreBackendWebDAV},
 
 		// 其他远程协议
-		{"smb://server/share", SMB},
-		{"sftp://user@server/path", SFTP},
-		{"ftp://server/path", FTP},
-		{"ftps://server/path", FTP},
-		{"s3://bucket/prefix", S3},
+		{"smb://server/share", tools.StoreBackendSMB},
+		{"sftp://user@server/path", tools.StoreBackendSFTP},
+		{"ftp://server/path", tools.StoreBackendFTP},
+		{"ftps://server/path", tools.StoreBackendFTP},
+		{"s3://bucket/prefix", tools.StoreBackendS3},
 	}
 
 	for _, tt := range tests {
@@ -161,32 +158,6 @@ func TestParseStoreURL(t *testing.T) {
 			gotType, _ := parseStoreURL(tt.url)
 			if gotType != tt.expectedType {
 				t.Errorf("parseStoreURL(%q) = %v, 期望 %v", tt.url, gotType, tt.expectedType)
-			}
-		})
-	}
-}
-
-// TestIsRemoteURL 测试远程 URL 判断
-func TestIsRemoteURL(t *testing.T) {
-	tests := []struct {
-		url      string
-		expected bool
-	}{
-		{"/home/user/books", false},
-		{"C:\\Users\\test", false},
-		{"file:///path/to/books", false},
-		{"http://localhost/webdav", true},
-		{"https://example.com/dav", true},
-		{"webdav://server/path", true},
-		{"smb://server/share", true},
-		{"sftp://server/path", true},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.url, func(t *testing.T) {
-			got := IsRemoteURL(tt.url)
-			if got != tt.expected {
-				t.Errorf("IsRemoteURL(%q) = %v, 期望 %v", tt.url, got, tt.expected)
 			}
 		})
 	}

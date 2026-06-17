@@ -16,6 +16,7 @@ import (
 	"github.com/yumenaka/comigo/tools/vfs"
 )
 
+// GetRawFile 输出书籍原始文件；本地/VFS/远端 Comigo 都保留 Range，供音视频拖动播放。
 func GetRawFile(c echo.Context) error {
 	bookID := c.Param("book_id")
 	if localBook, client, _, ok, err := remoteComigoBookFromRequest(c, bookID); ok {

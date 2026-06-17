@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="BookId">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
-    <dc:identifier id="BookId">{{.BookID}}</dc:identifier>
-    <dc:title>{{.Title}}</dc:title>
-{{if .Author}}    <dc:creator>{{.Author}}</dc:creator>
-{{end}}    <dc:language>{{.Language}}</dc:language>
-    <meta property="dcterms:modified">{{.ModifiedTime}}</meta>
+    <dc:identifier id="BookId">{{xml .BookID}}</dc:identifier>
+    <dc:title>{{xml .Title}}</dc:title>
+{{if .Author}}    <dc:creator>{{xml .Author}}</dc:creator>
+{{end}}    <dc:language>{{xml .Language}}</dc:language>
+    <meta property="dcterms:modified">{{xml .ModifiedTime}}</meta>
     <meta property="rendition:layout">pre-paginated</meta>
     <meta property="rendition:orientation">auto</meta>
     <meta property="rendition:spread">landscape</meta>
@@ -16,7 +16,7 @@
     <item id="css" href="styles.css" media-type="text/css"/>
 {{range .Pages}}
     <item id="page_{{.Index}}" href="text/page_{{.Index}}.xhtml" media-type="application/xhtml+xml"/>
-    <item id="img_{{.Index}}" href="images/{{.FileName}}" media-type="{{.MediaType}}"/>
+    <item id="img_{{.Index}}" href="images/{{xmlAttr .FileName}}" media-type="{{xmlAttr .MediaType}}"/>
 {{end}}
   </manifest>
   <spine toc="ncx" page-progression-direction="rtl">

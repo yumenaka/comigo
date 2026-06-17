@@ -3,6 +3,7 @@ package epub
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"image"
 	_ "image/gif"
@@ -74,7 +75,10 @@ func NewGenerator() (*Generator, error) {
 			return nil, fmt.Errorf("failed to read template %s: %w", tmplPath, err)
 		}
 
-		tmpl, err := template.New(filepath.Base(tmplPath)).Parse(string(data))
+		tmpl, err := template.New(filepath.Base(tmplPath)).Funcs(template.FuncMap{
+			"xml":     xmlText,
+			"xmlAttr": xmlAttr,
+		}).Parse(string(data))
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse template %s: %w", tmplPath, err)
 		}
@@ -118,6 +122,41 @@ func (g *Generator) Generate(w io.Writer, bookData BookData, images []ImageFile)
 		return fmt.Errorf("failed to write styles.css: %w", err)
 	}
 
+	// 先读取图片并改用 EPUB 内部安全文件名，避免原始文件名里的空格或 & 破坏 EPUB。
+	preparedImages := make([]ImageFile, 0, len(images))
+	pages := make([]PageData, 0, len(images))
+	for _, img := range images {
+		imgData := img.Data
+		if imgData == nil && img.Path != "" {
+			var readErr error
+			imgData, readErr = os.ReadFile(img.Path)
+			if readErr != nil {
+				logger.Infof(locale.GetString("log_failed_to_read_image_epub"), img.Path, readErr)
+				continue
+			}
+		}
+
+		width, height := getImageDimensions(imgData)
+		index := len(preparedImages) + 1
+		fileName := epubImageName(index, img.Name)
+		pages = append(pages, PageData{
+			Index:     index,
+			FileName:  fileName,
+			MediaType: getMediaType(fileName),
+			Width:     width,
+			Height:    height,
+		})
+		preparedImages = append(preparedImages, ImageFile{
+			Name: fileName,
+			Data: imgData,
+		})
+	}
+	bookData.Pages = pages
+
+	if len(preparedImages) == 0 {
+		return fmt.Errorf("no images to generate EPUB")
+	}
+
 	// 4. 生成 content.opf
 	contentOpf, err := g.renderTemplate("content.opf.tmpl", bookData)
 	if err != nil {
@@ -146,30 +185,8 @@ func (g *Generator) Generate(w io.Writer, bookData BookData, images []ImageFile)
 	}
 
 	// 7. 生成每个页面的 xhtml 和 写入图片
-	for i, img := range images {
-		// 获取图片数据
-		imgData := img.Data
-		if imgData == nil && img.Path != "" {
-			// 从磁盘读取图片
-			var readErr error
-			imgData, readErr = os.ReadFile(img.Path)
-			if readErr != nil {
-				logger.Infof(locale.GetString("log_failed_to_read_image_epub"), img.Path, readErr)
-				continue
-			}
-		}
-
-		// 获取图片尺寸用于 viewport
-		width, height := getImageDimensions(imgData)
-
-		pageData := PageData{
-			Index:     i + 1,
-			FileName:  img.Name,
-			MediaType: getMediaType(img.Name),
-			Width:     width,
-			Height:    height,
-		}
-
+	for i, img := range preparedImages {
+		pageData := pages[i]
 		// 生成页面 xhtml
 		pageXhtml, err := g.renderTemplate("page.xhtml.tmpl", pageData)
 		if err != nil {
@@ -182,7 +199,7 @@ func (g *Generator) Generate(w io.Writer, bookData BookData, images []ImageFile)
 
 		// 写入图片
 		imgPath := fmt.Sprintf("OEBPS/images/%s", img.Name)
-		if err := g.writeFile(zipWriter, imgPath, imgData); err != nil {
+		if err := g.writeFile(zipWriter, imgPath, img.Data); err != nil {
 			return fmt.Errorf("failed to write image %s: %w", img.Name, err)
 		}
 	}
@@ -255,6 +272,27 @@ func getMediaType(filename string) string {
 		}
 	}
 	return mimeType
+}
+
+// xmlText 转义 XML 文本节点内容，避免书名等元数据里的 & 破坏 OPF/NCX/XHTML。
+func xmlText(value any) string {
+	var buf bytes.Buffer
+	_ = xml.EscapeText(&buf, []byte(fmt.Sprint(value)))
+	return buf.String()
+}
+
+// xmlAttr 转义 XML 双引号属性值；路径已安全化，这里兜住标题、ID 等属性内容。
+func xmlAttr(value any) string {
+	return strings.ReplaceAll(xmlText(value), `"`, "&#34;")
+}
+
+// epubImageName 生成 EPUB 内部图片名，原始文件名只用于读取文件，不直接写入包内路径。
+func epubImageName(index int, filename string) string {
+	ext := strings.ToLower(filepath.Ext(filename))
+	if ext == "" {
+		ext = ".jpg"
+	}
+	return fmt.Sprintf("image_%04d%s", index, ext)
 }
 
 // getImageDimensions 从图片数据获取尺寸

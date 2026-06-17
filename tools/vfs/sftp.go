@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/fs"
 	"net"
 	"net/url"
 	"path"
@@ -188,7 +187,7 @@ func (s *SFTPFS) Stat(p string) (FileInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("无法获取 SFTP 文件信息 %s: %w", fullPath, err)
 	}
-	return &sftpFileInfo{info: info}, nil
+	return info, nil
 }
 
 // ReadDir 读取目录
@@ -201,7 +200,7 @@ func (s *SFTPFS) ReadDir(p string) ([]DirEntry, error) {
 
 	entries := make([]DirEntry, len(files))
 	for i, f := range files {
-		entries[i] = &sftpDirEntry{info: &sftpFileInfo{info: f}}
+		entries[i] = NewDirEntry(f)
 	}
 	return entries, nil
 }
@@ -234,11 +233,6 @@ func (s *SFTPFS) ReadFile(p string) ([]byte, error) {
 	}
 
 	return data, nil
-}
-
-// Type 返回后端类型
-func (s *SFTPFS) Type() BackendType {
-	return SFTP
 }
 
 // BaseURL 返回基础 URL
@@ -433,28 +427,6 @@ func (r *sftpReaderAtSeeker) Close() error {
 	}
 	return nil
 }
-
-// sftpFileInfo 实现 FileInfo 接口
-type sftpFileInfo struct {
-	info fs.FileInfo
-}
-
-func (fi *sftpFileInfo) Name() string       { return fi.info.Name() }
-func (fi *sftpFileInfo) Size() int64        { return fi.info.Size() }
-func (fi *sftpFileInfo) Mode() fs.FileMode  { return fi.info.Mode() }
-func (fi *sftpFileInfo) ModTime() time.Time { return fi.info.ModTime() }
-func (fi *sftpFileInfo) IsDir() bool        { return fi.info.IsDir() }
-func (fi *sftpFileInfo) Sys() any           { return fi.info.Sys() }
-
-// sftpDirEntry 实现 DirEntry 接口
-type sftpDirEntry struct {
-	info *sftpFileInfo
-}
-
-func (de *sftpDirEntry) Name() string               { return de.info.Name() }
-func (de *sftpDirEntry) IsDir() bool                { return de.info.IsDir() }
-func (de *sftpDirEntry) Type() fs.FileMode          { return de.info.Mode().Type() }
-func (de *sftpDirEntry) Info() (fs.FileInfo, error) { return de.info, nil }
 
 // sftpFile 实现 File 接口
 type sftpFile struct {

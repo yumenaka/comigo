@@ -13,6 +13,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/vfs"
 )
@@ -328,7 +329,7 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 				// 新建一本书,类型是书籍组
 				// 获取父目录信息（作为书组的时间信息来源）
 				var modTime time.Time
-				isRemote := vfs.IsRemoteURL(storeUrl)
+				isRemote := tools.IsRemoteStoreURL(storeUrl)
 				if isRemote {
 					// 远程书库：使用 VFS 获取文件信息
 					vfsInstance, err := vfs.GetOrCreate(storeUrl, vfs.Options{

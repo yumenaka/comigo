@@ -261,11 +261,6 @@ func (f *FTPFS) ReadFile(p string) ([]byte, error) {
 	return data, nil
 }
 
-// Type 返回后端类型
-func (f *FTPFS) Type() BackendType {
-	return FTP
-}
-
 // BaseURL 返回基础 URL
 func (f *FTPFS) BaseURL() string {
 	return f.baseURL

@@ -271,7 +271,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 	for _, storeUrl := range config.GetCfg().StoreUrls {
 		// 计算 StoreID（对于远程 URL 直接使用，本地路径转换为绝对路径）
 		var storeID string
-		if IsRemoteURL(storeUrl) {
+		if tools.IsRemoteStoreURL(storeUrl) {
 			// 远程 URL 直接使用
 			storeID = storeUrl
 		} else {
@@ -658,7 +658,7 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 	for _, storeUrl := range storeUrls {
 		// 对于远程 URL 直接使用，本地路径转换为绝对路径
 		var storeID string
-		if IsRemoteURL(storeUrl) {
+		if tools.IsRemoteStoreURL(storeUrl) {
 			storeID = storeUrl
 		} else {
 			storePathAbs, err := filepath.Abs(storeUrl)
@@ -675,7 +675,7 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 		newStoreBookInfo := model.StoreBookInfo{
 			StoreUrl:    storeID,
 			DisplayName: displayStoreName(storeID),
-			IsRemote:    IsRemoteURL(storeID),
+			IsRemote:    tools.IsRemoteStoreURL(storeID),
 		}
 		for _, topBook := range topBookList {
 			if topBook.StoreUrl == storeID {
@@ -768,7 +768,7 @@ func displayStoreName(storeID string) string {
 	if storeID == "" {
 		return ""
 	}
-	if IsRemoteURL(storeID) {
+	if tools.IsRemoteStoreURL(storeID) {
 		parsedURL, err := url.Parse(storeID)
 		if err == nil && parsedURL.Host != "" {
 			return parsedURL.Host

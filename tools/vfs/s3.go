@@ -360,11 +360,6 @@ func (s *S3FS) ReadFile(p string) ([]byte, error) {
 	return data, nil
 }
 
-// Type 返回后端类型
-func (s *S3FS) Type() BackendType {
-	return S3
-}
-
 // BaseURL 返回基础 URL
 func (s *S3FS) BaseURL() string {
 	return s.baseURL
