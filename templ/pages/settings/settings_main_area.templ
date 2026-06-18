@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/templ/pages/upload_page"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
@@ -11,6 +12,11 @@ func x_data_debug_mode(debug bool) string {
 		return "{debug_mode: true}"
 	}
 	return "{debug_mode: false}"
+}
+
+// showTailscaleConfigInSettings 控制设置页是否暴露 Tailscale；Wails 构建只有空实现，不能让用户配置不可用功能。
+func showTailscaleConfigInSettings() bool {
+	return !assets.IsWailsBuild()
 }
 
 templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
@@ -115,8 +121,10 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			@ReadingHistoryPanel()
 			<!-- 管理账号密码 -->
 			@UserInfoConfig()
-			<!-- Tailscale 远程连接 -->
-			@TailscaleConfig(tsStatus)
+			if showTailscaleConfigInSettings() {
+				<!-- Tailscale 远程连接 -->
+				@TailscaleConfig(tsStatus)
+			}
 			<!-- 网络设置 -->
 			<div
 				id="settings_network"

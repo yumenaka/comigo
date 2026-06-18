@@ -357,69 +357,118 @@ func StoreConfig(name string, values []string, description string, bookCounts ma
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\"> <button x-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\"> <button x-cloak x-show=\"$store.global.wailsBook\" type=\"button\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if config.GetCfg().ReadOnlyMode {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, " disabled")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, " @click=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("add"))
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue("selectStoreFolder('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 86, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 90, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" type=\"button\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" :aria-label=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue(base64.RawURLEncoding.EncodeToString([]byte(name)) + "StoreAddButton")
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("select_store_folder"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 88, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 91, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if config.GetCfg().ReadOnlyMode {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, " disabled")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, " @click=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" :title=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var23 string
-		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue("addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')")
+		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("select_store_folder"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 90, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 92, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" class=\"panel-control w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\">添加</button></div></div><div x-html=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" class=\"panel-control shrink-0 w-10 h-10 ml-2 inline-flex items-center justify-center border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\"><svg aria-hidden=\"true\" class=\"w-5 h-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z\"></path></svg></button> <button x-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations(description))
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations("add"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 97, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 100, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"w-auto py-1 text-left mx-2 text-xs text-base-content\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" type=\"button\" id=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var25 string
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.ResolveAttributeValue(base64.RawURLEncoding.EncodeToString([]byte(name)) + "StoreAddButton")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 102, Col: 79}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if config.GetCfg().ReadOnlyMode {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, " disabled")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, " @click=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var26 string
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.ResolveAttributeValue("addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 104, Col: 86}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\" class=\"panel-control w-20 h-10 ml-3 py-1 border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed\">添加</button></div></div><div x-html=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var27 string
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.ResolveAttributeValue(getTranslations(description))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/store_config.templ`, Line: 111, Col: 44}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var27)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" class=\"w-auto py-1 text-left mx-2 text-xs text-base-content\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -447,12 +496,12 @@ func StoreConfigJavaScript() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var25 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var25 == nil {
-			templ_7745c5c3_Var25 = templ.NopComponent
+		templ_7745c5c3_Var28 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var28 == nil {
+			templ_7745c5c3_Var28 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var26 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var29 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -464,13 +513,13 @@ func StoreConfigJavaScript() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<script>\n\t\t\t// base64UrlEncodeUtf8: 用于安全传输 Windows 路径（含反斜杠/中文）\n\t\t\t// 说明：使用 base64url（RawURLEncoding 风格，无 padding），与后端解码逻辑一致\n\t\t\tif (!window.base64UrlEncodeUtf8) {\n\t\t\t\twindow.base64UrlEncodeUtf8 = (str) => {\n\t\t\t\t\tconst bytes = new TextEncoder().encode(str);\n\t\t\t\t\tlet binary = \"\";\n\t\t\t\t\tfor (let i = 0; i < bytes.length; i++)\n\t\t\t\t\t\tbinary += String.fromCharCode(bytes[i]);\n\t\t\t\t\treturn btoa(binary)\n\t\t\t\t\t\t.replace(/\\+/g, \"-\")\n\t\t\t\t\t\t.replace(/\\//g, \"_\")\n\t\t\t\t\t\t.replace(/=+$/g, \"\");\n\t\t\t\t};\n\t\t\t}\n\n\t\t\t// replaceStoreConfigHTML 使用后端渲染的书库设置片段局部替换当前列表。\n\t\t\tfunction replaceStoreConfigHTML(configName, html, clearInput = false) {\n\t\t\t\tif (!html) return;\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (!container || !container.parentNode) return;\n\n\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。\n\t\t\t\ttemp.innerHTML = html;\n\t\t\t\tconst newContainer = temp.querySelector(\n\t\t\t\t\t\"#\" + configName + \"-store-config\",\n\t\t\t\t);\n\t\t\t\tif (!newContainer) return;\n\n\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\tif (window.Alpine) {\n\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t}\n\t\t\t\tif (clearInput) {\n\t\t\t\t\tconst newInput = newContainer.querySelector(\n\t\t\t\t\t\t\"#\" + configName + \"AddInput\",\n\t\t\t\t\t);\n\t\t\t\t\tif (newInput) newInput.value = \"\";\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// shouldReloadAfterStoreAdd 区分空书架页和设置页：前者添加后要重载书架，后者只局部更新。\n\t\t\tfunction shouldReloadAfterStoreAdd(configName) {\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\treturn container?.dataset.reloadAfterAdd === \"true\";\n\t\t\t}\n\n\t\t\t// 添加书库\n\t\t\tasync function addStore(configName) {\n\t\t\t\tconst addInput = document.getElementById(configName + \"AddInput\");\n\t\t\t\tif (!addInput) return;\n\t\t\t\tconst addValue = addInput.value.trim();\n\n\t\t\t\t// 验证：如果为空，显示错误提示\n\t\t\t\tif (addValue === \"\") {\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"content_empty_please_enter_before_submit\"),\n\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t});\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\t// 验证：如果已经有这个值了，显示错误提示\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (container) {\n\t\t\t\t\tconst existingStores =\n\t\t\t\t\t\tcontainer.querySelectorAll(\"[data-store-value]\");\n\t\t\t\t\tfor (const node of existingStores) {\n\t\t\t\t\t\tconst nodeText = node.dataset.storeValue || \"\";\n\t\t\t\t\t\tif (nodeText === addValue) {\n\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\tmessage: i18next.t(\"value_already_exists_do_not_add_again\"),\n\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// 发送添加请求到服务器\n\t\t\t\ttry {\n\t\t\t\t\tconst addValueB64 = window.base64UrlEncodeUtf8(addValue);\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/add-array-config\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\t\tconfigName: configName,\n\t\t\t\t\t\t\t\taddValue: addValueB64,\n\t\t\t\t\t\t\t}),\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_add_config_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示保存提示；书库列表会在本请求内局部更新。\n\t\t\t\t\tif (data.saveSuccessHint) {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"info\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"success\");\n\t\t\t\t\t}\n\t\t\t\t\tif (data.warningMessage) {\n\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\tmessage: data.warningMessage,\n\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\n\t\t\t\t\tif (shouldReloadAfterStoreAdd(configName)) {\n\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\treplaceStoreConfigHTML(configName, data.html, true);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"添加书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 重新扫描全部书库\n\t\t\tasync function rescanAllStores() {\n\t\t\t\tshowToast(i18next.t(\"rescan_store_in_progress\"), \"info\");\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/rescan-all-stores\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_rescan_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\tconst message = rescanStoreSuccessMessage(data);\n\t\t\t\t\tshowToast(message, \"success\");\n\t\t\t\t\treplaceStoreConfigHTML(\n\t\t\t\t\t\twindow.base64UrlEncodeUtf8(\"StoreUrls\"),\n\t\t\t\t\t\tdata.html,\n\t\t\t\t\t);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"重新扫描全部书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 重新扫描书库\n\t\t\tasync function rescanStore(storeUrlB64) {\n\t\t\t\t// 显示扫描中提示\n\t\t\t\tshowToast(i18next.t(\"rescan_store_in_progress\"), \"info\");\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(window.ComiGoPath(\"/api/rescan-store\"), {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tstoreUrl: storeUrlB64,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_rescan_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tconst message = rescanStoreSuccessMessage(data);\n\t\t\t\t\tshowToast(message, \"success\");\n\t\t\t\t\treplaceStoreConfigHTML(\n\t\t\t\t\t\twindow.base64UrlEncodeUtf8(\"StoreUrls\"),\n\t\t\t\t\t\tdata.html,\n\t\t\t\t\t);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"重新扫描书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// rescanStoreSuccessMessage 统一格式化重扫结果，显示净新增和净减少数量。\n\t\t\tfunction rescanStoreSuccessMessage(data) {\n\t\t\t\treturn i18next\n\t\t\t\t\t.t(\"rescan_store_success\")\n\t\t\t\t\t.replace(\"{0}\", data.newBooksCount || 0)\n\t\t\t\t\t.replace(\"{1}\", data.removedBooksCount || 0);\n\t\t\t}\n\n\t\t\t// 删除书库\n\t\t\tasync function deleteStore(configName, storeUrlB64) {\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (!container) return;\n\n\t\t\t\t// 删除书库会移除该路径下的书籍记录，必须经过已有的模态确认。\n\t\t\t\tconst confirmed = await new Promise((resolve) => {\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"confirm_delete_store\"),\n\t\t\t\t\t\tbuttons: \"confirm_cancel\",\n\t\t\t\t\t\tonConfirm: () => resolve(true),\n\t\t\t\t\t\tonCancel: () => resolve(false),\n\t\t\t\t\t});\n\t\t\t\t});\n\n\t\t\t\tif (!confirmed) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(window.ComiGoPath(\"/api/delete-store\"), {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tstoreUrl: storeUrlB64,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_delete_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tshowToast(i18next.t(\"delete_store_success\"), \"success\");\n\n\t\t\t\t\treplaceStoreConfigHTML(configName, data.html);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"删除书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<script>\n\t\t\t// base64UrlEncodeUtf8: 用于安全传输 Windows 路径（含反斜杠/中文）\n\t\t\t// 说明：使用 base64url（RawURLEncoding 风格，无 padding），与后端解码逻辑一致\n\t\t\tif (!window.base64UrlEncodeUtf8) {\n\t\t\t\twindow.base64UrlEncodeUtf8 = (str) => {\n\t\t\t\t\tconst bytes = new TextEncoder().encode(str);\n\t\t\t\t\tlet binary = \"\";\n\t\t\t\t\tfor (let i = 0; i < bytes.length; i++)\n\t\t\t\t\t\tbinary += String.fromCharCode(bytes[i]);\n\t\t\t\t\treturn btoa(binary)\n\t\t\t\t\t\t.replace(/\\+/g, \"-\")\n\t\t\t\t\t\t.replace(/\\//g, \"_\")\n\t\t\t\t\t\t.replace(/=+$/g, \"\");\n\t\t\t\t};\n\t\t\t}\n\n\t\t\t// replaceStoreConfigHTML 使用后端渲染的书库设置片段局部替换当前列表。\n\t\t\tfunction replaceStoreConfigHTML(configName, html, clearInput = false) {\n\t\t\t\tif (!html) return;\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (!container || !container.parentNode) return;\n\n\t\t\t\tconst temp = document.createElement(\"div\");\n\t\t\t\t// 只解析本服务 templ 返回的配置片段，不能用于用户输入或外部 HTML。\n\t\t\t\ttemp.innerHTML = html;\n\t\t\t\tconst newContainer = temp.querySelector(\n\t\t\t\t\t\"#\" + configName + \"-store-config\",\n\t\t\t\t);\n\t\t\t\tif (!newContainer) return;\n\n\t\t\t\tcontainer.parentNode.replaceChild(newContainer, container);\n\t\t\t\tif (window.Alpine) {\n\t\t\t\t\twindow.Alpine.initTree(newContainer);\n\t\t\t\t}\n\t\t\t\tif (clearInput) {\n\t\t\t\t\tconst newInput = newContainer.querySelector(\n\t\t\t\t\t\t\"#\" + configName + \"AddInput\",\n\t\t\t\t\t);\n\t\t\t\t\tif (newInput) newInput.value = \"\";\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// shouldReloadAfterStoreAdd 区分空书架页和设置页：前者添加后要重载书架，后者只局部更新。\n\t\t\tfunction shouldReloadAfterStoreAdd(configName) {\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\treturn container?.dataset.reloadAfterAdd === \"true\";\n\t\t\t}\n\n\t\t\t// selectStoreFolder 只在 Wails 桌面壳中调用系统目录选择器，普通浏览器不显示入口。\n\t\t\tasync function selectStoreFolder(configName) {\n\t\t\t\tif (!window.ComiGoWails) return;\n\t\t\t\tconst addInput = document.getElementById(configName + \"AddInput\");\n\t\t\t\tif (!addInput) return;\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/wails/select-directory\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\tcredentials: \"same-origin\",\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\t\t\t\t\tif (response.status === 204) return;\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\tif (data.path) {\n\t\t\t\t\t\taddInput.value = data.path;\n\t\t\t\t\t\taddInput.focus();\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"选择书库文件夹失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 添加书库\n\t\t\tasync function addStore(configName) {\n\t\t\t\tconst addInput = document.getElementById(configName + \"AddInput\");\n\t\t\t\tif (!addInput) return;\n\t\t\t\tconst addValue = addInput.value.trim();\n\n\t\t\t\t// 验证：如果为空，显示错误提示\n\t\t\t\tif (addValue === \"\") {\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"content_empty_please_enter_before_submit\"),\n\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t});\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\t// 验证：如果已经有这个值了，显示错误提示\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (container) {\n\t\t\t\t\tconst existingStores =\n\t\t\t\t\t\tcontainer.querySelectorAll(\"[data-store-value]\");\n\t\t\t\t\tfor (const node of existingStores) {\n\t\t\t\t\t\tconst nodeText = node.dataset.storeValue || \"\";\n\t\t\t\t\t\tif (nodeText === addValue) {\n\t\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\t\tmessage: i18next.t(\"value_already_exists_do_not_add_again\"),\n\t\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// 发送添加请求到服务器\n\t\t\t\ttry {\n\t\t\t\t\tconst addValueB64 = window.base64UrlEncodeUtf8(addValue);\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/add-array-config\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\t\tconfigName: configName,\n\t\t\t\t\t\t\t\taddValue: addValueB64,\n\t\t\t\t\t\t\t}),\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_add_config_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示保存提示；书库列表会在本请求内局部更新。\n\t\t\t\t\tif (data.saveSuccessHint) {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"info\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tshowToast(i18next.t(\"save_success_hint\"), \"success\");\n\t\t\t\t\t}\n\t\t\t\t\tif (data.warningMessage) {\n\t\t\t\t\t\tshowMessage({\n\t\t\t\t\t\t\tmessage: data.warningMessage,\n\t\t\t\t\t\t\tbuttons: \"confirm\",\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\n\t\t\t\t\tif (shouldReloadAfterStoreAdd(configName)) {\n\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\treplaceStoreConfigHTML(configName, data.html, true);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"添加书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 重新扫描全部书库\n\t\t\tasync function rescanAllStores() {\n\t\t\t\tshowToast(i18next.t(\"rescan_store_in_progress\"), \"info\");\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(\n\t\t\t\t\t\twindow.ComiGoPath(\"/api/rescan-all-stores\"),\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\t},\n\t\t\t\t\t);\n\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_rescan_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\tconst data = await response.json();\n\t\t\t\t\tconst message = rescanStoreSuccessMessage(data);\n\t\t\t\t\tshowToast(message, \"success\");\n\t\t\t\t\treplaceStoreConfigHTML(\n\t\t\t\t\t\twindow.base64UrlEncodeUtf8(\"StoreUrls\"),\n\t\t\t\t\t\tdata.html,\n\t\t\t\t\t);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"重新扫描全部书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// 重新扫描书库\n\t\t\tasync function rescanStore(storeUrlB64) {\n\t\t\t\t// 显示扫描中提示\n\t\t\t\tshowToast(i18next.t(\"rescan_store_in_progress\"), \"info\");\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(window.ComiGoPath(\"/api/rescan-store\"), {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tstoreUrl: storeUrlB64,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_rescan_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tconst message = rescanStoreSuccessMessage(data);\n\t\t\t\t\tshowToast(message, \"success\");\n\t\t\t\t\treplaceStoreConfigHTML(\n\t\t\t\t\t\twindow.base64UrlEncodeUtf8(\"StoreUrls\"),\n\t\t\t\t\t\tdata.html,\n\t\t\t\t\t);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"重新扫描书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// rescanStoreSuccessMessage 统一格式化重扫结果，显示净新增和净减少数量。\n\t\t\tfunction rescanStoreSuccessMessage(data) {\n\t\t\t\treturn i18next\n\t\t\t\t\t.t(\"rescan_store_success\")\n\t\t\t\t\t.replace(\"{0}\", data.newBooksCount || 0)\n\t\t\t\t\t.replace(\"{1}\", data.removedBooksCount || 0);\n\t\t\t}\n\n\t\t\t// 删除书库\n\t\t\tasync function deleteStore(configName, storeUrlB64) {\n\t\t\t\tconst container = document.getElementById(configName + \"-store-config\");\n\t\t\t\tif (!container) return;\n\n\t\t\t\t// 删除书库会移除该路径下的书籍记录，必须经过已有的模态确认。\n\t\t\t\tconst confirmed = await new Promise((resolve) => {\n\t\t\t\t\tshowMessage({\n\t\t\t\t\t\tmessage: i18next.t(\"confirm_delete_store\"),\n\t\t\t\t\t\tbuttons: \"confirm_cancel\",\n\t\t\t\t\t\tonConfirm: () => resolve(true),\n\t\t\t\t\t\tonCancel: () => resolve(false),\n\t\t\t\t\t});\n\t\t\t\t});\n\n\t\t\t\tif (!confirmed) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(window.ComiGoPath(\"/api/delete-store\"), {\n\t\t\t\t\t\tmethod: \"POST\",\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t\"Content-Type\": \"application/json\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tstoreUrl: storeUrlB64,\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\n\t\t\t\t\t// 检查响应状态\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tshowToast(i18next.t(\"err_delete_store_failed\"), \"error\");\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\n\t\t\t\t\t// 解析响应数据\n\t\t\t\t\tconst data = await response.json();\n\n\t\t\t\t\t// 显示成功提示\n\t\t\t\t\tshowToast(i18next.t(\"delete_store_success\"), \"success\");\n\n\t\t\t\t\treplaceStoreConfigHTML(configName, data.html);\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error(\"删除书库失败:\", error);\n\t\t\t\t\tshowToast(i18next.t(\"err_network_error\"), \"error\");\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = storeConfigScriptHandle.Once().Render(templ.WithChildren(ctx, templ_7745c5c3_Var26), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = storeConfigScriptHandle.Once().Render(templ.WithChildren(ctx, templ_7745c5c3_Var29), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

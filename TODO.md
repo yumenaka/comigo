@@ -1,6 +1,6 @@
 # ComiGo TODO
 
-更新日期：2026-06-14
+更新日期：2026-06-18
 
 本文件只记录当前仍需要推进的事项。已完成或已失效的旧条目不继续放在待办正文里，避免后续按过期信息排期。
 
@@ -65,6 +65,10 @@
 - [ ] Linux 软件源与包格式：Debian、RPM、Homebrew/Linuxbrew、AUR 或其他发行渠道。
 - [ ] 后台运行命令：`-start` 后台启动、`-stop` 停止进程。需要区分 CLI、桌面托盘和嵌入式宿主。
 - [ ] 跨平台 GUI：继续评估 Flutter + GoMobile、Wails、Electron 宿主。移动端和桌面端启动链路必须与 Tailscale、托盘、Windows 注册表逻辑解耦。
+- [ ] Wails v3 正式版发布后，评估并升级 desktop 版到 Wails v3。
+- [ ] desktop 版支持系统托盘，复用现有托盘能力时保持 Wails、tray、CLI 启动链路解耦。
+- [ ] 编译并验证 Wails desktop 的 iOS 与 Android 版本，确认移动端启动、资源加载和书库路径选择边界。
+- [ ] 测试 Wails v3 是否兼容内置 Tailscale；兼容前继续隐藏 Wails 环境的远程访问/Tailscale 配置。
 - [ ] 终端图片显示继续增强。TUI 侧可继续评估 Kitty/iTerm/Sixel/chafa 等协议，但要保持非图片终端可用。
 
 ## 产品方向

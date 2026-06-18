@@ -1,6 +1,8 @@
 package settings
 
 import (
+	"bytes"
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 )
@@ -149,6 +152,29 @@ func TestGetStoreRealBookCountOnlyCountsTargetStore(t *testing.T) {
 
 	if got := getStoreRealBookCount(storeDir); got != 1 {
 		t.Fatalf("target store count = %d, want 1", got)
+	}
+}
+
+func TestStoreConfigRendersWailsFolderPicker(t *testing.T) {
+	var html bytes.Buffer
+	if err := StoreConfig("StoreUrls", nil, "StoreUrls_Description", nil, false, false).Render(context.Background(), &html); err != nil {
+		t.Fatalf("render StoreConfig: %v", err)
+	}
+	text := html.String()
+	for _, want := range []string{
+		`x-show="$store.global.wailsBook"`,
+		`selectStoreFolder`,
+		`/api/wails/select-directory`,
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("StoreConfig missing %q in %s", want, text)
+		}
+	}
+}
+
+func TestMainAreaHidesTailscaleConfigInWailsBuild(t *testing.T) {
+	if got, want := showTailscaleConfigInSettings(), !assets.IsWailsBuild(); got != want {
+		t.Fatalf("showTailscaleConfigInSettings() = %v, want %v", got, want)
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/yumenaka/comigo/assets/locale"
 )
 
 var wailsContext context.Context
@@ -49,5 +50,23 @@ func bindWailsAPI(group *echo.Group) {
 		// Wails WebView 里 target=_blank 不一定会交给系统浏览器，需由宿主显式打开外部 URL。
 		wailsruntime.BrowserOpenURL(wailsContext, req.URL)
 		return c.NoContent(http.StatusNoContent)
+	})
+	group.POST("/wails/select-directory", func(c echo.Context) error {
+		if wailsContext == nil {
+			return c.NoContent(http.StatusServiceUnavailable)
+		}
+		// 只在 Wails 桌面壳里调用系统目录选择器，普通 Web 环境不暴露本机路径能力。
+		path, err := wailsruntime.OpenDirectoryDialog(wailsContext, wailsruntime.OpenDialogOptions{
+			Title:                locale.GetString("select_store_folder"),
+			CanCreateDirectories: true,
+			ResolvesAliases:      true,
+		})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		if path == "" {
+			return c.NoContent(http.StatusNoContent)
+		}
+		return c.JSON(http.StatusOK, map[string]string{"path": path})
 	})
 }

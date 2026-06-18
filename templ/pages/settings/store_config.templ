@@ -83,6 +83,20 @@ templ StoreConfig(name string, values []string, description string, bookCounts m
 					@keydown={ "if ($event.key === 'Enter') { addStore('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "'); }" }
 				/>
 				<button
+					x-cloak
+					x-show="$store.global.wailsBook"
+					type="button"
+					disabled?={ config.GetCfg().ReadOnlyMode }
+					@click={ "selectStoreFolder('" + base64.RawURLEncoding.EncodeToString([]byte(name)) + "')" }
+					:aria-label={ getTranslations("select_store_folder") }
+					:title={ getTranslations("select_store_folder") }
+					class="panel-control shrink-0 w-10 h-10 ml-2 inline-flex items-center justify-center border rounded shadow-lg font-semibold focus:outline-none focus:ring transition delay-150 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+				>
+					<svg aria-hidden="true" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
+					</svg>
+				</button>
+				<button
 					x-text={ getTranslations("add") }
 					type="button"
 					id={ base64.RawURLEncoding.EncodeToString([]byte(name)) + "StoreAddButton" }
@@ -150,6 +164,36 @@ templ StoreConfigJavaScript() {
 			function shouldReloadAfterStoreAdd(configName) {
 				const container = document.getElementById(configName + "-store-config");
 				return container?.dataset.reloadAfterAdd === "true";
+			}
+
+			// selectStoreFolder 只在 Wails 桌面壳中调用系统目录选择器，普通浏览器不显示入口。
+			async function selectStoreFolder(configName) {
+				if (!window.ComiGoWails) return;
+				const addInput = document.getElementById(configName + "AddInput");
+				if (!addInput) return;
+
+				try {
+					const response = await fetch(
+						window.ComiGoPath("/api/wails/select-directory"),
+						{
+							method: "POST",
+							credentials: "same-origin",
+						},
+					);
+					if (response.status === 204) return;
+					if (!response.ok) {
+						showToast(i18next.t("err_network_error"), "error");
+						return;
+					}
+					const data = await response.json();
+					if (data.path) {
+						addInput.value = data.path;
+						addInput.focus();
+					}
+				} catch (error) {
+					console.error("选择书库文件夹失败:", error);
+					showToast(i18next.t("err_network_error"), "error");
+				}
 			}
 
 			// 添加书库

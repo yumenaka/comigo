@@ -31,6 +31,7 @@ templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
 	<!-- 使用 transform 和 scale 实现“元素放大且不影响原有布局”的效果。核心思路是通过 CSS Transform 做放大动画，而不改变其占据的文档流空间。 -->
 	<a
 		:href={ generateReadURL(book, bookMarks.GetLastReadPage()) }
+		data-wails-book-card
 		x-data={ fmt.Sprintf("{ BookID: %s }", "'"+book.BookID+"'") }
 		title={ book.Title }
 		x-show="showBook"
