@@ -32,6 +32,7 @@ templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
 	<a
 		:href={ generateReadURL(book, bookMarks.GetLastReadPage()) }
 		data-wails-book-card
+		data-wails-book-id={ book.BookID }
 		x-data={ fmt.Sprintf("{ BookID: %s }", "'"+book.BookID+"'") }
 		title={ book.Title }
 		x-show="showBook"

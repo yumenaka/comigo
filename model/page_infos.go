@@ -22,7 +22,7 @@ func (s *PageInfos) SortImages(sortBy string) {
 		}
 	case "filename_reverse":
 		lessFunc = func(i, j int) bool {
-			return !tools.Compare((*s)[i].Name, (*s)[j].Name)
+			return tools.Compare((*s)[j].Name, (*s)[i].Name)
 		}
 	case "filesize":
 		lessFunc = func(i, j int) bool {
@@ -30,7 +30,7 @@ func (s *PageInfos) SortImages(sortBy string) {
 		}
 	case "filesize_reverse":
 		lessFunc = func(i, j int) bool {
-			return !((*s)[i].Size > (*s)[j].Size)
+			return (*s)[i].Size < (*s)[j].Size
 		}
 	case "modify_time": // 根据修改时间排序 从新到旧
 		lessFunc = func(i, j int) bool {

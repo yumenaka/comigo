@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -88,17 +89,12 @@ func ShelfHandler(c echo.Context) error {
 	// Set the response content type to HTML.
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	// 书籍排序方式
-	sortBy := "default"
-	sortBookBy, err := c.Cookie("ShelfSortBy")
-	if err == nil {
-		// c.Cookie("key") 没找到，那么就会取到空值（nil），
-		// 没处判断就直接访问 .Value 属性，会导致空指针引用错误。
-		sortBy = sortBookBy.Value
-	}
+	sortBy := getShelfSortBy(c)
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
 	// 如果没有指定书籍ID，获取顶层书架信息。
 	var storeBookInfos []model.StoreBookInfo
+	var err error
 	if bookID == "" {
 		storeBookInfos, err = store.TopOfShelfInfo(sortBy)
 		if err != nil {
@@ -197,6 +193,11 @@ func SearchHandler(c echo.Context) error {
 
 // getShelfSortBy 获取书架排序方式（与原书架页面保持一致）。
 func getShelfSortBy(c echo.Context) string {
+	if assets.IsWailsWebViewRequest(c.Request()) {
+		if sortBy := c.QueryParam("sort_by"); sortBy != "" {
+			return sortBy
+		}
+	}
 	sortBy := "default"
 	sortBookBy, err := c.Cookie("ShelfSortBy")
 	if err == nil {

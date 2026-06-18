@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -25,13 +26,19 @@ const (
 // ScrollModeHandler 阅读界面（卷轴阅读）
 func ScrollModeHandler(c echo.Context) error {
 	// 图片排序方式
-	sortBy := "default"
-	sortBookBy, err := c.Cookie("ScrollSortBy")
-	if err == nil {
-		// c.Cookie("key") 没找到，那么就会取到空值（nil），
-		// 没处判断就直接访问 .Value 属性，会导致空指针引用错误。
-		sortBy = sortBookBy.Value
-		// logger.Info("Scroll Mode Sort By:" + sortBy)
+	sortBy := ""
+	if assets.IsWailsWebViewRequest(c.Request()) {
+		sortBy = c.QueryParam("sort_by")
+	}
+	if sortBy == "" {
+		sortBy = "default"
+		sortBookBy, err := c.Cookie("ScrollSortBy")
+		if err == nil {
+			// c.Cookie("key") 没找到，那么就会取到空值（nil），
+			// 没处判断就直接访问 .Value 属性，会导致空指针引用错误。
+			sortBy = sortBookBy.Value
+			// logger.Info("Scroll Mode Sort By:" + sortBy)
+		}
 	}
 	// 读取url参数，获取书籍ID
 	bookID := c.Param("id")
@@ -57,6 +64,7 @@ func ScrollModeHandler(c echo.Context) error {
 	if book.Type == model.TypeHTML {
 		return c.Redirect(http.StatusTemporaryRedirect, common.RawBookURL(book))
 	}
+	book = book.CloneForView()
 	book.SortPages(sortBy)
 	loadMode := parseScrollLoadMode(c)
 	pageLimit := parseScrollPageLimit(c)

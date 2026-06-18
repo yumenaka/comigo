@@ -43,6 +43,7 @@ func GetBook(c echo.Context) error {
 		logger.Infof("%s", err)
 		return apiresp.BadRequest(c, "book_not_found", "id not found", map[string]string{"id": id})
 	}
+	b = b.CloneForView()
 	b.SortPages(sortBy)
 	// 如果是epub文件，重新按照Epub信息排序
 	if b.Type == model.TypeEpub && sortBy == "epub_info" {

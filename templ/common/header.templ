@@ -277,6 +277,10 @@ templ ReSortIcon() {
 		x-show="$store.global.onlineBook"
 		x-data="{
                     getCurrentSortBy() {
+                        if (window.ComiGoIsWails && window.ComiGoIsWails()) {
+                            const sortBy = new URL(window.location.href).searchParams.get('sort_by');
+                            if (sortBy) return sortBy;
+                        }
                         // 根据URL路径决定使用哪个cookie参数名
                         let paramName = '';
                         const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
@@ -304,6 +308,7 @@ templ ReSortIcon() {
                     },
                     setCookie(value) {
                         // 根据URL路径决定使用哪个cookie参数名
+                        let paramName = '';
                         const currentUrl = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
                         if (currentUrl.includes('/flip/')) {
                             paramName = 'FlipSortBy';
@@ -316,10 +321,17 @@ templ ReSortIcon() {
                         const expirationDate = new Date();
                         expirationDate.setDate(expirationDate.getDate() + 365);
                         document.cookie = paramName + '=' + encodeURIComponent(value) + '; expires=' + expirationDate.toUTCString() + '; path=/; SameSite=Lax';
+                        // Wails 自定义协议下 cookie 持久性不如普通浏览器稳定，排序参数同步到 URL 再跳转。
+                        if (window.ComiGoIsWails && window.ComiGoIsWails()) {
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('sort_by', value);
+                            window.location.href = url.toString();
+                            return;
+                        }
                         window.location.reload();
                     }
                 }"
-		class="panel-surface z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit bg-white/90 dark:bg-gray-700"
+		class="panel-surface z-10 hidden divide-y divide-gray-100 rounded-lg shadow max-w-fit whitespace-nowrap bg-white/90 dark:bg-gray-700"
 		x-init="currentSortBy = getCurrentSortBy()"
 	>
 		<ul class="py-0 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="ResortButton">

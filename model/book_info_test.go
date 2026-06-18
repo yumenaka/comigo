@@ -179,3 +179,35 @@ func TestSortBooksByLastReadFallsBackToModifiedTime(t *testing.T) {
 		t.Fatalf("last_read order = %v, want %v", got, want)
 	}
 }
+
+func TestSortBooksReverseOrders(t *testing.T) {
+	byTitle := BookInfos{
+		{Title: "001.zip", Type: TypeZip},
+		{Title: "003.zip", Type: TypeZip},
+		{Title: "002.zip", Type: TypeZip},
+	}
+	byTitle.SortBooks("filename_reverse")
+	if byTitle[0].Title != "003.zip" || byTitle[1].Title != "002.zip" || byTitle[2].Title != "001.zip" {
+		t.Fatalf("filename_reverse order = %#v", byTitle)
+	}
+
+	bySize := BookInfos{
+		{Title: "large", Type: TypeZip, FileSize: 30},
+		{Title: "small", Type: TypeZip, FileSize: 10},
+		{Title: "middle", Type: TypeZip, FileSize: 20},
+	}
+	bySize.SortBooks("filesize_reverse")
+	if bySize[0].Title != "small" || bySize[1].Title != "middle" || bySize[2].Title != "large" {
+		t.Fatalf("filesize_reverse order = %#v", bySize)
+	}
+
+	byAuthor := BookInfos{
+		{Title: "a", Author: "Ann", Type: TypeZip},
+		{Title: "b", Author: "Cat", Type: TypeZip},
+		{Title: "c", Author: "Bob", Type: TypeZip},
+	}
+	byAuthor.SortBooks("author_reverse")
+	if byAuthor[0].Author != "Cat" || byAuthor[1].Author != "Bob" || byAuthor[2].Author != "Ann" {
+		t.Fatalf("author_reverse order = %#v", byAuthor)
+	}
+}

@@ -173,3 +173,40 @@ func TestClearBookNotExistDeletesTypeDirWithNoPages(t *testing.T) {
 		t.Fatalf("DeleteBook calls = %d, want 1", store.deleteCalls)
 	}
 }
+
+func TestCloneForViewSortDoesNotMutateOriginalPages(t *testing.T) {
+	book := &Book{
+		PageInfos: PageInfos{
+			{Name: "002.jpg"},
+			{Name: "001.jpg"},
+		},
+	}
+
+	clone := book.CloneForView()
+	clone.SortPages("filename")
+
+	if clone.PageInfos[0].Name != "001.jpg" {
+		t.Fatalf("clone first page = %q, want sorted page", clone.PageInfos[0].Name)
+	}
+	if book.PageInfos[0].Name != "002.jpg" {
+		t.Fatalf("original first page = %q, want original order", book.PageInfos[0].Name)
+	}
+}
+
+func TestSortImagesReverseOrder(t *testing.T) {
+	pages := PageInfos{
+		{Name: "001.jpg", Size: 1},
+		{Name: "003.jpg", Size: 3},
+		{Name: "002.jpg", Size: 2},
+	}
+
+	pages.SortImages("filename_reverse")
+	if pages[0].Name != "003.jpg" || pages[1].Name != "002.jpg" || pages[2].Name != "001.jpg" {
+		t.Fatalf("filename_reverse order = %#v", pages)
+	}
+
+	pages.SortImages("filesize_reverse")
+	if pages[0].Size != 1 || pages[1].Size != 2 || pages[2].Size != 3 {
+		t.Fatalf("filesize_reverse order = %#v", pages)
+	}
+}

@@ -21,6 +21,18 @@ type Book struct {
 	PageInfos // 书籍内所有页面的信息
 }
 
+// CloneForView 返回用于渲染和 API 输出的书籍副本，避免排序、URL 改写污染内存书库。
+func (b *Book) CloneForView() *Book {
+	if b == nil {
+		return nil
+	}
+	clone := *b
+	clone.PageInfos = append(PageInfos(nil), b.PageInfos...)
+	clone.BookMarks = append(BookMarks(nil), b.BookMarks...)
+	clone.ChildBooksID = append([]string(nil), b.ChildBooksID...)
+	return &clone
+}
+
 // GuessCover 猜测书籍的封面
 func (b *Book) GuessCover() (cover PageInfo) {
 	// 按 cover/0/1 的常见命名优先猜测封面，找不到时回退到第一页。

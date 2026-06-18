@@ -91,9 +91,9 @@ window.ComiGoElectronAction = function(action) {
   return true;
 };
 window.ComiGoIsWails = function() {
-  return !!window.ComiGoWails || window.location.protocol === 'wails:';
+  return window.location.protocol === 'wails:' || !!window.WailsInvoke || !!window.go?.main?.App;
 };
-if (window.ComiGoWails) {
+if (window.ComiGoIsWails()) {
   // Wails dev/debug 默认会放开右键菜单，这里只在桌面壳内统一禁用。
   window.addEventListener('contextmenu', function(event) {
     event.preventDefault();

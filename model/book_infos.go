@@ -31,7 +31,7 @@ func (s *BookInfos) SortBooks(sortBy string) {
 		}
 	case "filename_reverse":
 		lessFunc = func(i, j int) bool {
-			return !tools.Compare((*s)[i].Title, (*s)[j].Title)
+			return tools.Compare((*s)[j].Title, (*s)[i].Title)
 		}
 	case "filesize":
 		lessFunc = func(i, j int) bool {
@@ -39,7 +39,7 @@ func (s *BookInfos) SortBooks(sortBy string) {
 		}
 	case "filesize_reverse":
 		lessFunc = func(i, j int) bool {
-			return !compareByFileSize((*s)[i], (*s)[j])
+			return compareByFileSize((*s)[j], (*s)[i])
 		}
 	case "modify_time": // 根据修改时间排序 从新到旧
 		lessFunc = func(i, j int) bool {
@@ -70,7 +70,7 @@ func (s *BookInfos) SortBooks(sortBy string) {
 		}
 	case "author_reverse":
 		lessFunc = func(i, j int) bool {
-			return !tools.Compare((*s)[i].Author, (*s)[j].Author)
+			return tools.Compare((*s)[j].Author, (*s)[i].Author)
 		}
 	default:
 		lessFunc = func(i, j int) bool {

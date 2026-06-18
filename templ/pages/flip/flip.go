@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -18,11 +19,17 @@ func FlipModeHandler(c echo.Context) error {
 	bookID := c.Param("id")
 	logger.Infof(locale.GetString("log_flip_mode_book_id"), bookID)
 	// 图片排序方式
-	sortBy := "default"
-	// c.Cookie("key") 没找到，那么就会取到空值（nil），没判断nil就直接访问 .Value 属性，会导致空指针引用错误。
-	sortBookBy, err := c.Cookie("FlipSortBy")
-	if err == nil {
-		sortBy = sortBookBy.Value
+	sortBy := ""
+	if assets.IsWailsWebViewRequest(c.Request()) {
+		sortBy = c.QueryParam("sort_by")
+	}
+	if sortBy == "" {
+		sortBy = "default"
+		// c.Cookie("key") 没找到，那么就会取到空值（nil），没判断nil就直接访问 .Value 属性，会导致空指针引用错误。
+		sortBookBy, err := c.Cookie("FlipSortBy")
+		if err == nil {
+			sortBy = sortBookBy.Value
+		}
 	}
 	// 读取url参数，获取书籍ID
 	var book *model.Book
@@ -47,6 +54,7 @@ func FlipModeHandler(c echo.Context) error {
 	if book.Type == model.TypeHTML {
 		return c.Redirect(http.StatusTemporaryRedirect, common.RawBookURL(book))
 	}
+	book = book.CloneForView()
 	book.SortPages(sortBy)
 
 	// 翻页阅读（先加载共享 WebSocket 模块，再加载页面逻辑）
@@ -62,18 +70,15 @@ func FlipModeHandler(c echo.Context) error {
 	// 静态模式
 	staticMode := c.QueryParam("static") != ""
 	if staticMode {
-		// staticBook := *book 仅做浅拷贝，结构体中的 PageInfos 是切片，切片头被复制但底层数组仍与原对象共享，修改其元素会同步影响原书数据。
-		staticBook := *book
-		// 深拷贝 PageInfos 切片
-		staticBook.PageInfos = make([]model.PageInfo, len(book.PageInfos))
-		copy(staticBook.PageInfos, book.PageInfos)
+		// 静态模式会把图片 URL 改成 base64，继续使用展示副本避免改到同一次渲染外的书籍数据。
+		staticBook := book.CloneForView()
 		// 静态模式下，使用 base64 图片数据
 		for i, image := range staticBook.PageInfos {
 			staticBook.PageInfos[i].Url = common.GetFileBase64Text(book.BookInfo.BookID, image.Name)
 		}
 		indexHtml = common.Html(
 			c,
-			FlipPage(c, &staticBook),
+			FlipPage(c, staticBook),
 			[]string{
 				"static/js/ws_sync.js",
 				"static/js/flip_modules/pagination_utils.js",
