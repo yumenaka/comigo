@@ -1,0 +1,54 @@
+# 使用: air -c .air.wails.toml
+# 这个配置只负责拉起 Wails CLI；不要用 go build -tags wails 直接启动桌面壳。
+
+root = "."
+tmp_dir = "test/.temp-wails"
+
+[build]
+cmd = "make wails-prepare"
+full_bin = "wails dev -m -nosyncgomod -skipembedcreate"
+post_cmd = []
+delay = 3000
+exclude_dir = [
+    "app",
+    "test",
+    ".parcel-cache",
+    "node_modules",
+    "tmp",
+    "bin",
+    "build",
+    "testdata",
+    "assets/dist",
+    "assets/wailsjs",
+]
+exclude_regex = ["_test\\.go", "_templ\\.go", "tar.gz", "zip", "tgz", "exe", "app"]
+exclude_unchanged = false
+follow_symlink = false
+include_ext = ["go", "templ", "json"]
+include_file = ["Makefile", "package.json", "wails.json"]
+kill_delay = "2s"
+log = "air.log"
+poll = false
+poll_interval = 500
+rerun = true
+rerun_delay = 1000
+send_interrupt = true
+stop_on_error = true
+
+[log]
+main_only = false
+silent = false
+time = false
+
+[color]
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+clean_on_exit = true
+
+[screen]
+clear_on_rebuild = false
+keep_scroll = true

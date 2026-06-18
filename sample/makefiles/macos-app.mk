@@ -1,7 +1,8 @@
 ## macOS App 打包相关变量
 ## make app
-MAC_APP_NAME    := Comigo
-BUNDLE_ID   := xyz.comigo.comigo
+MAC_APP_NAME ?= Comigo
+MAC_DISPLAY_NAME ?= $(MAC_APP_NAME)
+BUNDLE_ID ?= xyz.comigo.comigo
 
 # 最终 .app 输出目录
 BIN_DIR     := bin
@@ -131,6 +132,11 @@ $(INFO_PLIST_TMP): $(INFO_PLIST) $(VERSION_GO)
 	@cp $(INFO_PLIST) $(INFO_PLIST_TMP)
 	@# macOS Info.plist 版本号必须是纯数字格式，去掉 v 前缀
 	$(eval MAC_VERSION := $(patsubst v%,%,$(VERSION)))
+	@# 同一个系统里需要同时安装 tray 与 desktop，Info.plist 也要跟着改名。
+	@plutil -replace CFBundleName -string "$(MAC_DISPLAY_NAME)" $(INFO_PLIST_TMP)
+	@plutil -replace CFBundleDisplayName -string "$(MAC_DISPLAY_NAME)" $(INFO_PLIST_TMP)
+	@plutil -replace CFBundleIdentifier -string "$(BUNDLE_ID)" $(INFO_PLIST_TMP)
+	@plutil -replace CFBundleExecutable -string "$(MAC_APP_NAME)" $(INFO_PLIST_TMP)
 	@plutil -replace CFBundleVersion -string "$(MAC_VERSION)" $(INFO_PLIST_TMP)
 	@plutil -replace CFBundleShortVersionString -string "$(MAC_VERSION)" $(INFO_PLIST_TMP)
 	@echo "==> 已更新 Info.plist 版本号为 $(MAC_VERSION)"

@@ -7,10 +7,12 @@
 ## 2. 跨平台编译（sample/makefiles/cross-compile.mk）
 ##
 ## 常用命令：
-##   make all              - 编译所有平台（默认非 CGO）+ App 并生成校验
+##   make all              - 编译 tray + Wails desktop 发布包并生成校验
 ##
 ## 【跨平台编译】
-##   make compileAll       - 编译所有平台的非 CGO 版本
+##   make tray-all         - 编译 tray 版 Linux/Windows/macOS 发布包
+##   make desktop-all      - 编译 Wails desktop 版 Linux/Windows/macOS 发布包
+##   make compileAll       - 编译所有平台的非 CGO 旧版 CLI
 ##   make Windows_x86_64   - 编译 Windows 64 位版本
 ##   make Linux_x86_64     - 编译 Linux 64 位版本
 ##   make MacOS_x86_64     - 编译 macOS Intel 版本
@@ -36,7 +38,7 @@
 ##
 ## 【其他】
 ##   make -n <target>      - 打印编译命令而不实际执行（用于调试）
-##   make wails-build      - 编译 Wails 桌面版到 bin/Comigo
+##   make wails-build      - 编译当前平台 Wails desktop 发布包到 bin/
 ##   make clean            - 清理构建文件（不含 Docker 镜像）
 ##
 ## ============================================================================
@@ -91,10 +93,8 @@ wails-prepare:
 wails-dev: wails-prepare
 	@wails dev -m -nosyncgomod -skipembedcreate
 
-# Wails 固定输出到 build/bin；构建后把最终产物移到项目根 bin/。
-wails-build: wails-prepare
-	@wails build -m -nosyncgomod -skipembedcreate
-	@find build/bin -mindepth 1 -maxdepth 1 ! -name '.DS_Store' -exec sh -c 'for path do name=$$(basename "$$path"); rm -rf "bin/$$name"; mv "$$path" bin/; done' sh {} +
+# Wails release 输出统一交给跨平台发布矩阵命名，避免和 tray 产物冲突。
+wails-build: desktop-current
 
 ## ============================================================================
 ## 引入子 Makefile

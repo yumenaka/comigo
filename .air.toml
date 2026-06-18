@@ -12,8 +12,8 @@ pre_cmd = [
     "bun run dev",
     # "bun run build:wasm",
 ]
-# Wails 分支使用独立 build tag，避免热重载改动普通 CLI/托盘入口。
-cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -tags wails -o ./test/.temp/comi ."
+# Air 只跑普通入口；Wails 桌面壳开发请用 `bun run wails:dev`。
+cmd = "go run github.com/a-h/templ/cmd/templ@latest fmt ./templ && go run github.com/a-h/templ/cmd/templ@latest generate && go build -o ./test/.temp/comi ./cmd/comigo/main.go"
 # Array of commands to run after ^C
 post_cmd = []
 ## 运行的时候，需要传给二进制文件的参数。
