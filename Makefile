@@ -7,7 +7,7 @@
 ## 2. 跨平台编译（sample/makefiles/cross-compile.mk）
 ##
 ## 常用命令：
-##   make all              - 编译 tray + Wails desktop 发布包并生成校验
+##   make all              - 编译 CLI + deb + tray + Wails desktop 发布包并生成校验
 ##
 ## 【跨平台编译】
 ##   make tray-all         - 编译 tray 版 Linux/Windows/macOS 发布包
@@ -170,4 +170,5 @@ docker-help:
 # 清理所有构建文件（包括 macOS App 和跨平台编译）
 # 注意：不包括 Docker 镜像，如需清理请使用 make docker-clean
 clean: clean-app
+	@rm -rf bin
 	@echo "==> 清理完成"

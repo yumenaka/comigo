@@ -14,18 +14,24 @@ import (
 
 func TestShouldReplaceLatestWithVersionOnlyForComigoRelease(t *testing.T) {
 	version := config.GetVersion()
-	target := "https://github.com/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz"
-
-	if !shouldReplaceLatestWithVersion(target) {
-		t.Fatal("Comigo 官方 release 下载地址应该允许 latest 替换")
+	targets := []string{
+		"https://github.com/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz",
+		"https://github.com/yumenaka/comigo/releases/download/latest/comigo-tray_latest_MacOS_universal.dmg",
+		"https://github.com/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Windows_x86_64.zip",
 	}
 
-	replaced := replaceLatestWithVersion(target)
-	if !strings.Contains(replaced, "/releases/download/"+version+"/") {
-		t.Fatalf("release 路径未替换为当前版本: %s", replaced)
-	}
-	if !strings.Contains(replaced, "comi_"+version+"_MacOS_arm64.tar.gz") {
-		t.Fatalf("文件名未替换为当前版本: %s", replaced)
+	for _, target := range targets {
+		if !shouldReplaceLatestWithVersion(target) {
+			t.Fatalf("Comigo 官方 release 下载地址应该允许 latest 替换: %s", target)
+		}
+
+		replaced := replaceLatestWithVersion(target)
+		if !strings.Contains(replaced, "/releases/download/"+version+"/") {
+			t.Fatalf("release 路径未替换为当前版本: %s", replaced)
+		}
+		if strings.Contains(replaced, "latest") {
+			t.Fatalf("文件名未替换为当前版本: %s", replaced)
+		}
 	}
 }
 

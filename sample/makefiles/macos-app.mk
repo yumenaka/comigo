@@ -195,7 +195,7 @@ dmg: app
 	@ln -s /Applications "$(DMG_ROOT_DIR)/Applications"
 	@echo "==> 生成 $(DMG_FILE)"
 	@hdiutil create -volname "$(MAC_APP_NAME)" -srcfolder "$(DMG_ROOT_DIR)" -ov -format UDZO "$(DMG_FILE)" > /dev/null
-	@rm -rf "$(DMG_ROOT_DIR)"
+	@rm -rf "$(DMG_ROOT_DIR)" "$(APP_DIR)"
 	@echo "==> 已生成 $(DMG_FILE)"
 
 # macOS App 专用的清理目标（避免与跨平台编译的 clean 冲突）

@@ -100,7 +100,7 @@ func ShelfHeaderTitle(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><button type=\"button\" x-cloak x-show=\"$store.global.onlineBook\" @click.stop=\"window.ComiGoShelf?.rescanAllStores?.()\" :aria-label=\"i18next.t('rescan_all_stores')\" :title=\"i18next.t('rescan_all_stores')\" class=\"flex justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><button type=\"button\" x-cloak x-show=\"$store.global.onlineBook\" @click.stop=\"window.ComiGoShelf?.rescanAllStores?.()\" :aria-label=\"i18next.t('rescan_all_stores')\" :title=\"i18next.t('rescan_all_stores')\" class=\"flex justify-center items-center w-8 h-8 mx-1 my-0 rounded hover:ring\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

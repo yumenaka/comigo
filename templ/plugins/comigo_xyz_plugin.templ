@@ -91,58 +91,109 @@ templ ComigoXYZPlugin(c echo.Context) {
 					return { os, arch };
 				}
 
-				// 平台选项（包含托盘版本和命令行版本）
+				// 平台选项按推荐顺序排列：同系统优先托盘版，再桌面版，最后命令行。
 				const platforms = [
-					// Windows 托盘版本（默认）
 					{
 						os: "Windows",
 						arch: "x86_64",
 						type: "tray",
-						label: "Windows x86_64 (托盘版)",
+						label: "Windows x86_64（托盘版）",
 					},
-					// MacOS 托盘版本（默认，兼容 arm64 和 x86_64）
+					{
+						os: "Windows",
+						arch: "arm64",
+						type: "tray",
+						label: "Windows arm64（托盘版）",
+					},
+					{
+						os: "Windows",
+						arch: "x86_64",
+						type: "desktop",
+						label: "Windows x86_64（桌面版）",
+					},
+					{
+						os: "Windows",
+						arch: "arm64",
+						type: "desktop",
+						label: "Windows arm64（桌面版）",
+					},
 					{
 						os: "MacOS",
 						arch: "universal",
 						type: "tray",
-						label: "MacOS (托盘版)",
+						label: "MacOS（托盘版）",
+					},
+					{
+						os: "MacOS",
+						arch: "universal",
+						type: "desktop",
+						label: "MacOS（桌面版）",
 					},
 					{
 						os: "MacOS",
 						arch: "arm64",
 						type: "cli",
-						label: "MacOS arm64 (命令行)",
+						label: "MacOS arm64（命令行）",
 					},
 					{
 						os: "MacOS",
 						arch: "x86_64",
 						type: "cli",
-						label: "MacOS x86_64 (命令行)",
+						label: "MacOS x86_64（命令行）",
 					},
 					{
 						os: "Windows",
 						arch: "x86_64",
 						type: "cli",
-						label: "Windows x86_64 (命令行)",
+						label: "Windows x86_64（命令行）",
 					},
-					// Linux 只有命令行版本
+					{
+						os: "Windows",
+						arch: "arm64",
+						type: "cli",
+						label: "Windows arm64（命令行）",
+					},
+					{
+						os: "Linux",
+						arch: "x86_64",
+						type: "tray",
+						label: "Linux x86_64（托盘版）",
+					},
+					{
+						os: "Linux",
+						arch: "arm64",
+						type: "tray",
+						label: "Linux arm64（托盘版）",
+					},
+					{
+						os: "Linux",
+						arch: "x86_64",
+						type: "desktop",
+						label: "Linux x86_64（桌面版）",
+					},
+					{
+						os: "Linux",
+						arch: "arm64",
+						type: "desktop",
+						label: "Linux arm64（桌面版）",
+					},
 					{
 						os: "Linux",
 						arch: "x86_64",
 						type: "cli",
-						label: "Linux x86_64 (命令行)",
+						label: "Linux x86_64（命令行）",
 					},
 					{
 						os: "Linux",
 						arch: "arm64",
 						type: "cli",
-						label: "Linux arm64 (命令行)",
+						label: "Linux arm64（命令行）",
 					},
 					{
 						os: "Linux",
 						arch: "armv7",
 						type: "cli",
-						label: "Linux armv7 (命令行)",
+						label: "Linux armv7（命令行）",
 					},
 				];
 
@@ -164,12 +215,12 @@ templ ComigoXYZPlugin(c echo.Context) {
 						(p) => p.os === "MacOS" && p.type === "tray",
 					);
 				} else {
-					// Linux 默认选择命令行版
+					// Linux 也存在托盘版时默认优先选托盘版
 					defaultIndex = platforms.findIndex(
 						(p) =>
 							p.os === "Linux" &&
 							p.arch === currentSystem.arch &&
-							p.type === "cli",
+							p.type === "tray",
 					);
 				}
 
@@ -193,22 +244,28 @@ templ ComigoXYZPlugin(c echo.Context) {
 					},
 					getDownloadUrl() {
 						const platform = this.selectedPlatform;
+						const release = "latest";
 						let filename = "";
 
-						if (platform.type === "tray") {
-							// 托盘版本
+						if (platform.type === "cli") {
+							// Windows 命令行版是 zip，其他命令行版是 tar.gz。
 							if (platform.os === "Windows") {
-								// Windows 托盘版：comigo_v{version}_Windows_x86_64_full.zip
-								filename = \`comigo_\${this.version}_Windows_x86_64_full.zip\`;
-							} else if (platform.os === "MacOS") {
-								// MacOS 托盘版：Comigo_v{version}.dmg
-								filename = \`Comigo_\${this.version}.dmg\`;
+								filename = \`comi_\${release}_Windows_\${platform.arch}.zip\`;
+							} else {
+								filename = \`comi_\${release}_\${platform.os}_\${platform.arch}.tar.gz\`;
 							}
 						} else {
-							// 命令行版本：comi_v{version}_{OS}_{ARCH}.tar.gz
-							filename = \`comi_\${this.version}_\${platform.os}_\${platform.arch}.tar.gz\`;
+							// 托盘版与 Wails 桌面版分别使用当前 release 构建产物的前缀。
+							const appName = platform.type === "tray" ? "comigo-tray" : "comigo-desktop";
+							if (platform.os === "Windows") {
+								filename = \`\${appName}_\${release}_Windows_\${platform.arch}.zip\`;
+							} else if (platform.os === "MacOS") {
+								filename = \`\${appName}_\${release}_MacOS_universal.dmg\`;
+							} else {
+								filename = \`\${appName}_\${release}_Linux_\${platform.arch}.tar.gz\`;
+							}
 						}
-						return \`\${this.proxyBase}/yumenaka/comigo/releases/download/\${this.version}/\${filename}\`;
+						return \`\${this.proxyBase}/yumenaka/comigo/releases/download/\${release}/\${filename}\`;
 					},
 					async copyToClipboard(text, index) {
 						try {

@@ -2,7 +2,6 @@
 # go tool dist list
 
 NAME=comi
-FULL_NAME=comigo
 TRAY_NAME := comigo-tray
 DESKTOP_NAME := comigo-desktop
 TRAY_DISPLAY_NAME := Comigo Tray
@@ -48,7 +47,6 @@ else
 endif
 
 COMI_TARGETS := Windows_x86_64 Windows_i386 Windows_arm64 Linux_x86_64 Linux_i386 Linux_armv7 Linux_arm64 MacOS_x86_64 MacOS_arm64
-WINDOWS_FULL_TARGETS := Windows_x86_64_full Windows_i386_full Windows_arm64_full
 TRAY_TARGETS := tray-Linux_x86_64 tray-Linux_arm64 tray-Windows_x86_64 tray-Windows_arm64 tray-MacOS_universal
 DESKTOP_TARGETS := desktop-Linux_x86_64 desktop-Linux_arm64 desktop-Windows_x86_64 desktop-Windows_arm64 desktop-MacOS_universal
 
@@ -72,9 +70,9 @@ else ifneq (,$(findstring MINGW,$(OS)))
   endif
 endif
 
-.PHONY: all tray-all desktop-all desktop-current compileAll windows-full android md5SumThemAll wails-frontend wails-linux-images wails-linux-image-amd64 wails-linux-image-arm64
+.PHONY: all tray-all desktop-all desktop-current compileAll android md5SumThemAll wails-frontend wails-linux-images wails-linux-image-amd64 wails-linux-image-arm64
 
-all: tray-all desktop-all md5SumThemAll
+all: compileAll deb-all tray-all desktop-all md5SumThemAll
 tray-all: $(TRAY_TARGETS)
 desktop-all: $(DESKTOP_TARGETS)
 desktop-current:
@@ -84,7 +82,6 @@ desktop-current:
 	fi
 	@$(MAKE) $(DESKTOP_CURRENT_TARGET)
 compileAll: $(COMI_TARGETS)
-windows-full: $(WINDOWS_FULL_TARGETS)
 android: Linux_arm_android Linux_arm64-android
 
 gomobile:
@@ -129,7 +126,7 @@ md5SumThemAll:
 	@mkdir -p $(BINDIR)
 	rm -f $(MD5_TEXTFILE)
 	touch $(MD5_TEXTFILE)
-	find $(BINDIR) -maxdepth 1 -type f \( -name "$(NAME)_$(VERSION)_*" -o -name "$(FULL_NAME)_$(VERSION)_*" -o -name "$(TRAY_NAME)_$(VERSION)_*" -o -name "$(DESKTOP_NAME)_$(VERSION)_*" \) -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
+	find $(BINDIR) -maxdepth 1 -type f \( -name "$(NAME)_$(VERSION)_*" -o -name "$(TRAY_NAME)_$(VERSION)_*" -o -name "$(DESKTOP_NAME)_$(VERSION)_*" \) -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
 	$(SED_INPLACE) 's|./bin/||g' $(MD5_TEXTFILE)
 	cat $(MD5_TEXTFILE)
 
@@ -149,16 +146,6 @@ $1: build-wasm
 	zip -m -r -j -9 $(BINDIR)/$(NAME)_$(VERSION)_$1.zip $(BINDIR)/$(NAME)_$(VERSION)_$1
 	rmdir $(BINDIR)/$(NAME)_$(VERSION)_$1
 	rm -f cmd/comi/resource.syso
-endef
-
-define build_windows_full
-$1: build-wasm
-	cd cmd/comigo && $(GOVERSIONINFO) $3 -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
-	@mkdir -p $(BINDIR)/$(FULL_NAME)_$(VERSION)_$1
-	GOOS=windows GOARCH=$2 $(GOBUILD_WINDOWS_GUI) -o $(BINDIR)/$(FULL_NAME)_$(VERSION)_$1/$(FULL_NAME).exe ./cmd/comigo
-	zip -m -r -j -9 $(BINDIR)/$(FULL_NAME)_$(VERSION)_$1.zip $(BINDIR)/$(FULL_NAME)_$(VERSION)_$1
-	rmdir $(BINDIR)/$(FULL_NAME)_$(VERSION)_$1
-	rm -f cmd/comigo/resource.syso
 endef
 
 define build_tray_tar
@@ -227,14 +214,11 @@ desktop-MacOS_universal: wails-prepare wails-frontend
 	@ln -s /Applications $(BINDIR)/dmg-$(DESKTOP_NAME)/Applications
 	@# hdiutil 偶尔误报空间不足；删掉半成品后重试一次即可。
 	hdiutil create -volname "$(DESKTOP_DISPLAY_NAME)" -srcfolder $(BINDIR)/dmg-$(DESKTOP_NAME) -ov -format UDZO $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_MacOS_universal.dmg > /dev/null || (rm -f $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_MacOS_universal.dmg && sleep 2 && hdiutil create -volname "$(DESKTOP_DISPLAY_NAME)" -srcfolder $(BINDIR)/dmg-$(DESKTOP_NAME) -ov -format UDZO $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_MacOS_universal.dmg > /dev/null)
-	@rm -rf $(BINDIR)/dmg-$(DESKTOP_NAME) build/bin
+	@rm -rf $(BINDIR)/dmg-$(DESKTOP_NAME) $(BINDIR)/$(DESKTOP_NAME).app build/bin
 
 $(eval $(call build_windows_cli,Windows_x86_64,amd64,-64))
 $(eval $(call build_windows_cli,Windows_i386,386,))
 $(eval $(call build_windows_cli,Windows_arm64,arm64,-arm -64))
-$(eval $(call build_windows_full,Windows_x86_64_full,amd64,-64))
-$(eval $(call build_windows_full,Windows_i386_full,386,))
-$(eval $(call build_windows_full,Windows_arm64_full,arm64,-arm -64))
 $(eval $(call build_tray_tar,tray-Linux_x86_64,Linux_x86_64,linux,amd64))
 $(eval $(call build_tray_tar,tray-Linux_arm64,Linux_arm64,linux,arm64))
 $(eval $(call build_tray_windows,tray-Windows_x86_64,Windows_x86_64,amd64,-64))
