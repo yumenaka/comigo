@@ -349,10 +349,21 @@ templ StoreConfigJavaScript() {
 
 			// rescanStoreSuccessMessage 统一格式化重扫结果，显示净新增和净减少数量。
 			function rescanStoreSuccessMessage(data) {
-				return i18next
-					.t("rescan_store_success")
-					.replace("{0}", data.newBooksCount || 0)
-					.replace("{1}", data.removedBooksCount || 0);
+				const added = data.newBooksCount || 0;
+				const removed = data.removedBooksCount || 0;
+				if (added > 0 && removed > 0) {
+					return i18next
+						.t("rescan_store_added_removed")
+						.replace("{0}", added)
+						.replace("{1}", removed);
+				}
+				if (added > 0) {
+					return i18next.t("rescan_store_added").replace("{0}", added);
+				}
+				if (removed > 0) {
+					return i18next.t("rescan_store_removed").replace("{0}", removed);
+				}
+				return i18next.t("rescan_store_no_change");
 			}
 
 			// 删除书库

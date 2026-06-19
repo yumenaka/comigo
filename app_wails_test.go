@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers"
 )
 
 func TestTrashableBookPathAllowsOnlyLocalStoreBook(t *testing.T) {
@@ -22,7 +23,7 @@ func TestTrashableBookPathAllowsOnlyLocalStoreBook(t *testing.T) {
 		Type:     model.TypeCbz,
 	}}
 
-	got, isDir, err := trashableBookPath(book, []string{storeDir})
+	got, isDir, err := routers.TrashableBookPathForWails(book, []string{storeDir})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +32,16 @@ func TestTrashableBookPathAllowsOnlyLocalStoreBook(t *testing.T) {
 	}
 
 	book.IsRemote = true
-	if _, _, err := trashableBookPath(book, []string{storeDir}); err == nil {
+	if _, _, err := routers.TrashableBookPathForWails(book, []string{storeDir}); err == nil {
 		t.Fatal("remote book should not be trashable")
+	}
+
+	dirBook := &model.Book{BookInfo: model.BookInfo{
+		BookID:   "dir",
+		BookPath: storeDir,
+		Type:     model.TypeDir,
+	}}
+	if _, _, err := routers.TrashableBookPathForWails(dirBook, []string{storeDir}); err == nil {
+		t.Fatal("directory book should not be trashable")
 	}
 }

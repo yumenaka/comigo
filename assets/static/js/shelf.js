@@ -6,19 +6,75 @@ const shelfText = (key, fallback) => {
 };
 
 // shelfRescanStoreSuccessMessage 统一格式化书架页重扫结果。
-const shelfRescanStoreSuccessMessage = (data) =>
-  shelfText("rescan_store_success", "Store scan completed, {0} new books added, {1} books removed")
-    .replace("{0}", data.newBooksCount ?? 0)
-    .replace("{1}", data.removedBooksCount ?? 0);
+const shelfRescanStoreSuccessMessage = (data) => {
+  const added = data.newBooksCount ?? 0;
+  const removed = data.removedBooksCount ?? 0;
+  if (added > 0 && removed > 0) {
+    return shelfText("rescan_store_added_removed", "{0} books added, {1} books removed")
+      .replace("{0}", added)
+      .replace("{1}", removed);
+  }
+  if (added > 0) {
+    return shelfText("rescan_store_added", "{0} books added").replace("{0}", added);
+  }
+  if (removed > 0) {
+    return shelfText("rescan_store_removed", "{0} books removed").replace("{0}", removed);
+  }
+  return shelfText("rescan_store_no_change", "No book count changes");
+};
 
 window.ComiGoShelf = window.ComiGoShelf || {};
-window.ComiGoShelf.rescanAllStores = async () => {
+
+// getShelfContentRoot 找到当前页可替换的书架主体，兼容主书架、子书架和空书架。
+const getShelfContentRoot = (root = document) =>
+  root.getElementById("ShelfMainArea") ||
+  root.getElementById("book-shelf") ||
+  root.getElementById("tab-contents");
+
+// initShelfFragment 让新插入的 Alpine 片段重新绑定交互。
+const initShelfFragment = (element) => {
+  if (!element || !window.Alpine?.initTree) return;
+  window.Alpine.initTree(element);
+};
+
+// refreshShelfHTML 重新获取当前页 HTML，只替换书架主体和标题，避免整页 reload。
+const refreshShelfHTML = async () => {
+  const response = await fetch(window.location.href, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error("refresh shelf html failed");
+  }
+
+  const nextDoc = new DOMParser().parseFromString(await response.text(), "text/html");
+  const currentShelf = getShelfContentRoot();
+  const nextShelf = getShelfContentRoot(nextDoc);
+  if (!currentShelf || !nextShelf) {
+    throw new Error("shelf content not found");
+  }
+
+  currentShelf.replaceWith(nextShelf);
+  initShelfFragment(nextShelf);
+
+  const currentTitle = document.getElementById("headerTitle");
+  const nextTitle = nextDoc.getElementById("headerTitle");
+  if (currentTitle && nextTitle) {
+    currentTitle.replaceWith(nextTitle);
+    initShelfFragment(nextTitle);
+  }
+};
+
+// rescanShelfStore 调用书架重扫接口；单书库和全量重扫只差 URL 与请求体。
+const rescanShelfStore = async (path, body, logMessage) => {
   window.showToast?.(shelfText("rescan_store_in_progress", "Scanning store, please wait..."), "info");
 
   try {
-    const response = await fetch(window.ComiGoPath("/api/rescan-all-stores"), {
+    const options = {
       method: "POST",
-    });
+    };
+    if (body) {
+      options.headers = { "Content-Type": "application/json" };
+      options.body = JSON.stringify(body);
+    }
+    const response = await fetch(window.ComiGoPath(path), options);
 
     if (!response.ok) {
       window.showToast?.(shelfText("err_rescan_store_failed", "Rescan failed"), "error");
@@ -27,11 +83,18 @@ window.ComiGoShelf.rescanAllStores = async () => {
 
     const data = await response.json();
     window.showToast?.(shelfRescanStoreSuccessMessage(data), "success");
+    await refreshShelfHTML();
   } catch (error) {
-    console.error("重新扫描全部书库失败:", error);
+    console.error(logMessage, error);
     window.showToast?.(shelfText("err_network_error", "Failed"), "error");
   }
 };
+
+window.ComiGoShelf.rescanStore = (storeUrlB64) =>
+  rescanShelfStore("/api/rescan-store", { storeUrl: storeUrlB64 }, "重新扫描书库失败:");
+
+window.ComiGoShelf.rescanAllStores = () =>
+  rescanShelfStore("/api/rescan-all-stores", null, "重新扫描全部书库失败:");
 
 (() => {
   if (!window.ComiGoIsWails?.()) return;
@@ -91,7 +154,7 @@ window.ComiGoShelf.rescanAllStores = async () => {
   const deleteBookFile = () => window.go?.main?.App?.DeleteBookFile;
   const hideMenu = () => menu.classList.add("hidden");
   const toggleDeleteAction = () => {
-    const canDelete = typeof deleteBookFile() === "function";
+    const canDelete = currentCard?.dataset.wailsCanDeleteSource === "true";
     deleteButton.hidden = !canDelete;
     deleteSeparator.hidden = !canDelete;
   };
@@ -132,11 +195,17 @@ window.ComiGoShelf.rescanAllStores = async () => {
     hideMenu();
     if (action === "delete") {
       const deleteFn = deleteBookFile();
-      if (!currentBookID || typeof deleteFn !== "function") return;
+      if (!currentBookID) return;
       try {
-        const deleted = await deleteFn(currentBookID);
+        const deleted = await deleteBookSource(currentBookID, deleteFn);
         if (!deleted) return;
-        currentCard?.remove();
+        const deletedCard = currentCard;
+        try {
+          await refreshShelfHTML();
+        } catch (refreshError) {
+          console.error("刷新删除后的书架失败:", refreshError);
+          deletedCard?.remove();
+        }
         window.showToast?.(shelfText("wails_delete_file_success", "Moved to system trash"), "success");
       } catch (error) {
         console.error("删除书籍源文件失败:", error);
@@ -171,4 +240,19 @@ window.ComiGoShelf.rescanAllStores = async () => {
       window.showToast?.(shelfText("err_network_error", "Failed"), "error");
     }
   });
+
+  // deleteBookSource 子路由里 Wails bridge 可能不可用，HTTP 入口仍由 Wails 后端确认并进垃圾桶。
+  async function deleteBookSource(bookID, deleteFn) {
+    if (typeof deleteFn === "function") return deleteFn(bookID);
+    const response = await fetch(window.ComiGoPath("/api/wails/delete-book-file"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookId: bookID }),
+    });
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+    const data = await response.json();
+    return data.deleted;
+  }
 })();

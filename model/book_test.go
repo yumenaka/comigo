@@ -174,6 +174,25 @@ func TestClearBookNotExistDeletesTypeDirWithNoPages(t *testing.T) {
 	}
 }
 
+func TestClearBookNotExistKeepsBookGroup(t *testing.T) {
+	book := &Book{BookInfo: BookInfo{
+		BookID:   "group",
+		BookPath: filepath.Join(t.TempDir(), "virtual-group"),
+		Type:     TypeBooksGroup,
+	}}
+	store := &bookCleanupTestStore{books: map[string]*Book{book.BookID: book}}
+	withBookCleanupTestStore(t, store)
+
+	ClearBookNotExist()
+
+	if _, ok := store.books[book.BookID]; !ok {
+		t.Fatal("book group should not be deleted by source-file cleanup")
+	}
+	if store.deleteCalls != 0 {
+		t.Fatalf("DeleteBook calls = %d, want 0", store.deleteCalls)
+	}
+}
+
 func TestCloneForViewSortDoesNotMutateOriginalPages(t *testing.T) {
 	book := &Book{
 		PageInfos: PageInfos{

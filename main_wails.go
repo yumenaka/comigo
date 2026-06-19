@@ -14,6 +14,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -43,7 +44,7 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			app.startup(ctx)
 			routers.SetWailsContext(ctx)
-			if err := startComigoForWails(); err != nil {
+			if err := startComigoForWails(ctx); err != nil {
 				_, _ = fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
@@ -59,7 +60,7 @@ func main() {
 }
 
 // startComigoForWails 启动桌面壳内嵌的 Comigo Web 服务。
-func startComigoForWails() error {
+func startComigoForWails(ctx context.Context) error {
 	cmd.Execute()
 	if err := routers.StartWebServer(); err != nil {
 		return err
@@ -69,11 +70,17 @@ func startComigoForWails() error {
 	cmd.AddStoreUrls(cmd.Args)
 	cmd.SetCwdAsScanPathIfNeed()
 	cmd.LoadMetadata()
+	go finishWailsStartupScan(ctx)
+	config.StartOrStopAutoRescan()
+	return nil
+}
+
+// finishWailsStartupScan 后台刷新书库，避免 Wails 首页等扫描完成才出现。
+func finishWailsStartupScan(ctx context.Context) {
 	cmd.ScanStore()
 	model.GenerateBookGroup()
 	cmd.SaveMetadata()
-	config.StartOrStopAutoRescan()
-	return nil
+	wailsruntime.WindowReload(ctx)
 }
 
 // serveWailsAsset 在 Web 服务就绪后把 Wails 的资源请求转给 Echo。

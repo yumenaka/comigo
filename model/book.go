@@ -162,6 +162,9 @@ func ClearBookNotExist() {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, book := range allBooks {
+		if book.Type == TypeBooksGroup {
+			continue
+		}
 		if book.RemoteBookID != "" || book.RemoteStoreKey != "" {
 			// Comigo 远端书籍和本地生成的远端书组由重扫时对比远端书架清理，不通过 VFS 检查。
 			continue

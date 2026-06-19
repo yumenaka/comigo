@@ -21,6 +21,16 @@ func getCoverURL(book model.BookInfo, resizeHeight int) string {
 	return config.PrefixPath(coverURL)
 }
 
+// canDeleteSourceInWails 控制右键菜单显示；真正删除仍由 Wails 后端复核路径。
+func canDeleteSourceInWails(book model.BookInfo) bool {
+	return book.Type != model.TypeBooksGroup &&
+		book.Type != model.TypeDir &&
+		!book.IsRemote &&
+		book.RemoteURL == "" &&
+		book.RemoteBookID == "" &&
+		book.RemoteStoreKey == ""
+}
+
 css GetCoverBackgroundCSS(book model.BookInfo) {
 	background-image: { "url(" + getCoverURL(book, shelfCoverResizeHeight) + ")" };
 }
@@ -33,6 +43,7 @@ templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
 		:href={ generateReadURL(book, bookMarks.GetLastReadPage()) }
 		data-wails-book-card
 		data-wails-book-id={ book.BookID }
+		data-wails-can-delete-source={ canDeleteSourceInWails(book) }
 		x-data={ fmt.Sprintf("{ BookID: %s }", "'"+book.BookID+"'") }
 		title={ book.Title }
 		x-show="showBook"

@@ -870,6 +870,7 @@ func rescanOneStore(c echo.Context, storeUrl string) error {
 
 	// 扫描只会发现现存书籍，缺失的旧记录需要在保存和统计前主动清理。
 	model.ClearBookNotExist()
+	model.GenerateBookGroup()
 
 	// 如果启用数据库，保存扫描结果
 	if config.GetCfg().EnableDatabase {
@@ -894,7 +895,7 @@ func rescanOneStore(c echo.Context, storeUrl string) error {
 		"newBooksCount":     newBooksCount,
 		"removedBooksCount": removedBooksCount,
 		"html":              htmlString,
-		"message":           locale.GetString("rescan_store_success"),
+		"message":           rescanBookDeltaMessage(newBooksCount, removedBooksCount),
 	})
 }
 
@@ -913,6 +914,7 @@ func rescanAllStores(c echo.Context) error {
 
 	// 扫描结束后清理已经消失的书籍，才能保存并统计真实减少数量。
 	model.ClearBookNotExist()
+	model.GenerateBookGroup()
 
 	if config.GetCfg().EnableDatabase {
 		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
@@ -936,7 +938,7 @@ func rescanAllStores(c echo.Context) error {
 		"newBooksCount":     newBooksCount,
 		"removedBooksCount": removedBooksCount,
 		"html":              htmlString,
-		"message":           locale.GetString("rescan_store_success"),
+		"message":           rescanBookDeltaMessage(newBooksCount, removedBooksCount),
 	})
 }
 
@@ -946,6 +948,21 @@ func rescanBookDelta(beforeCount, afterCount int) (newBooksCount int, removedBoo
 		return afterCount - beforeCount, 0
 	}
 	return 0, beforeCount - afterCount
+}
+
+// rescanBookDeltaMessage 按净变化生成自然提示；当前扫描统计只能知道净增或净减。
+func rescanBookDeltaMessage(newBooksCount, removedBooksCount int) string {
+	if newBooksCount > 0 && removedBooksCount > 0 {
+		message := strings.ReplaceAll(locale.GetString("rescan_store_added_removed"), "{0}", strconv.Itoa(newBooksCount))
+		return strings.ReplaceAll(message, "{1}", strconv.Itoa(removedBooksCount))
+	}
+	if newBooksCount > 0 {
+		return strings.ReplaceAll(locale.GetString("rescan_store_added"), "{0}", strconv.Itoa(newBooksCount))
+	}
+	if removedBooksCount > 0 {
+		return strings.ReplaceAll(locale.GetString("rescan_store_removed"), "{0}", strconv.Itoa(removedBooksCount))
+	}
+	return locale.GetString("rescan_store_no_change")
 }
 
 // getStoreRealBookCount 统计单个书库的实际书籍数量，不包含自动生成的书组。

@@ -18,6 +18,10 @@ type wailsOpenURLRequest struct {
 	URL string `json:"url"`
 }
 
+type wailsDeleteBookFileRequest struct {
+	BookID string `json:"bookId"`
+}
+
 // SetWailsContext 保存桌面壳上下文，供普通 HTTP 页面触发窗口操作。
 func SetWailsContext(ctx context.Context) {
 	wailsContext = ctx
@@ -68,5 +72,16 @@ func bindWailsAPI(group *echo.Group) {
 			return c.NoContent(http.StatusNoContent)
 		}
 		return c.JSON(http.StatusOK, map[string]string{"path": path})
+	})
+	group.POST("/wails/delete-book-file", func(c echo.Context) error {
+		var req wailsDeleteBookFileRequest
+		if err := c.Bind(&req); err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+		deleted, err := DeleteBookFileForWails(req.BookID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		return c.JSON(http.StatusOK, map[string]bool{"deleted": deleted})
 	})
 }

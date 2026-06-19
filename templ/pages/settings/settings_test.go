@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/yumenaka/comigo/assets"
+	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 )
@@ -115,6 +116,29 @@ func TestRescanBookDeltaReportsRemovedBooks(t *testing.T) {
 	newBooksCount, removedBooksCount := rescanBookDelta(5, 3)
 	if newBooksCount != 0 || removedBooksCount != 2 {
 		t.Fatalf("delta = new %d removed %d, want new 0 removed 2", newBooksCount, removedBooksCount)
+	}
+}
+
+func TestRescanBookDeltaMessageUsesNaturalChinese(t *testing.T) {
+	locale.SetLanguage("zh-CN")
+
+	tests := []struct {
+		name    string
+		added   int
+		removed int
+		want    string
+	}{
+		{name: "no change", want: "数量没变化"},
+		{name: "added", added: 1, want: "多了 1 本书"},
+		{name: "removed", removed: 1, want: "少了 1 本书"},
+		{name: "both", added: 2, removed: 1, want: "新加 2 本书，少了 1 本书"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := rescanBookDeltaMessage(tt.added, tt.removed); got != tt.want {
+				t.Fatalf("message = %q, want %q", got, tt.want)
+			}
+		})
 	}
 }
 
