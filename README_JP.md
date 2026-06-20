@@ -53,6 +53,11 @@ PC/モバイル同期：
 
 > 💡 **説明**：トレイ版はシステムトレイアイコンを提供し、バックグラウンドで実行できます。デスクトップ版は通常のデスクトップアプリです。Windows: ダブルクリックで実行; macOS: Applicationsフォルダにドラッグ。
 
+> **macOS向けメモ**：macOS が「壊れているため開けません。ゴミ箱に入れる必要があります」と表示する場合、通常はファイル自体が壊れているわけではありません。アプリを Applications フォルダに移動してから実行してください：
+> ```bash
+> xattr -dr com.apple.quarantine /Applications/comigo-desktop.app
+> ```
+
 ### CLI版のワンクリックインストール
 
 ```bash

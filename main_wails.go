@@ -73,7 +73,6 @@ func startComigoForWails(ctx context.Context) error {
 	routers.StartTailscale()
 	cmd.LoadUserPlugins()
 	cmd.AddStoreUrls(cmd.Args)
-	cmd.SetCwdAsScanPathIfNeed()
 	cmd.LoadMetadata()
 	go finishWailsStartupScan(ctx)
 	config.StartOrStopAutoRescan()

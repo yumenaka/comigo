@@ -53,6 +53,11 @@ PC/手机同步：
 > 💡 **说明**：托盘版提供系统托盘图标，可最小化到后台运行；桌面版是普通桌面应用。
 >  Windows 用户双击运行即可，macOS 用户需要将APP拖入 应用程序 文件夹。
 
+> **macOS 提示**：如果系统提示应用“已损坏，无法打开，应该移到废纸篓”，通常不是下载文件真的损坏。将 App 拖入“应用程序”后执行：
+> ```bash
+> xattr -dr com.apple.quarantine /Applications/comigo-desktop.app
+> ```
+
 ### 一键安装(命令行版)
 
 ```bash

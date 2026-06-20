@@ -52,6 +52,11 @@ PC/Mobile Sync:
 
 > 💡 **Note**: Tray version provides system tray icon and can run minimized in background. Desktop version is the plain desktop app. Windows: Double-click to run; macOS: Drag to Applications folder.
 
+> **macOS tip**: If macOS says the app is damaged and should be moved to Trash, the downloaded file is usually not actually broken. Run this after moving the app to Applications:
+> ```bash
+> xattr -dr com.apple.quarantine /Applications/comigo-desktop.app
+> ```
+
 ### Quick Install for CLI
 
 ```bash
