@@ -67,6 +67,8 @@
   "comigo_xyz_description": "在所有设备上看漫画。无论电脑还是手机，Windows还是Linux、MacOS",
   "comigo_xyz_docker_deploy_title": "使用Docker部署：",
   "comigo_xyz_download": "⬇️ 下载",
+  "comigo_xyz_macos_damaged_tip_body": "如果 macOS 提示应用“已损坏，无法打开，应该移到废纸篓”，通常不是下载文件真的损坏。将 App 拖入“应用程序”后执行：",
+  "comigo_xyz_macos_damaged_tip_title": "macOS 应用损坏提示",
   "comigo_xyz_feature_cross_platform": "🌐 跨平台",
   "comigo_xyz_feature_cross_platform_desc": "单个文件，无需安装、支持 Linux、Windows、Mac OS 三大操作系统",
   "comigo_xyz_feature_download": "📥 用法灵活",

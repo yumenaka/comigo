@@ -67,6 +67,8 @@
   "comigo_xyz_description": "Help you read manga on all devices - Whether computer or phone, Windows, Linux,　MacOS",
   "comigo_xyz_docker_deploy_title": "Deploy with Docker:",
   "comigo_xyz_download": "⬇️ Download",
+  "comigo_xyz_macos_damaged_tip_body": "If macOS says the app is damaged and should be moved to Trash, the downloaded file is usually not actually broken. Move the app to Applications, then run:",
+  "comigo_xyz_macos_damaged_tip_title": "macOS app damaged warning",
   "comigo_xyz_feature_cross_platform": "🌐 Cross-platform",
   "comigo_xyz_feature_cross_platform_desc": "Supports Linux, Windows, Mac OS operating systems",
   "comigo_xyz_feature_download": "📥 Flexible Use",

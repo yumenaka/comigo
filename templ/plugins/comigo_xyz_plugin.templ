@@ -150,6 +150,11 @@ templ ComigoXYZPlugin(c echo.Context) {
 						const release = "latest";
 						return \`\${this.proxyBase}/yumenaka/comigo/releases/download/\${release}/\${option.filename}\`;
 					},
+					macOSQuarantineCommand(option) {
+						// 根据 DMG 文件名生成对应 App 的 quarantine 清理命令。
+						const appName = option.filename.includes("comigo-tray") ? "comigo-tray" : "comigo-desktop";
+						return \`xattr -dr com.apple.quarantine /Applications/\${appName}.app\`;
+					},
 					async copyToClipboard(text, index) {
 						try {
 							// 优先使用现代 Clipboard API
@@ -242,6 +247,15 @@ templ ComigoXYZPlugin(c echo.Context) {
 										>
 											<span x-text="i18next.t('comigo_xyz_download')">下载</span>
 										</a>
+										<div
+											x-cloak
+											x-show="system.os === 'MacOS' && selectedOS === 'MacOS' && system.options[system.selected].filename.endsWith('.dmg')"
+											class="text-xs leading-relaxed text-base-content/80 dark:text-white/80"
+										>
+											<p class="font-semibold" x-text="i18next.t('comigo_xyz_macos_damaged_tip_title')"></p>
+											<p class="mt-1" x-text="i18next.t('comigo_xyz_macos_damaged_tip_body')"></p>
+											<code x-text="macOSQuarantineCommand(system.options[system.selected])" class="mt-2 block max-w-full overflow-x-auto rounded bg-black px-2 py-1 font-mono text-white">xattr -dr com.apple.quarantine /Applications/comigo-desktop.app</code>
+										</div>
 									</section>
 								</template>
 							</div>

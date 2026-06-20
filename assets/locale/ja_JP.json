@@ -67,6 +67,8 @@
   "comigo_xyz_description": "すべてのデバイスで漫画を読む - ＰＣでもスマートフォンでも。",
   "comigo_xyz_docker_deploy_title": "Dockerでデプロイ：",
   "comigo_xyz_download": "⬇️ ダウンロード",
+  "comigo_xyz_macos_damaged_tip_body": "macOS が「壊れているため開けません。ゴミ箱に入れる必要があります」と表示する場合、通常はファイル自体が壊れているわけではありません。アプリを Applications フォルダに移動してから実行してください：",
+  "comigo_xyz_macos_damaged_tip_title": "macOS アプリ破損警告について",
   "comigo_xyz_feature_cross_platform": "🌐 クロスプラットフォーム",
   "comigo_xyz_feature_cross_platform_desc": "Linux、Windows、Mac OS のオペレーティングシステムをサポート",
   "comigo_xyz_feature_download": "📥 柔軟な使い方",
