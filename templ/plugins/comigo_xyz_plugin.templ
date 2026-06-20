@@ -6,7 +6,6 @@ import (
 )
 
 // ComigoXYZPlugin 在书架底部添加软件项目首页功能块。需要限定域名的时候：(c.Request().Host == "comigo.xyz" || strings.HasSuffix(c.Request().Host, ".comigo.xyz"))
-// x-init="$nextTick(() => { $el.value = selectedIndex; })" 确保：使用 $nextTick 等待 Alpine.js 完成所有 DOM 更新（包括 x-for 生成的选项）在下一个渲染周期中强制设置 select 元素的值  这样可以保证选项已经生成后再设置默认选中值
 templ ComigoXYZPlugin(c echo.Context) {
 	if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("comigo_xyz") && c.Param("id") == "" {
 		if config.GetCfg().Debug {
@@ -55,9 +54,8 @@ templ ComigoXYZPlugin(c echo.Context) {
 					HeaderTextElement.textContent = i18next.t("comigo_xyz_subtitle");
 				}
 
-				// 固定代理域名
-				const proxyBase = "https://comigo.xyz";
-				//const proxyBase = "http://127.0.0.1:1234";
+				// 使用当前站点做反代，线上是 comigo.xyz，本地测试也是同一路径。
+				const proxyBase = window.location.origin;
 
 				// 检测操作系统（只判断 OS，架构根据 OS 默认设置）
 				function detectSystem() {
@@ -91,142 +89,50 @@ templ ComigoXYZPlugin(c echo.Context) {
 					return { os, arch };
 				}
 
-				// 平台选项按推荐顺序排列：同系统优先托盘版，再桌面版，最后命令行。
-				const platforms = [
+				// 各系统内按托盘版、桌面版、命令行版排序；filename 对齐 make all 的 latest 命名。
+				const systems = [
 					{
 						os: "Windows",
-						arch: "x86_64",
-						type: "tray",
-						label: "Windows x86_64（托盘版）",
-					},
-					{
-						os: "Windows",
-						arch: "arm64",
-						type: "tray",
-						label: "Windows arm64（托盘版）",
-					},
-					{
-						os: "Windows",
-						arch: "x86_64",
-						type: "desktop",
-						label: "Windows x86_64（桌面版）",
-					},
-					{
-						os: "Windows",
-						arch: "arm64",
-						type: "desktop",
-						label: "Windows arm64（桌面版）",
+						selected: 0,
+						options: [
+							{ label: "托盘版 x86_64", filename: "comigo-tray_latest_Windows_x86_64.zip" },
+							{ label: "托盘版 arm64", filename: "comigo-tray_latest_Windows_arm64.zip" },
+							{ label: "桌面版 x86_64", filename: "comigo-desktop_latest_Windows_x86_64.zip" },
+							{ label: "桌面版 arm64", filename: "comigo-desktop_latest_Windows_arm64.zip" },
+							{ label: "命令行版 x86_64", filename: "comi_latest_Windows_x86_64.zip" },
+							{ label: "命令行版 arm64", filename: "comi_latest_Windows_arm64.zip" },
+							{ label: "命令行版 i386", filename: "comi_latest_Windows_i386.zip" },
+						],
 					},
 					{
 						os: "MacOS",
-						arch: "universal",
-						type: "tray",
-						label: "MacOS（托盘版）",
-					},
-					{
-						os: "MacOS",
-						arch: "universal",
-						type: "desktop",
-						label: "MacOS（桌面版）",
-					},
-					{
-						os: "MacOS",
-						arch: "arm64",
-						type: "cli",
-						label: "MacOS arm64（命令行）",
-					},
-					{
-						os: "MacOS",
-						arch: "x86_64",
-						type: "cli",
-						label: "MacOS x86_64（命令行）",
-					},
-					{
-						os: "Windows",
-						arch: "x86_64",
-						type: "cli",
-						label: "Windows x86_64（命令行）",
-					},
-					{
-						os: "Windows",
-						arch: "arm64",
-						type: "cli",
-						label: "Windows arm64（命令行）",
+						selected: 0,
+						options: [
+							{ label: "托盘版 universal", filename: "comigo-tray_latest_MacOS_universal.dmg" },
+							{ label: "桌面版 universal", filename: "comigo-desktop_latest_MacOS_universal.dmg" },
+							{ label: "命令行版 arm64", filename: "comi_latest_MacOS_arm64.tar.gz" },
+							{ label: "命令行版 x86_64", filename: "comi_latest_MacOS_x86_64.tar.gz" },
+						],
 					},
 					{
 						os: "Linux",
-						arch: "x86_64",
-						type: "tray",
-						label: "Linux x86_64（托盘版）",
-					},
-					{
-						os: "Linux",
-						arch: "arm64",
-						type: "tray",
-						label: "Linux arm64（托盘版）",
-					},
-					{
-						os: "Linux",
-						arch: "x86_64",
-						type: "desktop",
-						label: "Linux x86_64（桌面版）",
-					},
-					{
-						os: "Linux",
-						arch: "arm64",
-						type: "desktop",
-						label: "Linux arm64（桌面版）",
-					},
-					{
-						os: "Linux",
-						arch: "x86_64",
-						type: "cli",
-						label: "Linux x86_64（命令行）",
-					},
-					{
-						os: "Linux",
-						arch: "arm64",
-						type: "cli",
-						label: "Linux arm64（命令行）",
-					},
-					{
-						os: "Linux",
-						arch: "armv7",
-						type: "cli",
-						label: "Linux armv7（命令行）",
+						selected: 0,
+						options: [
+							{ label: "托盘版 x86_64", filename: "comigo-tray_latest_Linux_x86_64.tar.gz" },
+							{ label: "托盘版 arm64", filename: "comigo-tray_latest_Linux_arm64.tar.gz" },
+							{ label: "桌面版 x86_64", filename: "comigo-desktop_latest_Linux_x86_64.tar.gz" },
+							{ label: "桌面版 arm64", filename: "comigo-desktop_latest_Linux_arm64.tar.gz" },
+							{ label: "命令行版 x86_64", filename: "comi_latest_Linux_x86_64.tar.gz" },
+							{ label: "命令行版 arm64", filename: "comi_latest_Linux_arm64.tar.gz" },
+							{ label: "命令行版 armv7", filename: "comi_latest_Linux_armv7.tar.gz" },
+							{ label: "命令行版 i386", filename: "comi_latest_Linux_i386.tar.gz" },
+							{ label: "Debian/Ubuntu amd64", filename: "comi_latest_amd64.deb" },
+							{ label: "Debian/Ubuntu arm64", filename: "comi_latest_arm64.deb" },
+						],
 					},
 				];
 
-				// 检测当前系统并选择默认平台
 				const currentSystem = detectSystem();
-				let defaultIndex = 0;
-
-				if (currentSystem.os === "Windows") {
-					// Windows 默认选择托盘版
-					defaultIndex = platforms.findIndex(
-						(p) =>
-							p.os === "Windows" &&
-							p.arch === currentSystem.arch &&
-							p.type === "tray",
-					);
-				} else if (currentSystem.os === "MacOS") {
-					// MacOS 默认选择托盘版（通用版本，不区分架构）
-					defaultIndex = platforms.findIndex(
-						(p) => p.os === "MacOS" && p.type === "tray",
-					);
-				} else {
-					// Linux 也存在托盘版时默认优先选托盘版
-					defaultIndex = platforms.findIndex(
-						(p) =>
-							p.os === "Linux" &&
-							p.arch === currentSystem.arch &&
-							p.type === "tray",
-					);
-				}
-
-				// 如果找不到匹配的，使用第一个
-				const selectedIndex = defaultIndex >= 0 ? defaultIndex : 0;
-				//console.log(`Comigo.xyz插件: 检测到系统 ${currentSystem.os} ${currentSystem.arch}，默认选择平台索引 ${selectedIndex}`,);
 				// 创建主页功能块
 				const homePageBlock = document.createElement("div");
 				homePageBlock.className =
@@ -234,38 +140,15 @@ templ ComigoXYZPlugin(c echo.Context) {
 				homePageBlock.setAttribute(
 					"x-data",
 					`{
-					selectedIndex: ${selectedIndex},
-					platforms: ${JSON.stringify(platforms)},
+					systems: ${JSON.stringify(systems)},
+					currentSystem: ${JSON.stringify(currentSystem)},
+					selectedOS: ${JSON.stringify(currentSystem.os)},
 					version: ${JSON.stringify(version)},
 					proxyBase: ${JSON.stringify(proxyBase)},
 					copiedIndex: -1,
-					get selectedPlatform() {
-						return this.platforms[this.selectedIndex] || this.platforms[0];
-					},
-					getDownloadUrl() {
-						const platform = this.selectedPlatform;
+					getDownloadUrl(option) {
 						const release = "latest";
-						let filename = "";
-
-						if (platform.type === "cli") {
-							// Windows 命令行版是 zip，其他命令行版是 tar.gz。
-							if (platform.os === "Windows") {
-								filename = \`comi_\${release}_Windows_\${platform.arch}.zip\`;
-							} else {
-								filename = \`comi_\${release}_\${platform.os}_\${platform.arch}.tar.gz\`;
-							}
-						} else {
-							// 托盘版与 Wails 桌面版分别使用当前 release 构建产物的前缀。
-							const appName = platform.type === "tray" ? "comigo-tray" : "comigo-desktop";
-							if (platform.os === "Windows") {
-								filename = \`\${appName}_\${release}_Windows_\${platform.arch}.zip\`;
-							} else if (platform.os === "MacOS") {
-								filename = \`\${appName}_\${release}_MacOS_universal.dmg\`;
-							} else {
-								filename = \`\${appName}_\${release}_Linux_\${platform.arch}.tar.gz\`;
-							}
-						}
-						return \`\${this.proxyBase}/yumenaka/comigo/releases/download/\${release}/\${filename}\`;
+						return \`\${this.proxyBase}/yumenaka/comigo/releases/download/\${release}/\${option.filename}\`;
 					},
 					async copyToClipboard(text, index) {
 						try {
@@ -333,25 +216,34 @@ templ ComigoXYZPlugin(c echo.Context) {
 								<p class="text-base text-base-content dark:text-white" x-text="i18next.t('comigo_xyz_description')">在所有设备上看漫画。无论电脑还是手机，Windows还是Linux、MacOS</p>
 							</div>
 							<!-- 下载区域 -->
-							<div class="flex flex-col md:flex-row justify-center items-stretch md:items-center gap-4 mt-6 w-full min-w-0">
-								<div class="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto min-w-0">
-									<select
-										x-model.number="selectedIndex"
-										x-init="$nextTick(() => { $el.value = selectedIndex; })"
-										class="panel-control w-full md:w-auto min-w-0 px-4 py-3 border bg-base-100 border rounded-lg text-base-content focus:outline-none focus:ring-2 focus:ring-primary"
+							<div class="comigo_xyz_download_grid gap-4 mt-6 w-full min-w-0">
+								<template x-for="system in systems" :key="system.os">
+									<section
+										@click="selectedOS = system.os"
+										@keydown.enter.prevent="selectedOS = system.os"
+										@keydown.space.prevent="selectedOS = system.os"
+										tabindex="0"
+										class="comigo_xyz_download_panel panel-surface flex flex-col gap-3 bg-base-100 border rounded-lg p-3 min-w-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary"
+										:class="system.os === selectedOS ? 'comigo_xyz_download_panel_active border-primary ring-2 ring-primary' : 'border-gray-500 dark:border-gray-200'"
 									>
-										<template x-for="(platform, index) in platforms" :key="index">
-											<option :value="index" x-text="platform.label"></option>
-										</template>
-									</select>
-									<a
-										:href="getDownloadUrl()"
-										target="_blank"
-										class="panel-control w-full md:w-auto px-6 py-3 border bg-green-500 text-black dark:text-white rounded-lg font-semibold text-center"
-									>
-										<span x-text="i18next.t('comigo_xyz_download')">⬇️ 下载</span>
-									</a>
-								</div>
+										<h3 class="text-lg font-semibold text-base-content dark:text-white" x-text="system.os"></h3>
+										<select
+											x-model.number="system.selected"
+											class="panel-control w-full min-w-0 px-3 py-2 border bg-base-100 rounded-lg text-base-content focus:outline-none focus:ring-2 focus:ring-primary"
+										>
+											<template x-for="(option, index) in system.options" :key="option.filename">
+												<option :value="index" x-text="option.label"></option>
+											</template>
+										</select>
+										<a
+											:href="getDownloadUrl(system.options[system.selected])"
+											target="_blank"
+											class="panel-control self-center inline-flex items-center justify-center min-w-28 max-w-full px-4 py-2 border bg-green-500 text-black dark:text-white rounded-lg font-semibold text-center"
+										>
+											<span x-text="i18next.t('comigo_xyz_download')">下载</span>
+										</a>
+									</section>
+								</template>
 							</div>
 							<!-- 一键安装命令行版 -->
 							<div class="mt-8">
@@ -533,6 +425,23 @@ templ ComigoXYZPlugin(c echo.Context) {
 			/* 确保主页功能块样式正确显示 */
 			.comigo_plugin {
 				overflow: visible !important;
+			}
+			.comigo_xyz_download_grid {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr);
+			}
+			.comigo_xyz_download_panel {
+				transition: transform 160ms ease, box-shadow 160ms ease;
+			}
+			.comigo_xyz_download_panel_active {
+				transform: scale(1.06);
+				box-shadow: 0 0 24px color-mix(in srgb, var(--primary, #ff76bd) 45%, transparent);
+				z-index: 1;
+			}
+			@media (min-width: 768px) {
+				.comigo_xyz_download_grid {
+					grid-template-columns: repeat(3, minmax(0, 1fr));
+				}
 			}
 		</style>
 	}
