@@ -35,14 +35,22 @@ PC/手机同步：
 
 ## 安装指南
 
-### 托盘版（推荐）
+### 图形界面版（推荐）
 
-| 系统 | 下载链接 |
-|------|---------|
-| Windows 64位 | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
-| macOS (Intel/Apple芯片) | [Comigo_latest.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo_latest.dmg) |
+| 版本 | 系统 | 下载链接 |
+|------|------|---------|
+| 托盘版 | Windows 64位 | [comigo-tray_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-tray_latest_Windows_x86_64.zip) |
+| 托盘版 | Windows ARM64 | [comigo-tray_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-tray_latest_Windows_arm64.zip) |
+| 托盘版 | macOS (Intel/Apple芯片) | [comigo-tray_latest_MacOS_universal.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-tray_latest_MacOS_universal.dmg) |
+| 托盘版 | Linux 64位 | [comigo-tray_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-tray_latest_Linux_x86_64.tar.gz) |
+| 托盘版 | Linux ARM64 | [comigo-tray_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-tray_latest_Linux_arm64.tar.gz) |
+| 桌面版 | Windows 64位 | [comigo-desktop_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Windows_x86_64.zip) |
+| 桌面版 | Windows ARM64 | [comigo-desktop_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Windows_arm64.zip) |
+| 桌面版 | macOS (Intel/Apple芯片) | [comigo-desktop_latest_MacOS_universal.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_MacOS_universal.dmg) |
+| 桌面版 | Linux 64位 | [comigo-desktop_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Linux_x86_64.tar.gz) |
+| 桌面版 | Linux ARM64 | [comigo-desktop_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Linux_arm64.tar.gz) |
 
-> 💡 **说明**：托盘版提供系统托盘图标，可最小化到后台运行。
+> 💡 **说明**：托盘版提供系统托盘图标，可最小化到后台运行；桌面版是普通桌面应用。
 >  Windows 用户双击运行即可，macOS 用户需要将APP拖入 应用程序 文件夹。
 
 ### 一键安装(命令行版)
@@ -63,12 +71,14 @@ go install github.com/yumenaka/comigo/cmd/comi@latest
 | 系统类型 | 下载链接 |
 |---------|---------|
 | Windows 64位 | [comi_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_x86_64.zip) |
-| Windows ARM | [comi_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_arm64.zip) |
+| Windows ARM64 | [comi_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_arm64.zip) |
+| Windows 32位 | [comi_latest_Windows_i386.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_i386.zip) |
 | macOS Intel | [comi_latest_MacOS_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_x86_64.tar.gz) |
 | macOS Apple芯片 | [comi_latest_MacOS_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz) |
 | Linux 64位 | [comi_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_x86_64.tar.gz) |
 | Linux ARM64 | [comi_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_arm64.tar.gz) |
 | Linux ARM32 | [comi_latest_Linux_armv7.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_armv7.tar.gz) |
+| Linux 32位 | [comi_latest_Linux_i386.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_i386.tar.gz) |
 | Debian/Ubuntu 64位 | [comi_latest_amd64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_amd64.deb) |
 | Debian/Ubuntu ARM64 | [comi_latest_arm64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_arm64.deb) |
 

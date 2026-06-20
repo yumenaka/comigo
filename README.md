@@ -37,12 +37,20 @@ PC/Mobile Sync:
 
 ### GUI Version (Recommended for Beginners)
 
-| System | Download |
-|--------|----------|
-| Windows 64-bit | [comigo_latest_Windows_x86_64_full.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo_latest_Windows_x86_64_full.zip) |
-| macOS (Intel/Apple Silicon) | [Comigo_latest.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/Comigo_latest.dmg) |
+| Version | System | Download |
+|---------|--------|----------|
+| Tray | Windows 64-bit | [comigo-tray_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-tray_latest_Windows_x86_64.zip) |
+| Tray | Windows ARM64 | [comigo-tray_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-tray_latest_Windows_arm64.zip) |
+| Tray | macOS (Intel/Apple Silicon) | [comigo-tray_latest_MacOS_universal.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-tray_latest_MacOS_universal.dmg) |
+| Tray | Linux 64-bit | [comigo-tray_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-tray_latest_Linux_x86_64.tar.gz) |
+| Tray | Linux ARM64 | [comigo-tray_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-tray_latest_Linux_arm64.tar.gz) |
+| Desktop | Windows 64-bit | [comigo-desktop_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Windows_x86_64.zip) |
+| Desktop | Windows ARM64 | [comigo-desktop_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Windows_arm64.zip) |
+| Desktop | macOS (Intel/Apple Silicon) | [comigo-desktop_latest_MacOS_universal.dmg](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_MacOS_universal.dmg) |
+| Desktop | Linux 64-bit | [comigo-desktop_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Linux_x86_64.tar.gz) |
+| Desktop | Linux ARM64 | [comigo-desktop_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Linux_arm64.tar.gz) |
 
-> 💡 **Note**: GUI version provides system tray icon, can run minimized in background. Windows: Double-click to run; macOS: Drag to Applications folder.
+> 💡 **Note**: Tray version provides system tray icon and can run minimized in background. Desktop version is the plain desktop app. Windows: Double-click to run; macOS: Drag to Applications folder.
 
 ### Quick Install for CLI
 
@@ -62,12 +70,14 @@ go install github.com/yumenaka/comigo/cmd/comi@latest
 | System | Download |
 |--------|----------|
 | Windows 64-bit | [comi_latest_Windows_x86_64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_x86_64.zip) |
-| Windows ARM | [comi_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_arm64.zip) |
+| Windows ARM64 | [comi_latest_Windows_arm64.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_arm64.zip) |
+| Windows 32-bit | [comi_latest_Windows_i386.zip](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Windows_i386.zip) |
 | macOS Intel | [comi_latest_MacOS_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_x86_64.tar.gz) |
 | macOS Apple Silicon | [comi_latest_MacOS_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_MacOS_arm64.tar.gz) |
 | Linux 64-bit | [comi_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_x86_64.tar.gz) |
 | Linux ARM64 | [comi_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_arm64.tar.gz) |
 | Linux ARM32 | [comi_latest_Linux_armv7.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_armv7.tar.gz) |
+| Linux 32-bit | [comi_latest_Linux_i386.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_Linux_i386.tar.gz) |
 | Debian/Ubuntu 64-bit | [comi_latest_amd64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_amd64.deb) |
 | Debian/Ubuntu ARM64 | [comi_latest_arm64.deb](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comi_latest_arm64.deb) |
 

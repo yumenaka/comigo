@@ -33,7 +33,7 @@ func main() {
 
 	app := NewApp()
 	err := wails.Run(&options.App{
-		Title:  "Comigo",
+		Title:  wailsWindowTitle(),
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{
@@ -57,6 +57,11 @@ func main() {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+// wailsWindowTitle 生成桌面窗口标题，保留完整版本便于用户确认当前构建。
+func wailsWindowTitle() string {
+	return "Comigo " + config.GetVersion()
 }
 
 // startComigoForWails 启动桌面壳内嵌的 Comigo Web 服务。
