@@ -188,7 +188,7 @@ endef
 define build_desktop_windows
 $1: wails-prepare wails-frontend
 	@rm -rf build/bin $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2 $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2.zip
-	wails build $(WAILS_BUILD_FLAGS) -platform windows/$3 -s -nopackage -o $(DESKTOP_NAME).exe -ldflags "$(LDFLAGS)"
+	wails build $(WAILS_BUILD_FLAGS) -platform windows/$3 -s -o $(DESKTOP_NAME).exe -ldflags "$(LDFLAGS)"
 	@mkdir -p $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2
 	cp build/bin/$(DESKTOP_NAME).exe $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2/$(DESKTOP_NAME).exe
 	zip -m -r -j -9 $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2.zip $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2

@@ -88,7 +88,7 @@ export VERSION
 wails-prepare:
 	@mkdir -p build/windows bin
 	@cp assets/icon.png build/appicon.png
-	@cp icon.ico build/windows/icon.ico
+	@rm -f build/windows/icon.ico
 
 wails-dev: wails-prepare
 	@wails dev -m -nosyncgomod -skipembedcreate
