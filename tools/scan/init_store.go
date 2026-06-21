@@ -203,80 +203,14 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 	}
 
 	// 如果书库URL是一个文件夹，使用 HandleDirectory（不支持扫描单个文件）进行扫描
-	rootDirectoryNode, foundDirs, foundFiles, err := HandleDirectory(storePathAbs, 0)
+	rootDirectoryNode, _, foundFiles, err := HandleDirectory(storePathAbs, 0)
 	if err != nil {
 		return err
 	}
 
 	var newBookList []*model.Book
 
-	// 处理根目录
-	if rootDirectoryNode.Files != nil {
-		dirInfo, statErr := os.Stat(storePathAbs)
-		if statErr != nil {
-			return statErr
-		}
-		previousBook, skip := prepareBookPathForScan(storePathAbs, storePathAbs, dirInfo.Size(), dirInfo.ModTime())
-		if !skip {
-			book, err := scanDirGetBook(storePathAbs, storePathAbs, 0)
-			if err != nil {
-				restorePreviousBookAfterScanFailure(previousBook)
-				logger.Infof(locale.GetString("log_skip_to_scan_root_directory"), storePathAbs, err)
-			} else {
-				mergePreviousBookState(book, previousBook)
-				newBookList = append(newBookList, book)
-			}
-		}
-	}
-
-	// 处理子目录
-	for _, dir := range foundDirs {
-		absDir, err := filepath.Abs(dir)
-		if err != nil {
-			logger.Infof(locale.GetString("log_failed_to_get_absolute_path_scan"), err)
-			absDir = storePath
-		}
-
-		// 计算路径深度
-		relPath, err := filepath.Rel(storePathAbs, absDir)
-		if err != nil {
-			logger.Infof(locale.GetString("log_failed_to_get_relative_path"), err)
-			continue
-		}
-		depth := strings.Count(relPath, string(os.PathSeparator))
-
-		// 检查是否超过最大深度限制
-		if cfg.GetMaxScanDepth() >= 0 && depth > cfg.GetMaxScanDepth() {
-			logger.Infof(locale.GetString("exceeds_maximum_depth")+" %d, base: %s, scan: %s", cfg.GetMaxScanDepth(), storePathAbs, absDir)
-			continue
-		}
-
-		// 检查是否在忽略列表中
-		if IsSkipDir(absDir) {
-			logger.Infof(locale.GetString("skip_path")+" %s", absDir)
-			continue
-		}
-
-		dirInfo, statErr := os.Stat(absDir)
-		if statErr != nil {
-			logger.Infof(locale.GetString("log_failed_to_get_file_info_scan"), absDir, statErr)
-			continue
-		}
-		previousBook, skip := prepareBookPathForScan(storePathAbs, absDir, dirInfo.Size(), dirInfo.ModTime())
-		if skip {
-			continue
-		}
-
-		// 扫描目录
-		book, err := scanDirGetBook(absDir, storePathAbs, depth)
-		if err != nil {
-			restorePreviousBookAfterScanFailure(previousBook)
-			logger.Infof(locale.GetString("log_skip_to_scan_directory"), absDir, err)
-			continue
-		}
-		mergePreviousBookState(book, previousBook)
-		newBookList = append(newBookList, book)
-	}
+	appendLocalDirBooks(&newBookList, rootDirectoryNode, storePathAbs)
 
 	// 处理文件
 	for _, file := range foundFiles {
@@ -330,6 +264,53 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 	}
 	AddBooksToStore(newBookList)
 	return nil
+}
+
+// appendLocalDirBooks 复用 HandleDirectory 已经读到的文件列表，避免本地目录扫描阶段重复 ReadDir。
+func appendLocalDirBooks(newBookList *[]*model.Book, node DirNode, storePathAbs string) {
+	appendLocalDirBook(newBookList, node, storePathAbs)
+	for _, subNode := range node.SubDirs {
+		appendLocalDirBooks(newBookList, subNode, storePathAbs)
+	}
+}
+
+// appendLocalDirBook 处理单个本地目录节点，并保留旧书签迁移与失败回滚逻辑。
+func appendLocalDirBook(newBookList *[]*model.Book, node DirNode, storePathAbs string) {
+	depth, err := localScanDepth(storePathAbs, node.Path)
+	if err != nil {
+		logger.Infof(locale.GetString("log_failed_to_get_relative_path"), err)
+		return
+	}
+	if cfg.GetMaxScanDepth() >= 0 && depth > cfg.GetMaxScanDepth() {
+		logger.Infof(locale.GetString("exceeds_maximum_depth")+" %d, base: %s, scan: %s", cfg.GetMaxScanDepth(), storePathAbs, node.Path)
+		return
+	}
+	dirInfo, statErr := os.Stat(node.Path)
+	if statErr != nil {
+		logger.Infof(locale.GetString("log_failed_to_get_file_info_scan"), node.Path, statErr)
+		return
+	}
+	previousBook, skip := prepareBookPathForScan(storePathAbs, node.Path, dirInfo.Size(), dirInfo.ModTime())
+	if skip {
+		return
+	}
+	book, err := bookFromLocalDirNode(node, storePathAbs, depth)
+	if err != nil {
+		restorePreviousBookAfterScanFailure(previousBook)
+		logger.Infof(locale.GetString("log_skip_to_scan_directory"), node.Path, err)
+		return
+	}
+	mergePreviousBookState(book, previousBook)
+	*newBookList = append(*newBookList, book)
+}
+
+// localScanDepth 计算与旧逻辑一致的扫描深度：顶层文件夹为 0，每多一级子目录加 1。
+func localScanDepth(storePathAbs string, path string) (int, error) {
+	relPath, err := filepath.Rel(storePathAbs, path)
+	if err != nil {
+		return 0, err
+	}
+	return strings.Count(relPath, string(os.PathSeparator)), nil
 }
 
 // initRemoteStore 扫描远程书库（WebDAV 等）

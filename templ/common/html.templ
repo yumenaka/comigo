@@ -42,6 +42,8 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScripts []string) 
 					window.ComiGoForceRandomTheme = false;
 				</script>
 			}
+			// 内联脚本会在 main.js 前执行，路径工具必须先于页面内容注入。
+			@templ.Raw(assets.GetBasePathScript())
 			@templ.Raw(assets.GetCSS(c.QueryParam("static") != ""))
 		</head>
 		<!-- x-bind: Alpine.js的语法，随机模板会解析为实际生效主题 -->

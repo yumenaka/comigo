@@ -6,11 +6,11 @@ import (
 	"os/signal"
 	"path"
 	"syscall"
-	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -45,22 +45,9 @@ func SetShutdownHandler() {
 		}
 		logger.Infof("%s", locale.GetString("clear_temp_file_completed"))
 	}
-	// 上下文用于通知服务器它有 10 秒的时间来完成它当前正在处理的请求
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	// 只能通过http.Server.Shutdown()/http.Server.Close()等http包里的方法去实现,没办法自己实现.
-	// 因为这样的设计即使你给自定义Server接口的实现类设计了Shutdown()方法,也调用不到.
-	// 本质上还是因为从端口启动开始,后续的所有工作都是http包来完成的,我们无法干涉这其中的步骤
-	if config.Server == nil {
-		logger.Info("Comigo Server exit.")
-		return
-	}
-	if err := config.Server.Shutdown(ctx); err != nil {
-		// Shutdown 失败时只记录并尝试强制关闭，避免信号处理路径直接结束宿主进程。
+	// 统一走 routers.StopWebServer，确保 SSE、Tailscale 和 HTTP Server 按同一套流程关闭。
+	if err := routers.StopWebServer(); err != nil {
 		logger.Infof(locale.GetString("err_server_shutdown_failed")+": %v", err)
-		if closeErr := config.Server.Close(); closeErr != nil {
-			logger.Infof(locale.GetString("err_server_shutdown_failed")+": %v", closeErr)
-		}
 	}
 	logger.Info("Comigo Server exit.")
 }

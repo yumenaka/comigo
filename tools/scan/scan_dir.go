@@ -62,6 +62,27 @@ func scanDirGetBook(dirPath string, storePath string, depth int) (*model.Book, e
 	return newBook, nil
 }
 
+// bookFromLocalDirNode 将已递归扫描出的目录节点转成书籍，避免同一个目录再次 os.ReadDir。
+func bookFromLocalDirNode(node DirNode, storePath string, depth int) (*model.Book, error) {
+	dirInfo, err := os.Stat(node.Path)
+	if err != nil {
+		return nil, err
+	}
+	newBook, err := model.NewBook(node.Path, dirInfo.ModTime(), dirInfo.Size(), storePath, depth, model.TypeDir)
+	if err != nil {
+		return nil, err
+	}
+	for _, page := range node.Files {
+		if !IsSupportMedia(page.Name) {
+			continue
+		}
+		page.Url = "/api/get-file?id=" + newBook.BookID + "&filename=" + url.QueryEscape(page.Name)
+		newBook.PageInfos = append(newBook.PageInfos, page)
+	}
+	newBook.SortPages("default")
+	return newBook, nil
+}
+
 // scanRemoteDirGetBook 扫描远程目录，并返回对应书籍
 func scanRemoteDirGetBook(fs vfs.FileSystem, dirPath string, storeURL string, depth int) (*model.Book, error) {
 	// 获取目录信息

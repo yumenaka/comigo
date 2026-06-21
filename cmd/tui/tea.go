@@ -283,13 +283,11 @@ func Run() error {
 	}
 
 	if shouldBypassTUI(os.Args) {
-		runWithoutTUI()
-		return nil
+		return runWithoutTUI()
 	}
 
 	if !term.IsTerminal(int(os.Stdout.Fd())) {
-		runWithoutTUI()
-		return nil
+		return runWithoutTUI()
 	}
 
 	logBuffer := NewLogBuffer()
@@ -353,9 +351,11 @@ func shouldBypassTUI(args []string) bool {
 }
 
 // runWithoutTUI 在非终端环境下（如管道、重定向）退回普通服务模式启动。
-func runWithoutTUI() {
+func runWithoutTUI() error {
 	cmd.Execute()
-	routers.StartWebServer()
+	if err := routers.StartWebServer(); err != nil {
+		return err
+	}
 	routers.StartTailscale()
 	cmd.LoadUserPlugins()
 	cmd.AddStoreUrls(cmd.Args)
@@ -368,6 +368,7 @@ func runWithoutTUI() {
 	cmd.ShowQRCode()
 	cmd.OpenReaderBrowserIfNeeded()
 	cmd.SetShutdownHandler()
+	return nil
 }
 
 // tickCmd 返回一个定时 Cmd，每 tickInterval 触发一次数据刷新。
@@ -387,7 +388,9 @@ func startBackendCmd() tea.Cmd {
 		}()
 		// Comigo 后台服务启动
 		cmd.Execute()
-		routers.StartWebServer()
+		if err := routers.StartWebServer(); err != nil {
+			return backendErrorMsg{err: err}
+		}
 		routers.StartTailscale()
 		cmd.LoadUserPlugins()
 		cmd.AddStoreUrls(cmd.Args)

@@ -85,6 +85,86 @@ func TestHandleDirectory_ShouldCollectSupportedFiles(t *testing.T) {
 	}
 }
 
+func TestBookFromLocalDirNodeUsesScannedFiles(t *testing.T) {
+	tmp := t.TempDir()
+	bookDir := filepath.Join(tmp, "book")
+	if err := os.MkdirAll(bookDir, 0o755); err != nil {
+		t.Fatalf("mkdir bookDir: %v", err)
+	}
+
+	oldStore := model.IStore
+	model.IStore = &store.StoreInRam{}
+	t.Cleanup(func() {
+		model.IStore = oldStore
+	})
+
+	node := DirNode{
+		Name: "book",
+		Path: bookDir,
+		Files: []model.PageInfo{{
+			Name:    "001.jpg",
+			Path:    filepath.Join(bookDir, "001.jpg"),
+			PageNum: 1,
+		}, {
+			Name:    "archive.zip",
+			Path:    filepath.Join(bookDir, "archive.zip"),
+			PageNum: 2,
+		}},
+	}
+	InitConfig(&testCfgScan{
+		supportMediaType: []string{".jpg"},
+		supportFileType:  []string{".zip"},
+	})
+	book, err := bookFromLocalDirNode(node, tmp, 0)
+	if err != nil {
+		t.Fatalf("bookFromLocalDirNode error: %v", err)
+	}
+	if len(book.PageInfos) != 1 || book.PageInfos[0].Name != "001.jpg" || book.PageInfos[0].Url == "" {
+		t.Fatalf("PageInfos = %+v, want only media page with generated URL", book.PageInfos)
+	}
+	if book.Type != model.TypeDir || book.BookPath != bookDir {
+		t.Fatalf("book = %+v, want dir book at %s", book.BookInfo, bookDir)
+	}
+}
+
+func TestAppendLocalDirBooksSkipsOverMaxDepthNode(t *testing.T) {
+	tmp := t.TempDir()
+	nested := filepath.Join(tmp, "a", "b")
+	if err := os.MkdirAll(nested, 0o755); err != nil {
+		t.Fatalf("mkdir nested: %v", err)
+	}
+
+	oldStore := model.IStore
+	model.IStore = &store.StoreInRam{}
+	t.Cleanup(func() {
+		model.IStore = oldStore
+	})
+
+	InitConfig(&testCfgScan{
+		supportMediaType: []string{".jpg"},
+		maxScanDepth:     0,
+	})
+	var books []*model.Book
+	appendLocalDirBooks(&books, DirNode{
+		Name: "a",
+		Path: filepath.Join(tmp, "a"),
+		SubDirs: []DirNode{{
+			Name: "b",
+			Path: nested,
+			Files: []model.PageInfo{{
+				Name: "001.jpg",
+				Path: filepath.Join(nested, "001.jpg"),
+			}},
+		}},
+	}, tmp)
+
+	for _, book := range books {
+		if book.BookPath == nested {
+			t.Fatalf("unexpected nested book beyond max depth: %+v", book.BookInfo)
+		}
+	}
+}
+
 func TestInitStoreRescansChangedDirectoryBook(t *testing.T) {
 	tmp := t.TempDir()
 	root := filepath.Join(tmp, "library")
