@@ -20,8 +20,14 @@ templ Toast() {
 			if (!toastContainer) return;
 			const header = document.getElementById("header");
 			const rect = header?.getBoundingClientRect();
-			const opacity = header ? Number.parseFloat(getComputedStyle(header).opacity || "1") : 0;
-			const headerVisible = rect && rect.bottom > 0 && rect.top < window.innerHeight && opacity > 0.05;
+			const opacity = header
+				? Number.parseFloat(getComputedStyle(header).opacity || "1")
+				: 0;
+			const headerVisible =
+				rect &&
+				rect.bottom > 0 &&
+				rect.top < window.innerHeight &&
+				opacity > 0.05;
 			toastContainer.style.top = `${headerVisible ? Math.ceil(rect.bottom + 8) : 12}px`;
 		}
 

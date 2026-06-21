@@ -17,8 +17,13 @@ import (
 func TestHtmlLoadsPathHelpersBeforePageScripts(t *testing.T) {
 	cfg := config.GetCfg()
 	oldBasePath := cfg.BasePath
-	t.Cleanup(func() { cfg.BasePath = oldBasePath })
+	oldDebug := cfg.Debug
+	t.Cleanup(func() {
+		cfg.BasePath = oldBasePath
+		cfg.Debug = oldDebug
+	})
 	cfg.BasePath = "/proxy"
+	cfg.Debug = true
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/proxy/settings", nil)
@@ -47,5 +52,8 @@ func TestHtmlLoadsPathHelpersBeforePageScripts(t *testing.T) {
 	}
 	if !strings.Contains(output, `window.ComiGoBasePath = "/proxy";`) {
 		t.Fatalf("BasePath script did not include normalized base path")
+	}
+	if !strings.Contains(output, `window.ComiGoDebug = true;`) {
+		t.Fatalf("Debug script did not include server debug flag")
 	}
 }

@@ -417,12 +417,17 @@ function getTrackedPercent(image) {
     return clamp((window.innerHeight / 2 - rect.top) / rect.height, 0, 1)
 }
 
+// isScrollSyncDebug 使用服务端 Debug 开关，避免本地持久化状态绕过设置页。
+function isScrollSyncDebug() {
+    return window.ComiGoDebug === true
+}
+
 // 解析当前屏幕中线所在的图片及其阅读百分比
 function resolveCenterTrackedPage() {
     const centerY = window.innerHeight / 2
     const pageImages = getScrollPageImages()
     if (pageImages.length === 0) {
-        if (Alpine.store('global').debugMode) {
+        if (isScrollSyncDebug()) {
             console.log('[scroll-sync] resolveCenterTrackedPage: 未找到带 data-scroll-page-num 的图片')
         }
         return null
@@ -524,7 +529,7 @@ function sendScrollSyncData(tracked) {
         trigger_source: triggerSource,
     }
 
-    if (Alpine.store('global').debugMode) {
+    if (isScrollSyncDebug()) {
         console.log('[scroll-sync] sendScrollSyncData:', syncData)
     }
 
@@ -541,7 +546,7 @@ function applyTrackedPage(tracked) {
         return
     }
 
-    const debugMode = Alpine.store('global').debugMode
+    const debugMode = isScrollSyncDebug()
 
     if (!scrollSyncState.hasInitializedCenterTracking) {
         scrollSyncState.hasInitializedCenterTracking = true
@@ -711,7 +716,7 @@ function initScrollModeSync() {
         pageType: 'scroll',
         getBookId: () => book?.id,
         getWsConfig: () => SCROLL_WS_CONFIG,
-        isDebug: () => Alpine.store('global').debugMode,
+        isDebug: isScrollSyncDebug,
         onConnect() {
             // WS 连接就绪后，延迟发送一次当前位置（绕过 applyTrackedPage 的阈值逻辑）
             setTimeout(() => {
@@ -736,7 +741,7 @@ function initScrollModeSync() {
                 } catch (error) {
                     console.error('卷轴阅读 WebSocket 同步数据解析失败:', error)
                 }
-            } else if (msg.type === 'heartbeat' && Alpine.store('global').debugMode) {
+            } else if (msg.type === 'heartbeat' && isScrollSyncDebug()) {
                 console.log('收到心跳消息')
             }
         },

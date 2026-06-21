@@ -95,39 +95,102 @@ templ ComigoXYZPlugin(c echo.Context) {
 						os: "Windows",
 						selected: 0,
 						options: [
-							{ label: "托盘版 x86_64", filename: "comigo-tray_latest_Windows_x86_64.zip" },
-							{ label: "托盘版 arm64", filename: "comigo-tray_latest_Windows_arm64.zip" },
-							{ label: "桌面版 x86_64", filename: "comigo-desktop_latest_Windows_x86_64.zip" },
-							{ label: "桌面版 arm64", filename: "comigo-desktop_latest_Windows_arm64.zip" },
-							{ label: "命令行版 x86_64", filename: "comi_latest_Windows_x86_64.zip" },
-							{ label: "命令行版 arm64", filename: "comi_latest_Windows_arm64.zip" },
-							{ label: "命令行版 i386", filename: "comi_latest_Windows_i386.zip" },
+							{
+								label: "托盘版 x86_64",
+								filename: "comigo-tray_latest_Windows_x86_64.zip",
+							},
+							{
+								label: "托盘版 arm64",
+								filename: "comigo-tray_latest_Windows_arm64.zip",
+							},
+							{
+								label: "桌面版 x86_64",
+								filename: "comigo-desktop_latest_Windows_x86_64.zip",
+							},
+							{
+								label: "桌面版 arm64",
+								filename: "comigo-desktop_latest_Windows_arm64.zip",
+							},
+							{
+								label: "命令行版 x86_64",
+								filename: "comi_latest_Windows_x86_64.zip",
+							},
+							{
+								label: "命令行版 arm64",
+								filename: "comi_latest_Windows_arm64.zip",
+							},
+							{
+								label: "命令行版 i386",
+								filename: "comi_latest_Windows_i386.zip",
+							},
 						],
 					},
 					{
 						os: "MacOS",
 						selected: 0,
 						options: [
-							{ label: "托盘版 universal", filename: "comigo-tray_latest_MacOS_universal.dmg" },
-							{ label: "桌面版 universal", filename: "comigo-desktop_latest_MacOS_universal.dmg" },
-							{ label: "命令行版 arm64", filename: "comi_latest_MacOS_arm64.tar.gz" },
-							{ label: "命令行版 x86_64", filename: "comi_latest_MacOS_x86_64.tar.gz" },
+							{
+								label: "托盘版 universal",
+								filename: "comigo-tray_latest_MacOS_universal.dmg",
+							},
+							{
+								label: "桌面版 universal",
+								filename: "comigo-desktop_latest_MacOS_universal.dmg",
+							},
+							{
+								label: "命令行版 arm64",
+								filename: "comi_latest_MacOS_arm64.tar.gz",
+							},
+							{
+								label: "命令行版 x86_64",
+								filename: "comi_latest_MacOS_x86_64.tar.gz",
+							},
 						],
 					},
 					{
 						os: "Linux",
 						selected: 0,
 						options: [
-							{ label: "托盘版 x86_64", filename: "comigo-tray_latest_Linux_x86_64.tar.gz" },
-							{ label: "托盘版 arm64", filename: "comigo-tray_latest_Linux_arm64.tar.gz" },
-							{ label: "桌面版 x86_64", filename: "comigo-desktop_latest_Linux_x86_64.tar.gz" },
-							{ label: "桌面版 arm64", filename: "comigo-desktop_latest_Linux_arm64.tar.gz" },
-							{ label: "命令行版 x86_64", filename: "comi_latest_Linux_x86_64.tar.gz" },
-							{ label: "命令行版 arm64", filename: "comi_latest_Linux_arm64.tar.gz" },
-							{ label: "命令行版 armv7", filename: "comi_latest_Linux_armv7.tar.gz" },
-							{ label: "命令行版 i386", filename: "comi_latest_Linux_i386.tar.gz" },
-							{ label: "Debian/Ubuntu amd64", filename: "comi_latest_amd64.deb" },
-							{ label: "Debian/Ubuntu arm64", filename: "comi_latest_arm64.deb" },
+							{
+								label: "托盘版 x86_64",
+								filename: "comigo-tray_latest_Linux_x86_64.tar.gz",
+							},
+							{
+								label: "托盘版 arm64",
+								filename: "comigo-tray_latest_Linux_arm64.tar.gz",
+							},
+							{
+								label: "桌面版 x86_64",
+								filename: "comigo-desktop_latest_Linux_x86_64.tar.gz",
+							},
+							{
+								label: "桌面版 arm64",
+								filename: "comigo-desktop_latest_Linux_arm64.tar.gz",
+							},
+							{
+								label: "命令行版 x86_64",
+								filename: "comi_latest_Linux_x86_64.tar.gz",
+							},
+							{
+								label: "命令行版 arm64",
+								filename: "comi_latest_Linux_arm64.tar.gz",
+							},
+							{
+								label: "命令行版 armv7",
+								filename: "comi_latest_Linux_armv7.tar.gz",
+							},
+							{
+								label: "命令行版 i386",
+								filename: "comi_latest_Linux_i386.tar.gz",
+							},
+							{
+								label: "Debian/Ubuntu amd64",
+								filename: "comi_latest_amd64.deb",
+							},
+							{
+								label: "Debian/Ubuntu arm64",
+								filename: "comi_latest_arm64.deb",
+							},
 						],
 					},
 				];
@@ -445,11 +508,14 @@ templ ComigoXYZPlugin(c echo.Context) {
 				grid-template-columns: minmax(0, 1fr);
 			}
 			.comigo_xyz_download_panel {
-				transition: transform 160ms ease, box-shadow 160ms ease;
+				transition:
+					transform 160ms ease,
+					box-shadow 160ms ease;
 			}
 			.comigo_xyz_download_panel_active {
 				transform: scale(1.06);
-				box-shadow: 0 0 24px color-mix(in srgb, var(--primary, #ff76bd) 45%, transparent);
+				box-shadow: 0 0 24px
+					color-mix(in srgb, var(--primary, #ff76bd) 45%, transparent);
 				z-index: 1;
 			}
 			@media (min-width: 768px) {

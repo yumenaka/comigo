@@ -46,9 +46,11 @@ func GetCSS(oneFileMode bool) (cssString string) {
 func GetBasePathScript() string {
 	basePath, _ := json.Marshal(config.GetBasePath())
 	wailsBuild, _ := json.Marshal(isWailsBuild())
+	debugMode, _ := json.Marshal(config.GetCfg().Debug)
 	return `<script>
 window.ComiGoBasePath = ` + string(basePath) + `;
 window.ComiGoWails = ` + string(wailsBuild) + `;
+window.ComiGoDebug = ` + string(debugMode) + `;
 window.ComiGoPath = function(path) {
   const base = window.ComiGoBasePath || '';
   if (!path) return base ? base + '/' : '/';
