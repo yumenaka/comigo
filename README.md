@@ -50,7 +50,9 @@ PC/Mobile Sync:
 | Desktop | Linux 64-bit | [comigo-desktop_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Linux_x86_64.tar.gz) |
 | Desktop | Linux ARM64 | [comigo-desktop_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Linux_arm64.tar.gz) |
 
-> 💡 **Note**: Tray version provides system tray icon and can run minimized in background. Desktop version is the plain desktop app. Windows: Double-click to run; macOS: Drag to Applications folder.
+> 💡 **Which GUI package should I choose?** Choose Tray if you want ComiGo to keep running in the background and manage it from the system tray. The Tray version starts the local Web service and opens the reader in your browser; the tray menu can open the browser, copy the reading URL, open config/library folders, switch languages, check for updates, and toggle Tailscale remote access. On Windows, it can also register folder context menus, file associations, and desktop shortcuts.
+>
+> Choose Desktop if you prefer a regular app window. It wraps the same ComiGo reader in a Wails desktop shell and adds desktop-only actions such as selecting folders with the system picker and moving local source files to the system trash after confirmation. The current Desktop build does not include the tray menu or built-in Tailscale remote access.
 
 > **macOS tip**: If macOS says the app is damaged and should be moved to Trash, the downloaded file is usually not actually broken. Run this after moving the app to Applications:
 > ```bash

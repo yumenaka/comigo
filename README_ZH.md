@@ -50,8 +50,9 @@ PC/手机同步：
 | 桌面版 | Linux 64位 | [comigo-desktop_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Linux_x86_64.tar.gz) |
 | 桌面版 | Linux ARM64 | [comigo-desktop_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Linux_arm64.tar.gz) |
 
-> 💡 **说明**：托盘版提供系统托盘图标，可最小化到后台运行；桌面版是普通桌面应用。
->  Windows 用户双击运行即可，macOS 用户需要将APP拖入 应用程序 文件夹。
+> 💡 **版本选择**：如果希望 ComiGo 常驻后台、通过系统托盘管理，推荐托盘版。托盘版会启动本地 Web 服务，用浏览器打开阅读器；托盘菜单可打开浏览器、复制阅读地址、打开配置/书库目录、切换语言、检查更新，并可开启/关闭 Tailscale 远程访问。Windows 下还可注册文件夹右键菜单、文件关联和桌面快捷方式。
+>
+> 桌面版适合想要普通应用窗口的用户。它用 Wails 桌面壳承载同一套 ComiGo 阅读器，并提供系统目录选择、确认后将本地源文件移到系统垃圾桶等桌面专属操作。当前桌面版不包含系统托盘菜单，也不内置 Tailscale 远程访问。
 
 > **macOS 提示**：如果系统提示应用“已损坏，无法打开，应该移到废纸篓”，通常不是下载文件真的损坏。将 App 拖入“应用程序”后执行：
 > ```bash

@@ -51,7 +51,9 @@ PC/モバイル同期：
 | デスクトップ版 | Linux 64bit | [comigo-desktop_latest_Linux_x86_64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Linux_x86_64.tar.gz) |
 | デスクトップ版 | Linux ARM64 | [comigo-desktop_latest_Linux_arm64.tar.gz](https://comigo.xyz/yumenaka/comigo/releases/download/latest/comigo-desktop_latest_Linux_arm64.tar.gz) |
 
-> 💡 **説明**：トレイ版はシステムトレイアイコンを提供し、バックグラウンドで実行できます。デスクトップ版は通常のデスクトップアプリです。Windows: ダブルクリックで実行; macOS: Applicationsフォルダにドラッグ。
+> 💡 **GUI版の選び方**：ComiGo をバックグラウンドで常駐させ、システムトレイから管理したい場合はトレイ版がおすすめです。トレイ版はローカル Web サービスを起動し、ブラウザでリーダーを開きます。トレイメニューからブラウザを開く、閲覧URLをコピーする、設定/ライブラリフォルダを開く、言語を切り替える、更新を確認する、Tailscale リモートアクセスをオン/オフする、といった操作ができます。Windows ではフォルダ右クリックメニュー、ファイル関連付け、デスクトップショートカットの登録にも対応しています。
+>
+> 通常のアプリウィンドウとして使いたい場合はデスクトップ版を選んでください。デスクトップ版は同じ ComiGo リーダーを Wails のデスクトップシェルで表示し、システムのフォルダ選択や、確認後にローカルの元ファイルをシステムのゴミ箱へ移動する操作などに対応しています。現在のデスクトップ版にはシステムトレイメニューと内蔵 Tailscale リモートアクセスは含まれていません。
 
 > **macOS向けメモ**：macOS が「壊れているため開けません。ゴミ箱に入れる必要があります」と表示する場合、通常はファイル自体が壊れているわけではありません。アプリを Applications フォルダに移動してから実行してください：
 > ```bash
