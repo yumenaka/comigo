@@ -13,6 +13,7 @@ import (
 	"github.com/yumenaka/comigo/store"
 )
 
+// 验证扫描失败缓存只跳过同版本且指纹一致的压缩包。
 func TestScanFailureCacheSkipsOnlySameVersionAndFingerprint(t *testing.T) {
 	t.Setenv("COMIGO_CONFIG_DIR", t.TempDir())
 
@@ -34,6 +35,7 @@ func TestScanFailureCacheSkipsOnlySameVersionAndFingerprint(t *testing.T) {
 	}
 }
 
+// 验证版本变化后会重新尝试曾经失败的压缩包。
 func TestScanFailureCacheVersionChangeAllowsRetry(t *testing.T) {
 	t.Setenv("COMIGO_CONFIG_DIR", t.TempDir())
 
@@ -63,6 +65,7 @@ func TestScanFailureCacheVersionChangeAllowsRetry(t *testing.T) {
 	}
 }
 
+// 验证小补丁版本变化不会绕过扫描失败缓存。
 func TestScanFailureCacheSmallPatchVersionChangeStillSkips(t *testing.T) {
 	t.Setenv("COMIGO_CONFIG_DIR", t.TempDir())
 
@@ -92,6 +95,7 @@ func TestScanFailureCacheSmallPatchVersionChangeStillSkips(t *testing.T) {
 	}
 }
 
+// 验证失败压缩包是否重试取决于记录版本和当前版本。
 func TestShouldRetryFailedArchiveByVersion(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -117,6 +121,7 @@ func TestShouldRetryFailedArchiveByVersion(t *testing.T) {
 	}
 }
 
+// 验证失败缓存只作用于压缩包，并会在成功后清除记录。
 func TestScanFailureCacheIgnoresNonArchiveFilesAndClearsOnSuccess(t *testing.T) {
 	t.Setenv("COMIGO_CONFIG_DIR", t.TempDir())
 
@@ -145,6 +150,7 @@ func TestScanFailureCacheIgnoresNonArchiveFilesAndClearsOnSuccess(t *testing.T) 
 	}
 }
 
+// 验证初始化书库时会跳过已记录失败且无需重试的压缩包。
 func TestInitStoreSkipsPreviouslyFailedArchiveFiles(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("COMIGO_CONFIG_DIR", filepath.Join(tmp, "config"))

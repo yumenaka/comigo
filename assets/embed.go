@@ -170,7 +170,6 @@ func GetJavaScript(oneFileMode bool, insertScript []string) (jsString string) {
 			jsString += "<script src=\"" + config.PrefixPath("/assets/"+script) + "\"></script>\n"
 		}
 	}
-	// fmt.Println("jsString:", jsString)
 	return jsString
 }
 

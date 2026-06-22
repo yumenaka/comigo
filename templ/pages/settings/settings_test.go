@@ -17,6 +17,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
+// 提供设置页书库计数测试所需的最小内存书库。
 type storeBookCountsTestStore struct {
 	books         map[string]*model.Book
 	deleteCalls   int
@@ -65,6 +66,7 @@ func (s *storeBookCountsTestStore) DeleteBookMark(bookID string, markType model.
 	return nil
 }
 
+// 验证书库计数会清理已经不存在的本地书籍。
 func TestGetStoreBookCountsCleansMissingBooks(t *testing.T) {
 	oldCfg := config.CopyCfg()
 	t.Cleanup(func() {
@@ -112,6 +114,7 @@ func TestGetStoreBookCountsCleansMissingBooks(t *testing.T) {
 	}
 }
 
+// 验证重新扫描能正确计算被移除的书籍数量。
 func TestRescanBookDeltaReportsRemovedBooks(t *testing.T) {
 	newBooksCount, removedBooksCount := rescanBookDelta(5, 3)
 	if newBooksCount != 0 || removedBooksCount != 2 {
@@ -119,6 +122,7 @@ func TestRescanBookDeltaReportsRemovedBooks(t *testing.T) {
 	}
 }
 
+// 验证重新扫描结果提示使用自然的中文文案。
 func TestRescanBookDeltaMessageUsesNaturalChinese(t *testing.T) {
 	locale.SetLanguage("zh-CN")
 
@@ -142,6 +146,7 @@ func TestRescanBookDeltaMessageUsesNaturalChinese(t *testing.T) {
 	}
 }
 
+// 验证单个书库计数只统计目标书库内的真实书籍。
 func TestGetStoreRealBookCountOnlyCountsTargetStore(t *testing.T) {
 	oldStore := model.IStore
 	t.Cleanup(func() {
@@ -179,6 +184,7 @@ func TestGetStoreRealBookCountOnlyCountsTargetStore(t *testing.T) {
 	}
 }
 
+// 验证 Wails 环境可显示系统目录选择入口。
 func TestStoreConfigRendersWailsFolderPicker(t *testing.T) {
 	var html bytes.Buffer
 	if err := StoreConfig("StoreUrls", nil, "StoreUrls_Description", nil, false, false).Render(context.Background(), &html); err != nil {
@@ -196,12 +202,14 @@ func TestStoreConfigRendersWailsFolderPicker(t *testing.T) {
 	}
 }
 
-func TestMainAreaHidesTailscaleConfigInWailsBuild(t *testing.T) {
-	if got, want := showTailscaleConfigInSettings(), !assets.IsWailsBuild(); got != want {
-		t.Fatalf("showTailscaleConfigInSettings() = %v, want %v", got, want)
+// 验证 Wails 构建会隐藏会误报连接关闭的实时日志面板。
+func TestMainAreaHidesServerLogInWailsBuild(t *testing.T) {
+	if got, want := showServerLogInSettings(), !assets.IsWailsBuild(); got != want {
+		t.Fatalf("showServerLogInSettings() = %v, want %v", got, want)
 	}
 }
 
+// 验证远端 Comigo 版本更旧时会显示兼容性提示。
 func TestRemoteComigoVersionWarningWhenRemoteOlder(t *testing.T) {
 	server := newServerInfoTestServer(t, `{"Version":"v0.1.0","ServerName":"Comigo v0.1.0"}`)
 
@@ -214,6 +222,7 @@ func TestRemoteComigoVersionWarningWhenRemoteOlder(t *testing.T) {
 	}
 }
 
+// 验证远端 Comigo 版本更新时不显示兼容性提示。
 func TestRemoteComigoVersionWarningAllowsNewerRemote(t *testing.T) {
 	server := newServerInfoTestServer(t, `{"Version":"v99.0.0","ServerName":"Comigo v99.0.0"}`)
 
@@ -222,6 +231,7 @@ func TestRemoteComigoVersionWarningAllowsNewerRemote(t *testing.T) {
 	}
 }
 
+// 创建只响应 /api/server-info 的测试服务器。
 func newServerInfoTestServer(t *testing.T, body string) *httptest.Server {
 	t.Helper()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

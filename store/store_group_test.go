@@ -13,8 +13,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
-// fakeModelStore 仅用于 model.NewBook 过程中避免 nil IStore
-// 说明：GenerateBookGroup 内部会调用 model.NewBook，而 NewBook 会用到 model.IStore.ListBooks() 做去重检查。
+// 提供生成书籍组测试所需的最小书库实现，避免 model.NewBook 去重检查访问空书库。
 type fakeModelStore struct{}
 
 func (s *fakeModelStore) StoreBook(b *model.Book) error            { return nil }
@@ -69,6 +68,7 @@ func newStoreGroupTestBook(storeURL, id string) *model.Book {
 	}}
 }
 
+// 验证内存书库写入书籍时不会额外落盘元数据。
 func TestStoreBookInMemoryDoesNotPersistMeta(t *testing.T) {
 	configDir := useTempConfigDir(t)
 	storeURL := filepath.Join(t.TempDir(), "books")
@@ -86,6 +86,7 @@ func TestStoreBookInMemoryDoesNotPersistMeta(t *testing.T) {
 	}
 }
 
+// 验证需要持久化时书籍元数据会写入本地文件。
 func TestStoreBookPersistsMetaAfterInMemoryStore(t *testing.T) {
 	configDir := useTempConfigDir(t)
 	storeURL := filepath.Join(t.TempDir(), "books")
@@ -103,6 +104,7 @@ func TestStoreBookPersistsMetaAfterInMemoryStore(t *testing.T) {
 	}
 }
 
+// 验证公开 JSON 会隐藏本地路径，但内部元数据仍保留真实路径。
 func TestPublicJSONHidesLocalPathsButMetadataKeepsThem(t *testing.T) {
 	storeURL := filepath.Join(t.TempDir(), "books")
 	book := newStoreGroupTestBook(storeURL, "book-private-fields")
@@ -174,16 +176,15 @@ func TestPublicJSONHidesLocalPathsButMetadataKeepsThem(t *testing.T) {
 	}
 }
 
-// TestGenerateBookGroup_ShouldCreateFolderGroupsForIntermediateDirs
-// 目标：当一个目录自身不满足“目录型书籍入库条件”（例如无图片），但其更深层有图片目录/书籍时，
-// 应该能生成对应的“文件夹/书组(TypeBooksGroup)”节点用于导航（例如 Steam / Steam 2）。
+// 验证多级本地目录会生成中间层书籍组。
+// 当中间目录本身没有图片、但更深层有目录书籍时，仍应生成可导航的文件夹书组。
 func TestGenerateBookGroup_ShouldCreateFolderGroupsForIntermediateDirs(t *testing.T) {
 	setFakeBooks(t)
 
 	tmp := t.TempDir()
 	root := filepath.Join(tmp, "test")
-	leaf1 := filepath.Join(root, "Steam", "Vol1")   // leaf dir book
-	leaf2 := filepath.Join(root, "Steam 2", "Vol1") // leaf dir book
+	leaf1 := filepath.Join(root, "Steam", "Vol1")   // 叶子目录书籍
+	leaf2 := filepath.Join(root, "Steam 2", "Vol1") // 叶子目录书籍
 
 	if err := os.MkdirAll(leaf1, 0o755); err != nil {
 		t.Fatalf("mkdir leaf1: %v", err)
@@ -197,7 +198,7 @@ func TestGenerateBookGroup_ShouldCreateFolderGroupsForIntermediateDirs(t *testin
 	}
 
 	// 注意：这里不依赖扫描逻辑，直接构造“叶子目录型书籍”，模拟深层图片目录已被成功入库。
-	// depth: root/test 下的 Steam/Vol1 => 相对路径 "Steam/Vol1" 深度为 1
+	// 深度以书库根目录为起点，root/test 下的 Steam/Vol1 深度为 1。
 	b1 := &model.Book{BookInfo: model.BookInfo{
 		BookID:   "leaf-steam-vol1",
 		BookPath: leaf1,
@@ -243,6 +244,7 @@ func TestGenerateBookGroup_ShouldCreateFolderGroupsForIntermediateDirs(t *testin
 	}
 }
 
+// 验证首页书库名称只显示本地目录名，避免暴露父路径。
 func TestDisplayStoreNameHidesLocalParentPath(t *testing.T) {
 	localStore := filepath.Join(t.TempDir(), "books")
 	if got := displayStoreName(localStore); got != "books" {
@@ -250,6 +252,7 @@ func TestDisplayStoreNameHidesLocalParentPath(t *testing.T) {
 	}
 }
 
+// 验证远程书库名称显示主机而不是完整带密码地址。
 func TestDisplayStoreNameUsesRemoteHost(t *testing.T) {
 	const remoteStore = "sftp://user:pass@example.com:22/manga"
 	if got := displayStoreName(remoteStore); got != "example.com:22" {
@@ -257,6 +260,7 @@ func TestDisplayStoreNameUsesRemoteHost(t *testing.T) {
 	}
 }
 
+// 验证远程 Comigo 书库会按远端书架拆分展示。
 func TestTopOfShelfInfoSplitsRemoteComigoShelves(t *testing.T) {
 	oldCfg := config.CopyCfg()
 	t.Cleanup(func() {
@@ -298,6 +302,7 @@ func TestTopOfShelfInfoSplitsRemoteComigoShelves(t *testing.T) {
 	}
 }
 
+// 验证远程书籍组会继承远程访问所需字段。
 func TestGeneratedRemoteBookGroupInheritsRemoteFields(t *testing.T) {
 	const remoteStore = "sftp://example.com/manga"
 	childA := bookForFolderTest("child-a", "/remote/album/a.cbz", remoteStore, model.TypeZip)
@@ -338,6 +343,7 @@ func TestGeneratedRemoteBookGroupInheritsRemoteFields(t *testing.T) {
 	}
 }
 
+// 验证远程 Comigo 原始分组不会被本地自动分组覆盖。
 func TestGenerateBookGroupKeepsRemoteComigoOriginalGroup(t *testing.T) {
 	const remoteStore = "https://example.com"
 	child := bookForFolderTest("child", "/remote/album/a.cbz", remoteStore, model.TypeZip)
@@ -380,6 +386,7 @@ func TestGenerateBookGroupKeepsRemoteComigoOriginalGroup(t *testing.T) {
 	}
 }
 
+// 验证按文件夹取书时本地书库使用真实父路径匹配。
 func TestGetBookInfoListByBookFolderUsesRealLocalParentPath(t *testing.T) {
 	tmp := t.TempDir()
 	rootA := filepath.Join(tmp, "root-a")
@@ -400,6 +407,7 @@ func TestGetBookInfoListByBookFolderUsesRealLocalParentPath(t *testing.T) {
 	assertBookIDs(t, *got, "current", "sibling")
 }
 
+// 验证按文件夹取书时不同远程书库不会互相串数据。
 func TestGetBookInfoListByBookFolderSeparatesRemoteStores(t *testing.T) {
 	current := bookForFolderTest("current", "/manga/Album/01.cbz", "webdav://a.example/manga", model.TypeZip)
 	current.IsRemote = true

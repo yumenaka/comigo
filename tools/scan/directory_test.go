@@ -15,7 +15,7 @@ import (
 	"github.com/yumenaka/comigo/tools/comigo_remote"
 )
 
-// testCfgScan 仅用于扫描相关的单元测试
+// 提供扫描测试所需的最小配置实现。
 type testCfgScan struct {
 	excludePath       []string
 	supportMediaType  []string
@@ -39,8 +39,8 @@ func (c *testCfgScan) GetEnableDatabase() bool          { return false }
 func (c *testCfgScan) GetClearDatabaseWhenExit() bool   { return false }
 func (c *testCfgScan) GetDebug() bool                   { return false }
 
-// TestHandleDirectory_ShouldCollectSupportedFiles
-// 回归用例：目录递归扫描时，应该能收集到支持的文件（例如 .zip），否则 InitStore 的“处理文件”阶段会漏扫。
+// 验证目录扫描只收集支持的文件。
+// 这是防止初始化书库漏扫压缩包的回归用例。
 func TestHandleDirectory_ShouldCollectSupportedFiles(t *testing.T) {
 	tmp := t.TempDir()
 	root := filepath.Join(tmp, "test")
@@ -85,6 +85,7 @@ func TestHandleDirectory_ShouldCollectSupportedFiles(t *testing.T) {
 	}
 }
 
+// 验证目录书籍会使用扫描阶段收集到的文件列表。
 func TestBookFromLocalDirNodeUsesScannedFiles(t *testing.T) {
 	tmp := t.TempDir()
 	bookDir := filepath.Join(tmp, "book")
@@ -127,6 +128,7 @@ func TestBookFromLocalDirNodeUsesScannedFiles(t *testing.T) {
 	}
 }
 
+// 验证超过最大扫描深度的目录不会生成书籍。
 func TestAppendLocalDirBooksSkipsOverMaxDepthNode(t *testing.T) {
 	tmp := t.TempDir()
 	nested := filepath.Join(tmp, "a", "b")
@@ -165,6 +167,7 @@ func TestAppendLocalDirBooksSkipsOverMaxDepthNode(t *testing.T) {
 	}
 }
 
+// 验证目录书籍内容变更后重新扫描会刷新页面列表。
 func TestInitStoreRescansChangedDirectoryBook(t *testing.T) {
 	tmp := t.TempDir()
 	root := filepath.Join(tmp, "library")
@@ -250,6 +253,7 @@ func TestInitStoreRescansChangedDirectoryBook(t *testing.T) {
 	}
 }
 
+// 验证远程 Comigo 书库扫描不会重复收录嵌套远程书籍。
 func TestInitComigoStoreSkipsNestedRemoteBooks(t *testing.T) {
 	// 模拟远端 Comigo 里同时存在本地书、远程书和混合书组，覆盖嵌套远程书过滤。
 	remoteBooks := map[string]model.Book{
@@ -308,7 +312,7 @@ func TestInitComigoStoreSkipsNestedRemoteBooks(t *testing.T) {
 	oldStore := model.IStore
 	oldCfg := config.CopyCfg()
 	model.IStore = &store.StoreInRam{}
-	// AddBooksToStore 读取全局 MinImageNum；测试里固定成 1，避免本机配置影响断言。
+	// 入库流程读取全局最小图片数，测试里固定成 1，避免本机配置影响断言。
 	config.GetCfg().MinImageNum = 1
 	t.Cleanup(func() {
 		model.IStore = oldStore
@@ -339,6 +343,7 @@ func TestInitComigoStoreSkipsNestedRemoteBooks(t *testing.T) {
 	}
 }
 
+// 验证远程书库删除失效书籍时会同时清理生成的分组。
 func TestDeleteStaleComigoRemoteBooksRemovesGeneratedGroups(t *testing.T) {
 	oldStore := model.IStore
 	model.IStore = &store.StoreInRam{}

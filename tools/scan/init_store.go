@@ -225,8 +225,7 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 			logger.Infof(locale.GetString("log_skip_unsupported_file_type")+" (路径: %s)", file.Name, file.Path)
 			continue
 		}
-		// logger.Infof(locale.GetString("log_processing_file"), file.Name, file.Path)
-		// 计算路径深度
+			// 计算路径深度
 		relPath, err := filepath.Rel(storePathAbs, file.Path)
 		if err != nil {
 			logger.Infof(locale.GetString("log_failed_to_get_relative_path"), err)

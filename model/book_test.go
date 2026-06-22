@@ -67,6 +67,7 @@ func withBookCleanupTestStore(t *testing.T, store *bookCleanupTestStore) {
 	})
 }
 
+// 验证目录书籍中丢失的页面会从页面列表移除。
 func TestClearBookNotExistRemovesMissingTypeDirPages(t *testing.T) {
 	dir := t.TempDir()
 	existingPath := filepath.Join(dir, "001.jpg")
@@ -116,6 +117,7 @@ func TestClearBookNotExistRemovesMissingTypeDirPages(t *testing.T) {
 	}
 }
 
+// 验证目录书籍所有页面都丢失时会删除该书籍。
 func TestClearBookNotExistDeletesTypeDirWhenAllPagesMissing(t *testing.T) {
 	dir := t.TempDir()
 	book := &Book{
@@ -150,6 +152,7 @@ func TestClearBookNotExistDeletesTypeDirWhenAllPagesMissing(t *testing.T) {
 	}
 }
 
+// 验证没有页面的目录书籍会被清理。
 func TestClearBookNotExistDeletesTypeDirWithNoPages(t *testing.T) {
 	dir := t.TempDir()
 	book := &Book{
@@ -174,6 +177,7 @@ func TestClearBookNotExistDeletesTypeDirWithNoPages(t *testing.T) {
 	}
 }
 
+// 验证自动书籍组不会因缺少实体文件被误删。
 func TestClearBookNotExistKeepsBookGroup(t *testing.T) {
 	book := &Book{BookInfo: BookInfo{
 		BookID:   "group",
@@ -193,6 +197,7 @@ func TestClearBookNotExistKeepsBookGroup(t *testing.T) {
 	}
 }
 
+// 验证视图排序使用副本，不会修改原始页面顺序。
 func TestCloneForViewSortDoesNotMutateOriginalPages(t *testing.T) {
 	book := &Book{
 		PageInfos: PageInfos{
@@ -212,6 +217,7 @@ func TestCloneForViewSortDoesNotMutateOriginalPages(t *testing.T) {
 	}
 }
 
+// 验证图片反向排序会按页码倒序排列。
 func TestSortImagesReverseOrder(t *testing.T) {
 	pages := PageInfos{
 		{Name: "001.jpg", Size: 1},

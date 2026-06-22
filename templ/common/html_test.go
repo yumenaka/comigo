@@ -13,7 +13,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// TestHtmlLoadsPathHelpersBeforePageScripts 确认内联脚本执行前就能使用 ComiGoPath。
+// 验证路径辅助脚本先于页面脚本加载。
 func TestHtmlLoadsPathHelpersBeforePageScripts(t *testing.T) {
 	cfg := config.GetCfg()
 	oldBasePath := cfg.BasePath

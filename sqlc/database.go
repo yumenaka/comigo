@@ -425,13 +425,6 @@ func (db *StoreDatabase) GenerateBookGroup() (e error) {
 	return e
 }
 
-//// UpdateBook 更新书籍信息
-//func (db *StoreDatabase) UpdateBook(book *model.Book) error {
-//	ctx := context.Background()
-//	params := ToSQLCUpdateBookParams(book)
-//	return db.queries.UpdateBook(ctx, params)
-//}
-
 // DeleteBook 删除书籍信息
 func (db *StoreDatabase) DeleteBook(bookID string) error {
 	if err := db.CheckDBQueries(); err != nil {

@@ -2,6 +2,7 @@ package tools
 
 import "testing"
 
+// 验证常见书库地址能解析出正确的后端类型、主机、端口和路径。
 func TestParseStoreURLCommon(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -69,6 +70,7 @@ func TestParseStoreURLCommon(t *testing.T) {
 	}
 }
 
+// 验证书库地址归一化会去掉认证信息并统一等价协议。
 func TestNormalizeStoreURLKey(t *testing.T) {
 	tests := []struct {
 		storeURL string
@@ -88,6 +90,7 @@ func TestNormalizeStoreURLKey(t *testing.T) {
 	}
 }
 
+// 验证以点开头的普通目录名不会被误判为父目录跳转。
 func TestIsSubPathAllowsDotPrefixedNames(t *testing.T) {
 	if !IsSubPath("/a/b", "/a/b/..foo") {
 		t.Fatal("..foo 是普通子目录名，不应被当成父目录跳转")

@@ -54,6 +54,7 @@ func withOPDSTestStore(t *testing.T, store *fakeStore) {
 	})
 }
 
+// 验证 OPDS 根入口返回导航订阅源。
 func TestRootHandlerReturnsNavigationFeed(t *testing.T) {
 	withOPDSTestStore(t, &fakeStore{books: testBooks()})
 	e := echo.New()
@@ -83,6 +84,7 @@ func TestRootHandlerReturnsNavigationFeed(t *testing.T) {
 	}
 }
 
+// 验证 OPDS 书籍接口返回可获取书籍的订阅源。
 func TestBooksHandlerReturnsAcquisitionFeed(t *testing.T) {
 	withOPDSTestStore(t, &fakeStore{books: testBooks()})
 	e := echo.New()
@@ -115,6 +117,7 @@ func TestBooksHandlerReturnsAcquisitionFeed(t *testing.T) {
 	}
 }
 
+// 验证 OPDS 链接会带上反向代理基础路径。
 func TestOPDSLinksRespectBasePath(t *testing.T) {
 	cfg := config.GetCfg()
 	oldBasePath := cfg.BasePath

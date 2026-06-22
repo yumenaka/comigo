@@ -52,10 +52,9 @@ templ MainArea(c echo.Context, book *model.Book, loadMode string, pagedIndex int
             imageWidth: '', //图片的宽度
             counter: 0,//计数器
             maxReadPageNum: 0 //读取的最大页码
-        }"
+		}"
 		x-init="let stoper= setInterval(() => {
             counter++;
-            // console.log('Wait.. Attempt: ' + counter);
             if (counter > 1) {
                 clearInterval(stoper);
             }

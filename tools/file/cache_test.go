@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// 验证封面缓存文件名包含缩放高度，避免不同尺寸互相覆盖。
 func TestCoverCacheUsesResizeHeightInFilename(t *testing.T) {
 	cacheDir := t.TempDir()
 	bookID := "book123"
@@ -37,6 +38,7 @@ func TestCoverCacheUsesResizeHeightInFilename(t *testing.T) {
 	}
 }
 
+// 验证删除封面缓存会清理同一封面的所有尺寸变体。
 func TestDeleteCoverCacheRemovesAllSizeVariants(t *testing.T) {
 	cacheDir := t.TempDir()
 	bookID := "book123"

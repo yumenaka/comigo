@@ -34,12 +34,11 @@ func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, e
 	if ex, ok := format.(archives.Zip); ok {
 		if textEncoding != "" {
 			ex.TextEncoding = encoding.ByName(textEncoding)
-		}
-		ctx := context.Background()
-		reader, err := ex.CheckNonUTF8Zip(ctx, file, func(ctx context.Context, f archives.FileInfo) error {
-			// logger.Infof(f.title())
-			return nil
-		})
+			}
+			ctx := context.Background()
+			reader, err := ex.CheckNonUTF8Zip(ctx, file, func(ctx context.Context, f archives.FileInfo) error {
+				return nil
+			})
 		if err != nil {
 			return nil, err
 		}

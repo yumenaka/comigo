@@ -2,6 +2,7 @@ package tailscale_plugin
 
 import "testing"
 
+// 验证 Tailscale 用户日志中的登录提示会被降噪过滤。
 func TestShouldSuppressTailscaleUserLog(t *testing.T) {
 	tests := []struct {
 		name    string

@@ -2,6 +2,7 @@ package config
 
 import "testing"
 
+// 验证反向代理基础路径会被规范化为统一格式。
 func TestNormalizeBasePath(t *testing.T) {
 	tests := map[string]string{
 		"":               "",
@@ -18,6 +19,7 @@ func TestNormalizeBasePath(t *testing.T) {
 	}
 }
 
+// 验证路径加前缀和去前缀在根路径、子路径下都保持一致。
 func TestPrefixAndStripBasePath(t *testing.T) {
 	oldBasePath := cfg.BasePath
 	t.Cleanup(func() { cfg.BasePath = oldBasePath })
@@ -48,6 +50,7 @@ func TestPrefixAndStripBasePath(t *testing.T) {
 	}
 }
 
+// 验证通过通用配置入口设置基础路径时也会自动规范化。
 func TestSetConfigValueNormalizesBasePath(t *testing.T) {
 	testCfg := newDefaultConfig()
 	if err := testCfg.SetConfigValue("BasePath", "some/path/"); err != nil {
@@ -58,6 +61,7 @@ func TestSetConfigValueNormalizesBasePath(t *testing.T) {
 	}
 }
 
+// 验证二维码基础地址包含反向代理基础路径。
 func TestGetQrcodeURLIncludesBasePath(t *testing.T) {
 	oldCfg := cfg
 	t.Cleanup(func() { cfg = oldCfg })
@@ -72,6 +76,7 @@ func TestGetQrcodeURLIncludesBasePath(t *testing.T) {
 	}
 }
 
+// 验证二维码公开地址只替换本机回环地址，不改写任意文本。
 func TestToQrcodePublicURLRewritesLoopbackOnly(t *testing.T) {
 	oldCfg := cfg
 	t.Cleanup(func() { cfg = oldCfg })

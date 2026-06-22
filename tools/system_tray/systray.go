@@ -110,9 +110,6 @@ func onReady() {
 	} else {
 		systray.SetIcon(iconBytes)
 	}
-	// 设置托盘图标旁边的文字（占用空间太大，注释掉，以后或许可以显示用户数什么的）
-	// systray.SetTitle(“Comigo”)
-
 	OnClickTray := func(menu systray.IMenu) {
 		// 清理所有菜单项
 		systray.ResetMenu()

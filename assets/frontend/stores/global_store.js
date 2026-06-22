@@ -421,7 +421,6 @@ Alpine.store('global', {
         const isPortrait = window.innerHeight > window.innerWidth;
         this.isPortrait = isPortrait;
         this.isLandscape = !isPortrait;
-        //console.log(`当前视口方向: ${isPortrait ? '竖屏' : '横屏'}`);
     },
     // 初始化方法
     init() {

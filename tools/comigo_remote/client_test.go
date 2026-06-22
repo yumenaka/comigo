@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// 验证远端版本读取优先使用服务信息中的版本字段。
 func TestGetServerVersionUsesVersionField(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/api/server-info" {
@@ -29,6 +30,7 @@ func TestGetServerVersionUsesVersionField(t *testing.T) {
 	}
 }
 
+// 验证缺少版本字段时会从服务名中解析版本。
 func TestGetServerVersionFallsBackToServerName(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/api/server-info" {

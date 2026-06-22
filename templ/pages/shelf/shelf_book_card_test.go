@@ -14,6 +14,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
+// 验证书籍卡片带有 Wails 右键菜单所需的数据属性。
 func TestBookCardRendersWailsContextMenuHook(t *testing.T) {
 	var html bytes.Buffer
 	marks := model.BookMarks{}
@@ -39,6 +40,7 @@ func TestBookCardRendersWailsContextMenuHook(t *testing.T) {
 	}
 }
 
+// 验证 Wails 删除源文件入口不会暴露给不支持的书籍类型。
 func TestBookCardRendersUnsupportedDeleteSourceType(t *testing.T) {
 	var html bytes.Buffer
 	book := model.BookInfo{
@@ -56,6 +58,7 @@ func TestBookCardRendersUnsupportedDeleteSourceType(t *testing.T) {
 	}
 }
 
+// 验证书架标题区域会渲染重扫按钮。
 func TestShelfHeaderTitleRendersRescanButton(t *testing.T) {
 	var html bytes.Buffer
 
@@ -74,6 +77,7 @@ func TestShelfHeaderTitleRendersRescanButton(t *testing.T) {
 	}
 }
 
+// 验证书架主体会渲染当前书库的重扫入口。
 func TestMainAreaRendersStoreRescanButton(t *testing.T) {
 	e := echo.New()
 	c := e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
@@ -101,6 +105,7 @@ func TestMainAreaRendersStoreRescanButton(t *testing.T) {
 	}
 }
 
+// 验证普通网页环境优先使用 Cookie 中保存的书架排序方式。
 func TestGetShelfSortByUsesCookieForNormalHTTP(t *testing.T) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/?sort_by=filesize_reverse", nil)
@@ -113,6 +118,7 @@ func TestGetShelfSortByUsesCookieForNormalHTTP(t *testing.T) {
 	}
 }
 
+// 验证 Wails WebView 下优先使用 URL 查询参数保存排序方式。
 func TestGetShelfSortByOnlyPrefersQueryForWailsWebView(t *testing.T) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/?sort_by=filesize_reverse", nil)

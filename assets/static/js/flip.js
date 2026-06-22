@@ -849,7 +849,6 @@ function onMouseMove(e) {
     //在设置区域
     let inSetArea = getInSetArea(e)
     // https://developer.mozilla.org/zh-CN/docs/Web/CSS/cursor
-    //e.currentTarget.style.cursor = 'default'
     if (inSetArea) {
         e.currentTarget.style.cursor = `url("data:image/png;base64,${SettingsOutlineBase64}") 12 12, pointer`
         showToolbar()
@@ -987,7 +986,6 @@ function onResize() {
     Alpine.store('flip').imageMaxWidth = window.innerWidth
     let clientWidth = document.documentElement.clientWidth
     let clientHeight = document.documentElement.clientHeight
-    // var aspectRatio = window.innerWidth / window.innerHeight
     let aspectRatio = clientWidth / clientHeight
     // 为了调试的时候方便,阈值是正方形
     if (aspectRatio > 19 / 19) {
@@ -1176,7 +1174,6 @@ function handle(e, down) {
     const act = keyMap[k];              // 查映射表
     if (!act) return;                   // 映射表里没有，忽略
     state[act] = down;                  // 更新状态
-    //e.preventDefault();               // 阻止滚动等默认行为（可选）
     // 上一页
     if (act === "pre_page" && down) {
         toPreviousPage()

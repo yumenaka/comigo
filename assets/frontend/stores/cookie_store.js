@@ -16,8 +16,3 @@ window.cookieStorage = {
         document.cookie = `${key}=${encodeURIComponent(value)}; SameSite=Lax`;//SameSite设置默认值（Lax），防止控制台报错。加载图像或框架（frame）的请求将不会包含用户的 Cookie。
     }
 }
-
-// // 然后就可以这样使用使用 cookieStorage 作为 Persist 插件的存储了
-// Alpine.store('cookie', {
-//     someCookieKey: Alpine.$persist(false).using(cookieStorage).as('someCookieKey'),
-// })

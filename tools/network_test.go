@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// 验证域名校验接受合法域名并拒绝明显非法输入。
 func TestIsValidDomain(t *testing.T) {
 	validLabel63 := strings.Repeat("a", 63)
 	invalidLabel64 := strings.Repeat("b", 64)

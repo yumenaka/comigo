@@ -14,6 +14,7 @@ import (
 	"github.com/yumenaka/comigo/store"
 )
 
+// 验证内存书库实现满足统一书库接口契约。
 func TestStoreInterfaceContractRamStore(t *testing.T) {
 	runStoreInterfaceContract(t, func(t *testing.T) model.StoreInterface {
 		t.Helper()
@@ -34,6 +35,7 @@ func TestStoreInterfaceContractRamStore(t *testing.T) {
 	})
 }
 
+// 验证 SQLite 书库实现满足统一书库接口契约。
 func TestStoreInterfaceContractSQLite(t *testing.T) {
 	runStoreInterfaceContract(t, func(t *testing.T) model.StoreInterface {
 		t.Helper()
@@ -42,6 +44,7 @@ func TestStoreInterfaceContractSQLite(t *testing.T) {
 	})
 }
 
+// 验证 PostgreSQL 书库实现满足统一书库接口契约。
 func TestStoreInterfaceContractPostgres(t *testing.T) {
 	dsn := os.Getenv("COMIGO_TEST_PG_DSN")
 	if dsn == "" {

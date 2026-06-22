@@ -25,8 +25,7 @@ func uploadError(key string, args ...interface{}) map[string]interface{} {
 	}
 }
 
-// UploadFile 上传文件
-// engine.MaxMultipartMemory = 60 << 20  // 60 MiB  只限制程序在上传文件时可以使用多少内存，而是不限制上传文件的大小。(default is 32 MiB)
+// UploadFile 处理上传入口；Echo 的 MaxMultipartMemory 只限制解析时内存占用，不限制文件总大小。
 func UploadFile(c echo.Context) error {
 	// 是否开启上传功能
 	if !config.GetCfg().EnableUpload || config.GetCfg().ReadOnlyMode {
@@ -183,9 +182,6 @@ func UploadFile(c echo.Context) error {
 		logger.Infof(locale.GetString("log_file_upload_success"), filename)
 		uploadedFiles = append(uploadedFiles, filename)
 	}
-
-	//// 通知重新扫描（不等待完成）
-	//*RescanBroadcast <- "rescan_upload_path"
 
 	// 同步执行扫描（等待完成）
 	// 扫描上传目录的文件

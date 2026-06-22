@@ -77,23 +77,8 @@ func SetMiddleware() {
 	// 设置 Echo 的日志输出
 	SetEchoLogger(engine)
 
-	// 将 HTTP 流量重定向到 HTTPS，您可以使用重定向中间件
-	// 支持重定向到www子域名或非www子域名
-	// https://echo.labstack.com/docs/middleware/redirect#https-redirect
-	// engine.Pre(middleware.HTTPSRedirect())
-
-	// 流式处理 JSON 响应
-	// https://echo.labstack.com/docs/cookbook/streaming-response
-	// 可以用来试试重写时长比较长的API 0064155000
-
 	// sse（服务器发送数据）
 	// https://echo.labstack.com/docs/cookbook/sse
-
-	// 子域名
-	// https://echo.labstack.com/docs/cookbook/subdomain
-
-	// 类似推特的简单用户系统
-	// https://echo.labstack.com/docs/cookbook/twitter
 
 	// 允许的源列表
 	// https://echo.labstack.com/docs/cookbook/cors
@@ -105,16 +90,6 @@ func SetMiddleware() {
 		Level:   5, // 取值范围 -2～9；-2=DefaultCompression，0=NoCompression
 		Skipper: gzipSkipper,
 	}))
-
-	// 反向代理中间件。
-	// 反向代理中间件会将请求转发到后端服务器，并将响应返回给客户端。
-	// 以下示例将使用默认的内存存储将应用程序限制为 20 个请求/秒：
-	// https://echo.labstack.com/docs/cookbook/reverse-proxy
-	// engine.Use(middleware.ProxyWithConfig(middleware.ProxyConfig{}))
-
-	// 速率限制 中间件。
-	// https://echo.labstack.com/docs/middleware/rate-limiter
-	// e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(20))))
 
 	engine.Use(middleware.CORSWithConfig(corsConfig()))
 }

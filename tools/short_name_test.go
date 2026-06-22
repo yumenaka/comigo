@@ -2,6 +2,7 @@ package tools
 
 import "testing"
 
+// 验证短标题会清理域名、扩展名和括号信息，并在必要时截断。
 func TestShortName(t *testing.T) {
 	tests := []struct {
 		name  string

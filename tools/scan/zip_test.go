@@ -9,6 +9,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
+// 验证本地 EPUB 元数据会写回书籍信息，并按阅读顺序排序页面。
 func TestApplyEpubInfoFromLocalFileUpdatesMetadataAndSortsPages(t *testing.T) {
 	epubPath := filepath.Join(t.TempDir(), "book.epub")
 	writeMinimalEpub(t, epubPath)

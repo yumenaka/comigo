@@ -9,6 +9,7 @@ import (
 	"testing"
 )
 
+// 验证生成 EPUB 时会转义元数据并清理图片文件名。
 func TestGenerateEscapesMetadataAndSanitizesImageNames(t *testing.T) {
 	imageData, err := base64.StdEncoding.DecodeString("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/lD9q2wAAAABJRU5ErkJggg==")
 	if err != nil {
@@ -51,7 +52,7 @@ func TestGenerateEscapesMetadataAndSanitizesImageNames(t *testing.T) {
 	}
 }
 
-// readZipFile 读取生成包内文件，测试缺文件时直接失败。
+// 读取生成包内文件，测试缺文件时直接失败。
 func readZipFile(t *testing.T, reader *zip.Reader, name string) []byte {
 	t.Helper()
 	for _, file := range reader.File {

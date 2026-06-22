@@ -42,11 +42,6 @@ var upGrader = websocket.Upgrader{
 	// use default options
 	// 检测请求来源 //检查是否跨域
 	CheckOrigin: func(r *http.Request) bool {
-		// //验证方法，只支持Get的话这样写
-		// if r.Method != "GET" {
-		//	logger.Infof("method is not GET")
-		//	return false
-		// }
 		// 验证路径
 		if config.StripBasePath(r.URL.Path) != "/api/ws" {
 			logger.Info(locale.GetString("log_path_error") + "\n")

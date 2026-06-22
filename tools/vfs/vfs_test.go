@@ -8,7 +8,7 @@ import (
 	"github.com/yumenaka/comigo/tools"
 )
 
-// TestLocalFS 测试本地文件系统实现
+// 验证本地文件系统适配器的基础文件操作。
 func TestLocalFS(t *testing.T) {
 	// 创建临时目录
 	tempDir, err := os.MkdirTemp("", "vfs_test")
@@ -30,19 +30,19 @@ func TestLocalFS(t *testing.T) {
 		t.Fatalf("创建子目录失败: %v", err)
 	}
 
-	// 创建 LocalFS 实例
+	// 创建本地文件系统适配器。
 	fs, err := NewLocalFS(tempDir)
 	if err != nil {
 		t.Fatalf("创建 LocalFS 失败: %v", err)
 	}
 	defer fs.Close()
 
-	// 测试 IsRemote()
+	// 本地文件系统不应被识别为远程书库。
 	if fs.IsRemote() {
 		t.Error("IsRemote() = true, 期望 false")
 	}
 
-	// 测试 ReadFile()
+	// 读取文件应返回原始内容。
 	data, err := fs.ReadFile("test.txt")
 	if err != nil {
 		t.Fatalf("ReadFile() 失败: %v", err)
@@ -51,7 +51,7 @@ func TestLocalFS(t *testing.T) {
 		t.Errorf("ReadFile() = %q, 期望 %q", string(data), string(testContent))
 	}
 
-	// 测试 Stat()
+	// 文件状态应能反映文件名和目录标记。
 	info, err := fs.Stat("test.txt")
 	if err != nil {
 		t.Fatalf("Stat() 失败: %v", err)
@@ -63,7 +63,7 @@ func TestLocalFS(t *testing.T) {
 		t.Error("Stat().IsDir() = true, 期望 false")
 	}
 
-	// 测试 ReadDir()
+	// 读取目录应返回文件和子目录。
 	entries, err := fs.ReadDir(".")
 	if err != nil {
 		t.Fatalf("ReadDir() 失败: %v", err)
@@ -72,7 +72,7 @@ func TestLocalFS(t *testing.T) {
 		t.Errorf("ReadDir() 返回 %d 项, 期望 2 项", len(entries))
 	}
 
-	// 测试 Exists()
+	// 文件存在性判断应区分已有文件和缺失文件。
 	exists, err := fs.Exists("test.txt")
 	if err != nil {
 		t.Fatalf("Exists() 失败: %v", err)
@@ -89,7 +89,7 @@ func TestLocalFS(t *testing.T) {
 		t.Error("Exists('nonexistent.txt') = true, 期望 false")
 	}
 
-	// 测试 IsDir()
+	// 目录判断应区分目录和普通文件。
 	isDir, err := fs.IsDir("subdir")
 	if err != nil {
 		t.Fatalf("IsDir() 失败: %v", err)
@@ -106,7 +106,7 @@ func TestLocalFS(t *testing.T) {
 		t.Error("IsDir('test.txt') = true, 期望 false")
 	}
 
-	// 测试 Open()
+	// 打开文件后应能读出原始内容。
 	file, err := fs.Open("test.txt")
 	if err != nil {
 		t.Fatalf("Open() 失败: %v", err)
@@ -123,7 +123,7 @@ func TestLocalFS(t *testing.T) {
 	}
 }
 
-// TestParseStoreURL 测试 URL 解析
+// 验证不同书库地址能解析为对应的虚拟文件系统类型。
 func TestParseStoreURL(t *testing.T) {
 	tests := []struct {
 		url          string
@@ -163,7 +163,7 @@ func TestParseStoreURL(t *testing.T) {
 	}
 }
 
-// TestFileCache 测试文件缓存
+// 验证虚拟文件系统缓存的写入、读取和命中行为。
 func TestFileCache(t *testing.T) {
 	// 创建临时缓存目录
 	tempDir, err := os.MkdirTemp("", "vfs_cache_test")

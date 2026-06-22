@@ -142,7 +142,6 @@ func scanNonUTF8ZipFile(filePath string, b *model.Book) error {
 // https://books.studygolang.com/The-Golang-Standard-Library-by-Example/chapter06/06.3.html
 func walkUTF8ZipFs(fsys fs.FS, parent, base string, b *model.Book) error {
 	// 一般zip文件的处理流程
-	// logger.Infof("parent:" + parent + " base:" + base)
 	dirName := path.Join(parent, base)
 	dirEntries, err := fs.ReadDir(fsys, dirName)
 	pageNum := 1

@@ -6,6 +6,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
+// 验证配置变化会计算出正确的服务动作。
 func TestBuildConfigChangeAction(t *testing.T) {
 	oldCfg := &config.Config{
 		Port:                      1234,
@@ -35,6 +36,7 @@ func TestBuildConfigChangeAction(t *testing.T) {
 	}
 }
 
+// 验证基础路径变化会触发 Web 服务重启。
 func TestBuildConfigChangeActionRestartsWebServerWhenBasePathChanges(t *testing.T) {
 	oldCfg := &config.Config{
 		BasePath: "",
@@ -51,6 +53,7 @@ func TestBuildConfigChangeActionRestartsWebServerWhenBasePathChanges(t *testing.
 	}
 }
 
+// 验证等价基础路径不会触发多余重启。
 func TestBuildConfigChangeActionIgnoresEquivalentBasePath(t *testing.T) {
 	oldCfg := &config.Config{
 		BasePath: "/proxy/",
@@ -67,6 +70,7 @@ func TestBuildConfigChangeActionIgnoresEquivalentBasePath(t *testing.T) {
 	}
 }
 
+// 验证数据库运行时开关不会被配置变更流程处理。
 func TestBuildConfigChangeActionIgnoresDatabaseRuntimeSwitch(t *testing.T) {
 	oldCfg := &config.Config{
 		EnableDatabase: false,
@@ -88,6 +92,7 @@ func TestBuildConfigChangeActionIgnoresDatabaseRuntimeSwitch(t *testing.T) {
 	}
 }
 
+// 验证启用 Tailscale 时会生成启动动作。
 func TestBuildConfigChangeActionStartTailscale(t *testing.T) {
 	oldCfg := &config.Config{
 		EnableTailscale:   false,
@@ -112,6 +117,7 @@ func TestBuildConfigChangeActionStartTailscale(t *testing.T) {
 	}
 }
 
+// 验证关闭 Tailscale 时会生成停止动作。
 func TestBuildConfigChangeActionStopTailscale(t *testing.T) {
 	oldCfg := &config.Config{
 		EnableTailscale:   true,
@@ -136,6 +142,7 @@ func TestBuildConfigChangeActionStopTailscale(t *testing.T) {
 	}
 }
 
+// 验证 Tailscale 关键配置变化会生成重启动作。
 func TestBuildConfigChangeActionRestartTailscaleWhenConfigChanges(t *testing.T) {
 	oldCfg := &config.Config{
 		EnableTailscale:   true,

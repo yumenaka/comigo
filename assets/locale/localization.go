@@ -113,7 +113,6 @@ func init() {
 
 	// 默认使用自动检测的语言
 	lang, _ := getLocale()
-	// logger.Infof("OK: language=%s, locale=%s\n", lang, loc)
 	switch lang {
 	case "zh":
 		Localizer = i18n.NewLocalizer(bundle, "zh-CN")

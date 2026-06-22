@@ -11,6 +11,7 @@ import (
 	"github.com/yumenaka/comigo/routers"
 )
 
+// 验证 Wails 删除源文件时只允许处理本地书库内的普通书籍文件。
 func TestTrashableBookPathAllowsOnlyLocalStoreBook(t *testing.T) {
 	storeDir := t.TempDir()
 	bookPath := filepath.Join(storeDir, "book.cbz")

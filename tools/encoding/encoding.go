@@ -58,7 +58,6 @@ var encodings = map[string]encoding.Encoding{
 }
 
 func GuessText(unknowString string) (string, error) {
-	// var GuestList = []string{"gbk", "gb18030", "big5", "eucjp", "iso2022jp", "shiftjis", "euckr", "utf16be", "utf16le"}
 	if isGBK([]byte(unknowString)) {
 		utfString, err := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(unknowString)) // 将gbk转换为utf-8
 		return string(utfString), err

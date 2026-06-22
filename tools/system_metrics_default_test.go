@@ -8,6 +8,7 @@ import (
 	"testing"
 )
 
+// 验证 CPU 使用率平均值会忽略无效输入并返回是否可用。
 func TestAverageCPUPercent(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -48,6 +49,7 @@ func TestAverageCPUPercent(t *testing.T) {
 	}
 }
 
+// 验证平台未实现的系统指标错误不会被记录为真实采集错误。
 func TestLogSystemMetricErrorOnceIgnoresNotImplemented(t *testing.T) {
 	systemMetricLoggedErrors = sync.Map{}
 

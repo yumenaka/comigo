@@ -398,7 +398,6 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 	if err := c.Bind(&request); err != nil {
 		return jsonBadRequest(err)
 	}
-	//fmt.Printf("Received Tailscale config update: %+v\n", request)
 
 	// 验证输入
 	if request.EnableTailscale {

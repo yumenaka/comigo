@@ -41,6 +41,7 @@ func newTestStoreDatabase(t *testing.T) (*sql.DB, *StoreDatabase) {
 	return db, store
 }
 
+// 验证 SQLite 初始化会启用增量自动清理。
 func TestConfigureSQLitePragmasEnablesIncrementalAutoVacuum(t *testing.T) {
 	db, _ := newTestStoreDatabase(t)
 
@@ -53,6 +54,7 @@ func TestConfigureSQLitePragmasEnablesIncrementalAutoVacuum(t *testing.T) {
 	}
 }
 
+// 验证数据库类型必须显式支持，旧别名不会静默兼容。
 func TestOpenDatabaseRejectsImplicitCompatibilityTypes(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -71,6 +73,7 @@ func TestOpenDatabaseRejectsImplicitCompatibilityTypes(t *testing.T) {
 	}
 }
 
+// 验证书籍写入数据库再读出时保留 JSON 元数据字段。
 func TestStoreBookRoundTripKeepsJSONMetadataFields(t *testing.T) {
 	_, store := newTestStoreDatabase(t)
 	now := time.Date(2026, 4, 27, 10, 30, 0, 0, time.UTC)
@@ -133,6 +136,7 @@ func TestStoreBookRoundTripKeepsJSONMetadataFields(t *testing.T) {
 	}
 }
 
+// 验证保存空页面列表会清掉数据库中的旧页面记录。
 func TestStoreBookWithEmptyPageInfosClearsOldRows(t *testing.T) {
 	db, store := newTestStoreDatabase(t)
 	book := &model.Book{
@@ -161,6 +165,7 @@ func TestStoreBookWithEmptyPageInfosClearsOldRows(t *testing.T) {
 	}
 }
 
+// 验证生成书籍组会覆盖所有书库，并忽略旧的自动分组。
 func TestGenerateBookGroupProcessesAllStoresAndIgnoresOldGroups(t *testing.T) {
 	_, store := newTestStoreDatabase(t)
 	root := t.TempDir()

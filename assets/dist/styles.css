@@ -177,7 +177,6 @@
     --leading-tight: 1.25;
     --leading-relaxed: 1.625;
     --radius-xs: .125rem;
-    --radius-sm: .25rem;
     --radius-md: .375rem;
     --radius-lg: .5rem;
     --radius-xl: .75rem;
@@ -1399,10 +1398,6 @@
     margin-block: calc(var(--spacing) * 2);
   }
 
-  .my-2\.5 {
-    margin-block: calc(var(--spacing) * 2.5);
-  }
-
   .ms-0 {
     margin-inline-start: 0;
   }
@@ -2228,10 +2223,6 @@
 
   .rounded-none {
     border-radius: 0;
-  }
-
-  .rounded-sm {
-    border-radius: var(--radius-sm);
   }
 
   .rounded-xl {
@@ -3130,15 +3121,6 @@
     outline-width: 1px;
   }
 
-  .outline-2 {
-    outline-style: var(--tw-outline-style);
-    outline-width: 2px;
-  }
-
-  .outline-offset-4 {
-    outline-offset: 4px;
-  }
-
   .drop-shadow {
     --tw-drop-shadow-size: drop-shadow(0 1px 2px var(--tw-drop-shadow-color, #0000001a)) drop-shadow(0 1px 1px var(--tw-drop-shadow-color, #0000000f));
     --tw-drop-shadow: drop-shadow(0 1px 2px #0000001a) drop-shadow(0 1px 1px #0000000f);
@@ -3218,11 +3200,6 @@
   .ease-out {
     --tw-ease: var(--ease-out);
     transition-timing-function: var(--ease-out);
-  }
-
-  .outline-double {
-    --tw-outline-style: double;
-    outline-style: double;
   }
 
   .select-none {
@@ -3480,11 +3457,6 @@
 
     .hover\:ring-blue-500:hover {
       --tw-ring-color: var(--color-blue-500);
-    }
-
-    .hover\:outline-3:hover {
-      outline-style: var(--tw-outline-style);
-      outline-width: 3px;
     }
   }
 

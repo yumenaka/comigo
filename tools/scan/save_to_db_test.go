@@ -9,6 +9,7 @@ import (
 	"github.com/yumenaka/comigo/sqlc"
 )
 
+// 验证保存书籍到数据库前必须先初始化存储。
 func TestSaveBooksToDatabaseRequiresInitializedStore(t *testing.T) {
 	oldStore := sqlc.DbStore
 	sqlc.DbStore = nil

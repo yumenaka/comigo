@@ -10,6 +10,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
+// 验证配置账号密码后实时接口也必须经过登录认证。
 func TestRealtimeAPIRequiresAuthWhenPasswordConfigured(t *testing.T) {
 	restore := withRouterAuthTestConfig(t)
 	defer restore()
@@ -35,6 +36,7 @@ func TestRealtimeAPIRequiresAuthWhenPasswordConfigured(t *testing.T) {
 	}
 }
 
+// 验证阅读器离线缓存名会带上当前版本号，避免旧缓存长期命中。
 func TestRenderReaderServiceWorkerUsesComigoVersion(t *testing.T) {
 	got := string(renderReaderServiceWorker([]byte("const CACHE_NAME = __COMIGO_READER_PWA_CACHE_NAME__")))
 

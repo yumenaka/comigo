@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// 验证生成图片接口会拒绝不安全的尺寸参数。
 func TestGetGeneratedImageRejectsUnsafeParams(t *testing.T) {
 	e := echo.New()
 	cases := []string{
@@ -33,6 +34,7 @@ func TestGetGeneratedImageRejectsUnsafeParams(t *testing.T) {
 	}
 }
 
+// 验证生成图片参数解析接受边界范围内的合法值。
 func TestParseGeneratedImageRequestAcceptsBoundaryValues(t *testing.T) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/api/get-generated-image?width=4096&height=4096&font_size=512&text=ok", nil)

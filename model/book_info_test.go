@@ -64,6 +64,7 @@ func withBookInfoTestStore(t *testing.T, store *bookInfoTestStore) {
 	})
 }
 
+// 验证短书籍 ID 冲突时会在同一快照内继续扩展长度。
 func TestInitBookIDExpandsShortIDConflictFromSingleSnapshot(t *testing.T) {
 	store := &bookInfoTestStore{}
 	withBookInfoTestStore(t, store)
@@ -109,6 +110,7 @@ func TestInitBookIDExpandsShortIDConflictFromSingleSnapshot(t *testing.T) {
 	}
 }
 
+// 验证相同路径和类型的书籍不会重复生成新 ID。
 func TestInitBookIDRejectsExistingSamePathAndType(t *testing.T) {
 	store := &bookInfoTestStore{}
 	withBookInfoTestStore(t, store)
@@ -138,6 +140,7 @@ func TestInitBookIDRejectsExistingSamePathAndType(t *testing.T) {
 	}
 }
 
+// 验证按最近阅读排序时，没有阅读记录的书籍会回退到修改时间。
 func TestSortBooksByLastReadFallsBackToModifiedTime(t *testing.T) {
 	store := &bookInfoTestStore{
 		bookMarks: map[string]BookMarks{
@@ -180,6 +183,7 @@ func TestSortBooksByLastReadFallsBackToModifiedTime(t *testing.T) {
 	}
 }
 
+// 验证书籍列表的反向排序选项符合预期顺序。
 func TestSortBooksReverseOrders(t *testing.T) {
 	byTitle := BookInfos{
 		{Title: "001.zip", Type: TypeZip},

@@ -12,6 +12,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
+// 验证只在 Comigo 发布下载地址中把 latest 替换为具体版本。
 func TestShouldReplaceLatestWithVersionOnlyForComigoRelease(t *testing.T) {
 	version := config.GetVersion()
 	targets := []string{
@@ -35,6 +36,7 @@ func TestShouldReplaceLatestWithVersionOnlyForComigoRelease(t *testing.T) {
 	}
 }
 
+// 验证非 Comigo 仓库地址不会被替换版本。
 func TestShouldNotReplaceLatestWithVersionForOtherRepositories(t *testing.T) {
 	targets := []string{
 		"https://github.com/yumenaka/other/releases/download/latest/comi_latest_MacOS_arm64.tar.gz",
@@ -50,6 +52,7 @@ func TestShouldNotReplaceLatestWithVersionForOtherRepositories(t *testing.T) {
 	}
 }
 
+// 验证反向代理转发下载响应时保留关键下载头。
 func TestWriteUpstreamResponseKeepsDownloadHeaders(t *testing.T) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/download", nil)

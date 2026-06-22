@@ -10,6 +10,7 @@ import (
 	fileutil "github.com/yumenaka/comigo/tools/file"
 )
 
+// 验证文件请求在禁用缓存或带变换参数时会跳过缓存。
 func TestParseGetFileRequestDisablesCacheForNoCacheAndTransforms(t *testing.T) {
 	e := echo.New()
 
@@ -42,6 +43,7 @@ func TestParseGetFileRequestDisablesCacheForNoCacheAndTransforms(t *testing.T) {
 	}
 }
 
+// 验证文件请求会拒绝非法图片处理参数。
 func TestParseGetFileRequestRejectsInvalidImageParams(t *testing.T) {
 	e := echo.New()
 	cases := []string{
@@ -63,6 +65,7 @@ func TestParseGetFileRequestRejectsInvalidImageParams(t *testing.T) {
 	}
 }
 
+// 验证图片参数非法时会先返回错误，不继续查书。
 func TestGetFileRejectsInvalidImageParamBeforeBookLookup(t *testing.T) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/api/get-file?id=book1&filename=page.jpg&resize_width=4097", nil)
@@ -75,6 +78,7 @@ func TestGetFileRejectsInvalidImageParamBeforeBookLookup(t *testing.T) {
 	}
 }
 
+// 验证封面请求会拒绝危险的缩放高度。
 func TestParseCoverRequestRejectsUnsafeResizeHeight(t *testing.T) {
 	e := echo.New()
 	for _, query := range []string{
@@ -91,6 +95,7 @@ func TestParseCoverRequestRejectsUnsafeResizeHeight(t *testing.T) {
 	}
 }
 
+// 验证带禁用缓存参数时图片响应不会读取缓存。
 func TestServeCachedPictureSkipsCacheWhenNoCacheQuerySet(t *testing.T) {
 	cfg := config.GetCfg()
 	oldUseCache := cfg.UseCache

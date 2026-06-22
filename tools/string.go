@@ -48,7 +48,6 @@ func MD5file(fName string) string {
 	_, e = io.Copy(h, f)
 	if e != nil {
 		logger.Infof("%s", e)
-		// log.Fatal(e)
 	}
 	return hex.EncodeToString(h.Sum(nil))
 }

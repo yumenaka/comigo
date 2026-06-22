@@ -616,7 +616,6 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 						if (port !== 443 && port !== 80) {
 							href += ":" + port;
 						}
-						//console.log('Setting FQDN link to:', href);
 						fqdnLink.href = href;
 						fqdnLink.textContent = href;
 						// 更新二维码：当 Online 为 true 且 FQDN 不为空时显示

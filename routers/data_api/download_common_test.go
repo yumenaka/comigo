@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// 验证缺少书籍查询参数时会写入统一接口错误。
 func TestRequireBookByQueryIDMissingIDWritesAPIError(t *testing.T) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/api/download-zip", nil)
@@ -42,6 +43,7 @@ func TestRequireBookByQueryIDMissingIDWritesAPIError(t *testing.T) {
 	}
 }
 
+// 验证下载附件文件名会正确转义，避免响应头异常。
 func TestSetAttachmentHeadersEscapesFileName(t *testing.T) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/api/download-zip", nil)

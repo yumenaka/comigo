@@ -52,8 +52,7 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 			if f.Name() != needFile {
 				return nil
 			}
-			// logger.Info("file.Name():"+f.Name(), "needFile:", needFile)
-			found = true
+				found = true
 			// 取得特定压缩文件
 			file, err := f.Open()
 			if err != nil {
@@ -281,11 +280,10 @@ func GetImageListFromEpubFile(epubPath string) (imageList []string, err error) {
 			continue
 		}
 		reader := bytes.NewReader(data)
-		tempSrc := findAttrValue(reader, "src")
-		src := absUrl(tempSrc, htmlList[i])
-		imageList = append(imageList, src)
-		// logger.Infof(src)
-	}
+			tempSrc := findAttrValue(reader, "src")
+			src := absUrl(tempSrc, htmlList[i])
+			imageList = append(imageList, src)
+		}
 	return imageList, err
 }
 

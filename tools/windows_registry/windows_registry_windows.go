@@ -34,7 +34,6 @@ var (
 
 // notifyShellAssociationChanged 通知 Windows Shell 文件关联已更改，刷新缓存
 func notifyShellAssociationChanged() {
-	// SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL)
 	_, _, _ = procSHChangeNotify.Call(shcneAssocchanged, shcnfIdlist, 0, 0)
 }
 

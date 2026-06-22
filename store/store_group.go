@@ -315,7 +315,6 @@ func (ramStore *StoreInRam) LoadBooks() error {
 			// 只处理 .json 文件
 			fileName := entry.Name()
 			if !strings.HasSuffix(fileName, ".json") {
-				// logger.Infof(locale.GetString("log_skipping_non_json_file"), fileName)
 				continue
 			}
 			// 读取文件内容
@@ -687,7 +686,6 @@ func TopOfShelfInfo(sortBy string) ([]model.StoreBookInfo, error) {
 		for _, b := range allBooks {
 			if b.StoreUrl == storeID && b.Type != model.TypeBooksGroup {
 				childBookNum++
-				// logger.Infof("[%v]Counting book %s in store %s, BookID=%s", childBookNum, b.Title, storeID, b.BookID)
 			}
 		}
 		newStoreBookInfo.ChildBookNum = childBookNum

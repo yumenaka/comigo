@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// 验证缺少书籍 ID 时获取书籍接口返回统一错误结构。
 func TestGetBook_MissingID_ReturnsContract(t *testing.T) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/api/get-book", nil)

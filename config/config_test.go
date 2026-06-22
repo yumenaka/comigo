@@ -9,6 +9,7 @@ import (
 	"github.com/yumenaka/comigo/tools"
 )
 
+// 验证保存配置会创建目标文件，并记录实际使用的配置路径。
 func TestUpdateConfigFileCreatesTargetAndTracksConfigFile(t *testing.T) {
 	oldCfg := cfg
 	t.Cleanup(func() {
@@ -38,6 +39,7 @@ func TestUpdateConfigFileCreatesTargetAndTracksConfigFile(t *testing.T) {
 	}
 }
 
+// 验证启用插件列表会写入配置文件。
 func TestUpdateConfigFilePersistsEnabledPluginList(t *testing.T) {
 	oldCfg := cfg
 	t.Cleanup(func() {
@@ -62,6 +64,7 @@ func TestUpdateConfigFilePersistsEnabledPluginList(t *testing.T) {
 	}
 }
 
+// 验证显式配置文件尚不存在时也会使用其所在目录作为配置目录。
 func TestGetConfigDirUsesExplicitConfigPathWhenFileDoesNotExist(t *testing.T) {
 	oldCfg := cfg
 	t.Cleanup(func() {
@@ -84,6 +87,7 @@ func TestGetConfigDirUsesExplicitConfigPathWhenFileDoesNotExist(t *testing.T) {
 	}
 }
 
+// 验证 JSON 配置更新会写入全局配置对象。
 func TestUpdateConfigByJsonUpdatesGlobalConfig(t *testing.T) {
 	oldCfg := cfg
 	t.Cleanup(func() {
@@ -105,7 +109,7 @@ func TestUpdateConfigByJsonUpdatesGlobalConfig(t *testing.T) {
 	}
 }
 
-// TestDefaultConfigHasRemoteTimeout 确认远程书库和扫描共享的超时有明确默认值。
+// 确认远程书库和扫描共享的超时有明确默认值。
 func TestDefaultConfigHasRemoteTimeout(t *testing.T) {
 	c := newDefaultConfig()
 	if c.TimeoutLimitForScan != 20 {
@@ -113,7 +117,7 @@ func TestDefaultConfigHasRemoteTimeout(t *testing.T) {
 	}
 }
 
-// TestIsPathOverlapping 测试路径重合检测
+// 验证书库路径重叠检测能拦截父子目录重复添加。
 func TestIsPathOverlapping(t *testing.T) {
 	// 创建一个测试配置
 	c := &Config{
@@ -170,7 +174,7 @@ func TestIsPathOverlapping(t *testing.T) {
 	}
 }
 
-// TestIsSubPath 测试子路径检测
+// 验证本地路径从属关系判断。
 func TestIsSubPath(t *testing.T) {
 	tests := []struct {
 		parent   string
@@ -193,7 +197,7 @@ func TestIsSubPath(t *testing.T) {
 	}
 }
 
-// TestAddStringArrayConfigWithStoreUrls 测试 AddStringArrayConfig 对 StoreUrls 的特殊处理
+// 验证添加书库地址时会做路径重合校验。
 func TestAddStringArrayConfigWithStoreUrls(t *testing.T) {
 	c := &Config{
 		StoreUrls: []string{},
@@ -215,7 +219,7 @@ func TestAddStringArrayConfigWithStoreUrls(t *testing.T) {
 	}
 }
 
-// TestDeleteStringArrayConfigWithStoreUrls 测试删除 StoreUrls
+// 验证删除书库地址会更新书库列表。
 func TestDeleteStringArrayConfigWithStoreUrls(t *testing.T) {
 	c := &Config{
 		StoreUrls: []string{},

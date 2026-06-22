@@ -7,6 +7,7 @@ import (
 	"golang.org/x/crypto/acme"
 )
 
+// 验证自动证书模式同时保留常规 HTTPS 协议，避免浏览器握手失败。
 func TestAutoTLSNextProtosIncludesHTTPSProtocols(t *testing.T) {
 	t.Helper()
 

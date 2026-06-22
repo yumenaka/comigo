@@ -11,6 +11,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
+// 验证只读模式下更新配置会返回统一错误结构。
 func TestUpdateConfig_ReadOnly_ReturnsContract(t *testing.T) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPut, "/api/config", strings.NewReader(`{"Debug":true}`))

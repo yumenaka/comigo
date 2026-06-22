@@ -157,17 +157,12 @@ func OpenBrowserByURL(uri string) {
 	// Create a context with cancellation
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	// Create an HTTP checker with multiple validations
+	// 创建 HTTP 检查器，只验证健康接口是否能正常返回。
 	checker := httpChecker.New(
 		uri,
 		httpChecker.WithTimeout(3*time.Second),
 		httpChecker.WithExpectStatusCode(200),
-		// httpChecker.WithExpectBodyJSON("status"), // Check that 'status' field exists in JSON
-		// httpChecker.WithExpectBodyRegex(`"healthy":\s*true`), // Regex to check response
-		// httpChecker.WithExpectHeader("Content-Type=application/json"),
-		// httpChecker.WithRequestHeaders(headers),
-		// httpChecker.WithRequestBody(requestBody),
-		httpChecker.WithInsecureSkipTLSVerify(true), // Skip TLS verification
+		httpChecker.WithInsecureSkipTLSVerify(true),
 	)
 
 	// Wait for the API to be available and responding correctly

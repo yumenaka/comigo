@@ -45,6 +45,7 @@ var testList = []string{
 	"Xiph Xlater 58",
 }
 
+// 验证自然排序能按数字大小排列混合字母数字标题。
 func Test_Sort1(t *testing.T) {
 	testListSortedOK := []string{
 		"10X Radonius",
@@ -96,6 +97,7 @@ func Test_Sort1(t *testing.T) {
 	}
 }
 
+// 验证自然排序能正确排列同名前缀的编号文件名。
 func Test_Sort2(t *testing.T) {
 	testList := []string{
 		"z1.doc",
@@ -159,11 +161,5 @@ func Test_Sort2(t *testing.T) {
 %v
 	Got:
 %v`, strings.Join(testListSortedOK, "\n"), strings.Join(testListSorted, "\n"))
-	}
-}
-
-func BenchmarkSort1(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		Sort(testList)
 	}
 }

@@ -19,6 +19,11 @@ func showTailscaleConfigInSettings() bool {
 	return !assets.IsWailsBuild()
 }
 
+// showServerLogInSettings 控制实时日志面板；Wails WebView 里 SSE 初始化会直接关闭。
+func showServerLogInSettings() bool {
+	return !assets.IsWailsBuild()
+}
+
 templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 	<div
 		id="settingsMainArea"
@@ -115,8 +120,10 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 			}
 			<!-- 自定义主题 -->
 			@ThemeCustomConfig()
-			<!-- 服务器日志 -->
-			@LogPanel()
+			if showServerLogInSettings() {
+				<!-- 服务器日志 -->
+				@LogPanel()
+			}
 			<!-- 阅读历史 -->
 			@ReadingHistoryPanel()
 			<!-- 管理账号密码 -->
