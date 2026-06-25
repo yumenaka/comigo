@@ -44,6 +44,7 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			app.startup(ctx)
 			routers.SetWailsContext(ctx)
+			config.UseDesktopConfigProfile()
 			if err := startComigoForWails(ctx); err != nil {
 				_, _ = fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)

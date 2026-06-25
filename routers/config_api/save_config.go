@@ -23,25 +23,6 @@ func SaveConfigHandler(c echo.Context) error {
 			"error": "Failed save to " + SaveTo + " directory",
 		})
 	}
-	// 如果其他目录有配置文件，就不能保存（暂不支持多配置文件）
-	if SaveTo == "WorkingDirectory" && (config.CfgStatus.Path.HomeDirectory != "" || config.CfgStatus.Path.ProgramDirectory != "") {
-		logger.Infof(locale.GetString("log_error_find_config_in"), config.CfgStatus.Path.HomeDirectory, config.CfgStatus.Path.ProgramDirectory)
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "error: Find config in " + config.CfgStatus.Path.HomeDirectory + " " + config.CfgStatus.Path.ProgramDirectory,
-		})
-	}
-	if SaveTo == "HomeDirectory" && (config.CfgStatus.Path.WorkingDirectory != "" || config.CfgStatus.Path.ProgramDirectory != "") {
-		logger.Infof(locale.GetString("log_error_find_config_in"), config.CfgStatus.Path.WorkingDirectory, config.CfgStatus.Path.ProgramDirectory)
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "error: Find config in " + config.CfgStatus.Path.WorkingDirectory + " " + config.CfgStatus.Path.ProgramDirectory,
-		})
-	}
-	if SaveTo == "ProgramDirectory" && (config.CfgStatus.Path.WorkingDirectory != "" || config.CfgStatus.Path.HomeDirectory != "") {
-		logger.Infof(locale.GetString("log_error_find_config_in"), config.CfgStatus.Path.WorkingDirectory, config.CfgStatus.Path.HomeDirectory)
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "error: Find config in " + config.CfgStatus.Path.WorkingDirectory + " " + config.CfgStatus.Path.HomeDirectory,
-		})
-	}
 	// 保存配置
 	err := config.SaveConfig(SaveTo)
 	if err != nil {

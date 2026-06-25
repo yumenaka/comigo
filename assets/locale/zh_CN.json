@@ -652,6 +652,7 @@
   "no_pattern": "纯色",
   "no_reading_history": "暂无阅读历史",
   "no_tui": "不启动 TUI 模式，直接按普通服务模式运行",
+  "temp_reader_mode": "临时阅读模式：不读取或保存配置文件",
   "not_a_valid_zip_file": "不是合法的zip文件：",
   "not_connected": "未连接",
   "not_support_fullscreen": "当前浏览器不支持全屏显示",

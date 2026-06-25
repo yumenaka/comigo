@@ -64,6 +64,144 @@ func TestUpdateConfigFilePersistsEnabledPluginList(t *testing.T) {
 	}
 }
 
+// 验证临时阅读模式不会创建、保存或删除配置文件。
+func TestTemporaryReaderModeSkipsConfigFileWrites(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	cfg.TemporaryReaderMode = true
+	dir := t.TempDir()
+	t.Chdir(dir)
+
+	explicitConfig := filepath.Join(dir, "explicit.toml")
+	cfg.ConfigFile = explicitConfig
+	if err := UpdateConfigFile(); err != nil {
+		t.Fatalf("UpdateConfigFile 返回错误: %v", err)
+	}
+	if _, err := os.Stat(explicitConfig); !os.IsNotExist(err) {
+		t.Fatalf("临时模式不应写入显式配置文件: %v", err)
+	}
+
+	if err := SaveConfig(WorkingDirectory); err != nil {
+		t.Fatalf("SaveConfig 返回错误: %v", err)
+	}
+	workingConfig := filepath.Join(dir, PlatformConfigFilename())
+	if _, err := os.Stat(workingConfig); !os.IsNotExist(err) {
+		t.Fatalf("临时模式不应保存工作目录配置: %v", err)
+	}
+
+	if err := os.WriteFile(workingConfig, []byte("Port = 4321\n"), 0o644); err != nil {
+		t.Fatalf("写入测试配置失败: %v", err)
+	}
+	if err := DeleteConfigIn(WorkingDirectory); err != nil {
+		t.Fatalf("DeleteConfigIn 返回错误: %v", err)
+	}
+	if _, err := os.Stat(workingConfig); err != nil {
+		t.Fatalf("临时模式不应删除已有配置文件: %v", err)
+	}
+}
+
+// 验证默认保存使用当前启动壳的配置文件名。
+func TestSaveConfigUsesPlatformFilename(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	dir := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
+	t.Chdir(dir)
+
+	if err := SaveConfig(WorkingDirectory); err != nil {
+		t.Fatalf("SaveConfig 默认保存返回错误: %v", err)
+	}
+	platformConfig := filepath.Join(dir, PlatformConfigFilename())
+	if _, err := os.Stat(platformConfig); err != nil {
+		t.Fatalf("默认保存未写入平台配置文件: %v", err)
+	}
+	content, err := os.ReadFile(platformConfig)
+	if err != nil {
+		t.Fatalf("读取平台配置失败: %v", err)
+	}
+	if strings.Contains(string(content), "UseUnifiedConfig") {
+		t.Fatalf("不应再写入全平台共享配置字段:\n%s", string(content))
+	}
+}
+
+// 验证只读取当前启动壳的配置文件名。
+func TestFindConfigFileUsesOnlyPlatformFilename(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	home := t.TempDir()
+	work := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Chdir(work)
+
+	otherConfig := filepath.Join(work, "cli.toml")
+	if otherConfig == filepath.Join(work, PlatformConfigFilename()) {
+		otherConfig = filepath.Join(work, "unused.toml")
+	}
+	if err := os.WriteFile(otherConfig, []byte("Port = 4321\n"), 0o644); err != nil {
+		t.Fatalf("写入非当前壳配置失败: %v", err)
+	}
+
+	if location, filePath := FindConfigFile(); location != "" || filePath != "" {
+		t.Fatalf("非当前壳配置不应生效: got %q %q", location, filePath)
+	}
+
+	platformConfig := filepath.Join(work, PlatformConfigFilename())
+	if err := os.WriteFile(platformConfig, []byte("Port = 1235\n"), 0o644); err != nil {
+		t.Fatalf("写入平台配置失败: %v", err)
+	}
+	location, filePath := FindConfigFile()
+	if location != WorkingDirectory || filePath != platformConfig {
+		t.Fatalf("平台配置读取不正确: got %q %q want %q %q", location, filePath, WorkingDirectory, platformConfig)
+	}
+}
+
+// 验证已有生效配置时，配置管理器只能保存回同一个目录。
+func TestSaveConfigOnlyAllowsActiveLocation(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() {
+		cfg = oldCfg
+	})
+
+	cfg = newDefaultConfig()
+	home := t.TempDir()
+	work := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Chdir(work)
+
+	if !canSaveConfigTo(HomeDirectory) || !canSaveConfigTo(WorkingDirectory) || !canSaveConfigTo(ProgramDirectory) {
+		t.Fatal("没有生效配置时应允许保存到任一配置目录")
+	}
+
+	homeConfig := filepath.Join(home, ".config", "comigo", PlatformConfigFilename())
+	if err := os.MkdirAll(filepath.Dir(homeConfig), 0o755); err != nil {
+		t.Fatalf("创建配置目录失败: %v", err)
+	}
+	if err := os.WriteFile(homeConfig, []byte("Port = 4321\n"), 0o644); err != nil {
+		t.Fatalf("写入 Home 配置失败: %v", err)
+	}
+	if !canSaveConfigTo(HomeDirectory) {
+		t.Fatal("应允许保存回当前生效配置目录")
+	}
+	if canSaveConfigTo(WorkingDirectory) || canSaveConfigTo(ProgramDirectory) {
+		t.Fatal("已有生效配置时不应允许保存到其他目录")
+	}
+	if err := SaveConfig(WorkingDirectory); err == nil {
+		t.Fatal("SaveConfig 应拒绝保存到非当前生效目录")
+	}
+}
+
 // 验证显式配置文件尚不存在时也会使用其所在目录作为配置目录。
 func TestGetConfigDirUsesExplicitConfigPathWhenFileDoesNotExist(t *testing.T) {
 	oldCfg := cfg

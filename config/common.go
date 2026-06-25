@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -24,25 +23,109 @@ var (
 	ConfigFileLock sync.Mutex
 )
 
-func configFilePathForLocation(location string) (string, error) {
+const (
+	cliConfigFilename     = "config.toml"
+	desktopConfigFilename = "desktop.toml"
+	trayConfigFilename    = "tray.toml"
+)
+
+type configLocation struct {
+	name string
+	dir  string
+}
+
+// PlatformConfigFilename 返回当前启动壳默认使用的配置文件名。
+func PlatformConfigFilename() string {
+	switch configProfile() {
+	case "desktop":
+		return desktopConfigFilename
+	case "tray":
+		return trayConfigFilename
+	default:
+		return cliConfigFilename
+	}
+}
+
+func configDirForLocation(location string) (string, error) {
 	switch location {
 	case HomeDirectory:
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return "", err
 		}
-		return path.Join(home, ".config/comigo/config.toml"), nil
+		return filepath.Join(home, ".config", "comigo"), nil
 	case WorkingDirectory:
-		return "config.toml", nil
+		return ".", nil
 	case ProgramDirectory:
 		executable, err := os.Executable()
 		if err != nil {
 			return "", err
 		}
-		return path.Join(path.Dir(executable), "config.toml"), nil
+		return filepath.Dir(executable), nil
 	default:
 		return "", errors.New("unknown config location")
 	}
+}
+
+func configFilePathForLocation(location string) (string, error) {
+	configDir, err := configDirForLocation(location)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(configDir, PlatformConfigFilename()), nil
+}
+
+func configSearchLocations() []configLocation {
+	locations := make([]configLocation, 0, 3)
+	if home, err := os.UserHomeDir(); err == nil {
+		locations = append(locations, configLocation{
+			name: HomeDirectory,
+			dir:  filepath.Join(home, ".config", "comigo"),
+		})
+	} else {
+		logger.Infof(locale.GetString("log_warning_failed_to_get_homedir"), err)
+	}
+	if executable, err := os.Executable(); err == nil {
+		locations = append(locations, configLocation{
+			name: ProgramDirectory,
+			dir:  filepath.Dir(executable),
+		})
+	} else {
+		logger.Infof(locale.GetString("log_warning_failed_to_get_executable_path"), err)
+	}
+	if workingDir, err := os.Getwd(); err == nil {
+		locations = append(locations, configLocation{
+			name: WorkingDirectory,
+			dir:  workingDir,
+		})
+	} else {
+		logger.Infof(locale.GetString("log_failed_to_get_working_directory"), err)
+	}
+	return locations
+}
+
+func effectiveConfigPathInDir(dir string) string {
+	platformPath := filepath.Join(dir, PlatformConfigFilename())
+	if fileExists(platformPath) {
+		return platformPath
+	}
+	return ""
+}
+
+// FindConfigFile 按目录顺序寻找当前启动壳真正会读取的配置文件。
+func FindConfigFile() (location string, filePath string) {
+	for _, loc := range configSearchLocations() {
+		if configPath := effectiveConfigPathInDir(loc.dir); configPath != "" {
+			return loc.name, configPath
+		}
+	}
+	return "", ""
+}
+
+// canSaveConfigTo 限制配置管理器只覆盖当前生效目录，避免同时维护多份生效配置。
+func canSaveConfigTo(location string) bool {
+	activeLocation, _ := FindConfigFile()
+	return activeLocation == "" || activeLocation == location
 }
 
 func writeConfigBytes(filePath string, data []byte) error {
@@ -55,7 +138,7 @@ func writeConfigBytes(filePath string, data []byte) error {
 // UpdateConfigFile 更新当前正在使用的配置文件。
 // 如果尚未存在配置文件，则会自动在默认位置创建一份。
 func UpdateConfigFile() error {
-	if runtime.GOOS == "js" {
+	if runtime.GOOS == "js" || cfg.TemporaryReaderMode {
 		return nil
 	}
 	ConfigFileLock.Lock()
@@ -87,49 +170,15 @@ const (
 	ProgramDirectory = "ProgramDirectory"
 )
 
-// DefaultConfigLocation 判断当前配置文件应该保存到哪里。
-// 逻辑：
-//  1. 是否在HomeDirectory已有 config.toml
-//  2. 否则是否在WorkingDirectory已有 config.toml
-//  3. 否则是否在ProgramDirectory已有 config.toml
-//     若都没有，则返回 "HomeDirectory"。
-//
-// 返回：location字符串
+// DefaultConfigLocation 判断当前配置文件应该保存到哪里；没有配置时默认保存到 HomeDirectory。
 func DefaultConfigLocation() string {
 	// 只有在非js环境下才需要检查配置文件位置
 	if runtime.GOOS == "js" {
 		return ""
 	}
-	// 1. 检查HomeDirectory
-	home, err := os.UserHomeDir()
-	if err != nil {
-		// 获取Home失败就先记录一下，但不直接return，继续往后查
-		logger.Infof(locale.GetString("log_warning_failed_to_get_homedir"), err)
-	} else {
-		homePath := path.Join(home, ".config", "comigo", "config.toml")
-		if fileExists(homePath) {
-			return HomeDirectory
-		}
+	if location, _ := FindConfigFile(); location != "" {
+		return location
 	}
-	// 2. 检查WorkingDirectory
-	wdPath := "config.toml"
-	if fileExists(wdPath) {
-		return WorkingDirectory
-	}
-
-	// 3. 检查ProgramDirectory
-	executable, errExe := os.Executable()
-	if errExe != nil {
-		// 获取可执行文件路径出错，这种情况也比较少见，先打印日志
-		logger.Infof(locale.GetString("log_warning_failed_to_get_executable_path"), errExe)
-	} else {
-		progPath := path.Join(path.Dir(executable), "config.toml")
-		if fileExists(progPath) {
-			return ProgramDirectory
-		}
-	}
-
-	// 4. 如果都找不到，默认返回 HomeDirectory
 	return HomeDirectory
 }
 
@@ -149,11 +198,15 @@ func fileExists(filename string) bool {
 
 func SaveConfig(to string) error {
 	// 在js环境下
-	if runtime.GOOS == "js" {
+	if runtime.GOOS == "js" || cfg.TemporaryReaderMode {
 		return nil
 	}
 	ConfigFileLock.Lock()
 	defer ConfigFileLock.Unlock()
+
+	if !canSaveConfigTo(to) {
+		return errors.New(locale.GetString("please_delete_other_config_first"))
+	}
 
 	// 保存配置
 	bytes, errMarshal := toml.Marshal(cfg)
@@ -173,16 +226,7 @@ func SaveConfig(to string) error {
 }
 
 func GetWorkingDirectoryConfig() string {
-	WorkingDirectoryConfig := ""
-	wdPath := "config.toml"
-	if fileExists(wdPath) {
-		WorkingDirectoryConfig = wdPath
-		absPath, errAbs := filepath.Abs(WorkingDirectoryConfig)
-		if errAbs == nil {
-			WorkingDirectoryConfig = absPath
-		}
-	}
-	return WorkingDirectoryConfig
+	return getConfigInLocation(WorkingDirectory)
 }
 
 func GetHomeDirectoryConfig() string {
@@ -190,67 +234,45 @@ func GetHomeDirectoryConfig() string {
 	if runtime.GOOS == "js" {
 		return ""
 	}
-	HomeDirectoryConfig := ""
-	home, err := os.UserHomeDir()
-	if err == nil {
-		homePath := path.Join(home, ".config", "comigo", "config.toml")
-		if fileExists(homePath) {
-			absPath, errAbs := filepath.Abs(homePath)
-			if errAbs == nil {
-				HomeDirectoryConfig = absPath
-			} else {
-				HomeDirectoryConfig = homePath
-			}
-		}
-	} else {
-		// 获取HomeDir失败，可以做个日志或忽略
-		logger.Info("Warning: failed to get HomeDir:", err)
-	}
-	return HomeDirectoryConfig
+	return getConfigInLocation(HomeDirectory)
 }
 
 func GetProgramDirectoryConfig() string {
-	ProgramDirectoryConfig := ""
-	exe, errExe := os.Executable()
-	if errExe == nil {
-		progPath := path.Join(path.Dir(exe), "config.toml")
-		if fileExists(progPath) {
-			absPath, errAbs := filepath.Abs(progPath)
-			if errAbs == nil {
-				ProgramDirectoryConfig = absPath
-			} else {
-				ProgramDirectoryConfig = progPath
-			}
-		}
+	return getConfigInLocation(ProgramDirectory)
+}
+
+func getConfigInLocation(location string) string {
+	configDir, err := configDirForLocation(location)
+	if err != nil {
+		return ""
 	}
-	return ProgramDirectoryConfig
+	configPath := effectiveConfigPathInDir(configDir)
+	if configPath == "" {
+		return ""
+	}
+	absPath, err := filepath.Abs(configPath)
+	if err != nil {
+		return configPath
+	}
+	return absPath
 }
 
 func DeleteConfigIn(in string) error {
 	// 在非js环境下
-	if runtime.GOOS == "js" {
+	if runtime.GOOS == "js" || cfg.TemporaryReaderMode {
 		return nil
 	}
 	ConfigFileLock.Lock()
 	defer ConfigFileLock.Unlock()
 
 	logger.Infof(locale.GetString("log_try_delete_cfg_in"), in)
-	var configFile string
-	switch in {
-	case HomeDirectory:
-		home, errHomeDirectory := os.UserHomeDir()
-		if errHomeDirectory != nil {
-			return errHomeDirectory
-		}
-		configFile = path.Join(home, ".config/comigo/config.toml")
-	case WorkingDirectory:
-		configFile = "config.toml"
-	case ProgramDirectory:
-		executable, errExecutable := os.Executable()
-		if errExecutable != nil {
-			return errExecutable
-		}
-		configFile = path.Join(path.Dir(executable), "config.toml")
+	configDir, err := configDirForLocation(in)
+	if err != nil {
+		return err
+	}
+	configFile := effectiveConfigPathInDir(configDir)
+	if configFile == "" {
+		configFile = filepath.Join(configDir, PlatformConfigFilename())
 	}
 	return tools.DeleteFileIfExist(configFile)
 }

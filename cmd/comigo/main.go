@@ -20,6 +20,7 @@ import (
 
 // 运行 Comigo 服务器
 func main() {
+	config.UseTrayConfigProfile()
 	// 检查是否只是查看版本或帮助信息
 	for _, arg := range os.Args {
 		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" ||

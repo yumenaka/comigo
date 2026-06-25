@@ -652,6 +652,7 @@
   "no_pattern": "Solid Color",
   "no_reading_history": "No reading history",
   "no_tui": "Do not start TUI mode; run the normal service mode directly",
+  "temp_reader_mode": "Temporary reader mode: do not read or save config files",
   "not_a_valid_zip_file": "Not a valid ZIP file:",
   "not_connected": "Not Connected",
   "not_support_fullscreen": "This browser does not support fullscreen mode.",

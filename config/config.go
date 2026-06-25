@@ -22,6 +22,7 @@ type Config struct {
 	ClearCacheExit            bool           `json:"ClearCacheExit" comment:"退出程序的时候，清理web图片缓存"`
 	ClearDatabaseWhenExit     bool           `json:"ClearDatabaseWhenExit" comment:"启用本地数据库时，扫描完成后，清除不存在的书籍。"`
 	ConfigFile                string         `json:"-" toml:"-" comment:"用户指定的 toml 设置文件路径"`
+	TemporaryReaderMode       bool           `json:"-" toml:"-" comment:"CLI：纯文件参数启动时跳过配置文件读写（运行时状态）"`
 	SelfUpgrade               bool           `json:"-" toml:"-" comment:"CLI：检测并下载新版本替换当前可执行文件（仅命令行使用，不写入配置文件）"`
 	NoTUI                     bool           `json:"-" toml:"-" comment:"CLI：不启动 TUI，直接按普通服务模式运行（仅命令行使用，不写入配置文件）"`
 	RandomTheme               bool           `json:"-" toml:"-" comment:"CLI：强制前端选择随机模板（仅命令行使用，不写入配置文件）"`
@@ -54,7 +55,7 @@ type Config struct {
 	MinImageNum               int            `json:"MinImageNum" comment:"压缩包或文件夹内，至少有几张图片，才算作书籍"`
 	OpenBrowser               bool           `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
 	Password                  string         `json:"Password" comment:"登录界面需要的密码。"`
-	Port                      int            `json:"Port" comment:"Comigo设置文件(config.toml)，可保存在：HomeDirectory（$HOME/.config/comigo/config.toml）、WorkingDirectory（当前执行目录）、ProgramDirectory（程序所在目录）下。可用“comi --config-save”生成本文件\n网页服务端口，启用auto TLS时强制使用443端口"`
+	Port                      int            `json:"Port" comment:"Comigo 设置文件按启动壳分别使用 config.toml、desktop.toml、tray.toml，可保存在 HomeDirectory、WorkingDirectory、ProgramDirectory 下。\n网页服务端口，启用auto TLS时强制使用443端口"`
 	PrintAllPossibleQRCode    bool           `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
 	SupportFileType           []string       `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
 	SupportMediaType          []string       `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`

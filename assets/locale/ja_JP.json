@@ -652,6 +652,7 @@
   "no_pattern": "無地",
   "no_reading_history": "読書履歴がありません",
   "no_tui": "TUI モードを起動せず、通常のサービスモードで実行します",
+  "temp_reader_mode": "一時閲覧モード：設定ファイルを読み書きしません",
   "not_a_valid_zip_file": "有効なZIPファイルではありません：",
   "not_connected": "未接続",
   "not_support_fullscreen": "このブラウザはフルスクリーンをサポートしていません",
