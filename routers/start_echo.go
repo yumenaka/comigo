@@ -14,6 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/routers/websocket"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/sse_hub"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
@@ -131,6 +132,8 @@ func StopWebServer() error {
 	}
 	// 主动关闭所有 SSE 客户端，避免优雅关闭时被长连接阻塞
 	sse_hub.MessageHub.CloseAll()
+	// 主动关闭所有 WebSocket 客户端，阅读页打开时也能快速退出
+	websocket.CloseAll()
 	// 停止 Tailscale HTTP 服务器（如启用）
 	err := tailscale_plugin.StopTailscale()
 	if err != nil {

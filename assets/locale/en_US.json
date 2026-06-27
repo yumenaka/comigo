@@ -819,6 +819,8 @@
   "systray_config_directory_tooltip": "Open config directory",
   "systray_copy_url": "Copy Reading URL",
   "systray_copy_url_tooltip": "Copy reading URL to clipboard",
+  "wails_systray_show": "Open Comigo",
+  "wails_systray_show_tooltip": "Open the Comigo window",
   "wails_delete_file": "Delete source file",
   "wails_delete_file_confirm_button": "Move to system trash",
   "wails_delete_file_confirm_message": "Move this book's source file to the system trash?\n\n%s",

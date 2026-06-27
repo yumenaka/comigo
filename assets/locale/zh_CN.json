@@ -819,6 +819,8 @@
   "systray_config_directory_tooltip": "打开配置文件目录",
   "systray_copy_url": "复制阅读地址",
   "systray_copy_url_tooltip": "复制阅读地址到剪贴板",
+  "wails_systray_show": "打开Comigo",
+  "wails_systray_show_tooltip": "打开Comigo窗口",
   "wails_delete_file": "删除源文件",
   "wails_delete_file_confirm_button": "移到系统垃圾桶",
   "wails_delete_file_confirm_message": "确定要将此书籍的源文件移到系统垃圾桶吗？\n\n%s",

@@ -82,15 +82,7 @@ func WsHandler(c echo.Context) error {
 
 	// 比 defer wsConn.Close() 更好?
 	// 通知 Go 在函数返回的时候关闭 WebSocket。
-	defer func() {
-		closeSocketErr := wsConn.Close()
-		if closeSocketErr != nil {
-			logger.Infof("%s", closeSocketErr)
-		}
-		clientsMu.Lock()
-		delete(clients, wsConn)
-		clientsMu.Unlock()
-	}()
+	defer closeAndRemoveClient(wsConn)
 
 	// 无限循环，等待要写入 WebSocket 的新消息，将其从 JSON 反序列化为 Detail 对象然后送入广播频道。
 	for {
@@ -155,6 +147,13 @@ func snapshotClients() []clientSnapshot {
 	return result
 }
 
+// CloseAll 主动断开所有 WebSocket 客户端，避免服务器优雅关闭时被长连接拖到超时。
+func CloseAll() {
+	for _, client := range snapshotClients() {
+		closeAndRemoveClient(client.conn)
+	}
+}
+
 // broadcastMessage 向除发送方外的所有客户端发送消息；写失败时统一关闭并移除连接。
 func broadcastMessage(msg Message, skipClientID string) {
 	for _, client := range snapshotClients() {
@@ -177,6 +176,10 @@ func writeMessageToClient(client *websocket.Conn, msg Message, context string) {
 
 func closeAndRemoveClient(client *websocket.Conn) {
 	clientsMu.Lock()
+	if _, ok := clients[client]; !ok {
+		clientsMu.Unlock()
+		return
+	}
 	delete(clients, client)
 	clientsMu.Unlock()
 	if err := client.Close(); err != nil {

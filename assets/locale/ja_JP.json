@@ -819,6 +819,8 @@
   "systray_config_directory_tooltip": "設定ファイルディレクトリを開く",
   "systray_copy_url": "読書URLをコピー",
   "systray_copy_url_tooltip": "読書URLをクリップボードにコピー",
+  "wails_systray_show": "Comigo を開く",
+  "wails_systray_show_tooltip": "Comigo ウィンドウを開く",
   "wails_delete_file": "元ファイルを削除",
   "wails_delete_file_confirm_button": "システムのゴミ箱に移動",
   "wails_delete_file_confirm_message": "この本の元ファイルをシステムのゴミ箱に移動しますか？\n\n%s",

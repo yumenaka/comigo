@@ -19,6 +19,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers"
+	"github.com/yumenaka/comigo/tools/wails_systray"
 )
 
 // main 是 Wails 桌面壳入口；普通 CLI 入口保留在 main.go，减少合并冲突。
@@ -30,6 +31,11 @@ func main() {
 			return
 		}
 	}
+
+	config.UseDesktopConfigProfile()
+	cmd.Execute()
+	tray := wails_systray.Start()
+	defer tray.Stop()
 
 	app := NewApp()
 	err := wails.Run(&options.App{
@@ -44,11 +50,20 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			app.startup(ctx)
 			routers.SetWailsContext(ctx)
-			config.UseDesktopConfigProfile()
+			tray.SetContext(ctx)
 			if err := startComigoForWails(ctx); err != nil {
 				_, _ = fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
+		},
+		OnShutdown: func(context.Context) {
+			if err := routers.StopWebServer(); err != nil {
+				_, _ = fmt.Fprintln(os.Stderr, err)
+			}
+			tray.Stop()
+		},
+		OnBeforeClose: func(ctx context.Context) bool {
+			return tray.HandleBeforeClose(ctx)
 		},
 		Bind: []interface{}{
 			app,
@@ -67,7 +82,6 @@ func wailsWindowTitle() string {
 
 // startComigoForWails 启动桌面壳内嵌的 Comigo Web 服务。
 func startComigoForWails(ctx context.Context) error {
-	cmd.Execute()
 	if err := routers.StartWebServer(); err != nil {
 		return err
 	}
