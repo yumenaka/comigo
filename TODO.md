@@ -68,6 +68,7 @@
 - [ ] Wails3 alpha 分支继续跟进正式版 API 变化，发布前补齐打包、签名和跨平台回归。
 - [ ] desktop 版支持系统托盘，复用现有托盘能力时保持 Wails、tray、CLI 启动链路解耦。
 - [ ] 编译并验证 Wails desktop 的 iOS 与 Android 版本，确认移动端启动、资源加载和书库路径选择边界。
+- [ ] Android Wails 等待 Wails3 正式能力补齐后再恢复上传和设置页写操作；不要再用 fetch 拦截、HTML 重放或原生写文件桥做临时兼容。
 - [ ] 继续测试 Wails3 是否兼容内置 Tailscale；兼容前继续隐藏 Wails 环境的远程访问/Tailscale 配置。
 - [ ] 终端图片显示继续增强。TUI 侧可继续评估 Kitty/iTerm/Sixel/chafa 等协议，但要保持非图片终端可用。
 

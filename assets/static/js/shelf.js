@@ -126,15 +126,8 @@ window.ComiGoShelf.rescanAllStores = () =>
       pulling = false;
       refreshing = true;
       window.showToast?.(shelfText("loading", "Loading..."), "info");
-      // Android 首页下拉刷新只需要重新取当前书架 HTML，不重启整个 WebView。
-      refreshShelfHTML()
-        .catch((error) => {
-          console.error("下拉刷新书架失败:", error);
-          window.showToast?.(shelfText("err_network_error", "Failed"), "error");
-        })
-        .finally(() => {
-          refreshing = false;
-        });
+      // Android 下拉刷新按系统习惯刷新整个页面，避免书架片段状态残留。
+      window.location.reload();
     },
     { passive: true },
   );

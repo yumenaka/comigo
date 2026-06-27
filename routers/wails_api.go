@@ -3,19 +3,13 @@
 package routers
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"runtime"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/config"
 )
 
 var wailsApp *application.App
@@ -29,13 +23,6 @@ type wailsDeleteBookFileRequest struct {
 	BookID string `json:"bookId"`
 }
 
-type wailsAndroidFetchRequest struct {
-	Method  string            `json:"method"`
-	Path    string            `json:"path"`
-	Headers map[string]string `json:"headers"`
-	Body    string            `json:"body"`
-}
-
 // SetWailsRuntime 保存桌面壳对象，供普通 HTTP 页面触发窗口操作。
 func SetWailsRuntime(app *application.App, window application.Window) {
 	wailsApp = app
@@ -43,7 +30,6 @@ func SetWailsRuntime(app *application.App, window application.Window) {
 }
 
 func bindWailsAPI(group *echo.Group) {
-	group.GET("/wails/android-fetch/:payload", handleWailsAndroidFetch)
 	group.POST("/wails/toggle-fullscreen", func(c echo.Context) error {
 		if wailsWindow == nil {
 			return c.NoContent(http.StatusServiceUnavailable)
@@ -107,57 +93,4 @@ func bindWailsAPI(group *echo.Group) {
 			"message": DeleteBookFileSuccessMessageForWails(),
 		})
 	})
-}
-
-// handleWailsAndroidFetch 在 Android WebView 内重放 fetch 请求，绕过 Wails 资源拦截丢 method/body 的限制。
-func handleWailsAndroidFetch(c echo.Context) error {
-	data, err := base64.RawURLEncoding.DecodeString(c.Param("payload"))
-	if err != nil {
-		return c.NoContent(http.StatusBadRequest)
-	}
-	var payload wailsAndroidFetchRequest
-	if err := json.Unmarshal(data, &payload); err != nil {
-		return c.NoContent(http.StatusBadRequest)
-	}
-	targetPath := strings.TrimSpace(payload.Path)
-	if !strings.HasPrefix(targetPath, "/api/") || strings.HasPrefix(targetPath, "/api/wails/android-fetch/") {
-		return c.NoContent(http.StatusBadRequest)
-	}
-	method := strings.ToUpper(strings.TrimSpace(payload.Method))
-	if method == "" {
-		method = http.MethodGet
-	}
-	if strings.ContainsAny(method, " \t\r\n") {
-		return c.NoContent(http.StatusBadRequest)
-	}
-
-	req := httptest.NewRequest(method, config.PrefixPath(targetPath), strings.NewReader(payload.Body))
-	for key, value := range payload.Headers {
-		if strings.EqualFold(key, echo.HeaderContentLength) || strings.EqualFold(key, "Host") {
-			continue
-		}
-		req.Header.Set(key, value)
-	}
-	for _, cookie := range c.Request().Cookies() {
-		req.AddCookie(cookie)
-	}
-
-	recorder := httptest.NewRecorder()
-	c.Echo().ServeHTTP(recorder, req)
-	result := recorder.Result()
-	defer result.Body.Close()
-
-	for key, values := range result.Header {
-		if strings.EqualFold(key, echo.HeaderContentLength) {
-			continue
-		}
-		for _, value := range values {
-			c.Response().Header().Add(key, value)
-		}
-	}
-	body, err := io.ReadAll(result.Body)
-	if err != nil {
-		return err
-	}
-	return c.Blob(result.StatusCode, result.Header.Get(echo.HeaderContentType), body)
 }
