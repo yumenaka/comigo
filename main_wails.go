@@ -6,15 +6,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"os"
+	"sync"
 
-	"github.com/wailsapp/wails/v2"
-	"github.com/wailsapp/wails/v2/pkg/options"
-	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -37,38 +35,45 @@ func main() {
 	tray := wails_systray.Start()
 	defer tray.Stop()
 
-	app := NewApp()
-	err := wails.Run(&options.App{
-		Title:  wailsWindowTitle(),
-		Width:  1024,
-		Height: 768,
-		AssetServer: &assetserver.Options{
+	// Wails3 dev 默认设置前端 dev server；Comigo 由内嵌 Echo 直接供资源。
+	_ = os.Unsetenv("FRONTEND_DEVSERVER_URL")
+
+	appService := NewApp()
+	wailsApp := application.New(application.Options{
+		Name:        "Comigo",
+		Description: "Comigo desktop reader",
+		Services: []application.Service{
+			application.NewService(appService),
+		},
+		Assets: application.AssetOptions{
 			Handler: http.HandlerFunc(serveWailsAsset),
+			// 页面资源由内嵌 Echo 服务统一记录日志，Wails 资产层保持安静。
+			DisableLogging: true,
 		},
-		BackgroundColour:         &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		EnableDefaultContextMenu: false,
-		OnStartup: func(ctx context.Context) {
-			app.startup(ctx)
-			routers.SetWailsContext(ctx)
-			tray.SetContext(ctx)
-			if err := startComigoForWails(ctx); err != nil {
-				_, _ = fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
-		},
-		OnShutdown: func(context.Context) {
+		OnShutdown: func() {
 			if err := routers.StopWebServer(); err != nil {
 				_, _ = fmt.Fprintln(os.Stderr, err)
 			}
 			tray.Stop()
 		},
-		OnBeforeClose: func(ctx context.Context) bool {
-			return tray.HandleBeforeClose(ctx)
-		},
-		Bind: []interface{}{
-			app,
-		},
 	})
+	window := wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
+		Name:                       "main",
+		Title:                      wailsWindowTitle(),
+		Width:                      1024,
+		Height:                     768,
+		URL:                        "/",
+		BackgroundColour:           application.NewRGB(27, 38, 54),
+		DefaultContextMenuDisabled: true,
+	})
+	routers.SetWailsRuntime(wailsApp, window)
+	tray.SetRuntime(wailsApp, window)
+	tray.RegisterCloseHook(window)
+	if err := startComigoForWails(window); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	err := wailsApp.Run()
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -81,7 +86,10 @@ func wailsWindowTitle() string {
 }
 
 // startComigoForWails 启动桌面壳内嵌的 Comigo Web 服务。
-func startComigoForWails(ctx context.Context) error {
+func startComigoForWails(window application.Window) error {
+	if err := ensureWailsAndroidImportStore(); err != nil {
+		return err
+	}
 	if err := routers.StartWebServer(); err != nil {
 		return err
 	}
@@ -89,17 +97,22 @@ func startComigoForWails(ctx context.Context) error {
 	cmd.LoadUserPlugins()
 	cmd.AddStoreUrls(cmd.Args)
 	cmd.LoadMetadata()
-	go finishWailsStartupScan(ctx)
+	var scanOnce sync.Once
+	window.OnWindowEvent(events.Common.WindowRuntimeReady, func(*application.WindowEvent) {
+		scanOnce.Do(func() {
+			go finishWailsStartupScan(window)
+		})
+	})
 	config.StartOrStopAutoRescan()
 	return nil
 }
 
 // finishWailsStartupScan 后台刷新书库，避免 Wails 首页等扫描完成才出现。
-func finishWailsStartupScan(ctx context.Context) {
+func finishWailsStartupScan(window application.Window) {
 	cmd.ScanStore()
 	model.GenerateBookGroup()
 	cmd.SaveMetadata()
-	wailsruntime.WindowReload(ctx)
+	window.Reload()
 }
 
 // serveWailsAsset 在 Web 服务就绪后把 Wails 的资源请求转给 Echo。

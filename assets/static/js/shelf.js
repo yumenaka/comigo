@@ -97,6 +97,56 @@ window.ComiGoShelf.rescanAllStores = () =>
   rescanShelfStore("/api/rescan-all-stores", null, "重新扫描全部书库失败:");
 
 (() => {
+  const isAndroidWails = window.ComiGoWails && /Android/i.test(navigator.userAgent);
+  if (!isAndroidWails) return;
+  const path = window.ComiGoRelativePath?.(window.location.pathname) || window.location.pathname;
+  if (path !== "/" && path !== "/index.html") return;
+
+  let startY = 0;
+  let pulling = false;
+  let refreshing = false;
+  const pullThreshold = 72;
+  const scrollTop = () => getShelfContentRoot()?.scrollTop || window.scrollY || 0;
+
+  document.addEventListener(
+    "touchstart",
+    (event) => {
+      if (event.touches.length !== 1 || scrollTop() > 0 || refreshing) return;
+      startY = event.touches[0].clientY;
+      pulling = true;
+    },
+    { passive: true },
+  );
+
+  document.addEventListener(
+    "touchmove",
+    (event) => {
+      if (!pulling || event.touches.length !== 1) return;
+      if (event.touches[0].clientY - startY < pullThreshold) return;
+      pulling = false;
+      refreshing = true;
+      window.showToast?.(shelfText("loading", "Loading..."), "info");
+      // Android 首页下拉刷新只需要重新取当前书架 HTML，不重启整个 WebView。
+      refreshShelfHTML()
+        .catch((error) => {
+          console.error("下拉刷新书架失败:", error);
+          window.showToast?.(shelfText("err_network_error", "Failed"), "error");
+        })
+        .finally(() => {
+          refreshing = false;
+        });
+    },
+    { passive: true },
+  );
+
+  ["touchend", "touchcancel"].forEach((eventName) => {
+    document.addEventListener(eventName, () => {
+      pulling = false;
+    }, { passive: true });
+  });
+})();
+
+(() => {
   if (!window.ComiGoIsWails?.()) return;
 
   const menu = document.createElement("div");
@@ -150,8 +200,8 @@ window.ComiGoShelf.rescanAllStores = () =>
   let currentURL = "";
   let currentBookID = "";
   let currentCard = null;
-  // 删除源文件只走 Wails 绑定；普通网页没有 window.go，不能调用这个能力。
-  const deleteBookFile = () => window.go?.main?.App?.DeleteBookFile;
+  let longPressTimer = 0;
+  let suppressNextClick = false;
   const hideMenu = () => menu.classList.add("hidden");
   const toggleDeleteAction = () => {
     const canDelete = currentCard?.dataset.wailsCanDeleteSource === "true";
@@ -165,13 +215,20 @@ window.ComiGoShelf.rescanAllStores = () =>
     window.ComiGoShareURL
       ? window.ComiGoShareURL(card.href, shareBase())
       : card.href;
-  const placeMenu = (event) => {
+  const placeMenu = (clientX, clientY) => {
     menu.classList.remove("hidden");
     const gap = 8;
-    const left = Math.min(event.clientX, window.innerWidth - menu.offsetWidth - gap);
-    const top = Math.min(event.clientY, window.innerHeight - menu.offsetHeight - gap);
+    const left = Math.min(clientX, window.innerWidth - menu.offsetWidth - gap);
+    const top = Math.min(clientY, window.innerHeight - menu.offsetHeight - gap);
     menu.style.left = Math.max(gap, left) + "px";
     menu.style.top = Math.max(gap, top) + "px";
+  };
+  const openCardMenu = (card, clientX, clientY) => {
+    currentURL = readURL(card);
+    currentBookID = card.dataset.wailsBookId || "";
+    currentCard = card;
+    toggleDeleteAction();
+    placeMenu(clientX, clientY);
   };
 
   // 只接管 Wails 书籍卡片的右键，保留普通浏览器环境不变。
@@ -179,26 +236,55 @@ window.ComiGoShelf.rescanAllStores = () =>
     const card = event.target.closest("[data-wails-book-card]");
     if (!card) return;
     event.preventDefault();
-    currentURL = readURL(card);
-    currentBookID = card.dataset.wailsBookId || "";
-    currentCard = card;
-    toggleDeleteAction();
-    placeMenu(event);
+    openCardMenu(card, event.clientX, event.clientY);
   });
-  document.addEventListener("click", hideMenu);
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (suppressNextClick && !event.target.closest("#wails-book-card-menu")) {
+        suppressNextClick = false;
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      hideMenu();
+    },
+    true,
+  );
   window.addEventListener("resize", hideMenu);
   window.addEventListener("scroll", hideMenu, true);
 
+  // Android WebView 长按不一定触发 contextmenu，手动给书卡补一个长按菜单。
+  document.addEventListener(
+    "touchstart",
+    (event) => {
+      const card = event.target.closest("[data-wails-book-card]");
+      if (!card || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      clearTimeout(longPressTimer);
+      longPressTimer = window.setTimeout(() => {
+        suppressNextClick = true;
+        openCardMenu(card, touch.clientX, touch.clientY);
+      }, 650);
+    },
+    { passive: true },
+  );
+  ["touchmove", "touchend", "touchcancel"].forEach((eventName) => {
+    document.addEventListener(eventName, () => clearTimeout(longPressTimer), {
+      passive: true,
+    });
+  });
+
   menu.addEventListener("click", async (event) => {
+    suppressNextClick = false;
     const action = event.target.closest("button")?.dataset.action;
     if (!action) return;
     hideMenu();
     if (action === "delete") {
-      const deleteFn = deleteBookFile();
       if (!currentBookID) return;
       try {
-        const deleted = await deleteBookSource(currentBookID, deleteFn);
-        if (!deleted) return;
+        const result = await deleteBookSource(currentBookID);
+        if (!result.deleted) return;
         const deletedCard = currentCard;
         try {
           await refreshShelfHTML();
@@ -206,7 +292,10 @@ window.ComiGoShelf.rescanAllStores = () =>
           console.error("刷新删除后的书架失败:", refreshError);
           deletedCard?.remove();
         }
-        window.showToast?.(shelfText("wails_delete_file_success", "Moved to system trash"), "success");
+        window.showToast?.(
+          result.message || shelfText("wails_delete_file_success", "Moved to system trash"),
+          "success",
+        );
       } catch (error) {
         console.error("删除书籍源文件失败:", error);
         window.showToast?.(
@@ -241,9 +330,8 @@ window.ComiGoShelf.rescanAllStores = () =>
     }
   });
 
-  // deleteBookSource 子路由里 Wails bridge 可能不可用，HTTP 入口仍由 Wails 后端确认并进垃圾桶。
-  async function deleteBookSource(bookID, deleteFn) {
-    if (typeof deleteFn === "function") return deleteFn(bookID);
+  // deleteBookSource 统一走 HTTP 子路由，由 Wails 后端确认并按平台删除。
+  async function deleteBookSource(bookID) {
     const response = await fetch(window.ComiGoPath("/api/wails/delete-book-file"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -252,7 +340,6 @@ window.ComiGoShelf.rescanAllStores = () =>
     if (!response.ok) {
       throw new Error(await response.text());
     }
-    const data = await response.json();
-    return data.deleted;
+    return response.json();
   }
 })();

@@ -11,7 +11,6 @@ import (
 	"runtime"
 	"strings"
 
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -24,7 +23,7 @@ import (
 
 // DeleteBookFileForWails 确认后把书籍源文件移到系统垃圾桶。
 func DeleteBookFileForWails(bookID string) (bool, error) {
-	if wailsContext == nil || bookID == "" {
+	if wailsApp == nil || wailsWindow == nil || bookID == "" {
 		return false, errors.New(locale.GetString("wails_delete_file_not_allowed"))
 	}
 	book, err := model.IStore.GetBook(bookID)
@@ -53,6 +52,14 @@ func DeleteBookFileForWails(bookID string) (bool, error) {
 	return true, nil
 }
 
+// DeleteBookFileSuccessMessageForWails 返回与平台删除方式一致的成功提示。
+func DeleteBookFileSuccessMessageForWails() string {
+	if runtime.GOOS == "android" {
+		return locale.GetString("wails_delete_file_success_android")
+	}
+	return locale.GetString("wails_delete_file_success")
+}
+
 func saveWailsBookMetadata() {
 	if !config.GetCfg().EnableDatabase {
 		if err := store.RamStore.SaveAllBooksMetaJson(); err != nil {
@@ -75,16 +82,26 @@ func saveWailsBookMetadata() {
 
 func confirmDeleteBookFileForWails(trashPath string) (bool, error) {
 	deleteButton := locale.GetString("wails_delete_file_confirm_button")
+	message := fmt.Sprintf(locale.GetString("wails_delete_file_confirm_message"), trashPath)
+	if runtime.GOOS == "android" {
+		deleteButton = locale.GetString("wails_delete_file_confirm_button_android")
+		message = fmt.Sprintf(locale.GetString("wails_delete_file_confirm_message_android"), trashPath)
+	}
 	cancelButton := locale.GetString("cancel")
-	result, err := wailsruntime.MessageDialog(wailsContext, wailsruntime.MessageDialogOptions{
-		Type:          wailsruntime.QuestionDialog,
-		Title:         locale.GetString("wails_delete_file_confirm_title"),
-		Message:       fmt.Sprintf(locale.GetString("wails_delete_file_confirm_message"), trashPath),
-		Buttons:       []string{deleteButton, cancelButton},
-		DefaultButton: cancelButton,
-		CancelButton:  cancelButton,
+	result := make(chan bool, 1)
+	dialog := wailsApp.Dialog.Question().
+		SetTitle(locale.GetString("wails_delete_file_confirm_title")).
+		SetMessage(message).
+		AttachToWindow(wailsWindow)
+	dialog.AddButton(deleteButton).OnClick(func() {
+		result <- true
 	})
-	return result == deleteButton, err
+	cancel := dialog.AddButton(cancelButton).SetAsDefault().SetAsCancel().OnClick(func() {
+		result <- false
+	})
+	dialog.SetDefaultButton(cancel).SetCancelButton(cancel)
+	dialog.Show()
+	return <-result, nil
 }
 
 // TrashableBookPathForWails 只允许删除当前本地书库内的真实文件，远程书、书籍组和目录不触碰磁盘。
@@ -158,6 +175,11 @@ if (` + boolPowerShell(isDir) + `) {
 		if path, err := exec.LookPath("trash-put"); err == nil {
 			return runTrashCommand(path, target)
 		}
+	case "android":
+		if isDir {
+			return os.RemoveAll(target)
+		}
+		return os.Remove(target)
 	}
 	return errors.New(locale.GetString("wails_delete_file_unsupported"))
 }

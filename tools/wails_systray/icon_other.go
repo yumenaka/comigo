@@ -1,4 +1,4 @@
-//go:build wails && !js && !bindings && !linux && !darwin
+//go:build wails && !js && !bindings && !linux && !darwin && !android
 
 package wails_systray
 

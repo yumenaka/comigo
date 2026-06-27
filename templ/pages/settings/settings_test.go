@@ -195,6 +195,7 @@ func TestStoreConfigRendersWailsFolderPicker(t *testing.T) {
 		`x-show="$store.global.wailsBook"`,
 		`selectStoreFolder`,
 		`/api/wails/select-directory`,
+		`wails_android_directory_picker_unsupported`,
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("StoreConfig missing %q in %s", want, text)

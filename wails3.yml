@@ -1,0 +1,42 @@
+version: '3'
+
+info:
+  companyName: "yumenaka"
+  productName: "Comigo"
+  productIdentifier: "com.yumenaka.comigo"
+  description: "Comigo desktop reader"
+  copyright: "(c) yumenaka"
+  version: "1.3.0"
+
+dev_mode:
+  root_path: .
+  log_level: warn
+  debounce: 1000
+  ignore:
+    dir:
+      - .git
+      - .parcel-cache
+      - assets/dist
+      - bin
+      - build
+      - node_modules
+      - tmp
+    file:
+      - .DS_Store
+      - "*_templ.go"
+      - "*.map"
+    watched_extension:
+      - "*.go"
+      - "*.templ"
+      - "*.js"
+      - "*.css"
+      - "*.json"
+      - "*.yml"
+    git_ignore: true
+  executes:
+    - cmd: bun install
+      type: once
+    - cmd: wails3 task build DEV=true EXTRA_TAGS=wails
+      type: blocking
+    - cmd: wails3 task run
+      type: primary

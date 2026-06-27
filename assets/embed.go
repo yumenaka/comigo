@@ -47,6 +47,11 @@ func GetBasePathScript() string {
 	basePath, _ := json.Marshal(config.GetBasePath())
 	wailsBuild, _ := json.Marshal(isWailsBuild())
 	debugMode, _ := json.Marshal(config.GetCfg().Debug)
+	wailsRuntimeScript := ""
+	if isWailsBuild() {
+		// Wails3 runtime 负责通知窗口 ready；普通 Web 构建不插入这个脚本。
+		wailsRuntimeScript = "<script type=\"module\" src=\"/wails/runtime.js\"></script>\n"
+	}
 	return `<script>
 window.ComiGoBasePath = ` + string(basePath) + `;
 window.ComiGoWails = ` + string(wailsBuild) + `;
@@ -93,7 +98,7 @@ window.ComiGoElectronAction = function(action) {
   return true;
 };
 window.ComiGoIsWails = function() {
-  return window.location.protocol === 'wails:' || !!window.WailsInvoke || !!window.go?.main?.App;
+  return window.location.protocol === 'wails:' || !!window.WailsInvoke || !!window._wails || !!window.wails || !!window.go?.main?.App;
 };
 if (window.ComiGoIsWails()) {
   // Wails dev/debug 默认会放开右键菜单，这里只在桌面壳内统一禁用。
@@ -101,6 +106,66 @@ if (window.ComiGoIsWails()) {
     event.preventDefault();
   }, { capture: true });
 }
+// Android Wails 的资源拦截会丢掉普通 fetch 的 method/body/query；只桥接同源 /api/* 请求。
+(function() {
+  if (!window.ComiGoWails || !/Android/i.test(navigator.userAgent) || !window.fetch) return;
+  const nativeFetch = window.fetch.bind(window);
+  const bridgePrefix = '/api/wails/android-fetch/';
+  const encodePayload = function(value) {
+    const bytes = new TextEncoder().encode(value);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  };
+  const headersToObject = function(headers) {
+    const out = {};
+    headers.forEach(function(value, key) {
+      out[key] = value;
+    });
+    return out;
+  };
+  window.fetch = function(input, init) {
+    try {
+      const request = typeof Request !== 'undefined' && input instanceof Request ? input : null;
+      const target = new URL(request ? request.url : input, window.location.href);
+      const relativePath = window.ComiGoRelativePath(target.pathname);
+      if (
+        target.origin !== window.location.origin ||
+        !relativePath.startsWith('/api/') ||
+        relativePath.startsWith(bridgePrefix)
+      ) {
+        return nativeFetch(input, init);
+      }
+      const hasInitBody = init && Object.prototype.hasOwnProperty.call(init, 'body');
+      const body = hasInitBody ? init.body : undefined;
+      if (body !== undefined && body !== null && typeof body !== 'string') {
+        return nativeFetch(input, init);
+      }
+      if (request && !hasInitBody && !['GET', 'HEAD'].includes(request.method.toUpperCase())) {
+        return nativeFetch(input, init);
+      }
+      const headers = new Headers(request ? request.headers : undefined);
+      if (init && init.headers) {
+        new Headers(init.headers).forEach(function(value, key) {
+          headers.set(key, value);
+        });
+      }
+      const payload = {
+        method: ((init && init.method) || (request && request.method) || 'GET').toUpperCase(),
+        path: relativePath + target.search,
+        headers: headersToObject(headers),
+        body: body || '',
+      };
+      return nativeFetch(window.ComiGoPath(bridgePrefix + encodePayload(JSON.stringify(payload))), {
+        method: 'GET',
+        credentials: (init && init.credentials) || (request && request.credentials) || 'same-origin',
+        cache: 'no-store',
+      });
+    } catch (_) {
+      return nativeFetch(input, init);
+    }
+  };
+})();
 window.ComiGoShareURL = function(currentURL, publicBaseURL) {
   const target = new URL(currentURL || window.location.href);
   const publicBase = new URL(publicBaseURL || window.location.origin + '/');
@@ -151,7 +216,7 @@ window.ComiGoToggleFullscreen = async function() {
   }
 };
 </script>
-`
+` + wailsRuntimeScript
 }
 
 // GetJavaScript 在页面中插入需要的js代码

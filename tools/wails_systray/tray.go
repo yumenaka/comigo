@@ -3,17 +3,18 @@
 package wails_systray
 
 import (
-	"context"
 	"sync"
 	"sync/atomic"
 
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
 )
 
-// Tray 封装 Wails v2 临时托盘逻辑，迁到 Wails v3 时可整包替换。
+// Tray 封装 Wails 桌面壳托盘逻辑。
 type Tray struct {
 	mu       sync.RWMutex
-	ctx      context.Context
+	app      *application.App
+	window   application.Window
 	enabled  bool
 	end      func()
 	quitting atomic.Bool
@@ -30,14 +31,27 @@ func Start() *Tray {
 	return t
 }
 
-// SetContext 保存 Wails runtime context，供托盘点击恢复窗口或退出。
-func (t *Tray) SetContext(ctx context.Context) {
+// SetRuntime 保存 Wails 桌面壳对象，供托盘点击恢复窗口或退出。
+func (t *Tray) SetRuntime(app *application.App, window application.Window) {
 	if t == nil {
 		return
 	}
 	t.mu.Lock()
-	t.ctx = ctx
+	t.app = app
+	t.window = window
 	t.mu.Unlock()
+}
+
+// RegisterCloseHook 接管关闭按钮：有托盘时隐藏窗口并阻止 Wails 默认退出。
+func (t *Tray) RegisterCloseHook(window application.Window) {
+	if t == nil || !t.enabled || window == nil {
+		return
+	}
+	window.RegisterHook(events.Common.WindowClosing, func(event *application.WindowEvent) {
+		if t.HandleBeforeClose() {
+			event.Cancel()
+		}
+	})
 }
 
 // Stop 停止托盘；由 Wails OnShutdown 调用。
@@ -46,7 +60,7 @@ func (t *Tray) Stop() {
 		return
 	}
 	t.stopOnce.Do(func() {
-		t.SetContext(nil)
+		t.SetRuntime(nil, nil)
 		if t.end != nil {
 			t.end()
 		}
@@ -59,50 +73,50 @@ func (t *Tray) HideOnClose() bool {
 }
 
 // HandleBeforeClose 接管关闭按钮：有托盘时隐藏窗口并阻止 Wails 默认退出。
-func (t *Tray) HandleBeforeClose(ctx context.Context) bool {
+func (t *Tray) HandleBeforeClose() bool {
 	if t == nil || !t.enabled || t.quitting.Load() {
 		return false
 	}
-	t.hideWindow(ctx)
+	t.hideWindow()
 	return true
 }
 
-// context 读取当前 Wails context。
-func (t *Tray) context() context.Context {
+// runtime 读取当前 Wails app/window。
+func (t *Tray) runtime() (*application.App, application.Window) {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
-	return t.ctx
+	return t.app, t.window
 }
 
 // showWindow 恢复已隐藏或最小化的 Wails 窗口。
 func (t *Tray) showWindow() {
-	ctx := t.context()
-	if ctx == nil {
+	_, window := t.runtime()
+	if window == nil {
 		return
 	}
 	setPlatformWindowVisible(true)
-	wailsruntime.Show(ctx)
-	wailsruntime.WindowShow(ctx)
-	wailsruntime.WindowUnminimise(ctx)
+	window.Show()
+	window.UnMinimise()
 }
 
 // hideWindow 把窗口收进托盘，并同步隐藏 macOS Dock 图标。
-func (t *Tray) hideWindow(ctx context.Context) {
-	if ctx == nil {
+func (t *Tray) hideWindow() {
+	_, window := t.runtime()
+	if window == nil {
 		return
 	}
-	wailsruntime.WindowHide(ctx)
+	window.Hide()
 	setPlatformWindowVisible(false)
 }
 
 // quit 通过 Wails 退出应用，尚未启动完成时退回到 systray 退出。
 func (t *Tray) quit() {
-	ctx := t.context()
-	if ctx == nil {
+	app, _ := t.runtime()
+	if app == nil {
 		quitPlatformFallback()
 		return
 	}
 	t.quitting.Store(true)
 	setPlatformWindowVisible(true)
-	wailsruntime.Quit(ctx)
+	app.Quit()
 }

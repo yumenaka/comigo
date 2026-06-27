@@ -16,5 +16,4 @@ assets/dist/main.js  linguist-vendored
 assets/dist/styles.css  linguist-vendored
 assets/dist/main.js.map  linguist-vendored
 assets/dist/styles.css.map  linguist-vendored
-assets/wailsjs   linguist-vendored
 *.templ linguist-language=Go

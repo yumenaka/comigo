@@ -169,6 +169,10 @@ templ StoreConfigJavaScript() {
 			// selectStoreFolder 只在 Wails 桌面壳中调用系统目录选择器，普通浏览器不显示入口。
 			async function selectStoreFolder(configName) {
 				if (!window.ComiGoWails) return;
+				if (/Android/i.test(navigator.userAgent)) {
+					showToast(i18next.t("wails_android_directory_picker_unsupported"), "warning");
+					return;
+				}
 				const addInput = document.getElementById(configName + "AddInput");
 				if (!addInput) return;
 
@@ -182,7 +186,11 @@ templ StoreConfigJavaScript() {
 					);
 					if (response.status === 204) return;
 					if (!response.ok) {
-						showToast(i18next.t("err_network_error"), "error");
+						const data = await response.json().catch(() => ({}));
+						showToast(
+							data.message || i18next.t("err_network_error"),
+							"error",
+						);
 						return;
 					}
 					const data = await response.json();

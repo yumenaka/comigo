@@ -80,21 +80,49 @@ endif
 export VERSION
 
 ## ============================================================================
-## Wails 桌面版
+## Wails
 ## ============================================================================
 
-.PHONY: wails-prepare wails-dev wails-build
+WAILS3_VERSION ?= $(shell awk '/github.com\/wailsapp\/wails\/v3/ {print $$2; exit}' go.mod)
+WAILS3_GOBIN ?= $(shell go env GOBIN)
+ifeq ($(WAILS3_GOBIN),)
+WAILS3_GOBIN := $(shell go env GOPATH)/bin
+endif
+WAILS3 := $(WAILS3_GOBIN)/wails3
+WAILS3_STAMP := $(WAILS3).version
+WAILS3_ENV := PATH="$(WAILS3_GOBIN):$(PATH)"
 
-wails-prepare:
+.PHONY: wails3-tool wails-prepare wails-dev wails-build wails-android-icons
+
+wails3-tool:
+	@if [ ! -x "$(WAILS3)" ] || [ "$$(cat "$(WAILS3_STAMP)" 2>/dev/null)" != "$(WAILS3_VERSION)" ]; then \
+		echo "==> install Wails3 CLI $(WAILS3_VERSION)"; \
+		GOBIN="$(WAILS3_GOBIN)" go install github.com/wailsapp/wails/v3/cmd/wails3@$(WAILS3_VERSION); \
+		printf '%s\n' "$(WAILS3_VERSION)" > "$(WAILS3_STAMP)"; \
+	fi
+
+wails-prepare: wails3-tool
 	@mkdir -p build/windows bin
 	@cp assets/icon.png build/appicon.png
 	@rm -f build/windows/icon.ico
 
 wails-dev: wails-prepare
-	@wails dev -m -nosyncgomod -skipembedcreate
+	@$(WAILS3_ENV) "$(WAILS3)" dev -config ./wails3.yml
 
-# Wails release 输出统一交给跨平台发布矩阵命名，避免和 tray 产物冲突。
-wails-build: desktop-current
+wails-build: wails-prepare
+	@$(WAILS3_ENV) "$(WAILS3)" build -tags wails
+
+# Android 工程由 Wails 生成，生成后把启动图标同步成 Comigo 图标。
+wails-android-icons:
+	@test -d build/android/app/src/main/res || { echo "missing build/android; run wails3 android project first"; exit 1; }
+	@echo "==> sync Android launcher icons from assets/icon.png"
+	@for item in "mipmap-mdpi:48" "mipmap-hdpi:72" "mipmap-xhdpi:96" "mipmap-xxhdpi:144" "mipmap-xxxhdpi:192"; do \
+		dir="build/android/app/src/main/res/$${item%%:*}"; \
+		size="$${item##*:}"; \
+		mkdir -p "$$dir"; \
+		sips -z "$$size" "$$size" assets/icon.png --out "$$dir/ic_launcher.png" >/dev/null; \
+		cp "$$dir/ic_launcher.png" "$$dir/ic_launcher_round.png"; \
+	done
 
 ## ============================================================================
 ## 引入子 Makefile
