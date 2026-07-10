@@ -5,13 +5,10 @@ import './plugins/alpine'
 
 import './plugins/screenfull'
 import './plugins/comigo_ui_controls'
-// 声明各种变量
-import './stores/cookie_store'
 import './stores/global_store'
 import './stores/shelf_store'
 import './stores/scroll_store'
 import './stores/flip_store'
-import './utils/imageParameters'
 import './plugins/comigo_sse'
 
 // Start Alpine.

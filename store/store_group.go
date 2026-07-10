@@ -23,6 +23,7 @@ type StoreInRam struct {
 	StoreInfo
 	ChildStores      sync.Map // key为路径 存储 *Store
 	PendingBookmarks sync.Map // 待迁移的书签，key为BookID，value为model.BookMarks
+	bookmarksMu      sync.RWMutex
 }
 
 // getMajorMinorVersion 提取版本号的前两段（major.minor）
@@ -144,11 +145,13 @@ func SaveMetaJson(book *model.Book) error {
 	// 构造文件路径
 	fileName := filepath.Join(cacheDir, book.BookID+".json")
 	// 写入文件
-	err = os.WriteFile(fileName, jsonData, 0o644)
+	// metadata 包含本地路径和可能带凭据的远程 URL，只允许当前用户读取。
+	err = os.WriteFile(fileName, jsonData, 0o600)
 	if err != nil {
 		return err
 	}
-	return nil
+	// WriteFile 覆盖旧文件时不会应用 perm，需要显式收紧历史 metadata 权限。
+	return os.Chmod(fileName, 0o600)
 }
 
 // marshalBookMetaJSON 专用于本地 metadata 持久化。
@@ -543,6 +546,8 @@ func (ramStore *StoreInRam) GetBook(id string) (*model.Book, error) {
 }
 
 func (ramStore *StoreInRam) StoreBookMark(mark *model.BookMark) error {
+	ramStore.bookmarksMu.Lock()
+	defer ramStore.bookmarksMu.Unlock()
 	// 获取书籍
 	b, err := ramStore.GetBook(mark.BookID)
 	if err != nil {
@@ -587,17 +592,22 @@ func (ramStore *StoreInRam) StoreBookMark(mark *model.BookMark) error {
 }
 
 func (ramStore *StoreInRam) GetBookMarks(bookID string) (*model.BookMarks, error) {
+	ramStore.bookmarksMu.RLock()
+	defer ramStore.bookmarksMu.RUnlock()
 	// 获取书籍
 	b, err := ramStore.GetBook(bookID)
 	if err != nil {
 		return nil, fmt.Errorf(locale.GetString("err_getbookmark_cannot_find"), bookID)
 	}
-	return &b.BookMarks, nil
+	marks := append(model.BookMarks(nil), b.BookMarks...)
+	return &marks, nil
 }
 
 // DeleteBookMark 删除指定书籍的特定书签
 // 根据 bookID + markType + pageIndex 唯一确定一个书签
 func (ramStore *StoreInRam) DeleteBookMark(bookID string, markType model.MarkType, pageIndex int) error {
+	ramStore.bookmarksMu.Lock()
+	defer ramStore.bookmarksMu.Unlock()
 	// 获取书籍
 	b, err := ramStore.GetBook(bookID)
 	if err != nil {

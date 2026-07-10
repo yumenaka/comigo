@@ -24,7 +24,9 @@
     }
 
     function handleOpen() {
-        console.log('WebSocket连接已建立')
+        if (isDebug()) {
+            console.log('WebSocket连接已建立')
+        }
         reconnectAttempts = 0
         isIntentionallyClosed = false
         if (options && typeof options.onConnect === 'function') {
@@ -48,14 +50,18 @@
     }
 
     function handleClose() {
-        console.log('WebSocket连接已关闭')
+        if (isDebug()) {
+            console.log('WebSocket连接已关闭')
+        }
         if (!isIntentionallyClosed) {
             scheduleReconnect()
         }
     }
 
     function handleError(error) {
-        console.error('WebSocket发生错误：', error)
+        if (isDebug()) {
+            console.error('WebSocket发生错误：', error)
+        }
         if (socket) {
             socket.close()
         }
@@ -64,7 +70,9 @@
     function scheduleReconnect() {
         const config = getConfig()
         if (reconnectAttempts >= config.maxReconnectAttempts) {
-            console.log('已达到最大重连次数，停止重连')
+            if (isDebug()) {
+                console.log('已达到最大重连次数，停止重连')
+            }
             return
         }
         reconnectAttempts++

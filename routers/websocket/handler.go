@@ -1,7 +1,11 @@
 package websocket
 
 import (
+	"errors"
+	"net"
 	"net/http"
+	"net/url"
+	"strings"
 	"sync"
 
 	"github.com/google/uuid"
@@ -11,6 +15,8 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
 )
+
+const maxWebSocketMessageSize = 1 << 20
 
 func init() {
 	// Start listening for incoming chat messages
@@ -47,8 +53,32 @@ var upGrader = websocket.Upgrader{
 			logger.Info(locale.GetString("log_path_error") + "\n")
 			return false
 		}
-		return true
+		return websocketOriginAllowed(r)
 	},
+}
+
+// websocketOriginAllowed 允许原生客户端、同源页面、反向代理和 Wails 内部页面。
+func websocketOriginAllowed(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		return true
+	}
+	parsed, err := url.Parse(origin)
+	if err != nil {
+		return false
+	}
+	if parsed.Scheme == "wails" {
+		return true
+	}
+	if parsed.Host == "" {
+		return false
+	}
+	if strings.EqualFold(parsed.Host, r.Host) {
+		return true
+	}
+	// 代理可能把 Host 改成上游地址；浏览器不能自行设置该请求头。
+	forwardedHost, _, _ := strings.Cut(r.Header.Get("X-Forwarded-Host"), ",")
+	return strings.EqualFold(parsed.Host, strings.TrimSpace(forwardedHost))
 }
 
 // map 映射，其键对应是一个指向 WebSocket 的指针，
@@ -74,6 +104,7 @@ func WsHandler(c echo.Context) error {
 		logger.Infof("Error during connection upgradation: %v", err) // 连接升级出错
 		return err
 	}
+	wsConn.SetReadLimit(maxWebSocketMessageSize)
 	// 把新的客户端添加到全局的 "clients" 映射表中进行注册
 	clientID := uuid.New().String()
 	clientsMu.Lock()
@@ -90,7 +121,9 @@ func WsHandler(c echo.Context) error {
 		var msg Message // Read in a new message as JSON and map it to a Detail object
 		err = wsConn.ReadJSON(&msg)
 		if err != nil {
-			logger.Infof(locale.GetString("websocket_error")+"%v", err)
+			if shouldLogWebSocketReadError(err) {
+				logger.Infof(locale.GetString("websocket_error")+"%v", err)
+			}
 			// 如果从 socket 中读取数据有误，我们假设客户端已经因为某种原因断开。我们记录错误并从全局的 "clients" 映射表里删除该客户端，这样一来，我们不会继续尝试与其通信。
 			break
 		} else {
@@ -103,6 +136,11 @@ func WsHandler(c echo.Context) error {
 		}
 	}
 	return nil
+}
+
+func shouldLogWebSocketReadError(err error) bool {
+	return err != nil && !errors.Is(err, net.ErrClosed) &&
+		!websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway)
 }
 
 // 一个简单循环，从"broadcast"中连续读取数据，再按消息类型决定回复发送方或广播给其他客户端。

@@ -35,6 +35,8 @@ const (
 	webServeHTTP webServeMode = iota
 	webServeCustomTLS
 	webServeAutoTLS
+	readHeaderTimeout = 10 * time.Second
+	idleTimeout       = 2 * time.Minute
 )
 
 // StartEcho 启动网页服务
@@ -64,8 +66,10 @@ func buildHTTPServer(e *echo.Echo) (*http.Server, webServeMode, error) {
 		serveMode = webServeCustomTLS
 	}
 	return &http.Server{
-		Addr:    webServerAddr(),
-		Handler: e, // echo.Echo 实现了 http.Handler 接口
+		Addr:              webServerAddr(),
+		Handler:           e, // echo.Echo 实现了 http.Handler 接口
+		ReadHeaderTimeout: readHeaderTimeout,
+		IdleTimeout:       idleTimeout,
 	}, serveMode, nil
 }
 
@@ -95,8 +99,10 @@ func buildAutoTLSServer(e *echo.Echo) (*http.Server, webServeMode, error) {
 	}
 	logger.Infof(locale.GetString("log_auto_tls_enabled_for_domain"), config.GetCfg().Host)
 	return &http.Server{
-		Addr:    ":443",
-		Handler: e,
+		Addr:              ":443",
+		Handler:           e,
+		ReadHeaderTimeout: readHeaderTimeout,
+		IdleTimeout:       idleTimeout,
 		TLSConfig: &tls.Config{
 			GetCertificate: autoTLSManager.GetCertificate,
 			NextProtos:     autoTLSNextProtos(),

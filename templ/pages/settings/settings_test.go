@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
@@ -206,6 +207,30 @@ func TestStoreConfigRendersWailsFolderPicker(t *testing.T) {
 func TestMainAreaHidesServerLogInWailsBuild(t *testing.T) {
 	if got, want := showServerLogInSettings(), !assets.IsWailsBuild(); got != want {
 		t.Fatalf("showServerLogInSettings() = %v, want %v", got, want)
+	}
+}
+
+// TestGenericConfigEndpointsOnlyAllowRenderedFields 防止通用反射接口修改未在设置页开放的字段。
+func TestGenericConfigEndpointsOnlyAllowRenderedFields(t *testing.T) {
+	e := echo.New()
+	for _, test := range []struct {
+		name string
+		body string
+		call func(echo.Context) error
+	}{
+		{name: "password", body: `{"name":"Password","value":"changed"}`, call: func(c echo.Context) error { _, _, err := updateStringConfigFromJSON(c); return err }},
+		{name: "oversized port", body: `{"name":"Port","value":70000}`, call: func(c echo.Context) error { _, _, _, err := updateNumberConfigFromJSON(c); return err }},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/api/config", strings.NewReader(test.body))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			if err := test.call(e.NewContext(req, httptest.NewRecorder())); err == nil {
+				t.Fatal("unexposed config field should be rejected")
+			}
+		})
+	}
+	if err := validateArrayConfigName("EnabledPluginList"); err == nil {
+		t.Fatal("generic array API should not edit EnabledPluginList")
 	}
 }
 

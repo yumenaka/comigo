@@ -26,6 +26,11 @@ func SetShutdownHandler() {
 	// 恢复中断信号的默认行为并通知用户关机。
 	stop()
 	logger.Info(locale.GetString("shutdown_hint"))
+	Shutdown()
+}
+
+// Shutdown 统一清理缓存并关闭 Web、Tailscale、SSE 与 WebSocket 服务。
+func Shutdown() {
 	// 清理临时文件
 	if config.GetCfg().ClearCacheExit {
 		logger.Infof("\r"+locale.GetString("start_clear_file")+" CacheDir:%s ", config.GetCfg().CacheDir)

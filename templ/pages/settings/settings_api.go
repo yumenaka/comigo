@@ -98,14 +98,45 @@ func jsonBadRequest(err error) error {
 	return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("%s: %v", locale.GetString("err_invalid_json_request"), err))
 }
 
-// rejectRuntimeDatabaseConfig 拦截数据库后端相关设置。
-// 数据库只在启动时打开，不支持通过设置页 API 在运行中启用、关闭或切换后端。
-func rejectRuntimeDatabaseConfig(name string) error {
+func validateStringConfigName(name string) error {
 	switch name {
-	case "EnableDatabase", "DBType", "DBDSN":
-		return errors.New("database settings require restart")
-	default:
+	case "CacheDir", "Host", "BasePath", "ZipFileTextEncoding":
 		return nil
+	default:
+		return errors.New("string config is not editable: " + name)
+	}
+}
+
+func validateBoolConfigName(name string) error {
+	switch name {
+	case "DisableLAN", "OpenBrowser", "EnableUpload", "Debug", "UseCache", "ClearCacheExit", "LogToFile", "GenerateMetaData", "EnablePlugin":
+		return nil
+	default:
+		return errors.New("bool config is not editable: " + name)
+	}
+}
+
+func validateNumberConfig(name string, value int) error {
+	minValue, maxValue := 0, 65535
+	switch name {
+	case "TimeoutLimitForScan":
+		minValue, maxValue = 1, 3600
+	case "AutoRescanIntervalMinutes", "Port", "Timeout", "MaxScanDepth", "MinImageNum":
+	default:
+		return errors.New("number config is not editable: " + name)
+	}
+	if value < minValue || value > maxValue {
+		return fmt.Errorf("%s must be between %d and %d", name, minValue, maxValue)
+	}
+	return nil
+}
+
+func validateArrayConfigName(name string) error {
+	switch name {
+	case "StoreUrls", "ExcludePath", "SupportMediaType", "SupportFileType":
+		return nil
+	default:
+		return errors.New("array config is not editable: " + name)
 	}
 }
 
@@ -135,7 +166,7 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 	if request.Name == "" {
 		return "", "", errors.New("name is required")
 	}
-	if err := rejectRuntimeDatabaseConfig(request.Name); err != nil {
+	if err := validateStringConfigName(request.Name); err != nil {
 		return "", "", err
 	}
 
@@ -191,7 +222,7 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 	if request.Name == "" {
 		return "", false, errors.New("name is required")
 	}
-	if err := rejectRuntimeDatabaseConfig(request.Name); err != nil {
+	if err := validateBoolConfigName(request.Name); err != nil {
 		return "", false, err
 	}
 
@@ -249,6 +280,9 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, er
 
 	if request.Name == "" {
 		return "", 0, nil, errors.New("name is required")
+	}
+	if err := validateNumberConfig(request.Name, request.Value); err != nil {
+		return "", 0, nil, err
 	}
 
 	// 将 int 转换为 string
@@ -452,6 +486,9 @@ func AddArrayConfigHandler(c echo.Context) error {
 	decodedConfigName, err := decodeBase64URLStrict(request.ConfigName)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "configName is not valid base64url")
+	}
+	if err := validateArrayConfigName(decodedConfigName); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	decodedAddValue, err := decodeBase64URLStrict(request.AddValue)
 	if err != nil {
@@ -697,6 +734,9 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 	decodedConfigName, err := decodeBase64URLStrict(request.ConfigName)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "configName is not valid base64url")
+	}
+	if err := validateArrayConfigName(decodedConfigName); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	decodedDeleteValue, err := decodeBase64URLStrict(request.DeleteValue)
 	if err != nil {

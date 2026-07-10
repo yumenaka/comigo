@@ -1,6 +1,8 @@
 package error_page
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/templ/common"
 )
@@ -14,5 +16,7 @@ func NotFoundCommon(c echo.Context) error {
 		[]string{},
 	)
 	// 渲染 404 页面
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
+	c.Response().WriteHeader(http.StatusNotFound)
 	return common.RenderHTML(c, indexHtml)
 }

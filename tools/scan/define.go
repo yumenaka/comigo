@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/yumenaka/comigo/tools/vfs"
 )
@@ -25,6 +26,9 @@ type ConfigInterface interface {
 }
 
 var cfg ConfigInterface
+
+// scanMutex 串行化扫描，保护扫描期间共享的 cfg 与 currentFS。
+var scanMutex sync.Mutex
 
 // currentFS 当前使用的文件系统实例（扫描期间有效）
 var currentFS vfs.FileSystem

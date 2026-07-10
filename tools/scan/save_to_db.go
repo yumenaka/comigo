@@ -12,11 +12,10 @@ import (
 )
 
 // SaveBooksToDatabase 4，保存扫描结果到数据库
-func SaveBooksToDatabase(cfg ConfigInterface) error {
+func SaveBooksToDatabase(_ ConfigInterface) error {
 	if sqlc.DbStore == nil {
 		return errors.New("database store is not initialized")
 	}
-	InitConfig(cfg)
 	allBooks, err := store.RamStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)

@@ -3,6 +3,7 @@ package vfs
 import (
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/yumenaka/comigo/tools"
@@ -120,6 +121,55 @@ func TestLocalFS(t *testing.T) {
 	}
 	if n != len(testContent) {
 		t.Errorf("File.Read() 读取 %d 字节, 期望 %d 字节", n, len(testContent))
+	}
+}
+
+// TestGetOrCreateReturnsSingleInstance 验证并发请求不会重复创建并泄漏文件系统实例。
+func TestGetOrCreateReturnsSingleInstance(t *testing.T) {
+	CloseAll()
+	t.Cleanup(CloseAll)
+	const workers = 20
+	storeDir := t.TempDir()
+	results := make(chan FileSystem, workers)
+	errs := make(chan error, workers)
+	var wg sync.WaitGroup
+	for range workers {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			fs, err := GetOrCreate(storeDir)
+			results <- fs
+			errs <- err
+		}()
+	}
+	wg.Wait()
+	close(results)
+	close(errs)
+	for err := range errs {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	var first FileSystem
+	for fs := range results {
+		if first == nil {
+			first = fs
+			continue
+		}
+		if fs != first {
+			t.Fatal("concurrent GetOrCreate returned different instances")
+		}
+	}
+}
+
+// TestRegistryKeySeparatesCredentialsAndOptions 验证不同身份或配置不会共享可变实例。
+func TestRegistryKeySeparatesCredentialsAndOptions(t *testing.T) {
+	base := registryKey("webdav://alice:secret@example.com/books", nil)
+	if base == registryKey("webdav://bob:secret@example.com/books", nil) {
+		t.Fatal("different credentials must not share a VFS instance")
+	}
+	if base == registryKey("webdav://alice:secret@example.com/books", []Options{{CacheEnabled: true, Timeout: 30}}) {
+		t.Fatal("different options must not share a mutable VFS instance")
 	}
 }
 

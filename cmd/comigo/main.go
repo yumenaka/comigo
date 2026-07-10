@@ -3,12 +3,10 @@ package main
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -45,8 +43,6 @@ func main() {
 			cmd.ScanStore()
 			// 保存书籍元数据
 			cmd.SaveMetadata()
-			// 生成书组
-			model.GenerateBookGroup()
 			// 判断是否需要打开浏览器
 			config.OpenBrowserIfNeeded()
 			return nil
@@ -90,17 +86,20 @@ func main() {
 // startServer 启动服务器
 func startServer() {
 	// 启动网页服务器（不阻塞）
-	routers.StartWebServer()
+	if err := routers.StartWebServer(); err != nil {
+		logger.Infof("%v", err)
+		return
+	}
 	// 启动或停止 Tailscale 服务（如启用）
 	routers.StartTailscale()
+	// 加载用户插件，与 CLI 和桌面入口保持一致。
+	cmd.LoadUserPlugins()
 	// 分析命令行参数，生成书库URL
 	cmd.AddStoreUrls(cmd.Args)
 	// 加载书籍元数据（包括书签）
 	cmd.LoadMetadata()
 	// 扫描书库
 	cmd.ScanStore()
-	// 生成书组
-	model.GenerateBookGroup()
 	// 保存书籍元数据（包括书签）
 	cmd.SaveMetadata()
 	// 启动自动扫描（如果配置了间隔）
@@ -158,29 +157,5 @@ func shutdownServer() {
 		tools.CleanupSingleInstance()
 	}
 
-	// 清理临时文件
-	if config.GetCfg().ClearCacheExit {
-		logger.Infof("\r"+locale.GetString("start_clear_file")+" CacheDir:%s ", config.GetCfg().CacheDir)
-		allBooks, err := model.IStore.ListBooks()
-		if err != nil {
-			logger.Infof(locale.GetString("log_error_listing_books"), err)
-		}
-		for _, book := range allBooks {
-			// 清理某一本书的缓存
-			cachePath := filepath.Join(config.GetCfg().CacheDir, book.BookID)
-			err := os.RemoveAll(cachePath)
-			if err != nil {
-				logger.Infof(locale.GetString("log_error_clearing_temp_files"), cachePath)
-			} else if config.GetCfg().Debug {
-				logger.Infof(locale.GetString("log_cleared_temp_files"), cachePath)
-			}
-		}
-		logger.Infof("%s", locale.GetString("clear_temp_file_completed"))
-	}
-
-	// 统一走 routers.StopWebServer，确保 SSE、WebSocket、Tailscale 和 HTTP Server 按同一套流程关闭。
-	if err := routers.StopWebServer(); err != nil {
-		logger.Infof(locale.GetString("err_server_shutdown_failed")+": %v", err)
-	}
-	logger.Info("Comigo Server exit.")
+	cmd.Shutdown()
 }

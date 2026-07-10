@@ -7,6 +7,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/store"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 )
 
@@ -40,6 +42,32 @@ func TestParseGetFileRequestDisablesCacheForNoCacheAndTransforms(t *testing.T) {
 				t.Fatalf("%s 应禁用图片缓存", tc.name)
 			}
 		})
+	}
+}
+
+// TestGetFileRejectsPageOutsideBook 防止 filename 绕过书籍元数据读取目录外文件。
+func TestGetFileRejectsPageOutsideBook(t *testing.T) {
+	oldStore := model.IStore
+	testStore := &store.StoreInRam{}
+	model.IStore = testStore
+	defer func() { model.IStore = oldStore }()
+	book := &model.Book{BookInfo: model.BookInfo{
+		BookID:   "book1",
+		BookPath: t.TempDir(),
+		Type:     model.TypeDir,
+	}, PageInfos: []model.PageInfo{{Name: "page.jpg"}}}
+	if err := testStore.StoreBook(book); err != nil {
+		t.Fatal(err)
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/api/get-file?id=book1&filename=../secret.txt", nil)
+	rec := httptest.NewRecorder()
+	if err := GetFile(e.NewContext(req, rec)); err != nil {
+		t.Fatal(err)
+	}
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("outside page status = %d, want 404", rec.Code)
 	}
 }
 

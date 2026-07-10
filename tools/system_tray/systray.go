@@ -4,8 +4,6 @@ package system_tray
 
 import (
 	"embed"
-	"fmt"
-	"os/exec"
 	"runtime"
 	"sync/atomic"
 
@@ -269,15 +267,12 @@ func initMenuItems() {
 			if storeUrl == "" {
 				continue
 			}
-			menuTitle := fmt.Sprintf("%s", storeUrl)
-			mStore := menuItems.mOpenDir.AddSubMenuItem(menuTitle, storeUrl)
+			mStore := menuItems.mOpenDir.AddSubMenuItem(storeUrl, storeUrl)
 			menuItems.mStoreFolders = append(menuItems.mStoreFolders, mStore)
-			// 避免闭包问题，在循环内部创建函数并立即调用
-			func(url string) {
-				mStore.Click(func() {
-					openDirectory(url)
-				})
-			}(storeUrl)
+			// Go 1.22 起 range 变量按迭代独立，可直接捕获当前路径。
+			mStore.Click(func() {
+				openDirectory(storeUrl)
+			})
 		}
 	}
 
@@ -366,16 +361,7 @@ func onExit() {
 
 // openDirectory 打开指定目录
 func openDirectory(path string) {
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("explorer", path)
-	case "darwin":
-		cmd = exec.Command("open", path)
-	default: // linux
-		cmd = exec.Command("xdg-open", path)
-	}
-	if err := cmd.Start(); err != nil {
+	if err := tools.OpenURL(path); err != nil {
 		logger.Infof(locale.GetString("log_failed_to_open_directory"), err)
 	}
 }

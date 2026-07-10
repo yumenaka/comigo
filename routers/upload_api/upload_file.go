@@ -1,8 +1,10 @@
 package upload_api
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -18,6 +20,11 @@ import (
 )
 
 var RescanBroadcast *chan string
+
+const (
+	maxUploadFileSize = int64(5000 << 20)
+	maxUploadBodySize = maxUploadFileSize + 1<<20 // 为 multipart 边界与字段预留 1 MiB。
+)
 
 func uploadError(key string, args ...interface{}) map[string]interface{} {
 	return map[string]interface{}{
@@ -73,10 +80,15 @@ func UploadFile(c echo.Context) error {
 	}
 
 	// 获取表单文件
-	form, err := c.MultipartForm()
+	form, err := parseUploadMultipartForm(c, maxUploadBodySize)
 	if err != nil {
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &maxBytesErr) {
+			return c.JSON(http.StatusRequestEntityTooLarge, uploadError("upload_file_too_large", "multipart"))
+		}
 		return c.JSON(http.StatusBadRequest, uploadError("upload_parse_form_failed"))
 	}
+	defer form.RemoveAll()
 
 	files := form.File["files"]
 	if len(files) == 0 {
@@ -88,7 +100,7 @@ func UploadFile(c echo.Context) error {
 	// 遍历所有上传的文件
 	for _, file := range files {
 		// 验证文件大小（例如，不超过 5000 MB）
-		if file.Size > 5000<<20 {
+		if file.Size > maxUploadFileSize {
 			return c.JSON(http.StatusBadRequest, uploadError("upload_file_too_large", file.Filename))
 		}
 
@@ -149,34 +161,8 @@ func UploadFile(c echo.Context) error {
 		// 生成安全的文件名，避免目录遍历攻击
 		filename := filepath.Base(file.Filename)
 
-		// 确保文件名唯一（可选）
-		destPath := filepath.Join(storeUrl, filename)
-		// 如果文件已存在，追加编号
-		counter := 1
-		fileExt := filepath.Ext(filename)
-		name := filename[:len(filename)-len(fileExt)]
-		for {
-			if _, err := os.Stat(destPath); os.IsNotExist(err) {
-				break
-			}
-			filename = fmt.Sprintf("%s_%d%s", name, counter, fileExt)
-			destPath = filepath.Join(storeUrl, filename)
-			counter++
-		}
-		// 保存文件
-		src, err := file.Open()
+		filename, err = saveUploadedFile(storeUrl, filename, file)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, uploadError("upload_open_file_failed", filename))
-		}
-		defer src.Close()
-
-		dst, err := os.Create(destPath)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, uploadError("upload_create_file_failed", filename))
-		}
-		defer dst.Close()
-
-		if _, err = io.Copy(dst, src); err != nil {
 			return c.JSON(http.StatusInternalServerError, uploadError("upload_save_file_failed", filename))
 		}
 		logger.Infof(locale.GetString("log_file_upload_success"), filename)
@@ -201,4 +187,47 @@ func UploadFile(c echo.Context) error {
 		"message": locale.GetString("file_uploaded_successfully"),
 		"files":   uploadedFiles,
 	})
+}
+
+// parseUploadMultipartForm 在 multipart 写入临时磁盘前限制整个请求大小。
+func parseUploadMultipartForm(c echo.Context, maxBytes int64) (*multipart.Form, error) {
+	c.Request().Body = http.MaxBytesReader(c.Response(), c.Request().Body, maxBytes)
+	return c.MultipartForm()
+}
+
+// saveUploadedFile 用 O_EXCL 原子选择文件名，并在复制结束后立即关闭文件。
+func saveUploadedFile(storeURL, filename string, file *multipart.FileHeader) (string, error) {
+	src, err := file.Open()
+	if err != nil {
+		return filename, err
+	}
+	defer src.Close()
+
+	ext := filepath.Ext(filename)
+	name := filename[:len(filename)-len(ext)]
+	for counter := 0; ; counter++ {
+		candidate := filename
+		if counter > 0 {
+			candidate = fmt.Sprintf("%s_%d%s", name, counter, ext)
+		}
+		destPath := filepath.Join(storeURL, candidate)
+		dst, err := os.OpenFile(destPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+		if errors.Is(err, os.ErrExist) {
+			continue
+		}
+		if err != nil {
+			return candidate, err
+		}
+		_, copyErr := io.Copy(dst, src)
+		closeErr := dst.Close()
+		if copyErr != nil {
+			_ = os.Remove(destPath)
+			return candidate, copyErr
+		}
+		if closeErr != nil {
+			_ = os.Remove(destPath)
+			return candidate, closeErr
+		}
+		return candidate, nil
+	}
 }

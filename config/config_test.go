@@ -62,6 +62,13 @@ func TestUpdateConfigFilePersistsEnabledPluginList(t *testing.T) {
 	if !strings.Contains(string(content), "EnabledPluginList") || !strings.Contains(string(content), "clock") {
 		t.Fatalf("启用插件列表未写入配置文件:\n%s", string(content))
 	}
+	info, err := os.Stat(cfg.ConfigFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Fatalf("config mode = %o, want 600", info.Mode().Perm())
+	}
 }
 
 // 验证临时阅读模式不会创建、保存或删除配置文件。
@@ -244,6 +251,30 @@ func TestUpdateConfigByJsonUpdatesGlobalConfig(t *testing.T) {
 	}
 	if cfg.MinImageNum != 1 {
 		t.Fatalf("MinImageNum 未按 JSON 更新: got %d want 1", cfg.MinImageNum)
+	}
+}
+
+// TestUpdateConfigByJsonRejectsPartialAndRuntimeUpdates 确认错误请求不会留下部分配置变更。
+func TestUpdateConfigByJsonRejectsPartialAndRuntimeUpdates(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() { cfg = oldCfg })
+	cfg = newDefaultConfig()
+	cfg.Debug = false
+	originalPort := cfg.Port
+
+	for _, body := range []string{
+		`{"Debug":true,"Port":"invalid"}`,
+		`{"Debug":true,"UnknownField":1}`,
+		`{"ConfigFile":"outside.toml"}`,
+		`{"Password":"changed"}`,
+		`{"Port":1234.5}`,
+	} {
+		if err := UpdateConfigByJson(body); err == nil {
+			t.Fatalf("invalid update should fail: %s", body)
+		}
+		if cfg.Debug || cfg.Port != originalPort || cfg.ConfigFile != "" || cfg.Password != "" {
+			t.Fatalf("invalid update changed config: %#v", cfg)
+		}
 	}
 }
 

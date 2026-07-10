@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	stdlog "log"
@@ -312,13 +313,8 @@ func Run() error {
 		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	)
-	if _, err := program.Run(); err != nil {
-		return err
-	}
-	if err := routers.StopWebServer(); err != nil {
-		return err
-	}
-	return nil
+	_, runErr := program.Run()
+	return errors.Join(runErr, routers.StopWebServer())
 }
 
 // shouldBypassTUI 在 Cobra 正式解析前识别 --no-tui/-n。
@@ -352,6 +348,18 @@ func shouldBypassTUI(args []string) bool {
 
 // runWithoutTUI 在非终端环境下（如管道、重定向）退回普通服务模式启动。
 func runWithoutTUI() error {
+	if err := startBackend(); err != nil {
+		return err
+	}
+	// 非 TUI 模式没有右侧 QRCode 面板，需要在命令行最后打印阅读链接和二维码。
+	cmd.ShowQRCode()
+	cmd.OpenReaderBrowserIfNeeded()
+	cmd.SetShutdownHandler()
+	return nil
+}
+
+// startBackend 统一 TUI 与无界面 CLI 的服务和书库启动顺序。
+func startBackend() error {
 	cmd.Execute()
 	if err := routers.StartWebServer(); err != nil {
 		return err
@@ -364,10 +372,6 @@ func runWithoutTUI() error {
 	cmd.ScanStore()
 	cmd.SaveMetadata()
 	config.StartOrStopAutoRescan()
-	// 非 TUI 模式没有右侧 QRCode 面板，需要在命令行最后打印阅读链接和二维码。
-	cmd.ShowQRCode()
-	cmd.OpenReaderBrowserIfNeeded()
-	cmd.SetShutdownHandler()
 	return nil
 }
 
@@ -386,19 +390,9 @@ func startBackendCmd() tea.Cmd {
 				msg = backendErrorMsg{err: fmt.Errorf("tui 后台启动异常: %v", recovered)}
 			}
 		}()
-		// Comigo 后台服务启动
-		cmd.Execute()
-		if err := routers.StartWebServer(); err != nil {
+		if err := startBackend(); err != nil {
 			return backendErrorMsg{err: err}
 		}
-		routers.StartTailscale()
-		cmd.LoadUserPlugins()
-		cmd.AddStoreUrls(cmd.Args)
-		cmd.SetCwdAsScanPathIfNeed()
-		cmd.LoadMetadata()
-		cmd.ScanStore()
-		cmd.SaveMetadata()
-		config.StartOrStopAutoRescan()
 		go cmd.SetShutdownHandler()
 		return backendStartedMsg{}
 	}

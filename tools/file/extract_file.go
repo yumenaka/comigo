@@ -9,6 +9,7 @@ import (
 
 	"github.com/yumenaka/archives"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -30,6 +31,10 @@ func extractFileHandler(ctx context.Context, f archives.FileInfo) error {
 
 	// 目标文件路径
 	targetPath := filepath.Join(extractPath, f.NameInArchive)
+	// 归档文件名是不可信输入，禁止通过 ../ 或绝对路径写出解压目录。
+	if !tools.IsSubPath(extractPath, targetPath) {
+		return errors.New("archive entry escapes extraction directory: " + f.NameInArchive)
+	}
 
 	// 如果是目录，创建目录并返回
 	if f.IsDir() {

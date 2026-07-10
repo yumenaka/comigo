@@ -3,6 +3,7 @@ package logger
 import (
 	"bytes"
 	"fmt"
+	"html"
 	"io"
 	"os"
 	"path"
@@ -219,12 +220,13 @@ func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debu
 				c.RealIP(),
 				reqURI,
 			)
+			// RealIP 与 RequestURI 都来自请求，写入日志面板 HTML 前必须转义。
 			logMsgWeb := fmt.Sprintf("[%s:%d]<span style=\"color:#d08700\">[%6.2fms]</span><span style=\"color:#0084d1\">[%s]</span>%s",
 				reqMethod,
 				statusCode,
 				latencyTime,
-				c.RealIP(),
-				reqURI,
+				html.EscapeString(c.RealIP()),
+				html.EscapeString(reqURI),
 			)
 			// 把log发送给所有网页客户端 <span style="color:green">[GET:200]</span>
 			nowTimeStr := "<span style=\"color:oklch(62.7% 0.194 149.214)\">[" + time.Now().Format("2006-01-02 15:04:05") + "]</span>"

@@ -32,9 +32,6 @@ func Start() *Tray {
 
 // SetContext 保存 Wails runtime context，供托盘点击恢复窗口或退出。
 func (t *Tray) SetContext(ctx context.Context) {
-	if t == nil {
-		return
-	}
 	t.mu.Lock()
 	t.ctx = ctx
 	t.mu.Unlock()
@@ -42,7 +39,7 @@ func (t *Tray) SetContext(ctx context.Context) {
 
 // Stop 停止托盘；由 Wails OnShutdown 调用。
 func (t *Tray) Stop() {
-	if t == nil || !t.enabled {
+	if !t.enabled {
 		return
 	}
 	t.stopOnce.Do(func() {
@@ -53,14 +50,9 @@ func (t *Tray) Stop() {
 	})
 }
 
-// HideOnClose 仅在托盘可恢复窗口时让关闭按钮隐藏窗口。
-func (t *Tray) HideOnClose() bool {
-	return t != nil && t.enabled
-}
-
 // HandleBeforeClose 接管关闭按钮：有托盘时隐藏窗口并阻止 Wails 默认退出。
 func (t *Tray) HandleBeforeClose(ctx context.Context) bool {
-	if t == nil || !t.enabled || t.quitting.Load() {
+	if !t.enabled || t.quitting.Load() {
 		return false
 	}
 	t.hideWindow(ctx)

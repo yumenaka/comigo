@@ -132,7 +132,8 @@ func writeConfigBytes(filePath string, data []byte) error {
 	if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
 		return err
 	}
-	return writeFileAtomically(filePath, data, 0o644)
+	// 配置可能包含登录密码、Tailscale key 和远程书库凭据，只允许当前用户读取。
+	return writeFileAtomically(filePath, data, 0o600)
 }
 
 // UpdateConfigFile 更新当前正在使用的配置文件。

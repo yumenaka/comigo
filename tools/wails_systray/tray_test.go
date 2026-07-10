@@ -2,14 +2,14 @@
 
 package wails_systray
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
-// TestHideOnCloseReflectsTraySupport 确认关闭按钮行为只跟托盘可用性绑定。
-func TestHideOnCloseReflectsTraySupport(t *testing.T) {
-	if (&Tray{enabled: true}).HideOnClose() != true {
-		t.Fatal("enabled tray should hide window on close")
-	}
-	if (&Tray{enabled: false}).HideOnClose() != false {
-		t.Fatal("disabled tray should not hide window on close")
+// TestHandleBeforeCloseWithoutTray 确认无托盘环境仍使用 Wails 默认关闭行为。
+func TestHandleBeforeCloseWithoutTray(t *testing.T) {
+	if (&Tray{}).HandleBeforeClose(context.Background()) {
+		t.Fatal("disabled tray should not intercept window close")
 	}
 }

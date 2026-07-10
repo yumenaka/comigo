@@ -17,7 +17,6 @@ import (
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
-	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/tools/wails_systray"
 )
@@ -53,7 +52,7 @@ func main() {
 			tray.SetContext(ctx)
 			if err := startComigoForWails(ctx); err != nil {
 				_, _ = fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
+				wailsruntime.Quit(ctx)
 			}
 		},
 		OnShutdown: func(context.Context) {
@@ -97,7 +96,6 @@ func startComigoForWails(ctx context.Context) error {
 // finishWailsStartupScan 后台刷新书库，避免 Wails 首页等扫描完成才出现。
 func finishWailsStartupScan(ctx context.Context) {
 	cmd.ScanStore()
-	model.GenerateBookGroup()
 	cmd.SaveMetadata()
 	wailsruntime.WindowReload(ctx)
 }

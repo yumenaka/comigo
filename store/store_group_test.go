@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -24,6 +25,40 @@ func (s *fakeModelStore) GenerateBookGroup() error                 { return nil 
 func (s *fakeModelStore) StoreBookMark(mark *model.BookMark) error { return nil }
 func (s *fakeModelStore) GetBookMarks(bookID string) (*model.BookMarks, error) {
 	return &model.BookMarks{}, nil
+}
+
+// TestStoreBookMarkConcurrentUpdates 验证多个阅读标签页不会互相覆盖书签。
+func TestStoreBookMarkConcurrentUpdates(t *testing.T) {
+	useTempConfigDir(t)
+	ramStore := &StoreInRam{}
+	book := newStoreGroupTestBook(t.TempDir(), "concurrent-bookmarks")
+	if err := ramStore.StoreBook(book); err != nil {
+		t.Fatal(err)
+	}
+	const count = 20
+	var wg sync.WaitGroup
+	errs := make(chan error, count)
+	for page := range count {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			errs <- ramStore.StoreBookMark(&model.BookMark{BookID: book.BookID, Type: model.UserMark, PageIndex: page})
+		}()
+	}
+	wg.Wait()
+	close(errs)
+	for err := range errs {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	marks, err := ramStore.GetBookMarks(book.BookID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(*marks) != count {
+		t.Fatalf("bookmark count = %d, want %d", len(*marks), count)
+	}
 }
 func (s *fakeModelStore) DeleteBookMark(bookID string, markType model.MarkType, pageIndex int) error {
 	return nil
@@ -99,8 +134,35 @@ func TestStoreBookPersistsMetaAfterInMemoryStore(t *testing.T) {
 	if _, err := ramStore.GetBook(book.BookID); err != nil {
 		t.Fatalf("StoreBook 没有写入内存 Store: %v", err)
 	}
-	if _, err := os.Stat(metaJSONPath(configDir, book)); err != nil {
+	info, err := os.Stat(metaJSONPath(configDir, book))
+	if err != nil {
 		t.Fatalf("StoreBook 应写 metadata 文件: %v", err)
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Fatalf("metadata mode = %o, want 600", info.Mode().Perm())
+	}
+}
+
+// 验证覆盖历史 metadata 时也会把宽松权限收紧为仅当前用户可读写。
+func TestSaveMetaJsonTightensExistingFilePermissions(t *testing.T) {
+	configDir := useTempConfigDir(t)
+	book := newStoreGroupTestBook(t.TempDir(), "existing-metadata")
+	fileName := metaJSONPath(configDir, book)
+	if err := os.MkdirAll(filepath.Dir(fileName), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(fileName, []byte("{}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := SaveMetaJson(book); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(fileName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Fatalf("metadata mode = %o, want 600", info.Mode().Perm())
 	}
 }
 

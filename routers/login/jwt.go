@@ -29,9 +29,13 @@ func newClaims(username string) *JwtCustomClaims {
 		Username: username,
 		Admin:    true, // 当前是单管理员模型，已通过配置页维护管理员账号密码。
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(config.GetCfg().Timeout))),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(loginDuration())),
 		},
 	}
+}
+
+func loginDuration() time.Duration {
+	return time.Minute * time.Duration(config.GetCfg().Timeout)
 }
 
 // signedToken 将声明签名为 JWT 字符串。
@@ -45,7 +49,7 @@ func setTokenCookie(c echo.Context, token string) {
 	cookie := new(http.Cookie)
 	cookie.Name = CookieName
 	cookie.Value = token
-	cookie.Expires = time.Now().Add(24 * time.Hour * 30) // 30天有效期
+	cookie.Expires = time.Now().Add(loginDuration())
 	cookie.Path = "/"
 	cookie.HttpOnly = true                                          // JWT 不再暴露给前端 JS，退出登录统一走 /api/logout。
 	cookie.Secure = c.Scheme() == "https" || c.Request().TLS != nil // 如果是HTTPS则设置Secure

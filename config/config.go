@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -511,8 +512,10 @@ func UpdateConfigByJson(jsonString string) error {
 		return err
 	}
 
-	// cfg 是结构体值，反射更新必须先取地址，避免配置 API 写入时 panic。
-	v := reflect.ValueOf(&cfg).Elem()
+	// 先更新副本，全部字段校验成功后再替换，避免错误请求留下部分变更。
+	candidate := cfg
+	v := reflect.ValueOf(&candidate).Elem()
+	configType := v.Type()
 
 	for key, value := range updates {
 		if key == "BasePath" {
@@ -521,18 +524,24 @@ func UpdateConfigByJson(jsonString string) error {
 			}
 		}
 		// 查找字段
-		field := v.FieldByName(key)
-		if !field.IsValid() || !field.CanSet() {
-			logger.Infof(locale.GetString("log_unknown_config_key"), key)
-			continue
+		structField, ok := configType.FieldByName(key)
+		if !ok || structField.Tag.Get("json") == "-" {
+			return fmt.Errorf("config field is not editable: %s", key)
 		}
+		switch key {
+		case "Username", "Password":
+			return fmt.Errorf("config field requires dedicated login settings API: %s", key)
+		case "EnableDatabase", "DBType", "DBDSN":
+			return fmt.Errorf("database config requires restart: %s", key)
+		}
+		field := v.FieldByIndex(structField.Index)
 
 		// 根据字段类型进行赋值
 		if err := setFieldValue(field, value); err != nil {
-			logger.Infof(locale.GetString("log_failed_to_set_field"), key, err)
-			continue
+			return fmt.Errorf("set config field %s: %w", key, err)
 		}
 	}
+	cfg = candidate
 	return nil
 }
 
@@ -544,31 +553,41 @@ func setFieldValue(field reflect.Value, value interface{}) error {
 
 	switch field.Kind() {
 	case reflect.Bool:
-		if v, ok := value.(bool); ok {
-			field.SetBool(v)
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("expected bool, got %T", value)
 		}
+		field.SetBool(v)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		// JSON 数字默认解析为 float64
-		if v, ok := value.(float64); ok {
-			field.SetInt(int64(v))
+		v, ok := value.(float64)
+		if !ok || math.Trunc(v) != v || v > math.MaxInt64 || v < math.MinInt64 || field.OverflowInt(int64(v)) {
+			return fmt.Errorf("expected integer, got %v", value)
 		}
+		field.SetInt(int64(v))
 	case reflect.String:
-		if v, ok := value.(string); ok {
-			field.SetString(v)
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("expected string, got %T", value)
 		}
+		field.SetString(v)
 	case reflect.Slice:
 		// 处理 []string 类型
-		if field.Type().Elem().Kind() == reflect.String {
-			if arr, ok := value.([]interface{}); ok {
-				strSlice := make([]string, 0, len(arr))
-				for _, item := range arr {
-					if str, ok := item.(string); ok {
-						strSlice = append(strSlice, str)
-					}
-				}
-				field.Set(reflect.ValueOf(strSlice))
-			}
+		arr, ok := value.([]interface{})
+		if field.Type().Elem().Kind() != reflect.String || !ok {
+			return fmt.Errorf("expected string array, got %T", value)
 		}
+		strSlice := make([]string, 0, len(arr))
+		for _, item := range arr {
+			str, ok := item.(string)
+			if !ok {
+				return fmt.Errorf("expected string array item, got %T", item)
+			}
+			strSlice = append(strSlice, str)
+		}
+		field.Set(reflect.ValueOf(strSlice))
+	default:
+		return fmt.Errorf("unsupported config field type: %s", field.Type())
 	}
 	return nil
 }

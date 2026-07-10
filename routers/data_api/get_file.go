@@ -58,15 +58,18 @@ func GetFile(c echo.Context) error {
 		return c.Blob(http.StatusOK, contentType, imgData)
 	}
 
-	// 如果启用了本地缓存
-	if handled, err := serveCachedPicture(c, req); handled || err != nil {
-		return err
-	}
 	// 获取书籍信息
 	book, err := model.IStore.GetBook(req.bookID)
 	if err != nil {
 		logger.Infof(locale.GetString("log_getbook_error_common"), err)
 		return apiresp.Error(c, http.StatusNotFound, "book_not_found", "Book not found", map[string]string{"id": req.bookID})
+	}
+	if !bookContainsPage(book, req.fileName) {
+		return apiresp.Error(c, http.StatusNotFound, "page_not_found", "Page not found", map[string]string{"filename": req.fileName})
+	}
+	// 缓存也必须经过书籍与页面校验，不能让旧缓存绕过当前元数据边界。
+	if handled, err := serveCachedPicture(c, req); handled || err != nil {
+		return err
 	}
 
 	// 获取图片数据
@@ -80,6 +83,16 @@ func GetFile(c echo.Context) error {
 	savePictureCache(c, req, book, imgData, contentType)
 	// 返回图片数据
 	return c.Blob(http.StatusOK, contentType, imgData)
+}
+
+// bookContainsPage 只允许读取扫描后公开在书籍元数据中的页面。
+func bookContainsPage(book *model.Book, filename string) bool {
+	for _, page := range book.PageInfos {
+		if page.Name == filename {
+			return true
+		}
+	}
+	return false
 }
 
 func parseGetFileRequest(c echo.Context) (getFileRequest, error) {

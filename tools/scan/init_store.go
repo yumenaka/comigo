@@ -19,6 +19,9 @@ import (
 // InitStore 扫描书库路径，取得路径里的书籍
 // 支持本地路径和远程 URL（WebDAV 等）
 func InitStore(storePath string, cfg ConfigInterface) error {
+	scanMutex.Lock()
+	defer scanMutex.Unlock()
+
 	InitConfig(cfg)
 
 	if tools.DetectStoreURL(storePath).Type == tools.StoreBackendComigo {
@@ -225,7 +228,7 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 			logger.Infof(locale.GetString("log_skip_unsupported_file_type")+" (路径: %s)", file.Name, file.Path)
 			continue
 		}
-			// 计算路径深度
+		// 计算路径深度
 		relPath, err := filepath.Rel(storePathAbs, file.Path)
 		if err != nil {
 			logger.Infof(locale.GetString("log_failed_to_get_relative_path"), err)

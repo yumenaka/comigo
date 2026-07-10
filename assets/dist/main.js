@@ -6703,24 +6703,6 @@ function $d4bdadc633a1d79c$export$4a6bcc1fb47dea8() {
 document.addEventListener('DOMContentLoaded', $d4bdadc633a1d79c$export$4a6bcc1fb47dea8);
 
 
-// Alpine 使用 Persist 插件，用会话 cookie 作为存储
-// https://alpinejs.dev/plugins/persist#custom-storage
-// 定义自定义存储对象，公开 getItem 函数和 setItem 函数
-window.cookieStorage = {
-    getItem (key) {
-        let cookies = document.cookie.split(";");
-        for(let i = 0; i < cookies.length; i++){
-            let cookie = cookies[i].split("=");
-            if (key === cookie[0].trim()) return decodeURIComponent(cookie[1]);
-        }
-        return null;
-    },
-    setItem (key, value) {
-        document.cookie = `${key}=${encodeURIComponent(value)}; SameSite=Lax`; //SameSite设置默认值（Lax），防止控制台报错。加载图像或框架（frame）的请求将不会包含用户的 Cookie。
-    }
-};
-
-
 // 用Alpine Persist 注册全局变量
 // https://alpinejs.dev/plugins/persist#using-alpine-persist-global
 /**
@@ -7256,32 +7238,6 @@ Alpine.store('flip', {
     // WebSocket 重连间隔（毫秒）
     websocketReconnectInterval: Alpine.$persist(3000).as('flip.websocketReconnectInterval')
 });
-
-
-//请求图片文件时，可添加的额外参数
-const $1289c657a51e982f$export$444dbc9dc04ca304 = {
-    resize_width: -1,
-    resize_height: -1,
-    do_compress_image: false,
-    resize_max_width: 800,
-    resize_max_height: -1,
-    do_auto_crop: false,
-    auto_crop_num: 1,
-    gray: false
-};
-//添加各种字符串参数,不需要的话为空
-const $1289c657a51e982f$var$resize_width_str = $1289c657a51e982f$export$444dbc9dc04ca304.resize_width > 0 ? "&resize_width=" + $1289c657a51e982f$export$444dbc9dc04ca304.resize_width : "";
-const $1289c657a51e982f$var$resize_height_str = $1289c657a51e982f$export$444dbc9dc04ca304.resize_height > 0 ? "&resize_height=" + $1289c657a51e982f$export$444dbc9dc04ca304.resize_height : "";
-const $1289c657a51e982f$var$gray_str = $1289c657a51e982f$export$444dbc9dc04ca304.gray ? "&gray=true" : "";
-const $1289c657a51e982f$var$do_compress_image_str = $1289c657a51e982f$export$444dbc9dc04ca304.do_compress_image ? "&resize_max_width=" + $1289c657a51e982f$export$444dbc9dc04ca304.resize_max_width : "";
-const $1289c657a51e982f$var$resize_max_height_str = $1289c657a51e982f$export$444dbc9dc04ca304.resize_max_height > 0 ? "&resize_max_height=" + $1289c657a51e982f$export$444dbc9dc04ca304.resize_max_height : "";
-const $1289c657a51e982f$var$auto_crop_str = $1289c657a51e982f$export$444dbc9dc04ca304.do_auto_crop ? "&auto_crop=" + $1289c657a51e982f$export$444dbc9dc04ca304.auto_crop_num : "";
-//所有附加的转换参数
-let $1289c657a51e982f$export$52550a8b6a1f2afe = $1289c657a51e982f$var$resize_width_str + $1289c657a51e982f$var$resize_height_str + $1289c657a51e982f$var$do_compress_image_str + $1289c657a51e982f$var$resize_max_height_str + $1289c657a51e982f$var$auto_crop_str + $1289c657a51e982f$var$gray_str;
-if ($1289c657a51e982f$export$52550a8b6a1f2afe !== "") {
-    $1289c657a51e982f$export$52550a8b6a1f2afe = "?" + $1289c657a51e982f$export$52550a8b6a1f2afe.substring(1);
-    console.log("addStr:", $1289c657a51e982f$export$52550a8b6a1f2afe);
-}
 
 
 /**
