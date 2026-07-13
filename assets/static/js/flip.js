@@ -182,29 +182,25 @@ initDOMCache()
 // 首次加载时设置图片
 setImageSrc()
 
-// 首次加载时，检查URL参数中是否有页码
-const url = new URL(window.location.href);
-const params = new URLSearchParams(url.search);
-if (params.has('start')) {
+// 首次加载时，优先读取阅读模式共用的精确书页参数。
+const params = new URLSearchParams(window.location.search);
+if (params.has('page')) {
     // 优先使用URL参数中的页码
-    let pageNum = parseInt(params.get('start'))
+    let pageNum = parseInt(params.get('page'))
     jumpPageNum(pageNum, false); // 使用跳转函数更新页面
-    // 翻页阅读自动跳转后删除 start 查询参数
-    params.delete('start');
-    if (params.toString() !== '') {
-        const newUrl = `${url.origin}${url.pathname}?${params.toString()}`;
-        window.history.replaceState({}, document.title, newUrl);
-    }
-    if (params.toString() === '') {
-        const newUrl = `${url.origin}${url.pathname}`;
-        window.history.replaceState({}, document.title, newUrl);
-    }
 } else {
     // 页面加载时读取本地存储的页码
     Alpine.store('global').loadPageNumFromLocalStorage(book.id, () => {
         let pageNum = parseInt(localStorage.getItem(`pageNum_${book.id}`))
         jumpPageNum(pageNum, false); // 使用跳转函数更新页面
     });
+}
+
+// 同步地址栏中的精确书页，刷新或复制链接后仍能回到当前页。
+function updateFlipPageURL(pageNum) {
+    const pageURL = new URL(window.location.href)
+    pageURL.searchParams.set('page', pageNum.toString())
+    window.history.replaceState({}, document.title, pageURL.toString())
 }
 
 /**
@@ -667,6 +663,7 @@ function addPageNum(n = 1) {
     
     // 更新页码
     Alpine.store('global').nowPageNum = targetPage
+    updateFlipPageURL(targetPage)
     
     // 更新书签（仅在线书籍）
     if (book && book.id && Alpine.store('global').onlineBook) {
@@ -713,12 +710,13 @@ function jumpPageNum(jumpNum, sync = true) {
     const num = parseInt(jumpNum)
     const allPageNum = Alpine.store('global').allPageNum
 
-    if (num <= 0 || num > allPageNum) {
+    if (!Number.isInteger(num) || num <= 0 || num > allPageNum) {
         alert(i18next.t('hint_page_num_out_of_range'))
         return
     }
     
     Alpine.store('global').nowPageNum = num
+    updateFlipPageURL(num)
     
     if (Alpine.store('global').onlineBook) {
         Alpine.store('global').UpdateBookmark({

@@ -14,7 +14,7 @@ import (
 // x-data="{  isDoublePage: false, imageUrl: '/api/get-file?id=asxScIDD&filename=1.jpg' + ($store.global.autoCrop  ? &quot;&auto_crop=1&quot; : ")"
 func ImageXData(Url string) string {
 	Url = config.PrefixPath(Url)
-	return fmt.Sprintf(`{ isDoublePage: false, loaded: false, updateBookmarkCompleted: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
+	return fmt.Sprintf(`{ isDoublePage: false, loaded: false, imageUrl: '%s' + ($store.global.autoCrop?"&auto_crop=1":'')}`, Url)
 }
 
 // 压缩尺寸，切白边，无缓存等选项，http://192.168.3.26:58642/api/get-file?id=xE2Nmdj&filename=001_By_zhonyk_cover.jpg&resize_max_width=200&no-cache=true
@@ -68,7 +68,7 @@ templ MainArea(c echo.Context, book *model.Book, loadMode string, pagedIndex int
 			<template
 				class="hidden"
 				x-data={ fmt.Sprintf(`{ pagedIndex: %d,pageLimit: %d}`, pagedIndex, pageLimit) }
-				x-init="$nextTick(() => { $store.global.nowPageNum = (pagedIndex-1)*pageLimit+1})"
+				x-init="$nextTick(() => { $store.global.nowPageNum = parseInt(new URLSearchParams(window.location.search).get('page'), 10) || (pagedIndex-1)*pageLimit+1})"
 			></template>
 		}
 		for key, image := range book.PageInfos {
@@ -97,7 +97,6 @@ templ MainArea(c echo.Context, book *model.Book, loadMode string, pagedIndex int
 								:src={ fmt.Sprintf("$store.scroll.loadMode === 'lazy' && %d >= $store.scroll.pageLimit ? null : %s", key, ImageSrc(image.Url)) }
 								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;loaded = true;"
 								@error="loaded = false"
-								x-intersect:leave={ intersectScript(key + 1) }
 								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
 							/>
 						} else {

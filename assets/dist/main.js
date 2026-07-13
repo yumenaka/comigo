@@ -81,7 +81,7 @@ const $84bdf3b771aae356$var$getPathWithDefaults = (data, defaultData, key)=>{
 };
 const $84bdf3b771aae356$var$deepExtend = (target, source, overwrite)=>{
     for(const prop in source)if (prop !== '__proto__' && prop !== 'constructor') {
-        if (prop in target) {
+        if (Object.prototype.hasOwnProperty.call(target, prop)) {
             if ($84bdf3b771aae356$var$isString(target[prop]) || target[prop] instanceof String || $84bdf3b771aae356$var$isString(source[prop]) || source[prop] instanceof String) {
                 if (overwrite) target[prop] = source[prop];
             } else $84bdf3b771aae356$var$deepExtend(target[prop], source[prop], overwrite);
@@ -818,7 +818,10 @@ class $84bdf3b771aae356$var$Translator extends $84bdf3b771aae356$var$EventEmitte
         ];
         const useOptionsReplaceForData = options.replace && !$84bdf3b771aae356$var$isString(options.replace);
         let data = useOptionsReplaceForData ? options.replace : options;
-        if (useOptionsReplaceForData && typeof options.count !== 'undefined') data.count = options.count;
+        if (useOptionsReplaceForData && typeof options.count !== 'undefined') data = {
+            ...data,
+            count: options.count
+        };
         if (this.options.interpolation.defaultVariables) data = {
             ...this.options.interpolation.defaultVariables,
             ...data
@@ -1090,11 +1093,11 @@ class $84bdf3b771aae356$var$Interpolator {
         const todos = [
             {
                 regex: this.regexpUnescape,
-                safeValue: (val)=>$84bdf3b771aae356$var$regexSafe(val)
+                safeValue: (val)=>val
             },
             {
                 regex: this.regexp,
-                safeValue: (val)=>this.escapeValue ? $84bdf3b771aae356$var$regexSafe(this.escape(val)) : $84bdf3b771aae356$var$regexSafe(val)
+                safeValue: (val)=>this.escapeValue ? this.escape(val) : val
             }
         ];
         todos.forEach((todo)=>{
@@ -1116,9 +1119,9 @@ class $84bdf3b771aae356$var$Interpolator {
                     }
                 } else if (!$84bdf3b771aae356$var$isString(value) && !this.useRawValueToEscape) value = $84bdf3b771aae356$var$makeString(value);
                 const safeValue = todo.safeValue(value);
-                str = str.replace(match[0], safeValue);
+                str = str.replace(match[0], $84bdf3b771aae356$var$regexSafe(safeValue));
                 if (skipOnVariables) {
-                    todo.regex.lastIndex += value.length;
+                    todo.regex.lastIndex += safeValue.length;
                     todo.regex.lastIndex -= match[0].length;
                 } else todo.regex.lastIndex = 0;
                 replaces++;
@@ -1162,7 +1165,7 @@ class $84bdf3b771aae356$var$Interpolator {
             clonedOptions = clonedOptions.replace && !$84bdf3b771aae356$var$isString(clonedOptions.replace) ? clonedOptions.replace : clonedOptions;
             clonedOptions.applyPostProcessor = false;
             delete clonedOptions.defaultValue;
-            const keyEndIndex = /{.*}/.test(match[1]) ? match[1].lastIndexOf('}') + 1 : match[1].indexOf(this.formatSeparator);
+            const keyEndIndex = /{.*}/s.test(match[1]) ? match[1].lastIndexOf('}') + 1 : match[1].indexOf(this.formatSeparator);
             if (keyEndIndex !== -1) {
                 formatters = match[1].slice(keyEndIndex).split(this.formatSeparator).map((elem)=>elem.trim()).filter(Boolean);
                 match[1] = match[1].slice(0, keyEndIndex);
@@ -1287,13 +1290,12 @@ class $84bdf3b771aae356$var$Formatter {
     format(value, format, lng, options = {}) {
         if (!format) return value;
         if (value == null) return value;
-        const formats = format.split(this.formatSeparator);
-        if (formats.length > 1 && formats[0].indexOf('(') > 1 && !formats[0].includes(')') && formats.find((f)=>f.includes(')'))) {
-            const lastIndex = formats.findIndex((f)=>f.includes(')'));
-            formats[0] = [
-                formats[0],
-                ...formats.splice(1, lastIndex)
-            ].join(this.formatSeparator);
+        const rawFormats = format.split(this.formatSeparator);
+        const formats = [];
+        for(let i = 0; i < rawFormats.length; i++){
+            let f = rawFormats[i];
+            while(f.indexOf('(') > -1 && !f.includes(')') && i + 1 < rawFormats.length)f = `${f}${this.formatSeparator}${rawFormats[++i]}`;
+            formats.push(f);
         }
         const result = formats.reduce((mem, f)=>{
             const { formatName: formatName, formatOptions: formatOptions } = $84bdf3b771aae356$var$parseFormatStr(f);
@@ -6983,7 +6985,7 @@ Alpine.store('global', {
         // 翻页阅读
         if (this.readMode === 'flip') {
             let new_url = new URL($8def34bab28fb2bd$var$comigoPath(`/flip/${book_id}`), url.origin);
-            if (pageNum > 1) new_url.searchParams.set("start", pageNum.toString());
+            new_url.searchParams.set("page", pageNum.toString());
             if (remoteStore) new_url.searchParams.set("remote_store", remoteStore);
             return new_url.href;
         }
@@ -6997,11 +6999,9 @@ Alpine.store('global', {
                 'paged'
             ].includes(scrollStore.loadMode) ? scrollStore.loadMode : 'infinite';
             const pageLimit = Math.max(1, parseInt(scrollStore.pageLimit, 10) || 32);
-            if (loadMode === 'paged') {
-                const page = Math.floor((pageNum - 1) / pageLimit) + 1;
-                new_url.searchParams.set("page", page.toString());
-                new_url.searchParams.set("limit", pageLimit.toString());
-            }
+            // page 始终表示精确书页；limit 只用于标识并计算分页加载块。
+            new_url.searchParams.set("page", pageNum.toString());
+            if (loadMode === 'paged') new_url.searchParams.set("limit", pageLimit.toString());
             if (remoteStore) new_url.searchParams.set("remote_store", remoteStore);
             return new_url.href;
         }
@@ -7179,7 +7179,8 @@ Alpine.store("scroll", {
 if ($30ce0f2fa6105443$var$isScrollReadPage()) {
     const scrollURLParams = new URLSearchParams(window.location.search);
     const scrollStore = Alpine.store("scroll");
-    if (scrollURLParams.has("page")) {
+    // page 是所有阅读模式共用的精确书页，limit 才表示卷轴分页加载。
+    if (scrollURLParams.has("limit")) {
         scrollStore.loadMode = "paged";
         scrollStore.pageLimit = $30ce0f2fa6105443$var$normalizeScrollPageLimit(scrollURLParams.get("limit"));
     } else if (scrollStore.loadMode === "paged" || ![

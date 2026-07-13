@@ -51,7 +51,8 @@ Alpine.store("scroll", {
 if (isScrollReadPage()) {
 	const scrollURLParams = new URLSearchParams(window.location.search);
 	const scrollStore = Alpine.store("scroll");
-	if (scrollURLParams.has("page")) {
+	// page 是所有阅读模式共用的精确书页，limit 才表示卷轴分页加载。
+	if (scrollURLParams.has("limit")) {
 		scrollStore.loadMode = "paged";
 		scrollStore.pageLimit = normalizeScrollPageLimit(scrollURLParams.get("limit"));
 	} else if (scrollStore.loadMode === "paged" || !["infinite", "lazy"].includes(scrollStore.loadMode)) {

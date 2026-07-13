@@ -12,8 +12,8 @@ Alpine.store('scroll').allPageNum = parseInt(book.page_count)
 const userID = Alpine.store('global').clientID
 const scrollURLParams = new URLSearchParams(window.location.search)
 const scrollStore = Alpine.store('scroll')
-// 分页加载由 page 参数定位；无限卷轴与延迟加载只读取 scroll store。
-if (scrollURLParams.has('page')) {
+// page 是所有阅读模式共用的精确书页，limit 才表示卷轴分页加载。
+if (scrollURLParams.has('limit')) {
     scrollStore.loadMode = 'paged'
     scrollStore.pageLimit = Math.max(1, parseInt(scrollURLParams.get('limit'), 10) || 32)
 } else if (scrollStore.loadMode === 'paged' || !['infinite', 'lazy'].includes(scrollStore.loadMode)) {
@@ -60,6 +60,7 @@ const scrollSyncState = {
 }
 
 let scrollLazyObserver = null
+let initialScrollPageRestoreActive = false
 
 // 将数值限制在 [min, max] 范围内
 function clamp(value, min, max) {
@@ -240,11 +241,10 @@ function getPagedChunkForPageNum(pageNum) {
     return Math.floor((pageNum - 1) / PAGE_LIMIT) + 1
 }
 
-// 生成指定图片页码所在分页块的 URL
+// 生成指定精确书页的分页卷轴 URL，并保留远端书库等当前查询参数。
 function getPagedScrollURL(pageNum) {
-    const chunkPage = getPagedChunkForPageNum(pageNum)
-    const targetURL = new URL(window.ComiGoPath ? window.ComiGoPath(`/scroll/${book.id}`) : `/scroll/${book.id}`, window.location.origin)
-    targetURL.searchParams.set('page', chunkPage.toString())
+    const targetURL = new URL(window.location.href)
+    targetURL.searchParams.set('page', pageNum.toString())
     targetURL.searchParams.set('limit', PAGE_LIMIT.toString())
     return targetURL.toString()
 }
@@ -316,6 +316,42 @@ function getScrollImageByPageNum(pageNum) {
     return document.querySelector(
         `#ScrollMainArea img.manga_image[data-scroll-page-num="${pageNum}"]`,
     )
+}
+
+// 用 page 参数定位精确图片；延迟加载时先强制加载目标页。
+function scrollToPageFromURL() {
+    const pageNum = parseInt(scrollURLParams.get('page'), 10)
+    if (!Number.isInteger(pageNum) || pageNum < 1) {
+        return
+    }
+
+    const image = getScrollImageByPageNum(pageNum)
+    if (!image) {
+        return
+    }
+
+    initialScrollPageRestoreActive = true
+    image.scrollIntoView({block: 'center'})
+    ensureScrollImageLoaded(image).then(() => {
+        waitForImageReady(image, () => {
+            if (!initialScrollPageRestoreActive) {
+                return
+            }
+            image.scrollIntoView({block: 'center'})
+            initialScrollPageRestoreActive = false
+            scheduleCenterPageUpdate()
+        })
+    })
+}
+
+// 保持地址栏中的 page 与当前精确书页一致。
+function updateScrollPageURL(pageNum) {
+    const pageURL = new URL(window.location.href)
+    if (pageURL.searchParams.get('page') === pageNum.toString()) {
+        return
+    }
+    pageURL.searchParams.set('page', pageNum.toString())
+    window.history.replaceState({}, document.title, pageURL.toString())
 }
 
 // 延迟加载模式下，近屏图片才写入真实 src；远端同步定位会强制加载目标页。
@@ -496,6 +532,7 @@ function updateScrollBookmark(pageNum) {
 // 持久化当前追踪页码到 store 和书签
 function persistTrackedPage(pageNum) {
     Alpine.store('global').nowPageNum = pageNum
+    updateScrollPageURL(pageNum)
     Alpine.store('global').savePageNumToLocalStorage(book.id)
     updateScrollBookmark(pageNum)
 }
@@ -641,6 +678,7 @@ function applyRemoteScrollSync(data, { allowNavigation = true } = {}) {
         return
     }
 
+    initialScrollPageRestoreActive = false
     const pageNum = parseInt(data.now_page_num, 10)
     if (!Number.isInteger(pageNum) || pageNum < 1) {
         return
@@ -942,11 +980,11 @@ function handle(e, down) {
 addEventListener('keydown', (e) => handle(e, true))
 addEventListener('keyup', (e) => handle(e, false))
 
-// 根据 URL 获取分页加载块号，当前 URL 类似 http://localhost:1234/scroll/somebookid?page=1&limit=32
+// 根据 URL 中的精确书页计算当前分页块号。
 function getNowPageNum() {
     const urlParams = new URLSearchParams(window.location.search)
     const page = parseInt(urlParams.get('page'))
-    return isNaN(page) ? 1 : page
+    return isNaN(page) ? 1 : getPagedChunkForPageNum(page)
 }
 
 // 根据当前页码设置url并刷新，如果小于最小页码（1），打印错误并返回
@@ -961,9 +999,7 @@ function toPreviousPage() {
         return
     }
     const newPage = currentPage - 1
-    const url = new URL(window.location.href)
-    url.searchParams.set('page', newPage)
-    window.location.href = url.toString()
+    window.location.href = getPagedScrollURL((newPage - 1) * PAGE_LIMIT + 1)
 }
 
 // 根据当前页码设置url并刷新，如果大于最大页码（MaxPageNum），打印错误并返回
@@ -978,9 +1014,7 @@ function toNextPage() {
         return
     }
     const newPage = currentPage + 1
-    const url = new URL(window.location.href)
-    url.searchParams.set('page', newPage)
-    window.location.href = url.toString()
+    window.location.href = getPagedScrollURL((newPage - 1) * PAGE_LIMIT + 1)
 }
 
 // 根据当前页码设置url并刷新，如果小于最小页码（1）或大于最大页码（MaxPageNum），打印错误并返回
@@ -992,15 +1026,17 @@ function jumpPageNum(pageNum) {
         console.warn(`页码超出范围，有效范围为1-${MaxPageNum}`)
         return
     }
-    const url = new URL(window.location.href)
-    url.searchParams.set('page', pageNum)
-    window.location.href = url.toString()
+    window.location.href = getPagedScrollURL((pageNum - 1) * PAGE_LIMIT + 1)
 }
 
 // 卷轴阅读总初始化入口
 function initScrollMode() {
-    initScrollModeSync()
     initScrollLazyLoading()
+    // 跨标签页待恢复位置比书签 URL 更新，存在时优先应用同步位置。
+    if (!loadPendingRemoteSync()) {
+        scrollToPageFromURL()
+    }
+    initScrollModeSync()
     // 所有卷轴加载策略均启用中心追踪与 pending sync 恢复。
     scheduleCenterPageUpdate()
     setTimeout(scheduleCenterPageUpdate, 120)

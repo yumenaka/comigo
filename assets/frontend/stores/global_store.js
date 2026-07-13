@@ -290,9 +290,7 @@ Alpine.store('global', {
         // 翻页阅读
         if (this.readMode === 'flip') {
             let new_url = new URL(comigoPath(`/flip/${book_id}`), url.origin);
-            if (pageNum > 1) {
-                new_url.searchParams.set("start", pageNum.toString());
-            }
+            new_url.searchParams.set("page", pageNum.toString());
             if (remoteStore) {
                 new_url.searchParams.set("remote_store", remoteStore);
             }
@@ -304,9 +302,9 @@ Alpine.store('global', {
             const scrollStore = Alpine.store('scroll');
             const loadMode = ['infinite', 'lazy', 'paged'].includes(scrollStore.loadMode) ? scrollStore.loadMode : 'infinite';
             const pageLimit = Math.max(1, parseInt(scrollStore.pageLimit, 10) || 32);
+            // page 始终表示精确书页；limit 只用于标识并计算分页加载块。
+            new_url.searchParams.set("page", pageNum.toString());
             if (loadMode === 'paged') {
-                const page = Math.floor((pageNum - 1) / pageLimit) + 1;
-                new_url.searchParams.set("page", page.toString());
                 new_url.searchParams.set("limit", pageLimit.toString());
             }
             if (remoteStore) {

@@ -1,8 +1,8 @@
 package scroll
 
 import (
-	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -67,7 +67,7 @@ func ScrollModeHandler(c echo.Context) error {
 	book.SortPages(sortBy)
 	loadMode := parseScrollLoadMode(c)
 	pageLimit := parseScrollPageLimit(c)
-	pagedIndex := parseScrollPageIndex(c, loadMode)
+	pagedIndex := parseScrollPageIndex(c, loadMode, pageLimit)
 	if loadMode == scrollLoadModePaged && pagedIndex > scrollTotalPages(book, pageLimit) {
 		pagedIndex = scrollTotalPages(book, pageLimit)
 	}
@@ -98,7 +98,8 @@ func renderScrollNotFound(c echo.Context) error {
 }
 
 func parseScrollLoadMode(c echo.Context) string {
-	if c.QueryParam("page") != "" {
+	// page 是所有阅读模式共用的精确书页，limit 表示卷轴分页加载。
+	if c.QueryParam("limit") != "" {
 		return scrollLoadModePaged
 	}
 	return scrollLoadModeInfinite
@@ -115,7 +116,7 @@ func parseScrollPageLimit(c echo.Context) int {
 	return limit
 }
 
-func parseScrollPageIndex(c echo.Context, loadMode string) int {
+func parseScrollPageIndex(c echo.Context, loadMode string, pageLimit int) int {
 	if loadMode != scrollLoadModePaged {
 		return -1
 	}
@@ -123,7 +124,7 @@ func parseScrollPageIndex(c echo.Context, loadMode string) int {
 	if err != nil || page < 1 {
 		return 1
 	}
-	return page
+	return (page-1)/pageLimit + 1
 }
 
 func scrollTotalPages(book *model.Book, pageLimit int) int {
@@ -137,9 +138,8 @@ func scrollTotalPages(book *model.Book, pageLimit int) int {
 	return total
 }
 
-// 跳转用分页链接 /scroll/4cTOjFm?page=1&limit=32
+// 跳转用分页链接，page 始终保存目标分页块的第一张图片页码。
 func getScrollPaginationURL(book *model.Book, page int, pageLimit int) string {
-	readURL := `/scroll/` + book.BookID + `?page=` + strconv.Itoa(page) + `&limit=` + strconv.Itoa(pageLimit)
 	// href="javascript:void(0)" 是“点了什么也不发生”的老式写法
 	if page < 1 {
 		return `javascript:showToast(i18next.t('hint_first_page'), 'warning');`
@@ -147,31 +147,10 @@ func getScrollPaginationURL(book *model.Book, page int, pageLimit int) string {
 	if page > scrollTotalPages(book, pageLimit) {
 		return `javascript:showToast(i18next.t('hint_last_page'), 'warning')`
 	}
+	targetPage := (page-1)*pageLimit + 1
+	readURL := config.PrefixPath(`/scroll/`+book.BookID) + `?page=` + strconv.Itoa(targetPage) + `&limit=` + strconv.Itoa(pageLimit)
+	if book.RemoteStoreKey != "" {
+		readURL += `&remote_store=` + url.QueryEscape(book.RemoteStoreKey)
+	}
 	return readURL
-}
-
-// 自动书签脚本，同时更新当前页码
-func intersectScript(pageIndex int) string {
-	return fmt.Sprintf(`
-	    $nextTick(() => {
-		if ($store.scroll.loadMode !== 'paged') {
-			return;
-		}
-	if(!loaded || counter < 1){
-        return;
-    }
-    // 更新当前页码
-    $store.global.nowPageNum = %d;
-    if (loaded && !updateBookmarkCompleted) {
-        $store.global.UpdateBookmark(
-            {
-                type: 'auto',
-                bookId: book.id,
-                pageIndex: %d,
-            }
-        );
-        updateBookmarkCompleted = true;
-    }
-  })
-	`, pageIndex, pageIndex)
 }

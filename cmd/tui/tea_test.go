@@ -47,6 +47,29 @@ func TestBuildBaseURLUsesLocalhostWhenLANDisabled(t *testing.T) {
 	}
 }
 
+// 验证 TUI 打开的两种 Web 阅读模式都使用统一的精确书页参数。
+func TestBuildBookTargetURLUsesBookmarkPage(t *testing.T) {
+	restoreConfig(t)
+	cfg := config.GetCfg()
+	cfg.Host = "example.com"
+	cfg.Port = 1234
+	cfg.DisableLAN = false
+	cfg.CertFile = ""
+	cfg.KeyFile = ""
+	cfg.AutoTLSCertificate = false
+
+	marks := modelpkg.BookMarks{{Type: modelpkg.AutoMark, PageIndex: 7}}
+	restoreModelStore(t, &tuiTestStore{marks: marks})
+	book := modelpkg.BookInfo{BookID: "book", Type: modelpkg.TypeZip, RemoteStoreKey: "remote store"}
+
+	if got, want := buildBookTargetURL(book, 0), "http://example.com:1234/scroll/book?page=7&remote_store=remote+store"; got != want {
+		t.Fatalf("scroll target = %q, want %q", got, want)
+	}
+	if got, want := buildBookTargetURL(book, 1), "http://example.com:1234/flip/book?page=7&remote_store=remote+store"; got != want {
+		t.Fatalf("flip target = %q, want %q", got, want)
+	}
+}
+
 // 验证 TUI 主视图保留最右列，避免终端自动换行。
 func TestViewLeavesRightmostColumnUnused(t *testing.T) {
 	width := 120
@@ -1326,6 +1349,7 @@ func restoreModelStore(t *testing.T, store modelpkg.StoreInterface) {
 
 type tuiTestStore struct {
 	books map[string]*modelpkg.Book
+	marks modelpkg.BookMarks
 }
 
 func (s *tuiTestStore) StoreBook(b *modelpkg.Book) error {
@@ -1365,7 +1389,7 @@ func (s *tuiTestStore) StoreBookMark(_ *modelpkg.BookMark) error {
 }
 
 func (s *tuiTestStore) GetBookMarks(_ string) (*modelpkg.BookMarks, error) {
-	return nil, nil
+	return &s.marks, nil
 }
 
 func (s *tuiTestStore) DeleteBookMark(_ string, _ modelpkg.MarkType, _ int) error {

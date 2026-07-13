@@ -927,12 +927,19 @@ func buildBookTargetURL(book modelpkg.BookInfo, readMode int) string {
 			prefix = "/flip/"
 		}
 		target := base + config.PrefixPath(prefix+book.BookID)
-		if readMode == 0 && modelpkg.IStore != nil {
+		params := url.Values{}
+		if modelpkg.IStore != nil {
 			if marks, err := modelpkg.IStore.GetBookMarks(book.BookID); err == nil && marks != nil {
-				if start := marks.GetLastReadPage(); start > 1 {
-					target += "?start=" + strconv.Itoa(start)
+				if page := marks.GetLastReadPage(); page > 0 {
+					params.Set("page", strconv.Itoa(page))
 				}
 			}
+		}
+		if book.RemoteStoreKey != "" {
+			params.Set("remote_store", book.RemoteStoreKey)
+		}
+		if query := params.Encode(); query != "" {
+			target += "?" + query
 		}
 		return target
 	}
