@@ -9,38 +9,24 @@ templ QRCode() {
 		<div
 			class="relative w-64 h-64 p-1 m-1"
 			data-qrcode-base={ config.GetQrcodeURL() }
-			x-data="{ qrcodeImageSrc: '', qrcodeTargetURL: window.location.toString() }"
-			x-init="
-			if ($store.global.serverReachable) {
-				qrcodeTargetURL = window.ComiGoShareURL(window.location.toString(), $el.dataset.qrcodeBase);
-				const qrcodeSrc = window.location.origin + window.ComiGoPath('/api/qrcode.png') + '?base64=true&qrcode_str=' + encodeURIComponent(qrcodeTargetURL);
-				fetch(qrcodeSrc)
-					.then(response => response.text())
-					.then(data => {
-						qrcodeImageSrc = data;
-					})
-					.catch(error => {
-						console.error('加载二维码失败:', error);
-					});
-			}
-		"
+			@comigo-modal-shown.window="if ($event.target.id === 'qrcode-modal') $store.global.refreshQRCode($el.dataset.qrcodeBase)"
 		>
 			<img
 				id="qrcode-img"
 				draggable="false"
-				:src="qrcodeImageSrc"
+				:src="$store.global.qrcodeImageSrc"
 				class="w-64 h-64 rounded shadow-lg border border-gray-300"
 				alt="QR Code"
 			/>
 			<a
 				x-ref="content"
-				:href="qrcodeTargetURL"
+				:href="$store.global.qrcodeTargetURL"
 				class="block text-center"
 				target="_blank"
 				rel="noopener noreferrer"
-				@click="if (window.ComiGoWails && window.ComiGoOpenExternalURL) { $event.preventDefault(); window.ComiGoOpenExternalURL(qrcodeTargetURL); }"
+				@click="if (window.ComiGoWails && window.ComiGoOpenExternalURL) { $event.preventDefault(); window.ComiGoOpenExternalURL($store.global.qrcodeTargetURL); }"
 			>
-				<div class="panel-surface inline-block max-w-full p-1 px-2 mt-1 text-center text-base-content bg-base-100 rounded text-sm text-shadow-2xs font-semibold break-all" x-text="qrcodeTargetURL"></div>
+				<div class="panel-surface inline-block max-w-full p-1 px-2 mt-1 text-center text-base-content bg-base-100 rounded text-sm text-shadow-2xs font-semibold break-all" x-text="$store.global.qrcodeTargetURL"></div>
 			</a>
 			if config.GetCfg().DisableLAN {
 				<p x-text="i18next.t('qrcode_lan_sharing_disabled_hint')" class="panel-surface max-w-full p-1 px-2 mt-1 text-center text-warning bg-base-100 rounded text-sm font-semibold">请启用局域网共享，否则扫码后无法访问</p>

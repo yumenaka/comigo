@@ -4,12 +4,12 @@ import './plugins/i18n' // 这种 import 通常用于单纯执行该文件内的
 import './plugins/alpine'
 
 import './plugins/screenfull'
-import './plugins/comigo_ui_controls'
+import './plugins/ui_controls'
 import './stores/global_store'
 import './stores/shelf_store'
 import './stores/scroll_store'
 import './stores/flip_store'
-import './plugins/comigo_sse'
+import './plugins/sse'
 
 // Start Alpine.
 Alpine.start()

@@ -115,6 +115,50 @@ Alpine.store('global', {
     staticHtmlBook: staticHtmlBook,
     // 当前页面是否可访问 HTTP 后端能力，例如二维码和阅读历史。
     serverReachable: serverReachable,
+    // 抽屉与模态框共享二维码状态，避免同一 URL 被两个组件重复请求。
+    qrcodeImageSrc: '',
+    qrcodeTargetURL: window.location.toString(),
+    qrcodeRequestingURL: '',
+    // 只在二维码将要显示时调用；不要绑定翻页事件，生成二维码的接口成本较高。
+    refreshQRCode(publicBaseURL) {
+        if (!this.serverReachable) return
+
+        const targetURL = window.ComiGoShareURL
+            ? window.ComiGoShareURL(window.location.toString(), publicBaseURL)
+            : window.location.toString()
+        // 已显示或正在获取当前 URL 时直接复用，避免重复请求。
+        if (
+            (this.qrcodeTargetURL === targetURL && this.qrcodeImageSrc) ||
+            this.qrcodeRequestingURL === targetURL
+        ) {
+            return
+        }
+
+        this.qrcodeRequestingURL = targetURL
+        const qrcodeSrc =
+            window.location.origin +
+            window.ComiGoPath('/api/qrcode.png') +
+            '?base64=true&qrcode_str=' +
+            encodeURIComponent(targetURL)
+
+        return fetch(qrcodeSrc)
+            .then((response) => {
+                if (!response.ok) throw new Error(response.statusText)
+                return response.text()
+            })
+            .then((data) => {
+                if (!data || this.qrcodeRequestingURL !== targetURL) return
+                // 成功后再同时替换图片与链接；失败时继续保留上一张可用二维码。
+                this.qrcodeImageSrc = data
+                this.qrcodeTargetURL = targetURL
+            })
+            .catch(() => {})
+            .finally(() => {
+                if (this.qrcodeRequestingURL === targetURL) {
+                    this.qrcodeRequestingURL = ''
+                }
+            })
+    },
     // Wails 桌面壳使用自定义协议，但资源仍由内嵌服务处理。
     wailsBook: wailsBook,
     // 播放器：音量（0~100）
@@ -285,11 +329,15 @@ Alpine.store('global', {
     },
     getReadURL(book_id, start_index, remote_store = '') {
         const url = new URL(window.location.href);
-        const pageNum = Math.max(1, parseInt(start_index, 10) || 1);
+        const pageNum = Math.max(0, parseInt(start_index, 10) || 0);
         const remoteStore = remote_store || currentRemoteStore;
         // 翻页阅读
         if (this.readMode === 'flip') {
             let new_url = new URL(comigoPath(`/flip/${book_id}`), url.origin);
+            // 0 表示没有阅读记录；明确指定第一页时仍保留参数，确保第一页书签不会回退到本地进度。
+            if (pageNum > 0) {
+                new_url.searchParams.set("page", pageNum.toString());
+            }
             if (remoteStore) {
                 new_url.searchParams.set("remote_store", remoteStore);
             }
@@ -302,6 +350,9 @@ Alpine.store('global', {
             const loadMode = ['infinite', 'lazy', 'paged'].includes(scrollStore.loadMode) ? scrollStore.loadMode : 'infinite';
             const pageLimit = Math.max(1, parseInt(scrollStore.pageLimit, 10) || 32);
             // page 始终表示精确书页；limit 只用于标识并计算分页加载块。
+            if (pageNum > 0) {
+                new_url.searchParams.set("page", pageNum.toString());
+            }
             if (loadMode === 'paged') {
                 new_url.searchParams.set("limit", pageLimit.toString());
             }

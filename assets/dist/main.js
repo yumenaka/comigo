@@ -6319,18 +6319,21 @@ window.Screenfull = (0, $ccec68fe89cd2dbb$export$2e2bcd8739ae039 // 将 screenfu
 );
 
 
-// 此文件提供当前项目实际用到的轻量 UI 交互，避免为了少量组件引入整套前端依赖。
-const $d4bdadc633a1d79c$var$backdropClassNames = [
+// 此文件只实现模板实际使用的 drawer、modal 和 dropdown 数据属性交互。
+// 调用点集中在 templ/common/header.templ、drawer.templ 与 qrcode.templ。
+const $c6dff9af6b35c146$var$backdropClassNames = [
     'bg-dark-backdrop/70',
     'fixed',
     'inset-0'
 ];
-function $d4bdadc633a1d79c$var$getBoolAttr(element, name, defaultValue) {
+// data-* 布尔属性只接受字符串 true；未配置时沿用调用方给出的默认值。
+function $c6dff9af6b35c146$var$getBoolAttr(element, name, defaultValue) {
     const value = element.getAttribute(name);
     if (value === null) return defaultValue;
     return value === 'true';
 }
-function $d4bdadc633a1d79c$var$getPlacementClasses(placement) {
+// 将抽屉方向转换为固定边和显隐位移类，和模板初始的 translate-x-full 配合。
+function $c6dff9af6b35c146$var$getPlacementClasses(placement) {
     switch(placement){
         case 'right':
             return {
@@ -6389,16 +6392,17 @@ function $d4bdadc633a1d79c$var$getPlacementClasses(placement) {
             };
     }
 }
-function $d4bdadc633a1d79c$var$addClasses(element, classes) {
+function $c6dff9af6b35c146$var$addClasses(element, classes) {
     element.classList.add(...classes);
 }
-function $d4bdadc633a1d79c$var$removeClasses(element, classes) {
+function $c6dff9af6b35c146$var$removeClasses(element, classes) {
     element.classList.remove(...classes);
 }
-function $d4bdadc633a1d79c$var$createDrawerController(drawer, options) {
+// 控制单个抽屉的位移、遮罩、页面滚动和无障碍属性。
+function $c6dff9af6b35c146$var$createDrawerController(drawer, options) {
     let visible = false;
-    const placementClasses = $d4bdadc633a1d79c$var$getPlacementClasses(options.placement);
-    $d4bdadc633a1d79c$var$addClasses(drawer, placementClasses.base);
+    const placementClasses = $c6dff9af6b35c146$var$getPlacementClasses(options.placement);
+    $c6dff9af6b35c146$var$addClasses(drawer, placementClasses.base);
     drawer.classList.add('transition-transform');
     drawer.setAttribute('aria-hidden', 'true');
     function removeBackdrop() {
@@ -6408,8 +6412,8 @@ function $d4bdadc633a1d79c$var$createDrawerController(drawer, options) {
         if (!options.backdrop || visible) return;
         const backdrop = document.createElement('div');
         backdrop.setAttribute('drawer-backdrop', '');
-        $d4bdadc633a1d79c$var$addClasses(backdrop, [
-            ...$d4bdadc633a1d79c$var$backdropClassNames,
+        $c6dff9af6b35c146$var$addClasses(backdrop, [
+            ...$c6dff9af6b35c146$var$backdropClassNames,
             'z-30'
         ]);
         backdrop.addEventListener('click', hide);
@@ -6417,18 +6421,22 @@ function $d4bdadc633a1d79c$var$createDrawerController(drawer, options) {
     }
     // 打开/关闭抽屉时只切换既有 class 与 aria 属性，避免影响抽屉内部 Alpine 状态。
     function show() {
-        $d4bdadc633a1d79c$var$removeClasses(drawer, placementClasses.inactive);
-        $d4bdadc633a1d79c$var$addClasses(drawer, placementClasses.active);
+        $c6dff9af6b35c146$var$removeClasses(drawer, placementClasses.inactive);
+        $c6dff9af6b35c146$var$addClasses(drawer, placementClasses.active);
         drawer.setAttribute('aria-modal', 'true');
         drawer.setAttribute('role', 'dialog');
         drawer.removeAttribute('aria-hidden');
         if (!options.bodyScrolling) document.body.classList.add('overflow-hidden');
         createBackdrop();
         visible = true;
+        // 通知依赖可见状态的内容；二维码据此按需检查 URL，不监听每次翻页。
+        drawer.dispatchEvent(new CustomEvent('comigo-drawer-shown', {
+            bubbles: true
+        }));
     }
     function hide() {
-        $d4bdadc633a1d79c$var$removeClasses(drawer, placementClasses.active);
-        $d4bdadc633a1d79c$var$addClasses(drawer, placementClasses.inactive);
+        $c6dff9af6b35c146$var$removeClasses(drawer, placementClasses.active);
+        $c6dff9af6b35c146$var$addClasses(drawer, placementClasses.inactive);
         drawer.setAttribute('aria-hidden', 'true');
         drawer.removeAttribute('aria-modal');
         drawer.removeAttribute('role');
@@ -6447,15 +6455,16 @@ function $d4bdadc633a1d79c$var$createDrawerController(drawer, options) {
         isVisible: ()=>visible
     };
 }
-function $d4bdadc633a1d79c$var$initDrawers() {
+// 先由 data-drawer-target 建立控制器，再为 show/toggle/hide 触发器绑定点击行为。
+function $c6dff9af6b35c146$var$initDrawers() {
     const drawers = new Map();
     document.querySelectorAll('[data-drawer-target]').forEach((trigger)=>{
         const drawerId = trigger.getAttribute('data-drawer-target');
         const drawer = document.getElementById(drawerId);
         if (!drawer || drawers.has(drawerId)) return;
-        drawers.set(drawerId, $d4bdadc633a1d79c$var$createDrawerController(drawer, {
-            backdrop: $d4bdadc633a1d79c$var$getBoolAttr(trigger, 'data-drawer-backdrop', true),
-            bodyScrolling: $d4bdadc633a1d79c$var$getBoolAttr(trigger, 'data-drawer-body-scrolling', false),
+        drawers.set(drawerId, $c6dff9af6b35c146$var$createDrawerController(drawer, {
+            backdrop: $c6dff9af6b35c146$var$getBoolAttr(trigger, 'data-drawer-backdrop', true),
+            bodyScrolling: $c6dff9af6b35c146$var$getBoolAttr(trigger, 'data-drawer-body-scrolling', false),
             placement: trigger.getAttribute('data-drawer-placement') || 'left'
         }));
     });
@@ -6482,7 +6491,8 @@ function $d4bdadc633a1d79c$var$initDrawers() {
         });
     });
 }
-function $d4bdadc633a1d79c$var$getModalPlacementClasses(placement) {
+// modal 本身是 flex 容器，placement 决定内容在视口中的对齐位置。
+function $c6dff9af6b35c146$var$getModalPlacementClasses(placement) {
     switch(placement){
         case 'top-left':
             return [
@@ -6532,10 +6542,11 @@ function $d4bdadc633a1d79c$var$getModalPlacementClasses(placement) {
             ];
     }
 }
-function $d4bdadc633a1d79c$var$createModalController(modal, options) {
+// 控制单个模态框；dynamic 遮罩允许点击空白处关闭，所有模态框都支持 ESC。
+function $c6dff9af6b35c146$var$createModalController(modal, options) {
     let visible = false;
     let backdrop = null;
-    $d4bdadc633a1d79c$var$addClasses(modal, $d4bdadc633a1d79c$var$getModalPlacementClasses(options.placement));
+    $c6dff9af6b35c146$var$addClasses(modal, $c6dff9af6b35c146$var$getModalPlacementClasses(options.placement));
     function removeBackdrop() {
         backdrop?.remove();
         backdrop = null;
@@ -6543,8 +6554,8 @@ function $d4bdadc633a1d79c$var$createModalController(modal, options) {
     function createBackdrop() {
         if (backdrop) return;
         backdrop = document.createElement('div');
-        $d4bdadc633a1d79c$var$addClasses(backdrop, [
-            ...$d4bdadc633a1d79c$var$backdropClassNames,
+        $c6dff9af6b35c146$var$addClasses(backdrop, [
+            ...$c6dff9af6b35c146$var$backdropClassNames,
             'z-40'
         ]);
         document.body.append(backdrop);
@@ -6568,6 +6579,10 @@ function $d4bdadc633a1d79c$var$createModalController(modal, options) {
         modal.addEventListener('click', handleOutsideClick, true);
         document.body.addEventListener('keydown', handleKeydown, true);
         visible = true;
+        // 模态框真正显示后再刷新其按需内容，关闭动作不会触发后台请求。
+        modal.dispatchEvent(new CustomEvent('comigo-modal-shown', {
+            bubbles: true
+        }));
     }
     function hide() {
         if (!visible && modal.classList.contains('hidden')) return;
@@ -6593,13 +6608,14 @@ function $d4bdadc633a1d79c$var$createModalController(modal, options) {
         isVisible: ()=>visible
     };
 }
-function $d4bdadc633a1d79c$var$initModals() {
+// data-modal-target 负责注册模态框，toggle/show/hide 只调用已注册的控制器。
+function $c6dff9af6b35c146$var$initModals() {
     const modals = new Map();
     document.querySelectorAll('[data-modal-target]').forEach((trigger)=>{
         const modalId = trigger.getAttribute('data-modal-target');
         const modal = document.getElementById(modalId);
         if (!modal || modals.has(modalId)) return;
-        modals.set(modalId, $d4bdadc633a1d79c$var$createModalController(modal, {
+        modals.set(modalId, $c6dff9af6b35c146$var$createModalController(modal, {
             backdrop: modal.getAttribute('data-modal-backdrop') || 'dynamic',
             placement: modal.getAttribute('data-modal-placement') || 'center'
         }));
@@ -6620,7 +6636,8 @@ function $d4bdadc633a1d79c$var$initModals() {
         });
     });
 }
-function $d4bdadc633a1d79c$var$positionDropdown(trigger, menu, offsetDistance) {
+// 当前排序菜单固定显示在触发器下方并水平居中，同时限制在视口宽度内。
+function $c6dff9af6b35c146$var$positionDropdown(trigger, menu, offsetDistance) {
     const triggerRect = trigger.getBoundingClientRect();
     const menuRect = menu.getBoundingClientRect();
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
@@ -6636,7 +6653,8 @@ function $d4bdadc633a1d79c$var$positionDropdown(trigger, menu, offsetDistance) {
     menu.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
     menu.setAttribute('data-popper-placement', 'bottom');
 }
-function $d4bdadc633a1d79c$var$createDropdownController(trigger, menu, options) {
+// 排序菜单支持模板声明的 hover 或 click 触发，并在点击菜单外部时关闭。
+function $c6dff9af6b35c146$var$createDropdownController(trigger, menu, options) {
     let visible = false;
     let hideTimer = null;
     function clearHideTimer() {
@@ -6649,7 +6667,7 @@ function $d4bdadc633a1d79c$var$createDropdownController(trigger, menu, options) 
         menu.classList.remove('hidden');
         menu.classList.add('block');
         menu.removeAttribute('aria-hidden');
-        $d4bdadc633a1d79c$var$positionDropdown(trigger, menu, options.offsetDistance);
+        $c6dff9af6b35c146$var$positionDropdown(trigger, menu, options.offsetDistance);
         visible = true;
         document.body.addEventListener('click', handleOutsideClick, true);
     }
@@ -6685,24 +6703,26 @@ function $d4bdadc633a1d79c$var$createDropdownController(trigger, menu, options) 
         menu.addEventListener('mouseleave', scheduleHide);
     } else if (options.triggerType === 'click') trigger.addEventListener('click', toggle);
 }
-function $d4bdadc633a1d79c$var$initDropdowns() {
+// 读取 header.templ 中的 data-dropdown-* 参数并初始化排序菜单。
+function $c6dff9af6b35c146$var$initDropdowns() {
     document.querySelectorAll('[data-dropdown-toggle]').forEach((trigger)=>{
         const dropdownId = trigger.getAttribute('data-dropdown-toggle');
         const menu = document.getElementById(dropdownId);
         if (!menu) return;
-        $d4bdadc633a1d79c$var$createDropdownController(trigger, menu, {
+        $c6dff9af6b35c146$var$createDropdownController(trigger, menu, {
             delay: Number.parseInt(trigger.getAttribute('data-dropdown-delay') || '300', 10),
             offsetDistance: Number.parseInt(trigger.getAttribute('data-dropdown-offset-distance') || '10', 10),
             triggerType: trigger.getAttribute('data-dropdown-trigger') || 'click'
         });
     });
 }
-function $d4bdadc633a1d79c$export$4a6bcc1fb47dea8() {
-    $d4bdadc633a1d79c$var$initDrawers();
-    $d4bdadc633a1d79c$var$initModals();
-    $d4bdadc633a1d79c$var$initDropdowns();
+function $c6dff9af6b35c146$export$4a6bcc1fb47dea8() {
+    $c6dff9af6b35c146$var$initDrawers();
+    $c6dff9af6b35c146$var$initModals();
+    $c6dff9af6b35c146$var$initDropdowns();
 }
-document.addEventListener('DOMContentLoaded', $d4bdadc633a1d79c$export$4a6bcc1fb47dea8);
+// 主包脚本可能先于页面节点执行，等待 DOM 就绪后再扫描 data-* 属性。
+document.addEventListener('DOMContentLoaded', $c6dff9af6b35c146$export$4a6bcc1fb47dea8);
 
 
 // 用Alpine Persist 注册全局变量
@@ -6793,6 +6813,30 @@ Alpine.store('global', {
     staticHtmlBook: $8def34bab28fb2bd$var$staticHtmlBook,
     // 当前页面是否可访问 HTTP 后端能力，例如二维码和阅读历史。
     serverReachable: $8def34bab28fb2bd$var$serverReachable,
+    // 抽屉与模态框共享二维码状态，避免同一 URL 被两个组件重复请求。
+    qrcodeImageSrc: '',
+    qrcodeTargetURL: window.location.toString(),
+    qrcodeRequestingURL: '',
+    // 只在二维码将要显示时调用；不要绑定翻页事件，生成二维码的接口成本较高。
+    refreshQRCode (publicBaseURL) {
+        if (!this.serverReachable) return;
+        const targetURL = window.ComiGoShareURL ? window.ComiGoShareURL(window.location.toString(), publicBaseURL) : window.location.toString();
+        // 已显示或正在获取当前 URL 时直接复用，避免重复请求。
+        if (this.qrcodeTargetURL === targetURL && this.qrcodeImageSrc || this.qrcodeRequestingURL === targetURL) return;
+        this.qrcodeRequestingURL = targetURL;
+        const qrcodeSrc = window.location.origin + window.ComiGoPath('/api/qrcode.png') + '?base64=true&qrcode_str=' + encodeURIComponent(targetURL);
+        return fetch(qrcodeSrc).then((response)=>{
+            if (!response.ok) throw new Error(response.statusText);
+            return response.text();
+        }).then((data)=>{
+            if (!data || this.qrcodeRequestingURL !== targetURL) return;
+            // 成功后再同时替换图片与链接；失败时继续保留上一张可用二维码。
+            this.qrcodeImageSrc = data;
+            this.qrcodeTargetURL = targetURL;
+        }).catch(()=>{}).finally(()=>{
+            if (this.qrcodeRequestingURL === targetURL) this.qrcodeRequestingURL = '';
+        });
+    },
     // Wails 桌面壳使用自定义协议，但资源仍由内嵌服务处理。
     wailsBook: $8def34bab28fb2bd$var$wailsBook,
     // 播放器：音量（0~100）
@@ -6980,11 +7024,13 @@ Alpine.store('global', {
     },
     getReadURL (book_id, start_index, remote_store = '') {
         const url = new URL(window.location.href);
-        const pageNum = Math.max(1, parseInt(start_index, 10) || 1);
+        const pageNum = Math.max(0, parseInt(start_index, 10) || 0);
         const remoteStore = remote_store || $8def34bab28fb2bd$var$currentRemoteStore;
         // 翻页阅读
         if (this.readMode === 'flip') {
             let new_url = new URL($8def34bab28fb2bd$var$comigoPath(`/flip/${book_id}`), url.origin);
+            // 0 表示没有阅读记录；明确指定第一页时仍保留参数，确保第一页书签不会回退到本地进度。
+            if (pageNum > 0) new_url.searchParams.set("page", pageNum.toString());
             if (remoteStore) new_url.searchParams.set("remote_store", remoteStore);
             return new_url.href;
         }
@@ -6999,6 +7045,7 @@ Alpine.store('global', {
             ].includes(scrollStore.loadMode) ? scrollStore.loadMode : 'infinite';
             const pageLimit = Math.max(1, parseInt(scrollStore.pageLimit, 10) || 32);
             // page 始终表示精确书页；limit 只用于标识并计算分页加载块。
+            if (pageNum > 0) new_url.searchParams.set("page", pageNum.toString());
             if (loadMode === 'paged') new_url.searchParams.set("limit", pageLimit.toString());
             if (remoteStore) new_url.searchParams.set("remote_store", remoteStore);
             return new_url.href;
@@ -7242,61 +7289,67 @@ Alpine.store('flip', {
 
 
 /**
- * 全局 SSE：接收 ui_suggest_reload（整页刷新通知）并转发 log 到设置页日志面板。
- */ function $16a92ae9d4279a5e$var$shouldEnableComigoSSE() {
+ * 复用一个全局 SSE 连接接收后端事件：处理界面刷新通知，并把日志转交给设置页日志面板。
+ * 后端的 ui_suggest_reload 与 log 事件来自 tools/sse_hub；日志面板通过 __comigoLogAppend 接入同一连接。
+ */ // 登录页没有 JWT，且旧浏览器可能没有 EventSource；这两种情况都不建立连接。
+function $69eec9faa3c2a263$var$shouldEnableComigoSSE() {
     if (typeof window === 'undefined' || typeof EventSource === 'undefined') return false;
-    // 登录页没有 JWT，会导致 /api/sse 持续 401 重连
     const pathname = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
     return pathname !== '/login';
 }
-const $16a92ae9d4279a5e$var$libraryRescanReloadReasons = new Set([
+// 这三类通知表示书库数据已经完成重扫，书架和设置页可直接刷新，无需再次确认。
+const $69eec9faa3c2a263$var$libraryRescanReloadReasons = new Set([
     'library_rescan_done',
     'auto_library_rescan_done',
     'single_store_rescan_done'
 ]);
-// 仅在书架与设置页处理整页刷新；阅读页（flip/scroll 等）不打断
-function $16a92ae9d4279a5e$var$shouldShowUISuggestReloadPrompt() {
+// 仅在展示书库或设置数据的页面处理整页刷新；阅读页不应被后台通知打断。
+function $69eec9faa3c2a263$var$shouldShowUISuggestReloadPrompt() {
     const p = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname;
     if (p === '/settings') return true;
     if (p === '/' || p === '/index.html' || p === '/search') return true;
     if (p.startsWith('/shelf/')) return true;
     return false;
 }
-function $16a92ae9d4279a5e$var$isLibraryRescanReloadReason(reason) {
-    return $16a92ae9d4279a5e$var$libraryRescanReloadReasons.has(reason);
+function $69eec9faa3c2a263$var$isLibraryRescanReloadReason(reason) {
+    return $69eec9faa3c2a263$var$libraryRescanReloadReasons.has(reason);
 }
-function $16a92ae9d4279a5e$var$getReloadPromptMessage(reason) {
+// reason 与 locale 中 ui_suggest_reload_reason_* 的后缀一致，缺少翻译时回退到通用提示。
+function $69eec9faa3c2a263$var$getReloadPromptMessage(reason) {
     const key = 'ui_suggest_reload_reason_' + reason;
     const translated = typeof i18next !== 'undefined' && i18next.t ? i18next.t(key) : key;
     if (translated && translated !== key) return translated;
     return typeof i18next !== 'undefined' && i18next.t ? i18next.t('ui_suggest_reload_default') : 'Data was updated on the server. Reload the page to see the latest UI?';
 }
-function $16a92ae9d4279a5e$var$showReloadPrompt(reason) {
-    if (!$16a92ae9d4279a5e$var$shouldShowUISuggestReloadPrompt()) return;
+// 非书库重扫通知使用项目现有的 showMessage 确认框，且同一时间只显示一个刷新提示。
+function $69eec9faa3c2a263$var$showReloadPrompt(reason) {
+    if (!$69eec9faa3c2a263$var$shouldShowUISuggestReloadPrompt()) return;
     if (typeof showMessage !== 'function' || window.__comigoReloadPromptOpen) return;
     window.__comigoReloadPromptOpen = true;
     showMessage({
-        message: $16a92ae9d4279a5e$var$getReloadPromptMessage(reason),
+        message: $69eec9faa3c2a263$var$getReloadPromptMessage(reason),
         buttons: 'confirm_cancel',
         onConfirm: ()=>{
             window.__comigoReloadPromptOpen = false;
-            $16a92ae9d4279a5e$var$reloadComigoPage();
+            $69eec9faa3c2a263$var$reloadComigoPage();
         },
         onCancel: ()=>{
             window.__comigoReloadPromptOpen = false;
         }
     });
 }
-function $16a92ae9d4279a5e$var$autoReloadAfterLibraryRescan() {
-    if (!$16a92ae9d4279a5e$var$shouldShowUISuggestReloadPrompt() || window.__comigoAutoReloadQueued) return;
+// 书库重扫完成后，书架和设置页直接刷新；全局标记避免同批通知重复触发 reload。
+function $69eec9faa3c2a263$var$autoReloadAfterLibraryRescan() {
+    if (!$69eec9faa3c2a263$var$shouldShowUISuggestReloadPrompt() || window.__comigoAutoReloadQueued) return;
     window.__comigoAutoReloadQueued = true;
-    $16a92ae9d4279a5e$var$reloadComigoPage();
+    $69eec9faa3c2a263$var$reloadComigoPage();
 }
-function $16a92ae9d4279a5e$var$appendSharedLog(line) {
+// 设置页日志面板尚未挂载时直接丢弃日志；连接本身仍继续接收后续事件。
+function $69eec9faa3c2a263$var$appendSharedLog(line) {
     if (typeof window.__comigoLogAppend === 'function') window.__comigoLogAppend(line);
 }
 // 取消尚未执行的延迟连接，页面即将卸载时不能再新建 EventSource。
-function $16a92ae9d4279a5e$var$clearQueuedComigoSSEStart() {
+function $69eec9faa3c2a263$var$clearQueuedComigoSSEStart() {
     if (window.__comigoSSEStartTimer) {
         clearTimeout(window.__comigoSSEStartTimer);
         window.__comigoSSEStartTimer = null;
@@ -7304,26 +7357,28 @@ function $16a92ae9d4279a5e$var$clearQueuedComigoSSEStart() {
     window.__comigoSSEStartQueued = false;
 }
 // 主动关闭当前 SSE；由 reload/pagehide 共用，避免卸载时遗留被浏览器标记为中断的长连接。
-function $16a92ae9d4279a5e$var$closeComigoSSE() {
-    $16a92ae9d4279a5e$var$clearQueuedComigoSSEStart();
+function $69eec9faa3c2a263$var$closeComigoSSE() {
+    $69eec9faa3c2a263$var$clearQueuedComigoSSEStart();
     if (!window.__comigoSSEInstance) return;
     try {
         window.__comigoSSEInstance.close();
     } catch (_) {}
     window.__comigoSSEInstance = null;
 }
-function $16a92ae9d4279a5e$var$reloadComigoPage() {
-    $16a92ae9d4279a5e$var$closeComigoSSE();
+// 刷新前先主动关闭长连接，避免浏览器把正常卸载记录为 SSE 请求异常。
+function $69eec9faa3c2a263$var$reloadComigoPage() {
+    $69eec9faa3c2a263$var$closeComigoSSE();
     window.location.reload();
 }
-function $16a92ae9d4279a5e$var$queueComigoSSEStart() {
+// 等待页面 load 后再延迟一秒连接；pageshow 恢复时也复用这套去重逻辑。
+function $69eec9faa3c2a263$var$queueComigoSSEStart() {
     if (window.__comigoSSEStartQueued) return;
     window.__comigoSSEStartQueued = true;
     const start = ()=>{
         window.__comigoSSEStartTimer = setTimeout(()=>{
             window.__comigoSSEStartTimer = null;
             window.__comigoSSEStartQueued = false;
-            $16a92ae9d4279a5e$var$comigoSSEInit();
+            $69eec9faa3c2a263$var$comigoSSEInit();
         }, 1000);
     };
     if (document.readyState === 'complete') start();
@@ -7331,41 +7386,43 @@ function $16a92ae9d4279a5e$var$queueComigoSSEStart() {
         once: true
     });
 }
-function $16a92ae9d4279a5e$var$comigoAttachSSEListeners(es) {
+// 集中处理界面刷新、日志、显式 tick 与默认 message 事件；默认 message 额外显示全局提示。
+function $69eec9faa3c2a263$var$comigoAttachSSEListeners(es) {
     es.addEventListener('ui_suggest_reload', (e)=>{
         let reason = 'default';
         try {
             const data = JSON.parse(e.data || '{}');
             if (data.reason) reason = data.reason;
         } catch (_) {}
-        if ($16a92ae9d4279a5e$var$isLibraryRescanReloadReason(reason)) {
-            $16a92ae9d4279a5e$var$autoReloadAfterLibraryRescan();
+        if ($69eec9faa3c2a263$var$isLibraryRescanReloadReason(reason)) {
+            $69eec9faa3c2a263$var$autoReloadAfterLibraryRescan();
             return;
         }
-        $16a92ae9d4279a5e$var$showReloadPrompt(reason);
+        $69eec9faa3c2a263$var$showReloadPrompt(reason);
     });
     es.addEventListener('log', (e)=>{
-        $16a92ae9d4279a5e$var$appendSharedLog(e.data);
+        $69eec9faa3c2a263$var$appendSharedLog(e.data);
     });
     es.addEventListener('tick', (e)=>{
-        $16a92ae9d4279a5e$var$appendSharedLog('[tick] ' + e.data);
+        $69eec9faa3c2a263$var$appendSharedLog('[tick] ' + e.data);
     });
     es.onmessage = (e)=>{
         if (typeof showToast === 'function') showToast(e.data, 'info');
-        $16a92ae9d4279a5e$var$appendSharedLog('<span style="color:oklch(62.7% 0.194 149.214)">[message]</span>' + e.data);
+        $69eec9faa3c2a263$var$appendSharedLog('<span style="color:oklch(62.7% 0.194 149.214)">[message]</span>' + e.data);
     };
     es.onopen = ()=>{
         const text = typeof i18next !== 'undefined' && i18next.t ? i18next.t('settings_log_sse_connected') : 'SSE connected';
-        $16a92ae9d4279a5e$var$appendSharedLog('<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> ' + text);
+        $69eec9faa3c2a263$var$appendSharedLog('<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> ' + text);
     };
     es.onerror = ()=>{
         const closed = typeof EventSource !== 'undefined' && es.readyState === EventSource.CLOSED;
         const text = closed ? typeof i18next !== 'undefined' && i18next.t ? i18next.t('settings_log_sse_closed') : 'closed' : typeof i18next !== 'undefined' && i18next.t ? i18next.t('settings_log_sse_retrying') : 'retrying';
-        $16a92ae9d4279a5e$var$appendSharedLog('<span style="color:oklch(57.7% 0.245 27.325)">[error]</span> ' + text);
+        $69eec9faa3c2a263$var$appendSharedLog('<span style="color:oklch(57.7% 0.245 27.325)">[error]</span> ' + text);
     };
 }
-function $16a92ae9d4279a5e$var$comigoSSEInit() {
-    if (!$16a92ae9d4279a5e$var$shouldEnableComigoSSE()) return null;
+// 返回当前可用连接；只有旧连接已关闭时才创建新的 EventSource。
+function $69eec9faa3c2a263$var$comigoSSEInit() {
+    if (!$69eec9faa3c2a263$var$shouldEnableComigoSSE()) return null;
     if (window.__comigoSSEInstance) {
         if (window.__comigoSSEInstance.readyState === EventSource.CLOSED) window.__comigoSSEInstance = null;
         else return window.__comigoSSEInstance;
@@ -7373,7 +7430,7 @@ function $16a92ae9d4279a5e$var$comigoSSEInit() {
     if (window.__comigoSSEStartQueued) return window.__comigoSSEInstance;
     // 页面初次加载时稍后再连，避免浏览器把 SSE 长连接误报为加载中断。
     if (document.readyState !== 'complete') {
-        $16a92ae9d4279a5e$var$queueComigoSSEStart();
+        $69eec9faa3c2a263$var$queueComigoSSEStart();
         return null;
     }
     const sseURL = window.ComiGoPath ? window.ComiGoPath('/api/sse') : '/api/sse';
@@ -7381,22 +7438,24 @@ function $16a92ae9d4279a5e$var$comigoSSEInit() {
         withCredentials: true
     });
     window.__comigoSSEInstance = es;
-    $16a92ae9d4279a5e$var$comigoAttachSSEListeners(es);
+    $69eec9faa3c2a263$var$comigoAttachSSEListeners(es);
     return es;
 }
-window.__comigoSSEInit = $16a92ae9d4279a5e$var$comigoSSEInit;
+// 日志面板可能晚于主包脚本执行，因此暴露初始化入口供其确认共享连接已经建立。
+window.__comigoSSEInit = $69eec9faa3c2a263$var$comigoSSEInit;
 // 全局启动 SSE；具体事件处理仍由上面的路径判断决定，阅读页不会被重扫通知打断。
-$16a92ae9d4279a5e$var$queueComigoSSEStart();
+$69eec9faa3c2a263$var$queueComigoSSEStart();
 // 页面卸载时主动关闭 SSE，并取消尚未执行的延迟启动，避免卸载过程中创建/留下
 // 被中断(aborted)的 /api/sse 请求。
 if (typeof window.addEventListener === 'function') {
     window.addEventListener('pagehide', ()=>{
-        $16a92ae9d4279a5e$var$closeComigoSSE();
+        $69eec9faa3c2a263$var$closeComigoSSE();
     });
     window.addEventListener('pageshow', ()=>{
-        $16a92ae9d4279a5e$var$queueComigoSSEStart();
+        $69eec9faa3c2a263$var$queueComigoSSEStart();
     });
 }
+// 通知设置页日志面板：全局初始化入口已经可以调用。
 window.dispatchEvent(new Event('comigo:sse-ready'));
 
 

@@ -1,12 +1,15 @@
-// 此文件提供当前项目实际用到的轻量 UI 交互，避免为了少量组件引入整套前端依赖。
+// 此文件只实现模板实际使用的 drawer、modal 和 dropdown 数据属性交互。
+// 调用点集中在 templ/common/header.templ、drawer.templ 与 qrcode.templ。
 const backdropClassNames = ['bg-dark-backdrop/70', 'fixed', 'inset-0']
 
+// data-* 布尔属性只接受字符串 true；未配置时沿用调用方给出的默认值。
 function getBoolAttr(element, name, defaultValue) {
     const value = element.getAttribute(name)
     if (value === null) return defaultValue
     return value === 'true'
 }
 
+// 将抽屉方向转换为固定边和显隐位移类，和模板初始的 translate-x-full 配合。
 function getPlacementClasses(placement) {
     switch (placement) {
         case 'right':
@@ -45,6 +48,7 @@ function removeClasses(element, classes) {
     element.classList.remove(...classes)
 }
 
+// 控制单个抽屉的位移、遮罩、页面滚动和无障碍属性。
 function createDrawerController(drawer, options) {
     let visible = false
     const placementClasses = getPlacementClasses(options.placement)
@@ -78,6 +82,10 @@ function createDrawerController(drawer, options) {
         }
         createBackdrop()
         visible = true
+        // 通知依赖可见状态的内容；二维码据此按需检查 URL，不监听每次翻页。
+        drawer.dispatchEvent(
+            new CustomEvent('comigo-drawer-shown', { bubbles: true }),
+        )
     }
 
     function hide() {
@@ -111,6 +119,7 @@ function createDrawerController(drawer, options) {
     }
 }
 
+// 先由 data-drawer-target 建立控制器，再为 show/toggle/hide 触发器绑定点击行为。
 function initDrawers() {
     const drawers = new Map()
 
@@ -128,7 +137,8 @@ function initDrawers() {
                     'data-drawer-body-scrolling',
                     false,
                 ),
-                placement: trigger.getAttribute('data-drawer-placement') || 'left',
+                placement:
+                    trigger.getAttribute('data-drawer-placement') || 'left',
             }),
         )
     })
@@ -164,6 +174,7 @@ function initDrawers() {
     })
 }
 
+// modal 本身是 flex 容器，placement 决定内容在视口中的对齐位置。
 function getModalPlacementClasses(placement) {
     switch (placement) {
         case 'top-left':
@@ -188,6 +199,7 @@ function getModalPlacementClasses(placement) {
     }
 }
 
+// 控制单个模态框；dynamic 遮罩允许点击空白处关闭，所有模态框都支持 ESC。
 function createModalController(modal, options) {
     let visible = false
     let backdrop = null
@@ -234,6 +246,10 @@ function createModalController(modal, options) {
         modal.addEventListener('click', handleOutsideClick, true)
         document.body.addEventListener('keydown', handleKeydown, true)
         visible = true
+        // 模态框真正显示后再刷新其按需内容，关闭动作不会触发后台请求。
+        modal.dispatchEvent(
+            new CustomEvent('comigo-modal-shown', { bubbles: true }),
+        )
     }
 
     function hide() {
@@ -266,6 +282,7 @@ function createModalController(modal, options) {
     }
 }
 
+// data-modal-target 负责注册模态框，toggle/show/hide 只调用已注册的控制器。
 function initModals() {
     const modals = new Map()
 
@@ -277,8 +294,10 @@ function initModals() {
         modals.set(
             modalId,
             createModalController(modal, {
-                backdrop: modal.getAttribute('data-modal-backdrop') || 'dynamic',
-                placement: modal.getAttribute('data-modal-placement') || 'center',
+                backdrop:
+                    modal.getAttribute('data-modal-backdrop') || 'dynamic',
+                placement:
+                    modal.getAttribute('data-modal-placement') || 'center',
             }),
         )
     })
@@ -302,6 +321,7 @@ function initModals() {
     })
 }
 
+// 当前排序菜单固定显示在触发器下方并水平居中，同时限制在视口宽度内。
 function positionDropdown(trigger, menu, offsetDistance) {
     const triggerRect = trigger.getBoundingClientRect()
     const menuRect = menu.getBoundingClientRect()
@@ -322,6 +342,7 @@ function positionDropdown(trigger, menu, offsetDistance) {
     menu.setAttribute('data-popper-placement', 'bottom')
 }
 
+// 排序菜单支持模板声明的 hover 或 click 触发，并在点击菜单外部时关闭。
 function createDropdownController(trigger, menu, options) {
     let visible = false
     let hideTimer = null
@@ -360,7 +381,8 @@ function createDropdownController(trigger, menu, options) {
     }
 
     function handleOutsideClick(event) {
-        if (trigger.contains(event.target) || menu.contains(event.target)) return
+        if (trigger.contains(event.target) || menu.contains(event.target))
+            return
         hide()
     }
 
@@ -386,6 +408,7 @@ function createDropdownController(trigger, menu, options) {
     }
 }
 
+// 读取 header.templ 中的 data-dropdown-* 参数并初始化排序菜单。
 function initDropdowns() {
     document.querySelectorAll('[data-dropdown-toggle]').forEach((trigger) => {
         const dropdownId = trigger.getAttribute('data-dropdown-toggle')
@@ -401,15 +424,18 @@ function initDropdowns() {
                 trigger.getAttribute('data-dropdown-offset-distance') || '10',
                 10,
             ),
-            triggerType: trigger.getAttribute('data-dropdown-trigger') || 'click',
+            triggerType:
+                trigger.getAttribute('data-dropdown-trigger') || 'click',
         })
     })
 }
 
+// 主入口只初始化当前模板真实使用的三类控件。
 export function initComigoUIControls() {
     initDrawers()
     initModals()
     initDropdowns()
 }
 
+// 主包脚本可能先于页面节点执行，等待 DOM 就绪后再扫描 data-* 属性。
 document.addEventListener('DOMContentLoaded', initComigoUIControls)

@@ -59,10 +59,8 @@ templ ReadingHistoryPanel() {
 						if (typeof window.showToast === 'function') {
 							window.showToast(i18next.t('bookmark_deleted'), 'success');
 						}
-						// 如果当前页没有数据了，回到上一页
-						if (this.bookmarks.length === 0 && this.currentPage > 1) {
-							this.fetchPage(this.currentPage - 1);
-						}
+						// 重新读取当前页，让后续记录递补；若当前页已越界，后端会自动返回最后一页。
+						await this.fetchPage(this.currentPage);
 					} else {
 						const err = await response.text();
 						console.error('Delete bookmark failed:', err);

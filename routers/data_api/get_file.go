@@ -88,7 +88,9 @@ func GetFile(c echo.Context) error {
 // bookContainsPage 只允许读取扫描后公开在书籍元数据中的页面。
 func bookContainsPage(book *model.Book, filename string) bool {
 	for _, page := range book.PageInfos {
-		if page.Name == filename {
+		// PDF 的页面名是逻辑页码（如 "1"），公开 URL 则固定使用 "1.jpg"。
+		// 在校验层接受这一规范映射，避免迁移已有元数据，同时不放宽其他文件名。
+		if page.Name == filename || (book.Type == model.TypePDF && page.Name+".jpg" == filename) {
 			return true
 		}
 	}

@@ -9,7 +9,7 @@ import (
 
 templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component, slot templ.Component, showReturnIcon bool, returnUrl string) {
 	<!-- Drawer component -->
-	<!-- 右侧阅读设置抽屉，由 assets/frontend/plugins/comigo_ui_controls.js 处理 data-drawer-* 行为。 -->
+	<!-- 右侧阅读设置抽屉，由 assets/frontend/plugins/ui_controls.js 处理 data-drawer-* 行为。 -->
 	<div
 		id="drawer-right"
 		x-data="{ serverHost: 'localhost' }"
@@ -116,28 +116,14 @@ templ Drawer(c echo.Context, book *model.Book, beforeHistorySlot templ.Component
 				x-show="$store.global.onlineBook || (window.ComiGoReaderMode && $store.global.serverReachable)"
 				class="w-32 h-32 p-0 mt-2 mb-2"
 				data-qrcode-base={ config.GetQrcodeURL() }
-				x-data="{ qrcodeSrc: '', qrcodeImageSrc: '' }"
-				x-init="
-					if ($store.global.serverReachable) {
-						qrcodeSrc = window.location.origin + window.ComiGoPath('/api/qrcode.png') + '?base64=true&qrcode_str='+ encodeURIComponent(window.ComiGoShareURL ? window.ComiGoShareURL(window.location.toString(), $el.dataset.qrcodeBase) : window.location.toString());
-						// 使用 fetch 加载二维码
-						fetch(qrcodeSrc)
-							.then(response => response.text())
-							.then(data => {
-								qrcodeImageSrc = data;
-							})
-							.catch(error => {
-								console.error('加载二维码失败:', error);
-							});
-					}
-				"
+				@comigo-drawer-shown.window="if ($event.target.id === 'drawer-right' && $el.offsetParent !== null) $store.global.refreshQRCode($el.dataset.qrcodeBase)"
 			>
 				<img
 					id="QrcodeImage"
 					draggable="false"
 					data-modal-target="qrcode-modal"
 					data-modal-toggle="qrcode-modal"
-					:src="qrcodeImageSrc"
+					:src="$store.global.qrcodeImageSrc"
 					class="w-32 h-32 rounded border-2 border-gray-500 dark:border-gray-200"
 				/>
 			</div>

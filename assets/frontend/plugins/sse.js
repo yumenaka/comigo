@@ -1,24 +1,30 @@
 /**
- * 全局 SSE：接收 ui_suggest_reload（整页刷新通知）并转发 log 到设置页日志面板。
+ * 复用一个全局 SSE 连接接收后端事件：处理界面刷新通知，并把日志转交给设置页日志面板。
+ * 后端的 ui_suggest_reload 与 log 事件来自 tools/sse_hub；日志面板通过 __comigoLogAppend 接入同一连接。
  */
+// 登录页没有 JWT，且旧浏览器可能没有 EventSource；这两种情况都不建立连接。
 function shouldEnableComigoSSE() {
     if (typeof window === 'undefined' || typeof EventSource === 'undefined') {
         return false
     }
-    // 登录页没有 JWT，会导致 /api/sse 持续 401 重连
-    const pathname = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname
+    const pathname = window.ComiGoRelativePath
+        ? window.ComiGoRelativePath(window.location.pathname)
+        : window.location.pathname
     return pathname !== '/login'
 }
 
+// 这三类通知表示书库数据已经完成重扫，书架和设置页可直接刷新，无需再次确认。
 const libraryRescanReloadReasons = new Set([
     'library_rescan_done',
     'auto_library_rescan_done',
     'single_store_rescan_done',
 ])
 
-// 仅在书架与设置页处理整页刷新；阅读页（flip/scroll 等）不打断
+// 仅在展示书库或设置数据的页面处理整页刷新；阅读页不应被后台通知打断。
 function shouldShowUISuggestReloadPrompt() {
-    const p = window.ComiGoRelativePath ? window.ComiGoRelativePath(window.location.pathname) : window.location.pathname
+    const p = window.ComiGoRelativePath
+        ? window.ComiGoRelativePath(window.location.pathname)
+        : window.location.pathname
     if (p === '/settings') {
         return true
     }
@@ -35,6 +41,7 @@ function isLibraryRescanReloadReason(reason) {
     return libraryRescanReloadReasons.has(reason)
 }
 
+// reason 与 locale 中 ui_suggest_reload_reason_* 的后缀一致，缺少翻译时回退到通用提示。
 function getReloadPromptMessage(reason) {
     const key = 'ui_suggest_reload_reason_' + reason
     const translated =
@@ -47,6 +54,7 @@ function getReloadPromptMessage(reason) {
         : 'Data was updated on the server. Reload the page to see the latest UI?'
 }
 
+// 非书库重扫通知使用项目现有的 showMessage 确认框，且同一时间只显示一个刷新提示。
 function showReloadPrompt(reason) {
     if (!shouldShowUISuggestReloadPrompt()) {
         return
@@ -68,6 +76,7 @@ function showReloadPrompt(reason) {
     })
 }
 
+// 书库重扫完成后，书架和设置页直接刷新；全局标记避免同批通知重复触发 reload。
 function autoReloadAfterLibraryRescan() {
     if (!shouldShowUISuggestReloadPrompt() || window.__comigoAutoReloadQueued) {
         return
@@ -76,6 +85,7 @@ function autoReloadAfterLibraryRescan() {
     reloadComigoPage()
 }
 
+// 设置页日志面板尚未挂载时直接丢弃日志；连接本身仍继续接收后续事件。
 function appendSharedLog(line) {
     if (typeof window.__comigoLogAppend === 'function') {
         window.__comigoLogAppend(line)
@@ -103,11 +113,13 @@ function closeComigoSSE() {
     window.__comigoSSEInstance = null
 }
 
+// 刷新前先主动关闭长连接，避免浏览器把正常卸载记录为 SSE 请求异常。
 function reloadComigoPage() {
     closeComigoSSE()
     window.location.reload()
 }
 
+// 等待页面 load 后再延迟一秒连接；pageshow 恢复时也复用这套去重逻辑。
 function queueComigoSSEStart() {
     if (window.__comigoSSEStartQueued) {
         return
@@ -127,6 +139,7 @@ function queueComigoSSEStart() {
     }
 }
 
+// 集中处理界面刷新、日志、显式 tick 与默认 message 事件；默认 message 额外显示全局提示。
 function comigoAttachSSEListeners(es) {
     es.addEventListener('ui_suggest_reload', (e) => {
         let reason = 'default'
@@ -156,7 +169,8 @@ function comigoAttachSSEListeners(es) {
             showToast(e.data, 'info')
         }
         appendSharedLog(
-            '<span style="color:oklch(62.7% 0.194 149.214)">[message]</span>' + e.data
+            '<span style="color:oklch(62.7% 0.194 149.214)">[message]</span>' +
+                e.data,
         )
     }
 
@@ -166,7 +180,8 @@ function comigoAttachSSEListeners(es) {
                 ? i18next.t('settings_log_sse_connected')
                 : 'SSE connected'
         appendSharedLog(
-            '<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> ' + text
+            '<span style="color:oklch(62.7% 0.194 149.214)">[open]</span> ' +
+                text,
         )
     }
 
@@ -182,11 +197,13 @@ function comigoAttachSSEListeners(es) {
               ? i18next.t('settings_log_sse_retrying')
               : 'retrying'
         appendSharedLog(
-            '<span style="color:oklch(57.7% 0.245 27.325)">[error]</span> ' + text
+            '<span style="color:oklch(57.7% 0.245 27.325)">[error]</span> ' +
+                text,
         )
     }
 }
 
+// 返回当前可用连接；只有旧连接已关闭时才创建新的 EventSource。
 function comigoSSEInit() {
     if (!shouldEnableComigoSSE()) {
         return null
@@ -206,13 +223,16 @@ function comigoSSEInit() {
         queueComigoSSEStart()
         return null
     }
-    const sseURL = window.ComiGoPath ? window.ComiGoPath('/api/sse') : '/api/sse'
+    const sseURL = window.ComiGoPath
+        ? window.ComiGoPath('/api/sse')
+        : '/api/sse'
     const es = new EventSource(sseURL, { withCredentials: true })
     window.__comigoSSEInstance = es
     comigoAttachSSEListeners(es)
     return es
 }
 
+// 日志面板可能晚于主包脚本执行，因此暴露初始化入口供其确认共享连接已经建立。
 window.__comigoSSEInit = comigoSSEInit
 
 // 全局启动 SSE；具体事件处理仍由上面的路径判断决定，阅读页不会被重扫通知打断。
@@ -229,4 +249,5 @@ if (typeof window.addEventListener === 'function') {
     })
 }
 
+// 通知设置页日志面板：全局初始化入口已经可以调用。
 window.dispatchEvent(new Event('comigo:sse-ready'))

@@ -71,6 +71,20 @@ func TestGetFileRejectsPageOutsideBook(t *testing.T) {
 	}
 }
 
+// TestBookContainsPageAllowsPDFRequestFilename 验证 PDF 逻辑页码可以匹配其公开的 jpg 请求名。
+func TestBookContainsPageAllowsPDFRequestFilename(t *testing.T) {
+	book := &model.Book{
+		BookInfo:  model.BookInfo{Type: model.TypePDF},
+		PageInfos: []model.PageInfo{{Name: "1"}},
+	}
+	if !bookContainsPage(book, "1.jpg") {
+		t.Fatal("PDF 页面 1 应允许通过规范请求名 1.jpg 读取")
+	}
+	if bookContainsPage(book, "1.png") || bookContainsPage(book, "../1.jpg") {
+		t.Fatal("PDF 页面校验不应接受非规范或越界文件名")
+	}
+}
+
 // 验证文件请求会拒绝非法图片处理参数。
 func TestParseGetFileRequestRejectsInvalidImageParams(t *testing.T) {
 	e := echo.New()
