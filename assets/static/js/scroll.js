@@ -331,13 +331,13 @@ function scrollToPageFromURL() {
     }
 
     initialScrollPageRestoreActive = true
-    image.scrollIntoView({block: 'center'})
+    image.scrollIntoView({block: 'start'})
     ensureScrollImageLoaded(image).then(() => {
         waitForImageReady(image, () => {
             if (!initialScrollPageRestoreActive) {
                 return
             }
-            image.scrollIntoView({block: 'center'})
+            image.scrollIntoView({block: 'start'})
             initialScrollPageRestoreActive = false
             scheduleCenterPageUpdate()
         })
@@ -347,10 +347,11 @@ function scrollToPageFromURL() {
 // 保持地址栏中的 page 与当前精确书页一致。
 function updateScrollPageURL(pageNum) {
     const pageURL = new URL(window.location.href)
-    if (pageURL.searchParams.get('page') === pageNum.toString()) {
-        return
+    if (pageNum > 1) {
+        pageURL.searchParams.set('page', pageNum.toString())
+    } else {
+        pageURL.searchParams.delete('page')
     }
-    pageURL.searchParams.set('page', pageNum.toString())
     window.history.replaceState({}, document.title, pageURL.toString())
 }
 

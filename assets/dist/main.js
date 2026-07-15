@@ -6985,7 +6985,6 @@ Alpine.store('global', {
         // 翻页阅读
         if (this.readMode === 'flip') {
             let new_url = new URL($8def34bab28fb2bd$var$comigoPath(`/flip/${book_id}`), url.origin);
-            new_url.searchParams.set("page", pageNum.toString());
             if (remoteStore) new_url.searchParams.set("remote_store", remoteStore);
             return new_url.href;
         }
@@ -7000,7 +6999,6 @@ Alpine.store('global', {
             ].includes(scrollStore.loadMode) ? scrollStore.loadMode : 'infinite';
             const pageLimit = Math.max(1, parseInt(scrollStore.pageLimit, 10) || 32);
             // page 始终表示精确书页；limit 只用于标识并计算分页加载块。
-            new_url.searchParams.set("page", pageNum.toString());
             if (loadMode === 'paged') new_url.searchParams.set("limit", pageLimit.toString());
             if (remoteStore) new_url.searchParams.set("remote_store", remoteStore);
             return new_url.href;
@@ -7060,6 +7058,8 @@ Alpine.store('global', {
             if (this.debugMode) console.error(error);
             throw error;
         }
+        // 第一页是默认阅读位置，不创建自动阅读记录。
+        if (type === 'auto' && pageIndex === 1) return;
         if (description === '') description = `${$8def34bab28fb2bd$var$browser} in ${$8def34bab28fb2bd$var$system}`;
         const payload = {
             type: type,

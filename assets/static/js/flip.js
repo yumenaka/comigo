@@ -199,7 +199,11 @@ if (params.has('page')) {
 // 同步地址栏中的精确书页，刷新或复制链接后仍能回到当前页。
 function updateFlipPageURL(pageNum) {
     const pageURL = new URL(window.location.href)
-    pageURL.searchParams.set('page', pageNum.toString())
+    if (pageNum > 1) {
+        pageURL.searchParams.set('page', pageNum.toString())
+    } else {
+        pageURL.searchParams.delete('page')
+    }
     window.history.replaceState({}, document.title, pageURL.toString())
 }
 
