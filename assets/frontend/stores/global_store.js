@@ -74,16 +74,6 @@ const staticHtmlBook = window.location.toString().endsWith('.html');
 const readerPage = window.ComiGoReaderMode || currentRelativePath.includes('/reader');
 const onlineBook = !readerPage && serverReachable && !staticHtmlBook;
 
-if (window.ComiGoForceRandomTheme) {
-    try {
-        // Alpine Persist 当前使用无前缀 key；保留旧前缀 key 兼容历史数据。
-        localStorage.setItem('global.theme', JSON.stringify(randomThemeName));
-        localStorage.setItem('_x_global.theme', JSON.stringify(randomThemeName));
-    } catch (error) {
-        console.warn('无法强制保存随机模板设置:', error);
-    }
-}
-
 // setURLQueryParam 给站内资源 URL 设置查询参数，返回仍可交给 ComiGoPath 处理的相对 URL。
 function setURLQueryParam(rawURL, key, value) {
     if (!rawURL || value === undefined || value === null || value === '') {
@@ -177,12 +167,10 @@ Alpine.store('global', {
     autoResize: Alpine.$persist(false).as('global.autoResize'),
     // 压缩图片限宽
     autoResizeWidth: Alpine.$persist(800).as('global.autoResizeWidth'),
-    // 初始主题
-    theme: Alpine.$persist('retro').as('global.theme'),
+    // 插件只影响首次初始化的默认值；已有本地设置始终优先。
+    theme: Alpine.$persist(window.ComiGoDefaultTheme || 'retro').as('global.theme'),
     // 随机模板实际解析出的主题，选择态依然保留为 random。
     randomResolvedTheme: Alpine.$persist('').as('global.randomResolvedTheme'),
-    // 本次页面加载是否已经解析过随机模板；不持久化，刷新或跳转后会重新随机。
-    randomThemeResolvedThisPage: false,
     // custom 主题：组件颜色
     customBase100: Alpine.$persist('#dce6ff').as('global.customBase100'),
     // custom 主题：背景颜色
@@ -197,37 +185,28 @@ Alpine.store('global', {
     bgBase300ThemeList: ['light', 'dark', 'retro', 'custom', 'cupcake', 'cyberpunk', 'red-white-game', 'nord'],
     // 自带完整背景的主题会覆盖纯色/网格线花纹选择，相关控件需要隐藏。
     ownBackgroundThemeList: ['cupcake', 'cyberpunk', 'red-white-game', 'dracula', 'valentine', 'cmyk', 'halloween', 'coffee', 'winter', 'nord'],
-    // 主题下拉框统一走这里，选择 random 时立即解析一次和当前模板不同的实际主题。
+    // 选择 random 时立即抽取一次实际主题，并保存结果供后续页面复用。
     setTheme(theme) {
         const currentTheme = this.theme === randomThemeName ? themeToString(this.randomResolvedTheme) : themeToString(this.theme);
         this.theme = (theme || '').toString();
         if (this.theme === randomThemeName) {
-            this.refreshRandomTheme(currentTheme);
+            this.randomResolvedTheme = this.pickRandomTheme(currentTheme);
         }
     },
-    // 从随机池抽取主题，并排除当前实际主题，避免刷新后仍然是同一个模板。
+    // 从随机池抽取主题，并排除当前实际主题，避免手动重新选择 random 时没有变化。
     pickRandomTheme(currentTheme = '') {
         const candidates = this.randomThemeList.filter((theme) => theme !== currentTheme);
         const pool = candidates.length > 0 ? candidates : this.randomThemeList;
         return pool[Math.floor(Math.random() * pool.length)] || 'cmyk';
     },
-    // 重新解析 random 对应的实际主题；排除当前实际主题，避免刷新后仍是同一个模板。
-    refreshRandomTheme(excludedTheme = '') {
-        const resolvedTheme = themeToString(excludedTheme || this.randomResolvedTheme);
-        const currentTheme = this.randomThemeList.includes(resolvedTheme) ? resolvedTheme : '';
-        const nextTheme = this.pickRandomTheme(currentTheme);
-        this.randomResolvedTheme = nextTheme;
-        this.randomThemeResolvedThisPage = true;
-        return nextTheme;
-    },
-    // 页面加载时只解析一次 random；刷新或全页面跳转后会重新抽取。
+    // 首次使用 random 时解析并持久化；刷新页面时直接复用已解析的主题。
     ensureRandomTheme() {
         const resolvedTheme = themeToString(this.randomResolvedTheme);
-        const isResolvedThemeValid = this.randomThemeList.includes(resolvedTheme);
-        if (this.randomThemeResolvedThisPage && isResolvedThemeValid) {
+        if (this.randomThemeList.includes(resolvedTheme)) {
             return resolvedTheme;
         }
-        return this.refreshRandomTheme();
+        this.randomResolvedTheme = this.pickRandomTheme();
+        return this.randomResolvedTheme;
     },
     // 返回真正写入 body[data-theme] 的主题；random 只保留为设置项选择值。
     getEffectiveTheme() {

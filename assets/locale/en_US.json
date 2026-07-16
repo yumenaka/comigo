@@ -661,7 +661,6 @@
   "open_browser_description": "After the scan is completed, whether to open the browser at the same time. \nThe default is true for windows and false for other platforms.",
   "open_browser_error": "Failed to open the browser.",
   "open_browser_label": "Open browser",
-  "random_theme": "Force the frontend to use the random theme",
   "open_in_new_tab": "Open in New Tab",
   "other_information": "Other information",
   "other_settings": "Other Settings",

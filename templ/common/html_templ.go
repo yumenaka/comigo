@@ -118,13 +118,8 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 				return templ_7745c5c3_Err
 			}
 		}
-		if config.GetCfg().RandomTheme {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<script>\n\t\t\t\t\twindow.ComiGoForceRandomTheme = true;\n\t\t\t\t</script>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<script>\n\t\t\t\t\twindow.ComiGoForceRandomTheme = false;\n\t\t\t\t</script>")
+		if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("comigo_xyz") {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<script>\n\t\t\t\t\twindow.ComiGoDefaultTheme = \"random\";\n\t\t\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -137,7 +132,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</head><!-- x-bind: Alpine.js的语法，随机模板会解析为实际生效主题 --><!-- 主题值通过 Alpine Persist 持久化到 localStorage，key 为 global.theme --><body x-data=\"{}\" x-bind:data-theme=\"$store.global.getEffectiveTheme()\" x-bind:style=\"'--custom-base-100:' + $store.global.customBase100 + ';--custom-base-300:' + $store.global.customBase300 + ';--custom-base-content:' + $store.global.customBaseContent + ';'\" class=\"text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between h-full min-h-screen w-full max-w-full p-0 m-0 font-sans\" :class=\"$store.global.getMainAreaBgClass()\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</head><!-- x-bind: Alpine.js 的语法，随机模板会解析为实际生效主题 --><!-- 主题值通过 Alpine Persist 持久化到 localStorage，key 为 global.theme --><body x-data=\"{}\" x-bind:data-theme=\"$store.global.getEffectiveTheme()\" x-bind:style=\"'--custom-base-100:' + $store.global.customBase100 + ';--custom-base-300:' + $store.global.customBase300 + ';--custom-base-content:' + $store.global.customBaseContent + ';'\" class=\"text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between h-full min-h-screen w-full max-w-full p-0 m-0 font-sans\" :class=\"$store.global.getMainAreaBgClass()\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -149,7 +144,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</body><!-- 导入通用 JS 代码，初始化 Alpine 与页面交互等前端基础能力。 -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</body><!-- 导入通用 JS 代码，初始化 Alpine 与页面交互等前端基础能力。 -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -157,7 +152,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<!-- 导入 Plugins  -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<!-- 导入 Plugins  -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -165,7 +160,7 @@ func Html(c echo.Context, bodyContent templ.Component, insertScripts []string) t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -26,7 +26,6 @@ type Config struct {
 	TemporaryReaderMode       bool           `json:"-" toml:"-" comment:"CLI：纯文件参数启动时跳过配置文件读写（运行时状态）"`
 	SelfUpgrade               bool           `json:"-" toml:"-" comment:"CLI：检测并下载新版本替换当前可执行文件（仅命令行使用，不写入配置文件）"`
 	NoTUI                     bool           `json:"-" toml:"-" comment:"CLI：不启动 TUI，直接按普通服务模式运行（仅命令行使用，不写入配置文件）"`
-	RandomTheme               bool           `json:"-" toml:"-" comment:"CLI：强制前端选择随机模板（仅命令行使用，不写入配置文件）"`
 	ReadOnlyMode              bool           `json:"ReadOnlyMode" comment:"只读模式。禁止网页端更改配置或上传文件。"`
 	Debug                     bool           `json:"Debug" comment:"开启Debug模式"`
 	EnablePlugin              bool           `json:"EnablePlugin" comment:"启用插件系统"`

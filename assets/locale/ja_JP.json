@@ -661,7 +661,6 @@
   "open_browser_description": "windowsのデフォルトはtrue、その他のプラットフォームのデフォルトはfalse。",
   "open_browser_error": "ブラウザを開くことができませんでした。",
   "open_browser_label": "ブラウザを開く",
-  "random_theme": "フロントエンドでランダムテーマを強制使用",
   "open_in_new_tab": "新しいタブで開く",
   "other_information": "その他情報",
   "other_settings": "その他の設定",

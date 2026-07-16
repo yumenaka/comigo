@@ -32,21 +32,17 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScripts []string) 
 				<link rel="shortcut icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.ico")) } type="image/x-icon"/>
 				<link rel="icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) } sizes="any"/>
 			}
-			// CLI 的 --random-theme 只通过前端启动开关覆盖浏览器本地主题选择，不写入服务端配置。
-			if config.GetCfg().RandomTheme {
+			// Comigo.xyz 插件只提供首次初始化默认主题，不覆盖用户已保存的选择。
+			if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("comigo_xyz") {
 				<script>
-					window.ComiGoForceRandomTheme = true;
-				</script>
-			} else {
-				<script>
-					window.ComiGoForceRandomTheme = false;
+					window.ComiGoDefaultTheme = "random";
 				</script>
 			}
 			// 内联脚本会在 main.js 前执行，路径工具必须先于页面内容注入。
 			@templ.Raw(assets.GetBasePathScript())
 			@templ.Raw(assets.GetCSS(c.QueryParam("static") != ""))
 		</head>
-		<!-- x-bind: Alpine.js的语法，随机模板会解析为实际生效主题 -->
+		<!-- x-bind: Alpine.js 的语法，随机模板会解析为实际生效主题 -->
 		<!-- 主题值通过 Alpine Persist 持久化到 localStorage，key 为 global.theme -->
 		<body
 			x-data="{}"
