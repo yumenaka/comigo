@@ -259,9 +259,15 @@ ZipFileTextEncoding = "gbk"    # 非UTF-8编码ZIP的解析编码
 - [Baozisoftware](https://github.com/Baozisoftware)
 - 以及更多贡献者
 
-## 项目统计
+## Star History
 
-[![Stargazers over time](https://starchart.cc/yumenaka/comigo.svg?variant=adaptive)](https://starchart.cc/yumenaka/comigo)
+<a href="https://www.star-history.com/?repos=yumenaka%2Fcomigo&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=yumenaka/comigo&type=date&theme=dark&legend=top-left&sealed_token=HWOAmg0U031iJgsEmeThimLrmGTYn9bIb0JtHUapnADRBmC_1ISYM46YGi28oBQ_f9q9VjtIlkis8AOOpPYxvE6SabcMQ-JQlEBlFtkE7BfBkJK7hWhJrLD2wE14VtpOifa54t5eIEJmN5OXz6HYbI9v0Dcxm01wSINkyz1DVjuccNQdQ9ljt5YRxF2f" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=yumenaka/comigo&type=date&legend=top-left&sealed_token=HWOAmg0U031iJgsEmeThimLrmGTYn9bIb0JtHUapnADRBmC_1ISYM46YGi28oBQ_f9q9VjtIlkis8AOOpPYxvE6SabcMQ-JQlEBlFtkE7BfBkJK7hWhJrLD2wE14VtpOifa54t5eIEJmN5OXz6HYbI9v0Dcxm01wSINkyz1DVjuccNQdQ9ljt5YRxF2f" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=yumenaka/comigo&type=date&legend=top-left&sealed_token=HWOAmg0U031iJgsEmeThimLrmGTYn9bIb0JtHUapnADRBmC_1ISYM46YGi28oBQ_f9q9VjtIlkis8AOOpPYxvE6SabcMQ-JQlEBlFtkE7BfBkJK7hWhJrLD2wE14VtpOifa54t5eIEJmN5OXz6HYbI9v0Dcxm01wSINkyz1DVjuccNQdQ9ljt5YRxF2f" />
+ </picture>
+</a>
 
 ## 开源协议
 

@@ -204,9 +204,15 @@ Comigo は複数の設定ファイルの場所をサポートしています：
 - [Baozisoftware](https://github.com/Baozisoftware)
 - その他の貢献者の皆様
 
-## プロジェクト統計
+## Star History
 
-[![Stargazers over time](https://starchart.cc/yumenaka/comigo.svg?variant=adaptive)](https://starchart.cc/yumenaka/comigo)
+<a href="https://www.star-history.com/?repos=yumenaka%2Fcomigo&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=yumenaka/comigo&type=date&theme=dark&legend=top-left&sealed_token=HWOAmg0U031iJgsEmeThimLrmGTYn9bIb0JtHUapnADRBmC_1ISYM46YGi28oBQ_f9q9VjtIlkis8AOOpPYxvE6SabcMQ-JQlEBlFtkE7BfBkJK7hWhJrLD2wE14VtpOifa54t5eIEJmN5OXz6HYbI9v0Dcxm01wSINkyz1DVjuccNQdQ9ljt5YRxF2f" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=yumenaka/comigo&type=date&legend=top-left&sealed_token=HWOAmg0U031iJgsEmeThimLrmGTYn9bIb0JtHUapnADRBmC_1ISYM46YGi28oBQ_f9q9VjtIlkis8AOOpPYxvE6SabcMQ-JQlEBlFtkE7BfBkJK7hWhJrLD2wE14VtpOifa54t5eIEJmN5OXz6HYbI9v0Dcxm01wSINkyz1DVjuccNQdQ9ljt5YRxF2f" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=yumenaka/comigo&type=date&legend=top-left&sealed_token=HWOAmg0U031iJgsEmeThimLrmGTYn9bIb0JtHUapnADRBmC_1ISYM46YGi28oBQ_f9q9VjtIlkis8AOOpPYxvE6SabcMQ-JQlEBlFtkE7BfBkJK7hWhJrLD2wE14VtpOifa54t5eIEJmN5OXz6HYbI9v0Dcxm01wSINkyz1DVjuccNQdQ9ljt5YRxF2f" />
+ </picture>
+</a>
 
 ## ライセンス
 
