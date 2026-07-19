@@ -91,6 +91,13 @@ func renderKittyUnicodeSetup(data []byte, imageID uint32, cols int, rows int) st
 	return builder.String()
 }
 
+// kittySetupKey 提取首段中的图片 ID 用于去重，兼容 tmux 包装且避免额外持有整份图片数据。
+func kittySetupKey(setup string) string {
+	_, id, _ := strings.Cut(setup, ",i=")
+	id, _, _ = strings.Cut(id, ",")
+	return id
+}
+
 func renderKittyPlaceholderLines(imageID uint32, cols int, rows int) []string {
 	lines := make([]string, 0, rows)
 	colorStart := kittyPlaceholderColorStart(imageID)

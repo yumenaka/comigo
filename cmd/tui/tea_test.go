@@ -47,6 +47,38 @@ func TestBuildBaseURLUsesLocalhostWhenLANDisabled(t *testing.T) {
 	}
 }
 
+// 验证关闭局域网共享时忽略对外 Host 和自动 TLS，生成实际可访问的本机地址。
+func TestBuildBaseURLDisableLANOverridesPublicSettings(t *testing.T) {
+	restoreConfig(t)
+	cfg := config.GetCfg()
+	cfg.Host = "example.com"
+	cfg.Port = 4321
+	cfg.DisableLAN = true
+	cfg.CertFile = ""
+	cfg.KeyFile = ""
+	cfg.AutoTLSCertificate = true
+
+	if got, want := buildBaseURL(), "http://127.0.0.1:4321"; got != want {
+		t.Fatalf("buildBaseURL() = %q, want %q", got, want)
+	}
+}
+
+// 验证 IPv6 地址使用带方括号的合法 host:port 格式。
+func TestBuildBaseURLFormatsIPv6Host(t *testing.T) {
+	restoreConfig(t)
+	cfg := config.GetCfg()
+	cfg.Host = "2001:db8::1"
+	cfg.Port = 1234
+	cfg.DisableLAN = false
+	cfg.CertFile = ""
+	cfg.KeyFile = ""
+	cfg.AutoTLSCertificate = false
+
+	if got, want := buildBaseURL(), "http://[2001:db8::1]:1234"; got != want {
+		t.Fatalf("buildBaseURL() = %q, want %q", got, want)
+	}
+}
+
 // 验证 TUI 打开的两种 Web 阅读模式都使用统一的精确书页参数。
 func TestBuildBookTargetURLUsesBookmarkPage(t *testing.T) {
 	restoreConfig(t)
@@ -70,6 +102,78 @@ func TestBuildBookTargetURLUsesBookmarkPage(t *testing.T) {
 	}
 }
 
+// 验证所有远程书籍 URL 都保留 remote_store 参数。
+func TestBuildBookTargetURLKeepsRemoteStoreForEveryBookType(t *testing.T) {
+	restoreConfig(t)
+	cfg := config.GetCfg()
+	cfg.Host = "example.com"
+	cfg.Port = 1234
+	cfg.DisableLAN = false
+	cfg.CertFile = ""
+	cfg.KeyFile = ""
+	cfg.AutoTLSCertificate = false
+	restoreModelStore(t, &tuiTestStore{})
+
+	tests := []struct {
+		name string
+		book modelpkg.BookInfo
+		want string
+	}{
+		{
+			name: "group",
+			book: modelpkg.BookInfo{BookID: "group", Type: modelpkg.TypeBooksGroup, RemoteStoreKey: "remote store"},
+			want: "http://example.com:1234/shelf/group?remote_store=remote+store",
+		},
+		{
+			name: "audio",
+			book: modelpkg.BookInfo{BookID: "audio", Type: modelpkg.TypeAudio, RemoteStoreKey: "remote store"},
+			want: "http://example.com:1234/player/audio?remote_store=remote+store",
+		},
+		{
+			name: "raw",
+			book: modelpkg.BookInfo{BookID: "raw", Title: "file name.html", Type: modelpkg.TypeHTML, RemoteStoreKey: "remote store"},
+			want: "http://example.com:1234/api/raw/raw/file+name.html?remote_store=remote+store",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := buildBookTargetURL(test.book, 0); got != test.want {
+				t.Fatalf("buildBookTargetURL() = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+// 验证进入远程子书架后，面板二维码仍指向对应远程书库。
+func TestBuildCurrentShelfURLKeepsRemoteStore(t *testing.T) {
+	restoreConfig(t)
+	cfg := config.GetCfg()
+	cfg.Host = "example.com"
+	cfg.Port = 1234
+	cfg.DisableLAN = false
+	cfg.CertFile = ""
+	cfg.KeyFile = ""
+	cfg.AutoTLSCertificate = false
+
+	model := &appModel{stack: []shelfLevel{{BookID: "group", RemoteStoreKey: "remote store"}}}
+	if got, want := model.buildCurrentShelfURL(), "http://example.com:1234/shelf/group?remote_store=remote+store"; got != want {
+		t.Fatalf("buildCurrentShelfURL() = %q, want %q", got, want)
+	}
+}
+
+// 验证日志分片写入会拼成完整行，并在达到上限后按顺序淘汰旧行。
+func TestLogBufferHandlesPartialWritesAndLimit(t *testing.T) {
+	buffer := &LogBuffer{limit: 3}
+	_, _ = buffer.Write([]byte("one"))
+	if got := buffer.GetLines(); len(got) != 1 || got[0] != "one" {
+		t.Fatalf("partial log snapshot = %#v, want [one]", got)
+	}
+	_, _ = buffer.Write([]byte(" two\nthree\nfour\nfive\n"))
+	if got, want := buffer.GetLines(), []string{"three", "four", "five"}; strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Fatalf("log lines = %#v, want %#v", got, want)
+	}
+}
+
 // 验证 TUI 主视图保留最右列，避免终端自动换行。
 func TestViewLeavesRightmostColumnUnused(t *testing.T) {
 	width := 120
@@ -87,6 +191,24 @@ func TestViewLeavesRightmostColumnUnused(t *testing.T) {
 		if got, maxWidth := runewidth.StringWidth(line), width-1; got > maxWidth {
 			t.Fatalf("View() line %d width = %d, want <= %d", lineNumber+1, got, maxWidth)
 		}
+	}
+}
+
+// 验证切到窄屏布局时仍会清理此前宽屏预览留下的 Kitty 图层。
+func TestNarrowViewClearsPendingKittyImages(t *testing.T) {
+	model := &appModel{
+		width:                     80,
+		height:                    30,
+		coverProtocol:             termimg.Kitty,
+		clearKittyImagesNextFrame: true,
+		shelfRowToID:              make(map[int]int),
+	}
+	view := model.View()
+	if !strings.Contains(view, "a=d,d=A") {
+		t.Fatalf("narrow view should delete pending Kitty images, got %q", view)
+	}
+	if model.clearKittyImagesNextFrame {
+		t.Fatal("narrow view should consume the Kitty clear request")
 	}
 }
 
@@ -444,6 +566,14 @@ func TestRenderKittyUnicodeImageSplitsSetupAndPlaceholders(t *testing.T) {
 	}
 }
 
+// 验证 Kitty setup 去重键只取图片 ID，并能越过 tmux 包装前缀。
+func TestKittySetupKeyExtractsImageIDFromTmuxSequence(t *testing.T) {
+	setup := "\x1bPtmux;\x1b\x1b_Ga=T,f=100,t=d,i=42,U=1,c=3,r=2,q=2,m=0;data"
+	if got := kittySetupKey(setup); got != "42" {
+		t.Fatalf("kittySetupKey() = %q, want 42", got)
+	}
+}
+
 // 验证 Kitty 图片栅格化使用终端单元格矩形。
 func TestRasterizeKittyPlacementImageUsesCellRectangle(t *testing.T) {
 	cellW, cellH := protocolCellPixels(termimg.Kitty)
@@ -531,7 +661,7 @@ func TestPreviewContentShowsOnlyVersionAtBottom(t *testing.T) {
 	}
 }
 
-// 验证强制覆盖协议会先清理旧封面区域。
+// 验证 iTerm2 overlay 只使用零宽控制序列清理旧封面，避免 Bubble Tea 截断后续图片。
 func TestRenderCoverOverlayClearsForcedOverlayImageArea(t *testing.T) {
 	model := &appModel{
 		coverProtocol: termimg.ITerm2,
@@ -552,14 +682,52 @@ func TestRenderCoverOverlayClearsForcedOverlayImageArea(t *testing.T) {
 	}
 	frame, _ := previewImageFrameFor(panelRect{w: 60, h: 24})
 	overlay := model.renderCoverOverlay(panelRect{w: 60, h: 24})
-	if !strings.Contains(overlay, strings.Repeat(" ", frame.innerW)) {
-		t.Fatalf("overlay should actively clear the image area")
-	}
 	if !strings.Contains(overlay, "\x1b["+strconv.Itoa(frame.innerW)+"X") {
 		t.Fatalf("iTerm2 overlay should clear cells with ECH, got %q", overlay)
 	}
 	if !strings.Contains(overlay, "IMAGE") {
 		t.Fatalf("overlay should include the rendered image sequence")
+	}
+	if got := xansi.StringWidth(overlay); got != len("IMAGE") {
+		t.Fatalf("iTerm2 overlay width = %d, want only image marker width %d", got, len("IMAGE"))
+	}
+}
+
+// 验证左侧日志变化时跳过整个 iTerm2 封面内框，覆盖终端 auto 尺寸与本地估算不一致的区域。
+func TestITerm2CoverOverlaySurvivesWideLayoutLogChanges(t *testing.T) {
+	model := &appModel{
+		width:         120,
+		height:        30,
+		coverProtocol: termimg.ITerm2,
+		logs:          []string{"first"},
+		items: []shelfItem{{
+			Kind:       shelfItemBook,
+			Title:      "Book",
+			BookID:     "book1",
+			Selectable: true,
+		}},
+		coverPreview: coverPreviewState{
+			BookID:   "book1",
+			Protocol: termimg.ITerm2,
+			Overlay:  "IMAGE",
+			ImageW:   10,
+			ImageH:   5,
+		},
+	}
+	firstLines := strings.Split(model.View(), "\n")
+	model.logs = []string{"second"}
+	secondLines := strings.Split(model.View(), "\n")
+	if !strings.Contains(firstLines[0], "IMAGE") || firstLines[0] != secondLines[0] {
+		t.Fatal("stable first line should carry the unchanged iTerm2 overlay")
+	}
+	layout := model.layout()
+	frame, _ := previewImageFrameFor(layout.cover)
+	skip := xansi.CursorForward(frame.innerW)
+	startRow := layout.cover.y + 1 + frame.innerY
+	for row := startRow; row < startRow+frame.innerH; row++ {
+		if !strings.Contains(secondLines[row], skip) {
+			t.Fatalf("cover row %d should skip the full inner frame with %q", row, skip)
+		}
 	}
 }
 
@@ -613,43 +781,57 @@ func TestRenderITerm2InlineImageUsesCellUnits(t *testing.T) {
 	}
 }
 
-// 验证强制覆盖协议会生成清屏前缀。
-func TestRenderCoverClearPrefixForForcedOverlayProtocols(t *testing.T) {
+// 验证普通重绘不会内嵌整屏清除，只有待处理的 Kitty 图层会生成删除序列。
+func TestRenderPendingKittyClearPrefixOnlyClearsPendingImages(t *testing.T) {
 	model := &appModel{coverProtocol: termimg.ITerm2}
-	if prefix := model.renderCoverClearPrefix(panelRect{w: 60, h: 24}); prefix == "" {
-		t.Fatal("iTerm2 protocol should clear the screen before redraw")
+	if prefix := model.renderPendingKittyClearPrefix(); prefix != "" {
+		t.Fatalf("regular iTerm2 redraw should not embed a full-screen clear, got %q", prefix)
 	}
 
-	model.coverProtocol = termimg.Sixel
-	if prefix := model.renderCoverClearPrefix(panelRect{w: 60, h: 24}); prefix != "" {
-		t.Fatalf("Sixel should not use iTerm2 clear prefix, got %q", prefix)
+	model.clearKittyImagesNextFrame = true
+	if prefix := model.renderPendingKittyClearPrefix(); !strings.Contains(prefix, "a=d,d=A") {
+		t.Fatalf("pending Kitty images should be deleted, got %q", prefix)
 	}
-
-	model.coverProtocol = termimg.Kitty
-	if prefix := model.renderCoverClearPrefix(panelRect{w: 60, h: 24}); prefix != "" {
-		t.Fatalf("Kitty placeholder path should not use overlay clear prefix, got %q", prefix)
+	if model.clearKittyImagesNextFrame {
+		t.Fatal("Kitty clear flag should be consumed")
 	}
 }
 
 // 验证 Kitty 封面初始化前缀只针对当前图片输出。
 func TestRenderCoverSetupPrefixOnlyForCurrentKittyImage(t *testing.T) {
 	model := &appModel{
-		coverPreview: coverPreviewState{BookID: "book1", Protocol: termimg.Kitty, Setup: "SETUP"},
+		coverPreview: coverPreviewState{BookID: "book1", Protocol: termimg.Kitty, Setup: ",i=1,"},
 		items: []shelfItem{{
 			Kind:       shelfItemBook,
 			BookID:     "book1",
 			Selectable: true,
 		}},
 	}
-	if got := model.renderCoverSetupPrefix(); got != "SETUP" {
-		t.Fatalf("cover setup prefix = %q, want SETUP", got)
+	if got := model.renderCoverSetupPrefix(); got != ",i=1," {
+		t.Fatalf("cover setup prefix = %q, want image 1 setup", got)
 	}
 	if got := model.renderCoverSetupPrefix(); got != "" {
 		t.Fatalf("cover setup prefix should only be sent once, got %q", got)
 	}
+	model.coverPreview.Setup = ",i=2,"
+	if got := model.renderCoverSetupPrefix(); got != ",i=2," {
+		t.Fatalf("rerendered cover with the same dimensions should send its new setup, got %q", got)
+	}
 	model.coverPreview.BookID = "book2"
 	if got := model.renderCoverSetupPrefix(); got != "" {
 		t.Fatalf("stale cover setup prefix = %q, want empty", got)
+	}
+}
+
+// 验证 Bubble Tea 完成清屏后会作废 Kitty setup，避免终端图片已清除但模型跳过重传。
+func TestScreenClearedInvalidatesKittySetupKeys(t *testing.T) {
+	model := &appModel{coverSetupKey: "cover", readerSetupKey: "reader"}
+	_, cmd := model.Update(tuiScreenClearedMsg{})
+	if cmd != nil {
+		t.Fatal("screen-cleared notification should not start another command")
+	}
+	if model.coverSetupKey != "" || model.readerSetupKey != "" {
+		t.Fatalf("screen clear should invalidate setup keys, cover=%q reader=%q", model.coverSetupKey, model.readerSetupKey)
 	}
 }
 
@@ -687,6 +869,76 @@ func TestSyncCoverPreviewCacheInvalidatesStaleLoadingRequest(t *testing.T) {
 	}
 	if model.coverPreview.BookID != "book2" || model.coverPreview.Loading {
 		t.Fatalf("coverPreview = %+v, want cached book2", model.coverPreview)
+	}
+}
+
+// 验证同一封面的错误在退避时间内不会被全局 tick 反复重试。
+func TestSyncCoverPreviewRespectsErrorRetryDelay(t *testing.T) {
+	model := &appModel{
+		width:         120,
+		height:        40,
+		coverProtocol: termimg.Halfblocks,
+		coverCache:    make(map[string]coverPreviewState),
+		items: []shelfItem{{
+			Kind:       shelfItemBook,
+			BookID:     "book1",
+			Selectable: true,
+		}},
+	}
+	frame, ok := previewImageFrameFor(model.layout().cover)
+	if !ok {
+		t.Fatal("expected cover preview frame")
+	}
+	model.coverPreview = coverPreviewState{
+		BookID:   "book1",
+		Width:    frame.innerW,
+		Height:   frame.innerH,
+		Protocol: termimg.Halfblocks,
+		ErrText:  "broken cover",
+	}
+	model.coverRetryAt = time.Now().Add(coverRetryDelay)
+	requestID := model.coverRequestID
+	if cmd := model.syncCoverPreviewCmd(); cmd != nil {
+		t.Fatal("cover error should wait for retry delay")
+	}
+	if model.coverRequestID != requestID {
+		t.Fatalf("cover request id = %d, want %d", model.coverRequestID, requestID)
+	}
+	model.coverRetryAt = time.Now().Add(-time.Second)
+	if cmd := model.syncCoverPreviewCmd(); cmd == nil {
+		t.Fatal("cover error should retry after the delay")
+	}
+}
+
+// 验证大图缓存始终受固定容量限制。
+func TestTUIImageCachesAreBounded(t *testing.T) {
+	model := &appModel{
+		coverCache:          make(map[string]coverPreviewState),
+		terminalReaderCache: make(map[string]terminalReaderState),
+	}
+	for index := 0; index < coverCacheLimit+5; index++ {
+		model.storeCoverPreviewCache(coverPreviewState{
+			BookID:   "cover-" + strconv.Itoa(index),
+			Width:    10,
+			Height:   10,
+			Protocol: termimg.Halfblocks,
+		})
+	}
+	if got := len(model.coverCache); got != coverCacheLimit {
+		t.Fatalf("cover cache size = %d, want %d", got, coverCacheLimit)
+	}
+
+	for index := 0; index < readerCacheLimit+5; index++ {
+		model.storeTerminalReaderCache(terminalReaderState{
+			BookID:    "book",
+			PageIndex: index,
+			Width:     80,
+			Height:    20,
+			Protocol:  termimg.Halfblocks,
+		})
+	}
+	if got := len(model.terminalReaderCache); got != readerCacheLimit {
+		t.Fatalf("reader cache size = %d, want %d", got, readerCacheLimit)
 	}
 }
 
@@ -774,12 +1026,12 @@ func TestShelfDoubleClickStartsTerminalReaderByDefault(t *testing.T) {
 			{Kind: shelfItemBook, Title: "Book 1", BookID: "book1", Selectable: true},
 			{Kind: shelfItemBook, Title: "Book 2", BookID: "book2", Selectable: true},
 		},
-		selected:            0,
-		shelfRowToID:        make(map[int]int),
-		qrButtonFocus:       qrActionTerminalReader,
-		lastShelfClickIndex: 1,
-		lastShelfClickAt:    time.Now(),
+		selected:         0,
+		shelfRowToID:     make(map[int]int),
+		qrButtonFocus:    qrActionTerminalReader,
+		lastShelfClickAt: time.Now(),
 	}
+	model.lastShelfClickKey = model.shelfClickKey(1)
 	layout := model.layout()
 	_ = model.renderShelfContent(layout.shelf)
 
@@ -800,6 +1052,27 @@ func TestShelfDoubleClickStartsTerminalReaderByDefault(t *testing.T) {
 	}
 }
 
+// 验证进入另一层书架后，相同数组索引不会沿用上一层的双击状态。
+func TestShelfDoubleClickDoesNotLeakAcrossLevels(t *testing.T) {
+	now := time.Now()
+	model := &appModel{
+		stack: []shelfLevel{{BookID: "parent1"}},
+		items: []shelfItem{{
+			Kind:       shelfItemBook,
+			Title:      "Book",
+			BookID:     "book",
+			Selectable: true,
+		}},
+	}
+	if model.isShelfDoubleClick(0, now) {
+		t.Fatal("first click should not be a double click")
+	}
+	model.stack = []shelfLevel{{BookID: "parent2"}}
+	if model.isShelfDoubleClick(0, now.Add(100*time.Millisecond)) {
+		t.Fatal("same index in another shelf level should not be a double click")
+	}
+}
+
 // 验证书架双击会遵循当前浏览器打开动作。
 func TestShelfDoubleClickUsesCurrentBrowserAction(t *testing.T) {
 	model := &appModel{
@@ -813,11 +1086,11 @@ func TestShelfDoubleClickUsesCurrentBrowserAction(t *testing.T) {
 			TargetURL:  "http://127.0.0.1:1234/reader/book1",
 			Selectable: true,
 		}},
-		shelfRowToID:        make(map[int]int),
-		qrButtonFocus:       qrActionOpenBrowser,
-		lastShelfClickIndex: 0,
-		lastShelfClickAt:    time.Now(),
+		shelfRowToID:     make(map[int]int),
+		qrButtonFocus:    qrActionOpenBrowser,
+		lastShelfClickAt: time.Now(),
 	}
+	model.lastShelfClickKey = model.shelfClickKey(0)
 	layout := model.layout()
 	_ = model.renderShelfContent(layout.shelf)
 
@@ -867,7 +1140,7 @@ func TestStartTerminalReaderClearsGhosttyCoverOverlay(t *testing.T) {
 	if !model.clearKittyImagesNextFrame {
 		t.Fatal("entering reader from Ghostty cover overlay should request Kitty image clear")
 	}
-	prefix := model.renderTerminalReaderClearPrefix()
+	prefix := model.renderPendingKittyClearPrefix()
 	if !strings.Contains(prefix, "a=d,d=A") {
 		t.Fatalf("clear prefix should delete Kitty images, got %q", prefix)
 	}
@@ -1096,6 +1369,28 @@ func TestModalClosesOnEnterAndMouseOK(t *testing.T) {
 	}
 }
 
+// 验证弹窗会删除 Kitty 图层并作废 setup，关闭后可重新传图。
+func TestModalClearsKittyImageState(t *testing.T) {
+	model := &appModel{
+		width:          80,
+		height:         24,
+		coverProtocol:  termimg.Kitty,
+		coverSetupKey:  "cover",
+		readerSetupKey: "reader",
+	}
+	model.showModal("提示", "消息")
+	view := model.View()
+	if !strings.Contains(view, "a=d,d=A") {
+		t.Fatalf("modal should delete Kitty images, got %q", view)
+	}
+	if model.coverSetupKey != "" || model.readerSetupKey != "" {
+		t.Fatalf("modal should invalidate Kitty setup keys, cover=%q reader=%q", model.coverSetupKey, model.readerSetupKey)
+	}
+	if strings.Contains(view, "\x1b[2J") {
+		t.Fatalf("modal View should not embed a full-screen clear, got %q", view)
+	}
+}
+
 // 验证打开浏览器失败时会显示错误弹窗。
 func TestOpenBrowserFailureShowsModal(t *testing.T) {
 	model := &appModel{logBuffer: NewLogBuffer(), shelfRowToID: make(map[int]int)}
@@ -1230,7 +1525,7 @@ func TestITerm2PendingPageKeepsOldImageLayer(t *testing.T) {
 			ImageH:   8,
 		},
 	}
-	if prefix := model.renderTerminalReaderClearPrefix(); strings.Contains(prefix, "\x1b[2J") {
+	if prefix := model.renderPendingKittyClearPrefix(); strings.Contains(prefix, "\x1b[2J") {
 		t.Fatalf("pending iTerm2 page should not clear the full screen, got %q", prefix)
 	}
 	if overlay := model.renderTerminalReaderOverlay(terminalReaderImageArea{w: 20, h: 12}); overlay != "" {
@@ -1240,9 +1535,9 @@ func TestITerm2PendingPageKeepsOldImageLayer(t *testing.T) {
 
 // 验证终端阅读器只为 Kitty 协议输出初始化前缀。
 func TestTerminalReaderSetupPrefixOnlyForKitty(t *testing.T) {
-	model := &appModel{terminalReader: terminalReaderState{Protocol: termimg.Kitty, Setup: "SETUP"}}
-	if got := model.renderTerminalReaderSetupPrefix(); got != "SETUP" {
-		t.Fatalf("reader setup prefix = %q, want SETUP", got)
+	model := &appModel{terminalReader: terminalReaderState{Protocol: termimg.Kitty, Setup: ",i=1,"}}
+	if got := model.renderTerminalReaderSetupPrefix(); got != ",i=1," {
+		t.Fatalf("reader setup prefix = %q, want image 1 setup", got)
 	}
 	if got := model.renderTerminalReaderSetupPrefix(); got != "" {
 		t.Fatalf("reader setup prefix should only be sent once, got %q", got)
@@ -1250,16 +1545,6 @@ func TestTerminalReaderSetupPrefixOnlyForKitty(t *testing.T) {
 	model.terminalReader.Protocol = termimg.Halfblocks
 	if got := model.renderTerminalReaderSetupPrefix(); got != "" {
 		t.Fatalf("halfblocks setup prefix = %q, want empty", got)
-	}
-}
-
-// 验证 Kitty 终端阅读器使用占位符渲染图片。
-func TestTerminalReaderUsesPlaceholderForKitty(t *testing.T) {
-	if isTerminalReaderOverlayProtocol(termimg.Kitty) {
-		t.Fatal("Kitty terminal reader should use placeholder text rendering")
-	}
-	if isTerminalReaderOverlayProtocol(termimg.Halfblocks) {
-		t.Fatal("Halfblocks terminal reader should stay in text mode")
 	}
 }
 

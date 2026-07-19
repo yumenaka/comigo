@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	stdlog "log"
+	"net"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
+	termimg "github.com/blacktop/go-termimg"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mattn/go-runewidth"
 	"golang.org/x/term"
@@ -37,6 +39,9 @@ const (
 	layoutGap        = 1                      // 面板之间的间距列数
 	maxActionMessage = 120                    // 操作消息最大显示宽度
 	doubleClickGap   = 500 * time.Millisecond // 终端没有原生双击事件，用短时间内同一行两次点击模拟
+	coverCacheLimit  = 64                     // 封面渲染结果较大，限制缓存数量避免长时间浏览后持续占用内存
+	readerCacheLimit = 12                     // 阅读页只保留少量渲染结果
+	coverRetryDelay  = 30 * time.Second       // 封面读取失败后降低重试频率，避免全局 tick 形成错误风暴
 )
 
 // focusPanel 表示当前聚焦的面板类型
@@ -100,20 +105,25 @@ type openURLResultMsg struct {
 	err error
 }
 
+// tuiScreenClearedMsg 在 Bubble Tea 完成清屏后作废终端侧图片状态。
+type tuiScreenClearedMsg struct{}
+
 // shelfItem 书架列表中的单个条目
 type shelfItem struct {
-	Kind       shelfItemKind // 条目类型
-	Title      string        // 显示标题
-	Subtitle   string        // 副标题（页数、子项数等）
-	BookID     string        // 书籍/书架 ID
-	TargetURL  string        // 点击后打开的 URL
-	Selectable bool          // 是否可被选中
+	Kind           shelfItemKind // 条目类型
+	Title          string        // 显示标题
+	Subtitle       string        // 副标题（页数、子项数等）
+	BookID         string        // 书籍/书架 ID
+	RemoteStoreKey string        // 远程 Comigo 书库标识
+	TargetURL      string        // 点击后打开的 URL
+	Selectable     bool          // 是否可被选中
 }
 
 // shelfLevel 书架导航栈的一层，用于记录进入子书架的路径
 type shelfLevel struct {
-	BookID string // 当前层对应的书架 ID
-	Title  string // 显示名称
+	BookID         string // 当前层对应的书架 ID
+	Title          string // 显示名称
+	RemoteStoreKey string // 远程 Comigo 书库标识
 }
 
 // systemSnapshot 保存当前仍会渲染到 TUI 的状态文本。
@@ -171,16 +181,17 @@ type appModel struct {
 	actionMsg    string     // 最近一次操作的状态提示
 	modal        modalState // 全局提示弹窗，优先接管键盘和鼠标事件
 
-	stack               []shelfLevel // 书架导航栈（从根到当前层级）
-	items               []shelfItem  // 当前层级的书架条目列表
-	selected            int          // 当前选中的条目索引
-	shelfOffset         int          // 书架列表滚动偏移（首个可见的 item 索引）
-	shelfRowToID        map[int]int  // 面板内容行号 → items 索引的映射（用于鼠标点击定位）
-	lastShelfClickIndex int          // 上一次书架左键点击的条目索引，用于判断双击
-	lastShelfClickAt    time.Time    // 上一次书架左键点击时间，用于判断双击
+	stack             []shelfLevel // 书架导航栈（从根到当前层级）
+	items             []shelfItem  // 当前层级的书架条目列表
+	selected          int          // 当前选中的条目索引
+	shelfOffset       int          // 书架列表滚动偏移（首个可见的 item 索引）
+	shelfRowToID      map[int]int  // 面板内容行号 → items 索引的映射（用于鼠标点击定位）
+	lastShelfClickKey string       // 上一次书架左键点击的条目标识，用于判断双击
+	lastShelfClickAt  time.Time    // 上一次书架左键点击时间，用于判断双击
 
 	currentShelfURL string   // 当前书架层级对应的 Web URL
 	qrLines         []string // QR 码的 Unicode 字符行
+	qrValue         string   // 当前二维码对应的 URL，避免 tick 重复编码相同内容
 	qrButtonFocus   qrAction // QR 面板当前聚焦按钮
 	qrButtonHitbox  []qrButtonHitbox
 	readMode        int            // 阅读模式：0=scroll（卷轴阅读）, 1=flip（翻页阅读）
@@ -190,6 +201,7 @@ type appModel struct {
 	coverPreview   coverPreviewState            // 当前选中书籍的封面预览状态
 	coverCache     map[string]coverPreviewState // 已渲染封面缓存，避免频繁滚动时重复解码
 	coverRequestID int                          // 封面异步加载序号，用于丢弃过期结果
+	coverRetryAt   time.Time                    // 当前封面失败后的下次自动重试时间
 	coverSetupKey  string                       // 已发送到 Kitty 的封面 setup key，避免每帧重复传图
 
 	readerProtocol            tuiImageProtocol               // 终端阅读使用的图片协议，现代 Kitty 协议终端会尝试原生图像
@@ -207,10 +219,23 @@ type appModel struct {
 	clearKittyImagesNextFrame bool                           // 切换界面时下一帧清理 Kitty 图像层，避免旧 overlay 残留
 }
 
+// storeBoundedCache 写入固定容量缓存；已存在的 key 不触发淘汰。
+func storeBoundedCache[T any](cache map[string]T, key string, value T, limit int) {
+	if _, exists := cache[key]; !exists && len(cache) >= limit {
+		for oldKey := range cache {
+			delete(cache, oldKey)
+			break
+		}
+	}
+	cache[key] = value
+}
+
 // LogBuffer 用来缓存 TUI 需要展示的实时日志。
 type LogBuffer struct {
 	lines []string
 	limit int
+	start int
+	rest  string
 	mu    sync.RWMutex
 }
 
@@ -224,16 +249,19 @@ func (lb *LogBuffer) Write(p []byte) (int, error) {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
 
-	logText := string(p)
+	logText := lb.rest + string(p)
 	parts := strings.Split(logText, "\n")
-	for _, line := range parts {
+	lb.rest = parts[len(parts)-1]
+	for _, line := range parts[:len(parts)-1] {
 		if line == "" {
 			continue
 		}
-		lb.lines = append(lb.lines, line)
-	}
-	if overflow := len(lb.lines) - lb.limit; overflow > 0 {
-		lb.lines = append([]string(nil), lb.lines[overflow:]...)
+		if len(lb.lines) < lb.limit {
+			lb.lines = append(lb.lines, line)
+			continue
+		}
+		lb.lines[lb.start] = line
+		lb.start = (lb.start + 1) % lb.limit
 	}
 	return len(p), nil
 }
@@ -243,8 +271,15 @@ func (lb *LogBuffer) GetLines() []string {
 	lb.mu.RLock()
 	defer lb.mu.RUnlock()
 
-	result := make([]string, len(lb.lines))
-	copy(result, lb.lines)
+	result := make([]string, 0, len(lb.lines)+1)
+	result = append(result, lb.lines[lb.start:]...)
+	result = append(result, lb.lines[:lb.start]...)
+	if lb.rest != "" {
+		if len(result) == lb.limit {
+			result = result[1:]
+		}
+		result = append(result, lb.rest)
+	}
 	return result
 }
 
@@ -382,6 +417,15 @@ func tickCmd() tea.Cmd {
 	})
 }
 
+// clearTUIScreenCmd 保证清屏后先允许下一帧重传 Kitty setup，再执行后续图片同步。
+func clearTUIScreenCmd(next tea.Cmd) tea.Cmd {
+	return tea.Sequence(
+		tea.ClearScreen,
+		func() tea.Msg { return tuiScreenClearedMsg{} },
+		next,
+	)
+}
+
 // startBackendCmd 在后台协程中依次启动 Web 服务、扫描书籍等全部后端流程。
 func startBackendCmd() tea.Cmd {
 	return func() (msg tea.Msg) {
@@ -414,11 +458,21 @@ func (m *appModel) Init() tea.Cmd {
 // Update 实现 tea.Model 接口，处理所有消息分发：窗口变化、定时刷新、后台事件、键盘/鼠标输入。
 func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tuiScreenClearedMsg:
+		m.markKittyImagesCleared()
+		return m, nil
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		if m.coverProtocol == termimg.Kitty || m.readerProtocol == termimg.Kitty {
+			m.clearKittyImagesNextFrame = true
+		}
 		m.refreshData()
-		return m, m.syncActiveImageCmd()
+		syncCmd := m.syncActiveImageCmd()
+		if m.activeImageUsesOverlay() {
+			return m, clearTUIScreenCmd(syncCmd)
+		}
+		return m, syncCmd
 	case tickMsg:
 		if m.screen == screenReader {
 			return m, tea.Batch(tickCmd(), m.handleReaderAutoFlip(time.Time(msg)))
@@ -447,6 +501,9 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			logger.Infof(locale.GetString("log_opening_browser"), msg.url)
 		}
 		m.refreshData()
+		if msg.err != nil {
+			return m, clearTUIScreenCmd(nil)
+		}
 		return m, m.syncActiveImageCmd()
 	case coverPreviewMsg:
 		m.applyCoverPreviewMsg(msg)
@@ -518,6 +575,8 @@ func (m *appModel) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		case "enter", " ":
 			return m, m.activateSelectedItem()
 		case "r":
+			// 手动刷新时允许立即重试此前失败的封面请求。
+			m.coverRetryAt = time.Time{}
 			m.refreshData()
 		}
 	case focusLog:
@@ -623,11 +682,25 @@ func (m *appModel) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 
 // isShelfDoubleClick 判断本次书架点击是否构成双击；单击仍会立即更新选中项。
 func (m *appModel) isShelfDoubleClick(index int, now time.Time) bool {
+	key := m.shelfClickKey(index)
 	elapsed := now.Sub(m.lastShelfClickAt)
-	doubleClick := index == m.lastShelfClickIndex && !m.lastShelfClickAt.IsZero() && elapsed >= 0 && elapsed <= doubleClickGap
-	m.lastShelfClickIndex = index
+	doubleClick := key != "" && key == m.lastShelfClickKey && !m.lastShelfClickAt.IsZero() && elapsed >= 0 && elapsed <= doubleClickGap
+	m.lastShelfClickKey = key
 	m.lastShelfClickAt = now
 	return doubleClick
+}
+
+// shelfClickKey 用层级和条目身份判断双击，避免进入子书架后相同数组索引被误判。
+func (m *appModel) shelfClickKey(index int) string {
+	if index < 0 || index >= len(m.items) {
+		return ""
+	}
+	parentID := ""
+	if len(m.stack) > 0 {
+		level := m.stack[len(m.stack)-1]
+		parentID = level.BookID + "\x00" + level.RemoteStoreKey
+	}
+	return parentID + "\x00" + shelfItemIdentity(m.items[index])
 }
 
 // activateShelfDoubleClick 双击书籍时按当前打开方式执行；双击分组/返回项仍沿用原激活逻辑。
@@ -654,8 +727,9 @@ func (m *appModel) View() string {
 		return m.renderTerminalReaderView()
 	}
 
+	clearPrefix := m.renderPendingKittyClearPrefix()
 	if m.width < minTUIWidth || m.height < minTUIHeight {
-		return fmt.Sprintf(locale.GetString("tui_terminal_too_small"), minTUIWidth, minTUIHeight) + "\n" +
+		return clearPrefix + fmt.Sprintf(locale.GetString("tui_terminal_too_small"), minTUIWidth, minTUIHeight) + "\n" +
 			fmt.Sprintf(locale.GetString("tui_current_size"), m.width, m.height) + "\n"
 	}
 
@@ -669,7 +743,7 @@ func (m *appModel) View() string {
 		all = append(all, shelfLines...)
 		all = append(all, qrLines...)
 		all = append(all, logLines...)
-		return strings.Join(all, "\n")
+		return clearPrefix + strings.Join(all, "\n")
 	}
 
 	shelfLines := m.makePanel(locale.GetString("tui_panel_shelf"), m.renderShelfContent(layout.shelf), layout.shelf, m.focus == focusShelf)
@@ -678,7 +752,21 @@ func (m *appModel) View() string {
 	coverLines := m.makeStyledPanel(locale.GetString("tui_panel_preview"), m.renderCoverPreviewContent(layout.cover), layout.cover, false)
 
 	rows := mergeWideLayoutRows(layout, shelfLines, logLines, qrLines, coverLines)
-	return m.renderCoverClearPrefix(layout.cover) + m.renderCoverSetupPrefix() + strings.Join(rows, "\n") + m.renderCoverOverlay(layout.cover)
+	overlay := m.renderCoverOverlay(layout.cover)
+	if m.coverProtocol == termimg.ITerm2 {
+		m.protectITerm2CoverRows(rows, layout.cover)
+		// iTerm2 图片放在首行前输出；日志和时间变化不会让 Bubble Tea 重复发送同一张图。
+		return clearPrefix + m.renderCoverSetupPrefix() + overlay + strings.Join(rows, "\n")
+	}
+	return clearPrefix + m.renderCoverSetupPrefix() + strings.Join(rows, "\n") + overlay
+}
+
+// activeImageUsesOverlay 判断当前界面是否使用需要主动清屏的独立图像层。
+func (m *appModel) activeImageUsesOverlay() bool {
+	if m.screen == screenReader {
+		return isOverlayImageProtocol(m.readerProtocol)
+	}
+	return isCoverOverlayProtocol(m.coverProtocol)
 }
 
 // refreshData 一次性刷新日志、书架、系统状态和二维码等全部数据。
@@ -692,9 +780,26 @@ func (m *appModel) refreshData() {
 
 // refreshShelf 重新构建当前层级的书架条目列表并更新选中项和书架 URL。
 func (m *appModel) refreshShelf() {
+	selectedKey := ""
+	if item := m.currentItem(); item != nil {
+		selectedKey = shelfItemIdentity(*item)
+	}
 	m.items = m.buildCurrentShelfItems()
+	if selectedKey != "" {
+		for index, item := range m.items {
+			if item.Selectable && shelfItemIdentity(item) == selectedKey {
+				m.selected = index
+				break
+			}
+		}
+	}
 	m.ensureSelectedItem()
 	m.currentShelfURL = m.buildCurrentShelfURL()
+}
+
+// shelfItemIdentity 返回刷新和排序后仍稳定的条目标识。
+func shelfItemIdentity(item shelfItem) string {
+	return fmt.Sprintf("%d\x00%s\x00%s\x00%s", item.Kind, item.BookID, item.RemoteStoreKey, item.Title)
 }
 
 // refreshStatus 更新当前界面底部需要展示的服务状态。
@@ -729,12 +834,18 @@ func (m *appModel) selectedURL() string {
 
 // refreshQRCode 根据当前选中项的 URL 重新生成 QR 码字符行。
 func (m *appModel) refreshQRCode() {
-	lines, err := renderQRCodeLines(m.selectedURL())
+	value := m.selectedURL()
+	if value == m.qrValue && len(m.qrLines) > 0 {
+		return
+	}
+	lines, err := renderQRCodeLines(value)
 	if err != nil {
 		m.qrLines = []string{locale.GetString("tui_qr_gen_failed"), err.Error()}
+		m.qrValue = value
 		return
 	}
 	m.qrLines = lines
+	m.qrValue = value
 }
 
 // buildCurrentShelfItems 根据导航栈层级构建当前应显示的书架条目列表。
@@ -875,12 +986,13 @@ func convertBookInfo(book modelpkg.BookInfo, readMode int) shelfItem {
 		kind = shelfItemGroup
 	}
 	return shelfItem{
-		Kind:       kind,
-		Title:      book.ShortName(),
-		Subtitle:   subtitle,
-		BookID:     book.BookID,
-		TargetURL:  buildBookTargetURL(book, readMode),
-		Selectable: true,
+		Kind:           kind,
+		Title:          book.ShortName(),
+		Subtitle:       subtitle,
+		BookID:         book.BookID,
+		RemoteStoreKey: book.RemoteStoreKey,
+		TargetURL:      buildBookTargetURL(book, readMode),
+		Selectable:     true,
 	}
 }
 
@@ -914,20 +1026,21 @@ func buildBookSubtitle(book modelpkg.BookInfo) string {
 func buildBookTargetURL(book modelpkg.BookInfo, readMode int) string {
 	baseURL := buildBaseURL()
 	base := strings.TrimRight(baseURL, "/")
+	params := url.Values{}
+	var target string
 	switch book.Type {
 	case modelpkg.TypeBooksGroup:
-		return base + config.PrefixPath("/shelf/"+book.BookID)
+		target = base + config.PrefixPath("/shelf/"+book.BookID)
 	case modelpkg.TypeVideo, modelpkg.TypeAudio:
-		return base + config.PrefixPath("/player/"+book.BookID)
+		target = base + config.PrefixPath("/player/"+book.BookID)
 	case modelpkg.TypeHTML, modelpkg.TypeUnknownFile:
-		return base + config.PrefixPath("/api/raw/"+book.BookID+"/"+url.QueryEscape(book.Title))
+		target = base + config.PrefixPath("/api/raw/"+book.BookID+"/"+url.QueryEscape(book.Title))
 	default:
 		prefix := "/scroll/"
 		if readMode == 1 {
 			prefix = "/flip/"
 		}
-		target := base + config.PrefixPath(prefix+book.BookID)
-		params := url.Values{}
+		target = base + config.PrefixPath(prefix+book.BookID)
 		if modelpkg.IStore != nil {
 			if marks, err := modelpkg.IStore.GetBookMarks(book.BookID); err == nil && marks != nil {
 				if page := marks.GetLastReadPage(); page > 0 {
@@ -935,45 +1048,43 @@ func buildBookTargetURL(book modelpkg.BookInfo, readMode int) string {
 				}
 			}
 		}
-		if book.RemoteStoreKey != "" {
-			params.Set("remote_store", book.RemoteStoreKey)
-		}
-		if query := params.Encode(); query != "" {
-			target += "?" + query
-		}
-		return target
 	}
+	if book.RemoteStoreKey != "" {
+		params.Set("remote_store", book.RemoteStoreKey)
+	}
+	if query := params.Encode(); query != "" {
+		target += "?" + query
+	}
+	return target
 }
 
 // buildBaseURL 根据当前配置（Host、Port、TLS 等）构建 Web 服务的基础 URL。
 func buildBaseURL() string {
 	cfg := config.GetCfg()
+	autoTLS := cfg.AutoTLSCertificate && !cfg.DisableLAN
 	protocol := "http://"
-	if (cfg.CertFile != "" && cfg.KeyFile != "") || cfg.AutoTLSCertificate {
+	if (cfg.CertFile != "" && cfg.KeyFile != "") || autoTLS {
 		protocol = "https://"
 	}
 
-	host := cfg.Host
-	if host == "" {
-		if cfg.DisableLAN {
-			host = "127.0.0.1"
-		} else {
+	host := "127.0.0.1"
+	if !cfg.DisableLAN {
+		host = cfg.Host
+		if host == "" {
 			// TUI 只展示一个可访问地址：未指定 Host 时使用系统默认路由选出的出站 IP，避免 ZeroTier 等虚拟网卡因枚举顺序排在前面。
 			if outboundIP, err := tools.LookupOutboundIP(); err == nil {
 				host = outboundIP.String()
 			} else {
 				host = "127.0.0.1"
 			}
-		}
-	} else {
-		if tools.IsLoopbackHost(host) {
+		} else if tools.IsLoopbackHost(host) {
 			host = tools.GetOutboundIP().String()
 		}
 	}
-	if cfg.AutoTLSCertificate {
+	if autoTLS {
 		return protocol + host
 	}
-	return fmt.Sprintf("%s%s:%d", protocol, host, cfg.Port)
+	return protocol + net.JoinHostPort(host, strconv.Itoa(cfg.Port))
 }
 
 // buildCurrentShelfURL 构建当前书架层级对应的 Web URL（顶层为根 URL，子层为 /shelf/{id}）。
@@ -982,7 +1093,12 @@ func (m *appModel) buildCurrentShelfURL() string {
 	if len(m.stack) == 0 {
 		return baseURL + config.PrefixPath("/")
 	}
-	return baseURL + config.PrefixPath("/shelf/"+m.stack[len(m.stack)-1].BookID)
+	level := m.stack[len(m.stack)-1]
+	target := baseURL + config.PrefixPath("/shelf/"+level.BookID)
+	if level.RemoteStoreKey == "" {
+		return target
+	}
+	return target + "?remote_store=" + url.QueryEscape(level.RemoteStoreKey)
 }
 
 // displayStoreName 从 Store URL/路径中提取适合显示的简短名称。
@@ -1145,8 +1261,9 @@ func (m *appModel) activateSelectedItem() tea.Cmd {
 		return m.syncCoverPreviewCmd()
 	case shelfItemGroup:
 		m.stack = append(m.stack, shelfLevel{
-			BookID: item.BookID,
-			Title:  item.Title,
+			BookID:         item.BookID,
+			Title:          item.Title,
+			RemoteStoreKey: item.RemoteStoreKey,
 		})
 		m.selected = 0
 		m.shelfOffset = 0

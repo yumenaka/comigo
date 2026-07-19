@@ -12,12 +12,13 @@ import (
 // toggleTUIImageMode 在低兼容的 ANSI/Halfblocks 和终端原生图片协议之间切换。
 func (m *appModel) toggleTUIImageMode() tea.Cmd {
 	wasKitty := m.coverProtocol == termimg.Kitty || m.readerProtocol == termimg.Kitty
+	wasOverlay := m.activeImageUsesOverlay()
 	if m.isANSIImageMode() {
 		coverProtocol := detectNativeTUIImageProtocol()
 		readerProtocol := detectNativeTUIReaderImageProtocol()
 		if !isNativeTUIImageProtocol(coverProtocol) || !isNativeTUIImageProtocol(readerProtocol) {
 			m.showModal(locale.GetString("tui_modal_title_notice"), locale.GetString("tui_image_mode_incompatible"))
-			return nil
+			return clearTUIScreenCmd(nil)
 		}
 		m.coverProtocol = coverProtocol
 		m.readerProtocol = readerProtocol
@@ -32,7 +33,11 @@ func (m *appModel) toggleTUIImageMode() tea.Cmd {
 	}
 	m.invalidateTUIImageState()
 	m.refreshStatus()
-	return m.syncActiveImageCmd()
+	syncCmd := m.syncActiveImageCmd()
+	if wasOverlay {
+		return clearTUIScreenCmd(syncCmd)
+	}
+	return syncCmd
 }
 
 func (m *appModel) isANSIImageMode() bool {
@@ -74,4 +79,14 @@ func (m *appModel) invalidateTUIImageState() {
 func (m *appModel) markKittyImagesCleared() {
 	m.coverSetupKey = ""
 	m.readerSetupKey = ""
+}
+
+// renderPendingKittyClearPrefix 消费待清理标记，并作废终端侧 Kitty 图片状态。
+func (m *appModel) renderPendingKittyClearPrefix() string {
+	if !m.clearKittyImagesNextFrame {
+		return ""
+	}
+	m.clearKittyImagesNextFrame = false
+	m.markKittyImagesCleared()
+	return termimg.ClearAllString()
 }

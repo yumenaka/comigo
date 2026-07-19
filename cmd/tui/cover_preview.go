@@ -154,10 +154,6 @@ func (m *appModel) syncCoverPreviewCmd() tea.Cmd {
 		}
 		return nil
 	}
-	if m.coverCache == nil {
-		m.coverCache = make(map[string]coverPreviewState)
-	}
-
 	key := coverPreviewCacheKey(item.BookID, width, height, m.coverProtocol)
 	if cached, ok := m.coverCache[key]; ok {
 		if m.coverPreview.Loading && m.coverPreview.BookID != item.BookID {
@@ -165,6 +161,16 @@ func (m *appModel) syncCoverPreviewCmd() tea.Cmd {
 			m.coverRequestID++
 		}
 		m.coverPreview = cached
+		return nil
+	}
+	if !m.coverPreview.Loading &&
+		m.coverPreview.ErrText != "" &&
+		m.coverPreview.BookID == item.BookID &&
+		m.coverPreview.Width == width &&
+		m.coverPreview.Height == height &&
+		m.coverPreview.Protocol == m.coverProtocol &&
+		time.Now().Before(m.coverRetryAt) {
+		// 同一封面失败后等待退避时间，避免每个 tick 都重复读取和解码。
 		return nil
 	}
 	if m.coverPreview.Loading &&
@@ -177,6 +183,7 @@ func (m *appModel) syncCoverPreviewCmd() tea.Cmd {
 	}
 
 	m.coverRequestID++
+	m.coverRetryAt = time.Time{}
 	requestID := m.coverRequestID
 	m.coverPreview = coverPreviewState{
 		BookID:   item.BookID,
@@ -195,9 +202,20 @@ func (m *appModel) applyCoverPreviewMsg(msg coverPreviewMsg) {
 		return
 	}
 	m.coverPreview = msg.state
-	if msg.state.ErrText == "" && !msg.state.Loading {
-		m.coverCache[coverPreviewCacheKey(msg.state.BookID, msg.state.Width, msg.state.Height, msg.state.Protocol)] = msg.state
+	if msg.state.ErrText != "" {
+		m.coverRetryAt = time.Now().Add(coverRetryDelay)
+		return
 	}
+	m.coverRetryAt = time.Time{}
+	if !msg.state.Loading {
+		m.storeCoverPreviewCache(msg.state)
+	}
+}
+
+// storeCoverPreviewCache 写入有上限的封面缓存，避免长时间浏览后保留全部大图控制序列。
+func (m *appModel) storeCoverPreviewCache(state coverPreviewState) {
+	key := coverPreviewCacheKey(state.BookID, state.Width, state.Height, state.Protocol)
+	storeBoundedCache(m.coverCache, key, state, coverCacheLimit)
 }
 
 // loadCoverPreviewCmd 在 Bubble Tea 命令中异步读取封面并渲染成当前终端协议需要的内容。
@@ -437,12 +455,7 @@ func splitRenderedImageLines(rendered string, protocol tuiImageProtocol) (string
 			}
 		}
 	}
-	rawLines := strings.Split(rendered, "\n")
-	lines := make([]string, 0, len(rawLines))
-	for _, line := range rawLines {
-		lines = append(lines, line)
-	}
-	return setup, lines
+	return setup, strings.Split(rendered, "\n")
 }
 
 // renderCoverPreviewContent 渲染预览区：首行显示标题，中间全部给封面框，底部显示版本和当前时间。
@@ -454,21 +467,21 @@ func (m *appModel) renderCoverPreviewContent(rect panelRect) []string {
 	}
 	item := m.currentItem()
 	if item == nil || item.BookID == "" {
-		return appendPreviewFooter(m, []string{locale.GetString("tui_cover_no_selection")}, w, h)
+		return appendPreviewFooter([]string{locale.GetString("tui_cover_no_selection")}, w, h)
 	}
 
 	frame, ok := previewImageFrameFor(rect)
 	lines := []string{shortenText(item.Title, w)}
 	if !ok {
 		lines = append(lines, locale.GetString("tui_cover_too_small"))
-		return appendPreviewFooter(m, lines, w, h)
+		return appendPreviewFooter(lines, w, h)
 	}
 
 	for len(lines) < frame.y {
 		lines = append(lines, "")
 	}
 	lines = append(lines, m.renderCoverImageFrame(frame, item)...)
-	return appendPreviewFooter(m, lines, w, h)
+	return appendPreviewFooter(lines, w, h)
 }
 
 // renderCoverImageFrame 渲染预览区内封面边框，图片内容在边框内部居中显示。
@@ -499,7 +512,7 @@ func (m *appModel) renderCoverImageLines(frame previewImageFrame, item *shelfIte
 }
 
 // appendPreviewFooter 将版本号和当前时间固定放到预览区右下角。
-func appendPreviewFooter(_ *appModel, lines []string, width int, height int) []string {
+func appendPreviewFooter(lines []string, width int, height int) []string {
 	if height <= 0 {
 		return nil
 	}
@@ -518,31 +531,14 @@ func previewVersionLine() string {
 	return time.Now().Format("2006-01-02 15:04:05") + "  Comigo " + config.GetVersion()
 }
 
-// renderCoverClearPrefix 在主界面绘制前清理必要的图像层；Kitty 清理只在跨界面切换时触发。
-func (m *appModel) renderCoverClearPrefix(rect panelRect) string {
-	var builder strings.Builder
-	if m.clearKittyImagesNextFrame {
-		builder.WriteString(termimg.ClearAllString())
-		m.clearKittyImagesNextFrame = false
-		m.markKittyImagesCleared()
-	}
-	if _, ok := previewImageFrameFor(rect); ok && m.coverProtocol == termimg.ITerm2 {
-		// iTerm2 是独立图像层，切换封面时先清一帧屏幕，避免上一次 inline image 残留。
-		builder.WriteString("\x1b[2J\x1b[H")
-	}
-	return builder.String()
-}
-
 // renderCoverSetupPrefix 输出 Kitty 图片传输控制序列；可见 placeholder 行仍在主文本里渲染。
 func (m *appModel) renderCoverSetupPrefix() string {
 	item := m.currentItem()
-	if item == nil || item.BookID != m.coverPreview.BookID || m.coverPreview.Protocol != termimg.Kitty {
+	if item == nil || item.BookID != m.coverPreview.BookID ||
+		m.coverPreview.Protocol != termimg.Kitty || m.coverPreview.Setup == "" {
 		return ""
 	}
-	if m.coverPreview.Setup == "" {
-		return ""
-	}
-	key := coverPreviewCacheKey(m.coverPreview.BookID, m.coverPreview.Width, m.coverPreview.Height, m.coverPreview.Protocol)
+	key := kittySetupKey(m.coverPreview.Setup)
 	if key == m.coverSetupKey {
 		return ""
 	}
@@ -559,16 +555,17 @@ func (m *appModel) renderCoverOverlay(rect panelRect) string {
 	absX := rect.x + 2 + frame.innerX
 	absY := rect.y + 2 + frame.innerY
 	var builder strings.Builder
-	builder.WriteString(xansi.SaveCursorPosition)
+	builder.WriteString(xansi.SaveCurrentCursorPosition)
 	if m.coverProtocol == termimg.Kitty {
 		// Ghostty 预览改走 Kitty overlay，每帧先清理旧 placement，避免滚动选择时残留。
 		builder.WriteString(termimg.ClearAllString())
 	}
 	if m.coverProtocol == termimg.ITerm2 {
-		// iTerm2 inline image 可能残留上一帧背景，先用 ECH 清空目标单元格区域。
+		// iTerm2 只用零宽度的 ECH 清理；可见空格会被 Bubble Tea 计入行宽并截断后续图片。
 		builder.WriteString(clearITerm2CellArea(absX, absY, frame.innerW, frame.innerH))
+	} else {
+		builder.WriteString(clearTerminalArea(absX, absY, frame.innerW, frame.innerH))
 	}
-	builder.WriteString(clearTerminalArea(absX, absY, frame.innerW, frame.innerH))
 
 	item := m.currentItem()
 	if item != nil && item.BookID == m.coverPreview.BookID && m.coverPreview.Overlay != "" {
@@ -579,8 +576,27 @@ func (m *appModel) renderCoverOverlay(rect panelRect) string {
 		builder.WriteString(xansi.CursorPosition(col, row))
 		builder.WriteString(m.coverPreview.Overlay)
 	}
-	builder.WriteString(xansi.RestoreCursorPosition)
+	builder.WriteString(xansi.RestoreCurrentCursorPosition)
 	return builder.String()
+}
+
+// protectITerm2CoverRows 跳过整个封面内框，避免 iTerm2 的 auto 尺寸与本地估算不同而被正文裁切。
+func (m *appModel) protectITerm2CoverRows(rows []string, rect panelRect) {
+	item := m.currentItem()
+	frame, ok := previewImageFrameFor(rect)
+	if !ok || item == nil || item.BookID != m.coverPreview.BookID ||
+		m.coverPreview.Protocol != termimg.ITerm2 || m.coverPreview.Overlay == "" {
+		return
+	}
+
+	startCol := rect.x + 1 + frame.innerX
+	startRow := rect.y + 1 + frame.innerY
+	for row := startRow; row < min(len(rows), startRow+frame.innerH); row++ {
+		width := xansi.StringWidth(rows[row])
+		rows[row] = xansi.Cut(rows[row], 0, startCol) +
+			xansi.CursorForward(frame.innerW) +
+			xansi.Cut(rows[row], startCol+frame.innerW, width)
+	}
 }
 
 // clearITerm2CellArea 使用 ECH 清除指定终端单元格区域，只用于 iTerm2 残留清理。
@@ -591,7 +607,7 @@ func clearITerm2CellArea(col int, row int, width int, height int) string {
 	var builder strings.Builder
 	for y := 0; y < height; y++ {
 		builder.WriteString(xansi.CursorPosition(col, row+y))
-		builder.WriteString(fmt.Sprintf("\x1b[%dX", width))
+		builder.WriteString(xansi.EraseCharacter(width))
 	}
 	return builder.String()
 }

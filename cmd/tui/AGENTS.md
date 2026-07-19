@@ -14,7 +14,7 @@
 
 - `coverPreviewState.Lines` / `terminalReaderState.Lines` 只应保存随 TUI 文本布局输出的可见行。
 - Kitty Unicode placeholder 的图像传输和 virtual placement 控制序列不是可见行，不能参与居中、裁切或宽度计算。
-- iTerm2 协议是独立 inline image 层，使用 overlay 路径绘制；清理残留时只对 iTerm2 协议做 ECH/空格覆盖。
+- iTerm2 协议是独立 inline image 层，使用 overlay 路径绘制；清理残留时只使用零宽度 ECH，不要再叠加可见空格，否则 Bubble Tea 会把清理内容计入行宽并截断后续图片序列。
 - WezTerm 走 iTerm2 协议时，尺寸估算仍使用 WezTerm 的字符格比例；OSC 1337 只固定贴边轴，另一轴传 `auto`，减少协议内部二次等比缩放带来的底部留白。
 - Halfblocks 使用文本模式，不走图像层清理；它的尺寸计算保留半块字符的 1:2 逻辑。
 - 涉及终端差异的特殊处理应按终端类型局部生效，不要把 Ghostty/iTerm2 的 workaround 扩散到 Kitty 或 ANSI。
@@ -77,6 +77,15 @@
 
 - 自动协议选择不再调用 `go-termimg` 的交互式 `DetectProtocol()`；已知终端继续用环境变量判断，未知终端直接回退 ANSI/Halfblocks。
 - 原因：`DetectProtocol()` 会发送 Kitty/Sixel 能力查询，Bubble Tea 接管输入或 Ctrl-C 退出时可能把 `Gi=42,s=1,v=1,a=q,t=d,f=24;AAAA` 这类查询内容泄漏到终端。
+
+## 2026-07-19 处理记录
+
+- iTerm2/Sixel 的整屏清理改为仅在窗口尺寸、界面或协议切换时通过 Bubble Tea `ClearScreen` 有序触发，清屏后会作废 Kitty setup；普通 `View()` 不再内嵌 `CSI 2J`，避免逐行差分渲染在清屏后跳过未变化行。
+- 窄屏和终端过小页面也会消费待处理的 Kitty delete-all，避免宽屏预览 overlay 在隐藏预览区后残留。
+- 弹窗不再在 `View()` 中一次性消费整屏清理状态；Kitty delete-all 会保持在弹窗帧中，并同步作废 setup key，关闭弹窗后重新传输当前图片。
+- 封面和阅读页渲染缓存增加固定容量上限，避免长期浏览、调整尺寸或切换协议后持续保留大段图片控制序列。
+- iTerm2 overlay 清理去掉 ECH 后重复输出的可见空格，避免书架封面首次正常、下一次刷新后被部分擦黑。
+- 宽屏日志变化会重写同一物理行的封面空白区；iTerm2 封面把整个封面内框替换为游标前移，并在首行前输出 overlay，避免 `auto` 尺寸超出本地估算后被裁切，也避免擦图后重传造成闪烁。
 
 ## 参考资料
 

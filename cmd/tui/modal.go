@@ -22,16 +22,16 @@ const (
 
 // modalState 保存 TUI 内部的轻量提示弹窗；Bubble Tea 本身没有通用 modal 组件，因此在 View 中直接渲染。
 type modalState struct {
-	Visible    bool
-	Title      string
-	Message    string
-	OKRect     panelRect // OK 按钮的点击区域，View 渲染后写入，鼠标点击时复用。
-	NeedsClear bool      // 弹窗首次出现时清屏一次，避免底层终端图片残留到弹窗上。
+	Visible bool
+	Title   string
+	Message string
+	OKRect  panelRect // OK 按钮的点击区域，View 渲染后写入，鼠标点击时复用。
 }
 
 // showModal 打开全局提示弹窗；弹窗会在下一帧接管按键和鼠标事件。
 func (m *appModel) showModal(title string, message string) {
-	m.modal = modalState{Visible: true, Title: title, Message: message, NeedsClear: true}
+	m.modal = modalState{Visible: true, Title: title, Message: message}
+	m.markKittyImagesCleared()
 }
 
 // closeModal 关闭弹窗，并同步当前界面的图片状态，恢复被弹窗覆盖的阅读页或预览区。
@@ -64,9 +64,6 @@ func (m *appModel) renderModalView() string {
 	height := max(1, m.height)
 	lines := fitLines(nil, width, height)
 	m.modal.OKRect = panelRect{}
-	if width <= 0 || height <= 0 {
-		return ""
-	}
 
 	title := m.modal.Title
 	if title == "" {
@@ -116,21 +113,14 @@ func (m *appModel) renderModalView() string {
 	if okLine < height {
 		m.modal.OKRect = panelRect{x: startX + 1 + okStart, y: okLine, w: okWidth, h: 1}
 	}
-	prefix := ""
-	if m.modal.NeedsClear {
-		prefix = m.renderModalClearPrefix()
-		m.modal.NeedsClear = false
-	}
-	return prefix + strings.Join(lines, "\n")
+	return m.renderModalClearPrefix() + strings.Join(lines, "\n")
 }
 
 // renderModalClearPrefix 清掉独立图像层，避免弹窗上方残留上一帧封面或阅读页。
 func (m *appModel) renderModalClearPrefix() string {
-	var builder strings.Builder
 	if m.coverProtocol == termimg.Kitty || m.readerProtocol == termimg.Kitty ||
 		m.coverPreview.Protocol == termimg.Kitty || m.terminalReader.Protocol == termimg.Kitty {
-		builder.WriteString(termimg.ClearAllString())
+		return termimg.ClearAllString()
 	}
-	builder.WriteString("\x1b[2J\x1b[H")
-	return builder.String()
+	return ""
 }

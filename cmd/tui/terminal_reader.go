@@ -159,7 +159,8 @@ func (m *appModel) startTerminalReader(item *shelfItem) tea.Cmd {
 		return nil
 	}
 
-	if m.coverProtocol == termimg.Kitty && isCoverOverlayProtocol(m.coverProtocol) {
+	clearPreviousOverlay := isCoverOverlayProtocol(m.coverProtocol)
+	if m.coverProtocol == termimg.Kitty && clearPreviousOverlay {
 		// Ghostty 预览区使用 Kitty overlay，进入阅读页前先清掉书架预览的旧图层。
 		m.clearKittyImagesNextFrame = true
 	}
@@ -179,18 +180,30 @@ func (m *appModel) startTerminalReader(item *shelfItem) tea.Cmd {
 		Protocol:  m.readerProtocol,
 		Loading:   true,
 	}
-	return m.syncTerminalReaderPageCmd()
+	syncCmd := m.syncTerminalReaderPageCmd()
+	if clearPreviousOverlay {
+		return clearTUIScreenCmd(syncCmd)
+	}
+	return syncCmd
 }
 
 // exitTerminalReader 返回书架界面，并重新同步书架封面预览。
 func (m *appModel) exitTerminalReader() tea.Cmd {
+	clearPreviousOverlay := isOverlayImageProtocol(m.readerProtocol)
+	if m.readerProtocol == termimg.Kitty {
+		m.clearKittyImagesNextFrame = true
+	}
 	m.screen = screenShelf
 	m.readerAutoFlip = false
 	m.readerNextAutoAt = time.Time{}
 	m.readerPendingPage = false
 	m.readerPendingRequestKey = ""
 	m.readerRequestID++
-	return m.syncCoverPreviewCmd()
+	syncCmd := m.syncCoverPreviewCmd()
+	if clearPreviousOverlay {
+		return clearTUIScreenCmd(syncCmd)
+	}
+	return syncCmd
 }
 
 // handleTerminalReaderKey 处理终端阅读快捷键。
@@ -204,6 +217,11 @@ func (m *appModel) handleTerminalReaderKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) 
 		m.moveTerminalReaderPage(1)
 	case "f":
 		m.terminalReaderFullscreen = !m.terminalReaderFullscreen
+		syncCmd := m.syncTerminalReaderPageCmd()
+		if isOverlayImageProtocol(m.readerProtocol) {
+			return m, clearTUIScreenCmd(syncCmd)
+		}
+		return m, syncCmd
 	case "a":
 		m.toggleTerminalReaderAutoFlip()
 	case "+", "=":
@@ -328,10 +346,6 @@ func (m *appModel) syncTerminalReaderPageCmd() tea.Cmd {
 		m.terminalReader.Loading = false
 		return nil
 	}
-	if m.terminalReaderCache == nil {
-		m.terminalReaderCache = make(map[string]terminalReaderState)
-	}
-
 	targetPage := m.terminalReaderTargetPageIndex()
 	key := terminalReaderCacheKey(m.terminalReader.BookID, targetPage, area.w, area.h, m.readerProtocol)
 	if cached, ok := m.terminalReaderCache[key]; ok {
@@ -384,11 +398,17 @@ func (m *appModel) applyTerminalReaderPageMsg(msg terminalReaderPageMsg) {
 	m.readerPendingRequestKey = ""
 	m.terminalReader = msg.state
 	if msg.state.ErrText == "" && !msg.state.Loading {
-		m.terminalReaderCache[terminalReaderCacheKey(msg.state.BookID, msg.state.PageIndex, msg.state.Width, msg.state.Height, msg.state.Protocol)] = msg.state
+		m.storeTerminalReaderCache(msg.state)
 	}
 	if wasPending && m.readerAutoFlip {
 		m.scheduleNextReaderAutoFlip(time.Now())
 	}
+}
+
+// storeTerminalReaderCache 写入有上限的阅读页缓存，避免整本书的渲染结果常驻内存。
+func (m *appModel) storeTerminalReaderCache(state terminalReaderState) {
+	key := terminalReaderCacheKey(state.BookID, state.PageIndex, state.Width, state.Height, state.Protocol)
+	storeBoundedCache(m.terminalReaderCache, key, state, readerCacheLimit)
 }
 
 func loadTerminalReaderPageCmd(requestID int, state terminalReaderState, protocol tuiImageProtocol) tea.Cmd {
@@ -528,7 +548,7 @@ func (m *appModel) renderTerminalReaderView() string {
 		lines = append(lines, m.renderTerminalReaderFooter(width))
 	}
 	lines = fitStyledLines(lines, width, m.height)
-	return m.renderTerminalReaderClearPrefix() + m.renderTerminalReaderSetupPrefix() + strings.Join(lines, "\n") + m.renderTerminalReaderOverlay(area)
+	return m.renderPendingKittyClearPrefix() + m.renderTerminalReaderSetupPrefix() + strings.Join(lines, "\n") + m.renderTerminalReaderOverlay(area)
 }
 
 // renderTerminalReaderImageLines 渲染图片区域文本；overlay 协议只占位，实际图片由 renderTerminalReaderOverlay 输出。
@@ -540,7 +560,7 @@ func (m *appModel) renderTerminalReaderImageLines(area terminalReaderImageArea) 
 		return fitStyledLines(nil, area.w, area.h)
 	case m.terminalReader.ErrText != "":
 		return centeredPreviewText(shortenText(m.terminalReader.ErrText, area.w), area.w, area.h)
-	case isTerminalReaderOverlayProtocol(m.terminalReader.Protocol) && m.terminalReader.Overlay != "":
+	case isOverlayImageProtocol(m.terminalReader.Protocol) && m.terminalReader.Overlay != "":
 		return fitStyledLines(nil, area.w, area.h)
 	default:
 		return centerPreviewImageLines(m.terminalReader.Lines, area.w, area.h)
@@ -610,40 +630,12 @@ func formatThreePartStatusLine(left string, center string, right string, width i
 	return clipAndPad(line, width)
 }
 
-// renderTerminalReaderClearPrefix 输出阅读页绘制前的清理序列；只在必要终端/协议上清旧图层。
-func (m *appModel) renderTerminalReaderClearPrefix() string {
-	var builder strings.Builder
-	if m.clearKittyImagesNextFrame {
-		builder.WriteString(termimg.ClearAllString())
-		m.clearKittyImagesNextFrame = false
-		m.markKittyImagesCleared()
-	}
-	switch m.terminalReader.Protocol {
-	case termimg.ITerm2:
-		if m.terminalReader.Loading && m.terminalReader.Overlay == "" {
-			// 初次进入或尺寸切换且没有旧图可保留时才整屏清理；普通翻页保留旧图，避免 iTerm2 先黑屏。
-			builder.WriteString("\x1b[2J\x1b[H")
-		}
-	default:
-	}
-	return builder.String()
-}
-
 // renderTerminalReaderSetupPrefix 输出 Kitty 图片传输控制序列；可见 placeholder 行仍随正文布局。
 func (m *appModel) renderTerminalReaderSetupPrefix() string {
-	if m.terminalReader.Protocol != termimg.Kitty {
+	if m.terminalReader.Protocol != termimg.Kitty || m.terminalReader.Setup == "" {
 		return ""
 	}
-	if m.terminalReader.Setup == "" {
-		return ""
-	}
-	key := terminalReaderCacheKey(
-		m.terminalReader.BookID,
-		m.terminalReader.PageIndex,
-		m.terminalReader.Width,
-		m.terminalReader.Height,
-		m.terminalReader.Protocol,
-	)
+	key := kittySetupKey(m.terminalReader.Setup)
 	if key == m.readerSetupKey {
 		return ""
 	}
@@ -651,13 +643,8 @@ func (m *appModel) renderTerminalReaderSetupPrefix() string {
 	return m.terminalReader.Setup
 }
 
-// isTerminalReaderOverlayProtocol 判断终端阅读页是否使用独立图像层。
-func isTerminalReaderOverlayProtocol(protocol tuiImageProtocol) bool {
-	return isOverlayImageProtocol(protocol)
-}
-
 func (m *appModel) renderTerminalReaderOverlay(area terminalReaderImageArea) string {
-	if area.w <= 0 || area.h <= 0 || !isTerminalReaderOverlayProtocol(m.terminalReader.Protocol) || m.terminalReader.Overlay == "" {
+	if area.w <= 0 || area.h <= 0 || !isOverlayImageProtocol(m.terminalReader.Protocol) || m.terminalReader.Overlay == "" {
 		return ""
 	}
 	if m.readerPendingPage {
@@ -671,13 +658,14 @@ func (m *appModel) renderTerminalReaderOverlay(area terminalReaderImageArea) str
 	clearRow := 1 + area.y
 
 	var builder strings.Builder
-	builder.WriteString(xansi.SaveCursorPosition)
+	builder.WriteString(xansi.SaveCurrentCursorPosition)
 	if m.terminalReader.Protocol == termimg.ITerm2 {
 		builder.WriteString(clearITerm2CellArea(clearCol, clearRow, area.w, area.h))
+	} else {
+		builder.WriteString(clearTerminalArea(clearCol, clearRow, area.w, area.h))
 	}
-	builder.WriteString(clearTerminalArea(clearCol, clearRow, area.w, area.h))
 	builder.WriteString(xansi.CursorPosition(col, row))
 	builder.WriteString(m.terminalReader.Overlay)
-	builder.WriteString(xansi.RestoreCursorPosition)
+	builder.WriteString(xansi.RestoreCurrentCursorPosition)
 	return builder.String()
 }
