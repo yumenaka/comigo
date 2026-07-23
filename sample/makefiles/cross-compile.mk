@@ -202,13 +202,17 @@ tray-MacOS_universal: build-wasm
 
 desktop-MacOS_universal: wails-prepare wails-frontend
 	@rm -rf build/bin $(BINDIR)/$(DESKTOP_NAME).app $(BINDIR)/dmg-$(DESKTOP_NAME) $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_MacOS_universal.dmg
-	wails build $(WAILS_BUILD_FLAGS) -platform darwin/universal -s -o $(DESKTOP_NAME) -ldflags "$(LDFLAGS)"
+	wails build $(WAILS_BUILD_FLAGS) -platform darwin/universal -s -ldflags "$(LDFLAGS)"
 	@cp -R build/bin/Comigo.app $(BINDIR)/$(DESKTOP_NAME).app
 	@plutil -replace CFBundleName -string "$(DESKTOP_DISPLAY_NAME)" $(BINDIR)/$(DESKTOP_NAME).app/Contents/Info.plist
 	@plutil -replace CFBundleDisplayName -string "$(DESKTOP_DISPLAY_NAME)" $(BINDIR)/$(DESKTOP_NAME).app/Contents/Info.plist
+	@plutil -replace CFBundleIconFile -string "iconfile.icns" $(BINDIR)/$(DESKTOP_NAME).app/Contents/Info.plist
 	@plutil -replace CFBundleIdentifier -string "$(DESKTOP_BUNDLE_ID)" $(BINDIR)/$(DESKTOP_NAME).app/Contents/Info.plist
 	@plutil -replace CFBundleVersion -string "$(APP_VERSION)" $(BINDIR)/$(DESKTOP_NAME).app/Contents/Info.plist
 	@plutil -replace CFBundleShortVersionString -string "$(APP_VERSION)" $(BINDIR)/$(DESKTOP_NAME).app/Contents/Info.plist
+	@# 修改 Info.plist 会破坏 Wails 的临时签名，打包前重新自签并验证应用结构。
+	@codesign --force --deep --sign - $(BINDIR)/$(DESKTOP_NAME).app
+	@codesign --verify --deep --strict $(BINDIR)/$(DESKTOP_NAME).app
 	@mkdir -p $(BINDIR)/dmg-$(DESKTOP_NAME)
 	@cp -R $(BINDIR)/$(DESKTOP_NAME).app $(BINDIR)/dmg-$(DESKTOP_NAME)/$(DESKTOP_NAME).app
 	@ln -s /Applications $(BINDIR)/dmg-$(DESKTOP_NAME)/Applications
