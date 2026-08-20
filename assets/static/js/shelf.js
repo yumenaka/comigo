@@ -196,6 +196,7 @@ window.ComiGoShelf.rescanAllStores = () =>
     if (action === "delete") {
       const deleteFn = deleteBookFile();
       if (!currentBookID) return;
+      if (!(await confirmDeleteBookSource())) return;
       try {
         const deleted = await deleteBookSource(currentBookID, deleteFn);
         if (!deleted) return;
@@ -241,7 +242,26 @@ window.ComiGoShelf.rescanAllStores = () =>
     }
   });
 
-  // deleteBookSource 子路由里 Wails bridge 可能不可用，HTTP 入口仍由 Wails 后端确认并进垃圾桶。
+  // 使用页面模态框确认，避免 macOS 原生确认框保留应用图标区域。
+  function confirmDeleteBookSource() {
+    return new Promise((resolve) => {
+      showMessage({
+        message: shelfText(
+          "wails_delete_file_confirm_message",
+          "Move this book's source file to the system trash?",
+        ),
+        buttons: "confirm_cancel",
+        confirmText: shelfText(
+          "wails_delete_file_confirm_button",
+          "Move to system trash",
+        ),
+        onConfirm: () => resolve(true),
+        onCancel: () => resolve(false),
+      });
+    });
+  }
+
+  // deleteBookSource 子路由里 Wails bridge 可能不可用，HTTP 入口仍可执行删除。
   async function deleteBookSource(bookID, deleteFn) {
     if (typeof deleteFn === "function") return deleteFn(bookID);
     const response = await fetch(window.ComiGoPath("/api/wails/delete-book-file"), {

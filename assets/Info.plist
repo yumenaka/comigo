@@ -9,7 +9,7 @@
     <key>CFBundleDisplayName</key>
     <string>Comigo</string>
 
-    <!-- 反向域名形式，这里 comigo.xyz 来 -->
+    <!-- Bundle ID -->
     <key>CFBundleIdentifier</key>
     <string>xyz.comigo</string>
 
@@ -33,9 +33,9 @@
     <key>LSMinimumSystemVersion</key>
     <string>10.13.0</string>
 
-    <!-- 图标文件名（不带 .icns 后缀），后面可以放一个 AppIcon.icns 到 Resources -->
+    <!-- Resources 中的应用图标 -->
     <key>CFBundleIconFile</key>
-    <string>AppIcon</string>
+    <string>AppIcon.icns</string>
 
     <!-- 只在菜单栏显示，不在 Dock 显示图标 -->
     <key>LSUIElement</key>

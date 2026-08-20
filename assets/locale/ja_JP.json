@@ -822,7 +822,7 @@
   "wails_systray_show_tooltip": "Comigo ウィンドウを開く",
   "wails_delete_file": "元ファイルを削除",
   "wails_delete_file_confirm_button": "システムのゴミ箱に移動",
-  "wails_delete_file_confirm_message": "この本の元ファイルをシステムのゴミ箱に移動しますか？\n\n%s",
+  "wails_delete_file_confirm_message": "この本の元ファイルをシステムのゴミ箱に移動しますか？",
   "wails_delete_file_confirm_title": "元ファイルを削除",
   "wails_delete_file_failed": "元ファイルの削除に失敗しました",
   "wails_delete_file_not_allowed": "この本は元ファイルの削除に対応していません",

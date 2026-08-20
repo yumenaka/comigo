@@ -43,13 +43,15 @@ func GetCSS(oneFileMode bool) (cssString string) {
 }
 
 // GetBasePathScript 暴露前端路径工具，供静态 JS 与模板内联脚本统一处理反向代理基础路径。
-func GetBasePathScript() string {
+func GetBasePathScript(wailsWebView bool) string {
 	basePath, _ := json.Marshal(config.GetBasePath())
 	wailsBuild, _ := json.Marshal(isWailsBuild())
+	wailsWebViewJSON, _ := json.Marshal(wailsWebView)
 	debugMode, _ := json.Marshal(config.GetCfg().Debug)
 	return `<script>
 window.ComiGoBasePath = ` + string(basePath) + `;
 window.ComiGoWails = ` + string(wailsBuild) + `;
+window.ComiGoWailsWebView = ` + string(wailsWebViewJSON) + `;
 window.ComiGoDebug = ` + string(debugMode) + `;
 window.ComiGoPath = function(path) {
   const base = window.ComiGoBasePath || '';
@@ -93,7 +95,7 @@ window.ComiGoElectronAction = function(action) {
   return true;
 };
 window.ComiGoIsWails = function() {
-  return window.location.protocol === 'wails:' || !!window.WailsInvoke || !!window.go?.main?.App;
+  return window.ComiGoWailsWebView || window.location.protocol === 'wails:' || !!window.WailsInvoke || !!window.go?.main?.App;
 };
 if (window.ComiGoIsWails()) {
   // Wails dev/debug 默认会放开右键菜单，这里只在桌面壳内统一禁用。

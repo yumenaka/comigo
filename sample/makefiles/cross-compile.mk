@@ -7,7 +7,7 @@ DESKTOP_NAME := comigo-desktop
 TRAY_DISPLAY_NAME := Comigo Tray
 DESKTOP_DISPLAY_NAME := Comigo Desktop
 TRAY_BUNDLE_ID := xyz.comigo.tray
-DESKTOP_BUNDLE_ID := xyz.comigo.desktop
+DESKTOP_BUNDLE_ID := xyz.comigo
 
 OS := $(shell uname -s)
 HOST_ARCH := $(shell uname -m)

@@ -2,7 +2,7 @@
 ## make app
 MAC_APP_NAME ?= Comigo
 MAC_DISPLAY_NAME ?= $(MAC_APP_NAME)
-BUNDLE_ID ?= xyz.comigo.comigo
+BUNDLE_ID ?= xyz.comigo
 
 # 最终 .app 输出目录
 BIN_DIR     := bin

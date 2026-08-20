@@ -3,6 +3,7 @@
 package routers
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -11,7 +12,6 @@ import (
 	"runtime"
 	"strings"
 
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -22,7 +22,7 @@ import (
 	"github.com/yumenaka/comigo/tools/scan"
 )
 
-// DeleteBookFileForWails 确认后把书籍源文件移到系统垃圾桶。
+// DeleteBookFileForWails 把已在页面确认的书籍源文件移到系统垃圾桶。
 func DeleteBookFileForWails(bookID string) (bool, error) {
 	if wailsContext == nil || bookID == "" {
 		return false, errors.New(locale.GetString("wails_delete_file_not_allowed"))
@@ -33,10 +33,6 @@ func DeleteBookFileForWails(bookID string) (bool, error) {
 	}
 	trashPath, isDir, err := TrashableBookPathForWails(book, config.GetCfg().StoreUrls)
 	if err != nil {
-		return false, err
-	}
-	ok, err := confirmDeleteBookFileForWails(trashPath)
-	if err != nil || !ok {
 		return false, err
 	}
 	if err := movePathToSystemTrash(trashPath, isDir); err != nil {
@@ -71,20 +67,6 @@ func saveWailsBookMetadata() {
 			logger.Infof(locale.GetString("log_failed_savebookstodatabase"), err)
 		}
 	}
-}
-
-func confirmDeleteBookFileForWails(trashPath string) (bool, error) {
-	deleteButton := locale.GetString("wails_delete_file_confirm_button")
-	cancelButton := locale.GetString("cancel")
-	result, err := wailsruntime.MessageDialog(wailsContext, wailsruntime.MessageDialogOptions{
-		Type:          wailsruntime.QuestionDialog,
-		Title:         locale.GetString("wails_delete_file_confirm_title"),
-		Message:       fmt.Sprintf(locale.GetString("wails_delete_file_confirm_message"), trashPath),
-		Buttons:       []string{deleteButton, cancelButton},
-		DefaultButton: cancelButton,
-		CancelButton:  cancelButton,
-	})
-	return result == deleteButton, err
 }
 
 // TrashableBookPathForWails 只允许删除当前本地书库内的真实文件，远程书、书籍组和目录不触碰磁盘。
@@ -143,14 +125,7 @@ func movePathToSystemTrash(target string, isDir bool) error {
 			target,
 		)
 	case "windows":
-		script := `Add-Type -AssemblyName Microsoft.VisualBasic
-$p = $args[0]
-if (` + boolPowerShell(isDir) + `) {
-  [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteDirectory($p, [Microsoft.VisualBasic.FileIO.UIOption]::OnlyErrorDialogs, [Microsoft.VisualBasic.FileIO.RecycleOption]::SendToRecycleBin)
-} else {
-  [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile($p, [Microsoft.VisualBasic.FileIO.UIOption]::OnlyErrorDialogs, [Microsoft.VisualBasic.FileIO.RecycleOption]::SendToRecycleBin)
-}`
-		return runTrashCommand("powershell", "-NoProfile", "-NonInteractive", "-Command", script, target)
+		return runTrashCommand("powershell", "-NoProfile", "-NonInteractive", "-Command", windowsTrashScript(target, isDir))
 	case "linux":
 		if path, err := exec.LookPath("gio"); err == nil {
 			return runTrashCommand(path, "trash", target)
@@ -162,11 +137,17 @@ if (` + boolPowerShell(isDir) + `) {
 	return errors.New(locale.GetString("wails_delete_file_unsupported"))
 }
 
-func boolPowerShell(v bool) string {
-	if v {
-		return "$true"
+// windowsTrashScript 把路径编码进脚本，避免 PowerShell -Command 吞掉后置参数，并把删除失败转为非零退出码。
+func windowsTrashScript(target string, isDir bool) string {
+	method := "DeleteFile"
+	if isDir {
+		method = "DeleteDirectory"
 	}
-	return "$false"
+	return fmt.Sprintf(`$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName Microsoft.VisualBasic
+$p = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('%s'))
+[Microsoft.VisualBasic.FileIO.FileSystem]::%s($p, [Microsoft.VisualBasic.FileIO.UIOption]::OnlyErrorDialogs, [Microsoft.VisualBasic.FileIO.RecycleOption]::SendToRecycleBin)
+if (Test-Path -LiteralPath $p) { throw 'The source path still exists after moving it to the recycle bin.' }`, base64.StdEncoding.EncodeToString([]byte(target)), method)
 }
 
 // runTrashCommand 执行系统垃圾桶命令，并把命令输出补到错误里方便定位失败原因。

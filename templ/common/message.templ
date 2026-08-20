@@ -43,7 +43,7 @@ templ MessageModal() {
 			// 确认(OK)或取消按钮
 			if (options.buttons === "confirm_cancel") {
 				const confirmButton = document.createElement("button");
-				confirmButton.textContent = i18next.t("ok");
+				confirmButton.textContent = options.confirmText || i18next.t("ok");
 				confirmButton.className =
 					"panel-control min-w-24 mx-4 px-4 py-2 bg-red-400 hover:bg-red-450 active:bg-red-500 font-semibold  text-white rounded shadow-md";
 				confirmButton.onclick = function () {
