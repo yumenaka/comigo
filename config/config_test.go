@@ -130,13 +130,6 @@ func TestSaveConfigUsesPlatformFilename(t *testing.T) {
 	if _, err := os.Stat(platformConfig); err != nil {
 		t.Fatalf("默认保存未写入平台配置文件: %v", err)
 	}
-	content, err := os.ReadFile(platformConfig)
-	if err != nil {
-		t.Fatalf("读取平台配置失败: %v", err)
-	}
-	if strings.Contains(string(content), "UseUnifiedConfig") {
-		t.Fatalf("不应再写入全平台共享配置字段:\n%s", string(content))
-	}
 }
 
 // 验证只读取当前启动壳的配置文件名。

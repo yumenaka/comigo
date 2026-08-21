@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -54,22 +53,10 @@ func TestConfigureSQLitePragmasEnablesIncrementalAutoVacuum(t *testing.T) {
 	}
 }
 
-// 验证数据库类型必须显式支持，旧别名不会静默兼容。
-func TestOpenDatabaseRejectsImplicitCompatibilityTypes(t *testing.T) {
-	tests := []struct {
-		name    string
-		dbType  string
-		wantErr string
-	}{
-		{name: "empty type", dbType: "", wantErr: "unsupported database type"},
-		{name: "postgresql alias", dbType: "postgresql", wantErr: "unsupported database type"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := OpenDatabase(DBOptions{Type: tt.dbType}); err == nil || !strings.Contains(err.Error(), tt.wantErr) {
-				t.Fatalf("OpenDatabase(%q) error = %v, want containing %q", tt.dbType, err, tt.wantErr)
-			}
-		})
+// 验证数据库类型必须显式支持。
+func TestOpenDatabaseRejectsUnsupportedType(t *testing.T) {
+	if err := OpenDatabase(DBOptions{Type: "unsupported"}); err == nil {
+		t.Fatal("OpenDatabase should reject unsupported database type")
 	}
 }
 

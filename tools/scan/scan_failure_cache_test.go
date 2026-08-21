@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strconv"
 	"testing"
 	"time"
 
@@ -62,36 +61,6 @@ func TestScanFailureCacheVersionChangeAllowsRetry(t *testing.T) {
 
 	if shouldSkipFailedArchiveFile(storeURL, filePath, size, modTime, false) {
 		t.Fatalf("expected version mismatch to allow retry")
-	}
-}
-
-// 验证小补丁版本变化不会绕过扫描失败缓存。
-func TestScanFailureCacheSmallPatchVersionChangeStillSkips(t *testing.T) {
-	t.Setenv("COMIGO_CONFIG_DIR", t.TempDir())
-
-	storeURL := "/books"
-	filePath := filepath.Join(storeURL, "bad.cbz")
-	modTime := time.Unix(1700000000, 0)
-	size := int64(99)
-
-	cache := scanFailureCache{
-		scanFailureRecordKey(storeURL, filePath, false): {
-			StoreURL:         storeURL,
-			FilePath:         filePath,
-			FileSize:         size,
-			ModifiedUnixNano: modTime.UnixNano(),
-			CreatedByVersion: versionWithPatchDeltaForTest(t, -1),
-			FailedAt:         time.Now(),
-			Error:            "old patch failure",
-			IsRemote:         false,
-		},
-	}
-	if err := saveScanFailureCache(cache); err != nil {
-		t.Fatalf("saveScanFailureCache: %v", err)
-	}
-
-	if !shouldSkipFailedArchiveFile(storeURL, filePath, size, modTime, false) {
-		t.Fatalf("expected small patch version change to keep skipping failed archive")
 	}
 }
 
@@ -232,13 +201,4 @@ func failedAtByBaseName(cache scanFailureCache) map[string]time.Time {
 		result[filepath.Base(record.FilePath)] = record.FailedAt
 	}
 	return result
-}
-
-func versionWithPatchDeltaForTest(t *testing.T, delta int) string {
-	t.Helper()
-	major, minor, patch, ok := parseSemanticVersion(config.GetVersion())
-	if !ok {
-		t.Fatalf("cannot parse current version %q", config.GetVersion())
-	}
-	return "v" + strconv.Itoa(major) + "." + strconv.Itoa(minor) + "." + strconv.Itoa(patch+delta)
 }

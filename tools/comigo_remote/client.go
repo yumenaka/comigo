@@ -36,8 +36,7 @@ type successBody struct {
 }
 
 type serverInfoBody struct {
-	Version    string `json:"Version"`
-	ServerName string `json:"ServerName"`
+	Version string `json:"Version"`
 }
 
 // ShelfKey 生成远端顶级书库的本地内部标识。
@@ -178,7 +177,7 @@ func (c *Client) GetBook(remoteBookID string, sortBy string) (*model.Book, error
 	return &book, nil
 }
 
-// GetServerVersion 获取远端 Comigo 版本；兼容旧服务只在 ServerName 中带版本号的响应。
+// GetServerVersion 获取远端 Comigo 的明确版本字段。
 func (c *Client) GetServerVersion() (string, error) {
 	data, _, err := c.doBytes(http.MethodGet, "/api/server-info", nil, nil, "")
 	if err != nil {
@@ -188,10 +187,7 @@ func (c *Client) GetServerVersion() (string, error) {
 	if err := json.Unmarshal(data, &body); err != nil {
 		return "", err
 	}
-	if strings.TrimSpace(body.Version) != "" {
-		return strings.TrimSpace(body.Version), nil
-	}
-	return versionFromServerName(body.ServerName), nil
+	return strings.TrimSpace(body.Version), nil
 }
 
 // GetAllBookmarks 获取远端所有书签。
@@ -202,16 +198,6 @@ func (c *Client) GetAllBookmarks() ([]model.BookinfoWithBookMark, error) {
 	}
 	var bookmarks []model.BookinfoWithBookMark
 	return bookmarks, json.Unmarshal(data, &bookmarks)
-}
-
-func versionFromServerName(serverName string) string {
-	fields := strings.Fields(serverName)
-	for _, field := range fields {
-		if strings.HasPrefix(field, "v") {
-			return field
-		}
-	}
-	return ""
 }
 
 // GetBytes 代理远端二进制 API。

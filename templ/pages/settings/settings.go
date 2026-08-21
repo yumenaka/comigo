@@ -15,12 +15,14 @@ import (
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
-var localeKeyCollisionLabels = map[string]string{
-	"EnableDatabase":  "enable_database_label",
-	"FunnelTunnel":    "funnel_tunnel_label",
-	"OpenBrowser":     "open_browser_label",
-	"ReEnterPassword": "re_enter_password_label",
-	"Timeout":         "timeout_label",
+var localeKeyAliases = map[string]string{
+	"EnableDatabase":              "enable_database_label",
+	"FunnelTunnel":                "funnel_tunnel_label",
+	"OpenBrowser":                 "open_browser_label",
+	"ReEnterPassword":             "re_enter_password_label",
+	"SupportFileType":             "supported_scan_file_formats",
+	"SupportFileType_Description": "supported_scan_file_formats_description",
+	"Timeout":                     "timeout_label",
 }
 
 var (
@@ -31,7 +33,7 @@ var (
 )
 
 func toLocaleKey(value string) string {
-	if key, ok := localeKeyCollisionLabels[value]; ok {
+	if key, ok := localeKeyAliases[value]; ok {
 		return key
 	}
 	key := localeKeyUpperWordRegexp.ReplaceAllString(value, `${1}_${2}`)
