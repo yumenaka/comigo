@@ -7,7 +7,12 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/atotto/clipboard"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/tools/logger"
 )
 
 // Tray 封装 Wails v2 临时托盘逻辑，迁到 Wails v3 时可整包替换。
@@ -97,4 +102,21 @@ func (t *Tray) quit() {
 	t.quitting.Store(true)
 	setPlatformWindowVisible(true)
 	wailsruntime.Quit(ctx)
+}
+
+// copyReaderURL 复制当前可供其他设备访问的阅读地址。
+func copyReaderURL() {
+	url := config.GetQrcodeURL()
+	if err := clipboard.WriteAll(url); err != nil {
+		logger.Infof(locale.GetString("log_failed_to_copy_url"), err)
+		return
+	}
+	logger.Infof(locale.GetString("log_copied_url_to_clipboard"), url)
+}
+
+// openStoreDirectory 使用系统默认程序打开书库路径。
+func openStoreDirectory(path string) {
+	if err := tools.OpenURL(path); err != nil {
+		logger.Infof(locale.GetString("log_failed_to_open_directory"), err)
+	}
 }

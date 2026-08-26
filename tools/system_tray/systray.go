@@ -11,6 +11,7 @@ import (
 	"github.com/energye/systray"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/cmd"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/windows_registry"
@@ -39,6 +40,7 @@ var (
 		mCopyURL               *systray.MenuItem
 		mTailscale             *systray.MenuItem
 		mExtra                 *systray.MenuItem
+		mVersion               *systray.MenuItem
 		mProject               *systray.MenuItem
 		mContextFolder         *systray.MenuItem
 		mContextFileAssoc      *systray.MenuItem
@@ -342,6 +344,9 @@ func initMenuItems() {
 		go tools.OpenBrowserByURL("https://github.com/yumenaka/comigo")
 		logger.Infof(locale.GetString("log_opening_comigo_project_page"))
 	})
+	// 版本只用于展示，放在“其他”子菜单底部。
+	menuItems.mVersion = menuItems.mExtra.AddSubMenuItem("Comigo "+config.GetVersion(), "")
+	menuItems.mVersion.Disable()
 
 	// 退出
 	menuItems.mQuit = systray.AddMenuItem(locale.GetString("systray_quit"), locale.GetString("systray_quit_tooltip"))

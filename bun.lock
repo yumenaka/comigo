@@ -5,10 +5,10 @@
     "": {
       "name": "comigo",
       "dependencies": {
-        "@alpinejs/intersect": "3.16.2",
-        "@alpinejs/morph": "3.16.2",
-        "@alpinejs/persist": "3.16.2",
-        "alpinejs": "3.16.2",
+        "@alpinejs/intersect": "3.16.3",
+        "@alpinejs/morph": "3.16.3",
+        "@alpinejs/persist": "3.16.3",
+        "alpinejs": "3.16.3",
         "i18next": "26.4.0",
         "i18next-browser-languagedetector": "8.2.1",
         "screenfull": "latest",
@@ -27,11 +27,11 @@
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
 
-    "@alpinejs/intersect": ["@alpinejs/intersect@3.16.2", "", {}, "sha512-qRguIfwsvMrQwl5vgHm0wDKgexa9kjaInge8+3zJLhluSlwXf+ksg1ZdPINvFOFnrtD2WOABBqyDhCBZ815TOQ=="],
+    "@alpinejs/intersect": ["@alpinejs/intersect@3.16.3", "", {}, "sha512-hGiwxwfuRjiYpxnuZOD5ymQAPhyxspVfhwuSEg/TdJhfqmfacJd4Z42LIKIdXoDE8JaexXvrUeg5MBxzLVgMmQ=="],
 
-    "@alpinejs/morph": ["@alpinejs/morph@3.16.2", "", {}, "sha512-PQEuQg19QSauhj2t2XCZnFUh8YGNGH2CXwukp8eufKBp4X9CNUKqK2OxDOxonWXj9xfbBQqHZGWRVqrRnrg9ig=="],
+    "@alpinejs/morph": ["@alpinejs/morph@3.16.3", "", {}, "sha512-JUrZ9tCXTgdQRoHAIdCDzdrkyEC8ffXwFlynEQ7it0jFy2UW4X0jpcRRBUhvyD94OiMpN6bd82eWhd+3PaqP+g=="],
 
-    "@alpinejs/persist": ["@alpinejs/persist@3.16.2", "", {}, "sha512-KOqh+3Dkn/jPWoXpwnouT2n8iPCXxm0F9BWcOw+pd3PdJJQEYzV6RlBOGa85+A7HSLPyIi11AVxlxH+EPyjg1g=="],
+    "@alpinejs/persist": ["@alpinejs/persist@3.16.3", "", {}, "sha512-VyhG3C1CKTvGwHQICw1GLfqIuUt++q54oSRGstX+Y30yjj+JK6HrWj50yzAS+C2K8SXnR99ipY6SQevLaHAgog=="],
 
     "@babel/runtime": ["@babel/runtime@7.29.2", "", {}, "sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g=="],
 
@@ -301,7 +301,7 @@
 
     "@vue/shared": ["@vue/shared@3.5.41", "", {}, "sha512-IOnwSCma8j+9xJT6b8H0dEYidC80NsYmNMlZxRsukYcSoGaDBohog5hDxzeUXdFeGWFA++vWvxqOmrr96VlqMA=="],
 
-    "alpinejs": ["alpinejs@3.16.2", "", { "dependencies": { "@vue/reactivity": "~3.5.40" } }, "sha512-6kbqqrRK7iGPYx5upTfqc8Tcl1xhpcurLCxTdn4/ym2Kb68+cYj+2I5Zji53vUIPf7zj3C1DoIvrDkgrNDCXdA=="],
+    "alpinejs": ["alpinejs@3.16.3", "", { "dependencies": { "@vue/reactivity": "~3.5.40" } }, "sha512-kLIO2JOPs5ZY3mHPH+CHHPzp89Y6Gb2luLRy+RDIb1oG9y6N5Vfc75kkEoaSOPhJqvakuPiAsnd9paNPNSZyVg=="],
 
     "ansi-styles": ["ansi-styles@4.3.0", "", { "dependencies": { "color-convert": "^2.0.1" } }, "sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg=="],
 

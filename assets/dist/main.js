@@ -847,6 +847,10 @@ class $84bdf3b771aae356$var$LanguageUtil {
         this.options = options;
         this.supportedLngs = this.options.supportedLngs || false;
         this.logger = $84bdf3b771aae356$var$baseLogger.create('languageUtils');
+        this.resolveHierarchyCache = {};
+    }
+    clearCache() {
+        this.resolveHierarchyCache = {};
     }
     getScriptPartFromCode(code) {
         code = $84bdf3b771aae356$var$getCleanedCode(code);
@@ -921,6 +925,27 @@ class $84bdf3b771aae356$var$LanguageUtil {
         return found || [];
     }
     toResolveHierarchy(code, fallbackCode) {
+        const fallbackLng = this.options.fallbackLng;
+        const fallbackLngKey = Array.isArray(fallbackLng) ? fallbackLng.join('|') : fallbackLng;
+        if (fallbackLngKey !== this._cachedFallbackLng) {
+            this.resolveHierarchyCache = {};
+            this._cachedFallbackLng = fallbackLngKey;
+        }
+        const hasCacheableFallback = fallbackCode === undefined || fallbackCode === false || $84bdf3b771aae356$var$isString(fallbackCode);
+        const usesUncacheableOptionsFallback = fallbackCode === undefined && typeof this.options.fallbackLng === 'function';
+        const cacheable = $84bdf3b771aae356$var$isString(code) && hasCacheableFallback && !usesUncacheableOptionsFallback;
+        let cacheKey = null;
+        if (cacheable) {
+            let fallbackCacheKey;
+            if (fallbackCode === undefined) fallbackCacheKey = 'undefined';
+            else if (fallbackCode === false) fallbackCacheKey = 'boolean:false';
+            else fallbackCacheKey = `string:${fallbackCode}`;
+            cacheKey = `${code.length}:${code}|${fallbackCacheKey}`;
+        }
+        if (cacheKey !== null) {
+            const cached = this.resolveHierarchyCache[cacheKey];
+            if (cached !== undefined) return cached.slice();
+        }
         const fallbackCodes = this.getFallbackCodes((fallbackCode === false ? [] : fallbackCode) || this.options.fallbackLng || [], code);
         const codes = [];
         const addCode = (c)=>{
@@ -936,6 +961,10 @@ class $84bdf3b771aae356$var$LanguageUtil {
         fallbackCodes.forEach((fc)=>{
             if (!codes.includes(fc)) addCode(this.formatLanguageCode(fc));
         });
+        if (cacheKey !== null) {
+            this.resolveHierarchyCache[cacheKey] = codes;
+            return codes.slice();
+        }
         return codes;
     }
 }
@@ -2588,6 +2617,7 @@ var $fc0ce661316f8ab4$var$flushPending = false;
 var $fc0ce661316f8ab4$var$flushing = false;
 var $fc0ce661316f8ab4$var$queue = [];
 var $fc0ce661316f8ab4$var$lastFlushedIndex = -1;
+var $fc0ce661316f8ab4$var$queueNeedsSort = false;
 var $fc0ce661316f8ab4$var$transactionActive = false;
 function $fc0ce661316f8ab4$var$scheduler(callback) {
     $fc0ce661316f8ab4$var$queueJob(callback);
@@ -2600,7 +2630,10 @@ function $fc0ce661316f8ab4$var$commitTransaction() {
     $fc0ce661316f8ab4$var$queueFlush();
 }
 function $fc0ce661316f8ab4$var$queueJob(job) {
-    if (!$fc0ce661316f8ab4$var$queue.includes(job)) $fc0ce661316f8ab4$var$queue.push(job);
+    if (!$fc0ce661316f8ab4$var$queue.includes(job)) {
+        $fc0ce661316f8ab4$var$queue.push(job);
+        if (job._x_schedulerPriority !== void 0) $fc0ce661316f8ab4$var$queueNeedsSort = true;
+    }
     $fc0ce661316f8ab4$var$queueFlush();
 }
 function $fc0ce661316f8ab4$var$dequeueJob(job) {
@@ -2618,18 +2651,49 @@ function $fc0ce661316f8ab4$var$flushJobs() {
     $fc0ce661316f8ab4$var$flushPending = false;
     $fc0ce661316f8ab4$var$flushing = true;
     for(let i = 0; i < $fc0ce661316f8ab4$var$queue.length; i++){
+        if ($fc0ce661316f8ab4$var$queueNeedsSort) $fc0ce661316f8ab4$var$sortPendingJobs(i);
         $fc0ce661316f8ab4$var$queue[i]();
         $fc0ce661316f8ab4$var$lastFlushedIndex = i;
     }
     $fc0ce661316f8ab4$var$queue.length = 0;
     $fc0ce661316f8ab4$var$lastFlushedIndex = -1;
+    $fc0ce661316f8ab4$var$queueNeedsSort = false;
     $fc0ce661316f8ab4$var$flushing = false;
+}
+function $fc0ce661316f8ab4$var$sortPendingJobs(start2) {
+    let depths = /* @__PURE__ */ new Map();
+    let sorted = $fc0ce661316f8ab4$var$queue.slice(start2).sort((a, b)=>$fc0ce661316f8ab4$var$compareJobs(a, b, depths));
+    for(let i = 0; i < sorted.length; i++)$fc0ce661316f8ab4$var$queue[start2 + i] = sorted[i];
+    $fc0ce661316f8ab4$var$queueNeedsSort = false;
+}
+function $fc0ce661316f8ab4$var$compareJobs(a, b, depths) {
+    if (!$fc0ce661316f8ab4$var$isStructural(a)) return $fc0ce661316f8ab4$var$isStructural(b) ? 1 : 0;
+    if (!$fc0ce661316f8ab4$var$isStructural(b)) return -1;
+    let depthDifference = $fc0ce661316f8ab4$var$getElementDepth(a._x_schedulerPriority.el, depths) - $fc0ce661316f8ab4$var$getElementDepth(b._x_schedulerPriority.el, depths);
+    return depthDifference || a._x_schedulerPriority.order - b._x_schedulerPriority.order;
+}
+function $fc0ce661316f8ab4$var$isStructural(job) {
+    return job._x_schedulerPriority !== void 0;
+}
+function $fc0ce661316f8ab4$var$getElementDepth(el, depths) {
+    if (depths.has(el)) return depths.get(el);
+    let depth = 0;
+    let owner = el;
+    while(el){
+        depth++;
+        if (el._x_teleportBack) el = el._x_teleportBack;
+        else if (typeof ShadowRoot === "function" && el.parentNode instanceof ShadowRoot) el = el.parentNode.host;
+        else el = el.parentElement;
+    }
+    depths.set(owner, depth);
+    return depth;
 }
 // packages/alpinejs/src/reactivity.js
 var $fc0ce661316f8ab4$var$reactive;
 var $fc0ce661316f8ab4$var$effect;
 var $fc0ce661316f8ab4$var$release;
 var $fc0ce661316f8ab4$var$raw;
+var $fc0ce661316f8ab4$var$nextStructuralEffectOrder = 0;
 var $fc0ce661316f8ab4$var$shouldSchedule = true;
 function $fc0ce661316f8ab4$var$disableEffectScheduling(callback) {
     $fc0ce661316f8ab4$var$shouldSchedule = false;
@@ -2651,9 +2715,14 @@ function $fc0ce661316f8ab4$var$overrideEffect(override) {
     $fc0ce661316f8ab4$var$effect = override;
 }
 function $fc0ce661316f8ab4$var$elementBoundEffect(el) {
-    let cleanup2 = ()=>{};
-    let wrappedEffect = (callback)=>{
+    let cleanup = ()=>{};
+    let wrappedEffect = (callback, options)=>{
+        let priority = options?.priority === "structural" ? $fc0ce661316f8ab4$var$nextStructuralEffectOrder++ : void 0;
         let effectReference = $fc0ce661316f8ab4$var$effect(callback);
+        if (priority !== void 0 && effectReference !== void 0) effectReference._x_schedulerPriority = {
+            el: el,
+            order: priority
+        };
         if (!el._x_effects) {
             el._x_effects = /* @__PURE__ */ new Set();
             el._x_runEffects = ()=>{
@@ -2661,7 +2730,7 @@ function $fc0ce661316f8ab4$var$elementBoundEffect(el) {
             };
         }
         el._x_effects.add(effectReference);
-        cleanup2 = ()=>{
+        cleanup = ()=>{
             if (effectReference === void 0) return;
             el._x_effects.delete(effectReference);
             $fc0ce661316f8ab4$var$release(effectReference);
@@ -2671,7 +2740,7 @@ function $fc0ce661316f8ab4$var$elementBoundEffect(el) {
     return [
         wrappedEffect,
         ()=>{
-            cleanup2();
+            cleanup();
         }
     ];
 }
@@ -2815,22 +2884,22 @@ function $fc0ce661316f8ab4$var$onMutate(mutations) {
             let el = mutations[i].target;
             let name = mutations[i].attributeName;
             let oldValue = mutations[i].oldValue;
-            let add2 = ()=>{
+            let add = ()=>{
                 if (!addedAttributes.has(el)) addedAttributes.set(el, []);
                 addedAttributes.get(el).push({
                     name: name,
                     value: el.getAttribute(name)
                 });
             };
-            let remove = ()=>{
+            let remove2 = ()=>{
                 if (!removedAttributes.has(el)) removedAttributes.set(el, []);
                 removedAttributes.get(el).push(name);
             };
-            if (el.hasAttribute(name) && oldValue === null) add2();
+            if (el.hasAttribute(name) && oldValue === null) add();
             else if (el.hasAttribute(name)) {
-                remove();
-                add2();
-            } else remove();
+                remove2();
+                add();
+            } else remove2();
         }
     }
     removedAttributes.forEach((attrs, el)=>{
@@ -2913,14 +2982,14 @@ function $fc0ce661316f8ab4$var$collapseProxies() {
     }, {});
 }
 // packages/alpinejs/src/interceptor.js
-function $fc0ce661316f8ab4$var$initInterceptors(data2) {
+function $fc0ce661316f8ab4$var$initInterceptors(data2, cleanup = ()=>{}) {
     let isObject3 = (val)=>typeof val === "object" && !Array.isArray(val) && val !== null;
     let recurse = (obj, basePath = "")=>{
         Object.entries(Object.getOwnPropertyDescriptors(obj)).forEach(([key, { value: value, enumerable: enumerable }])=>{
             if (enumerable === false || value === void 0) return;
             if (typeof value === "object" && value !== null && value.__v_skip) return;
             let path = basePath === "" ? key : `${basePath}.${key}`;
-            if (typeof value === "object" && value !== null && value._x_interceptor) obj[key] = value.initialize(data2, path, key);
+            if (typeof value === "object" && value !== null && value._x_interceptor) obj[key] = value.initialize(data2, path, key, cleanup);
             else if (isObject3(value) && value !== obj && !(value instanceof Element)) recurse(value, path);
         });
     };
@@ -2930,18 +2999,18 @@ function $fc0ce661316f8ab4$var$interceptor(callback, mutateObj = ()=>{}) {
     let obj = {
         initialValue: void 0,
         _x_interceptor: true,
-        initialize (data2, path, key) {
-            return callback(this.initialValue, ()=>$fc0ce661316f8ab4$var$get(data2, path), (value)=>$fc0ce661316f8ab4$var$set(data2, path, value), path, key);
+        initialize (data2, path, key, cleanup) {
+            return callback(this.initialValue, ()=>$fc0ce661316f8ab4$var$get(data2, path), (value)=>$fc0ce661316f8ab4$var$set(data2, path, value), path, key, cleanup);
         }
     };
     mutateObj(obj);
     return (initialValue)=>{
         if (typeof initialValue === "object" && initialValue !== null && initialValue._x_interceptor) {
             let initialize = obj.initialize.bind(obj);
-            obj.initialize = (data2, path, key)=>{
-                let innerValue = initialValue.initialize(data2, path, key);
+            obj.initialize = (data2, path, key, cleanup)=>{
+                let innerValue = initialValue.initialize(data2, path, key, cleanup);
                 obj.initialValue = innerValue;
-                return initialize(data2, path, key);
+                return initialize(data2, path, key, cleanup);
             };
         } else obj.initialValue = initialValue;
         return obj;
@@ -2980,12 +3049,12 @@ function $fc0ce661316f8ab4$var$injectMagics(obj, el) {
     return obj;
 }
 function $fc0ce661316f8ab4$var$getUtilities(el) {
-    let [utilities, cleanup2] = $fc0ce661316f8ab4$var$getElementBoundUtilities(el);
+    let [utilities, cleanup] = $fc0ce661316f8ab4$var$getElementBoundUtilities(el);
     let utils = {
         interceptor: $fc0ce661316f8ab4$var$interceptor,
         ...utilities
     };
-    $fc0ce661316f8ab4$var$onElRemoved(el, cleanup2);
+    $fc0ce661316f8ab4$var$onElRemoved(el, cleanup);
     return utils;
 }
 // packages/alpinejs/src/utils/error.js
@@ -3225,13 +3294,13 @@ function $fc0ce661316f8ab4$var$deferHandlingDirectives(callback) {
 }
 function $fc0ce661316f8ab4$var$getElementBoundUtilities(el) {
     let cleanups = [];
-    let cleanup2 = (callback)=>cleanups.push(callback);
-    let [effect3, cleanupEffect] = $fc0ce661316f8ab4$var$elementBoundEffect(el);
-    cleanups.push(cleanupEffect);
+    let cleanup = (callback)=>cleanups.push(callback);
+    let [effect3, cleanupEffect2] = $fc0ce661316f8ab4$var$elementBoundEffect(el);
+    cleanups.push(cleanupEffect2);
     let utilities = {
         Alpine: $fc0ce661316f8ab4$var$alpine_default,
         effect: effect3,
-        cleanup: cleanup2,
+        cleanup: cleanup,
         evaluateLater: $fc0ce661316f8ab4$var$evaluateLater.bind($fc0ce661316f8ab4$var$evaluateLater, el),
         evaluate: $fc0ce661316f8ab4$var$evaluate.bind($fc0ce661316f8ab4$var$evaluate, el)
     };
@@ -3244,15 +3313,15 @@ function $fc0ce661316f8ab4$var$getElementBoundUtilities(el) {
 function $fc0ce661316f8ab4$var$getDirectiveHandler(el, directive2) {
     let noop = ()=>{};
     let handler4 = $fc0ce661316f8ab4$var$directiveHandlers[directive2.type] || noop;
-    let [utilities, cleanup2] = $fc0ce661316f8ab4$var$getElementBoundUtilities(el);
-    $fc0ce661316f8ab4$var$onAttributeRemoved(el, directive2.original, cleanup2);
+    let [utilities, cleanup] = $fc0ce661316f8ab4$var$getElementBoundUtilities(el);
+    $fc0ce661316f8ab4$var$onAttributeRemoved(el, directive2.original, cleanup);
     let fullHandler = ()=>{
         if (el._x_ignore || el._x_ignoreSelf) return;
         handler4.inline && handler4.inline(el, directive2, utilities);
         handler4 = handler4.bind(handler4, el, directive2, utilities);
         $fc0ce661316f8ab4$var$isDeferringHandlers ? $fc0ce661316f8ab4$var$directiveHandlerStacks.get($fc0ce661316f8ab4$var$currentHandlerStackKey).push(handler4) : handler4();
     };
-    fullHandler.runCleanups = cleanup2;
+    fullHandler.runCleanups = cleanup;
     return fullHandler;
 }
 var $fc0ce661316f8ab4$var$startingWith = (subject, replacement)=>({ name: name, value: value })=>{
@@ -3923,8 +3992,9 @@ function $fc0ce661316f8ab4$var$bindInputValue(el, value) {
         else if (Array.isArray(value)) el.checked = value.some((val)=>$fc0ce661316f8ab4$var$checkedAttrLooseCompare(val, el.value));
         else el.checked = !!value;
     } else if (el.tagName === "SELECT") $fc0ce661316f8ab4$var$updateSelect(el, value);
+    else if (el.tagName === "OPTION") $fc0ce661316f8ab4$var$bindAttribute(el, "value", value);
     else {
-        if (el.value === value) return;
+        if (el.value === value && (typeof value !== "object" || value === null)) return;
         el.value = value === void 0 ? "" : value;
     }
 }
@@ -3948,6 +4018,7 @@ function $fc0ce661316f8ab4$var$bindAttribute(el, name, value) {
     ].includes(value) && $fc0ce661316f8ab4$var$attributeShouldntBePreservedIfFalsy(name)) el.removeAttribute(name);
     else {
         if ($fc0ce661316f8ab4$var$isBooleanAttr(name)) value = name;
+        if ($fc0ce661316f8ab4$var$isObjectAttr(value)) value = JSON.stringify(value);
         $fc0ce661316f8ab4$var$setIfChanged(el, name, value);
     }
 }
@@ -4029,6 +4100,9 @@ function $fc0ce661316f8ab4$var$attributeShouldntBePreservedIfFalsy(name) {
         "aria-expanded",
         "aria-selected"
     ].includes(name);
+}
+function $fc0ce661316f8ab4$var$isObjectAttr(value) {
+    return typeof value === "object" && value !== null;
 }
 function $fc0ce661316f8ab4$var$getBinding(el, name, fallback) {
     if (el._x_bindings && el._x_bindings[name] !== void 0) return el._x_bindings[name];
@@ -4130,7 +4204,8 @@ function $fc0ce661316f8ab4$var$store(name, value) {
     }
     if (value === void 0) return $fc0ce661316f8ab4$var$stores[name];
     $fc0ce661316f8ab4$var$stores[name] = value;
-    $fc0ce661316f8ab4$var$initInterceptors($fc0ce661316f8ab4$var$stores[name]);
+    if (typeof value === "object" && value !== null && value._x_interceptor) $fc0ce661316f8ab4$var$stores[name] = value.initialize($fc0ce661316f8ab4$var$stores, name, name, ()=>{});
+    else $fc0ce661316f8ab4$var$initInterceptors($fc0ce661316f8ab4$var$stores[name]);
     if (typeof value === "object" && value !== null && value.hasOwnProperty("init") && typeof value.init === "function") $fc0ce661316f8ab4$var$stores[name].init();
 }
 function $fc0ce661316f8ab4$var$getStores() {
@@ -4214,7 +4289,7 @@ var $fc0ce661316f8ab4$var$Alpine = {
     get transaction () {
         return $fc0ce661316f8ab4$var$transaction;
     },
-    version: "3.15.12",
+    version: "3.16.2",
     flushAndStopDeferringMutations: $fc0ce661316f8ab4$var$flushAndStopDeferringMutations,
     dontAutoEvaluateFunctions: $fc0ce661316f8ab4$var$dontAutoEvaluateFunctions,
     disableEffectScheduling: $fc0ce661316f8ab4$var$disableEffectScheduling,
@@ -4279,16 +4354,14 @@ var $fc0ce661316f8ab4$var$Alpine = {
 };
 var $fc0ce661316f8ab4$var$alpine_default = $fc0ce661316f8ab4$var$Alpine;
 // node_modules/@vue/shared/dist/shared.esm-bundler.js
-function $fc0ce661316f8ab4$var$makeMap(str, expectsLowerCase) {
+function $fc0ce661316f8ab4$var$makeMap(str) {
     const map = /* @__PURE__ */ Object.create(null);
-    const list = str.split(",");
-    for(let i = 0; i < list.length; i++)map[list[i]] = true;
-    return expectsLowerCase ? (val)=>!!map[val.toLowerCase()] : (val)=>!!map[val];
+    for (const key of str.split(","))map[key] = 1;
+    return (val)=>val in map;
 }
-var $fc0ce661316f8ab4$var$specialBooleanAttrs = `itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,readonly`;
-var $fc0ce661316f8ab4$var$isBooleanAttr2 = /* @__PURE__ */ $fc0ce661316f8ab4$var$makeMap($fc0ce661316f8ab4$var$specialBooleanAttrs + `,async,autofocus,autoplay,controls,default,defer,disabled,hidden,loop,open,required,reversed,scoped,seamless,checked,muted,multiple,selected`);
 var $fc0ce661316f8ab4$var$EMPTY_OBJ = Object.freeze({});
 var $fc0ce661316f8ab4$var$EMPTY_ARR = Object.freeze([]);
+var $fc0ce661316f8ab4$var$extend = Object.assign;
 var $fc0ce661316f8ab4$var$hasOwnProperty = Object.prototype.hasOwnProperty;
 var $fc0ce661316f8ab4$var$hasOwn = (val, key)=>$fc0ce661316f8ab4$var$hasOwnProperty.call(val, key);
 var $fc0ce661316f8ab4$var$isArray = Array.isArray;
@@ -4309,70 +4382,258 @@ var $fc0ce661316f8ab4$var$cacheStringFunction = (fn)=>{
         return hit || (cache[str] = fn(str));
     };
 };
-var $fc0ce661316f8ab4$var$camelizeRE = /-(\w)/g;
+var $fc0ce661316f8ab4$var$camelizeRE = /-\w/g;
 var $fc0ce661316f8ab4$var$camelize = $fc0ce661316f8ab4$var$cacheStringFunction((str)=>{
-    return str.replace($fc0ce661316f8ab4$var$camelizeRE, (_, c)=>c ? c.toUpperCase() : "");
+    return str.replace($fc0ce661316f8ab4$var$camelizeRE, (c)=>c.slice(1).toUpperCase());
 });
 var $fc0ce661316f8ab4$var$hyphenateRE = /\B([A-Z])/g;
 var $fc0ce661316f8ab4$var$hyphenate = $fc0ce661316f8ab4$var$cacheStringFunction((str)=>str.replace($fc0ce661316f8ab4$var$hyphenateRE, "-$1").toLowerCase());
-var $fc0ce661316f8ab4$var$capitalize = $fc0ce661316f8ab4$var$cacheStringFunction((str)=>str.charAt(0).toUpperCase() + str.slice(1));
-var $fc0ce661316f8ab4$var$toHandlerKey = $fc0ce661316f8ab4$var$cacheStringFunction((str)=>str ? `on${$fc0ce661316f8ab4$var$capitalize(str)}` : ``);
-var $fc0ce661316f8ab4$var$hasChanged = (value, oldValue)=>value !== oldValue && (value === value || oldValue === oldValue);
+var $fc0ce661316f8ab4$var$capitalize = $fc0ce661316f8ab4$var$cacheStringFunction((str)=>{
+    return str.charAt(0).toUpperCase() + str.slice(1);
+});
+var $fc0ce661316f8ab4$var$toHandlerKey = $fc0ce661316f8ab4$var$cacheStringFunction((str)=>{
+    const s = str ? `on${$fc0ce661316f8ab4$var$capitalize(str)}` : ``;
+    return s;
+});
+var $fc0ce661316f8ab4$var$hasChanged = (value, oldValue)=>!Object.is(value, oldValue);
+var $fc0ce661316f8ab4$var$specialBooleanAttrs = `itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,readonly`;
+var $fc0ce661316f8ab4$var$isBooleanAttr2 = /* @__PURE__ */ $fc0ce661316f8ab4$var$makeMap($fc0ce661316f8ab4$var$specialBooleanAttrs + `,async,autofocus,autoplay,controls,default,defer,disabled,inert,loop,open,required,reversed,scoped,seamless,checked,muted,multiple,selected`);
 // node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
-var $fc0ce661316f8ab4$var$targetMap = /* @__PURE__ */ new WeakMap();
-var $fc0ce661316f8ab4$var$effectStack = [];
-var $fc0ce661316f8ab4$var$activeEffect;
-var $fc0ce661316f8ab4$var$ITERATE_KEY = Symbol("iterate");
-var $fc0ce661316f8ab4$var$MAP_KEY_ITERATE_KEY = Symbol("Map key iterate");
-function $fc0ce661316f8ab4$var$isEffect(fn) {
-    return fn && fn._isEffect === true;
+function $fc0ce661316f8ab4$var$warn2(msg, ...args) {
+    console.warn(`[Vue warn] ${msg}`, ...args);
 }
-function $fc0ce661316f8ab4$var$effect2(fn, options = $fc0ce661316f8ab4$var$EMPTY_OBJ) {
-    if ($fc0ce661316f8ab4$var$isEffect(fn)) fn = fn.raw;
-    const effect3 = $fc0ce661316f8ab4$var$createReactiveEffect(fn, options);
-    if (!options.lazy) effect3();
-    return effect3;
-}
-function $fc0ce661316f8ab4$var$stop(effect3) {
-    if (effect3.active) {
-        $fc0ce661316f8ab4$var$cleanup(effect3);
-        if (effect3.options.onStop) effect3.options.onStop();
-        effect3.active = false;
+var $fc0ce661316f8ab4$var$activeEffectScope;
+var $fc0ce661316f8ab4$var$activeSub;
+var $fc0ce661316f8ab4$var$pausedQueueEffects = /* @__PURE__ */ new WeakSet();
+var $fc0ce661316f8ab4$var$ReactiveEffect = class {
+    constructor(fn){
+        this.fn = fn;
+        this.deps = void 0;
+        this.depsTail = void 0;
+        this.flags = 5;
+        this.next = void 0;
+        this.cleanup = void 0;
+        this.scheduler = void 0;
+        if ($fc0ce661316f8ab4$var$activeEffectScope) {
+            if ($fc0ce661316f8ab4$var$activeEffectScope.active) $fc0ce661316f8ab4$var$activeEffectScope.effects.push(this);
+            else this.flags &= -2;
+        }
     }
-}
-var $fc0ce661316f8ab4$var$uid = 0;
-function $fc0ce661316f8ab4$var$createReactiveEffect(fn, options) {
-    const effect3 = function reactiveEffect() {
-        if (!effect3.active) return fn();
-        if (!$fc0ce661316f8ab4$var$effectStack.includes(effect3)) {
-            $fc0ce661316f8ab4$var$cleanup(effect3);
-            try {
-                $fc0ce661316f8ab4$var$enableTracking();
-                $fc0ce661316f8ab4$var$effectStack.push(effect3);
-                $fc0ce661316f8ab4$var$activeEffect = effect3;
-                return fn();
-            } finally{
-                $fc0ce661316f8ab4$var$effectStack.pop();
-                $fc0ce661316f8ab4$var$resetTracking();
-                $fc0ce661316f8ab4$var$activeEffect = $fc0ce661316f8ab4$var$effectStack[$fc0ce661316f8ab4$var$effectStack.length - 1];
+    pause() {
+        this.flags |= 64;
+    }
+    resume() {
+        if (this.flags & 64) {
+            this.flags &= -65;
+            if ($fc0ce661316f8ab4$var$pausedQueueEffects.has(this)) {
+                $fc0ce661316f8ab4$var$pausedQueueEffects.delete(this);
+                this.trigger();
             }
         }
-    };
-    effect3.id = $fc0ce661316f8ab4$var$uid++;
-    effect3.allowRecurse = !!options.allowRecurse;
-    effect3._isEffect = true;
-    effect3.active = true;
-    effect3.raw = fn;
-    effect3.deps = [];
-    effect3.options = options;
-    return effect3;
-}
-function $fc0ce661316f8ab4$var$cleanup(effect3) {
-    const { deps: deps } = effect3;
-    if (deps.length) {
-        for(let i = 0; i < deps.length; i++)deps[i].delete(effect3);
-        deps.length = 0;
     }
+    /**
+   * @internal
+   */ notify() {
+        if (this.flags & 2 && !(this.flags & 32)) return;
+        if (!(this.flags & 8)) $fc0ce661316f8ab4$var$batch(this);
+    }
+    run() {
+        if (!(this.flags & 1)) return this.fn();
+        this.flags |= 2;
+        $fc0ce661316f8ab4$var$cleanupEffect(this);
+        $fc0ce661316f8ab4$var$prepareDeps(this);
+        const prevEffect = $fc0ce661316f8ab4$var$activeSub;
+        const prevShouldTrack = $fc0ce661316f8ab4$var$shouldTrack;
+        $fc0ce661316f8ab4$var$activeSub = this;
+        $fc0ce661316f8ab4$var$shouldTrack = true;
+        try {
+            return this.fn();
+        } finally{
+            if ($fc0ce661316f8ab4$var$activeSub !== this) $fc0ce661316f8ab4$var$warn2("Active effect was not restored correctly - this is likely a Vue internal bug.");
+            $fc0ce661316f8ab4$var$cleanupDeps(this);
+            $fc0ce661316f8ab4$var$activeSub = prevEffect;
+            $fc0ce661316f8ab4$var$shouldTrack = prevShouldTrack;
+            this.flags &= -3;
+        }
+    }
+    stop() {
+        if (this.flags & 1) {
+            for(let link = this.deps; link; link = link.nextDep)$fc0ce661316f8ab4$var$removeSub(link);
+            this.deps = this.depsTail = void 0;
+            $fc0ce661316f8ab4$var$cleanupEffect(this);
+            this.onStop && this.onStop();
+            this.flags &= -2;
+        }
+    }
+    trigger() {
+        if (this.flags & 64) $fc0ce661316f8ab4$var$pausedQueueEffects.add(this);
+        else if (this.scheduler) this.scheduler();
+        else this.runIfDirty();
+    }
+    /**
+   * @internal
+   */ runIfDirty() {
+        if ($fc0ce661316f8ab4$var$isDirty(this)) this.run();
+    }
+    get dirty() {
+        return $fc0ce661316f8ab4$var$isDirty(this);
+    }
+};
+var $fc0ce661316f8ab4$var$batchDepth = 0;
+var $fc0ce661316f8ab4$var$batchedSub;
+var $fc0ce661316f8ab4$var$batchedComputed;
+function $fc0ce661316f8ab4$var$batch(sub, isComputed = false) {
+    sub.flags |= 8;
+    if (isComputed) {
+        sub.next = $fc0ce661316f8ab4$var$batchedComputed;
+        $fc0ce661316f8ab4$var$batchedComputed = sub;
+        return;
+    }
+    sub.next = $fc0ce661316f8ab4$var$batchedSub;
+    $fc0ce661316f8ab4$var$batchedSub = sub;
+}
+function $fc0ce661316f8ab4$var$startBatch() {
+    $fc0ce661316f8ab4$var$batchDepth++;
+}
+function $fc0ce661316f8ab4$var$endBatch() {
+    if (--$fc0ce661316f8ab4$var$batchDepth > 0) return;
+    if ($fc0ce661316f8ab4$var$batchedComputed) {
+        let e = $fc0ce661316f8ab4$var$batchedComputed;
+        $fc0ce661316f8ab4$var$batchedComputed = void 0;
+        while(e){
+            const next = e.next;
+            e.next = void 0;
+            e.flags &= -9;
+            e = next;
+        }
+    }
+    let error2;
+    while($fc0ce661316f8ab4$var$batchedSub){
+        let e = $fc0ce661316f8ab4$var$batchedSub;
+        $fc0ce661316f8ab4$var$batchedSub = void 0;
+        while(e){
+            const next = e.next;
+            e.next = void 0;
+            e.flags &= -9;
+            if (e.flags & 1) try {
+                e.trigger();
+            } catch (err) {
+                if (!error2) error2 = err;
+            }
+            e = next;
+        }
+    }
+    if (error2) throw error2;
+}
+function $fc0ce661316f8ab4$var$prepareDeps(sub) {
+    for(let link = sub.deps; link; link = link.nextDep){
+        link.version = -1;
+        link.prevActiveLink = link.dep.activeLink;
+        link.dep.activeLink = link;
+    }
+}
+function $fc0ce661316f8ab4$var$cleanupDeps(sub) {
+    let head;
+    let tail = sub.depsTail;
+    let link = tail;
+    while(link){
+        const prev = link.prevDep;
+        if (link.version === -1) {
+            if (link === tail) tail = prev;
+            $fc0ce661316f8ab4$var$removeSub(link);
+            $fc0ce661316f8ab4$var$removeDep(link);
+        } else head = link;
+        link.dep.activeLink = link.prevActiveLink;
+        link.prevActiveLink = void 0;
+        link = prev;
+    }
+    sub.deps = head;
+    sub.depsTail = tail;
+}
+function $fc0ce661316f8ab4$var$isDirty(sub) {
+    for(let link = sub.deps; link; link = link.nextDep){
+        if (link.dep.version !== link.version || link.dep.computed && ($fc0ce661316f8ab4$var$refreshComputed(link.dep.computed) || link.dep.version !== link.version)) return true;
+    }
+    if (sub._dirty) return true;
+    return false;
+}
+function $fc0ce661316f8ab4$var$refreshComputed(computed) {
+    if (computed.flags & 4 && !(computed.flags & 16)) return;
+    computed.flags &= -17;
+    if (computed.globalVersion === $fc0ce661316f8ab4$var$globalVersion) return;
+    computed.globalVersion = $fc0ce661316f8ab4$var$globalVersion;
+    if (!computed.isSSR && computed.flags & 128 && (!computed.deps && !computed._dirty || !$fc0ce661316f8ab4$var$isDirty(computed))) return;
+    computed.flags |= 2;
+    const dep = computed.dep;
+    const prevSub = $fc0ce661316f8ab4$var$activeSub;
+    const prevShouldTrack = $fc0ce661316f8ab4$var$shouldTrack;
+    $fc0ce661316f8ab4$var$activeSub = computed;
+    $fc0ce661316f8ab4$var$shouldTrack = true;
+    try {
+        $fc0ce661316f8ab4$var$prepareDeps(computed);
+        const value = computed.fn(computed._value);
+        if (dep.version === 0 || $fc0ce661316f8ab4$var$hasChanged(value, computed._value)) {
+            computed.flags |= 128;
+            computed._value = value;
+            dep.version++;
+        }
+    } catch (err) {
+        dep.version++;
+        throw err;
+    } finally{
+        $fc0ce661316f8ab4$var$activeSub = prevSub;
+        $fc0ce661316f8ab4$var$shouldTrack = prevShouldTrack;
+        $fc0ce661316f8ab4$var$cleanupDeps(computed);
+        computed.flags &= -3;
+    }
+}
+function $fc0ce661316f8ab4$var$removeSub(link, soft = false) {
+    const { dep: dep, prevSub: prevSub, nextSub: nextSub } = link;
+    if (prevSub) {
+        prevSub.nextSub = nextSub;
+        link.prevSub = void 0;
+    }
+    if (nextSub) {
+        nextSub.prevSub = prevSub;
+        link.nextSub = void 0;
+    }
+    if (dep.subsHead === link) dep.subsHead = nextSub;
+    if (dep.subs === link) {
+        dep.subs = prevSub;
+        if (!prevSub && dep.computed) {
+            dep.computed.flags &= -5;
+            for(let l = dep.computed.deps; l; l = l.nextDep)$fc0ce661316f8ab4$var$removeSub(l, true);
+        }
+    }
+    if (!soft && !--dep.sc && dep.map) dep.map.delete(dep.key);
+}
+function $fc0ce661316f8ab4$var$removeDep(link) {
+    const { prevDep: prevDep, nextDep: nextDep } = link;
+    if (prevDep) {
+        prevDep.nextDep = nextDep;
+        link.prevDep = void 0;
+    }
+    if (nextDep) {
+        nextDep.prevDep = prevDep;
+        link.nextDep = void 0;
+    }
+}
+function $fc0ce661316f8ab4$var$effect2(fn, options) {
+    if (fn.effect instanceof $fc0ce661316f8ab4$var$ReactiveEffect) fn = fn.effect.fn;
+    const e = new $fc0ce661316f8ab4$var$ReactiveEffect(fn);
+    if (options) $fc0ce661316f8ab4$var$extend(e, options);
+    try {
+        e.run();
+    } catch (err) {
+        e.stop();
+        throw err;
+    }
+    const runner = e.run.bind(e);
+    runner.effect = e;
+    return runner;
+}
+function $fc0ce661316f8ab4$var$stop(runner) {
+    runner.effect.stop();
 }
 var $fc0ce661316f8ab4$var$shouldTrack = true;
 var $fc0ce661316f8ab4$var$trackStack = [];
@@ -4380,25 +4641,124 @@ function $fc0ce661316f8ab4$var$pauseTracking() {
     $fc0ce661316f8ab4$var$trackStack.push($fc0ce661316f8ab4$var$shouldTrack);
     $fc0ce661316f8ab4$var$shouldTrack = false;
 }
-function $fc0ce661316f8ab4$var$enableTracking() {
-    $fc0ce661316f8ab4$var$trackStack.push($fc0ce661316f8ab4$var$shouldTrack);
-    $fc0ce661316f8ab4$var$shouldTrack = true;
-}
 function $fc0ce661316f8ab4$var$resetTracking() {
     const last = $fc0ce661316f8ab4$var$trackStack.pop();
     $fc0ce661316f8ab4$var$shouldTrack = last === void 0 ? true : last;
 }
+function $fc0ce661316f8ab4$var$cleanupEffect(e) {
+    const { cleanup: cleanup } = e;
+    e.cleanup = void 0;
+    if (cleanup) {
+        const prevSub = $fc0ce661316f8ab4$var$activeSub;
+        $fc0ce661316f8ab4$var$activeSub = void 0;
+        try {
+            cleanup();
+        } finally{
+            $fc0ce661316f8ab4$var$activeSub = prevSub;
+        }
+    }
+}
+var $fc0ce661316f8ab4$var$globalVersion = 0;
+var $fc0ce661316f8ab4$var$Link = class {
+    constructor(sub, dep){
+        this.sub = sub;
+        this.dep = dep;
+        this.version = dep.version;
+        this.nextDep = this.prevDep = this.nextSub = this.prevSub = this.prevActiveLink = void 0;
+    }
+};
+var $fc0ce661316f8ab4$var$Dep = class {
+    // TODO isolatedDeclarations "__v_skip"
+    constructor(computed){
+        this.computed = computed;
+        this.version = 0;
+        this.activeLink = void 0;
+        this.subs = void 0;
+        this.map = void 0;
+        this.key = void 0;
+        this.sc = 0;
+        this.__v_skip = true;
+        this.subsHead = void 0;
+    }
+    track(debugInfo) {
+        if (!$fc0ce661316f8ab4$var$activeSub || !$fc0ce661316f8ab4$var$shouldTrack || $fc0ce661316f8ab4$var$activeSub === this.computed) return;
+        let link = this.activeLink;
+        if (link === void 0 || link.sub !== $fc0ce661316f8ab4$var$activeSub) {
+            link = this.activeLink = new $fc0ce661316f8ab4$var$Link($fc0ce661316f8ab4$var$activeSub, this);
+            if (!$fc0ce661316f8ab4$var$activeSub.deps) $fc0ce661316f8ab4$var$activeSub.deps = $fc0ce661316f8ab4$var$activeSub.depsTail = link;
+            else {
+                link.prevDep = $fc0ce661316f8ab4$var$activeSub.depsTail;
+                $fc0ce661316f8ab4$var$activeSub.depsTail.nextDep = link;
+                $fc0ce661316f8ab4$var$activeSub.depsTail = link;
+            }
+            $fc0ce661316f8ab4$var$addSub(link);
+        } else if (link.version === -1) {
+            link.version = this.version;
+            if (link.nextDep) {
+                const next = link.nextDep;
+                next.prevDep = link.prevDep;
+                if (link.prevDep) link.prevDep.nextDep = next;
+                link.prevDep = $fc0ce661316f8ab4$var$activeSub.depsTail;
+                link.nextDep = void 0;
+                $fc0ce661316f8ab4$var$activeSub.depsTail.nextDep = link;
+                $fc0ce661316f8ab4$var$activeSub.depsTail = link;
+                if ($fc0ce661316f8ab4$var$activeSub.deps === link) $fc0ce661316f8ab4$var$activeSub.deps = next;
+            }
+        }
+        if ($fc0ce661316f8ab4$var$activeSub.onTrack) $fc0ce661316f8ab4$var$activeSub.onTrack($fc0ce661316f8ab4$var$extend({
+            effect: $fc0ce661316f8ab4$var$activeSub
+        }, debugInfo));
+        return link;
+    }
+    trigger(debugInfo) {
+        this.version++;
+        $fc0ce661316f8ab4$var$globalVersion++;
+        this.notify(debugInfo);
+    }
+    notify(debugInfo) {
+        $fc0ce661316f8ab4$var$startBatch();
+        try {
+            for(let head = this.subsHead; head; head = head.nextSub)if (head.sub.onTrigger && !(head.sub.flags & 8)) head.sub.onTrigger($fc0ce661316f8ab4$var$extend({
+                effect: head.sub
+            }, debugInfo));
+            for(let link = this.subs; link; link = link.prevSub)if (link.sub.notify()) link.sub.dep.notify();
+        } finally{
+            $fc0ce661316f8ab4$var$endBatch();
+        }
+    }
+};
+function $fc0ce661316f8ab4$var$addSub(link) {
+    link.dep.sc++;
+    if (link.sub.flags & 4) {
+        const computed = link.dep.computed;
+        if (computed && !link.dep.subs) {
+            computed.flags |= 20;
+            for(let l = computed.deps; l; l = l.nextDep)$fc0ce661316f8ab4$var$addSub(l);
+        }
+        const currentTail = link.dep.subs;
+        if (currentTail !== link) {
+            link.prevSub = currentTail;
+            if (currentTail) currentTail.nextSub = link;
+        }
+        if (link.dep.subsHead === void 0) link.dep.subsHead = link;
+        link.dep.subs = link;
+    }
+}
+var $fc0ce661316f8ab4$var$targetMap = /* @__PURE__ */ new WeakMap();
+var $fc0ce661316f8ab4$var$ITERATE_KEY = /* @__PURE__ */ Symbol("Object iterate");
+var $fc0ce661316f8ab4$var$MAP_KEY_ITERATE_KEY = /* @__PURE__ */ Symbol("Map keys iterate");
+var $fc0ce661316f8ab4$var$ARRAY_ITERATE_KEY = /* @__PURE__ */ Symbol("Array iterate");
 function $fc0ce661316f8ab4$var$track(target, type, key) {
-    if (!$fc0ce661316f8ab4$var$shouldTrack || $fc0ce661316f8ab4$var$activeEffect === void 0) return;
-    let depsMap = $fc0ce661316f8ab4$var$targetMap.get(target);
-    if (!depsMap) $fc0ce661316f8ab4$var$targetMap.set(target, depsMap = /* @__PURE__ */ new Map());
-    let dep = depsMap.get(key);
-    if (!dep) depsMap.set(key, dep = /* @__PURE__ */ new Set());
-    if (!dep.has($fc0ce661316f8ab4$var$activeEffect)) {
-        dep.add($fc0ce661316f8ab4$var$activeEffect);
-        $fc0ce661316f8ab4$var$activeEffect.deps.push(dep);
-        if ($fc0ce661316f8ab4$var$activeEffect.options.onTrack) $fc0ce661316f8ab4$var$activeEffect.options.onTrack({
-            effect: $fc0ce661316f8ab4$var$activeEffect,
+    if ($fc0ce661316f8ab4$var$shouldTrack && $fc0ce661316f8ab4$var$activeSub) {
+        let depsMap = $fc0ce661316f8ab4$var$targetMap.get(target);
+        if (!depsMap) $fc0ce661316f8ab4$var$targetMap.set(target, depsMap = /* @__PURE__ */ new Map());
+        let dep = depsMap.get(key);
+        if (!dep) {
+            depsMap.set(key, dep = new $fc0ce661316f8ab4$var$Dep());
+            dep.map = depsMap;
+            dep.key = key;
+        }
+        dep.track({
             target: target,
             type: type,
             key: key
@@ -4407,251 +4767,344 @@ function $fc0ce661316f8ab4$var$track(target, type, key) {
 }
 function $fc0ce661316f8ab4$var$trigger(target, type, key, newValue, oldValue, oldTarget) {
     const depsMap = $fc0ce661316f8ab4$var$targetMap.get(target);
-    if (!depsMap) return;
-    const effects = /* @__PURE__ */ new Set();
-    const add2 = (effectsToAdd)=>{
-        if (effectsToAdd) effectsToAdd.forEach((effect3)=>{
-            if (effect3 !== $fc0ce661316f8ab4$var$activeEffect || effect3.allowRecurse) effects.add(effect3);
-        });
-    };
-    if (type === "clear") depsMap.forEach(add2);
-    else if (key === "length" && $fc0ce661316f8ab4$var$isArray(target)) depsMap.forEach((dep, key2)=>{
-        if (key2 === "length" || key2 >= newValue) add2(dep);
-    });
-    else {
-        if (key !== void 0) add2(depsMap.get(key));
-        switch(type){
-            case "add":
-                if (!$fc0ce661316f8ab4$var$isArray(target)) {
-                    add2(depsMap.get($fc0ce661316f8ab4$var$ITERATE_KEY));
-                    if ($fc0ce661316f8ab4$var$isMap(target)) add2(depsMap.get($fc0ce661316f8ab4$var$MAP_KEY_ITERATE_KEY));
-                } else if ($fc0ce661316f8ab4$var$isIntegerKey(key)) add2(depsMap.get("length"));
-                break;
-            case "delete":
-                if (!$fc0ce661316f8ab4$var$isArray(target)) {
-                    add2(depsMap.get($fc0ce661316f8ab4$var$ITERATE_KEY));
-                    if ($fc0ce661316f8ab4$var$isMap(target)) add2(depsMap.get($fc0ce661316f8ab4$var$MAP_KEY_ITERATE_KEY));
-                }
-                break;
-            case "set":
-                if ($fc0ce661316f8ab4$var$isMap(target)) add2(depsMap.get($fc0ce661316f8ab4$var$ITERATE_KEY));
-                break;
-        }
+    if (!depsMap) {
+        $fc0ce661316f8ab4$var$globalVersion++;
+        return;
     }
-    const run = (effect3)=>{
-        if (effect3.options.onTrigger) effect3.options.onTrigger({
-            effect: effect3,
+    const run = (dep)=>{
+        if (dep) dep.trigger({
             target: target,
-            key: key,
             type: type,
+            key: key,
             newValue: newValue,
             oldValue: oldValue,
             oldTarget: oldTarget
         });
-        if (effect3.options.scheduler) effect3.options.scheduler(effect3);
-        else effect3();
     };
-    effects.forEach(run);
-}
-var $fc0ce661316f8ab4$var$isNonTrackableKeys = /* @__PURE__ */ $fc0ce661316f8ab4$var$makeMap(`__proto__,__v_isRef,__isVue`);
-var $fc0ce661316f8ab4$var$builtInSymbols = new Set(Object.getOwnPropertyNames(Symbol).map((key)=>Symbol[key]).filter($fc0ce661316f8ab4$var$isSymbol));
-var $fc0ce661316f8ab4$var$get2 = /* @__PURE__ */ $fc0ce661316f8ab4$var$createGetter();
-var $fc0ce661316f8ab4$var$readonlyGet = /* @__PURE__ */ $fc0ce661316f8ab4$var$createGetter(true);
-var $fc0ce661316f8ab4$var$arrayInstrumentations = /* @__PURE__ */ $fc0ce661316f8ab4$var$createArrayInstrumentations();
-function $fc0ce661316f8ab4$var$createArrayInstrumentations() {
-    const instrumentations = {};
-    [
-        "includes",
-        "indexOf",
-        "lastIndexOf"
-    ].forEach((key)=>{
-        instrumentations[key] = function(...args) {
-            const arr = $fc0ce661316f8ab4$var$toRaw(this);
-            for(let i = 0, l = this.length; i < l; i++)$fc0ce661316f8ab4$var$track(arr, "get", i + "");
-            const res = arr[key](...args);
-            if (res === -1 || res === false) return arr[key](...args.map($fc0ce661316f8ab4$var$toRaw));
-            else return res;
-        };
-    });
-    [
-        "push",
-        "pop",
-        "shift",
-        "unshift",
-        "splice"
-    ].forEach((key)=>{
-        instrumentations[key] = function(...args) {
-            $fc0ce661316f8ab4$var$pauseTracking();
-            const res = $fc0ce661316f8ab4$var$toRaw(this)[key].apply(this, args);
-            $fc0ce661316f8ab4$var$resetTracking();
-            return res;
-        };
-    });
-    return instrumentations;
-}
-function $fc0ce661316f8ab4$var$createGetter(isReadonly = false, shallow = false) {
-    return function get3(target, key, receiver) {
-        if (key === "__v_isReactive") return !isReadonly;
-        else if (key === "__v_isReadonly") return isReadonly;
-        else if (key === "__v_raw" && receiver === (isReadonly ? shallow ? $fc0ce661316f8ab4$var$shallowReadonlyMap : $fc0ce661316f8ab4$var$readonlyMap : shallow ? $fc0ce661316f8ab4$var$shallowReactiveMap : $fc0ce661316f8ab4$var$reactiveMap).get(target)) return target;
+    $fc0ce661316f8ab4$var$startBatch();
+    if (type === "clear") depsMap.forEach(run);
+    else {
         const targetIsArray = $fc0ce661316f8ab4$var$isArray(target);
-        if (!isReadonly && targetIsArray && $fc0ce661316f8ab4$var$hasOwn($fc0ce661316f8ab4$var$arrayInstrumentations, key)) return Reflect.get($fc0ce661316f8ab4$var$arrayInstrumentations, key, receiver);
-        const res = Reflect.get(target, key, receiver);
-        if ($fc0ce661316f8ab4$var$isSymbol(key) ? $fc0ce661316f8ab4$var$builtInSymbols.has(key) : $fc0ce661316f8ab4$var$isNonTrackableKeys(key)) return res;
-        if (!isReadonly) $fc0ce661316f8ab4$var$track(target, "get", key);
-        if (shallow) return res;
-        if ($fc0ce661316f8ab4$var$isRef(res)) {
-            const shouldUnwrap = !targetIsArray || !$fc0ce661316f8ab4$var$isIntegerKey(key);
-            return shouldUnwrap ? res.value : res;
-        }
-        if ($fc0ce661316f8ab4$var$isObject(res)) return isReadonly ? $fc0ce661316f8ab4$var$readonly(res) : $fc0ce661316f8ab4$var$reactive2(res);
-        return res;
-    };
-}
-var $fc0ce661316f8ab4$var$set2 = /* @__PURE__ */ $fc0ce661316f8ab4$var$createSetter();
-function $fc0ce661316f8ab4$var$createSetter(shallow = false) {
-    return function set3(target, key, value, receiver) {
-        let oldValue = target[key];
-        if (!shallow) {
-            value = $fc0ce661316f8ab4$var$toRaw(value);
-            oldValue = $fc0ce661316f8ab4$var$toRaw(oldValue);
-            if (!$fc0ce661316f8ab4$var$isArray(target) && $fc0ce661316f8ab4$var$isRef(oldValue) && !$fc0ce661316f8ab4$var$isRef(value)) {
-                oldValue.value = value;
-                return true;
+        const isArrayIndex = targetIsArray && $fc0ce661316f8ab4$var$isIntegerKey(key);
+        if (targetIsArray && key === "length") {
+            const newLength = Number(newValue);
+            depsMap.forEach((dep, key2)=>{
+                if (key2 === "length" || key2 === $fc0ce661316f8ab4$var$ARRAY_ITERATE_KEY || !$fc0ce661316f8ab4$var$isSymbol(key2) && key2 >= newLength) run(dep);
+            });
+        } else {
+            if (key !== void 0 || depsMap.has(void 0)) run(depsMap.get(key));
+            if (isArrayIndex) run(depsMap.get($fc0ce661316f8ab4$var$ARRAY_ITERATE_KEY));
+            switch(type){
+                case "add":
+                    if (!targetIsArray) {
+                        run(depsMap.get($fc0ce661316f8ab4$var$ITERATE_KEY));
+                        if ($fc0ce661316f8ab4$var$isMap(target)) run(depsMap.get($fc0ce661316f8ab4$var$MAP_KEY_ITERATE_KEY));
+                    } else if (isArrayIndex) run(depsMap.get("length"));
+                    break;
+                case "delete":
+                    if (!targetIsArray) {
+                        run(depsMap.get($fc0ce661316f8ab4$var$ITERATE_KEY));
+                        if ($fc0ce661316f8ab4$var$isMap(target)) run(depsMap.get($fc0ce661316f8ab4$var$MAP_KEY_ITERATE_KEY));
+                    }
+                    break;
+                case "set":
+                    if ($fc0ce661316f8ab4$var$isMap(target)) run(depsMap.get($fc0ce661316f8ab4$var$ITERATE_KEY));
+                    break;
             }
         }
-        const hadKey = $fc0ce661316f8ab4$var$isArray(target) && $fc0ce661316f8ab4$var$isIntegerKey(key) ? Number(key) < target.length : $fc0ce661316f8ab4$var$hasOwn(target, key);
-        const result = Reflect.set(target, key, value, receiver);
-        if (target === $fc0ce661316f8ab4$var$toRaw(receiver)) {
+    }
+    $fc0ce661316f8ab4$var$endBatch();
+}
+function $fc0ce661316f8ab4$var$reactiveReadArray(array) {
+    const raw2 = $fc0ce661316f8ab4$var$toRaw(array);
+    if (raw2 === array) return raw2;
+    $fc0ce661316f8ab4$var$track(raw2, "iterate", $fc0ce661316f8ab4$var$ARRAY_ITERATE_KEY);
+    return $fc0ce661316f8ab4$var$isShallow(array) ? raw2 : raw2.map($fc0ce661316f8ab4$var$toReactive);
+}
+function $fc0ce661316f8ab4$var$shallowReadArray(arr) {
+    $fc0ce661316f8ab4$var$track(arr = $fc0ce661316f8ab4$var$toRaw(arr), "iterate", $fc0ce661316f8ab4$var$ARRAY_ITERATE_KEY);
+    return arr;
+}
+function $fc0ce661316f8ab4$var$toWrapped(target, item) {
+    if ($fc0ce661316f8ab4$var$isReadonly(target)) return $fc0ce661316f8ab4$var$isReactive2(target) ? $fc0ce661316f8ab4$var$toReadonly($fc0ce661316f8ab4$var$toReactive(item)) : $fc0ce661316f8ab4$var$toReadonly(item);
+    return $fc0ce661316f8ab4$var$toReactive(item);
+}
+var $fc0ce661316f8ab4$var$arrayInstrumentations = {
+    __proto__: null,
+    [Symbol.iterator] () {
+        return $fc0ce661316f8ab4$var$iterator(this, Symbol.iterator, (item)=>$fc0ce661316f8ab4$var$toWrapped(this, item));
+    },
+    concat (...args) {
+        return $fc0ce661316f8ab4$var$reactiveReadArray(this).concat(...args.map((x)=>$fc0ce661316f8ab4$var$isArray(x) ? $fc0ce661316f8ab4$var$reactiveReadArray(x) : x));
+    },
+    entries () {
+        return $fc0ce661316f8ab4$var$iterator(this, "entries", (value)=>{
+            value[1] = $fc0ce661316f8ab4$var$toWrapped(this, value[1]);
+            return value;
+        });
+    },
+    every (fn, thisArg) {
+        return $fc0ce661316f8ab4$var$apply(this, "every", fn, thisArg, void 0, arguments);
+    },
+    filter (fn, thisArg) {
+        return $fc0ce661316f8ab4$var$apply(this, "filter", fn, thisArg, (v)=>v.map((item)=>$fc0ce661316f8ab4$var$toWrapped(this, item)), arguments);
+    },
+    find (fn, thisArg) {
+        return $fc0ce661316f8ab4$var$apply(this, "find", fn, thisArg, (item)=>$fc0ce661316f8ab4$var$toWrapped(this, item), arguments);
+    },
+    findIndex (fn, thisArg) {
+        return $fc0ce661316f8ab4$var$apply(this, "findIndex", fn, thisArg, void 0, arguments);
+    },
+    findLast (fn, thisArg) {
+        return $fc0ce661316f8ab4$var$apply(this, "findLast", fn, thisArg, (item)=>$fc0ce661316f8ab4$var$toWrapped(this, item), arguments);
+    },
+    findLastIndex (fn, thisArg) {
+        return $fc0ce661316f8ab4$var$apply(this, "findLastIndex", fn, thisArg, void 0, arguments);
+    },
+    // flat, flatMap could benefit from ARRAY_ITERATE but are not straight-forward to implement
+    forEach (fn, thisArg) {
+        return $fc0ce661316f8ab4$var$apply(this, "forEach", fn, thisArg, void 0, arguments);
+    },
+    includes (...args) {
+        return $fc0ce661316f8ab4$var$searchProxy(this, "includes", args);
+    },
+    indexOf (...args) {
+        return $fc0ce661316f8ab4$var$searchProxy(this, "indexOf", args);
+    },
+    join (separator) {
+        return $fc0ce661316f8ab4$var$reactiveReadArray(this).join(separator);
+    },
+    // keys() iterator only reads `length`, no optimization required
+    lastIndexOf (...args) {
+        return $fc0ce661316f8ab4$var$searchProxy(this, "lastIndexOf", args);
+    },
+    map (fn, thisArg) {
+        return $fc0ce661316f8ab4$var$apply(this, "map", fn, thisArg, void 0, arguments);
+    },
+    pop () {
+        return $fc0ce661316f8ab4$var$noTracking(this, "pop");
+    },
+    push (...args) {
+        return $fc0ce661316f8ab4$var$noTracking(this, "push", args);
+    },
+    reduce (fn, ...args) {
+        return $fc0ce661316f8ab4$var$reduce(this, "reduce", fn, args);
+    },
+    reduceRight (fn, ...args) {
+        return $fc0ce661316f8ab4$var$reduce(this, "reduceRight", fn, args);
+    },
+    shift () {
+        return $fc0ce661316f8ab4$var$noTracking(this, "shift");
+    },
+    // slice could use ARRAY_ITERATE but also seems to beg for range tracking
+    some (fn, thisArg) {
+        return $fc0ce661316f8ab4$var$apply(this, "some", fn, thisArg, void 0, arguments);
+    },
+    splice (...args) {
+        return $fc0ce661316f8ab4$var$noTracking(this, "splice", args);
+    },
+    toReversed () {
+        return $fc0ce661316f8ab4$var$reactiveReadArray(this).toReversed();
+    },
+    toSorted (comparer) {
+        return $fc0ce661316f8ab4$var$reactiveReadArray(this).toSorted(comparer);
+    },
+    toSpliced (...args) {
+        return $fc0ce661316f8ab4$var$reactiveReadArray(this).toSpliced(...args);
+    },
+    unshift (...args) {
+        return $fc0ce661316f8ab4$var$noTracking(this, "unshift", args);
+    },
+    values () {
+        return $fc0ce661316f8ab4$var$iterator(this, "values", (item)=>$fc0ce661316f8ab4$var$toWrapped(this, item));
+    }
+};
+function $fc0ce661316f8ab4$var$iterator(self2, method, wrapValue) {
+    const arr = $fc0ce661316f8ab4$var$shallowReadArray(self2);
+    const iter = arr[method]();
+    if (arr !== self2 && !$fc0ce661316f8ab4$var$isShallow(self2)) {
+        iter._next = iter.next;
+        iter.next = ()=>{
+            const result = iter._next();
+            if (!result.done) result.value = wrapValue(result.value);
+            return result;
+        };
+    }
+    return iter;
+}
+var $fc0ce661316f8ab4$var$arrayProto = Array.prototype;
+function $fc0ce661316f8ab4$var$apply(self2, method, fn, thisArg, wrappedRetFn, args) {
+    const arr = $fc0ce661316f8ab4$var$shallowReadArray(self2);
+    const needsWrap = arr !== self2 && !$fc0ce661316f8ab4$var$isShallow(self2);
+    const methodFn = arr[method];
+    if (methodFn !== $fc0ce661316f8ab4$var$arrayProto[method]) {
+        const result2 = methodFn.apply(self2, args);
+        return needsWrap ? $fc0ce661316f8ab4$var$toReactive(result2) : result2;
+    }
+    let wrappedFn = fn;
+    if (arr !== self2) {
+        if (needsWrap) wrappedFn = function(item, index) {
+            return fn.call(this, $fc0ce661316f8ab4$var$toWrapped(self2, item), index, self2);
+        };
+        else if (fn.length > 2) wrappedFn = function(item, index) {
+            return fn.call(this, item, index, self2);
+        };
+    }
+    const result = methodFn.call(arr, wrappedFn, thisArg);
+    return needsWrap && wrappedRetFn ? wrappedRetFn(result) : result;
+}
+function $fc0ce661316f8ab4$var$reduce(self2, method, fn, args) {
+    const arr = $fc0ce661316f8ab4$var$shallowReadArray(self2);
+    const needsWrap = arr !== self2 && !$fc0ce661316f8ab4$var$isShallow(self2);
+    let wrappedFn = fn;
+    let wrapInitialAccumulator = false;
+    if (arr !== self2) {
+        if (needsWrap) {
+            wrapInitialAccumulator = args.length === 0;
+            wrappedFn = function(acc, item, index) {
+                if (wrapInitialAccumulator) {
+                    wrapInitialAccumulator = false;
+                    acc = $fc0ce661316f8ab4$var$toWrapped(self2, acc);
+                }
+                return fn.call(this, acc, $fc0ce661316f8ab4$var$toWrapped(self2, item), index, self2);
+            };
+        } else if (fn.length > 3) wrappedFn = function(acc, item, index) {
+            return fn.call(this, acc, item, index, self2);
+        };
+    }
+    const result = arr[method](wrappedFn, ...args);
+    return wrapInitialAccumulator ? $fc0ce661316f8ab4$var$toWrapped(self2, result) : result;
+}
+function $fc0ce661316f8ab4$var$searchProxy(self2, method, args) {
+    const arr = $fc0ce661316f8ab4$var$toRaw(self2);
+    $fc0ce661316f8ab4$var$track(arr, "iterate", $fc0ce661316f8ab4$var$ARRAY_ITERATE_KEY);
+    const res = arr[method](...args);
+    if ((res === -1 || res === false) && $fc0ce661316f8ab4$var$isProxy(args[0])) {
+        args[0] = $fc0ce661316f8ab4$var$toRaw(args[0]);
+        return arr[method](...args);
+    }
+    return res;
+}
+function $fc0ce661316f8ab4$var$noTracking(self2, method, args = []) {
+    $fc0ce661316f8ab4$var$pauseTracking();
+    $fc0ce661316f8ab4$var$startBatch();
+    const res = $fc0ce661316f8ab4$var$toRaw(self2)[method].apply(self2, args);
+    $fc0ce661316f8ab4$var$endBatch();
+    $fc0ce661316f8ab4$var$resetTracking();
+    return res;
+}
+var $fc0ce661316f8ab4$var$isNonTrackableKeys = /* @__PURE__ */ $fc0ce661316f8ab4$var$makeMap(`__proto__,__v_isRef,__isVue`);
+var $fc0ce661316f8ab4$var$builtInSymbols = new Set(/* @__PURE__ */ Object.getOwnPropertyNames(Symbol).filter((key)=>key !== "arguments" && key !== "caller").map((key)=>Symbol[key]).filter($fc0ce661316f8ab4$var$isSymbol));
+function $fc0ce661316f8ab4$var$hasOwnProperty2(key) {
+    if (!$fc0ce661316f8ab4$var$isSymbol(key)) key = String(key);
+    const obj = $fc0ce661316f8ab4$var$toRaw(this);
+    $fc0ce661316f8ab4$var$track(obj, "has", key);
+    return obj.hasOwnProperty(key);
+}
+var $fc0ce661316f8ab4$var$BaseReactiveHandler = class {
+    constructor(_isReadonly = false, _isShallow = false){
+        this._isReadonly = _isReadonly;
+        this._isShallow = _isShallow;
+    }
+    get(target, key, receiver) {
+        if (key === "__v_skip") return target["__v_skip"];
+        const isReadonly2 = this._isReadonly, isShallow2 = this._isShallow;
+        if (key === "__v_isReactive") return !isReadonly2;
+        else if (key === "__v_isReadonly") return isReadonly2;
+        else if (key === "__v_isShallow") return isShallow2;
+        else if (key === "__v_raw") {
+            if (receiver === (isReadonly2 ? isShallow2 ? $fc0ce661316f8ab4$var$shallowReadonlyMap : $fc0ce661316f8ab4$var$readonlyMap : isShallow2 ? $fc0ce661316f8ab4$var$shallowReactiveMap : $fc0ce661316f8ab4$var$reactiveMap).get(target) || // receiver is not the reactive proxy, but has the same prototype
+            // this means the receiver is a user proxy of the reactive proxy
+            Object.getPrototypeOf(target) === Object.getPrototypeOf(receiver)) return target;
+            return;
+        }
+        const targetIsArray = $fc0ce661316f8ab4$var$isArray(target);
+        if (!isReadonly2) {
+            let fn;
+            if (targetIsArray && (fn = $fc0ce661316f8ab4$var$arrayInstrumentations[key])) return fn;
+            if (key === "hasOwnProperty") return $fc0ce661316f8ab4$var$hasOwnProperty2;
+        }
+        const res = Reflect.get(target, key, // if this is a proxy wrapping a ref, return methods using the raw ref
+        // as receiver so that we don't have to call `toRaw` on the ref in all
+        // its class methods
+        $fc0ce661316f8ab4$var$isRef(target) ? target : receiver);
+        if ($fc0ce661316f8ab4$var$isSymbol(key) ? $fc0ce661316f8ab4$var$builtInSymbols.has(key) : $fc0ce661316f8ab4$var$isNonTrackableKeys(key)) return res;
+        if (!isReadonly2) $fc0ce661316f8ab4$var$track(target, "get", key);
+        if (isShallow2) return res;
+        if ($fc0ce661316f8ab4$var$isRef(res)) {
+            const value = targetIsArray && $fc0ce661316f8ab4$var$isIntegerKey(key) ? res : res.value;
+            return isReadonly2 && $fc0ce661316f8ab4$var$isObject(value) ? $fc0ce661316f8ab4$var$readonly(value) : value;
+        }
+        if ($fc0ce661316f8ab4$var$isObject(res)) return isReadonly2 ? $fc0ce661316f8ab4$var$readonly(res) : $fc0ce661316f8ab4$var$reactive2(res);
+        return res;
+    }
+};
+var $fc0ce661316f8ab4$var$MutableReactiveHandler = class extends $fc0ce661316f8ab4$var$BaseReactiveHandler {
+    constructor(isShallow2 = false){
+        super(false, isShallow2);
+    }
+    set(target, key, value, receiver) {
+        let oldValue = target[key];
+        const isArrayWithIntegerKey = $fc0ce661316f8ab4$var$isArray(target) && $fc0ce661316f8ab4$var$isIntegerKey(key);
+        if (!this._isShallow) {
+            const isOldValueReadonly = $fc0ce661316f8ab4$var$isReadonly(oldValue);
+            if (!$fc0ce661316f8ab4$var$isShallow(value) && !$fc0ce661316f8ab4$var$isReadonly(value)) {
+                oldValue = $fc0ce661316f8ab4$var$toRaw(oldValue);
+                value = $fc0ce661316f8ab4$var$toRaw(value);
+            }
+            if (!isArrayWithIntegerKey && $fc0ce661316f8ab4$var$isRef(oldValue) && !$fc0ce661316f8ab4$var$isRef(value)) {
+                if (isOldValueReadonly) {
+                    $fc0ce661316f8ab4$var$warn2(`Set operation on key "${String(key)}" failed: target is readonly.`, target[key]);
+                    return true;
+                } else {
+                    oldValue.value = value;
+                    return true;
+                }
+            }
+        }
+        const hadKey = isArrayWithIntegerKey ? Number(key) < target.length : $fc0ce661316f8ab4$var$hasOwn(target, key);
+        const result = Reflect.set(target, key, value, $fc0ce661316f8ab4$var$isRef(target) ? target : receiver);
+        if (target === $fc0ce661316f8ab4$var$toRaw(receiver) && result) {
             if (!hadKey) $fc0ce661316f8ab4$var$trigger(target, "add", key, value);
             else if ($fc0ce661316f8ab4$var$hasChanged(value, oldValue)) $fc0ce661316f8ab4$var$trigger(target, "set", key, value, oldValue);
         }
         return result;
-    };
-}
-function $fc0ce661316f8ab4$var$deleteProperty(target, key) {
-    const hadKey = $fc0ce661316f8ab4$var$hasOwn(target, key);
-    const oldValue = target[key];
-    const result = Reflect.deleteProperty(target, key);
-    if (result && hadKey) $fc0ce661316f8ab4$var$trigger(target, "delete", key, void 0, oldValue);
-    return result;
-}
-function $fc0ce661316f8ab4$var$has(target, key) {
-    const result = Reflect.has(target, key);
-    if (!$fc0ce661316f8ab4$var$isSymbol(key) || !$fc0ce661316f8ab4$var$builtInSymbols.has(key)) $fc0ce661316f8ab4$var$track(target, "has", key);
-    return result;
-}
-function $fc0ce661316f8ab4$var$ownKeys(target) {
-    $fc0ce661316f8ab4$var$track(target, "iterate", $fc0ce661316f8ab4$var$isArray(target) ? "length" : $fc0ce661316f8ab4$var$ITERATE_KEY);
-    return Reflect.ownKeys(target);
-}
-var $fc0ce661316f8ab4$var$mutableHandlers = {
-    get: $fc0ce661316f8ab4$var$get2,
-    set: $fc0ce661316f8ab4$var$set2,
-    deleteProperty: $fc0ce661316f8ab4$var$deleteProperty,
-    has: $fc0ce661316f8ab4$var$has,
-    ownKeys: $fc0ce661316f8ab4$var$ownKeys
+    }
+    deleteProperty(target, key) {
+        const hadKey = $fc0ce661316f8ab4$var$hasOwn(target, key);
+        const oldValue = target[key];
+        const result = Reflect.deleteProperty(target, key);
+        if (result && hadKey) $fc0ce661316f8ab4$var$trigger(target, "delete", key, void 0, oldValue);
+        return result;
+    }
+    has(target, key) {
+        const result = Reflect.has(target, key);
+        if (!$fc0ce661316f8ab4$var$isSymbol(key) || !$fc0ce661316f8ab4$var$builtInSymbols.has(key)) $fc0ce661316f8ab4$var$track(target, "has", key);
+        return result;
+    }
+    ownKeys(target) {
+        $fc0ce661316f8ab4$var$track(target, "iterate", $fc0ce661316f8ab4$var$isArray(target) ? "length" : $fc0ce661316f8ab4$var$ITERATE_KEY);
+        return Reflect.ownKeys(target);
+    }
 };
-var $fc0ce661316f8ab4$var$readonlyHandlers = {
-    get: $fc0ce661316f8ab4$var$readonlyGet,
-    set (target, key) {
-        console.warn(`Set operation on key "${String(key)}" failed: target is readonly.`, target);
+var $fc0ce661316f8ab4$var$ReadonlyReactiveHandler = class extends $fc0ce661316f8ab4$var$BaseReactiveHandler {
+    constructor(isShallow2 = false){
+        super(true, isShallow2);
+    }
+    set(target, key) {
+        $fc0ce661316f8ab4$var$warn2(`Set operation on key "${String(key)}" failed: target is readonly.`, target);
         return true;
-    },
-    deleteProperty (target, key) {
-        console.warn(`Delete operation on key "${String(key)}" failed: target is readonly.`, target);
+    }
+    deleteProperty(target, key) {
+        $fc0ce661316f8ab4$var$warn2(`Delete operation on key "${String(key)}" failed: target is readonly.`, target);
         return true;
     }
 };
-var $fc0ce661316f8ab4$var$toReactive = (value)=>$fc0ce661316f8ab4$var$isObject(value) ? $fc0ce661316f8ab4$var$reactive2(value) : value;
-var $fc0ce661316f8ab4$var$toReadonly = (value)=>$fc0ce661316f8ab4$var$isObject(value) ? $fc0ce661316f8ab4$var$readonly(value) : value;
+var $fc0ce661316f8ab4$var$mutableHandlers = /* @__PURE__ */ new $fc0ce661316f8ab4$var$MutableReactiveHandler();
+var $fc0ce661316f8ab4$var$readonlyHandlers = /* @__PURE__ */ new $fc0ce661316f8ab4$var$ReadonlyReactiveHandler();
 var $fc0ce661316f8ab4$var$toShallow = (value)=>value;
 var $fc0ce661316f8ab4$var$getProto = (v)=>Reflect.getPrototypeOf(v);
-function $fc0ce661316f8ab4$var$get$1(target, key, isReadonly = false, isShallow = false) {
-    target = target["__v_raw"];
-    const rawTarget = $fc0ce661316f8ab4$var$toRaw(target);
-    const rawKey = $fc0ce661316f8ab4$var$toRaw(key);
-    if (key !== rawKey) !isReadonly && $fc0ce661316f8ab4$var$track(rawTarget, "get", key);
-    !isReadonly && $fc0ce661316f8ab4$var$track(rawTarget, "get", rawKey);
-    const { has: has2 } = $fc0ce661316f8ab4$var$getProto(rawTarget);
-    const wrap = isShallow ? $fc0ce661316f8ab4$var$toShallow : isReadonly ? $fc0ce661316f8ab4$var$toReadonly : $fc0ce661316f8ab4$var$toReactive;
-    if (has2.call(rawTarget, key)) return wrap(target.get(key));
-    else if (has2.call(rawTarget, rawKey)) return wrap(target.get(rawKey));
-    else if (target !== rawTarget) target.get(key);
-}
-function $fc0ce661316f8ab4$var$has$1(key, isReadonly = false) {
-    const target = this["__v_raw"];
-    const rawTarget = $fc0ce661316f8ab4$var$toRaw(target);
-    const rawKey = $fc0ce661316f8ab4$var$toRaw(key);
-    if (key !== rawKey) !isReadonly && $fc0ce661316f8ab4$var$track(rawTarget, "has", key);
-    !isReadonly && $fc0ce661316f8ab4$var$track(rawTarget, "has", rawKey);
-    return key === rawKey ? target.has(key) : target.has(key) || target.has(rawKey);
-}
-function $fc0ce661316f8ab4$var$size(target, isReadonly = false) {
-    target = target["__v_raw"];
-    !isReadonly && $fc0ce661316f8ab4$var$track($fc0ce661316f8ab4$var$toRaw(target), "iterate", $fc0ce661316f8ab4$var$ITERATE_KEY);
-    return Reflect.get(target, "size", target);
-}
-function $fc0ce661316f8ab4$var$add(value) {
-    value = $fc0ce661316f8ab4$var$toRaw(value);
-    const target = $fc0ce661316f8ab4$var$toRaw(this);
-    const proto = $fc0ce661316f8ab4$var$getProto(target);
-    const hadKey = proto.has.call(target, value);
-    if (!hadKey) {
-        target.add(value);
-        $fc0ce661316f8ab4$var$trigger(target, "add", value, value);
-    }
-    return this;
-}
-function $fc0ce661316f8ab4$var$set$1(key, value) {
-    value = $fc0ce661316f8ab4$var$toRaw(value);
-    const target = $fc0ce661316f8ab4$var$toRaw(this);
-    const { has: has2, get: get3 } = $fc0ce661316f8ab4$var$getProto(target);
-    let hadKey = has2.call(target, key);
-    if (!hadKey) {
-        key = $fc0ce661316f8ab4$var$toRaw(key);
-        hadKey = has2.call(target, key);
-    } else $fc0ce661316f8ab4$var$checkIdentityKeys(target, has2, key);
-    const oldValue = get3.call(target, key);
-    target.set(key, value);
-    if (!hadKey) $fc0ce661316f8ab4$var$trigger(target, "add", key, value);
-    else if ($fc0ce661316f8ab4$var$hasChanged(value, oldValue)) $fc0ce661316f8ab4$var$trigger(target, "set", key, value, oldValue);
-    return this;
-}
-function $fc0ce661316f8ab4$var$deleteEntry(key) {
-    const target = $fc0ce661316f8ab4$var$toRaw(this);
-    const { has: has2, get: get3 } = $fc0ce661316f8ab4$var$getProto(target);
-    let hadKey = has2.call(target, key);
-    if (!hadKey) {
-        key = $fc0ce661316f8ab4$var$toRaw(key);
-        hadKey = has2.call(target, key);
-    } else $fc0ce661316f8ab4$var$checkIdentityKeys(target, has2, key);
-    const oldValue = get3 ? get3.call(target, key) : void 0;
-    const result = target.delete(key);
-    if (hadKey) $fc0ce661316f8ab4$var$trigger(target, "delete", key, void 0, oldValue);
-    return result;
-}
-function $fc0ce661316f8ab4$var$clear() {
-    const target = $fc0ce661316f8ab4$var$toRaw(this);
-    const hadItems = target.size !== 0;
-    const oldTarget = $fc0ce661316f8ab4$var$isMap(target) ? new Map(target) : new Set(target);
-    const result = target.clear();
-    if (hadItems) $fc0ce661316f8ab4$var$trigger(target, "clear", void 0, void 0, oldTarget);
-    return result;
-}
-function $fc0ce661316f8ab4$var$createForEach(isReadonly, isShallow) {
-    return function forEach(callback, thisArg) {
-        const observed = this;
-        const target = observed["__v_raw"];
-        const rawTarget = $fc0ce661316f8ab4$var$toRaw(target);
-        const wrap = isShallow ? $fc0ce661316f8ab4$var$toShallow : isReadonly ? $fc0ce661316f8ab4$var$toReadonly : $fc0ce661316f8ab4$var$toReactive;
-        !isReadonly && $fc0ce661316f8ab4$var$track(rawTarget, "iterate", $fc0ce661316f8ab4$var$ITERATE_KEY);
-        return target.forEach((value, key)=>{
-            return callback.call(thisArg, wrap(value), wrap(key), observed);
-        });
-    };
-}
-function $fc0ce661316f8ab4$var$createIterableMethod(method, isReadonly, isShallow) {
+function $fc0ce661316f8ab4$var$createIterableMethod(method, isReadonly2, isShallow2) {
     return function(...args) {
         const target = this["__v_raw"];
         const rawTarget = $fc0ce661316f8ab4$var$toRaw(target);
@@ -4659,9 +5112,10 @@ function $fc0ce661316f8ab4$var$createIterableMethod(method, isReadonly, isShallo
         const isPair = method === "entries" || method === Symbol.iterator && targetIsMap;
         const isKeyOnly = method === "keys" && targetIsMap;
         const innerIterator = target[method](...args);
-        const wrap = isShallow ? $fc0ce661316f8ab4$var$toShallow : isReadonly ? $fc0ce661316f8ab4$var$toReadonly : $fc0ce661316f8ab4$var$toReactive;
-        !isReadonly && $fc0ce661316f8ab4$var$track(rawTarget, "iterate", isKeyOnly ? $fc0ce661316f8ab4$var$MAP_KEY_ITERATE_KEY : $fc0ce661316f8ab4$var$ITERATE_KEY);
-        return {
+        const wrap = isShallow2 ? $fc0ce661316f8ab4$var$toShallow : isReadonly2 ? $fc0ce661316f8ab4$var$toReadonly : $fc0ce661316f8ab4$var$toReactive;
+        !isReadonly2 && $fc0ce661316f8ab4$var$track(rawTarget, "iterate", isKeyOnly ? $fc0ce661316f8ab4$var$MAP_KEY_ITERATE_KEY : $fc0ce661316f8ab4$var$ITERATE_KEY);
+        return $fc0ce661316f8ab4$var$extend(// inheriting all iterator properties
+        Object.create(innerIterator), {
             // iterator protocol
             next () {
                 const { value: value, done: done } = innerIterator.next();
@@ -4675,84 +5129,116 @@ function $fc0ce661316f8ab4$var$createIterableMethod(method, isReadonly, isShallo
                     ] : wrap(value),
                     done: done
                 };
-            },
-            // iterable protocol
-            [Symbol.iterator] () {
-                return this;
             }
-        };
+        });
     };
 }
 function $fc0ce661316f8ab4$var$createReadonlyMethod(type) {
     return function(...args) {
         {
             const key = args[0] ? `on key "${args[0]}" ` : ``;
-            console.warn(`${$fc0ce661316f8ab4$var$capitalize(type)} operation ${key}failed: target is readonly.`, $fc0ce661316f8ab4$var$toRaw(this));
+            $fc0ce661316f8ab4$var$warn2(`${$fc0ce661316f8ab4$var$capitalize(type)} operation ${key}failed: target is readonly.`, $fc0ce661316f8ab4$var$toRaw(this));
         }
-        return type === "delete" ? false : this;
+        return type === "delete" ? false : type === "clear" ? void 0 : this;
     };
 }
-function $fc0ce661316f8ab4$var$createInstrumentations() {
-    const mutableInstrumentations2 = {
+function $fc0ce661316f8ab4$var$createInstrumentations(readonly2, shallow) {
+    const instrumentations = {
         get (key) {
-            return $fc0ce661316f8ab4$var$get$1(this, key);
+            const target = this["__v_raw"];
+            const rawTarget = $fc0ce661316f8ab4$var$toRaw(target);
+            const rawKey = $fc0ce661316f8ab4$var$toRaw(key);
+            if (!readonly2) {
+                if ($fc0ce661316f8ab4$var$hasChanged(key, rawKey)) $fc0ce661316f8ab4$var$track(rawTarget, "get", key);
+                $fc0ce661316f8ab4$var$track(rawTarget, "get", rawKey);
+            }
+            const { has: has } = $fc0ce661316f8ab4$var$getProto(rawTarget);
+            const wrap = shallow ? $fc0ce661316f8ab4$var$toShallow : readonly2 ? $fc0ce661316f8ab4$var$toReadonly : $fc0ce661316f8ab4$var$toReactive;
+            if (has.call(rawTarget, key)) return wrap(target.get(key));
+            else if (has.call(rawTarget, rawKey)) return wrap(target.get(rawKey));
+            else if (target !== rawTarget) target.get(key);
         },
         get size () {
-            return $fc0ce661316f8ab4$var$size(this);
-        },
-        has: $fc0ce661316f8ab4$var$has$1,
-        add: $fc0ce661316f8ab4$var$add,
-        set: $fc0ce661316f8ab4$var$set$1,
-        delete: $fc0ce661316f8ab4$var$deleteEntry,
-        clear: $fc0ce661316f8ab4$var$clear,
-        forEach: $fc0ce661316f8ab4$var$createForEach(false, false)
-    };
-    const shallowInstrumentations2 = {
-        get (key) {
-            return $fc0ce661316f8ab4$var$get$1(this, key, false, true);
-        },
-        get size () {
-            return $fc0ce661316f8ab4$var$size(this);
-        },
-        has: $fc0ce661316f8ab4$var$has$1,
-        add: $fc0ce661316f8ab4$var$add,
-        set: $fc0ce661316f8ab4$var$set$1,
-        delete: $fc0ce661316f8ab4$var$deleteEntry,
-        clear: $fc0ce661316f8ab4$var$clear,
-        forEach: $fc0ce661316f8ab4$var$createForEach(false, true)
-    };
-    const readonlyInstrumentations2 = {
-        get (key) {
-            return $fc0ce661316f8ab4$var$get$1(this, key, true);
-        },
-        get size () {
-            return $fc0ce661316f8ab4$var$size(this, true);
+            const target = this["__v_raw"];
+            !readonly2 && $fc0ce661316f8ab4$var$track($fc0ce661316f8ab4$var$toRaw(target), "iterate", $fc0ce661316f8ab4$var$ITERATE_KEY);
+            return target.size;
         },
         has (key) {
-            return $fc0ce661316f8ab4$var$has$1.call(this, key, true);
+            const target = this["__v_raw"];
+            const rawTarget = $fc0ce661316f8ab4$var$toRaw(target);
+            const rawKey = $fc0ce661316f8ab4$var$toRaw(key);
+            if (!readonly2) {
+                if ($fc0ce661316f8ab4$var$hasChanged(key, rawKey)) $fc0ce661316f8ab4$var$track(rawTarget, "has", key);
+                $fc0ce661316f8ab4$var$track(rawTarget, "has", rawKey);
+            }
+            return key === rawKey ? target.has(key) : target.has(key) || target.has(rawKey);
         },
+        forEach (callback, thisArg) {
+            const observed = this;
+            const target = observed["__v_raw"];
+            const rawTarget = $fc0ce661316f8ab4$var$toRaw(target);
+            const wrap = shallow ? $fc0ce661316f8ab4$var$toShallow : readonly2 ? $fc0ce661316f8ab4$var$toReadonly : $fc0ce661316f8ab4$var$toReactive;
+            !readonly2 && $fc0ce661316f8ab4$var$track(rawTarget, "iterate", $fc0ce661316f8ab4$var$ITERATE_KEY);
+            return target.forEach((value, key)=>{
+                return callback.call(thisArg, wrap(value), wrap(key), observed);
+            });
+        }
+    };
+    $fc0ce661316f8ab4$var$extend(instrumentations, readonly2 ? {
         add: $fc0ce661316f8ab4$var$createReadonlyMethod("add"),
         set: $fc0ce661316f8ab4$var$createReadonlyMethod("set"),
         delete: $fc0ce661316f8ab4$var$createReadonlyMethod("delete"),
-        clear: $fc0ce661316f8ab4$var$createReadonlyMethod("clear"),
-        forEach: $fc0ce661316f8ab4$var$createForEach(true, false)
-    };
-    const shallowReadonlyInstrumentations2 = {
-        get (key) {
-            return $fc0ce661316f8ab4$var$get$1(this, key, true, true);
+        clear: $fc0ce661316f8ab4$var$createReadonlyMethod("clear")
+    } : {
+        add (value) {
+            const target = $fc0ce661316f8ab4$var$toRaw(this);
+            const proto = $fc0ce661316f8ab4$var$getProto(target);
+            const rawValue = $fc0ce661316f8ab4$var$toRaw(value);
+            const valueToAdd = !shallow && !$fc0ce661316f8ab4$var$isShallow(value) && !$fc0ce661316f8ab4$var$isReadonly(value) ? rawValue : value;
+            const hadKey = proto.has.call(target, valueToAdd) || $fc0ce661316f8ab4$var$hasChanged(value, valueToAdd) && proto.has.call(target, value) || $fc0ce661316f8ab4$var$hasChanged(rawValue, valueToAdd) && proto.has.call(target, rawValue);
+            if (!hadKey) {
+                target.add(valueToAdd);
+                $fc0ce661316f8ab4$var$trigger(target, "add", valueToAdd, valueToAdd);
+            }
+            return this;
         },
-        get size () {
-            return $fc0ce661316f8ab4$var$size(this, true);
+        set (key, value) {
+            if (!shallow && !$fc0ce661316f8ab4$var$isShallow(value) && !$fc0ce661316f8ab4$var$isReadonly(value)) value = $fc0ce661316f8ab4$var$toRaw(value);
+            const target = $fc0ce661316f8ab4$var$toRaw(this);
+            const { has: has, get: get2 } = $fc0ce661316f8ab4$var$getProto(target);
+            let hadKey = has.call(target, key);
+            if (!hadKey) {
+                key = $fc0ce661316f8ab4$var$toRaw(key);
+                hadKey = has.call(target, key);
+            } else $fc0ce661316f8ab4$var$checkIdentityKeys(target, has, key);
+            const oldValue = get2.call(target, key);
+            target.set(key, value);
+            if (!hadKey) $fc0ce661316f8ab4$var$trigger(target, "add", key, value);
+            else if ($fc0ce661316f8ab4$var$hasChanged(value, oldValue)) $fc0ce661316f8ab4$var$trigger(target, "set", key, value, oldValue);
+            return this;
         },
-        has (key) {
-            return $fc0ce661316f8ab4$var$has$1.call(this, key, true);
+        delete (key) {
+            const target = $fc0ce661316f8ab4$var$toRaw(this);
+            const { has: has, get: get2 } = $fc0ce661316f8ab4$var$getProto(target);
+            let hadKey = has.call(target, key);
+            if (!hadKey) {
+                key = $fc0ce661316f8ab4$var$toRaw(key);
+                hadKey = has.call(target, key);
+            } else $fc0ce661316f8ab4$var$checkIdentityKeys(target, has, key);
+            const oldValue = get2 ? get2.call(target, key) : void 0;
+            const result = target.delete(key);
+            if (hadKey) $fc0ce661316f8ab4$var$trigger(target, "delete", key, void 0, oldValue);
+            return result;
         },
-        add: $fc0ce661316f8ab4$var$createReadonlyMethod("add"),
-        set: $fc0ce661316f8ab4$var$createReadonlyMethod("set"),
-        delete: $fc0ce661316f8ab4$var$createReadonlyMethod("delete"),
-        clear: $fc0ce661316f8ab4$var$createReadonlyMethod("clear"),
-        forEach: $fc0ce661316f8ab4$var$createForEach(true, true)
-    };
+        clear () {
+            const target = $fc0ce661316f8ab4$var$toRaw(this);
+            const hadItems = target.size !== 0;
+            const oldTarget = $fc0ce661316f8ab4$var$isMap(target) ? new Map(target) : new Set(target);
+            const result = target.clear();
+            if (hadItems) $fc0ce661316f8ab4$var$trigger(target, "clear", void 0, void 0, oldTarget);
+            return result;
+        }
+    });
     const iteratorMethods = [
         "keys",
         "values",
@@ -4760,24 +5246,15 @@ function $fc0ce661316f8ab4$var$createInstrumentations() {
         Symbol.iterator
     ];
     iteratorMethods.forEach((method)=>{
-        mutableInstrumentations2[method] = $fc0ce661316f8ab4$var$createIterableMethod(method, false, false);
-        readonlyInstrumentations2[method] = $fc0ce661316f8ab4$var$createIterableMethod(method, true, false);
-        shallowInstrumentations2[method] = $fc0ce661316f8ab4$var$createIterableMethod(method, false, true);
-        shallowReadonlyInstrumentations2[method] = $fc0ce661316f8ab4$var$createIterableMethod(method, true, true);
+        instrumentations[method] = $fc0ce661316f8ab4$var$createIterableMethod(method, readonly2, shallow);
     });
-    return [
-        mutableInstrumentations2,
-        readonlyInstrumentations2,
-        shallowInstrumentations2,
-        shallowReadonlyInstrumentations2
-    ];
+    return instrumentations;
 }
-var [$fc0ce661316f8ab4$var$mutableInstrumentations, $fc0ce661316f8ab4$var$readonlyInstrumentations, $fc0ce661316f8ab4$var$shallowInstrumentations, $fc0ce661316f8ab4$var$shallowReadonlyInstrumentations] = /* @__PURE__ */ $fc0ce661316f8ab4$var$createInstrumentations();
-function $fc0ce661316f8ab4$var$createInstrumentationGetter(isReadonly, shallow) {
-    const instrumentations = shallow ? isReadonly ? $fc0ce661316f8ab4$var$shallowReadonlyInstrumentations : $fc0ce661316f8ab4$var$shallowInstrumentations : isReadonly ? $fc0ce661316f8ab4$var$readonlyInstrumentations : $fc0ce661316f8ab4$var$mutableInstrumentations;
+function $fc0ce661316f8ab4$var$createInstrumentationGetter(isReadonly2, shallow) {
+    const instrumentations = $fc0ce661316f8ab4$var$createInstrumentations(isReadonly2, shallow);
     return (target, key, receiver)=>{
-        if (key === "__v_isReactive") return !isReadonly;
-        else if (key === "__v_isReadonly") return isReadonly;
+        if (key === "__v_isReactive") return !isReadonly2;
+        else if (key === "__v_isReadonly") return isReadonly2;
         else if (key === "__v_raw") return target;
         return Reflect.get($fc0ce661316f8ab4$var$hasOwn(instrumentations, key) && key in target ? instrumentations : target, key, receiver);
     };
@@ -4788,11 +5265,11 @@ var $fc0ce661316f8ab4$var$mutableCollectionHandlers = {
 var $fc0ce661316f8ab4$var$readonlyCollectionHandlers = {
     get: /* @__PURE__ */ $fc0ce661316f8ab4$var$createInstrumentationGetter(true, false)
 };
-function $fc0ce661316f8ab4$var$checkIdentityKeys(target, has2, key) {
+function $fc0ce661316f8ab4$var$checkIdentityKeys(target, has, key) {
     const rawKey = $fc0ce661316f8ab4$var$toRaw(key);
-    if (rawKey !== key && has2.call(target, rawKey)) {
+    if (rawKey !== key && has.call(target, rawKey)) {
         const type = $fc0ce661316f8ab4$var$toRawType(target);
-        console.warn(`Reactive ${type} contains both the raw and reactive versions of the same object${type === `Map` ? ` as keys` : ``}, which can lead to inconsistencies. Avoid differentiating between the raw and reactive versions of an object and only use the reactive version if possible.`);
+        $fc0ce661316f8ab4$var$warn2(`Reactive ${type} contains both the raw and reactive versions of the same object${type === `Map` ? ` as keys` : ``}, which can lead to inconsistencies. Avoid differentiating between the raw and reactive versions of an object and only use the reactive version if possible.`);
     }
 }
 var $fc0ce661316f8ab4$var$reactiveMap = /* @__PURE__ */ new WeakMap();
@@ -4813,42 +5290,56 @@ function $fc0ce661316f8ab4$var$targetTypeMap(rawType) {
             return 0;
     }
 }
-function $fc0ce661316f8ab4$var$getTargetType(value) {
-    return value["__v_skip"] || !Object.isExtensible(value) ? 0 : $fc0ce661316f8ab4$var$targetTypeMap($fc0ce661316f8ab4$var$toRawType(value));
-}
 function $fc0ce661316f8ab4$var$reactive2(target) {
-    if (target && target["__v_isReadonly"]) return target;
+    if (/* @__PURE__ */ $fc0ce661316f8ab4$var$isReadonly(target)) return target;
     return $fc0ce661316f8ab4$var$createReactiveObject(target, false, $fc0ce661316f8ab4$var$mutableHandlers, $fc0ce661316f8ab4$var$mutableCollectionHandlers, $fc0ce661316f8ab4$var$reactiveMap);
 }
 function $fc0ce661316f8ab4$var$readonly(target) {
     return $fc0ce661316f8ab4$var$createReactiveObject(target, true, $fc0ce661316f8ab4$var$readonlyHandlers, $fc0ce661316f8ab4$var$readonlyCollectionHandlers, $fc0ce661316f8ab4$var$readonlyMap);
 }
-function $fc0ce661316f8ab4$var$createReactiveObject(target, isReadonly, baseHandlers, collectionHandlers, proxyMap) {
+function $fc0ce661316f8ab4$var$createReactiveObject(target, isReadonly2, baseHandlers, collectionHandlers, proxyMap) {
     if (!$fc0ce661316f8ab4$var$isObject(target)) {
-        console.warn(`value cannot be made reactive: ${String(target)}`);
+        $fc0ce661316f8ab4$var$warn2(`value cannot be made ${isReadonly2 ? "readonly" : "reactive"}: ${String(target)}`);
         return target;
     }
-    if (target["__v_raw"] && !(isReadonly && target["__v_isReactive"])) return target;
+    if (target["__v_raw"] && !(isReadonly2 && target["__v_isReactive"])) return target;
+    if (target["__v_skip"] || !Object.isExtensible(target)) return target;
     const existingProxy = proxyMap.get(target);
     if (existingProxy) return existingProxy;
-    const targetType = $fc0ce661316f8ab4$var$getTargetType(target);
+    const targetType = $fc0ce661316f8ab4$var$targetTypeMap($fc0ce661316f8ab4$var$toRawType(target));
     if (targetType === 0) return target;
     const proxy = new Proxy(target, targetType === 2 ? collectionHandlers : baseHandlers);
     proxyMap.set(target, proxy);
     return proxy;
 }
-function $fc0ce661316f8ab4$var$toRaw(observed) {
-    return observed && $fc0ce661316f8ab4$var$toRaw(observed["__v_raw"]) || observed;
+function $fc0ce661316f8ab4$var$isReactive2(value) {
+    if (/* @__PURE__ */ $fc0ce661316f8ab4$var$isReadonly(value)) return /* @__PURE__ */ $fc0ce661316f8ab4$var$isReactive2(value["__v_raw"]);
+    return !!(value && value["__v_isReactive"]);
 }
+function $fc0ce661316f8ab4$var$isReadonly(value) {
+    return !!(value && value["__v_isReadonly"]);
+}
+function $fc0ce661316f8ab4$var$isShallow(value) {
+    return !!(value && value["__v_isShallow"]);
+}
+function $fc0ce661316f8ab4$var$isProxy(value) {
+    return value ? !!value["__v_raw"] : false;
+}
+function $fc0ce661316f8ab4$var$toRaw(observed) {
+    const raw2 = observed && observed["__v_raw"];
+    return raw2 ? /* @__PURE__ */ $fc0ce661316f8ab4$var$toRaw(raw2) : observed;
+}
+var $fc0ce661316f8ab4$var$toReactive = (value)=>$fc0ce661316f8ab4$var$isObject(value) ? /* @__PURE__ */ $fc0ce661316f8ab4$var$reactive2(value) : value;
+var $fc0ce661316f8ab4$var$toReadonly = (value)=>$fc0ce661316f8ab4$var$isObject(value) ? /* @__PURE__ */ $fc0ce661316f8ab4$var$readonly(value) : value;
 function $fc0ce661316f8ab4$var$isRef(r) {
-    return Boolean(r && r.__v_isRef === true);
+    return r ? r["__v_isRef"] === true : false;
 }
 // packages/alpinejs/src/magics/$nextTick.js
 $fc0ce661316f8ab4$var$magic("nextTick", ()=>$fc0ce661316f8ab4$var$nextTick);
 // packages/alpinejs/src/magics/$dispatch.js
 $fc0ce661316f8ab4$var$magic("dispatch", (el)=>$fc0ce661316f8ab4$var$dispatch.bind($fc0ce661316f8ab4$var$dispatch, el));
 // packages/alpinejs/src/magics/$watch.js
-$fc0ce661316f8ab4$var$magic("watch", (el, { evaluateLater: evaluateLater2, cleanup: cleanup2 })=>(key, callback)=>{
+$fc0ce661316f8ab4$var$magic("watch", (el, { evaluateLater: evaluateLater2, cleanup: cleanup })=>(key, callback)=>{
         let evaluate2 = evaluateLater2(key);
         let getter = ()=>{
             let value;
@@ -4856,7 +5347,7 @@ $fc0ce661316f8ab4$var$magic("watch", (el, { evaluateLater: evaluateLater2, clean
             return value;
         };
         let unwatch = $fc0ce661316f8ab4$var$watch(getter, callback);
-        cleanup2(unwatch);
+        cleanup(unwatch);
     });
 // packages/alpinejs/src/magics/$store.js
 $fc0ce661316f8ab4$var$magic("store", $fc0ce661316f8ab4$var$getStores);
@@ -4893,9 +5384,9 @@ function $fc0ce661316f8ab4$var$setIdRoot(el, name) {
     if (!el._x_ids[name]) el._x_ids[name] = $fc0ce661316f8ab4$var$findAndIncrementId(name);
 }
 // packages/alpinejs/src/magics/$id.js
-$fc0ce661316f8ab4$var$magic("id", (el, { cleanup: cleanup2 })=>(name, key = null)=>{
+$fc0ce661316f8ab4$var$magic("id", (el, { cleanup: cleanup })=>(name, key = null)=>{
         let cacheKey = `${name}${key ? `-${key}` : ""}`;
-        return $fc0ce661316f8ab4$var$cacheIdByNameOnElement(el, cacheKey, cleanup2, ()=>{
+        return $fc0ce661316f8ab4$var$cacheIdByNameOnElement(el, cacheKey, cleanup, ()=>{
             let root = $fc0ce661316f8ab4$var$closestIdRoot(el, name);
             let id = root ? root._x_ids[name] : $fc0ce661316f8ab4$var$findAndIncrementId(name);
             return key ? `${name}-${id}-${key}` : `${name}-${id}`;
@@ -4904,12 +5395,12 @@ $fc0ce661316f8ab4$var$magic("id", (el, { cleanup: cleanup2 })=>(name, key = null
 $fc0ce661316f8ab4$var$interceptClone((from, to)=>{
     if (from._x_id) to._x_id = from._x_id;
 });
-function $fc0ce661316f8ab4$var$cacheIdByNameOnElement(el, cacheKey, cleanup2, callback) {
+function $fc0ce661316f8ab4$var$cacheIdByNameOnElement(el, cacheKey, cleanup, callback) {
     if (!el._x_id) el._x_id = {};
     if (el._x_id[cacheKey]) return el._x_id[cacheKey];
     let output = callback();
     el._x_id[cacheKey] = output;
-    cleanup2(()=>{
+    cleanup(()=>{
         delete el._x_id[cacheKey];
     });
     return output;
@@ -4923,7 +5414,7 @@ function $fc0ce661316f8ab4$var$warnMissingPluginMagic(name, magicName, slug) {
     $fc0ce661316f8ab4$var$magic(magicName, (el)=>$fc0ce661316f8ab4$var$warn(`You can't use [$${magicName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
 }
 // packages/alpinejs/src/directives/x-modelable.js
-$fc0ce661316f8ab4$var$directive("modelable", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2, cleanup: cleanup2 })=>{
+$fc0ce661316f8ab4$var$directive("modelable", (el, { expression: expression }, { effect: effect3, evaluateLater: evaluateLater2, cleanup: cleanup })=>{
     let func = evaluateLater2(expression);
     let innerGet = ()=>{
         let result;
@@ -4958,11 +5449,11 @@ $fc0ce661316f8ab4$var$directive("modelable", (el, { expression: expression }, { 
                 innerSet(value);
             }
         });
-        cleanup2(releaseEntanglement);
+        cleanup(releaseEntanglement);
     });
 });
 // packages/alpinejs/src/directives/x-teleport.js
-$fc0ce661316f8ab4$var$directive("teleport", (el, { modifiers: modifiers, expression: expression }, { cleanup: cleanup2 })=>{
+$fc0ce661316f8ab4$var$directive("teleport", (el, { modifiers: modifiers, expression: expression }, { cleanup: cleanup })=>{
     if (el.tagName.toLowerCase() !== "template") $fc0ce661316f8ab4$var$warn("x-teleport can only be used on a <template> tag", el);
     let target = $fc0ce661316f8ab4$var$getTarget(expression);
     let clone2 = el.content.cloneNode(true).firstElementChild;
@@ -4994,7 +5485,7 @@ $fc0ce661316f8ab4$var$directive("teleport", (el, { modifiers: modifiers, express
             placeInDom(el._x_teleport, target2, modifiers);
         });
     };
-    cleanup2(()=>$fc0ce661316f8ab4$var$mutateDom(()=>{
+    cleanup(()=>$fc0ce661316f8ab4$var$mutateDom(()=>{
             clone2.remove();
             $fc0ce661316f8ab4$var$destroyTree(clone2);
         }));
@@ -5011,9 +5502,9 @@ function $fc0ce661316f8ab4$var$getTarget(expression) {
 }
 // packages/alpinejs/src/directives/x-ignore.js
 var $fc0ce661316f8ab4$var$handler = ()=>{};
-$fc0ce661316f8ab4$var$handler.inline = (el, { modifiers: modifiers }, { cleanup: cleanup2 })=>{
+$fc0ce661316f8ab4$var$handler.inline = (el, { modifiers: modifiers }, { cleanup: cleanup })=>{
     modifiers.includes("self") ? el._x_ignoreSelf = true : el._x_ignore = true;
-    cleanup2(()=>{
+    cleanup(()=>{
         modifiers.includes("self") ? delete el._x_ignoreSelf : delete el._x_ignore;
     });
 };
@@ -5192,7 +5683,7 @@ function $fc0ce661316f8ab4$var$keyToModifiers(key) {
     }).filter((modifier)=>modifier);
 }
 // packages/alpinejs/src/directives/x-model.js
-$fc0ce661316f8ab4$var$directive("model", (el, { modifiers: modifiers, expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
+$fc0ce661316f8ab4$var$directive("model", (el, { modifiers: modifiers, expression: expression }, { effect: effect3, cleanup: cleanup })=>{
     let scopeTarget = el;
     if (modifiers.includes("parent")) scopeTarget = $fc0ce661316f8ab4$var$findClosest(el, (element)=>element !== el);
     let evaluateGet = $fc0ce661316f8ab4$var$evaluateLater(scopeTarget, expression);
@@ -5237,7 +5728,7 @@ $fc0ce661316f8ab4$var$directive("model", (el, { modifiers: modifiers, expression
                     });
                 if (!form._x_pendingModelUpdates) form._x_pendingModelUpdates = [];
                 form._x_pendingModelUpdates.push(syncCallback);
-                cleanup2(()=>{
+                cleanup(()=>{
                     if (form._x_pendingModelUpdates) form._x_pendingModelUpdates.splice(form._x_pendingModelUpdates.indexOf(syncCallback), 1);
                 });
             }
@@ -5245,7 +5736,7 @@ $fc0ce661316f8ab4$var$directive("model", (el, { modifiers: modifiers, expression
         if (hasEnterModifier) listeners.push($fc0ce661316f8ab4$var$on(el, "keydown", modifiers, (e)=>{
             if (e.key === "Enter") syncValue(e);
         }));
-        removeListener = ()=>listeners.forEach((remove)=>remove());
+        removeListener = ()=>listeners.forEach((remove2)=>remove2());
     } else {
         let event = el.tagName.toLowerCase() === "select" || [
             "checkbox",
@@ -5266,14 +5757,14 @@ $fc0ce661316f8ab4$var$directive("model", (el, { modifiers: modifiers, expression
     }
     if (!el._x_removeModelListeners) el._x_removeModelListeners = {};
     el._x_removeModelListeners["default"] = removeListener;
-    cleanup2(()=>el._x_removeModelListeners["default"]());
+    cleanup(()=>el._x_removeModelListeners["default"]());
     if (el.form) {
         let removeResetListener = $fc0ce661316f8ab4$var$on(el.form, "reset", [], (e)=>{
             $fc0ce661316f8ab4$var$nextTick(()=>el._x_model && el._x_model.set($fc0ce661316f8ab4$var$getInputValue(el, modifiers, {
                     target: el
                 }, getValue())));
         });
-        cleanup2(()=>removeResetListener());
+        cleanup(()=>removeResetListener());
     }
     el._x_model = {
         get () {
@@ -5296,6 +5787,15 @@ $fc0ce661316f8ab4$var$directive("model", (el, { modifiers: modifiers, expression
             } else $fc0ce661316f8ab4$var$bind(el, "value", value);
         });
     };
+    if (el.tagName === "SELECT") {
+        let observer2 = new MutationObserver(()=>{
+            el._x_forceModelUpdate(getValue());
+        });
+        observer2.observe(el, {
+            childList: true
+        });
+        cleanup(()=>observer2.disconnect());
+    }
     effect3(()=>{
         let value = getValue();
         if (modifiers.includes("unintrusive") && document.activeElement.isSameNode(el)) return;
@@ -5378,17 +5878,20 @@ $fc0ce661316f8ab4$var$directive("html", (el, { expression: expression }, { effec
     effect3(()=>{
         evaluate2((value)=>{
             $fc0ce661316f8ab4$var$mutateDom(()=>{
+                Array.from(el.children).forEach((child)=>$fc0ce661316f8ab4$var$destroyTree(child));
                 el.innerHTML = value ?? "";
                 el._x_ignoreSelf = true;
                 $fc0ce661316f8ab4$var$initTree(el);
                 delete el._x_ignoreSelf;
             });
         });
+    }, {
+        priority: "structural"
     });
 });
 // packages/alpinejs/src/directives/x-bind.js
 $fc0ce661316f8ab4$var$mapAttributes($fc0ce661316f8ab4$var$startingWith(":", $fc0ce661316f8ab4$var$into($fc0ce661316f8ab4$var$prefix("bind:"))));
-var $fc0ce661316f8ab4$var$handler2 = (el, { value: value, modifiers: modifiers, expression: expression, original: original }, { effect: effect3, cleanup: cleanup2 })=>{
+var $fc0ce661316f8ab4$var$handler2 = (el, { value: value, modifiers: modifiers, expression: expression, original: original }, { effect: effect3, cleanup: cleanup })=>{
     if (!value) {
         let bindingProviders = {};
         $fc0ce661316f8ab4$var$injectBindingProviders(bindingProviders);
@@ -5407,7 +5910,7 @@ var $fc0ce661316f8ab4$var$handler2 = (el, { value: value, modifiers: modifiers, 
             if (result === void 0 && typeof expression === "string" && expression.match(/\./)) result = "";
             $fc0ce661316f8ab4$var$mutateDom(()=>$fc0ce661316f8ab4$var$bind(el, value, result, modifiers));
         }));
-    cleanup2(()=>{
+    cleanup(()=>{
         el._x_undoAddedClasses && el._x_undoAddedClasses();
         el._x_undoAddedStyles && el._x_undoAddedStyles();
     });
@@ -5426,8 +5929,11 @@ function $fc0ce661316f8ab4$var$storeKeyForXFor(el, expression) {
 }
 // packages/alpinejs/src/directives/x-data.js
 $fc0ce661316f8ab4$var$addRootSelector(()=>`[${$fc0ce661316f8ab4$var$prefix("data")}]`);
-$fc0ce661316f8ab4$var$directive("data", (el, { expression: expression }, { cleanup: cleanup2 })=>{
+var $fc0ce661316f8ab4$var$dataForReconciliation = Symbol();
+$fc0ce661316f8ab4$var$directive("data", (el, { expression: expression }, { cleanup: cleanup })=>{
     if ($fc0ce661316f8ab4$var$shouldSkipRegisteringDataDuringClone(el)) return;
+    let dataToReconcile = el[$fc0ce661316f8ab4$var$dataForReconciliation];
+    if (dataToReconcile?.expression === expression) return;
     expression = expression === "" ? "{}" : expression;
     let magicContext = {};
     $fc0ce661316f8ab4$var$injectMagics(magicContext, el);
@@ -5438,15 +5944,45 @@ $fc0ce661316f8ab4$var$directive("data", (el, { expression: expression }, { clean
     });
     if (data2 === void 0 || data2 === true) data2 = {};
     $fc0ce661316f8ab4$var$injectMagics(data2, el);
-    let reactiveData = $fc0ce661316f8ab4$var$reactive(data2);
-    $fc0ce661316f8ab4$var$initInterceptors(reactiveData);
+    let reactiveData;
+    if (dataToReconcile?.reactiveData) {
+        reactiveData = dataToReconcile.reactiveData;
+        $fc0ce661316f8ab4$var$reconcileData(reactiveData, data2);
+        let initialized = {
+            expression: expression
+        };
+        el[$fc0ce661316f8ab4$var$dataForReconciliation] = initialized;
+        queueMicrotask(()=>{
+            if (el[$fc0ce661316f8ab4$var$dataForReconciliation] === initialized) delete el[$fc0ce661316f8ab4$var$dataForReconciliation];
+        });
+    } else reactiveData = $fc0ce661316f8ab4$var$reactive(data2);
+    $fc0ce661316f8ab4$var$initInterceptors(reactiveData, cleanup);
     let undo = $fc0ce661316f8ab4$var$addScopeToNode(el, reactiveData);
     reactiveData["init"] && $fc0ce661316f8ab4$var$evaluate(el, reactiveData["init"]);
-    cleanup2(()=>{
+    cleanup(()=>{
         reactiveData["destroy"] && $fc0ce661316f8ab4$var$evaluate(el, reactiveData["destroy"]);
         undo();
+        let removed = {
+            reactiveData: reactiveData
+        };
+        el[$fc0ce661316f8ab4$var$dataForReconciliation] = removed;
+        queueMicrotask(()=>{
+            if (el[$fc0ce661316f8ab4$var$dataForReconciliation] === removed) delete el[$fc0ce661316f8ab4$var$dataForReconciliation];
+        });
     });
 });
+function $fc0ce661316f8ab4$var$reconcileData(target, source) {
+    Object.keys(source).forEach((key)=>{
+        let descriptor = Object.getOwnPropertyDescriptor(source, key);
+        let existingDescriptor = Object.getOwnPropertyDescriptor(target, key);
+        if (descriptor.get || descriptor.set || existingDescriptor?.get || existingDescriptor?.set) {
+            if (existingDescriptor) delete target[key];
+            if (!existingDescriptor) target[key] = void 0;
+            descriptor.get || descriptor.set ? Object.defineProperty(target, key, descriptor) : target[key] = source[key];
+        } else target[key] = source[key];
+    });
+    Object.keys(target).filter((key)=>!Object.prototype.hasOwnProperty.call(source, key)).forEach((key)=>delete target[key]);
+}
 $fc0ce661316f8ab4$var$interceptClone((from, to)=>{
     if (from._x_dataStack) {
         to._x_dataStack = from._x_dataStack;
@@ -5496,21 +6032,24 @@ $fc0ce661316f8ab4$var$directive("show", (el, { modifiers: modifiers, expression:
         }));
 });
 // packages/alpinejs/src/directives/x-for.js
-$fc0ce661316f8ab4$var$directive("for", (el, { expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
+$fc0ce661316f8ab4$var$directive("for", $fc0ce661316f8ab4$var$skipDuringClone((el, { expression: expression }, { effect: effect3, cleanup: cleanup })=>{
     let iteratorNames = $fc0ce661316f8ab4$var$parseForExpression(expression);
     let evaluateItems = $fc0ce661316f8ab4$var$evaluateLater(el, iteratorNames.items);
     let evaluateKey = $fc0ce661316f8ab4$var$evaluateLater(el, // the x-bind:key expression is stored for our use instead of evaluated.
     el._x_keyExpression || "index");
     el._x_lookup = /* @__PURE__ */ new Map();
-    effect3(()=>$fc0ce661316f8ab4$var$loop(el, iteratorNames, evaluateItems, evaluateKey));
-    cleanup2(()=>{
+    effect3(()=>$fc0ce661316f8ab4$var$loop(el, iteratorNames, evaluateItems, evaluateKey), {
+        priority: "structural"
+    });
+    cleanup(()=>{
         el._x_lookup.forEach((el2)=>$fc0ce661316f8ab4$var$mutateDom(()=>{
                 $fc0ce661316f8ab4$var$destroyTree(el2);
                 el2.remove();
             }));
         delete el._x_lookup;
+        delete el._x_lastRenderedEl;
     });
-});
+}));
 function $fc0ce661316f8ab4$var$refreshScope(scope2) {
     return (newScope)=>{
         Object.entries(newScope).forEach(([key, value])=>{
@@ -5584,7 +6123,9 @@ function $fc0ce661316f8ab4$var$loop(templateEl, iteratorNames, evaluateItems, ev
                 prev.after(clone2);
                 prev = clone2;
             });
-            $fc0ce661316f8ab4$var$skipDuringClone(()=>added.forEach((clone2)=>$fc0ce661316f8ab4$var$initTree(clone2)))();
+            added.forEach((clone2)=>$fc0ce661316f8ab4$var$initTree(clone2));
+            if (prev !== templateEl) templateEl._x_lastRenderedEl = prev;
+            else delete templateEl._x_lastRenderedEl;
         });
     });
 }
@@ -5630,16 +6171,16 @@ function $fc0ce661316f8ab4$var$isObject2(subject) {
 }
 // packages/alpinejs/src/directives/x-ref.js
 function $fc0ce661316f8ab4$var$handler3() {}
-$fc0ce661316f8ab4$var$handler3.inline = (el, { expression: expression }, { cleanup: cleanup2 })=>{
+$fc0ce661316f8ab4$var$handler3.inline = (el, { expression: expression }, { cleanup: cleanup })=>{
     let root = $fc0ce661316f8ab4$var$closestRoot(el);
     if (!root) return;
     if (!root._x_refs) root._x_refs = {};
     root._x_refs[expression] = el;
-    cleanup2(()=>delete root._x_refs[expression]);
+    cleanup(()=>delete root._x_refs[expression]);
 };
 $fc0ce661316f8ab4$var$directive("ref", $fc0ce661316f8ab4$var$handler3);
 // packages/alpinejs/src/directives/x-if.js
-$fc0ce661316f8ab4$var$directive("if", (el, { expression: expression }, { effect: effect3, cleanup: cleanup2 })=>{
+$fc0ce661316f8ab4$var$directive("if", $fc0ce661316f8ab4$var$skipDuringClone((el, { expression: expression }, { effect: effect3, cleanup: cleanup })=>{
     if (el.tagName.toLowerCase() !== "template") $fc0ce661316f8ab4$var$warn("x-if can only be used on a <template> tag", el);
     let evaluate2 = $fc0ce661316f8ab4$var$evaluateLater(el, expression);
     let show = ()=>{
@@ -5648,15 +6189,17 @@ $fc0ce661316f8ab4$var$directive("if", (el, { expression: expression }, { effect:
         $fc0ce661316f8ab4$var$addScopeToNode(clone2, {}, el);
         $fc0ce661316f8ab4$var$mutateDom(()=>{
             el.after(clone2);
-            $fc0ce661316f8ab4$var$skipDuringClone(()=>$fc0ce661316f8ab4$var$initTree(clone2))();
+            $fc0ce661316f8ab4$var$initTree(clone2);
         });
         el._x_currentIfEl = clone2;
+        el._x_lastRenderedEl = clone2;
         el._x_undoIf = ()=>{
             $fc0ce661316f8ab4$var$mutateDom(()=>{
                 $fc0ce661316f8ab4$var$destroyTree(clone2);
                 clone2.remove();
             });
             delete el._x_currentIfEl;
+            delete el._x_lastRenderedEl;
         };
         return clone2;
     };
@@ -5667,9 +6210,11 @@ $fc0ce661316f8ab4$var$directive("if", (el, { expression: expression }, { effect:
     };
     effect3(()=>evaluate2((value)=>{
             value ? show() : hide();
-        }));
-    cleanup2(()=>el._x_undoIf && el._x_undoIf());
-});
+        }), {
+        priority: "structural"
+    });
+    cleanup(()=>el._x_undoIf && el._x_undoIf());
+}));
 // packages/alpinejs/src/directives/x-id.js
 $fc0ce661316f8ab4$var$directive("id", (el, { expression: expression }, { evaluate: evaluate2 })=>{
     let names = evaluate2(expression);
@@ -5680,7 +6225,7 @@ $fc0ce661316f8ab4$var$interceptClone((from, to)=>{
 });
 // packages/alpinejs/src/directives/x-on.js
 $fc0ce661316f8ab4$var$mapAttributes($fc0ce661316f8ab4$var$startingWith("@", $fc0ce661316f8ab4$var$into($fc0ce661316f8ab4$var$prefix("on:"))));
-$fc0ce661316f8ab4$var$directive("on", $fc0ce661316f8ab4$var$skipDuringClone((el, { value: value, modifiers: modifiers, expression: expression }, { cleanup: cleanup2 })=>{
+$fc0ce661316f8ab4$var$directive("on", $fc0ce661316f8ab4$var$skipDuringClone((el, { value: value, modifiers: modifiers, expression: expression }, { cleanup: cleanup })=>{
     let evaluate2 = expression ? $fc0ce661316f8ab4$var$evaluateLater(el, expression) : ()=>{};
     if (el.tagName.toLowerCase() === "template") {
         if (!el._x_forwardEvents) el._x_forwardEvents = [];
@@ -5696,7 +6241,7 @@ $fc0ce661316f8ab4$var$directive("on", $fc0ce661316f8ab4$var$skipDuringClone((el,
             ]
         });
     });
-    cleanup2(()=>removeListener());
+    cleanup(()=>removeListener());
 }));
 // packages/alpinejs/src/directives/index.js
 $fc0ce661316f8ab4$var$warnMissingPluginDirective("Collapse", "collapse", "collapse");
@@ -5711,14 +6256,40 @@ $fc0ce661316f8ab4$var$alpine_default.setEvaluator($fc0ce661316f8ab4$var$normalEv
 $fc0ce661316f8ab4$var$alpine_default.setRawEvaluator($fc0ce661316f8ab4$var$normalRawEvaluator);
 $fc0ce661316f8ab4$var$alpine_default.setReactivityEngine({
     reactive: $fc0ce661316f8ab4$var$reactive2,
-    effect: $fc0ce661316f8ab4$var$effect2,
+    // Since Vue 3.2, the scheduler is called with no arguments, so we wrap
+    // the effect to hand Alpine's scheduler the runner it expects to queue.
+    effect: (callback, options = {})=>{
+        let runner;
+        runner = $fc0ce661316f8ab4$var$effect2(callback, {
+            scheduler: ()=>{
+                if (!runner) return;
+                options.scheduler ? options.scheduler(runner) : runner();
+            }
+        });
+        return runner;
+    },
     release: $fc0ce661316f8ab4$var$stop,
     raw: $fc0ce661316f8ab4$var$toRaw
 });
 var $fc0ce661316f8ab4$export$b7ee041e4ad2afec = $fc0ce661316f8ab4$var$alpine_default;
 // packages/alpinejs/builds/module.js
 var $fc0ce661316f8ab4$export$2e2bcd8739ae039 = $fc0ce661316f8ab4$export$b7ee041e4ad2afec;
+ /*! Bundled license information:
 
+@vue/shared/dist/shared.esm-bundler.js:
+  (**
+  * @vue/shared v3.5.41
+  * (c) 2018-present Yuxi (Evan) You and Vue contributors
+  * @license MIT
+  **)
+
+@vue/reactivity/dist/reactivity.esm-bundler.js:
+  (**
+  * @vue/reactivity v3.5.41
+  * (c) 2018-present Yuxi (Evan) You and Vue contributors
+  * @license MIT
+  **)
+*/ 
 
 // packages/persist/src/index.js
 function $1e9cc45ec1892dbc$export$9a6132153fba2e0(Alpine) {
@@ -5732,19 +6303,20 @@ function $1e9cc45ec1892dbc$export$9a6132153fba2e0(Alpine) {
             console.warn("Alpine: $persist is using temporary storage since localStorage is unavailable.");
             let dummy = /* @__PURE__ */ new Map();
             storage = {
-                getItem: dummy.get.bind(dummy),
+                getItem: (key)=>dummy.has(key) ? dummy.get(key) : null,
                 setItem: dummy.set.bind(dummy)
             };
         }
-        return Alpine.interceptor((initialValue, getter, setter, path, key)=>{
+        return Alpine.interceptor((initialValue, getter, setter, path, key, cleanup = ()=>{})=>{
             let lookup = alias || `_x_${path}`;
             let initial = $1e9cc45ec1892dbc$var$storageHas(lookup, storage) ? $1e9cc45ec1892dbc$var$storageGet(lookup, storage) : initialValue;
             setter(initial);
-            Alpine.effect(()=>{
+            let effect = Alpine.effect(()=>{
                 let value = getter();
                 $1e9cc45ec1892dbc$var$storageSet(lookup, value, storage);
                 setter(value);
             });
+            cleanup(()=>Alpine.release(effect));
             return initial;
         }, (func)=>{
             func.as = (key)=>{
@@ -5771,7 +6343,8 @@ function $1e9cc45ec1892dbc$export$9a6132153fba2e0(Alpine) {
     };
 }
 function $1e9cc45ec1892dbc$var$storageHas(key, storage) {
-    return storage.getItem(key) !== null;
+    let value = storage.getItem(key);
+    return value !== null && value !== void 0;
 }
 function $1e9cc45ec1892dbc$var$storageGet(key, storage) {
     let value = storage.getItem(key);
@@ -5779,6 +6352,10 @@ function $1e9cc45ec1892dbc$var$storageGet(key, storage) {
     return JSON.parse(value);
 }
 function $1e9cc45ec1892dbc$var$storageSet(key, value, storage) {
+    if (value === void 0) {
+        storage.removeItem?.(key);
+        return;
+    }
     storage.setItem(key, JSON.stringify(value));
 }
 // packages/persist/builds/module.js
@@ -6000,6 +6577,7 @@ function $237ce8a5bb7a27d3$var$createMorphContext(options = {}) {
             }
             let currentFromNext = currentFrom && $237ce8a5bb7a27d3$var$getNextSibling(from, currentFrom);
             context.patch(currentFrom, currentTo);
+            if (currentFrom._x_lastRenderedEl) currentFromNext = $237ce8a5bb7a27d3$var$getNextSibling(from, currentFrom._x_lastRenderedEl);
             currentTo = currentTo && $237ce8a5bb7a27d3$var$getNextSibling(to, currentTo);
             currentFrom = currentFromNext;
         }
@@ -6134,7 +6712,8 @@ function $45a824f3a6626b83$export$1f4807a235930d45(Alpine) {
         let evaluate = evaluateLater(expression);
         let options = {
             rootMargin: $45a824f3a6626b83$var$getRootMargin(modifiers),
-            threshold: $45a824f3a6626b83$var$getThreshold(modifiers)
+            threshold: $45a824f3a6626b83$var$getThreshold(modifiers),
+            root: modifiers.includes("parent") ? el.parentElement : null
         };
         let observer = new IntersectionObserver((entries)=>{
             entries.forEach((entry)=>{
