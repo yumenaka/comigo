@@ -35,7 +35,7 @@ docker run -d \
 3. 启动服务：
 
 ```bash
-cd sample/docker
+cd docs/docker
 docker-compose up -d
 ```
 
@@ -173,7 +173,7 @@ server {
 
 如果你需要通过二级目录（如 `/nginx_test/`）访问同一服务，可以参考本仓库示例配置：
 
-- `sample/docker/nginx/nginx.conf`
+- `docs/docker/nginx/nginx.conf`
 
 该示例会将 `http://localhost:12380/nginx_test/` 反向代理到 `comigo` 服务。
 
@@ -195,7 +195,7 @@ docker run -d \
 
 ```bash
 # 本地测试构建
-cd sample/docker
+cd docs/docker
 chmod +x build.sh
 ./build.sh --local
 
@@ -207,19 +207,19 @@ chmod +x build.sh
 
 ```bash
 # 查看所有可用命令
-make -f sample/docker/Makefile.docker help
+make -f docs/docker/Makefile.docker help
 
 # 构建本地镜像
-make -f sample/docker/Makefile.docker docker-build
+make -f docs/docker/Makefile.docker docker-build
 
 # 构建多平台镜像
-make -f sample/docker/Makefile.docker docker-build-all
+make -f docs/docker/Makefile.docker docker-build-all
 
 # 推送到 Docker Hub
-make -f sample/docker/Makefile.docker docker-push
+make -f docs/docker/Makefile.docker docker-push
 
 # 本地测试
-make -f sample/docker/Makefile.docker docker-test
+make -f docs/docker/Makefile.docker docker-test
 ```
 
 #### 手动构建
@@ -232,7 +232,7 @@ cd /path/to/comigo
 docker build \
   --build-arg VERSION=v1.2.5 \
   -t yumenaka/comigo:v1.2.5 \
-  -f sample/docker/Dockerfile \
+  -f docs/docker/Dockerfile \
   .
 
 # 构建多平台镜像（需要 Docker Buildx）
@@ -241,7 +241,7 @@ docker buildx build \
   --build-arg VERSION=v1.2.5 \
   -t yumenaka/comigo:v1.2.5 \
   -t yumenaka/comigo:latest \
-  -f sample/docker/Dockerfile \
+  -f docs/docker/Dockerfile \
   --push \
   .
 ```
@@ -351,7 +351,7 @@ Visit `http://localhost:1234` to get started.
 3. Start the service:
 
 ```bash
-cd sample/docker
+cd docs/docker
 docker-compose up -d
 ```
 
@@ -462,7 +462,7 @@ docker run -d \
 3. サービスを開始：
 
 ```bash
-cd sample/docker
+cd docs/docker
 docker-compose up -d
 ```
 

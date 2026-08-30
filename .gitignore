@@ -57,8 +57,8 @@ bin
 resource.syso
 \[*
 *upload
-sample/docker/books
-sample/docker/config
+docs/docker/books
+docs/docker/config
 __*
 #routers/web_static
 tmp
@@ -148,10 +148,9 @@ assets/AppIcon.icns
 assets/icon.png
 assets/icon_no_frame.png
 Caddyfile
+!docs/Caddyfile
 
 # Wiki is maintained as an independent repository.
-sample/wiki/
+docs/wiki/
 
-# Local review notes.
-docs/*
 package.json.md5

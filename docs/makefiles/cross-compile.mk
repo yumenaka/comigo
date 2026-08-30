@@ -112,7 +112,7 @@ wails-linux-image-amd64:
 		--build-arg WAILS_CLI_VERSION=$(WAILS_CLI_VERSION) \
 		--build-arg WAILS_LINUX_DEPS="$(WAILS_LINUX_DEPS)" \
 		-t $(WAILS_LINUX_RUNTIME_IMAGE_AMD64) \
-		-f sample/docker/Dockerfile.wails-linux .
+		-f docs/docker/Dockerfile.wails-linux .
 
 wails-linux-image-arm64:
 	docker build --platform linux/arm64 \
@@ -120,7 +120,7 @@ wails-linux-image-arm64:
 		--build-arg WAILS_CLI_VERSION=$(WAILS_CLI_VERSION) \
 		--build-arg WAILS_LINUX_DEPS="$(WAILS_LINUX_DEPS)" \
 		-t $(WAILS_LINUX_RUNTIME_IMAGE_ARM64) \
-		-f sample/docker/Dockerfile.wails-linux .
+		-f docs/docker/Dockerfile.wails-linux .
 
 md5SumThemAll:
 	@mkdir -p $(BINDIR)
@@ -290,7 +290,7 @@ deb-amd64: build-wasm
 	@echo "Homepage: https://github.com/yumenaka/comigo" >> $(DEB_DIR)/DEBIAN/control
 	@echo "Depends: libc6" >> $(DEB_DIR)/DEBIAN/control
 	@# Copy systemd service file
-	@cp sample/systemd/comigo.service $(DEB_DIR)/lib/systemd/system/
+	@cp docs/systemd/comigo.service $(DEB_DIR)/lib/systemd/system/
 	@# Build .deb package with root ownership
 	dpkg-deb --root-owner-group --build $(DEB_DIR)
 	@rm -rf $(DEB_DIR)
@@ -319,7 +319,7 @@ deb-arm64: build-wasm
 	@echo "Homepage: https://github.com/yumenaka/comigo" >> $(DEB_DIR)/DEBIAN/control
 	@echo "Depends: libc6" >> $(DEB_DIR)/DEBIAN/control
 	@# Copy systemd service file
-	@cp sample/systemd/comigo.service $(DEB_DIR)/lib/systemd/system/
+	@cp docs/systemd/comigo.service $(DEB_DIR)/lib/systemd/system/
 	@# Build .deb package with root ownership
 	dpkg-deb --root-owner-group --build $(DEB_DIR)
 	@rm -rf $(DEB_DIR)

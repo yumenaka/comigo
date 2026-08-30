@@ -1,0 +1,69 @@
+[tools]
+go = { version = "1.26.7", install_env = { GOROOT = "" } }
+bun = "1.4.0"
+"conda:make" = { version = "4.4.1", os = ["macos", "linux", "windows/x64"] }
+"go:github.com/a-h/templ/cmd/templ" = "0.3.1020"
+"go:github.com/wailsapp/wails/v2/cmd/wails" = "2.15.0"
+"go:github.com/air-verse/air" = "1.67.4"
+"go:github.com/sqlc-dev/sqlc/cmd/sqlc" = "1.31.1"
+"go:entgo.io/ent/cmd/ent" = "0.14.6"
+"go:github.com/josephspurrier/goversioninfo/cmd/goversioninfo" = "1.7.0"
+
+[env]
+# 空值让 Go 使用当前工具链自身的根目录，避免继承已失效的本机安装路径。
+GOROOT = ""
+
+[tasks.setup]
+description = "安装 Go 与前端依赖"
+alias = "i"
+run = ["go mod download", "bun install"]
+
+[tasks.generate]
+description = "格式化并生成 templ 代码"
+alias = ["g", "gen"]
+run = "templ fmt ./templ && templ generate"
+
+[tasks.frontend]
+description = "生成未压缩的前端资源"
+alias = "fe"
+run = "bun run dev"
+
+[tasks.dev]
+description = "使用 Air 启动热重载开发服务"
+alias = "d"
+run = "air -c .air.toml"
+
+[tasks.run]
+description = "生成模板并直接启动 Web 服务"
+alias = "r"
+run = "templ fmt ./templ && templ generate && go run main.go"
+
+[tasks.test]
+description = "运行 Go 测试"
+alias = "t"
+run = "go test ./..."
+
+[tasks.sqlc]
+description = "重新生成 sqlc 代码"
+alias = "db"
+run = "sqlc generate"
+
+[tasks.wails-dev]
+description = "启动 Wails v2 开发环境"
+alias = "wd"
+run = "bun run wails:dev"
+
+[tasks.wails-build]
+description = "构建当前平台的 Wails v2 应用"
+alias = "wb"
+run = "bun run wails:build"
+
+[tasks.release]
+description = "通过现有 Makefile 构建全部发布产物"
+alias = "rel"
+run = "make all"
+
+[tasks.clean]
+description = "清理现有 Makefile 构建产物"
+alias = "c"
+run = "make clean"

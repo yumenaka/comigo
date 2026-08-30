@@ -111,7 +111,7 @@ Visit `http://localhost:1234` to access your library.
 
 ### Using Docker Compose
 
-1. Download the [`docker-compose.yml`](sample/docker/docker-compose.yml) file
+1. Download the [`docker-compose.yml`](docs/docker/docker-compose.yml) file
 2. Edit the configuration as needed
 3. Start the service:
 
@@ -134,7 +134,7 @@ docker-compose up -d
 | `COMIGO_PASSWORD` | Login password (optional) | - |
 | `COMIGO_ENABLE_UPLOAD` | Enable file upload | `true` |
 
-For more details, see the complete [Docker documentation](sample/docker/README.md).
+For more details, see the complete [Docker documentation](docs/docker/README.md).
 
 ## Usage
 
@@ -187,6 +187,84 @@ Comigo supports  configuration file locations:
 
 4. **Custom Location**  
    - Specify configuration file path using the `--config` parameter
+
+## Development with mise
+
+The committed [`mise.toml`](mise.toml) pins Go, Bun, GNU Make, templ, Wails v2, Air, sqlc, Ent, and goversioninfo. It uses mise's documented core, `go:`, and `conda:` backends; GNU Make is provided by `conda:make`, whose mise backend supports macOS, Linux, and Windows x64 without a separate Conda installation.
+
+The initialization and task flow below was verified on macOS ARM64 with mise 2026.8.14. The Linux and Windows commands and platform limits come from the linked official mise and Wails documentation.
+
+### Install and activate mise
+
+Follow the official [mise Getting Started](https://mise.jdx.dev/getting-started.html) and [installation](https://mise.jdx.dev/installing-mise.html) documentation.
+
+macOS and Linux:
+
+```bash
+curl https://mise.run | sh
+
+# Bash
+echo 'eval "$(~/.local/bin/mise activate bash)"' >> ~/.bashrc
+
+# Zsh (use this instead on the default macOS shell)
+echo 'eval "$(~/.local/bin/mise activate zsh)"' >> ~/.zshrc
+```
+
+Restart the shell after adding one activation line. Homebrew is also supported with `brew install mise`, though the official installer is mise's recommended method.
+
+Windows PowerShell:
+
+```powershell
+# Recommended; Scoop also adds mise shims to PATH.
+scoop install mise
+
+# Alternative
+winget install jdx.mise
+```
+
+PowerShell activation is optional when the Scoop shims are available. To enable automatic environment switching, add the official activation command to your actual PowerShell profile:
+
+```powershell
+New-Item -ItemType Directory -Force (Split-Path $PROFILE)
+Add-Content $PROFILE '(&mise activate pwsh) | Out-String | Invoke-Expression'
+```
+
+### Initialize the repository
+
+The commands are the same in Bash, Zsh, and PowerShell:
+
+```text
+git clone https://github.com/yumenaka/comigo.git
+cd comigo
+mise trust
+mise install
+mise run setup
+mise doctor
+```
+
+`mise install` installs the pinned tools. `mise run setup` downloads Go modules and runs `bun install`; mise tasks also install any missing configured tools automatically. Run `wails doctor` once before desktop development. Wails still needs native platform components that mise cannot supply: Xcode Command Line Tools on macOS, WebView2 on Windows, or GCC, GTK3, and WebKitGTK development packages on Linux. See the official [Wails v2 installation guide](https://wails.io/docs/gettingstarted/installation/).
+
+On Windows x64, normal mise tasks work from PowerShell. The release-oriented Make targets additionally use POSIX utilities such as `sh`, `cp`, `rm`, `zip`, and `find`, so run those targets in MSYS2 with its toolchain on `PATH`. The mise Conda backend does not currently list Windows ARM64; on that host, install Make through MSYS2 and run the release targets there. Docker, platform SDKs, `dpkg`, UPX, and similar release dependencies remain system-managed.
+
+### Common tasks and aliases
+
+Run `mise tasks` to see the full list. Task aliases use the documented `mise run <alias>` form.
+
+| Task | Alias | Purpose |
+|------|-------|---------|
+| `mise run setup` | `mise run i` | Install Go modules and frontend packages |
+| `mise run generate` | `mise run g` / `mise run gen` | Format and generate templ output |
+| `mise run frontend` | `mise run fe` | Build unminified frontend assets |
+| `mise run dev` | `mise run d` | Start Air hot reload |
+| `mise run run` | `mise run r` | Generate templates and run the Web server |
+| `mise run test` | `mise run t` | Run all Go tests |
+| `mise run sqlc` | `mise run db` | Regenerate sqlc output |
+| `mise run wails-dev` | `mise run wd` | Start Wails v2 development mode |
+| `mise run wails-build` | `mise run wb` | Build the current platform's Wails app |
+| `mise run release` | `mise run rel` | Run the existing `make all` release matrix |
+| `mise run clean` | `mise run c` | Clean Make build output |
+
+Direct Make targets remain available inside the pinned environment, for example `mise exec -- make wails-prepare` or `mise exec -- make docker-help`.
 
 ## Feedback and Support
 

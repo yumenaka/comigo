@@ -49,11 +49,11 @@
 
 ## Wiki 与文档 TODO
 
-- [ ] `sample/wiki/11-Changelog-ZH.md`、`12-Changelog-JA.md`、`13-Changelog-EN.md`：同步 `v1.2.32` 到 `v1.2.36`，包含 Kitty TUI、主题刷新、随机主题、Postgres 适配、重扫控制和书架扫描优化。
+- [ ] `docs/wiki/11-Changelog-ZH.md`、`12-Changelog-JA.md`、`13-Changelog-EN.md`：同步 `v1.2.32` 到 `v1.2.36`，包含 Kitty TUI、主题刷新、随机主题、Postgres 适配、重扫控制和书架扫描优化。
 - [ ] 为 `v1.2.37` 准备 changelog 草稿：远程 Comigo 书库、运行时状态统一、远程书库设置页、Tailscale 状态接口、扫描失败缓存和依赖更新。
-- [ ] `sample/wiki/08-Reading-and-Library.md`：补充本地书库、远程 Comigo 书库、本地 `/reader` 三者差异，以及远程阅读/下载实时代理、不保存原始文件的边界。
-- [ ] `sample/wiki/09-Remote-and-Security.md`：补充 Tailscale、ZeroTier、局域网 IP、只读模式、上传开关、远程 Comigo 认证和文件不会上传到在线 reader 的边界说明。
-- [ ] `sample/wiki/03-Try-it-Online.md`：根据最新 `/reader` 行为更新离线/PWA/便携 HTML 说明，特别说明 `file://` 便携 HTML 不连接服务器。
+- [ ] `docs/wiki/08-Reading-and-Library.md`：补充本地书库、远程 Comigo 书库、本地 `/reader` 三者差异，以及远程阅读/下载实时代理、不保存原始文件的边界。
+- [ ] `docs/wiki/09-Remote-and-Security.md`：补充 Tailscale、ZeroTier、局域网 IP、只读模式、上传开关、远程 Comigo 认证和文件不会上传到在线 reader 的边界说明。
+- [ ] `docs/wiki/03-Try-it-Online.md`：根据最新 `/reader` 行为更新离线/PWA/便携 HTML 说明，特别说明 `file://` 便携 HTML 不连接服务器。
 - [ ] `README.md`、`README_ZH.md`、`README_JP.md`：同步稳定的远程 Comigo 书库、PWA、OPDS、TUI 和 reader 说明。
 - [ ] 新官网与使用文档继续推进，可参考 Omarchy 的“先解释场景，再给入口”结构。Discord/社区入口可以放到官网而不是核心 App。
 

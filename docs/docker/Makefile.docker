@@ -2,14 +2,14 @@
 # Docker 相关的 Makefile - Comigo
 # ============================================================================
 # 使用方法（从项目根目录执行）：
-#   make -f sample/docker/Makefile.docker <target>
+#   make -f docs/docker/Makefile.docker <target>
 # 
 # 常用命令：
-#   make -f sample/docker/Makefile.docker docker-build          - 构建本地镜像（当前平台）
-#   make -f sample/docker/Makefile.docker docker-buildx         - 构建并推送多平台镜像
-#   make -f sample/docker/Makefile.docker docker-push           - 推送镜像到仓库
-#   make -f sample/docker/Makefile.docker docker-test           - 本地测试运行
-#   make -f sample/docker/Makefile.docker docker-clean          - 清理镜像
+#   make -f docs/docker/Makefile.docker docker-build          - 构建本地镜像（当前平台）
+#   make -f docs/docker/Makefile.docker docker-buildx         - 构建并推送多平台镜像
+#   make -f docs/docker/Makefile.docker docker-push           - 推送镜像到仓库
+#   make -f docs/docker/Makefile.docker docker-test           - 本地测试运行
+#   make -f docs/docker/Makefile.docker docker-clean          - 清理镜像
 # ============================================================================
 
 # ============================================================================
@@ -32,7 +32,7 @@ IMAGE_NAME ?= $(DOCKER_HUB_REPO)
 PLATFORMS ?= linux/amd64,linux/arm64,linux/arm/v7
 
 # Docker 构建相关
-DOCKERFILE := sample/docker/Dockerfile
+DOCKERFILE := docs/docker/Dockerfile
 BUILD_CONTEXT := .
 BUILDX_BUILDER := comigo-builder
 
@@ -235,8 +235,8 @@ docker-test-bg:
 		-e COMIGO_DEBUG=true \
 		$(IMAGE_NAME):$(VERSION)
 	@echo "$(GREEN)✅ 容器已启动，访问: http://localhost:$(TEST_PORT)$(NC)"
-	@echo "$(YELLOW)查看日志: make -f sample/docker/Makefile.docker docker-logs$(NC)"
-	@echo "$(YELLOW)停止容器: make -f sample/docker/Makefile.docker docker-stop$(NC)"
+	@echo "$(YELLOW)查看日志: make -f docs/docker/Makefile.docker docker-logs$(NC)"
+	@echo "$(YELLOW)停止容器: make -f docs/docker/Makefile.docker docker-stop$(NC)"
 
 .PHONY: docker-stop
 docker-stop:
@@ -252,27 +252,27 @@ docker-logs:
 # Docker Compose 相关
 # ============================================================================
 
-COMPOSE_FILE := sample/docker/docker-compose.yml
+COMPOSE_FILE := docs/docker/docker-compose.yml
 
 .PHONY: docker-compose-up
 docker-compose-up:
 	@echo "$(GREEN)==> 启动 Docker Compose 服务$(NC)"
-	cd sample/docker && docker-compose up -d
+	cd docs/docker && docker-compose up -d
 	@echo "$(GREEN)✅ 服务已启动$(NC)"
 
 .PHONY: docker-compose-down
 docker-compose-down:
 	@echo "$(YELLOW)停止 Docker Compose 服务...$(NC)"
-	cd sample/docker && docker-compose down
+	cd docs/docker && docker-compose down
 
 .PHONY: docker-compose-restart
 docker-compose-restart:
 	@echo "$(YELLOW)重启 Docker Compose 服务...$(NC)"
-	cd sample/docker && docker-compose restart
+	cd docs/docker && docker-compose restart
 
 .PHONY: docker-compose-logs
 docker-compose-logs:
-	cd sample/docker && docker-compose logs -f
+	cd docs/docker && docker-compose logs -f
 
 # ============================================================================
 # 清理相关

@@ -3,8 +3,8 @@
 ## ============================================================================
 ##
 ## 本 Makefile 已拆分为模块化结构，主要功能分为两部分：
-## 1. macOS App 打包（sample/makefiles/macos-app.mk）
-## 2. 跨平台编译（sample/makefiles/cross-compile.mk）
+## 1. macOS App 打包（docs/makefiles/macos-app.mk）
+## 2. 跨平台编译（docs/makefiles/cross-compile.mk）
 ##
 ## 常用命令：
 ##   make all              - 编译 CLI + deb + tray + Wails desktop 发布包并生成校验
@@ -101,10 +101,10 @@ wails-build: desktop-current
 ## ============================================================================
 
 # 引入 macOS App 打包相关规则
-include sample/makefiles/macos-app.mk
+include docs/makefiles/macos-app.mk
 
 # 引入跨平台编译相关规则
-include sample/makefiles/cross-compile.mk
+include docs/makefiles/cross-compile.mk
 
 ## ============================================================================
 ## Docker 镜像构建目标
@@ -118,22 +118,22 @@ DOCKER_PLATFORMS := linux/amd64,linux/arm64,linux/arm/v7
 
 # 构建本地 Docker 镜像（当前平台）
 docker-build:
-	@$(MAKE) -f sample/docker/Makefile.docker docker-build IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
+	@$(MAKE) -f docs/docker/Makefile.docker docker-build IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
 
 # 构建并推送多平台 Docker 镜像
 # 注意：多平台镜像无法加载到本地，必须推送到远程仓库
 docker-buildx:
 	@echo "提示：多平台镜像将自动推送到 $(DOCKER_REPO)"
 	@echo "如果只想本地测试，请使用: make docker-build"
-	@$(MAKE) -f sample/docker/Makefile.docker docker-buildx IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
+	@$(MAKE) -f docs/docker/Makefile.docker docker-buildx IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
 
 # 本地测试 Docker 镜像
 docker-test:
-	@$(MAKE) -f sample/docker/Makefile.docker docker-test IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
+	@$(MAKE) -f docs/docker/Makefile.docker docker-test IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
 
 # 清理 Docker 镜像
 docker-clean:
-	@$(MAKE) -f sample/docker/Makefile.docker docker-clean IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
+	@$(MAKE) -f docs/docker/Makefile.docker docker-clean IMAGE_NAME=$(DOCKER_REPO) VERSION=$(VERSION) PLATFORMS=$(DOCKER_PLATFORMS)
 
 # Docker 帮助信息
 docker-help:
@@ -159,7 +159,7 @@ docker-help:
 	@echo "                   (Docker 不支持同时加载多个架构的镜像到本地)"
 	@echo ""
 	@echo "更多 Docker 命令请查看："
-	@echo "  make -f sample/docker/Makefile.docker help"
+	@echo "  make -f docs/docker/Makefile.docker help"
 
 ## ============================================================================
 ## 通用清理目标

@@ -112,7 +112,7 @@ docker run -d \
 
 ### Docker Compose を使用
 
-1. [`docker-compose.yml`](sample/docker/docker-compose.yml) ファイルをダウンロード
+1. [`docker-compose.yml`](docs/docker/docker-compose.yml) ファイルをダウンロード
 2. 必要に応じて設定を編集
 3. サービスを開始：
 
@@ -135,7 +135,7 @@ docker-compose up -d
 | `COMIGO_PASSWORD` | ログインパスワード（オプション） | - |
 | `COMIGO_ENABLE_UPLOAD` | ファイルアップロードを有効化 | `true` |
 
-詳細については、完全な [Docker ドキュメント](sample/docker/README.md) をご覧ください。
+詳細については、完全な [Docker ドキュメント](docs/docker/README.md) をご覧ください。
 
 ## 使用方法
 

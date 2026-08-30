@@ -2202,7 +2202,7 @@
   }
 
   .rounded-full {
-    border-radius: 3.40282e38px;
+    border-radius: 2147483647px;
   }
 
   .rounded-lg {
@@ -3270,7 +3270,7 @@
 
   .after\:rounded-full:after {
     content: var(--tw-content);
-    border-radius: 3.40282e38px;
+    border-radius: 2147483647px;
   }
 
   .after\:border:after {

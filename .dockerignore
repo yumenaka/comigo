@@ -39,8 +39,8 @@ dist/
 test/
 coverage.txt
 *.prof
-sample/docker/config
-sample/docker/books
+docs/docker/config
+docs/docker/books
 
 # 临时文件
 tmp/
@@ -98,8 +98,8 @@ Makefile.*
 *.mk
 
 # 示例和样本（除了插件）
-sample/
-!sample/plugins/
+docs/
+!docs/plugins/
 
 # 脚本
 *.sh

@@ -23,15 +23,15 @@
     "alpinejs": "3.16.3",
     "i18next": "26.4.0",
     "i18next-browser-languagedetector": "8.2.1",
-    "screenfull": "latest",
+    "screenfull": "^6.0.2",
     "tailwindcss": "4.3.3"
   },
   "devDependencies": {
-    "@parcel/transformer-css": "latest",
-    "@tailwindcss/forms": "latest",
+    "@parcel/transformer-css": "^2.16.4",
+    "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/postcss": "4.3.3",
     "@tailwindcss/typography": "0.5.20",
-    "parcel": "latest",
+    "parcel": "^2.16.4",
     "prettier": "3.9.6"
   }
 }

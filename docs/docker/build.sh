@@ -212,7 +212,7 @@ main() {
         docker build \
             --build-arg VERSION="$VERSION" \
             $NO_CACHE \
-            -f sample/docker/Dockerfile \
+            -f docs/docker/Dockerfile \
             -t ${REPO}:${VERSION} \
             -t ${REPO}:latest \
             .
@@ -249,7 +249,7 @@ main() {
             $BUILD_ARGS \
             --build-arg VERSION="$VERSION" \
             $NO_CACHE \
-            -f sample/docker/Dockerfile \
+            -f docs/docker/Dockerfile \
             -t ${REPO}:${VERSION} \
             -t ${REPO}:latest \
             .
@@ -258,7 +258,7 @@ main() {
             $BUILD_ARGS \
             --build-arg VERSION="$VERSION" \
             $NO_CACHE \
-            -f sample/docker/Dockerfile \
+            -f docs/docker/Dockerfile \
             -t ${REPO}:${VERSION} \
             .
     fi

@@ -112,7 +112,7 @@ docker run -d \
 
 ### 使用 Docker Compose
 
-1. 下载 [`docker-compose.yml`](sample/docker/docker-compose.yml) 文件
+1. 下载 [`docker-compose.yml`](docs/docker/docker-compose.yml) 文件
 2. 根据需要编辑配置
 3. 启动服务：
 
@@ -120,7 +120,7 @@ docker run -d \
 docker-compose up -d
 ```
 
-更多详细说明请查看完整的 [Docker 使用文档](sample/docker/README.md)。
+更多详细说明请查看完整的 [Docker 使用文档](docs/docker/README.md)。
 
 ## 使用方法
 
