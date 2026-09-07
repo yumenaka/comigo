@@ -46,13 +46,20 @@ func BindURLs() {
 	privateAPI := publicAPI.Group("")
 
 	// echo jwt简明教程，还有google登录示例：https://echo.labstack.com/docs/cookbook/jwt
-	if config.GetCfg().RequiresAuth() {
+	{
 		// jwtConfig格式参考：https://echo.labstack.com/docs/middleware/jwt#configuration
 		jwtConfig := echojwt.Config{
 			NewClaimsFunc: func(c echo.Context) jwt.Claims {
 				return new(login.JwtCustomClaims)
 			},
-			SigningKey: []byte(config.GetJwtSigningKey()),
+			// 每次请求读取认证配置，开启密码立即生效，修改密码使旧令牌失效。
+			Skipper: func(c echo.Context) bool { return !config.GetCfg().RequiresAuth() },
+			KeyFunc: func(token *jwt.Token) (interface{}, error) {
+				if token.Method != jwt.SigningMethodHS256 {
+					return nil, echo.ErrUnauthorized
+				}
+				return []byte(config.GetJwtSigningKey()), nil
+			},
 			// 从Cookie中获取token
 			TokenLookup: "cookie:" + login.CookieName + ",header:Authorization:Bearer ",
 			// 处理验证错误
@@ -69,6 +76,8 @@ func BindURLs() {
 		privateAPI.Use(echojwt.WithConfig(jwtConfig))
 		privateViewGroup.Use(echojwt.WithConfig(jwtConfig))
 	}
+	privateViewGroup.Use(data_api.DeviceCookie)
+	privateAPI.Use(data_api.DeviceCookie)
 	bindProtectedView(privateViewGroup)
 	bindProtectedAPI(privateAPI)
 }
@@ -132,9 +141,12 @@ func bindProtectedAPI(group *echo.Group) {
 func bindServerAPI(group *echo.Group) {
 	bindWailsAPI(group)
 	// 服务器状态
-	group.GET("/server-info", data_api.GetServerInfoHandler)
+	group.GET("/server", data_api.GetServerInfoHandler)
+	group.GET("/connections", data_api.GetConnections)
+	group.POST("/restart", restartHandler)
 	// 获取书库列表
 	group.GET("/stores", data_api.GetStores)
+	group.GET("/stores/:id", data_api.GetStore)
 	// 文件上传
 	group.POST("/upload", upload_api.UploadFile)
 	// 获取 tailscale 状态
@@ -153,9 +165,10 @@ func bindBookAPI(group *echo.Group) {
 	// 获取书架信息
 	group.GET("/top-shelf", data_api.GetTopOfShelfInfo)
 	// 查询书籍信息
-	group.GET("/get-book", data_api.GetBook)
+	group.GET("/books", data_api.GetBooks)
+	group.GET("/books/:id", data_api.GetBook)
 	// 查询父书籍信息
-	group.GET("/parent-book-info", data_api.GetParentBook)
+	group.GET("/books/:id/parent", data_api.GetParentBook)
 	// 下载 reg 设置文件
 	group.GET("/comigo.reg", data_api.GetRegFile)
 	// 生成图片 http://localhost:1234/api/generate-image?height=220&width=160&text=12345&font_size=32
@@ -165,62 +178,57 @@ func bindBookAPI(group *echo.Group) {
 	// 下载书籍为 EPUB 文件
 	group.GET("/download-epub", data_api.DownloadEpub)
 	// 删除书籍的元数据和缓存文件
-	group.DELETE("/book-cache", data_api.DeleteBookCache)
+	group.DELETE("/books/:id/cache", data_api.DeleteBookCache)
 }
 
 // bindBookmarkAPI 注册阅读历史和书签相关 API。
 func bindBookmarkAPI(group *echo.Group) {
 	// 获取所有书签的API
-	group.GET("/all-bookmarks", data_api.GetAllBookmarks)
+	group.GET("/bookmarks", data_api.GetAllBookmarks)
 	// 获取阅读历史（支持limit和分页参数）
 	group.GET("/reading-history", data_api.GetReadingHistory)
 	// 更新书签信息
-	group.POST("/store-bookmark", data_api.StoreBookmark)
+	group.POST("/bookmarks", data_api.StoreBookmark)
 	// 删除特定书签
-	group.DELETE("/delete-bookmark", data_api.DeleteBookmark)
+	group.DELETE("/bookmarks", data_api.DeleteBookmark)
 }
 
 // bindConfigAPI 注册配置读写 API。
 func bindConfigAPI(group *echo.Group) {
 	// 获取配置状态
-	group.GET("/config/status", config_api.GetConfigStatus)
+	group.GET("/configs/status", config_api.GetConfigStatus)
+	group.GET("/configs", config_api.GetConfig)
 	// 更新配置
-	group.PUT("/config", config_api.UpdateConfig)
-	// 保存配置到文件
-	group.POST("/config/:to", config_api.SaveConfigHandler)
-	// 删除特定路径下的配置
-	group.DELETE("/config/:in", config_api.DeleteConfig)
+	group.PATCH("/configs", updateConfigHandler)
 }
 
 // bindSettingsAPI 注册设置页使用的轻量操作 API。
 func bindSettingsAPI(group *echo.Group) {
 	// 字符串、布尔值、数字配置的更改
-	group.POST("/update-string-config", settings.UpdateStringConfigHandler)
-	group.POST("/update-bool-config", settings.UpdateBoolConfigHandler)
-	group.POST("/update-number-config", settings.UpdateNumberConfigHandler)
+	group.PUT("/configs/:name", settings.UpdateValueConfigHandler)
 	// 更改Comigo登录设置
-	group.POST("/update-login-settings", settings.UpdateLoginSettingsHandler)
+	group.PATCH("/configs/login", settings.UpdateLoginSettingsHandler)
 	// Tailscale配置更新JSON API
-	group.POST("/submit-tailscale-config", settings.UpdateTailscaleConfigHandler)
+	group.PATCH("/configs/tailscale", settings.UpdateTailscaleConfigHandler)
 	// 字符串数组配置的增删改
-	group.POST("/delete-array-config", settings.DeleteArrayConfigHandler)
-	group.POST("/add-array-config", settings.AddArrayConfigHandler)
+	group.DELETE("/configs/:name/items", settings.DeleteArrayConfigHandler)
+	group.POST("/configs/:name/items", settings.AddArrayConfigHandler)
 	// 书库管理
-	group.POST("/rescan-store", settings.RescanStoreHandler)
-	group.POST("/rescan-all-stores", settings.RescanAllStoresHandler)
-	group.POST("/delete-store", settings.DeleteStoreHandler)
+	group.POST("/stores/:id/refresh", settings.RescanStoreHandler)
+	group.POST("/stores/refresh", settings.RescanAllStoresHandler)
+	group.DELETE("/stores/:id", settings.DeleteStoreHandler)
 	// 插件管理
-	group.POST("/enable-plugin", settings.EnablePluginHandler)
-	group.POST("/disable-plugin", settings.DisablePluginHandler)
+	group.PUT("/plugins/:name", settings.EnablePluginHandler)
+	group.DELETE("/plugins/:name", settings.DisablePluginHandler)
 	// 保存和删除配置
-	group.POST("/config-save", settings.HandleConfigSave)
-	group.POST("/config-delete", settings.HandleConfigDelete)
+	group.PUT("/configs/files/:location", settings.HandleConfigSave)
+	group.DELETE("/configs/files/:location", settings.HandleConfigDelete)
 }
 
 // bindRealtimeAPI 注册 WebSocket/SSE 等实时通信 API。
 func bindRealtimeAPI(group *echo.Group) {
 	websocket.WsDebug = &config.GetCfg().Debug
-	group.GET("/ws", websocket.WsHandler)
+	group.GET("/ws", websocket.WsHandler, data_api.TrackConnection)
 	// SSE 服务器发送事件
-	group.GET("/sse", sse_hub.SSEHandler)
+	group.GET("/sse", sse_hub.SSEHandler, data_api.TrackConnection)
 }

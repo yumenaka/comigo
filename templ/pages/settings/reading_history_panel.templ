@@ -45,7 +45,7 @@ templ ReadingHistoryPanel() {
 				const key = item.book_info.id + '_' + item.book_mark.mark_type + '_' + item.book_mark.page_index;
 				this.deleting[key] = true;
 				try {
-					let url = window.ComiGoPath('/api/delete-bookmark') + '?book_id=' + encodeURIComponent(item.book_info.id) +
+					let url = window.ComiGoPath('/api/bookmarks') + '?book_id=' + encodeURIComponent(item.book_info.id) +
 						'&mark_type=' + encodeURIComponent(item.book_mark.mark_type) +
 						'&page_index=' + item.book_mark.page_index;
 					if (item.book_info.remote_store) {

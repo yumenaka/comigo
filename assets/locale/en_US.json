@@ -1020,5 +1020,15 @@
   "working_directory": "current working directory",
   "zip_encode": "Manually specify ZIP file encoding (e.g., gbk, shiftjis)",
   "zip_file_text_encoding": "Not UTF-8",
-  "zip_file_text_encoding_description": "Non-utf-8 encoded ZIP file, what encoding should be used to parse it. \nDefault GBK."
+  "zip_file_text_encoding_description": "Non-utf-8 encoded ZIP file, what encoding should be used to parse it. \nDefault GBK.",
+  "server_control": "Server control",
+  "online_counts_description": "Counts active realtime connections. Users are counted by signed-in account; devices by browser.",
+  "online_users": "Online users",
+  "online_devices": "Online devices",
+  "active_connections": "Active connections",
+  "server_books": "Books",
+  "server_version": "Version",
+  "server_refresh": "Refresh status",
+  "server_restart": "Restart server",
+  "server_restarting": "Restarting server…"
 }

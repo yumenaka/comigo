@@ -1,10 +1,12 @@
 package routers
 
 import (
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/config"
@@ -64,5 +66,50 @@ func withRouterAuthTestConfig(t *testing.T) func() {
 		cfg.Password = oldPassword
 		cfg.Timeout = oldTimeout
 		cfg.BasePath = oldBasePath
+	}
+}
+
+// 验证运行中启用密码立即保护所有控制资源，密码变更立即使旧 Bearer 令牌失效。
+func TestControlAuthChangesWithoutRebinding(t *testing.T) {
+	restore := withRouterAuthTestConfig(t)
+	defer restore()
+	config.GetCfg().Password = ""
+	oldEngine := engine
+	t.Cleanup(func() { engine = oldEngine })
+	engine = echo.New()
+	BindURLs()
+	request := func(method, path, token string) int {
+		req := httptest.NewRequest(method, path, nil)
+		if token != "" {
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
+		rec := httptest.NewRecorder()
+		engine.ServeHTTP(rec, req)
+		return rec.Code
+	}
+	if got := request(http.MethodGet, "/api/connections", ""); got != http.StatusOK {
+		t.Fatalf("公开模式: %d", got)
+	}
+	config.GetCfg().Password = "secret"
+	for _, route := range []struct{ method, path string }{
+		{http.MethodGet, "/api/server"}, {http.MethodGet, "/api/connections"},
+		{http.MethodGet, "/api/stores"}, {http.MethodGet, "/api/stores/test"},
+		{http.MethodGet, "/api/books/test"}, {http.MethodPost, "/api/restart"},
+		{http.MethodPost, "/api/stores/test/refresh"}, {http.MethodDelete, "/api/stores/test"},
+	} {
+		if got := request(route.method, route.path, ""); got != http.StatusUnauthorized {
+			t.Fatalf("%s %s: %d", route.method, route.path, got)
+		}
+	}
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"username": "comigo", "exp": time.Now().Add(time.Hour).Unix()}).SignedString([]byte(config.GetJwtSigningKey()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := request(http.MethodGet, "/api/connections", token); got != http.StatusOK {
+		t.Fatalf("Bearer: %d", got)
+	}
+	config.GetCfg().Password = "changed"
+	if got := request(http.MethodGet, "/api/connections", token); got != http.StatusUnauthorized {
+		t.Fatalf("旧令牌: %d", got)
 	}
 }

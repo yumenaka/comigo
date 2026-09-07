@@ -68,20 +68,6 @@ var stringArrayConfigScriptHandle = templ.NewOnceHandle()
 templ StringArrayConfigJavaScript() {
 	@stringArrayConfigScriptHandle.Once() {
 		<script>
-			// base64UrlEncodeUtf8: 用于安全传输（含反斜杠/中文）
-			if (!window.base64UrlEncodeUtf8) {
-				window.base64UrlEncodeUtf8 = (str) => {
-					const bytes = new TextEncoder().encode(str);
-					let binary = "";
-					for (let i = 0; i < bytes.length; i++)
-						binary += String.fromCharCode(bytes[i]);
-					return btoa(binary)
-						.replace(/\+/g, "-")
-						.replace(/\//g, "_")
-						.replace(/=+$/g, "");
-				};
-			}
-
 			// 添加字符串数组配置中的元素
 			async function addStringConfigValue(configName) {
 				const addInput = document.getElementById(configName + "AddInput");
@@ -118,17 +104,17 @@ templ StringArrayConfigJavaScript() {
 				}
 				// 发送添加请求到服务器
 				try {
-					const addValueB64 = window.base64UrlEncodeUtf8(addValue);
 					const response = await fetch(
-						window.ComiGoPath("/api/add-array-config"),
+						window.ComiGoPath(
+							"/api/configs/" + encodeURIComponent(atob(configName)) + "/items",
+						),
 						{
 							method: "POST",
 							headers: {
 								"Content-Type": "application/json",
 							},
 							body: JSON.stringify({
-								configName: configName,
-								addValue: addValueB64,
+								value: addValue,
 							}),
 						},
 					);
@@ -184,17 +170,17 @@ templ StringArrayConfigJavaScript() {
 			// 删除字符串数组配置中的元素
 			async function deleteStringConfigValue(configName, deleteValue) {
 				try {
-					const deleteValueB64 = window.base64UrlEncodeUtf8(deleteValue);
 					const response = await fetch(
-						window.ComiGoPath("/api/delete-array-config"),
+						window.ComiGoPath(
+							"/api/configs/" + encodeURIComponent(atob(configName)) + "/items",
+						),
 						{
-							method: "POST",
+							method: "DELETE",
 							headers: {
 								"Content-Type": "application/json",
 							},
 							body: JSON.stringify({
-								configName: configName,
-								deleteValue: deleteValueB64,
+								value: deleteValue,
 							}),
 						},
 					);

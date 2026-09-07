@@ -30,7 +30,7 @@ func StoreBookmark(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		if _, _, err := client.PostJSON("/api/store-bookmark", payload); err != nil {
+		if _, _, err := client.PostJSON("/api/bookmarks", payload); err != nil {
 			logger.Infof(locale.GetString("log_failed_to_store_bookmark"), err)
 			return writeRemoteComigoError(c, err)
 		}

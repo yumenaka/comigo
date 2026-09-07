@@ -1,7 +1,11 @@
 package login
 
 import (
+	"encoding/json"
+	"github.com/golang-jwt/jwt/v5"
+	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -28,5 +32,35 @@ func TestTokenAndCookieUseConfiguredTimeout(t *testing.T) {
 	cookies := rec.Result().Cookies()
 	if len(cookies) != 1 || cookies[0].Expires.Before(before) || cookies[0].Expires.After(time.Now().Add(91*time.Minute)) {
 		t.Fatalf("unexpected cookie expiry: %#v", cookies)
+	}
+}
+
+// 验证 JSON 登录签发的令牌可按当前密钥验证，同时保留浏览器 HttpOnly Cookie。
+func TestJSONLoginIssuesBearerToken(t *testing.T) {
+	old := config.CopyCfg()
+	defer func() { *config.GetCfg() = old }()
+	config.GetCfg().Username = "reader"
+	config.GetCfg().Password = "test-password"
+	config.GetCfg().Timeout = 60
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/api/login", strings.NewReader(`{"username":"reader","password":"test-password"}`))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	if err := Login(e.NewContext(req, rec)); err != nil {
+		t.Fatal(err)
+	}
+	var body struct {
+		Token string `json:"token"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	token, err := jwt.Parse(body.Token, func(token *jwt.Token) (interface{}, error) { return []byte(config.GetJwtSigningKey()), nil }, jwt.WithValidMethods([]string{"HS256"}))
+	if err != nil || !token.Valid {
+		t.Fatalf("invalid login token: %v", err)
+	}
+	cookies := rec.Result().Cookies()
+	if len(cookies) != 1 || !cookies[0].HttpOnly {
+		t.Fatal("missing HttpOnly login cookie")
 	}
 }

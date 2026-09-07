@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"slices"
 	"strconv"
-	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
@@ -72,7 +71,7 @@ func ApplyConfigChange(oldConfig config.Config, newConfig *config.Config, restar
 
 	if restartSignal != nil && action.ReStartWebServer {
 		restartSignal <- "restart_web_server"
-		tools.WaitUntilServerReady("localhost", uint16(newConfig.Port), 15*time.Second)
+		// HTTP 请求不能等待重启完成，否则 Shutdown 会等待这个尚未返回的请求。
 	}
 	if restartSignal != nil && action.StartTailscale {
 		restartSignal <- "start_tailscale"

@@ -47,7 +47,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<div x-show="!collapsed" x-transition>
 			<form
 				id="tailscale_config_form"
-				action={ templ.SafeURL(config.PrefixPath("/api/submit-tailscale-config")) }
+				action={ templ.SafeURL(config.PrefixPath("/api/configs/tailscale")) }
 				method="post"
 				class="flex flex-col justify-start w-full font-semibold items-left text-base-content"
 				x-data="{
@@ -383,8 +383,8 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 										FunnelTunnel: funnel,
 										FunnelLoginCheck: funnel_password_protection,
 									};
-									fetch(window.ComiGoPath("/api/submit-tailscale-config"), {
-										method: "POST",
+									fetch(window.ComiGoPath("/api/configs/tailscale"), {
+										method: "PATCH",
 										headers: {
 											"Content-Type": "application/json",
 											Accept: "application/json",

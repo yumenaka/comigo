@@ -15,14 +15,14 @@ import (
 )
 
 // DeleteBookCache 删除书籍的元数据和缓存文件
-// 示例 URL： http://127.0.0.1:1234/api/delete_book_cache?id=2b17a13
+// 示例 URL： /api/books/{id}/cache
 // 相关参数：
 // id：书籍的ID，必须参数  &id=2b17a13
 // delete_metadata: 是否删除元数据JSON文件，可选参数，默认 true  &delete_metadata=true
 // delete_cover: 是否删除封面缓存文件，可选参数，默认 true  &delete_cover=true
 // delete_image_cache: 是否删除图片缓存目录，可选参数，默认 true  &delete_image_cache=true
 func DeleteBookCache(c echo.Context) error {
-	id := c.QueryParam("id")
+	id := c.Param("id")
 	if id == "" {
 		return apiresp.BadRequest(c, "missing_param", "id is required", map[string]string{"param": "id"})
 	}

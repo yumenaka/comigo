@@ -12,7 +12,7 @@ import (
 )
 
 func GetParentBook(c echo.Context) error {
-	childID := c.QueryParam("id")
+	childID := c.Param("id")
 	if childID == "" {
 		return apiresp.BadRequest(c, "missing_param", "not set id param", map[string]string{"param": "id"})
 	}

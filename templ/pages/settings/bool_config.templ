@@ -36,14 +36,13 @@ templ BoolConfigJavaScript() {
 			async function updateBoolConfig(name, value) {
 				try {
 					const response = await fetch(
-						window.ComiGoPath("/api/update-bool-config"),
+						window.ComiGoPath("/api/configs/" + encodeURIComponent(name)),
 						{
-							method: "POST",
+							method: "PUT",
 							headers: {
 								"Content-Type": "application/json",
 							},
 							body: JSON.stringify({
-								name: name,
 								value: value,
 							}),
 						},

@@ -1,0 +1,95 @@
+package settings
+
+import "github.com/yumenaka/comigo/config"
+
+// ServerPanel 在设置页抽屉中展示服务状态，并提供刷新和重启入口。
+templ ServerPanel() {
+	<section id="server-control" class="panel-surface w-full min-w-0 shrink-0 my-2 p-3 border border-base-content/20 rounded-lg bg-base-100 text-base-content" aria-labelledby="server-control-title" x-data="serverControl()">
+		<h2 id="server-control-title" class="text-base font-semibold" x-text="i18next.t('server_control')"></h2>
+		<p class="text-xs leading-relaxed mt-1 mb-3 opacity-80" x-text="i18next.t('online_counts_description')"></p>
+		<dl class="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 text-sm" aria-live="polite">
+			<dt x-text="i18next.t('online_users')"></dt>
+			<dd class="text-right font-semibold tabular-nums break-all" x-text="info.onlineUsers ?? '—'"></dd>
+			<dt x-text="i18next.t('online_devices')"></dt>
+			<dd class="text-right font-semibold tabular-nums break-all" x-text="info.onlineDevices ?? '—'"></dd>
+			<dt x-text="i18next.t('active_connections')"></dt>
+			<dd class="text-right font-semibold tabular-nums break-all" x-text="info.connections ?? '—'"></dd>
+			<dt x-text="i18next.t('server_books')"></dt>
+			<dd class="text-right font-semibold tabular-nums break-all" x-text="info.NumberOfBooks ?? '—'"></dd>
+			<dt x-text="i18next.t('server_version')"></dt>
+			<dd class="text-right font-semibold tabular-nums break-all" x-text="info.Version ?? '—'"></dd>
+		</dl>
+		<div class="grid gap-2 mt-3">
+			<button type="button" class="panel-control w-full min-h-10 px-2 py-2 text-sm leading-snug font-semibold border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="refresh()" :disabled="busy" x-text="i18next.t('server_refresh')"></button>
+			if !config.GetCfg().ReadOnlyMode {
+				<button type="button" class="panel-control w-full min-h-10 px-2 py-2 text-sm leading-snug font-semibold border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="restart()" :disabled="busy" x-text="i18next.t('server_restart')"></button>
+			}
+		</div>
+		<p role="status" class="text-xs leading-relaxed mt-2 empty:hidden" x-text="message"></p>
+	</section>
+	<script>
+		// 控制面板复用既有登录 Cookie；轮询在 Alpine 销毁组件时停止。
+		function serverControl() {
+			return {
+				info: {},
+				busy: false,
+				message: "",
+				timer: null,
+				init() {
+					this.refresh();
+					this.timer = setInterval(() => {
+						if (!this.busy) this.refresh();
+					}, 10000);
+				},
+				destroy() {
+					clearInterval(this.timer);
+				},
+				async refresh() {
+					try {
+						const response = await fetch(window.ComiGoPath("/api/server"), {
+							cache: "no-store",
+						});
+						if (response.status === 401) {
+							clearInterval(this.timer);
+							this.message = i18next.t("err_login_required");
+							return;
+						}
+						if (!response.ok) throw new Error(response.status);
+						this.info = await response.json();
+						this.message = "";
+					} catch (error) {
+						this.message = i18next.t("err_network_error");
+					}
+				},
+				async restart() {
+					this.busy = true;
+					this.message = i18next.t("server_restarting");
+					try {
+						const response = await fetch(window.ComiGoPath("/api/restart"), {
+							method: "POST",
+						});
+						if (!response.ok) throw new Error(response.status);
+						// 重启会主动断开连接；等待健康检查恢复后重新加载最新页面与登录状态。
+						for (let attempt = 0; attempt < 30; attempt++) {
+							await new Promise((resolve) => setTimeout(resolve, 1000));
+							try {
+								const health = await fetch(window.ComiGoPath("/healthz"), {
+									cache: "no-store",
+								});
+								if (health.ok) {
+									window.location.reload();
+									return;
+								}
+							} catch (error) {}
+						}
+						throw new Error("restart timeout");
+					} catch (error) {
+						this.message = i18next.t("err_network_error");
+					} finally {
+						this.busy = false;
+					}
+				},
+			};
+		}
+	</script>
+}

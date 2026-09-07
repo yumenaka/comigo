@@ -67,14 +67,13 @@ templ NumberConfigJavaScript() {
 				}
 				try {
 					const response = await fetch(
-						window.ComiGoPath("/api/update-number-config"),
+						window.ComiGoPath("/api/configs/" + encodeURIComponent(name)),
 						{
-							method: "POST",
+							method: "PUT",
 							headers: {
 								"Content-Type": "application/json",
 							},
 							body: JSON.stringify({
-								name: name,
 								value: numValue,
 							}),
 						},

@@ -540,6 +540,10 @@ func UpdateConfigByJson(jsonString string) error {
 			return fmt.Errorf("set config field %s: %w", key, err)
 		}
 	}
+	// 控制接口会立即重启服务，拒绝非法端口，避免写入配置后丢失监听。
+	if candidate.Port < 0 || candidate.Port > 65535 {
+		return fmt.Errorf("Port must be between 0 and 65535")
+	}
 	cfg = candidate
 	return nil
 }

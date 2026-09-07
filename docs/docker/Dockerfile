@@ -25,8 +25,7 @@ COPY assets/ ./assets/
 COPY tailwind.config.js ./
 
 # 安装依赖并构建前端资源
-RUN bun install && \
-    bun run dev || true
+RUN bun install && bun run dev
 
 # ============================================================================
 # 第二阶段: Go 构建
