@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -296,8 +297,8 @@ func TestInitComigoStoreSkipsNestedRemoteBooks(t *testing.T) {
 					remoteBooks["group"].BookInfo,
 				},
 			}})
-		case "/api/get-book":
-			book, ok := remoteBooks[r.URL.Query().Get("id")]
+		case "/api/books/local", "/api/books/nested-remote", "/api/books/group":
+			book, ok := remoteBooks[strings.TrimPrefix(r.URL.Path, "/api/books/")]
 			if !ok {
 				http.NotFound(w, r)
 				return

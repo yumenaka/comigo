@@ -44,5 +44,11 @@ func GetServerInfoHandler(c echo.Context) error {
 			serverStatus.TailscaleUrl = href
 		}
 	}
-	return c.JSON(http.StatusOK, serverStatus)
+	connections, users, devices := connectionSnapshot()
+	return c.JSON(http.StatusOK, struct {
+		*tools.ServerStatus
+		OnlineUsers   int `json:"onlineUsers"`
+		OnlineDevices int `json:"onlineDevices"`
+		Connections   int `json:"connections"`
+	}{serverStatus, users, devices, len(connections)})
 }

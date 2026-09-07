@@ -9,7 +9,7 @@ import (
 // 验证远端版本读取优先使用服务信息中的版本字段。
 func TestGetServerVersionUsesVersionField(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/api/server-info" {
+		if r.URL.Path != "/api/server" {
 			http.NotFound(w, r)
 			return
 		}

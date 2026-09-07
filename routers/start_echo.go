@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"path"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -160,8 +161,13 @@ func StopWebServer() error {
 	return nil
 }
 
+var restartMutex sync.Mutex
+
 // RestartWebServer 停止当前服务器并重新启动，失败时返回错误，由调用方决定如何处理。
 func RestartWebServer() error {
+	// CLI 广播与 REST 请求共用同一重启锁，避免竞争监听端口。
+	restartMutex.Lock()
+	defer restartMutex.Unlock()
 	if err := StopWebServer(); err != nil {
 		return fmt.Errorf("%s: %w", locale.GetString("err_server_shutdown_failed"), err)
 	}

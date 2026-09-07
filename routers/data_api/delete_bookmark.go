@@ -13,7 +13,7 @@ import (
 )
 
 // DeleteBookmark 删除特定书签的 API 处理函数
-// DELETE /api/delete-bookmark
+// DELETE /api/bookmarks
 // 参数：book_id, mark_type, page_index
 func DeleteBookmark(c echo.Context) error {
 	request, err := parseDeleteBookmarkRequest(c)
@@ -29,7 +29,7 @@ func DeleteBookmark(c echo.Context) error {
 		query.Set("book_id", localBook.RemoteBookID)
 		query.Set("mark_type", string(request.MarkType))
 		query.Set("page_index", strconv.Itoa(request.PageIndex))
-		if _, _, err := client.Delete("/api/delete-bookmark", query); err != nil {
+		if _, _, err := client.Delete("/api/bookmarks", query); err != nil {
 			logger.Infof(locale.GetString("log_failed_to_delete_bookmark"), err)
 			return writeRemoteComigoError(c, err)
 		}

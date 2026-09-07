@@ -17,6 +17,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers/data_api"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/comigo_remote"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -156,12 +157,18 @@ func writeConfigAndApply(oldConfig config.Config) {
 func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 	// 解析 JSON 请求体
 	var request struct {
-		Name  string `json:"name"`
-		Value string `json:"value"`
+		Name  string  `json:"name"`
+		Value *string `json:"value"`
 	}
 	if err := c.Bind(&request); err != nil {
 		return "", "", fmt.Errorf("invalid JSON request: %v", err)
 	}
+
+	if request.Value == nil {
+		return "", "", errors.New("value is required")
+	}
+
+	request.Name = c.Param("name")
 
 	if request.Name == "" {
 		return "", "", errors.New("name is required")
@@ -175,14 +182,14 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 	// 更新前先保存旧配置，后续用于比较并触发副作用。
 	oldConfig := config.CopyCfg()
 	// 更新配置
-	if setErr := config.GetCfg().SetConfigValue(request.Name, request.Value); setErr != nil {
+	if setErr := config.GetCfg().SetConfigValue(request.Name, *request.Value); setErr != nil {
 		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
 		return "", "", setErr
 	}
 
 	writeConfigAndApply(oldConfig)
 
-	return request.Name, request.Value, nil
+	return request.Name, *request.Value, nil
 }
 
 // UpdateStringConfigHandler 处理 String 类型的 JSON API
@@ -213,11 +220,17 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 	// 解析 JSON 请求体
 	var request struct {
 		Name  string `json:"name"`
-		Value bool   `json:"value"`
+		Value *bool  `json:"value"`
 	}
 	if err := c.Bind(&request); err != nil {
 		return "", false, fmt.Errorf("invalid JSON request: %v", err)
 	}
+
+	if request.Value == nil {
+		return "", false, errors.New("value is required")
+	}
+
+	request.Name = c.Param("name")
 
 	if request.Name == "" {
 		return "", false, errors.New("name is required")
@@ -227,7 +240,7 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 	}
 
 	// 将 bool 转换为 string
-	newValue := strconv.FormatBool(request.Value)
+	newValue := strconv.FormatBool(*request.Value)
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name)
 
@@ -241,7 +254,7 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 
 	writeConfigAndApply(oldConfig)
 
-	return request.Name, request.Value, nil
+	return request.Name, *request.Value, nil
 }
 
 // UpdateBoolConfigHandler 处理 Bool 类型的 JSON API
@@ -272,21 +285,27 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, er
 	// 解析 JSON 请求体
 	var request struct {
 		Name  string `json:"name"`
-		Value int    `json:"value"`
+		Value *int   `json:"value"`
 	}
 	if err := c.Bind(&request); err != nil {
 		return "", 0, nil, fmt.Errorf("invalid JSON request: %v", err)
 	}
 
+	if request.Value == nil {
+		return "", 0, nil, errors.New("value is required")
+	}
+
+	request.Name = c.Param("name")
+
 	if request.Name == "" {
 		return "", 0, nil, errors.New("name is required")
 	}
-	if err := validateNumberConfig(request.Name, request.Value); err != nil {
+	if err := validateNumberConfig(request.Name, *request.Value); err != nil {
 		return "", 0, nil, err
 	}
 
 	// 将 int 转换为 string
-	newValue := strconv.Itoa(request.Value)
+	newValue := strconv.Itoa(*request.Value)
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name)
 
@@ -302,7 +321,7 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, er
 	if writeErr := config.UpdateConfigFile(); writeErr != nil {
 		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
-	return request.Name, request.Value, &oldConfig, nil
+	return request.Name, *request.Value, &oldConfig, nil
 }
 
 // UpdateNumberConfigHandler 处理 Number 类型的配置
@@ -470,30 +489,22 @@ func AddArrayConfigHandler(c echo.Context) error {
 		return err
 	}
 
-	// 解析 JSON 请求体
 	var request struct {
-		ConfigName string `json:"configName"`
-		AddValue   string `json:"addValue"`
+		Value string `json:"value"`
 	}
 	if err := c.Bind(&request); err != nil {
 		return jsonBadRequest(err)
 	}
-
-	if request.ConfigName == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "configName is required")
-	}
-
-	decodedConfigName, err := decodeBase64URLStrict(request.ConfigName)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "configName is not valid base64url")
-	}
+	decodedConfigName := c.Param("name")
 	if err := validateArrayConfigName(decodedConfigName); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.ErrNotFound
 	}
-	decodedAddValue, err := decodeBase64URLStrict(request.AddValue)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "addValue is not valid base64url")
+	if strings.TrimSpace(request.Value) == "" {
+		return echo.ErrBadRequest
 	}
+	decodedAddValue := request.Value
+	var err error
+
 	logger.Infof(locale.GetString("log_add_array_config_handler"), decodedConfigName)
 
 	var values []string
@@ -626,33 +637,23 @@ func EnablePluginHandler(c echo.Context) error {
 		return err
 	}
 
-	// 解析 JSON 请求体
-	var request struct {
-		PluginName string `json:"pluginName"`
-	}
-	if err := c.Bind(&request); err != nil {
-		return jsonBadRequest(err)
-	}
+	pluginName := c.Param("name")
 
-	if request.PluginName == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "pluginName is required")
-	}
-
-	logger.Infof(locale.GetString("log_plugin_enabled"), request.PluginName)
+	logger.Infof(locale.GetString("log_plugin_enabled"), pluginName)
 
 	// 互斥逻辑：auto_flip 和 sketch_practice 不能同时启用
-	if request.PluginName == "sketch_practice" && config.GetCfg().IsPluginEnabled("auto_flip") {
+	if pluginName == "sketch_practice" && config.GetCfg().IsPluginEnabled("auto_flip") {
 		// 启用 sketch_practice 时，禁用 auto_flip
 		logger.Infof(locale.GetString("log_disable_mutex_plugin_auto_flip") + "\n")
 		_ = config.GetCfg().DisablePlugin("auto_flip")
-	} else if request.PluginName == "auto_flip" && config.GetCfg().IsPluginEnabled("sketch_practice") {
+	} else if pluginName == "auto_flip" && config.GetCfg().IsPluginEnabled("sketch_practice") {
 		// 启用 auto_flip 时，禁用 sketch_practice
 		logger.Infof(locale.GetString("log_disable_mutex_plugin_sketch_practice") + "\n")
 		_ = config.GetCfg().DisablePlugin("sketch_practice")
 	}
 
 	// 启用插件
-	err := config.GetCfg().AddPlugin(request.PluginName)
+	err := config.GetCfg().AddPlugin(pluginName)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_update_config_failed"))
 	}
@@ -676,22 +677,12 @@ func DisablePluginHandler(c echo.Context) error {
 		return err
 	}
 
-	// 解析 JSON 请求体
-	var request struct {
-		PluginName string `json:"pluginName"`
-	}
-	if err := c.Bind(&request); err != nil {
-		return jsonBadRequest(err)
-	}
+	pluginName := c.Param("name")
 
-	if request.PluginName == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "pluginName is required")
-	}
-
-	logger.Infof(locale.GetString("log_plugin_disabled"), request.PluginName)
+	logger.Infof(locale.GetString("log_plugin_disabled"), pluginName)
 
 	// 禁用插件
-	err := config.GetCfg().DisablePlugin(request.PluginName)
+	err := config.GetCfg().DisablePlugin(pluginName)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_update_config_failed"))
 	}
@@ -714,34 +705,22 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 		return err
 	}
 
-	// 解析 JSON 请求体
 	var request struct {
-		ConfigName  string `json:"configName"`
-		DeleteValue string `json:"deleteValue"`
+		Value string `json:"value"`
 	}
 	if err := c.Bind(&request); err != nil {
 		return jsonBadRequest(err)
 	}
-
-	if request.ConfigName == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "configName is required")
-	}
-
-	if request.DeleteValue == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "deleteValue is required")
-	}
-
-	decodedConfigName, err := decodeBase64URLStrict(request.ConfigName)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "configName is not valid base64url")
-	}
+	decodedConfigName := c.Param("name")
 	if err := validateArrayConfigName(decodedConfigName); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.ErrNotFound
 	}
-	decodedDeleteValue, err := decodeBase64URLStrict(request.DeleteValue)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "deleteValue is not valid base64url")
+	if strings.TrimSpace(request.Value) == "" {
+		return echo.ErrBadRequest
 	}
+	decodedDeleteValue := request.Value
+	var err error
+
 	logger.Infof(locale.GetString("log_delete_array_config_handler"), decodedConfigName)
 
 	values, err := doDelete(decodedConfigName, decodedDeleteValue)
@@ -783,30 +762,20 @@ func renderTemplToString(ctx context.Context, component templ.Component) (string
 	return buf.String(), nil
 }
 
-// HandleConfigSave 处理 /api/config-save 的 JSON API
+// HandleConfigSave 保存指定位置的配置文件资源。
 func HandleConfigSave(c echo.Context) error {
 	if err := ensureWritableConfig(); err != nil {
 		return err
 	}
 
-	// 解析 JSON 请求体
-	var request struct {
-		SelectedDir string `json:"selectedDir"`
-	}
-	if err := c.Bind(&request); err != nil {
-		return jsonBadRequest(err)
-	}
+	selectedDir := c.Param("location")
 
-	if request.SelectedDir == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "No directory selected")
-	}
-
-	if request.SelectedDir != config.WorkingDirectory && request.SelectedDir != config.HomeDirectory && request.SelectedDir != config.ProgramDirectory {
+	if selectedDir != config.WorkingDirectory && selectedDir != config.HomeDirectory && selectedDir != config.ProgramDirectory {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid directory selected")
 	}
 
 	// 保存配置
-	if err := config.SaveConfig(request.SelectedDir); err != nil {
+	if err := config.SaveConfig(selectedDir); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_save_config_failed"))
 	}
 
@@ -822,30 +791,20 @@ func HandleConfigSave(c echo.Context) error {
 	})
 }
 
-// HandleConfigDelete 处理 /api/config-delete 的 JSON API
+// HandleConfigDelete 删除指定位置的配置文件资源。
 func HandleConfigDelete(c echo.Context) error {
 	if err := ensureWritableConfig(); err != nil {
 		return err
 	}
 
-	// 解析 JSON 请求体
-	var request struct {
-		SelectedDir string `json:"selectedDir"`
-	}
-	if err := c.Bind(&request); err != nil {
-		return jsonBadRequest(err)
-	}
+	selectedDir := c.Param("location")
 
-	if request.SelectedDir == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "No directory selected")
-	}
-
-	if request.SelectedDir != config.WorkingDirectory && request.SelectedDir != config.HomeDirectory && request.SelectedDir != config.ProgramDirectory {
+	if selectedDir != config.WorkingDirectory && selectedDir != config.HomeDirectory && selectedDir != config.ProgramDirectory {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid directory selected")
 	}
 
 	// 删除配置
-	if err := config.DeleteConfigIn(request.SelectedDir); err != nil {
+	if err := config.DeleteConfigIn(selectedDir); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_config_failed"))
 	}
 
@@ -867,22 +826,11 @@ func RescanStoreHandler(c echo.Context) error {
 		return err
 	}
 
-	// 解析 JSON 请求体
-	var request struct {
-		StoreUrl string `json:"storeUrl"`
-	}
-	if err := c.Bind(&request); err != nil {
-		return jsonBadRequest(err)
-	}
-
-	if request.StoreUrl == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is required")
-	}
-
-	storeUrl, err := decodeBase64URLStrict(request.StoreUrl)
+	storeUrl, err := data_api.StoreURLFromID(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is not valid base64url")
+		return err
 	}
+
 	return rescanOneStore(c, storeUrl)
 }
 
@@ -1031,22 +979,11 @@ func DeleteStoreHandler(c echo.Context) error {
 		return err
 	}
 
-	// 解析 JSON 请求体
-	var request struct {
-		StoreUrl string `json:"storeUrl"`
-	}
-	if err := c.Bind(&request); err != nil {
-		return jsonBadRequest(err)
-	}
-
-	if request.StoreUrl == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is required")
-	}
-
-	storeUrl, err := decodeBase64URLStrict(request.StoreUrl)
+	storeUrl, err := data_api.StoreURLFromID(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "storeUrl is not valid base64url")
+		return err
 	}
+
 	logger.Infof(locale.GetString("log_delete_store"), storeUrl)
 
 	// 先删除该书库的所有书籍数据
@@ -1103,4 +1040,20 @@ func DeleteStoreHandler(c echo.Context) error {
 		"html":    htmlString,
 		"message": locale.GetString("delete_store_success"),
 	})
+}
+
+// UpdateValueConfigHandler 按配置名路由到已有校验与副作用处理，不再按数据类型暴露三个动作 API。
+func UpdateValueConfigHandler(c echo.Context) error {
+	name := c.Param("name")
+	if validateStringConfigName(name) == nil {
+		return UpdateStringConfigHandler(c)
+	}
+	if validateBoolConfigName(name) == nil {
+		return UpdateBoolConfigHandler(c)
+	}
+	switch name {
+	case "TimeoutLimitForScan", "AutoRescanIntervalMinutes", "Port", "Timeout", "MaxScanDepth", "MinImageNum":
+		return UpdateNumberConfigHandler(c)
+	}
+	return echo.ErrNotFound
 }

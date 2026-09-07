@@ -2,6 +2,7 @@ package login
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -57,19 +58,16 @@ func setTokenCookie(c echo.Context, token string) {
 	c.SetCookie(cookie)
 }
 
-// issueLoginCookie 为指定用户签发 JWT 并写入 Cookie。
-func issueLoginCookie(c echo.Context, username string) error {
-	token, err := signedToken(newClaims(username))
-	if err != nil {
-		return err
-	}
-	setTokenCookie(c, token)
-	return nil
-}
-
 func Login(c echo.Context) error {
-	username := c.FormValue("username")
-	password := c.FormValue("password")
+	// 表单用于浏览器登录，JSON 用于签发 REST 客户端的 Bearer 令牌。
+	var request struct {
+		Username string `json:"username" form:"username"`
+		Password string `json:"password" form:"password"`
+	}
+	if err := c.Bind(&request); err != nil {
+		return echo.ErrBadRequest
+	}
+	username, password := request.Username, request.Password
 	// 如果未配置密码登录，则不接受表单登录
 	if !config.GetCfg().HasPasswordLoginConfigured() {
 		return echo.ErrTeapot
@@ -79,8 +77,13 @@ func Login(c echo.Context) error {
 		logger.Infof(locale.GetString("log_login_failed"), username)
 		return echo.ErrUnauthorized
 	}
-	if err := issueLoginCookie(c, username); err != nil {
+	token, err := signedToken(newClaims(username))
+	if err != nil {
 		return err
+	}
+	setTokenCookie(c, token)
+	if strings.HasPrefix(c.Request().Header.Get(echo.HeaderContentType), echo.MIMEApplicationJSON) {
+		return c.JSON(http.StatusOK, echo.Map{"token": token, "token_type": "Bearer", "expires_in": int(loginDuration().Seconds())})
 	}
 
 	// 返回登录成功信息，不再返回token本身

@@ -173,9 +173,9 @@ templ UserInfoConfig() {
 						form.__x.$data.saving = true;
 					}
 					const response = await fetch(
-						window.ComiGoPath("/api/update-login-settings"),
+						window.ComiGoPath("/api/configs/login"),
 						{
-							method: "POST",
+							method: "PATCH",
 							headers: {
 								"Content-Type": "application/json",
 							},

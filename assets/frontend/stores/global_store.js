@@ -384,7 +384,7 @@ Alpine.store('global', {
         window.location.reload();
     },
     /**
-     * 调用后端 /api/store-bookmark 接口，更新书签信息
+     * 调用后端 /api/bookmarks 接口，更新书签信息
      * @param {Object} params
      * @param {string} params.type - 书签类型，例如 'auto'
      * @param {string} params.bookId - 书籍ID
@@ -420,7 +420,7 @@ Alpine.store('global', {
             page_index: pageIndex,
             description: description
         };
-        let bookmarkURL = '/api/store-bookmark';
+        let bookmarkURL = '/api/bookmarks';
         const remoteStore = currentRemoteStore;
         if (remoteStore) {
             bookmarkURL = setURLQueryParam(bookmarkURL, 'remote_store', remoteStore);

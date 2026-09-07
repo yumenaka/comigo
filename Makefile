@@ -3,8 +3,8 @@
 ## ============================================================================
 ##
 ## 本 Makefile 已拆分为模块化结构，主要功能分为两部分：
-## 1. macOS App 打包（docs/makefiles/macos-app.mk）
-## 2. 跨平台编译（docs/makefiles/cross-compile.mk）
+## 1. macOS App 打包（docs/macos-app.mk）
+## 2. 跨平台编译（docs/cross-compile.mk）
 ##
 ## 常用命令：
 ##   make all              - 编译 CLI + deb + tray + Wails desktop 发布包并生成校验
@@ -101,10 +101,10 @@ wails-build: desktop-current
 ## ============================================================================
 
 # 引入 macOS App 打包相关规则
-include docs/makefiles/macos-app.mk
+include docs/macos-app.mk
 
 # 引入跨平台编译相关规则
-include docs/makefiles/cross-compile.mk
+include docs/cross-compile.mk
 
 ## ============================================================================
 ## Docker 镜像构建目标

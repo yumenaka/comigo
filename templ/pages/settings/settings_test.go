@@ -16,6 +16,7 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools/sse_hub"
 )
 
 // 提供设置页书库计数测试所需的最小内存书库。
@@ -214,17 +215,21 @@ func TestMainAreaHidesServerLogInWailsBuild(t *testing.T) {
 func TestGenericConfigEndpointsOnlyAllowRenderedFields(t *testing.T) {
 	e := echo.New()
 	for _, test := range []struct {
-		name string
-		body string
-		call func(echo.Context) error
+		name  string
+		field string
+		body  string
+		call  func(echo.Context) error
 	}{
-		{name: "password", body: `{"name":"Password","value":"changed"}`, call: func(c echo.Context) error { _, _, err := updateStringConfigFromJSON(c); return err }},
-		{name: "oversized port", body: `{"name":"Port","value":70000}`, call: func(c echo.Context) error { _, _, _, err := updateNumberConfigFromJSON(c); return err }},
+		{name: "password", field: "Password", body: `{"name":"Password","value":"changed"}`, call: func(c echo.Context) error { _, _, err := updateStringConfigFromJSON(c); return err }},
+		{name: "oversized port", field: "Port", body: `{"name":"Port","value":70000}`, call: func(c echo.Context) error { _, _, _, err := updateNumberConfigFromJSON(c); return err }},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, "/api/config", strings.NewReader(test.body))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-			if err := test.call(e.NewContext(req, httptest.NewRecorder())); err == nil {
+			ctx := e.NewContext(req, httptest.NewRecorder())
+			ctx.SetParamNames("name")
+			ctx.SetParamValues(test.field)
+			if err := test.call(ctx); err == nil {
 				t.Fatal("unexposed config field should be rejected")
 			}
 		})
@@ -256,11 +261,11 @@ func TestRemoteComigoVersionWarningAllowsNewerRemote(t *testing.T) {
 	}
 }
 
-// 创建只响应 /api/server-info 的测试服务器。
+// 创建只响应 /api/server 的测试服务器。
 func newServerInfoTestServer(t *testing.T, body string) *httptest.Server {
 	t.Helper()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/api/server-info" {
+		if r.URL.Path != "/api/server" {
 			http.NotFound(w, r)
 			return
 		}
@@ -268,4 +273,26 @@ func newServerInfoTestServer(t *testing.T, body string) *httptest.Server {
 	}))
 	t.Cleanup(server.Close)
 	return server
+}
+
+// 验证没有 CLI 广播的嵌入式模式也会在凭据变化时关闭旧 SSE 连接。
+func TestCredentialChangeClosesEmbeddedConnections(t *testing.T) {
+	oldHub, oldBroadcast := sse_hub.MessageHub, RestartWebServerBroadcast
+	defer func() { sse_hub.MessageHub = oldHub; RestartWebServerBroadcast = oldBroadcast }()
+	sse_hub.MessageHub = sse_hub.NewHub()
+	RestartWebServerBroadcast = nil
+	events := make(chan sse_hub.Event, 1)
+	sse_hub.MessageHub.Add("test", events)
+	old := config.CopyCfg()
+	next := old
+	next.Password = old.Password + "changed"
+	beforeConfigUpdate(old, &next)
+	select {
+	case _, ok := <-events:
+		if ok {
+			t.Fatal("旧连接未关闭")
+		}
+	default:
+		t.Fatal("旧连接未关闭")
+	}
 }

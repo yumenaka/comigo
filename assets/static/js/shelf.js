@@ -91,10 +91,10 @@ const rescanShelfStore = async (path, body, logMessage) => {
 };
 
 window.ComiGoShelf.rescanStore = (storeUrlB64) =>
-  rescanShelfStore("/api/rescan-store", { storeUrl: storeUrlB64 }, "重新扫描书库失败:");
+  rescanShelfStore("/api/stores/" + encodeURIComponent(storeUrlB64) + "/refresh", null, "重新扫描书库失败:");
 
 window.ComiGoShelf.rescanAllStores = () =>
-  rescanShelfStore("/api/rescan-all-stores", null, "重新扫描全部书库失败:");
+  rescanShelfStore("/api/stores/refresh", null, "重新扫描全部书库失败:");
 
 (() => {
   if (!window.ComiGoIsWails?.()) return;

@@ -1021,5 +1021,15 @@
   "working_directory": "作業ディレクトリ",
   "zip_encode": "ZIPファイルのエンコードを手動指定（gbk, shiftjisなど）",
   "zip_file_text_encoding": "UTF-8ではありません",
-  "zip_file_text_encoding_description": "utf-8 以外でエンコードされた ZIP ファイル。解析するにはどのエンコードを使用する必要があります。デフォルトのGBK。"
+  "zip_file_text_encoding_description": "utf-8 以外でエンコードされた ZIP ファイル。解析するにはどのエンコードを使用する必要があります。デフォルトのGBK。",
+  "server_control": "サーバー管理",
+  "online_counts_description": "現在のリアルタイム接続を集計します。ユーザーはアカウント別、端末はブラウザー別に数えます。",
+  "online_users": "オンラインユーザー",
+  "online_devices": "オンライン端末",
+  "active_connections": "接続数",
+  "server_books": "書籍数",
+  "server_version": "バージョン",
+  "server_refresh": "状態を更新",
+  "server_restart": "サーバーを再起動",
+  "server_restarting": "再起動しています…"
 }

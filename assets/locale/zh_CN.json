@@ -1021,5 +1021,15 @@
   "working_directory": "当前工作目录",
   "zip_encode": "指定zip文件编码（gbk、shiftjis等）",
   "zip_file_text_encoding": "非UTF-8",
-  "zip_file_text_encoding_description": "非utf-8编码ZIP文件，尝试用什么编码解析。默认GBK。"
+  "zip_file_text_encoding_description": "非utf-8编码ZIP文件，尝试用什么编码解析。默认GBK。",
+  "server_control": "服务控制",
+  "online_counts_description": "仅统计当前实时连接。用户按登录账号去重，设备按浏览器去重。",
+  "online_users": "在线用户",
+  "online_devices": "在线设备",
+  "active_connections": "实时连接",
+  "server_books": "书籍数量",
+  "server_version": "版本",
+  "server_refresh": "刷新状态",
+  "server_restart": "重启服务",
+  "server_restarting": "正在重启服务…"
 }

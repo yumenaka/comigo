@@ -22,7 +22,13 @@ var engine *echo.Echo
 
 func InitEcho() {
 	// ***共通的 404 页面，需要在创建路由之前就替换***
-	echo.NotFoundHandler = error_page.NotFoundCommon
+	echo.NotFoundHandler = func(c echo.Context) error {
+		// 控制接口的未知资源始终返回 JSON 错误，页面继续渲染 404。
+		if strings.HasPrefix(config.StripBasePath(c.Request().URL.Path), "/api/") {
+			return echo.ErrNotFound
+		}
+		return error_page.NotFoundCommon(c)
+	}
 	// 创建新的 Echo 实例
 	engine = echo.New()
 	// 禁用 Echo 的 banner

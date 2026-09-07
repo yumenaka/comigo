@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
@@ -22,6 +23,7 @@ func GetTailscaleStatus(c echo.Context) error {
 
 // GetTailscaleStatusSSE 通过 SSE 推送 Tailscale 状态，替代设置页里的轮询。
 func GetTailscaleStatusSSE(c echo.Context) error {
+	authKey := config.GetJwtSigningKey()
 	flusher, ok := c.Response().Writer.(http.Flusher)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "streaming unsupported")
@@ -63,6 +65,10 @@ func GetTailscaleStatusSSE(c echo.Context) error {
 		case <-c.Request().Context().Done():
 			return nil
 		case <-ticker.C:
+			// 独立状态流也不能在账号密码变化后继续输出敏感信息。
+			if authKey != config.GetJwtSigningKey() {
+				return nil
+			}
 			if err := writeStatus(); err != nil {
 				return err
 			}

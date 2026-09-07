@@ -261,6 +261,8 @@ func TestUpdateConfigByJsonRejectsPartialAndRuntimeUpdates(t *testing.T) {
 		`{"ConfigFile":"outside.toml"}`,
 		`{"Password":"changed"}`,
 		`{"Port":1234.5}`,
+		`{"Debug":true,"Port":70000}`,
+		`{"Port":-1}`,
 	} {
 		if err := UpdateConfigByJson(body); err == nil {
 			t.Fatalf("invalid update should fail: %s", body)

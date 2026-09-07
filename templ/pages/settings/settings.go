@@ -8,10 +8,12 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers/websocket"
 	"github.com/yumenaka/comigo/templ/common"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/service"
+	"github.com/yumenaka/comigo/tools/sse_hub"
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
@@ -116,6 +118,11 @@ var RestartWebServerBroadcast *chan string
 
 // beforeConfigUpdate 根据配置的变化，判断是否需要打开浏览器重新扫描等
 func beforeConfigUpdate(oldConfig config.Config, newConfig *config.Config) {
+	// 账号密码变化后关闭旧认证的实时连接；嵌入式模式没有 CLI 重启广播，也必须重新认证。
+	if oldConfig.Username != newConfig.Username || oldConfig.Password != newConfig.Password {
+		sse_hub.MessageHub.CloseAll()
+		websocket.CloseAll()
+	}
 	if RestartWebServerBroadcast == nil {
 		service.ApplyConfigChange(oldConfig, newConfig, nil)
 		return

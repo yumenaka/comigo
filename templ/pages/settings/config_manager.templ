@@ -166,15 +166,14 @@ templ ConfigManagerJavaScript() {
 			async function saveConfig(selectedDir) {
 				// 发送保存请求
 				try {
-					const response = await fetch(window.ComiGoPath("/api/config-save"), {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
+					const response = await fetch(
+						window.ComiGoPath(
+							"/api/configs/files/" + encodeURIComponent(selectedDir),
+						),
+						{
+							method: "PUT",
 						},
-						body: JSON.stringify({
-							selectedDir: selectedDir,
-						}),
-					});
+					);
 					// 检查响应状态
 					if (!response.ok) {
 						showToast(i18next.t("err_save_config_failed"), "error");
@@ -234,15 +233,11 @@ templ ConfigManagerJavaScript() {
 				// 发送删除请求
 				try {
 					const response = await fetch(
-						window.ComiGoPath("/api/config-delete"),
+						window.ComiGoPath(
+							"/api/configs/files/" + encodeURIComponent(selectedDir),
+						),
 						{
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-							},
-							body: JSON.stringify({
-								selectedDir: selectedDir,
-							}),
+							method: "DELETE",
 						},
 					);
 					// 检查响应状态

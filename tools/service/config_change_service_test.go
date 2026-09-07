@@ -2,6 +2,7 @@ package service
 
 import (
 	"testing"
+	"time"
 
 	"github.com/yumenaka/comigo/config"
 )
@@ -189,5 +190,22 @@ func TestBuildConfigChangeActionRestartTailscaleWhenConfigChanges(t *testing.T) 
 				t.Fatalf("expected StopTailscale=false")
 			}
 		})
+	}
+}
+
+// 验证配置请求只提交重启信号，不等待新监听就绪，避免与 HTTP Shutdown 互相等待。
+func TestApplyConfigChangeDoesNotWaitForRestart(t *testing.T) {
+	old := config.Config{Username: "old"}
+	next := config.Config{Username: "new"}
+	signal := make(chan string, 1)
+	done := make(chan struct{})
+	go func() { ApplyConfigChange(old, &next, signal); close(done) }()
+	select {
+	case <-done:
+		if got := <-signal; got != "restart_web_server" {
+			t.Fatalf("unexpected signal: %s", got)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("配置更新不应等待重启完成")
 	}
 }

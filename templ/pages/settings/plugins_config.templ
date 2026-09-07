@@ -80,17 +80,11 @@ templ PluginsConfigJavaScript() {
 			// 启用/禁用插件
 			async function togglePlugin(pluginName, enabled) {
 				try {
-					const endpoint = enabled
-						? window.ComiGoPath("/api/enable-plugin")
-						: window.ComiGoPath("/api/disable-plugin");
+					const endpoint = window.ComiGoPath(
+						"/api/plugins/" + encodeURIComponent(pluginName),
+					);
 					const response = await fetch(endpoint, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({
-							pluginName: pluginName,
-						}),
+						method: enabled ? "PUT" : "DELETE",
 					});
 
 					if (!response.ok) {

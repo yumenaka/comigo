@@ -155,11 +155,10 @@ func (c *Client) GetTopShelf(sortBy string) ([]model.StoreBookInfo, error) {
 // GetBook 获取远端书籍详情。
 func (c *Client) GetBook(remoteBookID string, sortBy string) (*model.Book, error) {
 	query := url.Values{}
-	query.Set("id", remoteBookID)
 	if sortBy != "" {
 		query.Set("sort_by", sortBy)
 	}
-	data, _, err := c.doBytes(http.MethodGet, "/api/get-book", query, nil, "")
+	data, _, err := c.doBytes(http.MethodGet, "/api/books/"+url.PathEscape(remoteBookID), query, nil, "")
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +178,7 @@ func (c *Client) GetBook(remoteBookID string, sortBy string) (*model.Book, error
 
 // GetServerVersion 获取远端 Comigo 的明确版本字段。
 func (c *Client) GetServerVersion() (string, error) {
-	data, _, err := c.doBytes(http.MethodGet, "/api/server-info", nil, nil, "")
+	data, _, err := c.doBytes(http.MethodGet, "/api/server", nil, nil, "")
 	if err != nil {
 		return "", err
 	}
@@ -192,7 +191,7 @@ func (c *Client) GetServerVersion() (string, error) {
 
 // GetAllBookmarks 获取远端所有书签。
 func (c *Client) GetAllBookmarks() ([]model.BookinfoWithBookMark, error) {
-	data, _, err := c.doBytes(http.MethodGet, "/api/all-bookmarks", nil, nil, "")
+	data, _, err := c.doBytes(http.MethodGet, "/api/bookmarks", nil, nil, "")
 	if err != nil {
 		return nil, err
 	}
