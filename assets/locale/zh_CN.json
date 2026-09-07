@@ -721,6 +721,7 @@
   "reader_select_archive": "选择本地文件",
   "reader_select_archive_hint": "支持多选图片；多选 ZIP/CBZ/RAR/CBR/PDF 时仅打开第一个文件。文件只在浏览器中读取，不会上传",
   "reader_settings": "阅读设置",
+  "user_manual": "阅读手册",
   "electron_open_external": "浏览器打开",
   "open_external_browser": "外部浏览器打开",
   "electron_open_settings": "应用设置",

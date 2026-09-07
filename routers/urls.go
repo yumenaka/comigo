@@ -17,6 +17,7 @@ import (
 	"github.com/yumenaka/comigo/routers/websocket"
 	"github.com/yumenaka/comigo/templ/pages/flip"
 	"github.com/yumenaka/comigo/templ/pages/login_page"
+	"github.com/yumenaka/comigo/templ/pages/manual"
 	"github.com/yumenaka/comigo/templ/pages/player"
 	"github.com/yumenaka/comigo/templ/pages/reader"
 	"github.com/yumenaka/comigo/templ/pages/scroll"
@@ -28,6 +29,11 @@ import (
 
 // BindURLs 为前端绑定 API 路由
 func BindURLs() {
+	// Manual 固定在根路径且始终公开，不受 BasePath 与登录保护影响。
+	engine.GET("/manual", manual.Handler)
+	engine.GET("/manual/", manual.Handler)
+	engine.GET("/manual/*", manual.Handler)
+
 	// 绑定公开页面与api
 	basePath := config.GetBasePath()
 	if basePath != "" {

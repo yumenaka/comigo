@@ -14,6 +14,7 @@ ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片�
 - `templ/**/*_templ.go` 和 `assets/dist/*` 是生成产物；不要手动编辑生成产物实现业务逻辑。
 - `assets/wailsjs/*` 是 Wails 生成产物；修改 Wails 绑定或升级 Wails 后允许同步，但不要手写业务逻辑。
 - 修改 `*.templ` 后执行 `templ fmt ./templ && templ generate`；修改 `assets/frontend/*` 或 `assets/locale/*` 后执行 `bun run dev` 或等价构建命令。
+- `templ/pages/manual/` 是内置手册页面，正文翻译独立放在 `assets/static/manual-content/*.json`；不需要单独构建，示例图片只使用 HTTPS 外链。
 - 提交/review 前分开检查源码和生成产物；生成产物必须能被本轮源码变化解释，不能混入无关 churn。
 - 汇报时说明哪些是源码修改，哪些只是同步生成产物。
 

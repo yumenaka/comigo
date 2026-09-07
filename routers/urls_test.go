@@ -36,6 +36,26 @@ func TestRealtimeAPIRequiresAuthWhenPasswordConfigured(t *testing.T) {
 	}
 }
 
+// 验证 Manual 即使启用登录也保持公开。
+func TestManualIsPublicWhenPasswordConfigured(t *testing.T) {
+	restore := withRouterAuthTestConfig(t)
+	defer restore()
+	config.GetCfg().BasePath = "/comics"
+
+	oldEngine := engine
+	t.Cleanup(func() { engine = oldEngine })
+	engine = echo.New()
+	BindURLs()
+	rec := httptest.NewRecorder()
+	engine.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/manual/", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/manual/ status = %d, want %d", rec.Code, http.StatusOK)
+	}
+	if !strings.Contains(rec.Body.String(), `/comics/assets/static/js/manual.js`) {
+		t.Fatal("Manual 静态资源没有跟随 BasePath")
+	}
+}
+
 // 验证阅读器离线缓存名会带上当前版本号，避免旧缓存长期命中。
 func TestRenderReaderServiceWorkerUsesComigoVersion(t *testing.T) {
 	got := string(renderReaderServiceWorker([]byte("const CACHE_NAME = __COMIGO_READER_PWA_CACHE_NAME__")))

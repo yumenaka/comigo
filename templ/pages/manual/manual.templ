@@ -1,0 +1,108 @@
+package manual
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets"
+	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/templ/common/svg"
+)
+
+// ManualDocument 使用现有主题与前端基础脚本，但不加载书架插件和主翻译正文。
+templ ManualDocument(c echo.Context, language string, page string) {
+	<!DOCTYPE html>
+	<html lang={ language }>
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>ComiGo 用户手册</title>
+			<meta name="description" content="ComiGo 用户手册：安装、阅读、书库管理与服务器部署。"/>
+			<link rel="icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) }/>
+			@templ.Raw(assets.GetBasePathScript(assets.IsWailsWebViewRequest(c.Request())))
+			@templ.Raw(assets.GetCSS(false))
+			<link rel="stylesheet" href={ templ.SafeURL(config.PrefixPath("/assets/static/css/manual.css")) }/>
+		</head>
+		<body
+			x-data="{}"
+			x-bind:data-theme="$store.global.getEffectiveTheme()"
+			x-bind:style="'--custom-base-100:' + $store.global.customBase100 + ';--custom-base-300:' + $store.global.customBase300 + ';--custom-base-content:' + $store.global.customBaseContent + ';'"
+			class="m-0 min-h-screen w-full bg-base-300 text-base-content"
+		>
+			<div id="ManualApp" data-language={ language } data-page={ page }>
+				<header class="manual-header">
+					<a class="flex shrink-0 justify-center items-center w-10 h-10 mx-1 my-0 rounded hover:ring" href={ templ.SafeURL(config.PrefixPath("/")) } data-manual-back data-manual-label="back" aria-label="返回阅读器">
+						@svg.Return()
+					</a>
+					<a class="manual-brand" href="/manual/" data-manual-label="manualTitle" aria-label="ComiGo 用户手册">
+						<img src={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) } alt=""/>
+						<span data-manual-text="manualTitle">ComiGo 用户手册</span>
+					</a>
+					<nav class="manual-top-links" data-manual-label="mainNavigation" aria-label="顶部导航">
+						<a href={ templ.SafeURL(config.PrefixPath("/")) }>ComiGo</a>
+						<a href="https://github.com/yumenaka/comigo" target="_blank" rel="noopener">GitHub</a>
+						<a href="https://github.com/yumenaka/comigo/releases" target="_blank" rel="noopener" data-manual-text="releases">更新日志</a>
+					</nav>
+					<div class="manual-header-actions">
+						<button type="button" class="manual-mobile-only" data-manual-search-open data-manual-label="search" aria-label="搜索手册" aria-haspopup="dialog" aria-controls="ManualSearch">
+							@searchIcon()
+						</button>
+						<label class="manual-language">
+							<span data-manual-text="language">语言</span>
+							<select data-manual-language data-manual-label="language" aria-label="语言">
+								<option value="zh-CN">中文</option>
+								<option value="ja">日本語</option>
+								<option value="en-US">English</option>
+							</select>
+						</label>
+						<button type="button" class="manual-mobile-only" data-manual-menu data-manual-label="menu" aria-label="目录" aria-controls="ManualSidebar" aria-expanded="false">☰ <span data-manual-text="menu">目录</span></button>
+					</div>
+				</header>
+				<button type="button" class="manual-backdrop" data-manual-menu-close data-manual-label="close" aria-label="关闭" tabindex="-1"></button>
+				<div class="manual-layout">
+					<aside class="manual-sidebar" id="ManualSidebar" data-manual-label="manualNavigation" aria-label="手册目录">
+						<button type="button" class="manual-search-field manual-search-trigger" data-manual-search-open aria-haspopup="dialog" aria-controls="ManualSearch">
+							@searchIcon()
+							<span data-manual-text="search">搜索手册</span>
+							<kbd data-manual-shortcut aria-hidden="true">Ctrl K</kbd>
+						</button>
+						<nav data-manual-nav></nav>
+					</aside>
+					<main class="manual-main" id="ManualMain" tabindex="-1">
+						<details class="manual-mobile-outline">
+							<summary data-manual-text="onThisPage">本页目录</summary>
+							<nav data-manual-outline-mobile></nav>
+						</details>
+						<article class="manual-article" data-manual-content></article>
+						<nav class="manual-page-nav" data-manual-page-nav></nav>
+					</main>
+					<aside class="manual-outline">
+						<strong data-manual-text="onThisPage">本页目录</strong>
+						<nav data-manual-outline></nav>
+					</aside>
+				</div>
+				<dialog class="manual-search-dialog" id="ManualSearch" data-manual-search-dialog aria-labelledby="ManualSearchTitle">
+					<div class="manual-search-heading">
+						<strong id="ManualSearchTitle" data-manual-text="search">搜索手册</strong>
+						<form method="dialog"><button data-manual-label="close" aria-label="关闭"><span aria-hidden="true">×</span></button></form>
+					</div>
+					<div class="manual-search-body">
+						<label class="manual-search-field">
+							@searchIcon()
+							<input type="search" data-manual-search-modal placeholder="搜索手册" autofocus autocomplete="off"/>
+						</label>
+						<p class="manual-search-status" data-manual-search-status role="status"></p>
+					</div>
+					<div class="manual-search-results" data-manual-search-results></div>
+				</dialog>
+			</div>
+		</body>
+		@templ.Raw(assets.GetJavaScript(false, []string{"static/js/manual.js"}))
+	</html>
+}
+
+// 搜索入口和输入框复用同一图标，避免字符在不同平台上大小不一致。
+templ searchIcon() {
+	<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+		<circle cx="10.5" cy="10.5" r="6.5"></circle>
+		<path d="m16 16 4 4"></path>
+	</svg>
+}

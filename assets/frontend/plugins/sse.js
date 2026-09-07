@@ -2,7 +2,7 @@
  * 复用一个全局 SSE 连接接收后端事件：处理界面刷新通知，并把日志转交给设置页日志面板。
  * 后端的 ui_suggest_reload 与 log 事件来自 tools/sse_hub；日志面板通过 __comigoLogAppend 接入同一连接。
  */
-// 登录页没有 JWT，且旧浏览器可能没有 EventSource；这两种情况都不建立连接。
+// 登录页与公开手册不使用书库事件，也不应发起需要 JWT 的连接。
 function shouldEnableComigoSSE() {
     if (typeof window === 'undefined' || typeof EventSource === 'undefined') {
         return false
@@ -10,7 +10,7 @@ function shouldEnableComigoSSE() {
     const pathname = window.ComiGoRelativePath
         ? window.ComiGoRelativePath(window.location.pathname)
         : window.location.pathname
-    return pathname !== '/login'
+    return pathname !== '/login' && pathname !== '/manual' && !pathname.startsWith('/manual/')
 }
 
 // 这三类通知表示书库数据已经完成重扫，书架和设置页可直接刷新，无需再次确认。

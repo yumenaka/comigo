@@ -721,6 +721,7 @@
   "reader_select_archive": "Select Local File",
   "reader_select_archive_hint": "Select multiple images; when selecting multiple ZIP/CBZ/RAR/CBR/PDF files, only the first file is opened. Files stay in your browser and are never uploaded",
   "reader_settings": "Settings",
+  "user_manual": "Read the manual",
   "electron_open_external": "Open Browser",
   "open_external_browser": "Open in external browser",
   "electron_open_settings": "App Settings",
