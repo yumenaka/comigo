@@ -36,13 +36,11 @@ PC/モバイル同期：
 
 ## Omarchy ステータスバー連携
 
-[comigo-omarchy](https://github.com/yumenaka/comigo-omarchy) は Omarchy のステータスバーから Comigo を操作するパネルです。読書リンクと QR コード、ローカル IP の切り替え、サービスと通信量の表示、ローカル CLI の管理に対応し、起動済みのリモートサーバーにも接続できます。UI は日本語・英語・中国語に対応しています。
+Comigo は Omarchy に対応しています。[comigo-omarchy プラグイン](https://github.com/yumenaka/comigo-omarchy)で、ステータスバーからローカル・リモートの Comigo を利用できます。
 
 ```bash
 omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
 ```
-
-Shell プラグイン対応の Omarchy と Comigo v1.3.5 以降が必要です。リモートモードではローカル CLI は不要です。[プラグインの日本語ガイド](https://github.com/yumenaka/comigo-omarchy/blob/main/README_JP.md)を参照してください。Comigo サーバーの **ユーザーマニュアル → Omarchy プラグイン**、または `/manual/ja-JP/comigo-omarchy` からも読めます。
 
 ## インストール方法
 

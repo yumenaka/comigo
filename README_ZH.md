@@ -35,13 +35,11 @@ PC/手机同步：
 
 ## Omarchy 状态栏集成
 
-[comigo-omarchy](https://github.com/yumenaka/comigo-omarchy) 在 Omarchy 状态栏中提供 Comigo 控制面板，可打开阅读链接与二维码、切换本机 IP、查看服务和流量统计、管理本机 CLI，也可连接已运行的远程服务。界面支持中文、英文和日文。
+Comigo 支持 Omarchy，可通过 [comigo-omarchy 插件](https://github.com/yumenaka/comigo-omarchy)在状态栏管理本机或连接远程 Comigo。
 
 ```bash
 omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
 ```
-
-需要支持 Shell 插件的 Omarchy 和 Comigo v1.3.5 或以上；远程模式无需安装本机 CLI。详见[插件中文手册](https://github.com/yumenaka/comigo-omarchy/blob/main/README_ZH.md)。在自己的 Comigo 服务中打开 **用户手册 → Omarchy 插件**，或访问 `/manual/comigo-omarchy`。
 
 ## 安装指南
 

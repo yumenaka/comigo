@@ -35,13 +35,11 @@ PC/Mobile Sync:
 
 ## Omarchy status bar integration
 
-[comigo-omarchy](https://github.com/yumenaka/comigo-omarchy) brings Comigo controls to the Omarchy status bar. Open reading links and QR codes, switch local IPs, view service and traffic statistics, manage a local CLI, or connect to an existing remote server. The panel supports English, Chinese, and Japanese.
+Comigo supports Omarchy through the [comigo-omarchy plugin](https://github.com/yumenaka/comigo-omarchy), which controls local or remote services from the status bar.
 
 ```bash
 omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
 ```
-
-Requires Omarchy with shell plugin support and Comigo v1.3.5 or later; remote mode needs no local CLI. See the [plugin guide](https://github.com/yumenaka/comigo-omarchy#readme). On your Comigo server, open **User Manual → Comigo on Omarchy**, or visit `/manual/en-US/comigo-omarchy`.
 
 ## Installation Guide
 
