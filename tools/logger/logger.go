@@ -2,9 +2,11 @@ package logger
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html"
 	"io"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -213,6 +215,28 @@ func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debu
 			reqMethod := c.Request().Method
 			reqURI := c.Request().RequestURI
 			statusCode := c.Response().Status
+			// 错误响应可能由外层 Echo 处理，日志先按返回错误确定状态。
+			if err != nil && !c.Response().Committed {
+				statusCode = http.StatusInternalServerError
+				var httpErr *echo.HTTPError
+				if errors.As(err, &httpErr) {
+					statusCode = httpErr.Code
+				}
+			}
+			// 高频状态轮询成功时保持安静；失败和其他接口仍输出到所有日志通道。
+			route := c.Path()
+			polling := false
+			for _, endpoint := range []string{"/api/server", "/api/server/traffic", "/api/connections", "/api/configs", "/api/configs/status"} {
+				if strings.HasSuffix(route, endpoint) {
+					polling = true
+					break
+				}
+			}
+			// 需要查看成功轮询日志时，临时取消下一行注释，让 Debug 模式放行。
+			// polling = polling && !Debug
+			if reqMethod == http.MethodGet && polling && err == nil && statusCode >= 200 && statusCode < 300 {
+				return nil
+			}
 			logMsg := fmt.Sprintf("[%s:%d][%6.2fms][%s]%s",
 				reqMethod,
 				statusCode,

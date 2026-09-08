@@ -33,6 +33,16 @@
 PC/手机同步：  
 ![移动端同步演示](https://www.yumenaka.net/wp-content/uploads/2026/04/scroll.gif "移动端同步演示")
 
+## Omarchy 状态栏集成
+
+[comigo-omarchy](https://github.com/yumenaka/comigo-omarchy) 在 Omarchy 状态栏中提供 Comigo 控制面板，可打开阅读链接与二维码、切换本机 IP、查看服务和流量统计、管理本机 CLI，也可连接已运行的远程服务。界面支持中文、英文和日文。
+
+```bash
+omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
+```
+
+需要支持 Shell 插件的 Omarchy 和 Comigo v1.3.5 或以上；远程模式无需安装本机 CLI。详见[插件中文手册](https://github.com/yumenaka/comigo-omarchy/blob/main/README_ZH.md)。在自己的 Comigo 服务中打开 **用户手册 → Omarchy 插件**，或访问 `/manual/comigo-omarchy`。
+
 ## 安装指南
 
 ### 图形界面版（推荐）
@@ -63,14 +73,30 @@ PC/手机同步：
 
 ```bash
 # 中国大陆用户推荐使用中转脚本：
-bash <(curl -s https://comigo.xyz/get.sh) --cn
+installer=$(curl -fsSL https://comigo.xyz/get.sh) && bash -c "$installer" -- --cn
 
 # 从 GitHub下载：
-bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
+installer=$(curl -fsSL https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh) && bash -c "$installer" --
 
 # 如果您已设置 Golang 环境：
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
+
+安装器默认使用 `$HOME/.local/bin`，不自动修改 shell 配置。它会检查当前可用的 `comi` 命令和目标文件；已安装同版本时，有终端则询问跳过（默认）或覆盖显示的目标位置，无终端则跳过。使用 `--force` 可在非交互环境直接覆盖同版本。
+
+以下参数示例先用 `curl -fSL -o get.sh https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh` 下载脚本。
+
+```bash
+bash get.sh --help
+bash get.sh --version v1.2.22
+bash get.sh --system                 # /usr/local/bin；文件归 root，必要时使用 sudo
+bash get.sh --install-dir "$HOME/bin" # 优先于 COMIGO_INSTALL_DIR
+bash get.sh --force                  # 同版本直接覆盖
+```
+
+安装位置以显示的目标为准，不会自动替换其他目录中的已有命令；可用 `--system` 或 `--install-dir` 选择其目录。若 PATH 优先使用其他副本，会提示其路径并输出适合当前 shell 的 PATH 配置命令。指定目录失败不会回退，目标是符号链接时拒绝覆盖。卸载时只需删除所选目录中的 `comi`；由包管理器管理的副本应通过包管理器卸载。
+
+下载默认要求发布附件包含 `checksums.txt`；没有此文件的旧版本需显式添加 `--skip-checksum` 以跳过校验。`make all` 会在全部包构建完成后生成 SHA-256 清单，发布时须将其与安装包一同上传；也可运行 `make checksums VERSION=vX.Y.Z` 单独生成。
 
 ### 下载命令行版
 

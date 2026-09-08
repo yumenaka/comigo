@@ -18,6 +18,9 @@ func TestParsePath(t *testing.T) {
 		{"/manual/install", "zh", "install", true},
 		{"/manual/ja-JP/reading", "ja-JP", "reading", true},
 		{"/manual/en-US/faq", "en-US", "faq", true},
+		{"/manual/comigo-omarchy", "zh", "comigo-omarchy", true},
+		{"/manual/en-US/comigo-omarchy", "en-US", "comigo-omarchy", true},
+		{"/manual/ja-JP/comigo-omarchy", "ja-JP", "comigo-omarchy", true},
 		{"/manual/unknown", "", "", false},
 		{"/manual/en-US/faq/extra", "", "", false},
 	}

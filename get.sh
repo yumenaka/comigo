@@ -1,1003 +1,274 @@
 #!/bin/bash
+# Comigo CLI 安装器；兼容 macOS Bash 3.2 和 Linux Bash。
+# 先下载脚本并检查下载状态，再执行：bash get.sh --help
+# Bash 3.2 的 nounset 不支持空数组展开；可选变量在读取时显式给默认值。
+set -eo pipefail
 
-# ============================================================================
-# Comigo 一键安装脚本
-# ============================================================================
-# 使用 curl：
-#   bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
-# 使用 wget：
-#   bash <(wget -qO- https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
-#
-# 使用代理模式（通过 comigo.xyz 代理 GitHub）：
-#   bash <(curl -s https://comigo.xyz/get.sh) --cn
-#   或指定代理域名：
-#   bash <(curl -s https://comigo.xyz/get.sh) --proxy-base https://comigo.xyz
-#
-# 指定版本（默认下载最新版本）：
-#   bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh) --version v1.2.22
-# ============================================================================
-
-# 遇到错误时立即退出
-set -e
-
-# ============================================================================
-# 初始化：获取系统语言
-# ============================================================================
-# 获取系统语言设置，如果 locale 命令不存在或无法获取语言信息，则使用默认值 en_US
-# 使用 2>/dev/null 抑制错误输出，避免 locale 命令不存在时报错
-system_language=$(locale 2>/dev/null | grep -E '^LANG=' | cut -d= -f2 | cut -d. -f1 || echo "en_US")
-
-# ============================================================================
-# 参数解析
-# ============================================================================
-USE_PROXY=false
-PROXY_BASE="https://comigo.xyz"
-SPECIFIED_VERSION=""
+LANGUAGE=${LC_ALL:-${LC_MESSAGES:-${LANG:-en}}}
 WORK_DIR=""
+STAGE_DIR=""
+PRIVILEGE=()
 
+# 独立脚本不依赖应用资源；每条消息保留中英日翻译。
+message() {
+    local format="$1"
+    case "$LANGUAGE" in zh*) format="$2" ;; ja*) format="$3" ;; esac
+    shift 3
+    printf "$format\n" "$@"
+}
+
+die() { message "$@" >&2; exit 1; }
+
+# 暂存文件与目标位于同一文件系统；退出或中断时清理，旧程序始终保留到替换成功。
 cleanup() {
-    if [[ -n "$WORK_DIR" && -d "$WORK_DIR" ]]; then
-        rm -rf "$WORK_DIR"
-    fi
+    if [[ -n "$STAGE_DIR" ]]; then "${PRIVILEGE[@]}" rm -rf -- "$STAGE_DIR" || :; fi
+    if [[ -n "$WORK_DIR" ]]; then rm -rf -- "$WORK_DIR" || :; fi
 }
 trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
-# 解析命令行参数
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --cn|--proxy|--use-proxy)
-            USE_PROXY=true
-            shift
-            ;;
-        --proxy-base)
-            if [[ $# -lt 2 || "$2" == -* ]]; then
-                echo "Error: --proxy-base requires a value." >&2
-                exit 1
-            fi
-            PROXY_BASE="$2"
-            USE_PROXY=true
-            shift 2
-            ;;
-        --version|-V)
-            if [[ $# -lt 2 || "$2" == -* ]]; then
-                echo "Error: --version requires a value." >&2
-                exit 1
-            fi
-            SPECIFIED_VERSION="$2"
-            shift 2
-            ;;
-        *)
-            # 未知参数，忽略
-            shift
-            ;;
-    esac
-done
-
-# 如果指定了版本号，确保以 v 开头
-if [[ -n "$SPECIFIED_VERSION" ]]; then
-    if [[ ! "$SPECIFIED_VERSION" =~ ^v ]]; then
-        SPECIFIED_VERSION="v${SPECIFIED_VERSION}"
-    fi
-fi
-
-# ============================================================================
-# URL 转换函数
-# ============================================================================
-# 将 GitHub URL 转换为代理 URL（如果启用代理）
-convert_github_url() {
-    local original_url="$1"
-    
-    if [ "$USE_PROXY" = false ]; then
-        echo "$original_url"
-        return
-    fi
-    
-    # 处理 raw.githubusercontent.com
-    if [[ "$original_url" =~ ^https://raw\.githubusercontent\.com/(.*)$ ]]; then
-        local path="${BASH_REMATCH[1]}"
-        # 特殊处理：get.sh 使用简化路径
-        if [[ "$path" == "yumenaka/comigo/master/get.sh" ]]; then
-            echo "${PROXY_BASE}/get.sh"
-            return
-        fi
-        echo "${PROXY_BASE}/yumenaka/raw.githubusercontent.com/${path}"
-        return
-    fi
-    
-    # 处理 api.github.com
-    if [[ "$original_url" =~ ^https://api\.github\.com/(.*)$ ]]; then
-        local path="${BASH_REMATCH[1]}"
-        echo "${PROXY_BASE}/yumenaka/api.github.com/${path}"
-        return
-    fi
-    
-    # 处理 github.com（releases 下载等）
-    if [[ "$original_url" =~ ^https://github\.com/(.*)$ ]]; then
-        local path="${BASH_REMATCH[1]}"
-        # 如果路径以 yumenaka/ 开头，去掉它，因为反向代理会自动添加
-        if [[ "$path" =~ ^yumenaka/(.*)$ ]]; then
-            path="${BASH_REMATCH[1]}"
-        fi
-        echo "${PROXY_BASE}/yumenaka/${path}"
-        return
-    fi
-    
-    # 如果不是 GitHub URL，直接返回原 URL
-    echo "$original_url"
+usage() {
+    message 'Comigo CLI installer' 'Comigo CLI 安装器' 'Comigo CLI インストーラー'
+    message 'Usage: bash get.sh [options]' '用法：bash get.sh [选项]' '使い方：bash get.sh [オプション]'
+    message '  --version, -V TAG   Install a release (default: latest stable)' '  --version, -V TAG   指定版本（默认最新稳定版）' '  --version, -V TAG   バージョン指定（既定：最新安定版）'
+    message '  --install-dir DIR  Destination (overrides COMIGO_INSTALL_DIR)' '  --install-dir DIR  安装目录（优先于 COMIGO_INSTALL_DIR）' '  --install-dir DIR  インストール先（COMIGO_INSTALL_DIR より優先）'
+    message '  --system           Install to /usr/local/bin; sudo only when needed' '  --system           安装到 /usr/local/bin；仅必要时使用 sudo' '  --system           /usr/local/bin にインストール；必要時のみ sudo'
+    message '  --force            Overwrite without asking when versions match' '  --force            同版本时直接覆盖，不询问' '  --force            同じバージョンでも確認せず上書き'
+    message '  --cn, --proxy      Download through https://comigo.xyz' '  --cn, --proxy      通过 https://comigo.xyz 下载' '  --cn, --proxy      https://comigo.xyz 経由でダウンロード'
+    message '  --proxy-base URL   Custom HTTPS proxy base' '  --proxy-base URL   自定义 HTTPS 代理地址' '  --proxy-base URL   HTTPS プロキシを指定'
+    message '  --arch ARCH        x86_64, arm64, armv7 or i386' '  --arch ARCH        x86_64、arm64、armv7 或 i386' '  --arch ARCH        x86_64、arm64、armv7 または i386'
+    message '  --skip-checksum    Explicitly allow releases without SHA-256 verification' '  --skip-checksum    显式跳过 SHA-256 校验（用于没有清单的旧版本）' '  --skip-checksum    SHA-256 検証を明示的に省略（一覧のない旧リリース用）'
+    message '  --help, -h         Show help without installing' '  --help, -h         显示帮助，不安装' '  --help, -h         ヘルプを表示して終了'
+    message 'Default: $HOME/.local/bin. Same version: ask on a terminal, otherwise skip.' '默认目录：$HOME/.local/bin。同版本：有终端时询问，否则跳过。' '既定：$HOME/.local/bin。同じバージョン：端末で確認、それ以外はスキップ。'
 }
 
-# ============================================================================
-# 国际化消息输出函数
-# ============================================================================
-# 根据系统语言输出多语言消息（支持中文、英文、日文）
-function print_message() {
-    local key="$1"
-    local param="$2"
-    case "$key" in
-        "error_no_curl_wget")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：需要安装 curl 或 wget"
-                    ;;
-                en_US)
-                    echo "Error: curl or wget is required."
-                    ;;
-                ja_JP)
-                    echo "エラー：curlまたはwgetが必要です。"
-                    ;;
-                *)
-                    echo "Error: curl or wget is required."
-                    ;;
-            esac
-            ;;
-        "error_cmd_not_found")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：未找到 $param，请先安装 $param"
-                    ;;
-                en_US)
-                    echo "Error: $param not found. Please install $param."
-                    ;;
-                ja_JP)
-                    echo "エラー：$param が見つかりません。$param をインストールしてください。"
-                    ;;
-                *)
-                    echo "Error: $param not found. Please install $param."
-                    ;;
-            esac
-            ;;
-        "error_cannot_get_latest_tag")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：无法获取最新版本标签。"
-                    ;;
-                en_US)
-                    echo "Error: Unable to fetch the latest version tag."
-                    ;;
-                ja_JP)
-                    echo "エラー：最新のバージョンタグを取得できません。"
-                    ;;
-                *)
-                    echo "Error: Unable to fetch the latest version tag."
-                    ;;
-            esac
-            ;;
-        "error_cannot_parse_version")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：无法从标签 $param 解析版本号。"
-                    ;;
-                en_US)
-                    echo "Error: Unable to parse version number from tag $param."
-                    ;;
-                ja_JP)
-                    echo "エラー：タグ $param からバージョン番号を解析できません。"
-                    ;;
-                *)
-                    echo "Error: Unable to parse version number from tag $param."
-                    ;;
-            esac
-            ;;
-        "error_unsupported_os")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：不支持的操作系统：$param"
-                    ;;
-                en_US)
-                    echo "Error: Unsupported operating system: $param"
-                    ;;
-                ja_JP)
-                    echo "エラー：サポートされていないオペレーティングシステム：$param"
-                    ;;
-                *)
-                    echo "Error: Unsupported operating system: $param"
-                    ;;
-            esac
-            ;;
-        "error_unsupported_arch")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：不支持的架构：$param"
-                    ;;
-                en_US)
-                    echo "Error: Unsupported architecture: $param"
-                    ;;
-                ja_JP)
-                    echo "エラー：サポートされていないアーキテクチャ：$param"
-                    ;;
-                *)
-                    echo "Error: Unsupported architecture: $param"
-                    ;;
-            esac
-            ;;
-        "downloading")
-            case "$system_language" in
-                zh_CN)
-                    echo "正在下载 $param"
-                    ;;
-                en_US)
-                    echo "Downloading $param"
-                    ;;
-                ja_JP)
-                    echo "$param をダウンロードしています"
-                    ;;
-                *)
-                    echo "Downloading $param"
-                    ;;
-            esac
-            ;;
-        "error_download_failed")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：下载失败。"
-                    ;;
-                en_US)
-                    echo "Error: Download failed."
-                    ;;
-                ja_JP)
-                    echo "エラー：ダウンロードに失敗しました。"
-                    ;;
-                *)
-                    echo "Error: Download failed."
-                    ;;
-            esac
-            ;;
-        "error_file_not_gzip")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：下载的文件不是有效的 gzip 压缩文件。"
-                    ;;
-                en_US)
-                    echo "Error: Downloaded file is not a valid gzip archive."
-                    ;;
-                ja_JP)
-                    echo "エラー：ダウンロードしたファイルは有効なgzip圧縮ファイルではありません。"
-                    ;;
-                *)
-                    echo "Error: Downloaded file is not a valid gzip archive."
-                    ;;
-            esac
-            ;;
-        "error_file_not_found")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：未找到文件 $param"
-                    ;;
-                en_US)
-                    echo "Error: File not found: $param"
-                    ;;
-                ja_JP)
-                    echo "エラー：ファイルが見つかりません：$param"
-                    ;;
-                *)
-                    echo "Error: File not found: $param"
-                    ;;
-            esac
-            ;;
-        "error_cannot_execute")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：文件 $param 无法执行。"
-                    ;;
-                en_US)
-                    echo "Error: Cannot execute file: $param"
-                    ;;
-                ja_JP)
-                    echo "エラー：ファイルを実行できません：$param"
-                    ;;
-                *)
-                    echo "Error: Cannot execute file: $param"
-                    ;;
-            esac
-            ;;
-        "cleaning")
-            case "$system_language" in
-                zh_CN)
-                    echo "清理 $param"
-                    ;;
-                en_US)
-                    echo "Cleaning up $param"
-                    ;;
-                ja_JP)
-                    echo "$param をクリーンアップしています"
-                    ;;
-                *)
-                    echo "Cleaning up $param"
-                    ;;
-            esac
-            ;;
-        "moving")
-            # param 是安装目录路径
-            local install_dir="$param"
-            # 将绝对路径转换为 ~ 格式（如果可能）
-            local path_display="$install_dir"
-            if [[ "$install_dir" == "$HOME"* ]]; then
-                path_display="~${install_dir#$HOME}"
-            fi
-            case "$system_language" in
-                zh_CN)
-                    echo "添加执行权限并移动到 $path_display"
-                    ;;
-                en_US)
-                    echo "Adding execution permissions and moving to $path_display"
-                    ;;
-                ja_JP)
-                    echo "実行権限を追加し、$path_display に移動します"
-                    ;;
-                *)
-                    echo "Adding execution permissions and moving to $path_display"
-                    ;;
-            esac
-            ;;
-        "installation_complete")
-            case "$system_language" in
-                zh_CN)
-                    echo -e "\033[34mComigo 安装完毕，可以在漫画目录下执行 'comi' 命令扫描漫画了。\033[0m"
-                    ;;
-                en_US)
-                    echo -e "\033[34mComigo is installed. You can now run the 'comi' command in the comics directory to scan for comics.\033[0m"
-                    ;;
-                ja_JP)
-                    echo -e "\033[34mComigoがインストールされました。コミックディレクトリで 'comi' コマンドを実行してコミックをスキャンできます。\033[0m"
-                    ;;
-                *)
-                    echo -e "\033[34mComigo is installed. You can now run the 'comi' command in the comics directory to scan for comics.\033[0m"
-                    ;;
-            esac
-            ;;
-        "system_info")
-            case "$system_language" in
-                zh_CN)
-                    echo "检测到系统：$param"
-                    ;;
-                en_US)
-                    echo "Detected system: $param"
-                    ;;
-                ja_JP)
-                    echo "検出されたシステム：$param"
-                    ;;
-                *)
-                    echo "Detected system: $param"
-                    ;;
-            esac
-            ;;
-        "installing_version")
-            case "$system_language" in
-                zh_CN)
-                    echo "准备安装版本：$param"
-                    ;;
-                en_US)
-                    echo "Preparing to install version: $param"
-                    ;;
-                ja_JP)
-                    echo "インストールするバージョン：$param"
-                    ;;
-                *)
-                    echo "Preparing to install version: $param"
-                    ;;
-            esac
-            ;;
-        "using_specified_version")
-            case "$system_language" in
-                zh_CN)
-                    echo "使用指定版本：$param"
-                    ;;
-                en_US)
-                    echo "Using specified version: $param"
-                    ;;
-                ja_JP)
-                    echo "指定されたバージョンを使用：$param"
-                    ;;
-                *)
-                    echo "Using specified version: $param"
-                    ;;
-            esac
-            ;;
-        "error_invalid_version")
-            case "$system_language" in
-                zh_CN)
-                    echo "错误：无效的版本号格式：$param（应为 vX.Y.Z 格式）"
-                    ;;
-                en_US)
-                    echo "Error: Invalid version format: $param (expected vX.Y.Z)"
-                    ;;
-                ja_JP)
-                    echo "エラー：無効なバージョン形式：$param（vX.Y.Z 形式が必要です）"
-                    ;;
-                *)
-                    echo "Error: Invalid version format: $param (expected vX.Y.Z)"
-                    ;;
-            esac
-            ;;
-        "extracting")
-            case "$system_language" in
-                zh_CN)
-                    echo "正在解压 $param"
-                    ;;
-                en_US)
-                    echo "Extracting $param"
-                    ;;
-                ja_JP)
-                    echo "$param を展開しています"
-                    ;;
-                *)
-                    echo "Extracting $param"
-                    ;;
-            esac
-            ;;
-        "verifying")
-            case "$system_language" in
-                zh_CN)
-                    echo "正在验证安装..."
-                    ;;
-                en_US)
-                    echo "Verifying installation..."
-                    ;;
-                ja_JP)
-                    echo "インストールを確認しています..."
-                    ;;
-                *)
-                    echo "Verifying installation..."
-                    ;;
-            esac
-            ;;
-        "selecting_install_path")
-            case "$system_language" in
-                zh_CN)
-                    echo "选择安装路径：$param"
-                    ;;
-                en_US)
-                    echo "Selected install path: $param"
-                    ;;
-                ja_JP)
-                    echo "インストールパスを選択：$param"
-                    ;;
-                *)
-                    echo "Selected install path: $param"
-                    ;;
-            esac
-            ;;
-        "path_not_in_path")
-            case "$system_language" in
-                zh_CN)
-                    echo "警告：安装目录 $param 不在 PATH 环境变量中"
-                    ;;
-                en_US)
-                    echo "Warning: Install directory $param is not in PATH"
-                    ;;
-                ja_JP)
-                    echo "警告：インストールディレクトリ $param が PATH 環境変数に含まれていません"
-                    ;;
-                *)
-                    echo "Warning: Install directory $param is not in PATH"
-                    ;;
-            esac
-            ;;
-        "path_config_hint")
-            # param 格式：install_dir|shell_config
-            local install_dir=$(echo "$param" | cut -d'|' -f1)
-            local shell_config=$(echo "$param" | cut -d'|' -f2)
-            # 将绝对路径转换为 ~ 格式（如果可能）
-            local path_display="$install_dir"
-            if [[ "$install_dir" == "$HOME"* ]]; then
-                path_display="~${install_dir#$HOME}"
-            fi
-            case "$system_language" in
-                zh_CN)
-                    echo -e "\033[33m请将以下内容添加到您的 shell 配置文件中（$shell_config）：\033[0m"
-                    echo -e "\033[36mexport PATH=\"$path_display:\$PATH\"\033[0m"
-                    echo ""
-                    echo "或者运行："
-                    echo -e "\033[36mecho 'export PATH=\"$path_display:\$PATH\"' >> $shell_config\033[0m"
-                    ;;
-                en_US)
-                    echo -e "\033[33mPlease add the following to your shell config file ($shell_config):\033[0m"
-                    echo -e "\033[36mexport PATH=\"$path_display:\$PATH\"\033[0m"
-                    echo ""
-                    echo "Or run:"
-                    echo -e "\033[36mecho 'export PATH=\"$path_display:\$PATH\"' >> $shell_config\033[0m"
-                    ;;
-                ja_JP)
-                    echo -e "\033[33mシェル設定ファイル（$shell_config）に以下を追加してください：\033[0m"
-                    echo -e "\033[36mexport PATH=\"$path_display:\$PATH\"\033[0m"
-                    echo ""
-                    echo "または実行："
-                    echo -e "\033[36mecho 'export PATH=\"$path_display:\$PATH\"' >> $shell_config\033[0m"
-                    ;;
-                *)
-                    echo -e "\033[33mPlease add the following to your shell config file ($shell_config):\033[0m"
-                    echo -e "\033[36mexport PATH=\"$path_display:\$PATH\"\033[0m"
-                    echo ""
-                    echo "Or run:"
-                    echo -e "\033[36mecho 'export PATH=\"$path_display:\$PATH\"' >> $shell_config\033[0m"
-                    ;;
-            esac
-            ;;
-        "file_in_current_dir")
-            case "$system_language" in
-                zh_CN)
-                    echo -e "\033[33m文件已下载到当前目录：\033[0m"
-                    echo -e "\033[36m$param\033[0m"
-                    echo ""
-                    echo "您可以使用以下方式运行："
-                    echo -e "\033[36m./comi\033[0m"
-                    echo ""
-                    echo "或者将其移动到 PATH 中的目录，例如："
-                    echo -e "\033[36mmv comi ~/.local/bin/\033[0m"
-                    ;;
-                en_US)
-                    echo -e "\033[33mFile has been downloaded to the current directory:\033[0m"
-                    echo -e "\033[36m$param\033[0m"
-                    echo ""
-                    echo "You can run it using:"
-                    echo -e "\033[36m./comi\033[0m"
-                    echo ""
-                    echo "Or move it to a directory in your PATH, for example:"
-                    echo -e "\033[36mmv comi ~/.local/bin/\033[0m"
-                    ;;
-                ja_JP)
-                    echo -e "\033[33mファイルは現在のディレクトリにダウンロードされました：\033[0m"
-                    echo -e "\033[36m$param\033[0m"
-                    echo ""
-                    echo "以下の方法で実行できます："
-                    echo -e "\033[36m./comi\033[0m"
-                    echo ""
-                    echo "または、PATH 内のディレクトリに移動することもできます："
-                    echo -e "\033[36mmv comi ~/.local/bin/\033[0m"
-                    ;;
-                *)
-                    echo -e "\033[33mFile has been downloaded to the current directory:\033[0m"
-                    echo -e "\033[36m$param\033[0m"
-                    echo ""
-                    echo "You can run it using:"
-                    echo -e "\033[36m./comi\033[0m"
-                    echo ""
-                    echo "Or move it to a directory in your PATH, for example:"
-                    echo -e "\033[36mmv comi ~/.local/bin/\033[0m"
-                    ;;
-            esac
-            ;;
-        *)
-            echo "$key"
-            ;;
-    esac
+require_value() {
+    if [[ -z "${2:-}" || "$2" == -* ]]; then
+        die '%s requires a value.' '%s 需要参数值。' '%s には値が必要です。' "$1"
+    fi
 }
 
-# ============================================================================
-# 依赖检查
-# ============================================================================
-dependencies=("tar" "file")
-
-# 检查是否有 curl 或 wget（用于下载文件）
-if command -v curl &> /dev/null; then
-    download_tool="curl"
-elif command -v wget &> /dev/null; then
-    download_tool="wget"
-else
-    print_message "error_no_curl_wget"
-    exit 1
-fi
-
-# 检查必需的依赖工具
-for cmd in "${dependencies[@]}"; do
-    if ! command -v "$cmd" &> /dev/null; then
-        print_message "error_cmd_not_found" "$cmd"
-        exit 1
-    fi
-done
-
-# ============================================================================
-# 版本信息获取
-# ============================================================================
-if [[ -n "$SPECIFIED_VERSION" ]]; then
-    # 使用用户指定的版本
-    print_message "using_specified_version" "$SPECIFIED_VERSION"
-    latest_tag="$SPECIFIED_VERSION"
-else
-    # 从 GitHub API 获取最新版本标签
-    api_url=$(convert_github_url "https://api.github.com/repos/yumenaka/comigo/releases/latest")
-    if [ "$download_tool" = "curl" ]; then
-        latest_release=$(curl --silent "$api_url")
-    else
-        latest_release=$(wget -qO- "$api_url")
-    fi
-
-    # 使用 sed 提取最新标签（MacOS 不支持 grep -P）
-    latest_tag=$(echo "$latest_release" | sed -n 's/.*"tag_name": *"\(v[^"]*\)".*/\1/p')
-    if [[ -z "$latest_tag" ]]; then
-        print_message "error_cannot_get_latest_tag"
-        exit 1
-    fi
-fi
-
-# 从标签中提取版本号（严格要求 vX.Y.Z）
-if [[ $latest_tag =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-    Version="${BASH_REMATCH[1]}"
-    Version="${Version}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
-else
-    print_message "error_invalid_version" "$latest_tag"
-    exit 1
-fi
-
-# ============================================================================
-# 系统信息检测
-# ============================================================================
-# 获取操作系统和架构信息
-OS=$(uname -s)
-ARCH=$(uname -m)
-
-# 显示检测到的系统信息
-print_message "system_info" "${OS} (${ARCH})"
-
-# 显示将要安装的版本
-print_message "installing_version" "$latest_tag"
-
-# 将系统标识符映射为发布包使用的名称
-case "$OS" in
-    Linux)
-        OS_NAME="Linux"
-        ;;
-    Darwin)
-        OS_NAME="MacOS"
-        ;;
-    *)
-        print_message "error_unsupported_os" "$OS"
-        exit 1
-        ;;
-esac
-
-# 映射架构名称
-case "$ARCH" in
-    x86_64)
-        ARCH_NAME="x86_64"
-        ;;
-    armv7l|armv7)
-        # Linux armv7l 实际对应的发布文件名为 *_Linux_armv7.tar.gz
-        ARCH_NAME="armv7"
-        ;;
-    arm64|aarch64)
-        ARCH_NAME="arm64"
-        ;;
-    *)
-        print_message "error_unsupported_arch" "$ARCH"
-        exit 1
-        ;;
-esac
-
-# ============================================================================
-# 文件下载
-# ============================================================================
-# 构造下载文件名
-file_name="comi_v${Version}_${OS_NAME}_${ARCH_NAME}.tar.gz"
-original_url="https://github.com/yumenaka/comigo/releases/download/${latest_tag}/${file_name}"
-url=$(convert_github_url "$original_url")
-
-print_message "downloading" "$file_name"
-
-# 在临时目录中下载和解压，避免污染或覆盖用户当前目录中的文件。
-WORK_DIR=$(mktemp -d "${TMPDIR:-/tmp}/comigo-install.XXXXXX")
-archive_path="$WORK_DIR/$file_name"
-binary_path="$WORK_DIR/comi"
-
-# 下载文件（包含 404 错误检测）
-if [ "$download_tool" = "curl" ]; then
-    # -f 遇到HTTP非200就返回错误码，不写进文件
-    if ! curl -fSL -o "$archive_path" "$url"; then
-        print_message "error_download_failed"
-        exit 1
-    fi
-else
-    # --tries 和 --timeout 可酌情修改
-    if ! wget --tries=3 --timeout=55 -O "$archive_path" "$url"; then
-        print_message "error_download_failed"
-        exit 1
-    fi
-fi
-
-# 验证下载的文件是否存在
-if [[ ! -f "$archive_path" ]]; then
-    print_message "error_download_failed"
-    exit 1
-fi
-
-# ============================================================================
-# 文件验证
-# ============================================================================
-# 检查文件是否为有效的 gzip 格式（无效时可能是文本，比如 404 页面）
-if ! file "$archive_path" | grep -q "gzip compressed data"; then
-    print_message "error_file_not_gzip"
-    exit 1
-fi
-
-# ============================================================================
-# 文件解压
-# ============================================================================
-print_message "extracting" "$file_name"
-tar -xzf "$archive_path" -C "$WORK_DIR"
-
-# ============================================================================
-# 路径选择函数
-# ============================================================================
-
-# 检测目录是否在 PATH 环境变量中
-is_in_path() {
-    local dir="$1"
-    # 规范化路径（去除尾部斜杠，转换为绝对路径）
-    local normalized_dir=$(cd "$dir" 2>/dev/null && pwd || echo "$dir")
-    # 检查 PATH 中是否包含该目录
-    case ":$PATH:" in
-        *":$normalized_dir:"*) return 0 ;;
-        *":$normalized_dir/:"*) return 0 ;;
+# 只转换实际使用的 API 与资源下载地址，避免维护无关的 raw URL 分支。
+release_url() {
+    if [[ "$USE_PROXY" == false ]]; then printf '%s\n' "$1"; return; fi
+    case "$1" in
+        https://api.github.com/*) printf '%s/yumenaka/api.github.com/%s\n' "$PROXY_BASE" "${1#https://api.github.com/}" ;;
+        https://github.com/yumenaka/*) printf '%s/yumenaka/%s\n' "$PROXY_BASE" "${1#https://github.com/yumenaka/}" ;;
         *) return 1 ;;
     esac
 }
 
-# 获取 shell 配置文件路径
-get_shell_config_file() {
-    local shell_name=$(basename "$SHELL" 2>/dev/null || echo "bash")
-    local home_dir="$HOME"
-    
+# API 和发布文件共用下载策略，HTTP 错误、重定向、重试和超时行为一致。
+download() {
+    local url
+    url=$(release_url "$1")
+    if command -v curl >/dev/null; then
+        curl --fail --silent --show-error --location --retry 3 --connect-timeout 15 --max-time 300 \
+            --proto '=https' --proto-redir '=https' --output "$2" "$url"
+    else
+        command -v wget >/dev/null || die 'curl or wget is required.' '需要 curl 或 wget。' 'curl または wget が必要です。'
+        wget --quiet --https-only --tries=3 --timeout=30 -O "$2" "$url"
+    fi
+}
+
+# 只识别 Comigo 的版本行，不能把其他同名命令的任意数字当作版本。
+binary_version() {
+    local output
+    output=$("$1" --version) || return 1
+    printf '%s\n' "$output" | sed -n 's/^Comigo \(v[0-9][^[:space:]]*\)[[:space:]]*$/\1/p'
+}
+
+# 从终端读取，不消耗 curl | bash 的脚本输入；无终端时安全地跳过同版本。
+confirm_reinstall() {
+    local answer
+    if [[ "$FORCE" == true ]]; then return 0; fi
+    if { true </dev/tty; } 2>/dev/null; then
+        message 'Same version. [s] Skip (default), [u] overwrite %s:' '已安装同版本。[s] 跳过（默认），[u] 更新并覆盖 %s：' '同じバージョンです。[s] スキップ（既定）、[u] %s を上書き：' "$TARGET" >/dev/tty
+        while IFS= read -r answer </dev/tty; do
+            case "$answer" in
+                u|U|update|更新|覆盖) return 0 ;;
+                ''|s|S|skip|跳过) return 1 ;;
+                *) message 'Enter s or u:' '请输入 s 或 u：' 's または u を入力してください：' >/dev/tty ;;
+            esac
+        done
+    fi
+    return 1
+}
+
+# 输出适合当前 shell 的命令；%q 保证空格等字符不会破坏可复制的命令。
+path_hint() {
+    local shell_name config quoted_dir quoted_config
+    shell_name=${SHELL##*/}
+    printf -v quoted_dir '%q' "$INSTALL_DIR"
     case "$shell_name" in
-        bash)
-            if [ -f "$home_dir/.bash_profile" ]; then
-                echo "$home_dir/.bash_profile"
-            elif [ -f "$home_dir/.bashrc" ]; then
-                echo "$home_dir/.bashrc"
-            else
-                echo "$home_dir/.bash_profile"
-            fi
-            ;;
-        zsh)
-            if [ -f "$home_dir/.zshrc" ]; then
-                echo "$home_dir/.zshrc"
-            else
-                echo "$home_dir/.zshrc"
-            fi
-            ;;
         fish)
-            if [ -d "$home_dir/.config/fish" ]; then
-                echo "$home_dir/.config/fish/config.fish"
-            else
-                echo "$home_dir/.config/fish/config.fish"
-            fi
-            ;;
-        *)
-            # 默认使用 .profile
-            echo "$home_dir/.profile"
-            ;;
+            message 'Add to PATH with:' '运行以下命令加入 PATH：' 'PATH に追加するには：'
+            # Fish 的单引号规则不同于 Bash，使用字面路径并转义反斜杠和单引号。
+            local fish_dir=${INSTALL_DIR//\\/\\\\}
+            fish_dir=${fish_dir//\'/\\\'}
+            printf "fish_add_path '%s'\n" "$fish_dir"
+            return ;;
+        zsh) config="${ZDOTDIR:-$HOME}/.zshrc" ;;
+        bash)
+            if [[ "$OS" == Darwin ]]; then config="$HOME/.bash_profile"; else config="$HOME/.bashrc"; fi ;;
+        *) config="$HOME/.profile" ;;
     esac
+    printf -v quoted_config '%q' "$config"
+    message 'Run now, and add this line to %s for future terminals:' '现在运行，并将此行添加到 %s 以供新终端使用：' '今すぐ実行し、新しい端末用に %s にも追加してください：' "$quoted_config"
+    printf 'export PATH=%s:"$PATH"\n' "$quoted_dir"
 }
 
-# 选择安装目录
-select_install_directory() {
-    local install_dir=""
-    local need_sudo=false
-    
-    # 1. 检查环境变量
-    if [ -n "$COMIGO_INSTALL_DIR" ]; then
-        install_dir="$COMIGO_INSTALL_DIR"
-        # 如果环境变量指定的目录需要 root 权限
-        if [[ "$install_dir" == /usr/* ]] && [ "$EUID" -ne 0 ]; then
-            need_sudo=true
-        fi
-    # 2. 优先使用 ~/.local/bin（现代标准，无需 root）
-    elif [ -d "$HOME/.local/bin" ] || mkdir -p "$HOME/.local/bin" 2>/dev/null; then
-        install_dir="$HOME/.local/bin"
-    # 3. 备选 ~/bin（仅在 PATH 中时使用）
-    elif is_in_path "$HOME/bin"; then
-        # ~/bin 在 PATH 中，可以使用（如果不存在则创建）
-        if [ -d "$HOME/bin" ] || mkdir -p "$HOME/bin" 2>/dev/null; then
-            install_dir="$HOME/bin"
-        fi
-    fi
-    # 4. 如果前面都没有选择，检查 /usr/local/bin
-    if [ -z "$install_dir" ]; then
-        # 检查 /usr/local/bin 是否在 PATH 中
-        if is_in_path "/usr/local/bin"; then
-            # 在 PATH 中，可以使用
-            install_dir="/usr/local/bin"
-            if [ "$EUID" -ne 0 ]; then
-                need_sudo=true
-            fi
-        else
-            # 不在 PATH 中，使用当前目录
-            install_dir="."
-            need_sudo=false
-        fi
-    fi
-    
-    # 确保目录存在
-    if [ "$need_sudo" = true ]; then
-        if [ ! -d "$install_dir" ]; then
-            sudo mkdir -p "$install_dir" 2>/dev/null || {
-                # 如果创建失败，回退到用户目录
-                install_dir="$HOME/.local/bin"
-                mkdir -p "$install_dir" 2>/dev/null || {
-                    # 如果 ~/.local/bin 也失败，尝试 ~/bin（如果它在 PATH 中）
-                    if is_in_path "$HOME/bin"; then
-                        install_dir="$HOME/bin"
-                        mkdir -p "$install_dir" 2>/dev/null
-                    fi
-                }
-                need_sudo=false
-            }
-        fi
-    else
-        mkdir -p "$install_dir" 2>/dev/null || {
-            # 如果创建失败，尝试使用备选路径
-            if [ "$install_dir" != "$HOME/bin" ]; then
-                # 尝试 ~/bin（如果它在 PATH 中）
-                if is_in_path "$HOME/bin"; then
-                    install_dir="$HOME/bin"
-                    mkdir -p "$install_dir" 2>/dev/null || {
-                        # 最后尝试系统目录（如果它在 PATH 中）
-                        if is_in_path "/usr/local/bin"; then
-                            install_dir="/usr/local/bin"
-                            need_sudo=true
-                            if [ "$EUID" -ne 0 ]; then
-                                sudo mkdir -p "$install_dir" 2>/dev/null
-                            else
-                                mkdir -p "$install_dir" 2>/dev/null
-                            fi
-                        else
-                            # /usr/local/bin 不在 PATH 中，使用当前目录
-                            install_dir="."
-                            need_sudo=false
-                        fi
-                    }
-                else
-                    # ~/bin 不在 PATH 中，检查 /usr/local/bin
-                    if is_in_path "/usr/local/bin"; then
-                        # /usr/local/bin 在 PATH 中，可以使用
-                        install_dir="/usr/local/bin"
-                        need_sudo=true
-                        if [ "$EUID" -ne 0 ]; then
-                            sudo mkdir -p "$install_dir" 2>/dev/null
-                        else
-                            mkdir -p "$install_dir" 2>/dev/null
-                        fi
-                    else
-                        # /usr/local/bin 也不在 PATH 中，使用当前目录
-                        install_dir="."
-                        need_sudo=false
-                    fi
-                fi
-            fi
-        }
-    fi
-    
-    # 输出选择的目录和是否需要 sudo
-    echo "$install_dir|$need_sudo"
-}
-
-# ============================================================================
-# 安装到系统路径
-# ============================================================================
-# 验证解压后的文件是否存在
-if [[ ! -f "$binary_path" ]]; then
-    print_message "error_file_not_found" "comi"
-    exit 1
-fi
-
-# 添加执行权限
-chmod +x "$binary_path"
-
-# 选择安装目录
-install_result=$(select_install_directory)
-INSTALL_DIR=$(echo "$install_result" | cut -d'|' -f1)
-NEED_SUDO=$(echo "$install_result" | cut -d'|' -f2)
-
-# 显示选择的安装路径
-if [ "$INSTALL_DIR" != "." ]; then
-    print_message "selecting_install_path" "$INSTALL_DIR"
-    
-    # 移动到安装目录
-    print_message "moving" "$INSTALL_DIR"
-    if [ "$NEED_SUDO" = "true" ] && [ "$EUID" -ne 0 ]; then
-        sudo mv "$binary_path" "$INSTALL_DIR/comi"
-    else
-        mv "$binary_path" "$INSTALL_DIR/comi"
-    fi
-    
-    # ============================================================================
-    # PATH 检测和提示
-    # ============================================================================
-    # 检测安装目录是否在 PATH 中
-    if ! is_in_path "$INSTALL_DIR"; then
-        print_message "path_not_in_path" "$INSTALL_DIR"
-        shell_config=$(get_shell_config_file)
-        # 传递安装目录和 shell 配置文件路径（用 | 分隔）
-        print_message "path_config_hint" "$INSTALL_DIR|$shell_config"
-        echo ""
-    fi
-else
-    # 当前目录，不移动文件，提示用户
-    current_dir=$(pwd)
-    file_path="$current_dir/comi"
-    if [ -e "$file_path" ]; then
-        echo "Error: File already exists: $file_path" >&2
-        exit 1
-    fi
-    mv "$binary_path" "$file_path"
-    print_message "file_in_current_dir" "$file_path"
-fi
-
-# ============================================================================
-# 安装验证
-# ============================================================================
-if [ "$INSTALL_DIR" != "." ]; then
-    print_message "verifying"
-    # 检查文件是否存在且可执行
-    if [ ! -f "$INSTALL_DIR/comi" ]; then
-        print_message "error_file_not_found" "$INSTALL_DIR/comi"
-        exit 1
-    fi
-
-    if [ ! -x "$INSTALL_DIR/comi" ]; then
-        print_message "error_cannot_execute" "$INSTALL_DIR/comi"
-        exit 1
-    fi
-
-    print_message "installation_complete"
-    if ! "$INSTALL_DIR/comi" --version 2>/dev/null | grep -q "$latest_tag"; then
-        "$INSTALL_DIR/comi" --version 2>/dev/null || true
-    fi
-
-    # 如果安装目录还不在 PATH 中，提示用户重新加载 shell 配置。
-    if ! is_in_path "$INSTALL_DIR"; then
-        shell_config=$(get_shell_config_file)
-        echo ""
-        case "$system_language" in
-            zh_CN)
-                echo -e "\033[33m提示：请重新打开终端或运行以下命令使 PATH 生效：\033[0m"
-                echo -e "\033[36msource $shell_config\033[0m"
-                ;;
-            en_US)
-                echo -e "\033[33mNote: Please reopen your terminal or run the following to update PATH:\033[0m"
-                echo -e "\033[36msource $shell_config\033[0m"
-                ;;
-            ja_JP)
-                echo -e "\033[33m注意：ターミナルを再起動するか、以下のコマンドを実行して PATH を更新してください：\033[0m"
-                echo -e "\033[36msource $shell_config\033[0m"
-                ;;
-            *)
-                echo -e "\033[33mNote: Please reopen your terminal or run the following to update PATH:\033[0m"
-                echo -e "\033[36msource $shell_config\033[0m"
-                ;;
+main() {
+    USE_PROXY=false
+    PROXY_BASE=https://comigo.xyz
+    VERSION=""
+    INSTALL_DIR=${COMIGO_INSTALL_DIR:-}
+    SYSTEM=false
+    FORCE=false
+    SKIP_CHECKSUM=false
+    ARCH=""
+    SHELL=${SHELL:-/bin/bash}
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help) usage; return ;;
+            --version|-V) require_value "$@"; VERSION="$2"; shift ;;
+            --install-dir) require_value "$@"; INSTALL_DIR="$2"; shift ;;
+            --system) SYSTEM=true ;;
+            --force) FORCE=true ;;
+            --cn|--proxy|--use-proxy) USE_PROXY=true ;;
+            --proxy-base) require_value "$@"; PROXY_BASE=${2%/}; USE_PROXY=true; shift ;;
+            --arch) require_value "$@"; ARCH="$2"; shift ;;
+            --skip-checksum) SKIP_CHECKSUM=true ;;
+            *) die 'Unknown option: %s' '未知参数：%s' '不明なオプション：%s' "$1" ;;
         esac
+        shift
+    done
+    if [[ "$SYSTEM" == true && -n "$INSTALL_DIR" ]]; then
+        die '--system conflicts with --install-dir / COMIGO_INSTALL_DIR.' '--system 不能与 --install-dir / COMIGO_INSTALL_DIR 同用。' '--system と --install-dir / COMIGO_INSTALL_DIR は併用できません。'
     fi
-else
-    # 当前目录，验证文件存在且可执行
-    print_message "verifying"
-    if [ ! -f "comi" ]; then
-        print_message "error_file_not_found" "comi"
-        exit 1
+    if [[ "$PROXY_BASE" != https://?* || "$PROXY_BASE" == *[[:space:]\?#]* ]]; then
+        die 'Invalid HTTPS proxy base: %s' '无效的 HTTPS 代理地址：%s' '無効な HTTPS プロキシ：%s' "$PROXY_BASE"
+    fi
+    if [[ -n "$VERSION" && "$VERSION" != v* ]]; then VERSION="v$VERSION"; fi
+    if [[ -n "$VERSION" && ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
+        die 'Invalid version: %s' '版本号无效：%s' '無効なバージョン：%s' "$VERSION"
     fi
 
-    if [ ! -x "comi" ]; then
-        print_message "error_cannot_execute" "comi"
-        exit 1
+    OS=$(uname -s)
+    if [[ -z "$ARCH" ]]; then
+        ARCH=$(uname -m)
+        # Rosetta 中优先下载 Apple Silicon 原生程序。
+        if [[ "$OS" == Darwin && "$ARCH" == x86_64 ]] && [[ "$(sysctl -in sysctl.proc_translated 2>/dev/null || :)" == 1 ]]; then ARCH=arm64; fi
     fi
-    
-    print_message "installation_complete"
-fi
+    case "$OS" in Linux) OS_NAME=Linux ;; Darwin) OS_NAME=MacOS ;; *) die 'Unsupported OS: %s' '不支持的系统：%s' '未対応の OS：%s' "$OS" ;; esac
+    case "$ARCH" in aarch64) ARCH=arm64 ;; armv7l) ARCH=armv7 ;; i[3-6]86) ARCH=i386 ;; esac
+    case "$OS/$ARCH" in Linux/x86_64|Linux/arm64|Linux/armv7|Linux/i386|Darwin/x86_64|Darwin/arm64) ;; *) die 'Unsupported platform: %s' '不支持的平台：%s' '未対応のプラットフォーム：%s' "$OS/$ARCH" ;; esac
+    local dep
+    for dep in sed mktemp; do
+        command -v "$dep" >/dev/null || die 'Missing command: %s' '缺少命令：%s' '必要なコマンドがありません：%s' "$dep"
+    done
+
+    # 固定默认目录；显式指定目录失败时不回退，也不自动修改 shell 配置。
+    if [[ "$SYSTEM" == true ]]; then INSTALL_DIR=/usr/local/bin
+    elif [[ -z "$INSTALL_DIR" ]]; then
+        [[ -n "${HOME:-}" && "$HOME" == /* ]] || die 'HOME must be an absolute path.' 'HOME 必须是绝对路径。' 'HOME は絶対パスである必要があります。'
+        INSTALL_DIR="$HOME/.local/bin"
+    fi
+    [[ "$INSTALL_DIR" == /* ]] || INSTALL_DIR="$PWD/$INSTALL_DIR"
+    local ancestor="$INSTALL_DIR"
+    while [[ ! -e "$ancestor" && ! -L "$ancestor" ]]; do ancestor=${ancestor%/*}; [[ -n "$ancestor" ]] || ancestor=/; done
+    [[ -d "$ancestor" ]] || die 'Not a directory: %s' '不是目录：%s' 'ディレクトリではありません：%s' "$ancestor"
+    TARGET="${INSTALL_DIR%/}/comi"
+    if [[ -L "$TARGET" || ( -e "$TARGET" && ! -f "$TARGET" ) ]]; then
+        die 'Refusing to replace a symlink or non-file: %s' '不能覆盖符号链接或非普通文件：%s' 'シンボリックリンクまたは通常ファイル以外は上書きできません：%s' "$TARGET"
+    fi
+    message 'Platform: %s; destination: %s' '平台：%s；安装位置：%s' 'プラットフォーム：%s；インストール先：%s' "$OS_NAME/$ARCH" "$TARGET"
+
+    WORK_DIR=$(mktemp -d "${TMPDIR:-/tmp}/comigo-install.XXXXXX")
+    if [[ -z "$VERSION" ]]; then
+        download https://api.github.com/repos/yumenaka/comigo/releases/latest "$WORK_DIR/release.json" || die 'Cannot fetch latest release.' '获取最新版本失败。' '最新リリースを取得できません。'
+        VERSION=$(sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$WORK_DIR/release.json")
+    fi
+    [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]] || die 'Invalid release tag: %s' '发布标签无效：%s' '無効なリリースタグ：%s' "$VERSION"
+
+    # 同时检查 PATH 中的可用命令和目标文件，避免目标尚未加入 PATH 时重复安装。
+    local existing existing_version candidate same=false
+    existing=$(type -P comi || :)
+    for candidate in "$existing" "$TARGET"; do
+        [[ -n "$candidate" && -f "$candidate" && -x "$candidate" ]] || continue
+        existing_version=$(binary_version "$candidate" 2>/dev/null) || existing_version=""
+        message 'Existing command: %s (%s)' '已有命令：%s（%s）' '既存のコマンド：%s（%s）' "$candidate" "${existing_version:-unknown}"
+        [[ "$existing_version" != "$VERSION" ]] || same=true
+        [[ "$candidate" != "$TARGET" ]] || break
+        [[ "$existing" != "$TARGET" ]] || break
+    done
+    if [[ "$same" == true ]] && ! confirm_reinstall; then
+        message 'Skipped %s. Use --force to overwrite non-interactively.' '已跳过 %s。非交互覆盖可使用 --force。' '%s をスキップしました。非対話で上書きするには --force を使用してください。' "$VERSION"
+        return
+    fi
+
+    # 只有确认安装后才检查写权限和解包、校验工具，同版本跳过不需要它们。
+    for dep in tar awk install; do
+        command -v "$dep" >/dev/null || die 'Missing command: %s' '缺少命令：%s' '必要なコマンドがありません：%s' "$dep"
+    done
+    # 全局文件必须归 root 所有，即使目录本身可写也需要管理员权限。
+    if [[ "$SYSTEM" == true && "$EUID" -ne 0 ]]; then
+        command -v sudo >/dev/null || die 'System install requires sudo.' '系统安装需要 sudo。' 'システムへのインストールには sudo が必要です。'
+        PRIVILEGE=(sudo)
+    elif [[ ! -w "$ancestor" || ! -x "$ancestor" ]]; then
+        die 'Directory is not writable: %s' '目录不可写：%s' 'ディレクトリに書き込めません：%s' "$ancestor"
+    fi
+    if [[ "$SKIP_CHECKSUM" == false ]]; then
+        if command -v sha256sum >/dev/null; then HASH_TOOL=(sha256sum)
+        elif command -v shasum >/dev/null; then HASH_TOOL=(shasum -a 256)
+        else die 'sha256sum or shasum is required.' '需要 sha256sum 或 shasum。' 'sha256sum または shasum が必要です。'; fi
+    fi
+
+    local name="comi_${VERSION}_${OS_NAME}_${ARCH}.tar.gz"
+    local base="https://github.com/yumenaka/comigo/releases/download/$VERSION"
+    message 'Downloading %s' '正在下载 %s' '%s をダウンロード中' "$name"
+    download "$base/$name" "$WORK_DIR/archive.tar.gz" || die 'Download failed: %s' '下载失败：%s' 'ダウンロード失敗：%s' "$name"
+    if [[ "$SKIP_CHECKSUM" == true ]]; then
+        message 'SHA-256 verification explicitly disabled.' '已按参数要求跳过 SHA-256 校验。' '指定により SHA-256 検証を省略します。' >&2
+    else
+        download "$base/checksums.txt" "$WORK_DIR/checksums" || die 'Cannot fetch checksums.txt. Old releases require explicit --skip-checksum.' '无法获取 checksums.txt。旧版本需显式使用 --skip-checksum。' 'checksums.txt を取得できません。旧リリースには --skip-checksum の明示指定が必要です。'
+        local expected actual
+        expected=$(awk -v name="$name" '$2 == name {print tolower($1)}' "$WORK_DIR/checksums")
+        [[ "$expected" =~ ^[0-9a-fA-F]{64}$ ]] || die 'Missing or invalid SHA-256 for %s' '%s 的 SHA-256 缺失或无效' '%s の SHA-256 がないか無効です' "$name"
+        actual=$("${HASH_TOOL[@]}" "$WORK_DIR/archive.tar.gz")
+        actual=${actual%% *}
+        [[ "$actual" == "$expected" ]] || die 'SHA-256 mismatch: %s' 'SHA-256 不匹配：%s' 'SHA-256 不一致：%s' "$name"
+    fi
+
+    # 发布包只允许一个名为 comi 的普通文件，拒绝额外成员和链接。
+    local members details
+    members=$(tar -tzf "$WORK_DIR/archive.tar.gz") || die 'Invalid archive.' '压缩包无效。' '無効なアーカイブです。'
+    details=$(LC_ALL=C tar -tvzf "$WORK_DIR/archive.tar.gz") || return 1
+    [[ "$members" == comi && "$details" == -* ]] || die 'Archive must contain only a regular comi file.' '压缩包必须仅包含普通文件 comi。' 'アーカイブには通常ファイル comi のみを含めてください。'
+    tar -xzf "$WORK_DIR/archive.tar.gz" -C "$WORK_DIR" comi
+    [[ -f "$WORK_DIR/comi" && ! -L "$WORK_DIR/comi" ]] || return 1
+
+    "${PRIVILEGE[@]}" mkdir -p -- "$INSTALL_DIR"
+    INSTALL_DIR=$(cd "$INSTALL_DIR" && pwd -P)
+    TARGET="$INSTALL_DIR/comi"
+    STAGE_DIR=$("${PRIVILEGE[@]}" mktemp -d "$INSTALL_DIR/.comigo-install.XXXXXX")
+    # 系统暂存目录允许当前用户执行验证，但只有目录所有者能修改暂存文件。
+    "${PRIVILEGE[@]}" chmod 755 "$STAGE_DIR"
+    "${PRIVILEGE[@]}" install -m 0755 "$WORK_DIR/comi" "$STAGE_DIR/comi"
+    if [[ "$SYSTEM" == true ]]; then "${PRIVILEGE[@]}" chown 0:0 "$STAGE_DIR/comi"; fi
+    local installed_version
+    installed_version=$(binary_version "$STAGE_DIR/comi") || die 'New binary cannot run; existing installation preserved.' '新程序无法运行，已保留原安装。' '新しいプログラムを実行できません。既存のインストールは保持されます。'
+    [[ "$installed_version" == "$VERSION" ]] || die 'Version mismatch: expected %s, got %s; existing installation preserved.' '版本不匹配：期望 %s，实际 %s；已保留原安装。' 'バージョン不一致：期待値 %s、実際 %s。既存のインストールは保持されます。' "$VERSION" "$installed_version"
+    "${PRIVILEGE[@]}" mv -f -- "$STAGE_DIR/comi" "$TARGET"
+    message 'Installed %s: %s' '已安装 %s：%s' '%s をインストールしました：%s' "$VERSION" "$TARGET"
+    printf '  %q --version\n' "$TARGET"
+    local resolved
+    resolved=$(type -P comi || :)
+    if [[ -z "$resolved" || ! "$resolved" -ef "$TARGET" ]]; then
+        if [[ -n "$resolved" ]]; then message 'PATH currently selects another command: %s' 'PATH 当前优先使用另一个命令：%s' 'PATH は現在別のコマンドを選択しています：%s' "$resolved"; fi
+        path_hint
+    fi
+}
+
+main "$@"

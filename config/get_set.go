@@ -95,15 +95,12 @@ func GetJwtSigningKey() string {
 	if cfg.HasPasswordLoginConfigured() {
 		return cfg.Username + cfg.Password
 	}
-	{
-		logger.Infof(locale.GetString("log_username_or_password_empty"))
-		tempStr := cfg.Username + cfg.Password + GetVersion()
-		for _, store := range cfg.StoreUrls {
-			tempStr = tempStr + store
-		}
-		// 未配置账号密码时，回退到可复现但不为空的签名 key。
-		return base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(tempStr))))
+	// 取值函数供状态轮询调用；匿名模式使用稳定签名 key，不重复记录提示。
+	tempStr := cfg.Username + cfg.Password + GetVersion()
+	for _, store := range cfg.StoreUrls {
+		tempStr += store
 	}
+	return base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(tempStr))))
 }
 
 func SetPort(port int) {

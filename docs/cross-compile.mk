@@ -12,7 +12,7 @@ DESKTOP_BUNDLE_ID := xyz.comigo
 OS := $(shell uname -s)
 HOST_ARCH := $(shell uname -m)
 BINDIR := ./bin
-MD5_TEXTFILE := $(BINDIR)/md5Sums.txt
+CHECKSUM_TEXTFILE := $(BINDIR)/checksums.txt
 
 # go: cannot install cross-compiled binaries when GOBIN is set
 unexport GOBIN
@@ -39,11 +39,9 @@ WASM_EXEC_JS := $(shell go env GOROOT 2>/dev/null)/lib/wasm/wasm_exec.js
 WASM_EXEC_JS_LEGACY := $(shell go env GOROOT 2>/dev/null)/misc/wasm/wasm_exec.js
 
 ifeq ($(OS), Darwin)
-  MD5_UTIL = md5
-  SED_INPLACE = sed -i ''
+  SHA256_UTIL = shasum -a 256
 else
-  MD5_UTIL = md5sum
-  SED_INPLACE = sed -i
+  SHA256_UTIL = sha256sum
 endif
 
 COMI_TARGETS := Windows_x86_64 Windows_i386 Windows_arm64 Linux_x86_64 Linux_i386 Linux_armv7 Linux_arm64 MacOS_x86_64 MacOS_arm64
@@ -70,9 +68,10 @@ else ifneq (,$(findstring MINGW,$(OS)))
   endif
 endif
 
-.PHONY: all tray-all desktop-all desktop-current compileAll android md5SumThemAll wails-frontend wails-linux-images wails-linux-image-amd64 wails-linux-image-arm64
+.PHONY: all tray-all desktop-all desktop-current compileAll android checksums wails-frontend wails-linux-images wails-linux-image-amd64 wails-linux-image-arm64
 
-all: compileAll deb-all tray-all desktop-all md5SumThemAll
+all: compileAll deb-all tray-all desktop-all
+	@$(MAKE) checksums
 tray-all: $(TRAY_TARGETS)
 desktop-all: $(DESKTOP_TARGETS)
 desktop-current:
@@ -122,13 +121,19 @@ wails-linux-image-arm64:
 		-t $(WAILS_LINUX_RUNTIME_IMAGE_ARM64) \
 		-f docs/docker/Dockerfile.wails-linux .
 
-md5SumThemAll:
-	@mkdir -p $(BINDIR)
-	rm -f $(MD5_TEXTFILE)
-	touch $(MD5_TEXTFILE)
-	find $(BINDIR) -maxdepth 1 -type f \( -name "$(NAME)_$(VERSION)_*" -o -name "$(TRAY_NAME)_$(VERSION)_*" -o -name "$(DESKTOP_NAME)_$(VERSION)_*" \) -exec $(MD5_UTIL) {} >> $(MD5_TEXTFILE) \;
-	$(SED_INPLACE) 's|./bin/||g' $(MD5_TEXTFILE)
-	cat $(MD5_TEXTFILE)
+# 全部发布包完成后生成校验清单；只使用文件名，兼容 Linux 与 macOS 校验工具。
+checksums:
+	@mkdir -p "$(BINDIR)"
+	@set -e; cd "$(BINDIR)"; \
+		tmp=$$(mktemp .checksums.XXXXXX); \
+		trap 'rm -f "$$tmp"' EXIT HUP INT TERM; \
+		for file in $(NAME)_$(VERSION)_* $(TRAY_NAME)_$(VERSION)_* $(DESKTOP_NAME)_$(VERSION)_*; do \
+			[ -f "$$file" ] || continue; \
+			$(SHA256_UTIL) "$$file" >> "$$tmp"; \
+		done; \
+		[ -s "$$tmp" ] || { echo "No release files found for $(VERSION)" >&2; exit 1; }; \
+		chmod 644 "$$tmp"; \
+		mv "$$tmp" "$(notdir $(CHECKSUM_TEXTFILE))"
 
 define build_comi_tar
 $1: build-wasm

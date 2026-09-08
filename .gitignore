@@ -53,7 +53,7 @@ go_build_main_go
 archives
 bin
 .config
-*md5Sums.txt
+checksums.txt
 resource.syso
 \[*
 *upload

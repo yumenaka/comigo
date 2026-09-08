@@ -33,6 +33,16 @@
 PC/Mobile Sync:   
 ![Mobile Sync Sample](https://www.yumenaka.net/wp-content/uploads/2026/04/scroll.gif "Mobile Sync Sample")
 
+## Omarchy status bar integration
+
+[comigo-omarchy](https://github.com/yumenaka/comigo-omarchy) brings Comigo controls to the Omarchy status bar. Open reading links and QR codes, switch local IPs, view service and traffic statistics, manage a local CLI, or connect to an existing remote server. The panel supports English, Chinese, and Japanese.
+
+```bash
+omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
+```
+
+Requires Omarchy with shell plugin support and Comigo v1.3.5 or later; remote mode needs no local CLI. See the [plugin guide](https://github.com/yumenaka/comigo-omarchy#readme). On your Comigo server, open **User Manual → Comigo on Omarchy**, or visit `/manual/en-US/comigo-omarchy`.
+
 ## Installation Guide
 
 ### GUI Version (Recommended for Beginners)
@@ -63,14 +73,30 @@ PC/Mobile Sync:
 
 ```bash
 # Recommended:
-bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
+installer=$(curl -fsSL https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh) && bash -c "$installer" --
 
 # For users in Mainland China:
-bash <(curl -s https://comigo.xyz/get.sh) --cn
+installer=$(curl -fsSL https://comigo.xyz/get.sh) && bash -c "$installer" -- --cn
 
 # If you have Golang (go 1.23 or higher):
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
+
+The installer defaults to `$HOME/.local/bin` and does not edit shell configuration. It checks both the available `comi` command and the destination file. If the requested version is already installed, a terminal prompt offers skip (default) or overwrite at the displayed destination; without a terminal it skips. Use `--force` to overwrite the same version non-interactively.
+
+For the examples below, first download the script with `curl -fSL -o get.sh https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh`.
+
+```bash
+bash get.sh --help
+bash get.sh --version v1.2.22
+bash get.sh --system                 # /usr/local/bin; root-owned, sudo when needed
+bash get.sh --install-dir "$HOME/bin" # overrides COMIGO_INSTALL_DIR
+bash get.sh --force                  # overwrite the same version
+```
+
+The destination remains explicit: an existing command elsewhere is not automatically replaced. Use `--system` or `--install-dir` to select its directory. The installer reports if PATH selects another copy and prints shell-specific PATH instructions. Explicit directories never silently fall back; symlink targets are rejected. To uninstall, remove only `comi` from the chosen directory (use the package manager if it manages that copy).
+
+Downloads require the release asset `checksums.txt`; for older releases without it, explicitly add `--skip-checksum` to disable verification. `make all` generates the SHA-256 manifest after building all packages; publish it alongside the release assets. To regenerate it separately, run `make checksums VERSION=vX.Y.Z`.
 
 ### CLI Version
 

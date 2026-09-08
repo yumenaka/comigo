@@ -1,6 +1,7 @@
 package settings
 
 import "github.com/yumenaka/comigo/config"
+import "github.com/yumenaka/comigo/assets"
 
 // ServerPanel 在设置主区域展示可折叠的服务控制与实时统计。
 templ ServerPanel() {
@@ -35,52 +36,88 @@ templ ServerPanel() {
 		</button>
 		<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<div id="server-control-content" x-show="!collapsed" x-transition x-cloak class="px-2 pb-2 font-normal">
-			<p class="text-xs leading-relaxed mt-1 mb-3 opacity-80" x-text="i18next.t('online_counts_description')"></p>
-			<dl class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm" aria-live="polite">
-				<dt x-text="i18next.t('online_users')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="info.onlineUsers ?? '—'"></dd>
-				<dt x-text="i18next.t('online_devices')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="info.onlineDevices ?? '—'"></dd>
-				<dt x-text="i18next.t('active_connections')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="info.connections ?? '—'"></dd>
-				<dt x-text="i18next.t('server_books')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="info.NumberOfBooks ?? '—'"></dd>
-				<dt x-text="i18next.t('server_version')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="info.Version ?? '—'"></dd>
-				<dt x-text="i18next.t('server_local_ips')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="(info.localIPs || []).join(', ') || '—'"></dd>
-				<dt x-text="i18next.t('server_receive_rate')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.receiveBytesPerSecond, true)"></dd>
-				<dt x-text="i18next.t('server_send_rate')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.sendBytesPerSecond, true)"></dd>
-				<dt x-text="i18next.t('server_received')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.receivedBytes)"></dd>
-				<dt x-text="i18next.t('server_sent')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.sentBytes)"></dd>
-				<dt x-text="i18next.t('server_traffic_total')"></dt>
-				<dd class="text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic ? info.traffic.receivedBytes + info.traffic.sentBytes : undefined)"></dd>
-			</dl>
-			<p class="mt-3 text-xs opacity-80" x-text="i18next.t('server_traffic_description')"></p>
-			<p class="mt-2 text-sm break-all" x-text="info.readingURL || '—'"></p>
-			<div class="grid grid-cols-2 gap-2 mt-2">
-				<button type="button" class="panel-control min-h-10 border border-base-content/20 rounded cursor-pointer" @click="copyURL()" :disabled="!info.readingURL" x-text="i18next.t('server_copy_url')"></button>
-				<button type="button" class="panel-control min-h-10 border border-base-content/20 rounded cursor-pointer" @click="showQR = !showQR" :disabled="!info.readingURL" x-text="i18next.t('server_show_qr')"></button>
+			<div class="grid grid-cols-[2.5rem_minmax(0,16rem)_2.5rem] justify-center items-center gap-2 my-3">
+				<button type="button" class="panel-control size-10 border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="cycleReadingIP(-1)" :disabled="readingIPs.length < 2" :aria-label="i18next.t('previous') + ' IP'">
+					<img src={ assets.GetImageDataSrc("ArrowLeft.png") } alt="" width="32" height="32" class="mx-auto"/>
+				</button>
+				<div class="w-full aspect-square">
+					<template x-if="readingURL">
+						<img class="w-full aspect-square bg-white" width="256" height="256" :alt="i18next.t('server_show_qr')" :src="window.ComiGoPath('/api/qrcode.png') + '?qrcode_str=' + encodeURIComponent(readingURL)"/>
+					</template>
+				</div>
+				<button type="button" class="panel-control size-10 border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="cycleReadingIP(1)" :disabled="readingIPs.length < 2" :aria-label="i18next.t('next') + ' IP'">
+					<img src={ assets.GetImageDataSrc("ArrowRight.png") } alt="" width="32" height="32" class="mx-auto"/>
+				</button>
 			</div>
-			<template x-if="showQR && info.readingURL">
-				<img class="mx-auto mt-3 bg-white" width="256" height="256" :alt="i18next.t('server_show_qr')" :src="window.ComiGoPath('/api/qrcode.png') + '?qrcode_str=' + encodeURIComponent(info.readingURL)"/>
-			</template>
-			<div class="grid gap-2 mt-3">
-				<button type="button" class="panel-control min-h-10 border border-base-content/20 rounded cursor-pointer" @click="checkUpdate()" :disabled="busy || updating" x-text="i18next.t('server_check_update')"></button>
-				<p class="text-sm" x-show="update.state" x-text="updateText()"></p>
-				<a class="text-sm underline" x-show="update.releaseURL" :href="update.releaseURL" target="_blank" rel="noopener noreferrer" x-text="i18next.t('server_release_page')"></a>
-			</div>
-			<div class="grid gap-2 mt-3">
-				<button type="button" class="panel-control w-full min-h-10 px-2 py-2 text-sm leading-snug font-semibold border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="refresh()" :disabled="busy" x-text="i18next.t('server_refresh')"></button>
+			<p class="text-center text-sm break-all" x-text="readingURL || '—'"></p>
+			<button type="button" class="panel-control min-w-28 max-w-full min-h-10 px-3 py-2 text-sm text-center font-semibold border border-black text-black rounded shadow-lg cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-200 hover:bg-indigo-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed block mx-auto mt-2" @click="copyURL()" :disabled="!readingURL" x-text="i18next.t('server_copy_url')"></button>
+			<table class="w-full table-fixed border-collapse text-sm mt-4" aria-live="polite">
+				<tbody class="divide-y divide-base-content/10">
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('server_local_ips')"></th>
+						<td class="py-2 text-right tabular-nums break-all">
+							<template x-for="ip in (info.localIPs || [])" :key="ip">
+								<div :class="{ 'font-bold': ip === currentReadingIP }" x-text="ip"></div>
+							</template>
+							<span x-show="!info.localIPs?.length">—</span>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('online_users')"></th>
+						<td class="py-2 text-right font-semibold tabular-nums break-all" x-text="info.onlineUsers ?? '—'"></td>
+					</tr>
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('online_devices')"></th>
+						<td class="py-2 text-right font-semibold tabular-nums break-all" x-text="info.onlineDevices ?? '—'"></td>
+					</tr>
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('active_connections')"></th>
+						<td class="py-2 text-right font-semibold tabular-nums break-all" x-text="info.connections ?? '—'"></td>
+					</tr>
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('server_books')"></th>
+						<td class="py-2 text-right font-semibold tabular-nums break-all" x-text="info.NumberOfBooks ?? '—'"></td>
+					</tr>
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('server_version')"></th>
+						<td class="py-2 text-right font-semibold tabular-nums break-all" x-text="info.Version ?? '—'"></td>
+					</tr>
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('server_receive_rate')"></th>
+						<td class="py-2 text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.receiveBytesPerSecond, true)"></td>
+					</tr>
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('server_send_rate')"></th>
+						<td class="py-2 text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.sendBytesPerSecond, true)"></td>
+					</tr>
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('server_received')"></th>
+						<td class="py-2 text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.receivedBytes)"></td>
+					</tr>
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('server_sent')"></th>
+						<td class="py-2 text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.sentBytes)"></td>
+					</tr>
+					<tr>
+						<th scope="row" class="w-1/2 py-2 pr-3 text-left font-normal" x-text="i18next.t('server_traffic_total')"></th>
+						<td class="py-2 text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic ? info.traffic.receivedBytes + info.traffic.sentBytes : undefined)"></td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="flex flex-wrap justify-center items-center gap-4 mt-3">
+				<button type="button" class="panel-control min-w-28 max-w-full min-h-10 px-3 py-2 text-sm text-center font-semibold border border-black text-black rounded shadow-lg cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-200 hover:bg-indigo-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" @click="refresh()" :disabled="busy" x-text="i18next.t('server_refresh')"></button>
 				if !config.GetCfg().ReadOnlyMode {
-					<button type="button" class="panel-control w-full min-h-10 px-2 py-2 text-sm leading-snug font-semibold border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="restart()" :disabled="busy" x-text="i18next.t('server_restart')"></button>
+					<button type="button" class="panel-control min-w-28 max-w-full min-h-10 px-3 py-2 text-sm text-center font-semibold border border-black text-black rounded shadow-lg cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 bg-red-200 hover:bg-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" @click="restart()" :disabled="busy" x-text="i18next.t('server_restart')"></button>
 				}
 			</div>
 			<p role="status" class="text-xs leading-relaxed mt-2 empty:hidden" x-text="message"></p>
+			<div class="grid gap-2 mt-3">
+				<button type="button" class="panel-control min-w-28 max-w-full min-h-10 px-3 py-2 text-sm text-center font-semibold border border-black text-black rounded shadow-lg cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 bg-blue-200 hover:bg-indigo-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed justify-self-center" @click="checkUpdate()" :disabled="busy || updating" x-text="i18next.t('server_check_update')"></button>
+				<div class="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 text-sm" x-show="update.state || update.releaseURL">
+					<p class="min-w-0 break-words" x-show="update.state" x-text="updateText()"></p>
+					<a class="underline" x-show="update.releaseURL" :href="update.releaseURL" target="_blank" rel="noopener noreferrer" x-text="i18next.t('server_release_page')"></a>
+				</div>
+			</div>
 		</div>
 	</section>
 	<script>
@@ -93,7 +130,27 @@ templ ServerPanel() {
 				update: {},
 				updating: false,
 				refreshing: false,
-				showQR: false,
+				selectedReadingIP: "",
+				get readingIPs() {
+					return this.info.externalAccess === false ? [] : [...new Set(this.info.localIPs || [])];
+				},
+				// 默认使用服务出口地址；选择网卡时仅替换主机，保留协议、端口和路径。
+				get readingURL() {
+					const address = this.info.readingURL || "";
+					if (!address || !this.readingIPs.includes(this.selectedReadingIP)) return address;
+					const url = new URL(address);
+					url.hostname = this.selectedReadingIP.includes(":") ? `[${this.selectedReadingIP}]` : this.selectedReadingIP;
+					return url.href;
+				},
+				get currentReadingIP() {
+					return this.readingURL ? new URL(this.readingURL).hostname.replace(/^\[|\]$/g, "") : "";
+				},
+				cycleReadingIP(direction) {
+					const ips = this.readingIPs;
+					if (ips.length < 2) return;
+					const index = ips.indexOf(this.currentReadingIP);
+					this.selectedReadingIP = ips[index < 0 ? (direction > 0 ? 0 : ips.length - 1) : (index + direction + ips.length) % ips.length];
+				},
 				busy: false,
 				message: "",
 				timer: null,
@@ -129,6 +186,7 @@ templ ServerPanel() {
 							this.info = {...this.info, traffic, connections: counts.connections.length, onlineUsers: counts.onlineUsers, onlineDevices: counts.onlineDevices};
 						} else {
 							this.info = snapshots[0];
+							if (!this.readingIPs.includes(this.selectedReadingIP)) this.selectedReadingIP = "";
 							this.lastFullRefresh = Date.now();
 							if (!this.updating && this.info.update) this.update = this.info.update;
 						}
@@ -146,10 +204,10 @@ templ ServerPanel() {
 				async copyURL() {
 					try {
 						if (navigator.clipboard && window.isSecureContext)
-							await navigator.clipboard.writeText(this.info.readingURL);
+							await navigator.clipboard.writeText(this.readingURL);
 						else {
 							const input = document.createElement("textarea");
-							input.value = this.info.readingURL;
+							input.value = this.readingURL;
 							input.style.position = "fixed";
 							input.style.opacity = "0";
 							document.body.appendChild(input);
