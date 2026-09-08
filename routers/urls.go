@@ -148,6 +148,8 @@ func bindServerAPI(group *echo.Group) {
 	bindWailsAPI(group)
 	// 服务器状态
 	group.GET("/server", data_api.GetServerInfoHandler)
+	group.GET("/server/update", data_api.GetServerUpdateHandler)
+	group.GET("/server/traffic", data_api.GetServerTrafficHandler)
 	group.GET("/connections", data_api.GetConnections)
 	group.POST("/restart", restartHandler)
 	// 获取书库列表

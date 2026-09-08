@@ -1031,5 +1031,22 @@
   "server_version": "バージョン",
   "server_refresh": "状態を更新",
   "server_restart": "サーバーを再起動",
-  "server_restarting": "再起動しています…"
+  "server_restarting": "再起動しています…",
+  "server_local_ips": "ローカル IP",
+  "server_receive_rate": "受信速度",
+  "server_send_rate": "送信速度",
+  "server_received": "累計受信",
+  "server_sent": "累計送信",
+  "server_traffic_total": "今回の通信量",
+  "server_traffic_description": "プロセス起動後の HTTP 本文の通信量です。再起動でリセットされ、速度は直近5秒の平均です。",
+  "server_copy_url": "閲覧URLをコピー",
+  "server_show_qr": "閲覧QRコード",
+  "server_check_update": "更新を確認",
+  "server_release_page": "リリースページ",
+  "server_update_unchecked": "更新は未確認",
+  "server_update_unknown": "開発版を比較できません",
+  "server_update_available": "更新があります",
+  "server_update_latest": "最新です",
+  "server_url_copied": "閲覧URLをコピーしました",
+  "server_copy_failed": "コピーに失敗しました。URLを手動でコピーしてください"
 }

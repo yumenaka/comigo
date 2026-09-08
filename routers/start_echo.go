@@ -75,11 +75,7 @@ func buildHTTPServer(e *echo.Echo) (*http.Server, webServeMode, error) {
 }
 
 func webServerAddr() string {
-	// 绑定到 127.0.0.1，避免 localhost 在不同平台解析到 IPv6 时导致 WebView 无法通过 127.0.0.1 访问。
-	if config.GetCfg().DisableLAN {
-		return "127.0.0.1:" + strconv.Itoa(config.GetCfg().Port)
-	}
-	return ":" + strconv.Itoa(config.GetCfg().Port)
+	return net.JoinHostPort(config.GetListenHost(), strconv.Itoa(config.GetCfg().Port))
 }
 
 func hasCustomTLSCertificate() bool {
@@ -100,7 +96,7 @@ func buildAutoTLSServer(e *echo.Echo) (*http.Server, webServeMode, error) {
 	}
 	logger.Infof(locale.GetString("log_auto_tls_enabled_for_domain"), config.GetCfg().Host)
 	return &http.Server{
-		Addr:              ":443",
+		Addr:              net.JoinHostPort(config.GetListenHost(), "443"),
 		Handler:           e,
 		ReadHeaderTimeout: readHeaderTimeout,
 		IdleTimeout:       idleTimeout,

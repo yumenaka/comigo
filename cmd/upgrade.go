@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net"
@@ -17,61 +17,22 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	toolsfile "github.com/yumenaka/comigo/tools/file"
+	"github.com/yumenaka/comigo/tools/releases"
 	"golang.org/x/mod/semver"
 )
 
 const (
 	upgradeProxyHost   = "https://comigo.xyz"
-	latestReleasePath  = "/yumenaka/api.github.com/repos/yumenaka/comigo/releases/latest"
 	downloadPathPrefix = "/yumenaka/comigo/releases/download/"
 	upgradeUserAgent   = "Comigo-Upgrade/"
 )
 
-// ghAsset release 资源条目（仅解析名称）
-type ghAsset struct {
-	Name string `json:"name"`
-}
+type ghAsset = releases.Asset
+type ghRelease = releases.Release
 
-// ghRelease 解析 GitHub releases/latest JSON 所需字段
-type ghRelease struct {
-	TagName string    `json:"tag_name"`
-	Assets  []ghAsset `json:"assets"`
-}
-
-// loadLatestRelease 从 comigo.xyz 反代拉取 GitHub latest release JSON。
+// loadLatestRelease 复用 REST 和托盘使用的版本查询，下载仍走 CLI 原有实现。
 func loadLatestRelease() (*ghRelease, error) {
-	current := strings.TrimSpace(config.GetVersion())
-	clientAPI := newUpgradeHTTPClient(45 * time.Second)
-
-	req, err := http.NewRequest(http.MethodGet, upgradeProxyHost+latestReleasePath, nil)
-	if err != nil {
-		return nil, fmt.Errorf(locale.GetString("upgrade_fetch_release_failed"), err)
-	}
-	req.Header.Set("User-Agent", upgradeUserAgent+current)
-	req.Header.Set("Accept", "application/vnd.github+json")
-
-	resp, err := clientAPI.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf(locale.GetString("upgrade_fetch_release_failed"), err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(locale.GetString("upgrade_http_status"), resp.Status)
-	}
-
-	body, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
-	if err != nil {
-		return nil, fmt.Errorf(locale.GetString("upgrade_fetch_release_failed"), err)
-	}
-
-	var rel ghRelease
-	if err := json.Unmarshal(body, &rel); err != nil {
-		return nil, fmt.Errorf(locale.GetString("upgrade_fetch_release_failed"), err)
-	}
-	if strings.TrimSpace(rel.TagName) == "" {
-		return nil, fmt.Errorf(locale.GetString("upgrade_fetch_release_failed"), fmt.Errorf("empty tag_name"))
-	}
-	return &rel, nil
+	return releases.Load(context.Background(), newUpgradeHTTPClient(45*time.Second), strings.TrimSpace(config.GetVersion()))
 }
 
 // runSelfUpgrade 经 comigo.xyz 反代检查版本、下载 CLI 包并替换当前可执行文件。
@@ -149,19 +110,7 @@ func runSelfUpgrade() error {
 	return nil
 }
 
-func canonicalSemverTag(v string) string {
-	v = strings.TrimSpace(v)
-	if v == "" {
-		return ""
-	}
-	if !strings.HasPrefix(v, "v") {
-		v = "v" + v
-	}
-	if semver.IsValid(v) {
-		return v
-	}
-	return ""
-}
+func canonicalSemverTag(v string) string { return releases.Canonical(v) }
 
 // platformReleaseLabels 与 comigo_xyz 插件中 CLI 包命名一致
 func platformReleaseLabels() (osLabel, archLabel string, ok bool) {

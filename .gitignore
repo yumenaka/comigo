@@ -154,3 +154,6 @@ Caddyfile
 docs/wiki/
 
 package.json.md5
+
+# Independent Omarchy plugin repository.
+/comigo-omarchy/

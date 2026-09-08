@@ -2031,8 +2031,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .grid-cols-\[minmax\(0\,1fr\)_auto\] {
-    grid-template-columns: minmax(0, 1fr) auto;
+  .grid-cols-\[minmax\(0\,1fr\)_minmax\(0\,1fr\)\] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
   .flex-col {

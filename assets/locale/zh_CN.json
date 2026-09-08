@@ -1031,5 +1031,22 @@
   "server_version": "版本",
   "server_refresh": "刷新状态",
   "server_restart": "重启服务",
-  "server_restarting": "正在重启服务…"
+  "server_restarting": "正在重启服务…",
+  "server_local_ips": "本地 IP",
+  "server_receive_rate": "接收速度",
+  "server_send_rate": "发送速度",
+  "server_received": "累计接收",
+  "server_sent": "累计发送",
+  "server_traffic_total": "本次运行总流量",
+  "server_traffic_description": "统计本次进程运行的 HTTP 正文收发，重启进程后归零。速度为最近 5 秒平均值。",
+  "server_copy_url": "复制阅读地址",
+  "server_show_qr": "阅读二维码",
+  "server_check_update": "检测更新",
+  "server_release_page": "查看发布页面",
+  "server_update_unchecked": "尚未检查更新",
+  "server_update_unknown": "无法比较开发版本",
+  "server_update_available": "发现新版本",
+  "server_update_latest": "已是最新版本",
+  "server_url_copied": "阅读地址已复制",
+  "server_copy_failed": "复制失败，请手动复制地址"
 }

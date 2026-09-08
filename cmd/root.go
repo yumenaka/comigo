@@ -16,13 +16,15 @@ import (
 
 var Args []string
 
-// RootCmd 没有任何子命令的情况下时的基本命令
+// RootCmd 接收书库路径和 CLI 选项。
 var RootCmd = &cobra.Command{
 	Use:     locale.GetString("comigo_use"),
 	Short:   locale.GetString("short_description"),
 	Example: locale.GetString("comigo_example"),
 	Version: config.GetVersion(),
 	Long:    locale.GetString("long_description"),
+	// 书库路径和远程 URL 作为位置参数传入，独立于子命令解析。
+	Args: cobra.ArbitraryArgs,
 	// Run 函数按以下顺序执行：PersistentPreRun() PreRun() Run() PostRun() PersistentPostRun()
 	// 所有函数都能拿到相同的参数，即命令名称后面添加的参数。仅当设置了 Run 函数时，才会执行 PreRun 和 PostRun 函数。
 	// 因为参数设置已完成，实际运行的命令习惯写在这里
@@ -75,6 +77,8 @@ var RootCmd = &cobra.Command{
 }
 
 func init() {
+	// 帮助中公开桌面协议能力，旧版客户端探测时不会误启动服务。
+	RootCmd.AddCommand(&cobra.Command{Use: "desktop", Short: "Machine-readable desktop integration: info, check-update"})
 	// 自定义 -v/--version 输出：软件版本、系统类型、Go 版本
 	RootCmd.SetVersionTemplate(`Comigo {{.Version}}
 OS/Arch: ` + runtime.GOOS + "/" + runtime.GOARCH + `

@@ -1031,5 +1031,22 @@
   "server_version": "Version",
   "server_refresh": "Refresh status",
   "server_restart": "Restart server",
-  "server_restarting": "Restarting server…"
+  "server_restarting": "Restarting server…",
+  "server_local_ips": "Local IPs",
+  "server_receive_rate": "Receive rate",
+  "server_send_rate": "Send rate",
+  "server_received": "Received",
+  "server_sent": "Sent",
+  "server_traffic_total": "Total this run",
+  "server_traffic_description": "HTTP body traffic since process start; resets when the process restarts. Rates average the last 5 seconds.",
+  "server_copy_url": "Copy reading URL",
+  "server_show_qr": "Reading QR code",
+  "server_check_update": "Check for updates",
+  "server_release_page": "View release page",
+  "server_update_unchecked": "Updates not checked",
+  "server_update_unknown": "Cannot compare development version",
+  "server_update_available": "Update available",
+  "server_update_latest": "Up to date",
+  "server_url_copied": "Reading URL copied",
+  "server_copy_failed": "Copy failed; please copy the URL manually"
 }

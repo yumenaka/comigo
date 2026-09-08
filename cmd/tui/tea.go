@@ -306,6 +306,10 @@ func InitialModel(lb *LogBuffer) *appModel {
 
 // Run 启动 TUI 模式；如果没有终端，则退回到普通服务模式。
 func Run() error {
+	// 桌面协议命令不进入 TUI，也不初始化书库与 HTTP 服务。
+	if handled, err := cmd.RunDesktop(os.Args[1:], os.Stdout); handled {
+		return err
+	}
 	// 现代终端（iTerm2、Terminal.app 等）将 East Asian Ambiguous 字符（含 Box Drawing）渲染为宽度 1，
 	// 但 go-runewidth 在 zh_CN 等 CJK locale 下默认将其视为宽度 2，导致面板宽度计算偏差。
 	runewidth.DefaultCondition.EastAsianWidth = false

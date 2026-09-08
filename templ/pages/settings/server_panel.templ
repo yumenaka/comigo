@@ -2,63 +2,216 @@ package settings
 
 import "github.com/yumenaka/comigo/config"
 
-// ServerPanel 在设置页抽屉中展示服务状态，并提供刷新和重启入口。
+// ServerPanel 在设置主区域展示可折叠的服务控制与实时统计。
 templ ServerPanel() {
-	<section id="server-control" class="panel-surface w-full min-w-0 shrink-0 my-2 p-3 border border-base-content/20 rounded-lg bg-base-100 text-base-content" aria-labelledby="server-control-title" x-data="serverControl()">
-		<h2 id="server-control-title" class="text-base font-semibold" x-text="i18next.t('server_control')"></h2>
-		<p class="text-xs leading-relaxed mt-1 mb-3 opacity-80" x-text="i18next.t('online_counts_description')"></p>
-		<dl class="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 text-sm" aria-live="polite">
-			<dt x-text="i18next.t('online_users')"></dt>
-			<dd class="text-right font-semibold tabular-nums break-all" x-text="info.onlineUsers ?? '—'"></dd>
-			<dt x-text="i18next.t('online_devices')"></dt>
-			<dd class="text-right font-semibold tabular-nums break-all" x-text="info.onlineDevices ?? '—'"></dd>
-			<dt x-text="i18next.t('active_connections')"></dt>
-			<dd class="text-right font-semibold tabular-nums break-all" x-text="info.connections ?? '—'"></dd>
-			<dt x-text="i18next.t('server_books')"></dt>
-			<dd class="text-right font-semibold tabular-nums break-all" x-text="info.NumberOfBooks ?? '—'"></dd>
-			<dt x-text="i18next.t('server_version')"></dt>
-			<dd class="text-right font-semibold tabular-nums break-all" x-text="info.Version ?? '—'"></dd>
-		</dl>
-		<div class="grid gap-2 mt-3">
-			<button type="button" class="panel-control w-full min-h-10 px-2 py-2 text-sm leading-snug font-semibold border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="refresh()" :disabled="busy" x-text="i18next.t('server_refresh')"></button>
-			if !config.GetCfg().ReadOnlyMode {
-				<button type="button" class="panel-control w-full min-h-10 px-2 py-2 text-sm leading-snug font-semibold border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="restart()" :disabled="busy" x-text="i18next.t('server_restart')"></button>
-			}
+	<section id="server-control" class="panel-surface flex flex-col justify-start w-full pl-2 pr-4 py-2 mx-2 my-1 font-semibold border rounded shadow-md hover:shadow-2xl items-left bg-base-100 text-base-content border-slate-400" aria-labelledby="server-control-title" x-data="serverControl()">
+		<button
+			type="button"
+			id="server-control-title"
+			:aria-expanded="!collapsed"
+			aria-controls="server-control-content"
+			@click="collapsed = !collapsed"
+			class="flex justify-between items-center w-full cursor-pointer px-2 py-1.5"
+		>
+			<svg
+				class="w-5 h-5 transition-transform"
+				:class="{ '-rotate-90': collapsed }"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 10 6"
+			>
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+			</svg>
+			<span x-text="i18next.t('server_control')" class="flex-1 text-center font-semibold">服务控制</span>
+			<svg
+				class="w-5 h-5 transition-transform"
+				:class="{ 'rotate-90': collapsed }"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 10 6"
+			>
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"></path>
+			</svg>
+		</button>
+		<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
+		<div id="server-control-content" x-show="!collapsed" x-transition x-cloak class="px-2 pb-2 font-normal">
+			<p class="text-xs leading-relaxed mt-1 mb-3 opacity-80" x-text="i18next.t('online_counts_description')"></p>
+			<dl class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm" aria-live="polite">
+				<dt x-text="i18next.t('online_users')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="info.onlineUsers ?? '—'"></dd>
+				<dt x-text="i18next.t('online_devices')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="info.onlineDevices ?? '—'"></dd>
+				<dt x-text="i18next.t('active_connections')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="info.connections ?? '—'"></dd>
+				<dt x-text="i18next.t('server_books')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="info.NumberOfBooks ?? '—'"></dd>
+				<dt x-text="i18next.t('server_version')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="info.Version ?? '—'"></dd>
+				<dt x-text="i18next.t('server_local_ips')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="(info.localIPs || []).join(', ') || '—'"></dd>
+				<dt x-text="i18next.t('server_receive_rate')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.receiveBytesPerSecond, true)"></dd>
+				<dt x-text="i18next.t('server_send_rate')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.sendBytesPerSecond, true)"></dd>
+				<dt x-text="i18next.t('server_received')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.receivedBytes)"></dd>
+				<dt x-text="i18next.t('server_sent')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic?.sentBytes)"></dd>
+				<dt x-text="i18next.t('server_traffic_total')"></dt>
+				<dd class="text-right font-semibold tabular-nums break-all" x-text="formatBytes(info.traffic ? info.traffic.receivedBytes + info.traffic.sentBytes : undefined)"></dd>
+			</dl>
+			<p class="mt-3 text-xs opacity-80" x-text="i18next.t('server_traffic_description')"></p>
+			<p class="mt-2 text-sm break-all" x-text="info.readingURL || '—'"></p>
+			<div class="grid grid-cols-2 gap-2 mt-2">
+				<button type="button" class="panel-control min-h-10 border border-base-content/20 rounded cursor-pointer" @click="copyURL()" :disabled="!info.readingURL" x-text="i18next.t('server_copy_url')"></button>
+				<button type="button" class="panel-control min-h-10 border border-base-content/20 rounded cursor-pointer" @click="showQR = !showQR" :disabled="!info.readingURL" x-text="i18next.t('server_show_qr')"></button>
+			</div>
+			<template x-if="showQR && info.readingURL">
+				<img class="mx-auto mt-3 bg-white" width="256" height="256" :alt="i18next.t('server_show_qr')" :src="window.ComiGoPath('/api/qrcode.png') + '?qrcode_str=' + encodeURIComponent(info.readingURL)"/>
+			</template>
+			<div class="grid gap-2 mt-3">
+				<button type="button" class="panel-control min-h-10 border border-base-content/20 rounded cursor-pointer" @click="checkUpdate()" :disabled="busy || updating" x-text="i18next.t('server_check_update')"></button>
+				<p class="text-sm" x-show="update.state" x-text="updateText()"></p>
+				<a class="text-sm underline" x-show="update.releaseURL" :href="update.releaseURL" target="_blank" rel="noopener noreferrer" x-text="i18next.t('server_release_page')"></a>
+			</div>
+			<div class="grid gap-2 mt-3">
+				<button type="button" class="panel-control w-full min-h-10 px-2 py-2 text-sm leading-snug font-semibold border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="refresh()" :disabled="busy" x-text="i18next.t('server_refresh')"></button>
+				if !config.GetCfg().ReadOnlyMode {
+					<button type="button" class="panel-control w-full min-h-10 px-2 py-2 text-sm leading-snug font-semibold border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="restart()" :disabled="busy" x-text="i18next.t('server_restart')"></button>
+				}
+			</div>
+			<p role="status" class="text-xs leading-relaxed mt-2 empty:hidden" x-text="message"></p>
 		</div>
-		<p role="status" class="text-xs leading-relaxed mt-2 empty:hidden" x-text="message"></p>
 	</section>
 	<script>
-		// 控制面板复用既有登录 Cookie；轮询在 Alpine 销毁组件时停止。
+		// 复用插件的 REST 接口与网页登录 Cookie；折叠和隐藏时暂停轮询。
 		function serverControl() {
 			return {
+				collapsed: Alpine.$persist(false).as("settings.serverControlCollapsed"),
+				lastFullRefresh: 0,
 				info: {},
+				update: {},
+				updating: false,
+				refreshing: false,
+				showQR: false,
 				busy: false,
 				message: "",
 				timer: null,
 				init() {
-					this.refresh();
+					if (!this.collapsed && !document.hidden) this.refresh();
+					this.$watch("collapsed", (value) => {
+						if (!value && !document.hidden) this.refresh();
+					});
 					this.timer = setInterval(() => {
-						if (!this.busy) this.refresh();
-					}, 10000);
+						if (!this.collapsed && !this.busy && !document.hidden)
+							this.refresh(Date.now() - this.lastFullRefresh < 30000);
+					}, 2000);
 				},
 				destroy() {
 					clearInterval(this.timer);
 				},
-				async refresh() {
+				// 高频只读取轻量流量、连接快照，避免反复探测网卡和 Tailscale。
+				async refresh(live = false) {
+					if (this.refreshing || this.busy) return;
+					this.refreshing = true;
 					try {
-						const response = await fetch(window.ComiGoPath("/api/server"), {
+						const paths = live ? ["/api/server/traffic", "/api/connections"] : ["/api/server"];
+						const snapshots = await Promise.all(paths.map(async (path) => {
+							const response = await fetch(window.ComiGoPath(path), {
+								cache: "no-store",
+								signal: AbortSignal.timeout(15000),
+							});
+							if (!response.ok) throw new Error(String(response.status));
+							return response.json();
+						}));
+						if (live) {
+							const [traffic, counts] = snapshots;
+							this.info = {...this.info, traffic, connections: counts.connections.length, onlineUsers: counts.onlineUsers, onlineDevices: counts.onlineDevices};
+						} else {
+							this.info = snapshots[0];
+							this.lastFullRefresh = Date.now();
+							if (!this.updating && this.info.update) this.update = this.info.update;
+						}
+						this.message = "";
+					} catch (error) {
+						this.info = {};
+						this.lastFullRefresh = 0;
+						if (error.message === "401") clearInterval(this.timer);
+						this.message = i18next.t(error.message === "401" ? "err_login_required" : "err_network_error");
+					} finally {
+						this.refreshing = false;
+					}
+				},
+				// HTTP 页面可能没有 Clipboard API，保留用户点击触发的本地复制回退。
+				async copyURL() {
+					try {
+						if (navigator.clipboard && window.isSecureContext)
+							await navigator.clipboard.writeText(this.info.readingURL);
+						else {
+							const input = document.createElement("textarea");
+							input.value = this.info.readingURL;
+							input.style.position = "fixed";
+							input.style.opacity = "0";
+							document.body.appendChild(input);
+							try {
+								input.select();
+								if (!document.execCommand("copy")) throw new Error("copy failed");
+							} finally {
+								input.remove();
+							}
+						}
+						this.message = i18next.t("server_url_copied");
+					} catch (error) {
+						this.message = i18next.t("server_copy_failed");
+					}
+				},
+				formatBytes(value, rate = false) {
+					if (!Number.isFinite(value)) return "—";
+					const units = ["B", "KiB", "MiB", "GiB", "TiB"];
+					let index = 0;
+					while (value >= 1024 && index < units.length - 1) {
+						value /= 1024;
+						index++;
+					}
+					return (
+						value.toFixed(index ? 1 : 0) + " " + units[index] + (rate ? "/s" : "")
+					);
+				},
+				updateText() {
+					const state = this.update.state;
+					const key =
+						state === "unchecked"
+							? "server_update_unchecked"
+							: state === "unknown"
+								? "server_update_unknown"
+								: state === "error"
+									? "err_network_error"
+									: this.update.available
+										? "server_update_available"
+										: "server_update_latest";
+					return (
+						i18next.t(key) +
+						(this.update.latestVersion ? " · " + this.update.latestVersion : "")
+					);
+				},
+				async checkUpdate() {
+					if (this.updating) return;
+					this.updating = true;
+					try {
+						const response = await fetch(window.ComiGoPath("/api/server/update"), {
 							cache: "no-store",
+							signal: AbortSignal.timeout(16000),
 						});
 						if (response.status === 401) {
-							clearInterval(this.timer);
 							this.message = i18next.t("err_login_required");
 							return;
 						}
 						if (!response.ok) throw new Error(response.status);
-						this.info = await response.json();
-						this.message = "";
+						this.update = await response.json();
 					} catch (error) {
-						this.message = i18next.t("err_network_error");
+						this.update = { state: "error" };
+					} finally {
+						this.updating = false;
 					}
 				},
 				async restart() {

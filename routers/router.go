@@ -16,6 +16,7 @@ import (
 	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/traffic"
 )
 
 var engine *echo.Echo
@@ -76,6 +77,7 @@ func SetHTTPErrorHandler(e *echo.Echo) {
 
 // SetMiddleware 设置 Echo 的中间件等
 func SetMiddleware() {
+	engine.Pre(trackTraffic(traffic.Default))
 	// Recovery 中间件。返回 500 错误，避免程序直接崩溃，同时记录错误日志。
 	engine.Use(middleware.Recover())
 	engine.Use(middleware.RequestID())

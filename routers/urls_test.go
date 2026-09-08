@@ -112,9 +112,9 @@ func TestControlAuthChangesWithoutRebinding(t *testing.T) {
 	}
 	config.GetCfg().Password = "secret"
 	for _, route := range []struct{ method, path string }{
-		{http.MethodGet, "/api/server"}, {http.MethodGet, "/api/connections"},
+		{http.MethodGet, "/api/server"}, {http.MethodGet, "/api/server/update"}, {http.MethodGet, "/api/server/traffic"}, {http.MethodGet, "/api/connections"},
 		{http.MethodGet, "/api/stores"}, {http.MethodGet, "/api/stores/test"},
-		{http.MethodGet, "/api/books/test"}, {http.MethodPost, "/api/restart"},
+		{http.MethodGet, "/api/books/test"}, {http.MethodPost, "/api/restart"}, {http.MethodPatch, "/api/configs"}, {http.MethodGet, "/api/configs/status"},
 		{http.MethodPost, "/api/stores/test/refresh"}, {http.MethodDelete, "/api/stores/test"},
 	} {
 		if got := request(route.method, route.path, ""); got != http.StatusUnauthorized {

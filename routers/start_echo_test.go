@@ -39,3 +39,23 @@ func TestBuildHTTPServerSetsConnectionTimeouts(t *testing.T) {
 		t.Fatalf("server timeouts = %v/%v", server.ReadHeaderTimeout, server.IdleTimeout)
 	}
 }
+
+// 对外服务切换必须改变实际监听地址。
+func TestHTTPServerListenScope(t *testing.T) {
+	old := config.CopyCfg()
+	t.Cleanup(func() { *config.GetCfg() = old })
+	config.GetCfg().AutoTLSCertificate = false
+	config.GetCfg().CertFile = ""
+	config.GetCfg().KeyFile = ""
+	config.GetCfg().Port = 1234
+	for _, tc := range []struct {
+		local   bool
+		address string
+	}{{true, "127.0.0.1:1234"}, {false, "0.0.0.0:1234"}} {
+		config.GetCfg().DisableLAN = tc.local
+		server, _, err := buildHTTPServer(echo.New())
+		if err != nil || server.Addr != tc.address {
+			t.Fatalf("监听地址: %v, %v", server, err)
+		}
+	}
+}

@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -15,6 +16,13 @@ import (
 
 // 运行 Comigo 服务器
 func main() {
+	if handled, err := cmd.RunDesktop(os.Args[1:], os.Stdout); handled {
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
 	config.UseTrayConfigProfile()
 	// 检查是否只是查看版本或帮助信息
 	for _, arg := range os.Args {

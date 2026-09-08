@@ -96,3 +96,33 @@ func TestToQrcodePublicURLRewritesLoopbackOnly(t *testing.T) {
 		t.Fatalf("ToQrcodePublicURL(text) = %q, want %q", got, rawText)
 	}
 }
+
+// 分享地址与浏览器地址必须和实际 TLS/IPv6 监听方式一致。
+func TestReadingURLsTransport(t *testing.T) {
+	oldCfg := cfg
+	t.Cleanup(func() { cfg = oldCfg })
+	cfg = newDefaultConfig()
+	cfg.Host = "2001:db8::1"
+	cfg.Port = 4321
+	cfg.BasePath = "/books"
+	if got := GetQrcodeURL(); got != "http://[2001:db8::1]:4321/books/" {
+		t.Fatal(got)
+	}
+	cfg.CertFile = "cert.pem"
+	cfg.KeyFile = "key.pem"
+	if got := GetLocalBrowserURL(); got != "https://127.0.0.1:4321/books/" {
+		t.Fatal(got)
+	}
+	cfg.AutoTLSCertificate = true
+	cfg.Host = "example.com"
+	if got := GetLocalBrowserURL(); got != "https://example.com:443/books/" {
+		t.Fatal(got)
+	}
+	cfg.AutoTLSCertificate = false
+	cfg.CertFile = ""
+	cfg.KeyFile = ""
+	cfg.DisableLAN = true
+	if got := GetQrcodeURL(); got != "http://127.0.0.1:4321/books/" {
+		t.Fatal(got)
+	}
+}

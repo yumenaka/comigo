@@ -1,64 +1,60 @@
 package config
 
 import (
+	"path/filepath"
 	"runtime"
-
-	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/tools/logger"
 )
 
+// ConfigFileInfo 描述运行配置的文件来源；文件删除后，已加载配置仍保留在内存中。
+type ConfigFileInfo struct {
+	Path     string `json:"path"`
+	Location string `json:"location"`
+	Type     string `json:"type"`
+	Format   string `json:"format"`
+	Exists   bool   `json:"exists"`
+}
+
 type Status struct {
-	// 当前生效的配置文件路径 None、HomeDirectory、WorkingDirectory、ProgramDirectory
-	// 设置读取顺序：None（默认值） -> HomeDirectory -> ProgramDirectory -> WorkingDirectory
 	In   string
 	Path struct {
-		// 对应配置文件的绝对路径
 		WorkingDirectory string
 		HomeDirectory    string
 		ProgramDirectory string
 	}
+	Current ConfigFileInfo `json:"current"`
 }
 
+// SetConfigStatus 区分实际加载的文件与各保存位置的现存文件。
 func (c *Status) SetConfigStatus() error {
-	// 在js环境下
-	if runtime.GOOS == "js" {
+	ConfigFileLock.Lock()
+	defer ConfigFileLock.Unlock()
+	*c = Status{In: "None", Current: ConfigFileInfo{Location: "None", Type: configProfile(), Format: "toml"}}
+	if runtime.GOOS == "js" || cfg.TemporaryReaderMode {
 		return nil
 	}
-	// 初始化
-	c.In = "None"
-	c.Path.WorkingDirectory = ""
-	c.Path.HomeDirectory = ""
-	c.Path.ProgramDirectory = ""
-	if cfg.TemporaryReaderMode {
+	c.Path.WorkingDirectory = GetWorkingDirectoryConfig()
+	c.Path.HomeDirectory = GetHomeDirectoryConfig()
+	c.Path.ProgramDirectory = GetProgramDirectoryConfig()
+	if cfg.ConfigFile == "" {
 		return nil
 	}
-	logger.Info(locale.GetString("log_checking_cfg_sharename"))
-
-	for _, cp := range []struct {
-		name string
-		path string
-	}{
-		{name: HomeDirectory, path: GetHomeDirectoryConfig()},
-		{name: ProgramDirectory, path: GetProgramDirectoryConfig()},
-		{name: WorkingDirectory, path: GetWorkingDirectoryConfig()},
-	} {
-		if cp.path == "" {
-			continue
+	current, err := filepath.Abs(cfg.ConfigFile)
+	if err != nil {
+		return err
+	}
+	c.Current.Path = current
+	c.Current.Exists = fileExists(current)
+	c.Current.Location = "Custom"
+	for _, location := range configSearchLocations() {
+		directory, err := filepath.Abs(location.dir)
+		if err != nil {
+			return err
 		}
-		switch cp.name {
-		case HomeDirectory:
-			c.Path.HomeDirectory = cp.path
-		case ProgramDirectory:
-			c.Path.ProgramDirectory = cp.path
-		case WorkingDirectory:
-			c.Path.WorkingDirectory = cp.path
+		if filepath.Dir(current) == directory {
+			c.Current.Location = location.name
+			break
 		}
-		c.In = cp.name
-		return nil
 	}
+	c.In = c.Current.Location
 	return nil
 }
-
-type UploadDirOption int
-
-var CfgStatus = Status{}

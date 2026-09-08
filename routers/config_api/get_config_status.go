@@ -10,11 +10,13 @@ import (
 
 // GetConfigStatus 获取json格式的当前配置
 func GetConfigStatus(c echo.Context) error {
-	err := config.CfgStatus.SetConfigStatus()
+	var status config.Status
+	err := status.SetConfigStatus()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get config"})
 	}
-	return c.JSON(http.StatusOK, config.CfgStatus)
+	c.Response().Header().Set("Cache-Control", "no-store")
+	return c.JSON(http.StatusOK, status)
 }
 
 // GetConfig 返回当前配置的可读副本，凭据不回传到控制面板。

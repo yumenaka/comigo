@@ -27,3 +27,20 @@ func TestConfigUpdateWhileRestarting(t *testing.T) {
 		t.Fatalf("重启期间更新: status=%d, port=%d，期望409且配置不变", rec.Code, config.GetCfg().Port)
 	}
 }
+
+// 锁定配置时 REST 不能改变对外服务状态。
+func TestExternalAccessReadOnly(t *testing.T) {
+	old := config.CopyCfg()
+	t.Cleanup(func() { *config.GetCfg() = old; restarting.Store(false) })
+	config.GetCfg().ReadOnlyMode = true
+	config.GetCfg().DisableLAN = true
+	e := echo.New()
+	e.PATCH("/configs", updateConfigHandler)
+	req := httptest.NewRequest(http.MethodPatch, "/configs", strings.NewReader(`{"DisableLAN":false}`))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	if rec.Code != http.StatusForbidden || !config.GetCfg().DisableLAN {
+		t.Fatalf("锁定配置被修改: %d", rec.Code)
+	}
+}

@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -309,21 +310,26 @@ func writeFileAtomically(filePath string, data []byte, perm os.FileMode) error {
 	return nil
 }
 
+// GetQrcodeURL 使用服务实际协议与监听端口构造可分享地址。
 func GetQrcodeURL() string {
-	enableTLS := cfg.CertFile != "" && cfg.KeyFile != ""
-	protocol := "http://"
-	if enableTLS {
-		protocol = "https://"
+	host := strings.Trim(strings.TrimSpace(cfg.Host), "[]")
+	if host == "" || tools.IsLoopbackHost(host) || host == "0.0.0.0" || host == "::" {
+		host = tools.GetOutboundIP().String()
 	}
-	if host := strings.TrimSpace(cfg.Host); host != "" {
-		if tools.IsLoopbackHost(host) {
-			host = tools.GetOutboundIP().String()
-		}
-		return protocol + host + ":" + strconv.Itoa(int(cfg.Port)) + PrefixPath("/")
+	if cfg.DisableLAN && !cfg.AutoTLSCertificate {
+		host = "127.0.0.1"
 	}
-	// 取得本机的首选出站IP
-	OutIP := tools.GetOutboundIP().String()
-	return protocol + OutIP + ":" + strconv.Itoa(int(cfg.Port)) + PrefixPath("/")
+	return readingURL(host)
+}
+
+func readingURL(host string) string {
+	protocol, port := "http", cfg.Port
+	if cfg.AutoTLSCertificate {
+		protocol, port = "https", 443
+	} else if cfg.CertFile != "" && cfg.KeyFile != "" {
+		protocol = "https"
+	}
+	return (&url.URL{Scheme: protocol, Host: net.JoinHostPort(host, strconv.Itoa(port)), Path: PrefixPath("/")}).String()
 }
 
 // ToQrcodePublicURL 将页面 URL 中的 localhost/127.0.0.1 替换为二维码公开地址。
@@ -344,15 +350,23 @@ func ToQrcodePublicURL(rawURL string) string {
 
 // GetLocalBrowserURL 返回启动时自动打开浏览器使用的本机入口，避免本机启动流程受 Host 或 0.0.0.0 影响。
 func GetLocalBrowserURL() string {
-	protocol := "http://"
-	if cfg.EnableTLS {
-		protocol = "https://"
+	// 自动证书依赖域名 SNI；用域名访问才能通过证书校验。
+	if cfg.AutoTLSCertificate {
+		return readingURL(strings.Trim(cfg.Host, "[]"))
 	}
-	return protocol + "127.0.0.1:" + strconv.Itoa(cfg.Port) + PrefixPath("/")
+	return readingURL("127.0.0.1")
 }
 
 func OpenBrowserIfNeeded() {
 	if cfg.OpenBrowser == true {
 		go tools.OpenBrowserByURL(GetLocalBrowserURL())
 	}
+}
+
+// GetListenHost 返回阅读服务的绑定地址。
+func GetListenHost() string {
+	if GetCfg().DisableLAN {
+		return "127.0.0.1"
+	}
+	return "0.0.0.0"
 }
