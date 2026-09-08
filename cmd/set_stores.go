@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
@@ -35,9 +36,21 @@ func init() {
 	})
 }
 
-// SetCwdAsScanPath  当没有指定扫描路径时，把当前工作目录作为扫描路径
+// SetCwdAsScanPathIfNeed 首次无书库参数或配置文件时优先使用已有用户目录，否则回退到工作目录。
 func SetCwdAsScanPathIfNeed() {
 	if len(config.GetCfg().StoreUrls) == 0 {
+		if len(Args) == 0 && config.GetCfg().ConfigFile == "" {
+			if home, err := os.UserHomeDir(); err == nil {
+				for _, name := range []string{"Pictures", "Documents", "Downloads"} {
+					path := filepath.Join(home, name)
+					if info, err := os.Stat(path); err == nil && info.IsDir() {
+						if err := config.GetCfg().AddStoreUrl(path); err == nil {
+							return
+						}
+					}
+				}
+			}
+		}
 		// 获取当前工作目录
 		wd, err := os.Getwd()
 		if err != nil {
