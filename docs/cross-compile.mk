@@ -40,8 +40,11 @@ WASM_EXEC_JS_LEGACY := $(shell go env GOROOT 2>/dev/null)/misc/wasm/wasm_exec.js
 
 ifeq ($(OS), Darwin)
   SHA256_UTIL = shasum -a 256
+  # 仅在 macOS 宿主机打包时禁用 AppleDouble、扩展属性和 ACL，保留基本权限。
+  RELEASE_TAR := COPYFILE_DISABLE=1 tar --no-xattrs --no-acls
 else
   SHA256_UTIL = sha256sum
+  RELEASE_TAR := tar
 endif
 
 COMI_TARGETS := Windows_x86_64 Windows_i386 Windows_arm64 Linux_x86_64 Linux_i386 Linux_armv7 Linux_arm64 MacOS_x86_64 MacOS_arm64
@@ -139,7 +142,7 @@ define build_comi_tar
 $1: build-wasm
 	@mkdir -p $(BINDIR)/$(NAME)_$(VERSION)_$1
 	GOOS=$2 GOARCH=$3 $(if $4,GOARM=$4 )$(GOBUILD_CROSS) -o $(BINDIR)/$(NAME)_$(VERSION)_$1/$(NAME) ./cmd/comi
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$1 -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$1.tar.gz $(NAME)
+	$(RELEASE_TAR) --directory=$(BINDIR)/$(NAME)_$(VERSION)_$1 -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$1.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$1
 endef
 
@@ -158,7 +161,7 @@ $1: build-wasm
 	@rm -rf $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2 $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2.tar.gz
 	@mkdir -p $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2
 	GOOS=$3 GOARCH=$4 $(GOBUILD_CROSS) -o $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2/$(TRAY_NAME) ./cmd/comigo
-	tar --directory=$(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2 -zcvf $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2.tar.gz $(TRAY_NAME)
+	$(RELEASE_TAR) --directory=$(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2 -zcvf $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2.tar.gz $(TRAY_NAME)
 	rm -rf $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2
 endef
 
@@ -186,7 +189,7 @@ $1: $5 wails-prepare wails-frontend
 		-c "wails build $(WAILS_BUILD_FLAGS) -platform linux/$3 -s -nopackage -o $(DESKTOP_NAME) -ldflags \"$(LDFLAGS)\""
 	@mkdir -p $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2
 	cp build/bin/$(DESKTOP_NAME) $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2/$(DESKTOP_NAME)
-	tar --directory=$(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2 -zcvf $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2.tar.gz $(DESKTOP_NAME)
+	$(RELEASE_TAR) --directory=$(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2 -zcvf $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2.tar.gz $(DESKTOP_NAME)
 	rm -rf $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_$2 build/bin
 endef
 
@@ -248,13 +251,13 @@ $(eval $(call build_comi_tar,MacOS_arm64,darwin,arm64,))
 #Android，32位arm，Termux
 Linux_arm_android:
 	GOARCH=arm GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@ -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
+	$(RELEASE_TAR) --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@ -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 #Android，64位arm，Termux
 Linux_arm64-android:
 	GOARCH=arm64 GOOS=android $(GOBUILD) -o $(BINDIR)/$(NAME)_$(VERSION)_$@/$(NAME) cmd/comi/main.go
-	tar --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@ -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
+	$(RELEASE_TAR) --directory=$(BINDIR)/$(NAME)_$(VERSION)_$@ -zcvf $(BINDIR)/$(NAME)_$(VERSION)_$@.tar.gz $(NAME)
 	rm -rf $(BINDIR)/$(NAME)_$(VERSION)_$@
 
 ## ============================================================================

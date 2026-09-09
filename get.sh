@@ -241,13 +241,8 @@ main() {
         [[ "$actual" == "$expected" ]] || die 'SHA-256 mismatch: %s' 'SHA-256 不匹配：%s' 'SHA-256 不一致：%s' "$name"
     fi
 
-    # 发布包只允许一个名为 comi 的普通文件，拒绝额外成员和链接。
-    local members details
-    members=$(tar -tzf "$WORK_DIR/archive.tar.gz") || die 'Invalid archive.' '压缩包无效。' '無効なアーカイブです。'
-    details=$(LC_ALL=C tar -tvzf "$WORK_DIR/archive.tar.gz") || return 1
-    [[ "$members" == comi && "$details" == -* ]] || die 'Archive must contain only a regular comi file.' '压缩包必须仅包含普通文件 comi。' 'アーカイブには通常ファイル comi のみを含めてください。'
-    tar -xzf "$WORK_DIR/archive.tar.gz" -C "$WORK_DIR" comi
-    [[ -f "$WORK_DIR/comi" && ! -L "$WORK_DIR/comi" ]] || return 1
+    # 只读取 comi 的内容写入暂存文件，随后验证新程序能够运行。
+    tar -xzOf "$WORK_DIR/archive.tar.gz" comi > "$WORK_DIR/comi"
 
     "${PRIVILEGE[@]}" mkdir -p -- "$INSTALL_DIR"
     INSTALL_DIR=$(cd "$INSTALL_DIR" && pwd -P)
