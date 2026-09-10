@@ -132,24 +132,38 @@ templ ServerPanel() {
 				refreshing: false,
 				selectedReadingIP: "",
 				get readingIPs() {
-					return this.info.externalAccess === false ? [] : [...new Set(this.info.localIPs || [])];
+					return this.info.externalAccess === false
+						? []
+						: [...new Set(this.info.localIPs || [])];
 				},
 				// 默认使用服务出口地址；选择网卡时仅替换主机，保留协议、端口和路径。
 				get readingURL() {
 					const address = this.info.readingURL || "";
-					if (!address || !this.readingIPs.includes(this.selectedReadingIP)) return address;
+					if (!address || !this.readingIPs.includes(this.selectedReadingIP))
+						return address;
 					const url = new URL(address);
-					url.hostname = this.selectedReadingIP.includes(":") ? `[${this.selectedReadingIP}]` : this.selectedReadingIP;
+					url.hostname = this.selectedReadingIP.includes(":")
+						? `[${this.selectedReadingIP}]`
+						: this.selectedReadingIP;
 					return url.href;
 				},
 				get currentReadingIP() {
-					return this.readingURL ? new URL(this.readingURL).hostname.replace(/^\[|\]$/g, "") : "";
+					return this.readingURL
+						? new URL(this.readingURL).hostname.replace(/^\[|\]$/g, "")
+						: "";
 				},
 				cycleReadingIP(direction) {
 					const ips = this.readingIPs;
 					if (ips.length < 2) return;
 					const index = ips.indexOf(this.currentReadingIP);
-					this.selectedReadingIP = ips[index < 0 ? (direction > 0 ? 0 : ips.length - 1) : (index + direction + ips.length) % ips.length];
+					this.selectedReadingIP =
+						ips[
+							index < 0
+								? direction > 0
+									? 0
+									: ips.length - 1
+								: (index + direction + ips.length) % ips.length
+						];
 				},
 				busy: false,
 				message: "",
@@ -172,30 +186,46 @@ templ ServerPanel() {
 					if (this.refreshing || this.busy) return;
 					this.refreshing = true;
 					try {
-						const paths = live ? ["/api/server/traffic", "/api/connections"] : ["/api/server"];
-						const snapshots = await Promise.all(paths.map(async (path) => {
-							const response = await fetch(window.ComiGoPath(path), {
-								cache: "no-store",
-								signal: AbortSignal.timeout(15000),
-							});
-							if (!response.ok) throw new Error(String(response.status));
-							return response.json();
-						}));
+						const paths = live
+							? ["/api/server/traffic", "/api/connections"]
+							: ["/api/server"];
+						const snapshots = await Promise.all(
+							paths.map(async (path) => {
+								const response = await fetch(window.ComiGoPath(path), {
+									cache: "no-store",
+									signal: AbortSignal.timeout(15000),
+								});
+								if (!response.ok) throw new Error(String(response.status));
+								return response.json();
+							}),
+						);
 						if (live) {
 							const [traffic, counts] = snapshots;
-							this.info = {...this.info, traffic, connections: counts.connections.length, onlineUsers: counts.onlineUsers, onlineDevices: counts.onlineDevices};
+							this.info = {
+								...this.info,
+								traffic,
+								connections: counts.connections.length,
+								onlineUsers: counts.onlineUsers,
+								onlineDevices: counts.onlineDevices,
+							};
 						} else {
 							this.info = snapshots[0];
-							if (!this.readingIPs.includes(this.selectedReadingIP)) this.selectedReadingIP = "";
+							if (!this.readingIPs.includes(this.selectedReadingIP))
+								this.selectedReadingIP = "";
 							this.lastFullRefresh = Date.now();
-							if (!this.updating && this.info.update) this.update = this.info.update;
+							if (!this.updating && this.info.update)
+								this.update = this.info.update;
 						}
 						this.message = "";
 					} catch (error) {
 						this.info = {};
 						this.lastFullRefresh = 0;
 						if (error.message === "401") clearInterval(this.timer);
-						this.message = i18next.t(error.message === "401" ? "err_login_required" : "err_network_error");
+						this.message = i18next.t(
+							error.message === "401"
+								? "err_login_required"
+								: "err_network_error",
+						);
 					} finally {
 						this.refreshing = false;
 					}
@@ -213,7 +243,8 @@ templ ServerPanel() {
 							document.body.appendChild(input);
 							try {
 								input.select();
-								if (!document.execCommand("copy")) throw new Error("copy failed");
+								if (!document.execCommand("copy"))
+									throw new Error("copy failed");
 							} finally {
 								input.remove();
 							}
@@ -232,7 +263,10 @@ templ ServerPanel() {
 						index++;
 					}
 					return (
-						value.toFixed(index ? 1 : 0) + " " + units[index] + (rate ? "/s" : "")
+						value.toFixed(index ? 1 : 0) +
+						" " +
+						units[index] +
+						(rate ? "/s" : "")
 					);
 				},
 				updateText() {
@@ -256,10 +290,13 @@ templ ServerPanel() {
 					if (this.updating) return;
 					this.updating = true;
 					try {
-						const response = await fetch(window.ComiGoPath("/api/server/update"), {
-							cache: "no-store",
-							signal: AbortSignal.timeout(16000),
-						});
+						const response = await fetch(
+							window.ComiGoPath("/api/server/update"),
+							{
+								cache: "no-store",
+								signal: AbortSignal.timeout(16000),
+							},
+						);
 						if (response.status === 401) {
 							this.message = i18next.t("err_login_required");
 							return;

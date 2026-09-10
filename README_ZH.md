@@ -260,9 +260,6 @@ Debug = false                  # 调试模式
 UseCache = false               # 启用图片缓存
 CacheDir = ""                  # 缓存目录（留空使用系统临时目录）
 ClearCacheExit = false         # 退出时清除缓存
-
-# ZIP文件设置
-ZipFileTextEncoding = "gbk"    # 非UTF-8编码ZIP的解析编码
 ```
 
 ## 反馈与支持

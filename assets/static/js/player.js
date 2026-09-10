@@ -126,7 +126,6 @@
         this.$nextTick(() => {
           this.applyVolumeFromStore();
           if (this.player) this.player.load();
-          this.scrollCurrentPlaylistItem('auto');
         });
       },
 
@@ -241,21 +240,12 @@
           this.applyVolumeFromStore();
           this.player.load();
           this.applyVolumeFromStore();
-          this.scrollCurrentPlaylistItem('smooth');
           if (shouldAutoPlay) {
             this.player
               .play()
               .catch((error) => console.error('[player] autoplay failed:', error));
           }
         });
-      },
-
-      // scrollCurrentPlaylistItem 刷新或切歌后，将播放列表滚到当前媒体。
-      scrollCurrentPlaylistItem(behavior = 'smooth') {
-        const root = document.getElementById('PlayerMainArea');
-        const activeItem = root?.querySelector('[data-player-active="true"]');
-        if (!activeItem) return;
-        activeItem.scrollIntoView({ block: 'center', inline: 'nearest', behavior });
       },
 
       playPrevious(opts = {}) {
