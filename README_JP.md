@@ -34,14 +34,6 @@
 PC/モバイル同期：  
 ![モバイル同期サンプル](https://www.yumenaka.net/wp-content/uploads/2026/04/scroll.gif "モバイル同期サンプル")
 
-## Omarchy ステータスバー連携
-
-Comigo は Omarchy に対応しています。[comigo-omarchy プラグイン](https://github.com/yumenaka/comigo-omarchy)で、ステータスバーからローカル・リモートの Comigo を利用できます。
-
-```bash
-omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
-```
-
 ## インストール方法
 
 ### GUI版（初心者におすすめ）
@@ -68,35 +60,19 @@ omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
 > xattr -dr com.apple.quarantine /Applications/comigo-desktop.app
 > ```
 
-### CLI版のワンクリックインストール
+### CLI 版のワンクリックインストール
 
 ```bash
-# GitHub：
-installer=$(curl -fsSL https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh) && bash -c "$installer" --
-
-# comigo.xyz（中国本土のユーザーに推奨）：
-installer=$(curl -fsSL https://comigo.xyz/get.sh) && bash -c "$installer" --
-
-# Golang環境（go 1.23以上）が設定済みの場合：
-go install github.com/yumenaka/comigo/cmd/comi@latest
+bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 ```
 
-ダウンロード前に GitHub または comigo.xyz（中国本土のユーザーに推奨）を選び、次にインストール先を選択します。PATH に含まれる候補だけを `/usr/bin`、`/usr/local/bin`、`$HOME/.local/bin` の順に表示し、root 権限の要否を示します。macOS の保護された `/usr/bin` は除外します。候補がない場合は `--install-dir` で指定してください。既定の選択はなく、シェル設定も自動変更しません。端末がない場合は `--github` または `--cn` と、`--install-dir` または `--system`（または `COMIGO_INSTALL_DIR`）を明示してください。利用可能な `comi` とインストール先を確認し、同じバージョンなら端末でスキップ（既定）または表示された保存先への上書きを選択できます。端末がない場合はスキップし、`--force` を指定すると確認せず上書きします。
-
-以下の例では、先に `curl -fSL -o get.sh https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh` でスクリプトを取得してください。
+中国本土のユーザーに推奨：
 
 ```bash
-bash get.sh --help
-bash get.sh --github --install-dir "$HOME/.local/bin"
-bash get.sh --version v1.2.22
-bash get.sh --system                 # /usr/local/bin、root 所有、必要時 sudo
-bash get.sh --install-dir "$HOME/bin" # COMIGO_INSTALL_DIR より優先
-bash get.sh --force                  # 同じバージョンを上書き
+bash <(curl -s https://comigo.xyz/get.sh) --cn
 ```
 
-別のディレクトリにある既存コマンドは自動的に置き換えません。必要に応じて `--system` または `--install-dir` でその場所を指定してください。PATH が別のコピーを選択する場合は、パスとシェルに合った設定方法を表示します。指定先で失敗しても別の場所に切り替えず、シンボリックリンクへの上書きは拒否します。アンインストールは選択したディレクトリの `comi` のみを削除してください。パッケージ管理下のコピーはパッケージマネージャーで削除します。
-
-検証にはリリース添付の `checksums.txt` が必要です。このファイルのない旧リリースには、検証を省略する `--skip-checksum` を明示してください。`make all` は全パッケージのビルド後に SHA-256 一覧を生成します。リリース時はパッケージと一緒に公開してください。個別生成は `make checksums VERSION=vX.Y.Z`です。
+[インストール手順](https://comigo.xyz/manual/ja-JP/install)
 
 ### CLI版
 
@@ -119,6 +95,16 @@ bash get.sh --force                  # 同じバージョンを上書き
 ### 手動インストール
 
 [Releases ページ](https://github.com/yumenaka/comigo/releases) から最新バージョンをダウンロードし、実行ファイルをシステムの `PATH` 環境変数に追加してください。
+
+## Omarchy ステータスバー連携
+
+Comigo は Omarchy に対応しています。[comigo-omarchy プラグイン](https://github.com/yumenaka/comigo-omarchy)で、ステータスバーからローカル・リモートの Comigo を利用できます。
+
+```bash
+omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
+```
+
+[ユーザーマニュアル](https://comigo.xyz/manual/ja-JP/comigo-omarchy)
 
 ## Docker デプロイ
 
@@ -163,6 +149,8 @@ docker-compose up -d
 詳細については、完全な [Docker ドキュメント](docs/docker/README.md) をご覧ください。
 
 ## 使用方法
+
+[ユーザーマニュアル](https://comigo.xyz/manual/ja-JP/) · [開発](https://comigo.xyz/manual/ja-JP/development)
 
 ```bash
 comi [flags] file_or_dir
