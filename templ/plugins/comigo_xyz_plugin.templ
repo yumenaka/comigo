@@ -89,38 +89,45 @@ templ ComigoXYZPlugin(c echo.Context) {
 					return { os, arch };
 				}
 
-				// 各系统内按托盘版、桌面版、命令行版排序；filename 对齐 make all 的 latest 命名。
+				// label 保存翻译键，随页面语言渲染；filename 对齐 make all 的 latest 命名。
 				const systems = [
 					{
 						os: "Windows",
 						selected: 0,
 						options: [
 							{
-								label: "托盘版 x86_64",
+								label: "comigo_xyz_download_tray",
+								arch: "x86_64",
 								filename: "comigo-tray_latest_Windows_x86_64.zip",
 							},
 							{
-								label: "托盘版 arm64",
+								label: "comigo_xyz_download_tray",
+								arch: "arm64",
 								filename: "comigo-tray_latest_Windows_arm64.zip",
 							},
 							{
-								label: "桌面版 x86_64",
+								label: "comigo_xyz_download_desktop",
+								arch: "x86_64",
 								filename: "comigo-desktop_latest_Windows_x86_64.zip",
 							},
 							{
-								label: "桌面版 arm64",
+								label: "comigo_xyz_download_desktop",
+								arch: "arm64",
 								filename: "comigo-desktop_latest_Windows_arm64.zip",
 							},
 							{
-								label: "命令行版 x86_64",
+								label: "comigo_xyz_download_cli",
+								arch: "x86_64",
 								filename: "comi_latest_Windows_x86_64.zip",
 							},
 							{
-								label: "命令行版 arm64",
+								label: "comigo_xyz_download_cli",
+								arch: "arm64",
 								filename: "comi_latest_Windows_arm64.zip",
 							},
 							{
-								label: "命令行版 i386",
+								label: "comigo_xyz_download_cli",
+								arch: "i386",
 								filename: "comi_latest_Windows_i386.zip",
 							},
 						],
@@ -130,19 +137,23 @@ templ ComigoXYZPlugin(c echo.Context) {
 						selected: 0,
 						options: [
 							{
-								label: "托盘版 universal",
+								label: "comigo_xyz_download_tray",
+								arch: "universal",
 								filename: "comigo-tray_latest_MacOS_universal.dmg",
 							},
 							{
-								label: "桌面版 universal",
+								label: "comigo_xyz_download_desktop",
+								arch: "universal",
 								filename: "comigo-desktop_latest_MacOS_universal.dmg",
 							},
 							{
-								label: "命令行版 arm64",
+								label: "comigo_xyz_download_cli",
+								arch: "arm64",
 								filename: "comi_latest_MacOS_arm64.tar.gz",
 							},
 							{
-								label: "命令行版 x86_64",
+								label: "comigo_xyz_download_cli",
+								arch: "x86_64",
 								filename: "comi_latest_MacOS_x86_64.tar.gz",
 							},
 						],
@@ -152,43 +163,53 @@ templ ComigoXYZPlugin(c echo.Context) {
 						selected: 0,
 						options: [
 							{
-								label: "托盘版 x86_64",
+								label: "comigo_xyz_download_tray",
+								arch: "x86_64",
 								filename: "comigo-tray_latest_Linux_x86_64.tar.gz",
 							},
 							{
-								label: "托盘版 arm64",
+								label: "comigo_xyz_download_tray",
+								arch: "arm64",
 								filename: "comigo-tray_latest_Linux_arm64.tar.gz",
 							},
 							{
-								label: "桌面版 x86_64",
+								label: "comigo_xyz_download_desktop",
+								arch: "x86_64",
 								filename: "comigo-desktop_latest_Linux_x86_64.tar.gz",
 							},
 							{
-								label: "桌面版 arm64",
+								label: "comigo_xyz_download_desktop",
+								arch: "arm64",
 								filename: "comigo-desktop_latest_Linux_arm64.tar.gz",
 							},
 							{
-								label: "命令行版 x86_64",
+								label: "comigo_xyz_download_cli",
+								arch: "x86_64",
 								filename: "comi_latest_Linux_x86_64.tar.gz",
 							},
 							{
-								label: "命令行版 arm64",
+								label: "comigo_xyz_download_cli",
+								arch: "arm64",
 								filename: "comi_latest_Linux_arm64.tar.gz",
 							},
 							{
-								label: "命令行版 armv7",
+								label: "comigo_xyz_download_cli",
+								arch: "armv7",
 								filename: "comi_latest_Linux_armv7.tar.gz",
 							},
 							{
-								label: "命令行版 i386",
+								label: "comigo_xyz_download_cli",
+								arch: "i386",
 								filename: "comi_latest_Linux_i386.tar.gz",
 							},
 							{
-								label: "Debian/Ubuntu amd64",
+								label: "comigo_xyz_download_deb",
+								arch: "amd64",
 								filename: "comi_latest_amd64.deb",
 							},
 							{
-								label: "Debian/Ubuntu arm64",
+								label: "comigo_xyz_download_deb",
+								arch: "arm64",
 								filename: "comi_latest_arm64.deb",
 							},
 						],
@@ -300,7 +321,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 											class="panel-control w-full min-w-0 px-3 py-2 border bg-base-100 rounded-lg text-base-content focus:outline-none focus:ring-2 focus:ring-primary"
 										>
 											<template x-for="(option, index) in system.options" :key="option.filename">
-												<option :value="index" x-text="option.label"></option>
+												<option :value="index" x-text="i18next.t(option.label, { arch: option.arch })"></option>
 											</template>
 										</select>
 										<a
