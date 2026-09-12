@@ -165,6 +165,15 @@
         wrapper.append(pre);
       }
       wrapper.classList.add("manual-code");
+      // 新代码块的类型在 code 上，旧格式在容器上；统一显示已有类型标签。
+      if (!wrapper.querySelector(".lang")) {
+        const language = [...(pre.querySelector("code")?.classList || []), ...wrapper.classList]
+          .find((name) => name.startsWith("language-"))?.slice(9) || "text";
+        const label = document.createElement("span");
+        label.className = "lang";
+        label.textContent = language;
+        wrapper.prepend(label);
+      }
       if (wrapper.querySelector(".manual-copy")) return;
       const button = document.createElement("button");
       button.type = "button";

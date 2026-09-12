@@ -281,7 +281,7 @@ body:has(.manual-sidebar.open) {
 
 .manual-article pre {
   margin: 0;
-  padding: 1rem 1rem 3.5rem;
+  padding: 1rem;
   overflow-x: auto;
   line-height: 1.55;
 }
@@ -302,7 +302,7 @@ body:has(.manual-sidebar.open) {
   padding: 0.3rem 0.55rem;
   border: 1px solid #555;
   border-radius: 0.4rem;
-  background: #292929;
+  background: rgb(41 41 41 / 55%);
   color: white;
   cursor: pointer;
 }

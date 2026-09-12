@@ -170,9 +170,10 @@ async (page) => {
   }
   // 所有章节的新旧代码块共用样式；明暗主题和窄屏下复制按钮均位于右下角。
   for (const language of ["", "en-US/", "ja-JP/"]) {
-    for (const chapter of ["reading", "comigo-omarchy", "deployment", "development"]) {
+    for (const chapter of ["index", "install", "quick-start", "reading", "library", "desktop", "comigo-omarchy", "deployment", "development", "faq"]) {
       await page.goto(`${origin}/manual/${language}${chapter}`);
-      await page.locator(".manual-copy").first().waitFor();
+      await page.locator("[data-manual-nav] a").first().waitFor();
+      if (await page.locator("[data-manual-content] pre").count() === 0) continue;
       for (const theme of ["light", "dark"]) {
         await page.evaluate((value) => { document.body.dataset.theme = value; }, theme);
         for (const width of [390, 1440]) {
@@ -187,8 +188,14 @@ async (page) => {
               const box = wrapper.getBoundingClientRect();
               const button = buttons[0].getBoundingClientRect();
               if (Math.abs(box.right - button.right - 10) > 3 || Math.abs(box.bottom - button.bottom - 10) > 3) return "Copy button is not bottom-right";
-              const code = pre.querySelector("code").getBoundingClientRect();
-              if (code.bottom > button.top) return "Copy button overlaps code";
+              const preStyle = getComputedStyle(pre);
+              const buttonStyle = getComputedStyle(buttons[0]);
+              if (buttonStyle.position !== "absolute" || preStyle.paddingBottom !== preStyle.paddingTop) return "Copy button reserves a row";
+              const alpha = Number(buttonStyle.backgroundColor.match(/rgba\(.+, ([\d.]+)\)/)?.[1]);
+              if (!(alpha > 0 && alpha < 1)) return "Copy background is not translucent";
+              const type = [...pre.querySelector("code").classList, ...wrapper.classList].find((name) => name.startsWith("language-"))?.slice(9);
+              const labels = wrapper.querySelectorAll(".lang");
+              if (!type || labels.length !== 1 || labels[0].textContent !== type) return "Missing or incorrect language label";
             }
             return "";
           });
@@ -213,5 +220,5 @@ async (page) => {
     await page.locator("[data-manual-nav] a").first().waitFor();
     check((await page.locator("[data-manual-back]").getAttribute("href")) === home, "Invalid entry was accepted");
   }
-  return "PASS: search dismissal, focus, 3 languages, snippets, clipboard, anchors, drawer, 5 widths, all code blocks in light/dark, bottom-right copy, no SSE/errors";
+  return "PASS: search dismissal, focus, 3 languages, snippets, clipboard, anchors, drawer, 5 widths, all code blocks in light/dark, translucent overlay copy and language labels, no SSE/errors";
 }
