@@ -33,14 +33,6 @@
 PC/手机同步：  
 ![移动端同步演示](https://www.yumenaka.net/wp-content/uploads/2026/04/scroll.gif "移动端同步演示")
 
-## Omarchy 状态栏集成
-
-Comigo 支持 Omarchy，可通过 [comigo-omarchy 插件](https://github.com/yumenaka/comigo-omarchy)在状态栏管理本机或连接远程 Comigo。
-
-```bash
-omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
-```
-
 ## 安装指南
 
 ### 图形界面版（推荐）
@@ -67,35 +59,19 @@ omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
 > xattr -dr com.apple.quarantine /Applications/comigo-desktop.app
 > ```
 
-### 一键安装(命令行版)
+### 一键安装命令行版
 
 ```bash
-# comigo.xyz（中国大陆推荐）：
-installer=$(curl -fsSL https://comigo.xyz/get.sh) && bash -c "$installer" --
-
-# 从 GitHub下载：
-installer=$(curl -fsSL https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh) && bash -c "$installer" --
-
-# 如果您已设置 Golang 环境：
-go install github.com/yumenaka/comigo/cmd/comi@latest
+bash <(curl -s https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh)
 ```
 
-下载前先选择 GitHub 或 comigo.xyz（中国大陆推荐），再互动选择安装目录。菜单只显示 PATH 中的候选目录，依次为 `/usr/bin`、`/usr/local/bin`、`$HOME/.local/bin`，并标注是否需要 root 权限；macOS 不提供受系统保护的 `/usr/bin`。没有符合条件的目录时，使用 `--install-dir` 指定。不设默认选项，不自动修改 shell 配置。无终端时须明确指定 `--github` 或 `--cn`，以及 `--install-dir` 或 `--system`（也可设置 `COMIGO_INSTALL_DIR`）。它会检查当前可用的 `comi` 命令和目标文件；已安装同版本时，有终端则询问跳过（默认）或覆盖显示的目标位置，无终端则跳过。使用 `--force` 可在非交互环境直接覆盖同版本。
-
-以下参数示例先用 `curl -fSL -o get.sh https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh` 下载脚本。
+中国大陆用户推荐：
 
 ```bash
-bash get.sh --help
-bash get.sh --github --install-dir "$HOME/.local/bin"
-bash get.sh --version v1.2.22
-bash get.sh --system                 # /usr/local/bin；文件归 root，必要时使用 sudo
-bash get.sh --install-dir "$HOME/bin" # 优先于 COMIGO_INSTALL_DIR
-bash get.sh --force                  # 同版本直接覆盖
+bash <(curl -s https://comigo.xyz/get.sh) --cn
 ```
 
-安装位置以显示的目标为准，不会自动替换其他目录中的已有命令；可用 `--system` 或 `--install-dir` 选择其目录。若 PATH 优先使用其他副本，会提示其路径并输出适合当前 shell 的 PATH 配置命令。指定目录失败不会回退，目标是符号链接时拒绝覆盖。卸载时只需删除所选目录中的 `comi`；由包管理器管理的副本应通过包管理器卸载。
-
-下载默认要求发布附件包含 `checksums.txt`；没有此文件的旧版本需显式添加 `--skip-checksum` 以跳过校验。`make all` 会在全部包构建完成后生成 SHA-256 清单，发布时须将其与安装包一同上传；也可运行 `make checksums VERSION=vX.Y.Z` 单独生成。
+[安装手册](https://comigo.xyz/manual/install)
 
 ### 下载命令行版
 
@@ -119,6 +95,16 @@ bash get.sh --force                  # 同版本直接覆盖
 
 也可以在 [Releases 页面](https://github.com/yumenaka/comigo/releases) 下载最新版本，并将可执行文件添加到系统的 `PATH` 环境变量中。
 
+
+## Omarchy 状态栏集成
+
+Comigo 支持 Omarchy，可通过 [comigo-omarchy 插件](https://github.com/yumenaka/comigo-omarchy)在状态栏管理本机或连接远程 Comigo。
+
+```bash
+omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
+```
+
+[用户手册](https://comigo.xyz/manual/comigo-omarchy)
 
 ## 使用Docker 部署
 
@@ -148,6 +134,8 @@ docker-compose up -d
 更多详细说明请查看完整的 [Docker 使用文档](docs/docker/README.md)。
 
 ## 使用方法
+
+[用户手册](https://comigo.xyz/manual/) · [开发](https://comigo.xyz/manual/development)
 
 ```bash
 comi [flags] file_or_dir

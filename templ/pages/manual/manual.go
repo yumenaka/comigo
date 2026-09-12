@@ -9,7 +9,7 @@ import (
 
 var validPages = map[string]bool{
 	"index": true, "install": true, "quick-start": true, "reading": true,
-	"library": true, "desktop": true, "comigo-omarchy": true, "deployment": true, "faq": true,
+	"library": true, "desktop": true, "comigo-omarchy": true, "deployment": true, "development": true, "faq": true,
 }
 
 // Handler 渲染公开的内置手册；正文由独立 JSON 在浏览器中载入。
