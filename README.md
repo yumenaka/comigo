@@ -70,22 +70,23 @@ omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
 ### Quick Install for CLI
 
 ```bash
-# Recommended:
+# GitHub:
 installer=$(curl -fsSL https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh) && bash -c "$installer" --
 
-# For users in Mainland China:
-installer=$(curl -fsSL https://comigo.xyz/get.sh) && bash -c "$installer" -- --cn
+# comigo.xyz (recommended in mainland China):
+installer=$(curl -fsSL https://comigo.xyz/get.sh) && bash -c "$installer" --
 
 # If you have Golang (go 1.23 or higher):
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
 
-The installer defaults to `$HOME/.local/bin` and does not edit shell configuration. It checks both the available `comi` command and the destination file. If the requested version is already installed, a terminal prompt offers skip (default) or overwrite at the displayed destination; without a terminal it skips. Use `--force` to overwrite the same version non-interactively.
+Before downloading, the installer asks you to choose GitHub or comigo.xyz (recommended in mainland China), then an installation directory. The menu lists only directories present in PATH, in this order: `/usr/bin`, `/usr/local/bin`, `$HOME/.local/bin`, with root requirements labeled. macOS excludes its protected `/usr/bin`. If none qualify, specify `--install-dir`. There is no default selection and shell configuration is not edited. Without a terminal, explicitly pass `--github` or `--cn` and `--install-dir` or `--system` (or set `COMIGO_INSTALL_DIR`). It checks both the available `comi` command and the destination file. If the requested version is already installed, a terminal prompt offers skip (default) or overwrite at the displayed destination; without a terminal it skips. Use `--force` to overwrite the same version non-interactively.
 
 For the examples below, first download the script with `curl -fSL -o get.sh https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh`.
 
 ```bash
 bash get.sh --help
+bash get.sh --github --install-dir "$HOME/.local/bin"
 bash get.sh --version v1.2.22
 bash get.sh --system                 # /usr/local/bin; root-owned, sudo when needed
 bash get.sh --install-dir "$HOME/bin" # overrides COMIGO_INSTALL_DIR

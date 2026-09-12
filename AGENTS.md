@@ -52,3 +52,10 @@ ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片�
 ## 插件与 TUI
 - 内置插件在 `templ/plugins/`，用户插件在 `configDir/plugins/`；插件作用域包括 `global`、`shelf`、`flip`、`scroll`、`flip/{bookID}`。
 - TUI 终端图片细节以 `cmd/tui/AGENTS.md` 为准；终端 workaround 不要扩散到全局。
+
+## Omarchy 插件
+- 修改 `comigo-omarchy/` 插件前，先阅读 [Comigo Omarchy 插件开发规则](COMIGO_OMARCHY.md)，实现约束与验证命令以该文件为准。
+
+## CLI 安装脚本
+- `get.sh` 保持兼容 macOS Bash 3.2 与 Linux Bash；未显式指定下载源、安装目录时分别通过 `/dev/tty` 交互选择，不设默认选择或按 PATH 推断。GitHub 不附地域推荐，comigo.xyz 标注“中国大陆推荐”；候选目录只保留 PATH 中的 `/usr/bin`、`/usr/local/bin`、`$HOME/.local/bin`，按此顺序展示并标注 root 权限要求；macOS 排除受保护的 `/usr/bin`。无终端时必须提供对应参数。
+- 修改安装流程后执行 `bash -n get.sh` 与 `python3 scripts/test-installer.py`；测试使用临时目录和下载替身，不安装到系统目录。

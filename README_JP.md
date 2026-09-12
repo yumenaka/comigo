@@ -71,22 +71,23 @@ omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
 ### CLI版のワンクリックインストール
 
 ```bash
-# 推奨：
+# GitHub：
 installer=$(curl -fsSL https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh) && bash -c "$installer" --
 
-# 中国本土のユーザー向け：
-installer=$(curl -fsSL https://comigo.xyz/get.sh) && bash -c "$installer" -- --cn
+# comigo.xyz（中国本土のユーザーに推奨）：
+installer=$(curl -fsSL https://comigo.xyz/get.sh) && bash -c "$installer" --
 
 # Golang環境（go 1.23以上）が設定済みの場合：
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
 
-インストール先の既定値は `$HOME/.local/bin` です。シェル設定は自動変更しません。利用可能な `comi` とインストール先を確認し、同じバージョンなら端末でスキップ（既定）または表示された保存先への上書きを選択できます。端末がない場合はスキップし、`--force` を指定すると確認せず上書きします。
+ダウンロード前に GitHub または comigo.xyz（中国本土のユーザーに推奨）を選び、次にインストール先を選択します。PATH に含まれる候補だけを `/usr/bin`、`/usr/local/bin`、`$HOME/.local/bin` の順に表示し、root 権限の要否を示します。macOS の保護された `/usr/bin` は除外します。候補がない場合は `--install-dir` で指定してください。既定の選択はなく、シェル設定も自動変更しません。端末がない場合は `--github` または `--cn` と、`--install-dir` または `--system`（または `COMIGO_INSTALL_DIR`）を明示してください。利用可能な `comi` とインストール先を確認し、同じバージョンなら端末でスキップ（既定）または表示された保存先への上書きを選択できます。端末がない場合はスキップし、`--force` を指定すると確認せず上書きします。
 
 以下の例では、先に `curl -fSL -o get.sh https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh` でスクリプトを取得してください。
 
 ```bash
 bash get.sh --help
+bash get.sh --github --install-dir "$HOME/.local/bin"
 bash get.sh --version v1.2.22
 bash get.sh --system                 # /usr/local/bin、root 所有、必要時 sudo
 bash get.sh --install-dir "$HOME/bin" # COMIGO_INSTALL_DIR より優先

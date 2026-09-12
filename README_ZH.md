@@ -70,8 +70,8 @@ omarchy plugin add https://github.com/yumenaka/comigo-omarchy --enable
 ### 一键安装(命令行版)
 
 ```bash
-# 中国大陆用户推荐使用中转脚本：
-installer=$(curl -fsSL https://comigo.xyz/get.sh) && bash -c "$installer" -- --cn
+# comigo.xyz（中国大陆推荐）：
+installer=$(curl -fsSL https://comigo.xyz/get.sh) && bash -c "$installer" --
 
 # 从 GitHub下载：
 installer=$(curl -fsSL https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh) && bash -c "$installer" --
@@ -80,12 +80,13 @@ installer=$(curl -fsSL https://raw.githubusercontent.com/yumenaka/comigo/master/
 go install github.com/yumenaka/comigo/cmd/comi@latest
 ```
 
-安装器默认使用 `$HOME/.local/bin`，不自动修改 shell 配置。它会检查当前可用的 `comi` 命令和目标文件；已安装同版本时，有终端则询问跳过（默认）或覆盖显示的目标位置，无终端则跳过。使用 `--force` 可在非交互环境直接覆盖同版本。
+下载前先选择 GitHub 或 comigo.xyz（中国大陆推荐），再互动选择安装目录。菜单只显示 PATH 中的候选目录，依次为 `/usr/bin`、`/usr/local/bin`、`$HOME/.local/bin`，并标注是否需要 root 权限；macOS 不提供受系统保护的 `/usr/bin`。没有符合条件的目录时，使用 `--install-dir` 指定。不设默认选项，不自动修改 shell 配置。无终端时须明确指定 `--github` 或 `--cn`，以及 `--install-dir` 或 `--system`（也可设置 `COMIGO_INSTALL_DIR`）。它会检查当前可用的 `comi` 命令和目标文件；已安装同版本时，有终端则询问跳过（默认）或覆盖显示的目标位置，无终端则跳过。使用 `--force` 可在非交互环境直接覆盖同版本。
 
 以下参数示例先用 `curl -fSL -o get.sh https://raw.githubusercontent.com/yumenaka/comigo/master/get.sh` 下载脚本。
 
 ```bash
 bash get.sh --help
+bash get.sh --github --install-dir "$HOME/.local/bin"
 bash get.sh --version v1.2.22
 bash get.sh --system                 # /usr/local/bin；文件归 root，必要时使用 sudo
 bash get.sh --install-dir "$HOME/bin" # 优先于 COMIGO_INSTALL_DIR

@@ -35,18 +35,67 @@ usage() {
     message '  --install-dir DIR  Destination (overrides COMIGO_INSTALL_DIR)' '  --install-dir DIR  安装目录（优先于 COMIGO_INSTALL_DIR）' '  --install-dir DIR  インストール先（COMIGO_INSTALL_DIR より優先）'
     message '  --system           Install to /usr/local/bin; sudo only when needed' '  --system           安装到 /usr/local/bin；仅必要时使用 sudo' '  --system           /usr/local/bin にインストール；必要時のみ sudo'
     message '  --force            Overwrite without asking when versions match' '  --force            同版本时直接覆盖，不询问' '  --force            同じバージョンでも確認せず上書き'
-    message '  --cn, --proxy      Download through https://comigo.xyz' '  --cn, --proxy      通过 https://comigo.xyz 下载' '  --cn, --proxy      https://comigo.xyz 経由でダウンロード'
+    message '  --github           Download from GitHub' '  --github           从 GitHub 下载' '  --github           GitHub からダウンロード'
+    message '  --cn, --proxy      Download through https://comigo.xyz (recommended in mainland China)' '  --cn, --proxy      通过 https://comigo.xyz 下载（中国大陆推荐）' '  --cn, --proxy      https://comigo.xyz 経由（中国本土のユーザーに推奨）'
     message '  --proxy-base URL   Custom HTTPS proxy base' '  --proxy-base URL   自定义 HTTPS 代理地址' '  --proxy-base URL   HTTPS プロキシを指定'
     message '  --arch ARCH        x86_64, arm64, armv7 or i386' '  --arch ARCH        x86_64、arm64、armv7 或 i386' '  --arch ARCH        x86_64、arm64、armv7 または i386'
     message '  --skip-checksum    Explicitly allow releases without SHA-256 verification' '  --skip-checksum    显式跳过 SHA-256 校验（用于没有清单的旧版本）' '  --skip-checksum    SHA-256 検証を明示的に省略（一覧のない旧リリース用）'
     message '  --help, -h         Show help without installing' '  --help, -h         显示帮助，不安装' '  --help, -h         ヘルプを表示して終了'
-    message 'Default: $HOME/.local/bin. Same version: ask on a terminal, otherwise skip.' '默认目录：$HOME/.local/bin。同版本：有终端时询问，否则跳过。' '既定：$HOME/.local/bin。同じバージョン：端末で確認、それ以外はスキップ。'
+    message 'Choose a source and directory interactively; no default selection. Without a terminal, specify --github / --cn and --install-dir / --system.' '交互选择下载源与目录，不设默认选项。无终端时须指定 --github / --cn 和 --install-dir / --system。' 'ダウンロード元と保存先を対話で選択します。既定の選択はありません。端末がない場合は --github / --cn と --install-dir / --system を指定してください。'
 }
 
 require_value() {
     if [[ -z "${2:-}" || "$2" == -* ]]; then
         die '%s requires a value.' '%s 需要参数值。' '%s には値が必要です。' "$1"
     fi
+}
+
+# 从控制终端交互读取，避免消耗管道中的脚本；不为空输入选择默认值。
+choose_source() {
+    { true </dev/tty; } 2>/dev/null || die 'Specify --github or --cn without a terminal.' '无终端时请指定 --github 或 --cn。' '端末がない場合は --github または --cn を指定してください。'
+    message 'Choose download source:' '选择下载源：' 'ダウンロード元を選択：' >/dev/tty
+    message '  1) GitHub' '  1) GitHub' '  1) GitHub' >/dev/tty
+    message '  2) comigo.xyz (recommended in mainland China)' '  2) comigo.xyz（中国大陆推荐）' '  2) comigo.xyz（中国本土のユーザーに推奨）' >/dev/tty
+    local answer
+    while true; do
+        message 'Enter 1 or 2:' '请输入 1 或 2：' '1 または 2 を入力してください：' >/dev/tty
+        IFS= read -r answer </dev/tty || die 'Selection cancelled.' '已取消选择。' '選択を中止しました。'
+        case "$answer" in 1) USE_PROXY=false; return ;; 2) USE_PROXY=true; return ;; esac
+    done
+}
+
+# 只列出 PATH 中的常用安装目录，按固定顺序编号，仍由用户明确选择。
+choose_install_dir() {
+    { true </dev/tty; } 2>/dev/null || die 'Specify --install-dir or --system without a terminal.' '无终端时请指定 --install-dir 或 --system。' '端末がない場合は --install-dir または --system を指定してください。'
+    [[ -n "${HOME:-}" && "$HOME" == /* ]] || die 'HOME must be an absolute path.' 'HOME 必须是绝对路径。' 'HOME は絶対パスである必要があります。'
+    local paths=() candidate
+    for candidate in /usr/bin /usr/local/bin "$HOME/.local/bin"; do
+        # macOS 的 /usr/bin 受系统保护，root 也不能用于安装。
+        [[ "$OS" != Darwin || "$candidate" != /usr/bin ]] || continue
+        case ":${PATH}:" in
+            *":$candidate:"*|*":$candidate/:"*) paths+=("$candidate") ;;
+        esac
+    done
+    ((${#paths[@]})) || die 'No supported install directory is in PATH; specify --install-dir.' 'PATH 中没有可用的候选安装目录，请使用 --install-dir 指定。' 'PATH に候補の保存先がありません。--install-dir で指定してください。'
+    message 'Choose install directory:' '选择安装目录：' 'インストール先を選択：' >/dev/tty
+    local i answer
+    for ((i=0; i<${#paths[@]}; i++)); do
+        if [[ "${paths[i]}" == "$HOME/.local/bin" ]]; then
+            message '  %s) %s (no root required)' '  %s) %s（无需 root 权限）' '  %s) %s（root 権限不要）' "$((i+1))" "${paths[i]}" >/dev/tty
+        else
+            message '  %s) %s (root required; sudo when needed)' '  %s) %s（需要 root 权限，必要时使用 sudo）' '  %s) %s（root 権限が必要、必要時 sudo）' "$((i+1))" "${paths[i]}" >/dev/tty
+        fi
+    done
+    while true; do
+        message 'Enter a number (1–%s):' '请输入编号（1–%s）：' '番号を入力してください（1–%s）：' "${#paths[@]}" >/dev/tty
+        IFS= read -r answer </dev/tty || die 'Selection cancelled.' '已取消选择。' '選択を中止しました。'
+        case "$answer" in
+            1|2|3)
+                ((answer<=${#paths[@]})) || continue
+                INSTALL_DIR=${paths[answer-1]}
+                return ;;
+        esac
+    done
 }
 
 # 只转换实际使用的 API 与资源下载地址，避免维护无关的 raw URL 分支。
@@ -120,7 +169,7 @@ path_hint() {
 }
 
 main() {
-    USE_PROXY=false
+    USE_PROXY=""
     PROXY_BASE=https://comigo.xyz
     VERSION=""
     INSTALL_DIR=${COMIGO_INSTALL_DIR:-}
@@ -136,6 +185,7 @@ main() {
             --install-dir) require_value "$@"; INSTALL_DIR="$2"; shift ;;
             --system) SYSTEM=true ;;
             --force) FORCE=true ;;
+            --github) USE_PROXY=false ;;
             --cn|--proxy|--use-proxy) USE_PROXY=true ;;
             --proxy-base) require_value "$@"; PROXY_BASE=${2%/}; USE_PROXY=true; shift ;;
             --arch) require_value "$@"; ARCH="$2"; shift ;;
@@ -169,13 +219,15 @@ main() {
         command -v "$dep" >/dev/null || die 'Missing command: %s' '缺少命令：%s' '必要なコマンドがありません：%s' "$dep"
     done
 
-    # 固定默认目录；显式指定目录失败时不回退，也不自动修改 shell 配置。
-    if [[ "$SYSTEM" == true ]]; then INSTALL_DIR=/usr/local/bin
-    elif [[ -z "$INSTALL_DIR" ]]; then
-        [[ -n "${HOME:-}" && "$HOME" == /* ]] || die 'HOME must be an absolute path.' 'HOME 必须是绝对路径。' 'HOME は絶対パスである必要があります。'
-        INSTALL_DIR="$HOME/.local/bin"
-    fi
+    # 显式参数跳过对应选择；无人值守时不猜测下载源或安装位置。
+    if [[ "$SYSTEM" == true ]]; then INSTALL_DIR=/usr/local/bin; fi
+    if [[ -z "$USE_PROXY" ]]; then choose_source; fi
+    if [[ -z "$INSTALL_DIR" ]]; then choose_install_dir; fi
     [[ "$INSTALL_DIR" == /* ]] || INSTALL_DIR="$PWD/$INSTALL_DIR"
+    INSTALL_DIR=${INSTALL_DIR%/}
+    [[ -n "$INSTALL_DIR" ]] || INSTALL_DIR=/
+    # 常用系统目录无论通过菜单还是参数选中，都使用相同的权限规则。
+    case "$INSTALL_DIR" in /usr/local/bin|/usr/bin) SYSTEM=true ;; esac
     local ancestor="$INSTALL_DIR"
     while [[ ! -e "$ancestor" && ! -L "$ancestor" ]]; do ancestor=${ancestor%/*}; [[ -n "$ancestor" ]] || ancestor=/; done
     [[ -d "$ancestor" ]] || die 'Not a directory: %s' '不是目录：%s' 'ディレクトリではありません：%s' "$ancestor"
