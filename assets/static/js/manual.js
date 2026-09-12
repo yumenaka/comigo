@@ -155,11 +155,17 @@
     </section>`;
   }
 
-  // 复制失败（例如局域网 HTTP）时选中代码，允许用户直接手动复制。
+  // 统一新旧代码块容器；复制失败时选中代码，允许用户手动复制。
   function addCopyButtons(content, ui) {
     content.querySelectorAll("pre").forEach((pre) => {
-      const wrapper = pre.parentElement;
-      if (!wrapper || !wrapper.className.includes("language-")) return;
+      let wrapper = pre.parentElement;
+      if (!wrapper.matches('div[class*="language-"], .manual-code')) {
+        wrapper = document.createElement("div");
+        pre.before(wrapper);
+        wrapper.append(pre);
+      }
+      wrapper.classList.add("manual-code");
+      if (wrapper.querySelector(".manual-copy")) return;
       const button = document.createElement("button");
       button.type = "button";
       button.className = "manual-copy";

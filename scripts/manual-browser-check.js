@@ -73,7 +73,7 @@ async (page) => {
     check(await page.evaluate(() => i18next.language === localStorage.getItem("i18nextLng")) && await page.locator("[data-manual-language]").inputValue() === language, "Manual and app language differ");
     check((await page.locator("[data-manual-back]").getAttribute("href")) === returnTo, "Language switch lost entry page");
     check(
-      (await page.locator("[data-manual-nav] a").count()) === 8,
+      (await page.locator("[data-manual-nav] a").count()) === 10,
       "Navigation incomplete",
     );
     await trigger.click();
@@ -168,6 +168,42 @@ async (page) => {
       check(href.startsWith("https://comigo.xyz/yumenaka/comigo/releases/download/latest/") && href.includes("_latest_"), "Download URL is not a fixed latest URL");
     }
   }
+  // 所有章节的新旧代码块共用样式；明暗主题和窄屏下复制按钮均位于右下角。
+  for (const language of ["", "en-US/", "ja-JP/"]) {
+    for (const chapter of ["reading", "comigo-omarchy", "deployment", "development"]) {
+      await page.goto(`${origin}/manual/${language}${chapter}`);
+      await page.locator(".manual-copy").first().waitFor();
+      for (const theme of ["light", "dark"]) {
+        await page.evaluate((value) => { document.body.dataset.theme = value; }, theme);
+        for (const width of [390, 1440]) {
+          await page.setViewportSize({ width, height: 900 });
+          const problem = await page.locator("[data-manual-content]").evaluate((content) => {
+            for (const pre of content.querySelectorAll("pre")) {
+              const wrapper = pre.parentElement;
+              const buttons = wrapper.querySelectorAll(".manual-copy");
+              if (!wrapper.classList.contains("manual-code") || buttons.length !== 1) return "Missing code wrapper/button";
+              const style = getComputedStyle(wrapper);
+              if (style.borderTopWidth !== "1px" || style.borderTopStyle !== "solid") return "Missing code border";
+              const box = wrapper.getBoundingClientRect();
+              const button = buttons[0].getBoundingClientRect();
+              if (Math.abs(box.right - button.right - 10) > 3 || Math.abs(box.bottom - button.bottom - 10) > 3) return "Copy button is not bottom-right";
+              const code = pre.querySelector("code").getBoundingClientRect();
+              if (code.bottom > button.top) return "Copy button overlaps code";
+            }
+            return "";
+          });
+          check(!problem, `${language}${chapter}/${theme}/${width}: ${problem}`);
+        }
+      }
+      // 捕获复制内容，不改动系统剪贴板；保留之前对真实剪贴板及拒绝权限的验证。
+      await page.evaluate(() => { navigator.clipboard.writeText = async (text) => { window.manualCopiedText = text; }; });
+      for (const block of await page.locator(".manual-code").all()) {
+        const expected = await block.locator("pre").textContent();
+        await block.locator(".manual-copy").click();
+        check(await page.evaluate((text) => window.manualCopiedText === text, expected), "Copied text changed");
+      }
+    }
+  }
   check(errors.length === 0, errors.join("\n"));
   // URL 来源不能将返回按钮变成站外跳转或再次进入手册。
   const home = await page.evaluate(() => window.ComiGoPath("/"));
@@ -177,5 +213,5 @@ async (page) => {
     await page.locator("[data-manual-nav] a").first().waitFor();
     check((await page.locator("[data-manual-back]").getAttribute("href")) === home, "Invalid entry was accepted");
   }
-  return "PASS: search dismissal, focus, 3 languages, snippets, clipboard, anchors, drawer, 5 widths, no SSE/errors";
+  return "PASS: search dismissal, focus, 3 languages, snippets, clipboard, anchors, drawer, 5 widths, all code blocks in light/dark, bottom-right copy, no SSE/errors";
 }
