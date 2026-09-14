@@ -1,0 +1,44 @@
+package settings
+
+import "github.com/yumenaka/comigo/config"
+
+// AutostartConfig 状态来自系统服务管理器，初始化和失败均不会触发注册操作。
+templ AutostartConfig() {
+	<fieldset id="autostartConfig" disabled?={ config.GetCfg().ReadOnlyMode } x-data="comigoAutostart()" x-init="load()" class="panel-surface flex flex-col w-full p-2 m-1 font-semibold border rounded shadow-md hover:shadow-2xl justify-left items-left bg-base-100 text-base-content border-slate-400">
+		<div id="autostart-label" x-text="i18next.t('autostart_label')" class="w-full py-0 text-left"></div>
+		<label for="autostart" class="relative h-8 cursor-pointer w-14">
+			<input id="autostart" type="checkbox" class="sr-only peer" aria-labelledby="autostart-label" aria-describedby="autostart-description" x-model="enabled" @change="save()" :disabled="busy || !supported"/>
+			<span class="absolute inset-0 transition bg-gray-300 rounded-full peer-checked:bg-green-500"></span>
+			<span class="absolute inset-y-0 w-6 h-6 m-1 transition-all bg-white rounded-full start-0 peer-checked:start-6"></span>
+		</label>
+		<div id="autostart-description" x-text="i18next.t('autostart_description')" class="w-auto py-1 text-left text-xs text-base-content"></div>
+		<p role="status" class="text-sm text-error empty:hidden" x-text="error"></p>
+	</fieldset>
+	<script>
+ function comigoAutostart() {
+  return {
+   enabled:false, supported:false, busy:true, error:'',
+   async load() {
+    try {
+     const response=await fetch(window.ComiGoPath('/api/autostart'));
+     if (!response.ok) throw new Error(i18next.t('autostart_unavailable'));
+     const data=await response.json();
+     this.enabled=data.enabled;this.supported=data.supported;
+     if (!this.supported) this.error=i18next.t('autostart_unavailable');
+    } catch(error) {this.error=error.message;this.supported=false;}
+    finally {this.busy=false;}
+   },
+   async save() {
+    this.busy=true;this.error='';const wanted=this.enabled;
+    try {
+     const response=await fetch(window.ComiGoPath('/api/autostart'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:wanted})});
+     const data=await response.json();
+     if (!response.ok) throw new Error(data.message || i18next.t('autostart_failed'));
+     this.enabled=data.enabled;
+    } catch(error) {this.enabled=!wanted;this.error=error.message;}
+    finally {this.busy=false;}
+   }
+  };
+ }
+ </script>
+}

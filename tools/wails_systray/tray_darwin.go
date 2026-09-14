@@ -124,6 +124,6 @@ func comigoWailsTrayQuit() {
 	t := darwinTray.tray
 	darwinTray.Unlock()
 	if t != nil {
-		go t.quit()
+		go t.Quit()
 	}
 }

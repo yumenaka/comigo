@@ -40,6 +40,7 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/jlaffaye/ftp v0.2.4
 	github.com/jxskiss/base62 v1.1.0
+	github.com/kardianos/service v1.3.0
 	github.com/klauspost/compress v1.19.2
 	github.com/labstack/echo-jwt/v4 v4.4.0
 	github.com/labstack/echo/v4 v4.15.4

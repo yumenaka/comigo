@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -23,6 +25,14 @@ import (
 
 // main 是 Wails 桌面壳入口；普通 CLI 入口保留在 main.go，减少合并冲突。
 func main() {
+	config.UseDesktopConfigProfile()
+	if handled, err := cmd.RunDesktop(os.Args[1:], os.Stdout); handled {
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
 	for _, arg := range os.Args {
 		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" {
 			// 仅打印版本或帮助信息时，不启动 WebView。
@@ -31,10 +41,19 @@ func main() {
 		}
 	}
 
-	config.UseDesktopConfigProfile()
 	cmd.Execute()
+	// 先确认监听成功；WebView 初始化期间的 Quit 可能尚无法退出窗口循环。
+	if err := routers.StartWebServer(); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	defer routers.StopWebServer()
 	tray := wails_systray.Start()
 	defer tray.Stop()
+	// systemd 退出信号必须真正退出，不能被托盘的关闭窗口隐藏逻辑截住。
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(signals)
 
 	app := NewApp()
 	err := wails.Run(&options.App{
@@ -50,10 +69,14 @@ func main() {
 			app.startup(ctx)
 			routers.SetWailsContext(ctx)
 			tray.SetContext(ctx)
-			if err := startComigoForWails(ctx); err != nil {
-				_, _ = fmt.Fprintln(os.Stderr, err)
-				wailsruntime.Quit(ctx)
-			}
+			go func() {
+				select {
+				case <-signals:
+					tray.Quit()
+				case <-ctx.Done():
+				}
+			}()
+			startComigoForWails(ctx)
 		},
 		OnShutdown: func(context.Context) {
 			if err := routers.StopWebServer(); err != nil {
@@ -79,18 +102,14 @@ func wailsWindowTitle() string {
 	return "Comigo " + config.GetVersion()
 }
 
-// startComigoForWails 启动桌面壳内嵌的 Comigo Web 服务。
-func startComigoForWails(ctx context.Context) error {
-	if err := routers.StartWebServer(); err != nil {
-		return err
-	}
+// startComigoForWails 在桌面上下文就绪后加载书库；监听已在创建窗口前确认。
+func startComigoForWails(ctx context.Context) {
 	routers.StartTailscale()
 	cmd.LoadUserPlugins()
 	cmd.AddStoreUrls(cmd.Args)
 	cmd.LoadMetadata()
 	go finishWailsStartupScan(ctx)
 	config.StartOrStopAutoRescan()
-	return nil
 }
 
 // finishWailsStartupScan 后台刷新书库，避免 Wails 首页等扫描完成才出现。

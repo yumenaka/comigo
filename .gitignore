@@ -157,3 +157,6 @@ package.json.md5
 
 # Independent Omarchy plugin repository.
 /comigo-omarchy/
+
+# Local temporary plans.
+TEMP_*.md

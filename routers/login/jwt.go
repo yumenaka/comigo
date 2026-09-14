@@ -81,10 +81,10 @@ func Login(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	setTokenCookie(c, token)
 	if strings.HasPrefix(c.Request().Header.Get(echo.HeaderContentType), echo.MIMEApplicationJSON) {
 		return c.JSON(http.StatusOK, echo.Map{"token": token, "token_type": "Bearer", "expires_in": int(loginDuration().Seconds())})
 	}
+	setTokenCookie(c, token)
 
 	// 返回登录成功信息，不再返回token本身
 	return c.JSON(http.StatusOK, echo.Map{

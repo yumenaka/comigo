@@ -77,6 +77,7 @@ var RootCmd = &cobra.Command{
 }
 
 func init() {
+	RootCmd.AddCommand(serviceCommand())
 	// 帮助中公开桌面协议能力，旧版客户端探测时不会误启动服务。
 	RootCmd.AddCommand(&cobra.Command{Use: "desktop", Short: "Machine-readable desktop integration: info, check-update"})
 	// 自定义 -v/--version 输出：软件版本、系统类型、Go 版本

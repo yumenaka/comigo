@@ -1051,5 +1051,10 @@
   "server_update_available": "Update available",
   "server_update_latest": "Up to date",
   "server_url_copied": "Reading URL copied",
-  "server_copy_failed": "Copy failed; please copy the URL manually"
+  "server_copy_failed": "Copy failed; please copy the URL manually",
+  "no_default_library": "Do not add a default library automatically",
+  "autostart_label": "Start automatically",
+  "autostart_description": "Start this Comigo edition when you log in. Changing this does not interrupt the current session.",
+  "autostart_unavailable": "Startup state is unavailable, or user services are not supported.",
+  "autostart_failed": "Unable to change automatic startup."
 }

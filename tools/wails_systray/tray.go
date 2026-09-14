@@ -92,8 +92,8 @@ func (t *Tray) hideWindow(ctx context.Context) {
 	setPlatformWindowVisible(false)
 }
 
-// quit 通过 Wails 退出应用，尚未启动完成时退回到 systray 退出。
-func (t *Tray) quit() {
+// Quit 通过 Wails 退出应用，尚未启动完成时退回到 systray 退出。
+func (t *Tray) Quit() {
 	ctx := t.context()
 	if ctx == nil {
 		quitPlatformFallback()

@@ -35,7 +35,7 @@ func TestTokenAndCookieUseConfiguredTimeout(t *testing.T) {
 	}
 }
 
-// 验证 JSON 登录签发的令牌可按当前密钥验证，同时保留浏览器 HttpOnly Cookie。
+// JSON 登录只签发 Bearer，避免客户端 Cookie 跨端口串用或退出后继续生效。
 func TestJSONLoginIssuesBearerToken(t *testing.T) {
 	old := config.CopyCfg()
 	defer func() { *config.GetCfg() = old }()
@@ -60,7 +60,7 @@ func TestJSONLoginIssuesBearerToken(t *testing.T) {
 		t.Fatalf("invalid login token: %v", err)
 	}
 	cookies := rec.Result().Cookies()
-	if len(cookies) != 1 || !cookies[0].HttpOnly {
-		t.Fatal("missing HttpOnly login cookie")
+	if len(cookies) != 0 {
+		t.Fatal("REST login must not create a browser cookie")
 	}
 }

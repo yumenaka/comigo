@@ -22,7 +22,11 @@ func TestDefaultScanPath(t *testing.T) {
 		configured bool
 		existing   bool
 		want       string
+		disabled   bool
+		background bool
 	}{
+		{name: "disabled", disabled: true},
+		{name: "background", background: true},
 		{name: "pictures first", dirs: []string{"Pictures", "Documents", "Downloads"}, want: "Pictures"},
 		{name: "documents second", dirs: []string{"Documents", "Downloads"}, want: "Documents"},
 		{name: "downloads third", dirs: []string{"Downloads"}, want: "Downloads"},
@@ -39,6 +43,7 @@ func TestDefaultScanPath(t *testing.T) {
 			t.Chdir(cwd)
 			*cfg, Args = saved, tc.args
 			cfg.StoreUrls, cfg.ConfigFile = nil, ""
+			cfg.NoDefaultLibrary = tc.disabled
 			if tc.configured {
 				cfg.ConfigFile = filepath.Join(home, "config.toml")
 			}
@@ -55,7 +60,7 @@ func TestDefaultScanPath(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			SetCwdAsScanPathIfNeed()
+			setDefaultLibrary(!tc.background)
 			want := cwd
 			if tc.want != "" {
 				want = filepath.Join(home, tc.want)
@@ -73,8 +78,12 @@ func TestDefaultScanPath(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			if !reflect.DeepEqual(got, []string{want}) {
-				t.Fatalf("书库 = %v，期望 %v", got, want)
+			expected := []string{want}
+			if tc.disabled || tc.background || tc.configured || len(tc.args) > 0 {
+				expected = nil
+			}
+			if !reflect.DeepEqual(got, expected) {
+				t.Fatalf("书库 = %v，期望 %v", got, expected)
 			}
 			entries, err := os.ReadDir(home)
 			if err != nil {

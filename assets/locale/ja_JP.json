@@ -1051,5 +1051,10 @@
   "server_update_available": "更新があります",
   "server_update_latest": "最新です",
   "server_url_copied": "閲覧URLをコピーしました",
-  "server_copy_failed": "コピーに失敗しました。URLを手動でコピーしてください"
+  "server_copy_failed": "コピーに失敗しました。URLを手動でコピーしてください",
+  "no_default_library": "既定の書庫を自動追加しない",
+  "autostart_label": "自動起動",
+  "autostart_description": "ユーザーのログイン時にこの Comigo を起動します。変更しても現在の読書は中断しません。",
+  "autostart_unavailable": "自動起動の状態を取得できないか、ユーザーサービスに対応していません。",
+  "autostart_failed": "自動起動の設定に失敗しました。"
 }

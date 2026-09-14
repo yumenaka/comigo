@@ -26,6 +26,9 @@ func init() {
 }
 
 func InitFlags() {
+	if RootCmd.PersistentFlags().Lookup("config") != nil {
+		return
+	}
 	// 加载环境变量，改写对应值
 	runtimeViper.AutomaticEnv()
 	// 设置环境变量的前缀，将 PORT变为 COMIGO_PORT
@@ -98,6 +101,9 @@ func InitFlags() {
 	// 打开浏览器
 	RootCmd.PersistentFlags().BoolVarP(&cfg.OpenBrowser, "open-browser", "o", false, locale.GetString("open_browser"))
 	runtimeViper.BindPFlag("OpenBrowser", RootCmd.PersistentFlags().Lookup("open-browser"))
+
+	// 服务启动不自动将当前目录加入书库，不从 TOML 读取。
+	RootCmd.PersistentFlags().BoolVar(&cfg.NoDefaultLibrary, "no-default-library", false, locale.GetString("no_default_library"))
 
 	// 不启动 TUI（不绑定 viper，避免配置文件或环境变量影响默认交互入口）
 	RootCmd.PersistentFlags().BoolVarP(&cfg.NoTUI, "no-tui", "n", false, locale.GetString("no_tui"))

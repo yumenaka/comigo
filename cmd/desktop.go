@@ -7,12 +7,21 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/spf13/cobra"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/releases"
 )
 
-// RunDesktop 在服务初始化前处理桌面客户端的只读命令；不会扫描书库或启动监听。
+// RunDesktop 在服务初始化前处理管理命令；不会扫描书库或启动监听。
 func RunDesktop(args []string, out io.Writer) (bool, error) {
+	InitFlags()
+	command, _, findErr := RootCmd.Find(args)
+	if findErr == nil && command.Name() == "service" {
+		cobra.OnInitialize(LoadConfigFile)
+		RootCmd.SetArgs(args)
+		RootCmd.SetOut(out)
+		return true, RootCmd.Execute()
+	}
 	if len(args) == 0 || args[0] != "desktop" {
 		return false, nil
 	}

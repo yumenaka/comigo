@@ -19,6 +19,28 @@ import (
 	"github.com/yumenaka/comigo/tools/sse_hub"
 )
 
+// 开机启动必须位于服务控制中，只读模式由原生 fieldset 保护，避免 Alpine 覆盖 input.disabled。
+func TestServerPanelAutostart(t *testing.T) {
+	old := config.CopyCfg()
+	t.Cleanup(func() { *config.GetCfg() = old })
+	for _, readOnly := range []bool{true, false} {
+		config.GetCfg().ReadOnlyMode = readOnly
+		var output bytes.Buffer
+		if err := ServerPanel().Render(context.Background(), &output); err != nil {
+			t.Fatal(err)
+		}
+		body := output.String()
+		if strings.Count(body, `id="autostart"`) != 1 {
+			t.Fatal("service panel must contain one autostart switch")
+		}
+		_, fieldset, found := strings.Cut(body, `<fieldset id="autostartConfig"`)
+		fieldset, _, _ = strings.Cut(fieldset, ">")
+		if !found || strings.Contains(fieldset, "disabled") != readOnly {
+			t.Fatal("autostart fieldset must respect read-only mode")
+		}
+	}
+}
+
 // 提供设置页书库计数测试所需的最小内存书库。
 type storeBookCountsTestStore struct {
 	books         map[string]*model.Book

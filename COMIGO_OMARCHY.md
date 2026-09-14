@@ -1,55 +1,45 @@
 # comigo-omarchy
 
-独立 Git 仓库，插件 ID `yumenaka.comigo`；父仓库忽略此目录。仅在用户要求时提交、推送。
+独立 Git 仓库，插件 ID `yumenaka.comigo`；父仓库忽略此目录。每次修改插件后，必须在同一任务内完成相关验证、重新部署到本机并重启 Omarchy Shell，让用户能直接查看效果，无需再次请求部署许可。提交、推送仍仅在用户明确要求时执行。
 
-## 实现
+## 实现与边界
 
-- 概览页本机启用对外服务且存在多个 IP 时，二维码两侧箭头循环切换阅读链接与二维码地址，并加粗当前 IP；默认沿用服务返回的出口地址，远程模式保持配置 URL。
-- `Panel.qml` 管理概览、状态、服务、设置四页；概览提供二维码及下方阅读入口和 IP，状态页提供服务状态、速度、累计流量与书籍/连接统计，默认本机模式及概览页，本机缺少 CLI 时进入服务页；远程未配置地址时进入设置页。
-- 本机与远程通过侧栏按钮切换，Shell 启动默认本机；`serverURL` 保存本机回环地址，`remoteURL` 保存远程完整地址。远程各页只显示对应 REST 数据，隐藏本地启停、日志、CLI/书库设置、对外服务与防火墙。
-- `Service.qml` 共享 REST、登录会话、轮询和设置；`bin/comigo-ctl` 使用 Bash、curl 调用 CLI 及管理进程。
-- JSON、剪贴板、浏览器使用 QML/Quickshell；平台文件工具与 pkexec 使用宿主提供的版本。
-- 服务页本机控制块提供 `autoStart` 开关，默认关闭；插件加载后直接调用本地 CLI，失败间隔 10 秒、最多 3 次。运行目录保存次数与完成标记，重载不重置；成功或手动控制后不再自动拉起，关闭选项取消后续重试，不使用 systemd。
-- CLI 进程以 PID 和内核启动时间识别，启停加锁；端口被占用时拒绝启动。日志在用户 state 目录。
-- 未指定书库时，插件不填充目录、不传书库参数，由 Comigo 自身的默认规则处理；指定书库时校验目录存在。
-- 插件不提供 Comigo 二进制下载或安装功能；服务页在本机和远程模式均显示 GitHub 项目地址与 comigo.xyz 官网地址（中国大陆推荐），支持浏览器打开和复制链接。pkexec 仅用于 UFW 规则变更。
-- 关键函数写中文注释，文本同步 `I18n.js` 的中英日翻译。
+- `Panel.qml` 管理概览、状态、服务、设置四页；统一服务地址，不要求插件所在机器安装 `comi`。服务未连接时打开面板默认进入设置页，打开期间断线也转到设置页；之后手动选页不被离线轮询反复覆盖。
+- `Service.qml` 使用 Quickshell `Process` 直接调用系统 curl 访问 REST，不增加 Shell 包装脚本；不运行 Comigo CLI、systemd 或防火墙工具。curl 必须以 `-q` 忽略个人配置、不跟随重定向，仅允许 HTTP(S)，请求超时 15 秒、响应上限 1 MiB；URL、密码、令牌经标准输入传入，不写入命令行或临时文件。不提供二进制安装、更新检查、进程启停或离线日志功能。
+- 服务页提供 GitHub 项目和 comigo.xyz 官网链接，后者标注“中国大陆推荐”。最低版本 v1.3.7，同时要求公开 `/api/info` 接口。
+- 阅读入口默认使用配置的完整 HTTP(S) 地址，保留 BasePath。启用对外服务时，概览依据 REST 返回的 IP 提供切换，阅读链接与二维码同步；不探测本机网卡。
+- 浏览器、剪贴板及 JSON 使用 QML/Quickshell。仅非敏感诊断信息通过宿主 IPC 暴露。
+- 关键代码写中文注释，用户文本同步 `I18n.js` 中英日翻译。三语 README 与内置手册保持当前行为。
 
-## 接口与数据
+## 接口、权限与状态
 
-- `/api/server` 提供地址、流量、`externalAccess` 和 `listenAddress`；完整状态每 30 秒及手动刷新，打开面板时每 2 秒刷新流量；设置页同期读取完整状态和运行配置。后台查询不禁用控件，相同快照复用对象。
-- 防火墙使用宿主 UFW、ip；只在本机回环端点下提供操作，放行默认网卡的直连 RFC1918 网段和当前 TCP 端口。规则标记 `omarchy-comigo`，撤销仅删除本插件规则；等价现有规则保持归属。
-- 对外服务通过 `PATCH /api/configs` 设置 `DisableLAN`，遵守认证、只读模式及 BasePath；更新后等待重连。配置由 Comigo 解析、保存并重启监听。
-- 插件不提供更新检查、发布页或升级命令；保留当前版本展示及最低支持版本校验。
-- 配置文件只读展示 `/api/configs/status` 的 `current`：实际路径、位置、运行类型、格式和存在状态。修改、保存、删除由网页管理；插件启动不传配置文件路径。
-- `/api/configs` 返回脱敏配置，`POST /api/login` 登录，`/api/qrcode.png` 生成阅读二维码。
-- 登录会话按模式及地址隔离，仅存内存；切换恢复对应会话并清空状态重查，退出或切换使在途旧响应失效。远程阅读、浏览器及二维码使用配置的完整远程地址。
-- 密码提交后清空，token 只存内存；凭据通过 stdin/fd 传给 curl。设置仅保存非敏感 JSON，禁止 source/eval。
-- 设置文件监听外部变更；未编辑字段自动同步，草稿保留，保存只合并已编辑字段。
-- 命令使用参数数组。修改宿主安装副本只操作脚本拥有的目录。
+- `/api/info` 与 `/healthz` 无需认证；公开接口不包含书库、地址列表或凭据。私有 REST 继续遵守认证。
+- `/api/server` 返回状态、地址、流量、`externalAccess` 和 `listenAddress`；完整状态每 30 秒及手动刷新，打开面板时每 2 秒刷新流量，设置页同期查询配置。后台查询不禁用控件，未变化的快照复用对象。
+- `/api/configs/status` 的 `current` 只读展示实际配置路径、位置、运行类型、格式和存在状态；文件修改进入网页。仅当已保存的连接地址主机为 `127.0.0.1` 或 `localhost` 时显示对外服务卡片，服务方法同步拒绝其他地址，避免远程关闭后无法恢复；不依据阅读 IP 或未保存的地址草稿判断。对外服务通过 `PATCH /api/configs` 设置 `DisableLAN`，更新后等待重连。
+- JSON `POST /api/login` 只签发 Bearer 令牌；网页表单登录使用 HttpOnly Cookie。密码提交后清空，令牌仅存内存并按地址隔离。切换或退出使在途旧响应失效并清空私有状态。
+- 设置存入 Omarchy 宿主的插件条目 `comigo: {serverURL, language}`，通过 `shell.updateEntryInline` 合并更新；不直接读写配置文件。未编辑字段随宿主变化同步，保留未保存草稿。
+- 插件尚未首次发布，不实现旧版设置文件的保留、读取或兼容迁移，仅使用 Omarchy 宿主设置。
+- 只读模式下，服务端统一拒绝全部设置写入与自启变更，网页控件禁用；CLI 服务管理不受网页只读限制。
 
-## 验证
+## Comigo 服务管理
 
-以下命令在 `comigo-omarchy/` 目录执行。
+- Go 使用 `kardianos/service` v1.3.0 管理 Linux systemd 用户服务；开机启动默认 false，状态来自 OS，没有 TOML 自启项。其他平台明确报告不支持，阅读不受影响。
+- Comigo 网页设置的“服务控制”区域提供开机启动开关，沿用同页布尔设置样式；网页及 `comi service status|autostart true|false` 共用服务逻辑。仅注册／撤销后续启动，不额外启动或停止当前阅读进程；不启用 linger、不安装 root 系统服务。
+- CLI、桌面、托盘分别使用 `comigo-config`、`comigo-desktop`、`comigo-tray` 单元；桌面与托盘随图形会话启动。单元使用当前可执行文件与持久配置的明确路径，参数正确引用并禁止 systemd 环境变量展开。
+- `--no-default-library` 禁止隐式书库回退，保留显式参数和配置书库。仅终端无目录、无明确配置的普通 CLI 启动可自动回退。管理子命令先于扫描与界面启动执行，完成后退出；生成的服务参数包含该 flag。
+
+## 验证与部署
+
+传输层验收须覆盖 301/302/303/307/308 跨端口重定向：目标不得收到请求或凭据；同时验证个人 curlrc 不影响策略、认证与登录请求体不进入进程参数、超时与响应上限、地址切换和退出后的旧响应失效。
+
+插件仓库不附安装或测试脚本。长期 Go 功能测试保留在父仓库；临时 QML、HTTP、浏览器或安装验收脚本只放系统临时目录，不加入任一仓库。
 
 ```bash
-omarchy plugin validate .
-bash -n install.sh bin/comigo-ctl tests/*.sh
-bash tests/test-ctl.sh
-bash tests/test-refresh.sh
-bash tests/test-modes.sh
-bash tests/test-reading-ip.sh
-bash tests/test-autostart.sh
-bash tests/test-download-links.sh
-bash tests/test-version.sh
-bash tests/test-firewall.sh
-COMIGO_TEST_CLI=/path/to/comi bash tests/test-default-library.sh
-COMIGO_TEST_CLI=/path/to/comi bash tests/smoke.sh
+omarchy plugin validate comigo-omarchy
+go test ./cmd ./routers/... ./templ/pages/settings ./tools/autostart
+go test -tags 'wails webkit2_41' ./tools/wails_systray
 ```
 
-联调使用临时书库、配置和端口，退出时停止测试进程。检查启停、登录、二维码、剪贴板、流量、监听切换、默认书库与页面、语言；核心修改执行相关 Go 测试。
+修改 templ 后生成模板，修改前端或 locale 后构建资源。运行联调使用临时配置、书库及端口，结束时清理测试进程和测试服务。验证真实密码登录、错误密码、令牌隔离、只读 API 无副作用、公开元数据、CLI／桌面／托盘运行及自启。
 
-保持文档描述当前实现。不得提交凭据、私人配置或截图。安装到本机时使用 Omarchy 与系统档案技能，同步当前状态。`install.sh` 复制后重启 Shell，加载安装目录的 QML 组件；安装验证包含文件一致性、启用状态及实际面板。
-
-
-最低支持 Comigo v1.3.6，桌面协议版本为 `1`。
+安装与本机服务变更使用 Omarchy 和系统档案技能。安装到用户插件目录时保留独立检出的 `.git`，只同步插件拥有的文件并删除已废弃的运行脚本；运行 `omarchy restart shell`，检查文件一致性、启用状态和真实面板。不得提交凭据、私人配置、截图或临时计划。

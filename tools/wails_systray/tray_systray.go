@@ -32,7 +32,7 @@ func startPlatform(t *Tray) func() {
 		mVersion := mExtra.AddSubMenuItem("Comigo "+config.GetVersion(), "")
 		mVersion.Disable()
 		mQuit := systray.AddMenuItem(locale.GetString("systray_quit"), locale.GetString("systray_quit_tooltip"))
-		mQuit.Click(t.quit)
+		mQuit.Click(t.Quit)
 		// 左右键统一打开菜单；Linux 库拿不到菜单时保留原有恢复行为。
 		showMenu := func(menu systray.IMenu) {
 			if menu == nil {

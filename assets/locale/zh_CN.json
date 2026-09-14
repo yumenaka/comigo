@@ -1051,5 +1051,10 @@
   "server_update_available": "发现新版本",
   "server_update_latest": "已是最新版本",
   "server_url_copied": "阅读地址已复制",
-  "server_copy_failed": "复制失败，请手动复制地址"
+  "server_copy_failed": "复制失败，请手动复制地址",
+  "no_default_library": "不自动添加默认书库",
+  "autostart_label": "开机启动",
+  "autostart_description": "登录当前用户后自动启动此版本的 Comigo。开启或关闭不会中断当前阅读。",
+  "autostart_unavailable": "无法查询自启动状态，或当前环境不支持用户服务。",
+  "autostart_failed": "设置自启动失败。"
 }

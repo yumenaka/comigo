@@ -106,6 +106,7 @@ func bindPublicAPI(group *echo.Group) {
 	group.GET("/qrcode.png", data_api.GetQrcode)
 	group.POST("/login", login.Login)
 	group.POST("/logout", login.Logout)
+	group.GET("/info", data_api.GetPublicInfo)
 }
 
 // bindProtectedView 注册需要登录的页面
@@ -138,28 +139,31 @@ func bindProtectedAPI(group *echo.Group) {
 	bindServerAPI(group)
 	bindBookAPI(group)
 	bindBookmarkAPI(group)
-	bindConfigAPI(group)
-	bindSettingsAPI(group)
+	bindConfigAPI(group.Group("", controlAccess))
+	bindSettingsAPI(group.Group("", controlAccess))
 	bindRealtimeAPI(group)
 }
 
 // bindServerAPI 注册服务状态、上传和书库管理等服务级 API。
 func bindServerAPI(group *echo.Group) {
-	bindWailsAPI(group)
+	control := group.Group("", controlAccess)
+	bindWailsAPI(control)
 	// 服务器状态
-	group.GET("/server", data_api.GetServerInfoHandler)
-	group.GET("/server/update", data_api.GetServerUpdateHandler)
-	group.GET("/server/traffic", data_api.GetServerTrafficHandler)
-	group.GET("/connections", data_api.GetConnections)
-	group.POST("/restart", restartHandler)
+	control.GET("/server", data_api.GetServerInfoHandler)
+	control.GET("/server/update", data_api.GetServerUpdateHandler)
+	control.GET("/server/traffic", data_api.GetServerTrafficHandler)
+	control.GET("/connections", data_api.GetConnections)
+	control.POST("/restart", restartHandler)
+	control.GET("/autostart", settings.GetAutostartHandler)
+	control.PUT("/autostart", settings.SetAutostartHandler)
 	// 获取书库列表
 	group.GET("/stores", data_api.GetStores)
 	group.GET("/stores/:id", data_api.GetStore)
 	// 文件上传
 	group.POST("/upload", upload_api.UploadFile)
 	// 获取 tailscale 状态
-	group.GET("/tailscale-status", data_api.GetTailscaleStatus)
-	group.GET("/tailscale-status-sse", data_api.GetTailscaleStatusSSE)
+	control.GET("/tailscale-status", data_api.GetTailscaleStatus)
+	control.GET("/tailscale-status-sse", data_api.GetTailscaleStatusSSE)
 }
 
 // bindBookAPI 注册书籍读取、封面、下载和缓存相关 API。

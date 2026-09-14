@@ -10,6 +10,7 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
 	"github.com/yumenaka/comigo/tools/sse_hub"
+	"golang.org/x/term"
 )
 
 func init() {
@@ -36,8 +37,16 @@ func init() {
 	})
 }
 
-// SetCwdAsScanPathIfNeed 首次无书库参数或配置文件时优先使用已有用户目录，否则回退到工作目录。
+// SetCwdAsScanPathIfNeed 仅允许终端直接启动时回退到默认书库。
 func SetCwdAsScanPathIfNeed() {
+	setDefaultLibrary(term.IsTerminal(int(os.Stdin.Fd())))
+}
+
+// setDefaultLibrary 管理命令、后台服务和明确配置的书库不触发隐式扫描。
+func setDefaultLibrary(interactive bool) {
+	if !interactive || config.GetCfg().NoDefaultLibrary || len(Args) != 0 || config.GetCfg().ConfigFile != "" {
+		return
+	}
 	if len(config.GetCfg().StoreUrls) == 0 {
 		if len(Args) == 0 && config.GetCfg().ConfigFile == "" {
 			if home, err := os.UserHomeDir(); err == nil {

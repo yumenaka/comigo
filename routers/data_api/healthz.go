@@ -14,3 +14,12 @@ func Healthz(c echo.Context) error {
 		"port":   config.GetCfg().Port,
 	})
 }
+
+// GetPublicInfo 只公开连接协商必需的信息，不包含书库、地址、设备或流量。
+func GetPublicInfo(c echo.Context) error {
+	c.Response().Header().Set("Cache-Control", "no-store")
+	return c.JSON(http.StatusOK, map[string]any{
+		"Version": config.GetVersion(), "desktopProtocol": 1,
+		"requiresAuth": config.GetCfg().RequiresAuth(),
+	})
+}
