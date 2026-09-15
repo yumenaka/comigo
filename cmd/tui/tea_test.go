@@ -188,7 +188,7 @@ func TestViewLeavesRightmostColumnUnused(t *testing.T) {
 	}
 
 	for lineNumber, line := range strings.Split(model.View(), "\n") {
-		if got, maxWidth := runewidth.StringWidth(line), width-1; got > maxWidth {
+		if got, maxWidth := xansi.StringWidth(line), width-1; got > maxWidth {
 			t.Fatalf("View() line %d width = %d, want <= %d", lineNumber+1, got, maxWidth)
 		}
 	}
@@ -377,6 +377,8 @@ func TestDetectTUIImageProtocolAllowsEnvOverride(t *testing.T) {
 
 // 验证终端图片协议会根据终端类型选择合适实现。
 func TestDetectTUIImageProtocolUsesTerminalSpecificProtocols(t *testing.T) {
+	// 隔离启动测试的宿主终端，避免 Kitty 标记覆盖模拟的终端类型。
+	t.Setenv("KITTY_WINDOW_ID", "")
 	t.Setenv("COMIGO_TUI_IMAGE", "auto")
 	t.Setenv("TERM", "xterm-ghostty")
 	t.Setenv("TERM_PROGRAM", "")
@@ -1599,6 +1601,8 @@ func TestReaderProtocolDefaultsToKittyForKittyTerminal(t *testing.T) {
 
 // 验证 WezTerm 阅读模式默认使用 iTerm2 图片协议。
 func TestReaderProtocolUsesITerm2ForWezTerm(t *testing.T) {
+	// 隔离启动测试的宿主终端，避免 Kitty 标记覆盖模拟的终端类型。
+	t.Setenv("KITTY_WINDOW_ID", "")
 	t.Setenv("COMIGO_TUI_IMAGE", "auto")
 	t.Setenv("TERM_PROGRAM", "WezTerm")
 	t.Setenv("TERM", "xterm-256color")

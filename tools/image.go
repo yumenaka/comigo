@@ -215,25 +215,6 @@ func ImageResize(loadedImage []byte, width int, height int) []byte {
 	return buf2.Bytes()
 }
 
-// ImageThumbnail 根据设定的图片大小,剪裁图片
-func ImageThumbnail(loadedImage []byte, width int, height int) []byte {
-	buf := bytes.NewBuffer(loadedImage)
-	imageData, err := imaging.Decode(buf)
-	if err != nil {
-		logger.Infof("%s", err)
-		return loadedImage
-	}
-	// 生成缩略图，尺寸width*height
-	imageData = imaging.Thumbnail(imageData, width, height, imaging.Lanczos)
-	buf2 := &bytes.Buffer{}
-	// 将图片编码成jpeg
-	err = imaging.Encode(buf2, imageData, imaging.JPEG)
-	if err != nil {
-		return loadedImage
-	}
-	return buf2.Bytes()
-}
-
 // ImageAutoCrop  自动裁白边
 func ImageAutoCrop(loadedImage []byte, energyThreshold float32) []byte {
 	// //读取本地文件，本地文件尺寸300*400

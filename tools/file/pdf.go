@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"image/jpeg"
-	"io"
 	"os"
 	"strconv"
 	"time"
@@ -79,107 +78,4 @@ func digestImage(buff *bytes.Buffer) func(model.Image, bool, int) error {
 		}
 		return nil
 	}
-}
-
-// ExportImageFromPDF 将指定 PDF 页面的内嵌图片导出到调试文件。
-func ExportImageFromPDF(pdfFile string, pageNum int) error {
-	start := time.Now()
-	// 打开PDF文件
-	file, err := os.Open(pdfFile)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	pageImagesMap, err := api.ExtractImagesRaw(file, []string{strconv.Itoa(pageNum)}, model.NewDefaultConfiguration())
-	if err != nil {
-		return err
-	}
-	images := make([]model.Image, 0)
-	for _, pageImages := range pageImagesMap {
-		for _, img := range pageImages {
-			images = append(images, img)
-		}
-	}
-
-	for i := range images {
-		imgBytes, err := io.ReadAll(images[i])
-		if err != nil {
-			return err
-		}
-		// 写入文件，如果文件不存在则创建，文件权限设置为 0644
-		err = os.WriteFile("example.jpeg", imgBytes, 0o644)
-		if err != nil {
-			return err
-		}
-	}
-
-	logger.Info(time.Now().Sub(start))
-	return nil
-}
-
-// PDF页面分辨率
-type dim struct {
-	width  float64
-	height float64
-}
-
-// GetPageDimensions 取得PDF页面分辨率
-func GetPageDimensions(fileName string) []dim {
-	pageCount, _ := CountPagesOfPDF(fileName)
-	logger.Infof("pagecount of %v was %v", fileName, pageCount)
-	var pageDimensions []dim
-	var currentPageDim dim
-	pdfDims, err := api.PageDimsFile(fileName)
-	if err != nil {
-		logger.Infof("Error %v", err)
-	}
-	for i := 0; i < pageCount; i++ {
-		currentPageDim.width = pdfDims[i].Width
-		currentPageDim.height = pdfDims[i].Height
-		pageDimensions = append(pageDimensions, currentPageDim)
-	}
-	return pageDimensions
-}
-
-// ExportAllImageFromPDF 将 PDF 中的内嵌图片导出到调试目录。
-func ExportAllImageFromPDF(pdfFile string) error {
-	// 打开PDF文件
-	file, err := os.Open(pdfFile)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	pageCount, err := CountPagesOfPDF(pdfFile)
-	if err != nil {
-		return err
-	}
-	list := []string{}
-	for i := 0; i < pageCount; i++ {
-		list = append(list, strconv.Itoa(i+1))
-	}
-
-	pageImagesMap, err := api.ExtractImagesRaw(file, list, model.NewDefaultConfiguration())
-	if err != nil {
-		return err
-	}
-	images := make([]model.Image, 0)
-	for _, pageImages := range pageImagesMap {
-		for _, img := range pageImages {
-			images = append(images, img)
-		}
-	}
-
-	for i := range images {
-		imgBytes, err := io.ReadAll(images[i])
-		if err != nil {
-			return err
-		}
-		// 写入文件，如果文件不存在则创建，文件权限设置为 0644
-		err = os.WriteFile("test/"+strconv.Itoa(i+1)+".jpg", imgBytes, 0o644)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }

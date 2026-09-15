@@ -3,33 +3,13 @@ package tools
 // 自然字符串排序库： https://github.com/facette/natsort
 import (
 	"regexp"
-	"sort"
 	"strconv"
 )
-
-type stringSlice []string
-
-func (s stringSlice) Len() int {
-	return len(s)
-}
-
-func (s stringSlice) Less(a, b int) bool {
-	return Compare(s[a], s[b])
-}
-
-func (s stringSlice) Swap(a, b int) {
-	s[a], s[b] = s[b], s[a]
-}
 
 var chunkifyRegexp = regexp.MustCompile(`(\d+|\D+)`)
 
 func chunkify(s string) []string {
 	return chunkifyRegexp.FindAllString(s, -1)
-}
-
-// Sort sorts a list of strings in a natural order
-func Sort(l []string) {
-	sort.Sort(stringSlice(l))
 }
 
 // Compare returns true if the first string precedes the second one according to natural order

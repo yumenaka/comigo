@@ -2,9 +2,9 @@ package tools
 
 import (
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
-	"time"
 )
 
 var testList = []string{
@@ -84,11 +84,10 @@ func Test_Sort1(t *testing.T) {
 		"Xiph Xlater 5000",
 		"Xiph Xlater 10000",
 	}
-	testListSorted := testList[:]
-	Sort(testListSorted)
+	testListSorted := append([]string(nil), testList...)
+	sort.Slice(testListSorted, func(i, j int) bool { return Compare(testListSorted[i], testListSorted[j]) })
 
 	if !reflect.DeepEqual(testListSortedOK, testListSorted) {
-		time.Sleep(3 * time.Second)
 		t.Fatalf(`ERROR: sorted list different from expected results:
 	Expected results:
 %v
@@ -151,11 +150,10 @@ func Test_Sort2(t *testing.T) {
 		"z102.doc",
 	}
 
-	testListSorted := testList[:]
-	Sort(testListSorted)
+	testListSorted := append([]string(nil), testList...)
+	sort.Slice(testListSorted, func(i, j int) bool { return Compare(testListSorted[i], testListSorted[j]) })
 
 	if !reflect.DeepEqual(testListSortedOK, testListSorted) {
-		time.Sleep(3 * time.Second)
 		t.Fatalf(`ERROR: sorted list different from expected results:
 	Expected results:
 %v

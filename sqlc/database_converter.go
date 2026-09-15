@@ -3,7 +3,6 @@ package sqlc
 import (
 	"database/sql"
 	"strings"
-	"time"
 
 	"github.com/yumenaka/comigo/model"
 )
@@ -202,100 +201,4 @@ func FromSQLCPageInfos(sqlcPageInfos []PageInfo) []model.PageInfo {
 		pageInfos[i] = FromSQLCPageInfo(sqlcPageInfo)
 	}
 	return pageInfos
-}
-
-// ==================== User 相关转换 ====================
-
-// parseExpireAtString 解析过期时间字符串为time.Time
-func parseExpireAtString(expireAt string) time.Time {
-	if expireAt == "" {
-		return time.Time{}
-	}
-	// 尝试解析多种时间格式
-	formats := []string{
-		"2006-01-02 15:04:05",
-		"2006-01-02T15:04:05Z",
-		"2006-01-02T15:04:05.000Z",
-		"2006-01-02",
-	}
-	for _, format := range formats {
-		if t, err := time.Parse(format, expireAt); err == nil {
-			return t
-		}
-	}
-	return time.Time{}
-}
-
-// formatTimeToString 将time.Time格式化为字符串
-func formatTimeToString(t time.Time) string {
-	if t.IsZero() {
-		return ""
-	}
-	return t.Format("2006-01-02 15:04:05")
-}
-
-// FromSQLCUser 将sqlc.User转换为model.User
-func FromSQLCUser(sqlcUser User) *model.User {
-	return &model.User{
-		ID:       int(sqlcUser.ID),
-		Username: sqlcUser.Username,
-		Password: sqlcUser.Password,
-		Role:     sqlcUser.Role.String,
-		Email:    sqlcUser.Email.String,
-		Key:      sqlcUser.Key.String,
-		ExpireAt: formatTimeToString(sqlcUser.ExpiresAt.Time),
-	}
-}
-
-// ToSQLCCreateUserParams 将model.User转换为sqlc.CreateUserParams
-func ToSQLCCreateUserParams(user *model.User) CreateUserParams {
-	expiresAt := parseExpireAtString(user.ExpireAt)
-	return CreateUserParams{
-		Username:  user.Username,
-		Password:  user.Password,
-		Role:      sql.NullString{String: user.Role, Valid: user.Role != ""},
-		Email:     sql.NullString{String: user.Email, Valid: user.Email != ""},
-		Key:       sql.NullString{String: user.Key, Valid: user.Key != ""},
-		ExpiresAt: sql.NullTime{Time: expiresAt, Valid: !expiresAt.IsZero()},
-	}
-}
-
-// ToSQLCUpdateUserParams 将model.User转换为sqlc.UpdateUserParams
-func ToSQLCUpdateUserParams(user *model.User) UpdateUserParams {
-	expiresAt := parseExpireAtString(user.ExpireAt)
-	return UpdateUserParams{
-		Username:  user.Username,
-		Password:  user.Password,
-		Role:      sql.NullString{String: user.Role, Valid: user.Role != ""},
-		Email:     sql.NullString{String: user.Email, Valid: user.Email != ""},
-		Key:       sql.NullString{String: user.Key, Valid: user.Key != ""},
-		ExpiresAt: sql.NullTime{Time: expiresAt, Valid: !expiresAt.IsZero()},
-		ID:        int64(user.ID),
-	}
-}
-
-// ToSQLCUpdateUserPasswordParams 将用户ID和新密码转换为sqlc.UpdateUserPasswordParams
-func ToSQLCUpdateUserPasswordParams(userID int, newPassword string) UpdateUserPasswordParams {
-	return UpdateUserPasswordParams{
-		Password: newPassword,
-		ID:       int64(userID),
-	}
-}
-
-// ToSQLCUpdateUserKeyParams 将用户ID、key和过期时间转换为sqlc.UpdateUserKeyParams
-func ToSQLCUpdateUserKeyParams(userID int, key string, expiresAt time.Time) UpdateUserKeyParams {
-	return UpdateUserKeyParams{
-		Key:       sql.NullString{String: key, Valid: key != ""},
-		ExpiresAt: sql.NullTime{Time: expiresAt, Valid: !expiresAt.IsZero()},
-		ID:        int64(userID),
-	}
-}
-
-// FromSQLCUsers 批量转换sqlc.User为model.User
-func FromSQLCUsers(sqlcUsers []User) []*model.User {
-	users := make([]*model.User, len(sqlcUsers))
-	for i, sqlcUser := range sqlcUsers {
-		users[i] = FromSQLCUser(sqlcUser)
-	}
-	return users
 }

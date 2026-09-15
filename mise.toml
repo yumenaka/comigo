@@ -6,7 +6,6 @@ bun = "1.4.0"
 "go:github.com/wailsapp/wails/v2/cmd/wails" = "2.15.0"
 "go:github.com/air-verse/air" = "1.67.4"
 "go:github.com/sqlc-dev/sqlc/cmd/sqlc" = "1.31.1"
-"go:entgo.io/ent/cmd/ent" = "0.14.6"
 "go:github.com/josephspurrier/goversioninfo/cmd/goversioninfo" = "1.7.0"
 
 [env]

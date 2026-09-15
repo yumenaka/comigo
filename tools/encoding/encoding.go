@@ -2,11 +2,8 @@ package encoding
 
 // source: github.com/mholt/archiver/pull/149/files/92cf5d0fb45d7fa943e25fc83fc71cd2e734a4fb
 import (
-	"errors"
-	"io"
 	"strings"
 
-	"github.com/yumenaka/comigo/assets/locale"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/japanese"
@@ -14,7 +11,6 @@ import (
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/encoding/traditionalchinese"
 	"golang.org/x/text/encoding/unicode"
-	"golang.org/x/text/transform"
 )
 
 var encodings = map[string]encoding.Encoding{
@@ -55,92 +51,6 @@ var encodings = map[string]encoding.Encoding{
 	"euckr":             korean.EUCKR,
 	"utf16be":           unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM),
 	"utf16le":           unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM),
-}
-
-func GuessText(unknowString string) (string, error) {
-	if isGBK([]byte(unknowString)) {
-		utfString, err := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(unknowString)) // 将gbk转换为utf-8
-		return string(utfString), err
-	} else {
-		utfString, err := japanese.ShiftJIS.NewDecoder().Bytes([]byte(unknowString)) // 将ShiftJIS转换为utf-8
-		return string(utfString), err
-	}
-}
-
-func ShiftjisToUtf8(unknowString string) (string, error) {
-	utfString, err := japanese.ShiftJIS.NewDecoder().Bytes([]byte(unknowString)) // 将ShiftJIS转换为utf-8
-	return string(utfString), err
-}
-
-func GbkToUtf8(unknowString string) (string, error) {
-	utfString, err := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(unknowString)) // 将gbk转换为utf-8
-	return string(utfString), err
-}
-
-// ToShiftJIS Convert a string encoding from UTF-8 to ShiftJIS
-func ToShiftJIS(str string) (string, error) {
-	return transformEncoding(strings.NewReader(str), japanese.ShiftJIS.NewEncoder())
-}
-
-// ToGBK Convert a string encoding from UTF-8 to ShiftJIS
-func ToGBK(str string) (string, error) {
-	return transformEncoding(strings.NewReader(str), simplifiedchinese.GBK.NewEncoder())
-}
-
-func transformEncoding(rawReader io.Reader, trans transform.Transformer) (string, error) {
-	ret, err := io.ReadAll(transform.NewReader(rawReader, trans))
-	if err == nil {
-		return string(ret), nil
-	} else {
-		return "", err
-	}
-}
-
-func isGBK(data []byte) bool {
-	length := len(data)
-	i := 0
-	for i < length {
-		if data[i] <= 0x7f {
-			// 编码0~127,只有一个字节的编码，兼容ASCII码
-			i++
-			continue
-		} else {
-			// 大于127的使用双字节编码，落在gbk编码范围内的字符
-			if data[i] >= 0x81 &&
-				data[i] <= 0xfe &&
-				data[i+1] >= 0x40 &&
-				data[i+1] <= 0xfe &&
-				data[i+1] != 0xf7 {
-				i += 2
-				continue
-			} else {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-func GetEncoding(charset string) (encoding.Encoding, bool) {
-	charset = strings.ToLower(charset)
-	enc, ok := encodings[charset]
-	return enc, ok
-}
-
-func Decode(in []byte, charset string) ([]byte, error) {
-	if enc, ok := GetEncoding(charset); ok {
-		return enc.NewDecoder().Bytes(in)
-	}
-	return nil, errors.New(locale.GetString("err_charset_not_found"))
-}
-
-func DecodeFileName(headerName string, ZipFilenameEncoding string) string {
-	if ZipFilenameEncoding != "" { // common.Config.ZipFileTextEncoding
-		if filename, err := Decode([]byte(headerName), ZipFilenameEncoding); err == nil {
-			return string(filename)
-		}
-	}
-	return headerName
 }
 
 func ByName(charset string) encoding.Encoding {

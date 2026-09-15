@@ -190,31 +190,6 @@ func GetFileStr(filePath string) string {
 	return safe
 }
 
-// GetImageSrc 获取Base64编码的图片的src属性
-func GetImageSrc(filePath string) string {
-	// 使用ReadFile从嵌入文件系统中读取文件内容
-	data, err := Frontend.ReadFile(filePath)
-	if err != nil {
-		logger.Errorf(locale.GetString("err_failed_to_read_embedded_image"), err)
-		return "Not Found Image:" + filePath
-	}
-
-	// 获取文件扩展名，并猜测MIME类型
-	ext := filepath.Ext(filePath)
-	mimeType := mime.TypeByExtension(ext)
-	if mimeType == "" {
-		mimeType = "application/octet-stream"
-	}
-
-	// Base64 编码图片数据
-	base64Data := base64.StdEncoding.EncodeToString(data)
-
-	// 生成图片的 src 属性
-	src := fmt.Sprintf("data:%s;base64,%s", mimeType, base64Data)
-
-	return src
-}
-
 // GetData 获取字节切片形式的数据
 func GetData(filePath string) []byte {
 	// 使用ReadFile从嵌入文件系统中读取文件内容

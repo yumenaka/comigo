@@ -12,6 +12,8 @@
 
 ## 实现要点
 
+- 终端协议测试需显式隔离宿主环境标记（如 `KITTY_WINDOW_ID`）；视图行宽断言使用 `x/ansi.StringWidth`，不把颜色控制序列计入可见宽度。
+
 - `coverPreviewState.Lines` / `terminalReaderState.Lines` 只应保存随 TUI 文本布局输出的可见行。
 - Kitty Unicode placeholder 的图像传输和 virtual placement 控制序列不是可见行，不能参与居中、裁切或宽度计算。
 - iTerm2 协议是独立 inline image 层，使用 overlay 路径绘制；清理残留时只使用零宽度 ECH，不要再叠加可见空格，否则 Bubble Tea 会把清理内容计入行宽并截断后续图片序列。

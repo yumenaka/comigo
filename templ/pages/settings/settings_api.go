@@ -3,7 +3,6 @@ package settings
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -25,19 +24,6 @@ import (
 	"github.com/yumenaka/comigo/tools/sse_hub"
 	"golang.org/x/mod/semver"
 )
-
-// decodeBase64URLStrict 将 base64url（RawURLEncoding，无 padding）解码为原始字符串。
-// 解码失败应视为客户端请求参数不合法。
-func decodeBase64URLStrict(s string) (string, error) {
-	if s == "" {
-		return "", errors.New("empty base64url value")
-	}
-	b, err := base64.RawURLEncoding.DecodeString(s)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
-}
 
 func reloadHintForStringConfig(name string) (saveSuccessHint bool, reason string) {
 	switch name {
