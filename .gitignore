@@ -160,9 +160,3 @@ package.json.md5
 
 # Local temporary plans.
 TEMP_*.md
-
-# Local audit and planning notes.
-/docs/manual-plan-stashed.md
-/docs/manual-zh-review.md
-/docs/rest-control-review.md
-/docs/rest-control.md

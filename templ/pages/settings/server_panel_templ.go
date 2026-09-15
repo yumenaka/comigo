@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/config"
+	"runtime"
 )
 
 // ServerPanel 在设置主区域展示可折叠的服务控制与实时统计。
@@ -39,9 +40,11 @@ func ServerPanel() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = AutostartConfig().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if runtime.GOOS != "darwin" {
+			templ_7745c5c3_Err = AutostartConfig().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"grid grid-cols-[2.5rem_minmax(0,16rem)_2.5rem] justify-center items-center gap-2 my-3\"><button type=\"button\" class=\"panel-control size-10 border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed\" @click=\"cycleReadingIP(-1)\" :disabled=\"readingIPs.length < 2\" :aria-label=\"i18next.t('previous') + ' IP'\"><img src=\"")
 		if templ_7745c5c3_Err != nil {
@@ -50,7 +53,7 @@ func ServerPanel() templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(assets.GetImageDataSrc("ArrowLeft.png"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/server_panel.templ`, Line: 44, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/server_panel.templ`, Line: 48, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -63,7 +66,7 @@ func ServerPanel() templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(assets.GetImageDataSrc("ArrowRight.png"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/server_panel.templ`, Line: 52, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/settings/server_panel.templ`, Line: 56, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {

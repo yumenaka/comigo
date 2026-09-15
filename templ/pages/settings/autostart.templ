@@ -15,30 +15,51 @@ templ AutostartConfig() {
 		<p role="status" class="text-sm text-error empty:hidden" x-text="error"></p>
 	</fieldset>
 	<script>
- function comigoAutostart() {
-  return {
-   enabled:false, supported:false, busy:true, error:'',
-   async load() {
-    try {
-     const response=await fetch(window.ComiGoPath('/api/autostart'));
-     if (!response.ok) throw new Error(i18next.t('autostart_unavailable'));
-     const data=await response.json();
-     this.enabled=data.enabled;this.supported=data.supported;
-     if (!this.supported) this.error=i18next.t('autostart_unavailable');
-    } catch(error) {this.error=error.message;this.supported=false;}
-    finally {this.busy=false;}
-   },
-   async save() {
-    this.busy=true;this.error='';const wanted=this.enabled;
-    try {
-     const response=await fetch(window.ComiGoPath('/api/autostart'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:wanted})});
-     const data=await response.json();
-     if (!response.ok) throw new Error(data.message || i18next.t('autostart_failed'));
-     this.enabled=data.enabled;
-    } catch(error) {this.enabled=!wanted;this.error=error.message;}
-    finally {this.busy=false;}
-   }
-  };
- }
- </script>
+		function comigoAutostart() {
+			return {
+				enabled: false,
+				supported: false,
+				busy: true,
+				error: "",
+				async load() {
+					try {
+						const response = await fetch(window.ComiGoPath("/api/autostart"));
+						if (!response.ok)
+							throw new Error(i18next.t("autostart_unavailable"));
+						const data = await response.json();
+						this.enabled = data.enabled;
+						this.supported = data.supported;
+						if (!this.supported)
+							this.error = i18next.t("autostart_unavailable");
+					} catch (error) {
+						this.error = error.message;
+						this.supported = false;
+					} finally {
+						this.busy = false;
+					}
+				},
+				async save() {
+					this.busy = true;
+					this.error = "";
+					const wanted = this.enabled;
+					try {
+						const response = await fetch(window.ComiGoPath("/api/autostart"), {
+							method: "PUT",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ enabled: wanted }),
+						});
+						const data = await response.json();
+						if (!response.ok)
+							throw new Error(data.message || i18next.t("autostart_failed"));
+						this.enabled = data.enabled;
+					} catch (error) {
+						this.enabled = !wanted;
+						this.error = error.message;
+					} finally {
+						this.busy = false;
+					}
+				},
+			};
+		}
+	</script>
 }

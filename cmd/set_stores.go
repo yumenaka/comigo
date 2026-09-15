@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
@@ -10,7 +9,6 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
 	"github.com/yumenaka/comigo/tools/sse_hub"
-	"golang.org/x/term"
 )
 
 func init() {
@@ -37,39 +35,20 @@ func init() {
 	})
 }
 
-// SetCwdAsScanPathIfNeed 仅允许终端直接启动时回退到默认书库。
+// SetCwdAsScanPathIfNeed 未指定路径、配置文件或书库时，将当前目录作为默认书库。
 func SetCwdAsScanPathIfNeed() {
-	setDefaultLibrary(term.IsTerminal(int(os.Stdin.Fd())))
-}
-
-// setDefaultLibrary 管理命令、后台服务和明确配置的书库不触发隐式扫描。
-func setDefaultLibrary(interactive bool) {
-	if !interactive || config.GetCfg().NoDefaultLibrary || len(Args) != 0 || config.GetCfg().ConfigFile != "" {
+	cfg := config.GetCfg()
+	if cfg.NoDefaultLibrary || len(Args) != 0 || cfg.ConfigFile != "" || len(cfg.StoreUrls) != 0 {
 		return
 	}
-	if len(config.GetCfg().StoreUrls) == 0 {
-		if len(Args) == 0 && config.GetCfg().ConfigFile == "" {
-			if home, err := os.UserHomeDir(); err == nil {
-				for _, name := range []string{"Pictures", "Documents", "Downloads"} {
-					path := filepath.Join(home, name)
-					if info, err := os.Stat(path); err == nil && info.IsDir() {
-						if err := config.GetCfg().AddStoreUrl(path); err == nil {
-							return
-						}
-					}
-				}
-			}
-		}
-		// 获取当前工作目录
-		wd, err := os.Getwd()
-		if err != nil {
-			logger.Infof(locale.GetString("log_failed_to_get_working_directory"), err)
-		}
-		logger.Infof(locale.GetString("log_working_directory"), wd)
-		err = config.GetCfg().AddStoreUrl(wd)
-		if err != nil {
-			logger.Infof(locale.GetString("log_failed_to_add_working_directory_to_store_urls"), err)
-		}
+	wd, err := os.Getwd()
+	if err != nil {
+		logger.Infof(locale.GetString("log_failed_to_get_working_directory"), err)
+		return
+	}
+	logger.Infof(locale.GetString("log_working_directory"), wd)
+	if err := cfg.AddStoreUrl(wd); err != nil {
+		logger.Infof(locale.GetString("log_failed_to_add_working_directory_to_store_urls"), err)
 	}
 }
 

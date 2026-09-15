@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -19,7 +20,7 @@ import (
 	"github.com/yumenaka/comigo/tools/sse_hub"
 )
 
-// 开机启动必须位于服务控制中，只读模式由原生 fieldset 保护，避免 Alpine 覆盖 input.disabled。
+// macOS 不渲染开机启动控件及脚本；其他平台的控件遵守只读模式。
 func TestServerPanelAutostart(t *testing.T) {
 	old := config.CopyCfg()
 	t.Cleanup(func() { *config.GetCfg() = old })
@@ -30,6 +31,12 @@ func TestServerPanelAutostart(t *testing.T) {
 			t.Fatal(err)
 		}
 		body := output.String()
+		if runtime.GOOS == "darwin" {
+			if strings.Contains(body, "autostart") || strings.Contains(body, "comigoAutostart") {
+				t.Fatal("macOS 不应渲染开机启动控件或脚本")
+			}
+			continue
+		}
 		if strings.Count(body, `id="autostart"`) != 1 {
 			t.Fatal("service panel must contain one autostart switch")
 		}

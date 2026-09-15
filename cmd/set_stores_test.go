@@ -9,11 +9,21 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// 验证首次书库选择顺序、不创建候选目录，以及已有配置和参数的优先级。
+// 验证默认使用当前目录（包括非终端启动），以及已有配置和参数的优先级。
 func TestDefaultScanPath(t *testing.T) {
 	cfg := config.GetCfg()
-	saved, savedArgs := *cfg, Args
-	t.Cleanup(func() { *cfg, Args = saved, savedArgs })
+	saved, savedArgs, savedStdin := *cfg, Args, os.Stdin
+	// 使用管道模拟非终端启动，默认目录选择不应依赖终端。
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdin = reader
+	t.Cleanup(func() {
+		*cfg, Args, os.Stdin = saved, savedArgs, savedStdin
+		_ = reader.Close()
+		_ = writer.Close()
+	})
 	for _, tc := range []struct {
 		name       string
 		dirs       []string
@@ -21,17 +31,14 @@ func TestDefaultScanPath(t *testing.T) {
 		args       []string
 		configured bool
 		existing   bool
-		want       string
 		disabled   bool
-		background bool
 	}{
 		{name: "disabled", disabled: true},
-		{name: "background", background: true},
-		{name: "pictures first", dirs: []string{"Pictures", "Documents", "Downloads"}, want: "Pictures"},
-		{name: "documents second", dirs: []string{"Documents", "Downloads"}, want: "Documents"},
-		{name: "downloads third", dirs: []string{"Downloads"}, want: "Downloads"},
+		{name: "ignore home directories", dirs: []string{"Pictures", "Documents", "Downloads"}},
+		{name: "ignore documents", dirs: []string{"Documents", "Downloads"}},
+		{name: "ignore downloads", dirs: []string{"Downloads"}},
 		{name: "no directories"},
-		{name: "skip regular file", dirs: []string{"Documents"}, file: "Pictures", want: "Documents"},
+		{name: "skip regular file", dirs: []string{"Documents"}, file: "Pictures"},
 		{name: "configuration exists", dirs: []string{"Pictures"}, configured: true},
 		{name: "arguments exist", dirs: []string{"Pictures"}, args: []string{"missing"}},
 		{name: "library exists", dirs: []string{"Pictures"}, existing: true},
@@ -60,11 +67,8 @@ func TestDefaultScanPath(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			setDefaultLibrary(!tc.background)
+			SetCwdAsScanPathIfNeed()
 			want := cwd
-			if tc.want != "" {
-				want = filepath.Join(home, tc.want)
-			}
 			// 统一解析 macOS 临时目录可能包含的符号链接。
 			want, err := filepath.EvalSymlinks(want)
 			if err != nil {
@@ -79,7 +83,7 @@ func TestDefaultScanPath(t *testing.T) {
 				}
 			}
 			expected := []string{want}
-			if tc.disabled || tc.background || tc.configured || len(tc.args) > 0 {
+			if tc.disabled || tc.configured || len(tc.args) > 0 {
 				expected = nil
 			}
 			if !reflect.DeepEqual(got, expected) {

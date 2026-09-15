@@ -3,6 +3,7 @@ package settings
 import (
 	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/config"
+	"runtime"
 )
 
 // ServerPanel 在设置主区域展示可折叠的服务控制与实时统计。
@@ -38,7 +39,10 @@ templ ServerPanel() {
 		</button>
 		<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 		<div id="server-control-content" x-show="!collapsed" x-transition x-cloak class="px-2 pb-2 font-normal">
-			@AutostartConfig()
+			// macOS 不渲染开机启动选项及其初始化脚本。
+			if runtime.GOOS != "darwin" {
+				@AutostartConfig()
+			}
 			<div class="grid grid-cols-[2.5rem_minmax(0,16rem)_2.5rem] justify-center items-center gap-2 my-3">
 				<button type="button" class="panel-control size-10 border border-base-content/20 rounded shadow-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" @click="cycleReadingIP(-1)" :disabled="readingIPs.length < 2" :aria-label="i18next.t('previous') + ' IP'">
 					<img src={ assets.GetImageDataSrc("ArrowLeft.png") } alt="" width="32" height="32" class="mx-auto"/>
