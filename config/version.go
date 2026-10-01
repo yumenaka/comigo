@@ -1,6 +1,6 @@
 package config
 
-var version = "v1.3.7"
+var version = "v1.3.8"
 
 // minSupportedVersion 是可直接加载的 metadata 最小版本，仅在数据格式不兼容时提高。
 var minSupportedVersion = "v1.3.0"

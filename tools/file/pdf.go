@@ -2,6 +2,7 @@ package file
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"image/jpeg"
@@ -29,11 +30,13 @@ func CountPagesOfPDF(pdfFileName string) (int, error) {
 		}
 	}()
 	// use default configuration for pdfcpu ("nil")
-	err := api.ValidateFile(pdfFileName, nil)
+	// pdfcpu 的文件接口需要上下文；本地同步读取使用后台上下文。
+	ctx := context.Background()
+	err := api.ValidateFile(ctx, pdfFileName, nil, nil)
 	if err != nil {
 		return -1, fmt.Errorf(locale.GetString("err_countpages_pdf_invalid"), pdfFileName, err.Error())
 	}
-	return api.PageCountFile(pdfFileName)
+	return api.PageCountFile(ctx, pdfFileName)
 }
 
 // GetImageFromPDF 从PDF里面取jpeg文件，pageNum从1开始
@@ -49,7 +52,7 @@ func GetImageFromPDF(pdfFileName string, pageNum int, Debug bool) ([]byte, error
 	pdfSetting := model.NewDefaultConfiguration()
 	pdfSetting.DecodeAllStreams = true
 	buffer := &bytes.Buffer{}
-	err = api.ExtractImages(file, []string{strconv.Itoa(pageNum)}, digestImage(buffer), pdfSetting)
+	err = api.ExtractImages(context.Background(), file, []string{strconv.Itoa(pageNum)}, digestImage(buffer), pdfSetting)
 	if err != nil {
 		logger.Info(err)
 	}

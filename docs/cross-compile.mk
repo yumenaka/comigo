@@ -109,7 +109,7 @@ wails-frontend: build-wasm
 wails-linux-images: wails-linux-image-amd64 wails-linux-image-arm64
 
 wails-linux-image-amd64:
-	docker build --platform linux/amd64 \
+	docker build --pull --platform linux/amd64 \
 		--build-arg BASE_IMAGE=$(WAILS_LINUX_IMAGE_AMD64) \
 		--build-arg WAILS_CLI_VERSION=$(WAILS_CLI_VERSION) \
 		--build-arg WAILS_LINUX_DEPS="$(WAILS_LINUX_DEPS)" \
@@ -117,7 +117,7 @@ wails-linux-image-amd64:
 		-f docs/docker/Dockerfile.wails-linux .
 
 wails-linux-image-arm64:
-	docker build --platform linux/arm64 \
+	docker build --pull --platform linux/arm64 \
 		--build-arg BASE_IMAGE=$(WAILS_LINUX_IMAGE_ARM64) \
 		--build-arg WAILS_CLI_VERSION=$(WAILS_CLI_VERSION) \
 		--build-arg WAILS_LINUX_DEPS="$(WAILS_LINUX_DEPS)" \
