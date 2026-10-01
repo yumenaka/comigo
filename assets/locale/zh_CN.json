@@ -319,7 +319,7 @@
   "log_book_data_directory_not_exist": "书籍数据目录尚不存在: %s",
   "log_book_file_not_exist_skip": "书籍文件不存在，跳过加载: %s",
   "log_book_version_minor_mismatch": "书籍 %s 次版本不同（缓存: %s, 当前: %s），将迁移书签后重新扫描",
-  "log_book_version_mismatch_skip": "书籍 %s 版本不匹配（缓存: %s, 当前: %s），跳过加载",
+  "log_book_version_mismatch_skip": "书籍 %s 数据版本不受支持（缓存: %s, 最小支持: %s），保留阅读历史并重新扫描",
   "log_bookmark_migrated": "书籍 %s 成功迁移了 %d 个书签",
   "log_bookmark_saved_for_migration": "书籍 %s 的 %d 个书签已保存，等待迁移到新数据",
   "log_books_saved_to_database_successfully": "SaveBooksToDatabase: 成功保存 %d 本书籍到数据库",

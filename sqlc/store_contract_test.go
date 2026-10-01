@@ -23,8 +23,8 @@ func TestStoreInterfaceContractRamStore(t *testing.T) {
 		tmp := t.TempDir()
 		config.GetCfg().ConfigFile = filepath.Join(tmp, "config.toml")
 		ramStore := &store.StoreInRam{
-			ChildStores:      sync.Map{},
-			PendingBookmarks: sync.Map{},
+			ChildStores:  sync.Map{},
+			PendingBooks: sync.Map{},
 		}
 		model.IStore = ramStore
 		t.Cleanup(func() {

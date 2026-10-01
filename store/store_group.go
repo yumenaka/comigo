@@ -16,41 +16,23 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
+	"golang.org/x/mod/semver"
 )
 
 // StoreInRam 内存书库，扫描后生成。可以有多个子书库。
 type StoreInRam struct {
 	StoreInfo
-	ChildStores      sync.Map // key为路径 存储 *Store
-	PendingBookmarks sync.Map // 待迁移的书签，key为BookID，value为model.BookMarks
-	bookmarksMu      sync.RWMutex
+	ChildStores  sync.Map // key为路径 存储 *Store
+	PendingBooks sync.Map // 待重扫的旧书籍，按书库和路径匹配，保留书签及已读状态
+	bookmarksMu  sync.RWMutex
 }
 
-// getMajorMinorVersion 提取版本号的前两段（major.minor）
-// 支持格式："v1.2.23"、"1.13.4"、"v1.2"、"1.13" 等
-// 返回格式："v1.2" 或 "1.13"，如果解析失败返回空字符串
-func getMajorMinorVersion(version string) string {
-	if version == "" {
-		return ""
+// pendingBookKey 优先按书库和路径匹配；缺路径的旧 metadata 仍按 BookID 恢复。
+func pendingBookKey(book *model.Book) [2]string {
+	if book.BookPath == "" || book.StoreUrl == "" {
+		return [2]string{"", book.BookID}
 	}
-	// 去除可能的前缀 "v" 或 "V"
-	trimmed := version
-	hasPrefix := false
-	if len(version) > 0 && (version[0] == 'v' || version[0] == 'V') {
-		trimmed = version[1:]
-		hasPrefix = true
-	}
-	// 按 "." 分割版本号
-	parts := strings.Split(trimmed, ".")
-	if len(parts) < 2 {
-		return "" // 版本号格式不正确，至少需要 major.minor
-	}
-	// 拼接前两段
-	majorMinor := parts[0] + "." + parts[1]
-	if hasPrefix {
-		return "v" + majorMinor
-	}
-	return majorMinor
+	return [2]string{book.StoreUrl, book.BookPath}
 }
 
 // AddStore 创建一个新书库
@@ -112,7 +94,7 @@ func (ramStore *StoreInRam) SaveAllBooksMetaJson() error {
 	}
 	// 遍历并保存每本书的元数据到 JSON 文件
 	for _, book := range allBooks {
-		err := SaveMetaJson(book)
+		err := ramStore.StoreBook(book)
 		if err != nil {
 			logger.Infof(locale.GetString("log_error_saving_book"), book.BookID, err)
 		}
@@ -144,14 +126,21 @@ func SaveMetaJson(book *model.Book) error {
 	}
 	// 构造文件路径
 	fileName := filepath.Join(cacheDir, book.BookID+".json")
-	// 写入文件
-	// metadata 包含本地路径和可能带凭据的远程 URL，只允许当前用户读取。
-	err = os.WriteFile(fileName, jsonData, 0o600)
+	// 先写同目录临时文件，再替换旧 JSON，写入失败或中断时仍可恢复旧阅读历史。
+	// CreateTemp 的 0600 权限也会收紧历史 metadata 的宽松权限。
+	tempFile, err := os.CreateTemp(cacheDir, ".metadata-*.tmp")
 	if err != nil {
 		return err
 	}
-	// WriteFile 覆盖旧文件时不会应用 perm，需要显式收紧历史 metadata 权限。
-	return os.Chmod(fileName, 0o600)
+	defer os.Remove(tempFile.Name())
+	if _, err := tempFile.Write(jsonData); err != nil {
+		_ = tempFile.Close()
+		return err
+	}
+	if err := tempFile.Close(); err != nil {
+		return err
+	}
+	return os.Rename(tempFile.Name(), fileName)
 }
 
 // marshalBookMetaJSON 专用于本地 metadata 持久化。
@@ -345,47 +334,18 @@ func (ramStore *StoreInRam) LoadBooks() error {
 				continue
 			}
 			if book.BookPath == "" || book.StoreUrl == "" {
-				// BookPath/StoreUrl 不再走普通 JSON 输出，但 metadata 必须保留。
-				// 遇到缺字段的旧/坏 metadata 时，先暂存书签再删除，让后续扫描重建完整数据。
-				if book.BookID != "" && len(book.BookMarks) > 0 {
-					ramStore.PendingBookmarks.Store(book.BookID, book.BookMarks)
-				}
-				errDel := os.Remove(filePath)
-				if errDel != nil {
-					logger.Infof(locale.GetString("log_error_deleting_orphan_metadata"), fileName, errDel)
+				// 缺字段时等待重扫，旧 JSON 保留到新数据成功落盘，避免扫描失败丢失历史。
+				if book.BookID != "" {
+					ramStore.PendingBooks.Store(pendingBookKey(&book), &book)
 				}
 				continue
 			}
-			// 检查版本号：根据前两段版本号(major.minor)决定处理方式
-			currentVersion := config.GetVersion()
-			bookMajorMinor := getMajorMinorVersion(book.CreatedByVersion)
-			currentMajorMinor := getMajorMinorVersion(currentVersion)
-
-			// 版本号为空或前两段版本号不一致时，跳过加载并删除元数据文件
-			if book.CreatedByVersion == "" || bookMajorMinor == "" || bookMajorMinor != currentMajorMinor {
-				logger.Infof(locale.GetString("log_book_version_mismatch_skip"), book.BookID, book.CreatedByVersion, currentVersion)
-				// 删除版本不匹配的元数据文件
-				errDel := os.Remove(filePath)
-				if errDel != nil {
-					logger.Infof(locale.GetString("log_error_deleting_version_mismatch_metadata"), fileName, errDel)
-				}
-				continue // 跳过版本不匹配的书籍
-			}
-
-			// 前两段版本号一致但完整版本号不同时，保存bookmark后删除老数据
-			if book.CreatedByVersion != currentVersion {
-				logger.Infof(locale.GetString("log_book_version_minor_mismatch"), book.BookID, book.CreatedByVersion, currentVersion)
-				// 如果有bookmark，保存到待迁移列表中
-				if len(book.BookMarks) > 0 {
-					ramStore.PendingBookmarks.Store(book.BookID, book.BookMarks)
-					logger.Infof(locale.GetString("log_bookmark_saved_for_migration"), book.BookID, len(book.BookMarks))
-				}
-				// 删除老的元数据文件
-				errDel := os.Remove(filePath)
-				if errDel != nil {
-					logger.Infof(locale.GetString("log_error_deleting_version_mismatch_metadata"), fileName, errDel)
-				}
-				continue // 跳过，等待重新扫描生成新数据
+			// 仅低于数据格式支持下限（或没有有效版本）时重扫，普通升级直接沿用 JSON。
+			minimumVersion := config.GetMinSupportedVersion()
+			if !semver.IsValid(book.CreatedByVersion) || semver.Compare(book.CreatedByVersion, minimumVersion) < 0 {
+				logger.Infof(locale.GetString("log_book_version_mismatch_skip"), book.BookID, book.CreatedByVersion, minimumVersion)
+				ramStore.PendingBooks.Store(pendingBookKey(&book), &book)
+				continue
 			}
 			// 检查书籍文件或目录是否存在，如果不存在则跳过加载并删除元数据文件
 			// 注意：远程书籍（WebDAV 等）不需要检查本地文件系统
@@ -419,10 +379,42 @@ func (ramStore *StoreInRam) LoadBooks() error {
 
 // StoreBook 添加一本书，并在内存入库成功后持久化 metadata。
 func (ramStore *StoreInRam) StoreBook(b *model.Book) error {
+	key := pendingBookKey(b)
+	previous, pending := ramStore.PendingBooks.Load(key)
+	if !pending {
+		key = [2]string{"", b.BookID}
+		previous, pending = ramStore.PendingBooks.Load(key)
+	}
+	if pending {
+		oldBook := previous.(*model.Book)
+		// 首次入库时恢复旧状态；落盘失败后的重试不能覆盖内存中继续阅读产生的新记录。
+		if current, _ := ramStore.GetBook(b.BookID); current != b {
+			b.BookMarks = append(model.BookMarks(nil), oldBook.BookMarks...)
+			for i := range b.BookMarks {
+				b.BookMarks[i].BookID = b.BookID
+				b.BookMarks[i].BookStoreID = b.GetStoreID()
+			}
+			b.BookComplete = oldBook.BookComplete
+		}
+	}
 	if err := ramStore.storeBookInMemory(b); err != nil {
 		return err
 	}
-	return saveBookMeta(b)
+	if err := saveBookMeta(b); err != nil {
+		return err
+	}
+	if pending {
+		oldBook := previous.(*model.Book)
+		// 新 JSON 写入成功后再清除旧 ID 的文件；失败时留下旧文件供下次启动恢复。
+		if oldBook.BookID != b.BookID {
+			if err := DeleteBookJson(oldBook); err != nil {
+				return err
+			}
+		}
+		ramStore.PendingBooks.Delete(key)
+		logger.Infof(locale.GetString("log_bookmark_migrated"), b.BookID, len(b.BookMarks))
+	}
+	return nil
 }
 
 // storeBookInMemory 只更新内存 Store，不写 metadata 文件。
@@ -435,14 +427,6 @@ func (ramStore *StoreInRam) storeBookInMemory(b *model.Book) error {
 	if _, ok := ramStore.ChildStores.Load(b.StoreUrl); !ok {
 		if err := ramStore.AddStore(b.StoreUrl); err != nil {
 			logger.Infof(locale.GetString("log_error_adding_subfolder"), err)
-		}
-	}
-	// 检查是否有待迁移的书签（来自版本升级时的老数据）
-	if pendingMarks, ok := ramStore.PendingBookmarks.LoadAndDelete(b.BookID); ok {
-		if marks, valid := pendingMarks.(model.BookMarks); valid && len(marks) > 0 {
-			// 合并书签到新书中（保留新书中已有的书签，追加老书签）
-			b.BookMarks = append(b.BookMarks, marks...)
-			logger.Infof(locale.GetString("log_bookmark_migrated"), b.BookID, len(marks))
 		}
 	}
 	return ramStore.StoreBookToSubStore(b.StoreUrl, b)
@@ -483,12 +467,8 @@ func (ramStore *StoreInRam) StoreBookToSubStore(storeURL string, b *model.Book) 
 func (ramStore *StoreInRam) StoreBooks(books []*model.Book) error {
 	var storeErrors []error
 	for _, b := range books {
-		if err := ramStore.storeBookInMemory(b); err != nil {
+		if err := ramStore.StoreBook(b); err != nil {
 			logger.Infof(locale.GetString("log_error_adding_book"), b.BookID, err)
-			storeErrors = append(storeErrors, err)
-			continue
-		}
-		if err := saveBookMeta(b); err != nil {
 			storeErrors = append(storeErrors, err)
 		}
 	}

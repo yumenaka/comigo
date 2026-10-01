@@ -319,7 +319,7 @@
   "log_book_data_directory_not_exist": "書籍データディレクトリがまだ存在しません: %s",
   "log_book_file_not_exist_skip": "書籍ファイルが存在しないため、読み込みをスキップしました: %s",
   "log_book_version_minor_mismatch": "書籍 %s のマイナーバージョンが異なります（キャッシュ: %s、現在: %s）、ブックマークを移行して再スキャンします",
-  "log_book_version_mismatch_skip": "書籍 %s のバージョンが一致しません（キャッシュ: %s、現在: %s）、読み込みをスキップ",
+  "log_book_version_mismatch_skip": "書籍 %s のデータバージョンは未対応です（キャッシュ: %s、最小対応: %s）、読書履歴を保持して再スキャンします",
   "log_bookmark_migrated": "書籍 %s の %d 個のブックマークを正常に移行しました",
   "log_bookmark_saved_for_migration": "書籍 %s の %d 個のブックマークを保存しました、移行待ち",
   "log_books_saved_to_database_successfully": "SaveBooksToDatabase: %d 冊の書籍をデータベースに正常に保存しました",

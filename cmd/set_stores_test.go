@@ -5,8 +5,11 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/yumenaka/comigo/config"
+	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/store"
 )
 
 // 验证默认使用当前目录（包括非终端启动），以及已有配置和参数的优先级。
@@ -101,5 +104,86 @@ func TestDefaultScanPath(t *testing.T) {
 				t.Fatalf("不应创建用户目录: %v", entries)
 			}
 		})
+	}
+}
+
+// TestLoadMetadataMigratesOldJSONHistory 用 test 下真实压缩包验证升级重扫、ID 变化和重启后的历史恢复。
+func TestLoadMetadataMigratesOldJSONHistory(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join("..", "test", "Public Domain Image Archive.zip"))
+	if os.IsNotExist(err) {
+		t.Skip("test 书籍未提供")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	bookPath := filepath.Join(root, "book.zip")
+	if err := os.WriteFile(bookPath, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	oldCfg, oldStore, oldRamStore := config.CopyCfg(), model.IStore, store.RamStore
+	t.Cleanup(func() { *config.GetCfg(), model.IStore, store.RamStore = oldCfg, oldStore, oldRamStore })
+	config.GetCfg().ConfigFile = filepath.Join(t.TempDir(), "config.toml")
+	config.GetCfg().StoreUrls = []string{root}
+	config.GetCfg().MinImageNum = 1
+	ramStore := &store.StoreInRam{}
+	model.IStore, store.RamStore = ramStore, ramStore
+	ScanStore()
+	// 从实际扫描结果中定位测试书籍。
+	findBook := func() *model.Book {
+		books, _ := model.IStore.ListBooks()
+		for _, book := range books {
+			if book.BookPath == bookPath {
+				return book
+			}
+		}
+		t.Fatal("扫描结果缺少测试书籍")
+		return nil
+	}
+	book := findBook()
+	book.BookID = "old-id"
+	book.CreatedByVersion = "v1.2.99"
+	book.BookComplete = true
+	book.BookMarks = model.BookMarks{
+		{Type: model.AutoMark, BookID: book.BookID, PageIndex: 3, UpdatedAt: time.Unix(1700000000, 0).UTC()},
+		{Type: model.UserMark, BookID: book.BookID, PageIndex: 2, Description: "保留书签", CreatedAt: time.Unix(1690000000, 0).UTC()},
+	}
+	if err := store.SaveMetaJson(book); err != nil {
+		t.Fatal(err)
+	}
+	configDir, err := config.GetConfigDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 只留下旧版 JSON，模拟升级前磁盘状态。
+	entries, err := filepath.Glob(filepath.Join(configDir, "metadata", book.GetStoreID(), "*.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range entries {
+		if filepath.Base(entry) != book.BookID+".json" {
+			if err := os.Remove(entry); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	ramStore = &store.StoreInRam{}
+	model.IStore, store.RamStore = ramStore, ramStore
+	// 只调用加载入口，验证未请求启动扫描时也自动迁移。
+	LoadMetadata()
+	refreshed := findBook()
+	wantMarks := append(model.BookMarks(nil), book.BookMarks...)
+	for i := range wantMarks {
+		wantMarks[i].BookID, wantMarks[i].BookStoreID = refreshed.BookID, refreshed.GetStoreID()
+	}
+	if refreshed.BookID == book.BookID || refreshed.CreatedByVersion != config.GetVersion() || !refreshed.BookComplete || !reflect.DeepEqual(refreshed.BookMarks, wantMarks) {
+		t.Fatalf("升级迁移失败: %+v", refreshed)
+	}
+	ramStore = &store.StoreInRam{}
+	model.IStore, store.RamStore = ramStore, ramStore
+	LoadMetadata()
+	reloaded := findBook()
+	if !reflect.DeepEqual(reloaded.BookMarks, wantMarks) || !reloaded.BookComplete || reloaded.GetLastReadPage() != 3 {
+		t.Fatalf("重启恢复阅读历史失败: %+v", reloaded)
 	}
 }

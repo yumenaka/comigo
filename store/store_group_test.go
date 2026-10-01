@@ -94,6 +94,89 @@ func metaJSONPath(configDir string, book *model.Book) string {
 	return filepath.Join(configDir, "metadata", book.GetStoreID(), book.BookID+".json")
 }
 
+// TestLoadBooksMinimumVersion 验证支持下限，而非当前程序版本，决定是否重扫。
+func TestLoadBooksMinimumVersion(t *testing.T) {
+	configDir := useTempConfigDir(t)
+	oldCfg := config.CopyCfg()
+	t.Cleanup(func() { *config.GetCfg() = oldCfg })
+	storeURL := t.TempDir()
+	config.GetCfg().StoreUrls = []string{storeURL}
+	for _, version := range []string{"", "invalid", "v1.2.99", "v1.3.0-rc.1", config.GetMinSupportedVersion(), "v1.3.6", config.GetVersion(), "v1.4.0", "v2.0.0"} {
+		t.Run(version, func(t *testing.T) {
+			book := newStoreGroupTestBook(storeURL, "version-book")
+			book.CreatedByVersion = version
+			if err := os.WriteFile(book.BookPath, nil, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if err := SaveMetaJson(book); err != nil {
+				t.Fatal(err)
+			}
+			ramStore := &StoreInRam{}
+			if err := ramStore.LoadBooks(); err != nil {
+				t.Fatal(err)
+			}
+			_, err := ramStore.GetBook(book.BookID)
+			wantRescan := version == "" || version == "invalid" || version == "v1.2.99" || version == "v1.3.0-rc.1"
+			if (err != nil) != wantRescan {
+				t.Fatalf("version %q: load error = %v, want rescan = %v", version, err, wantRescan)
+			}
+			if _, pending := ramStore.PendingBooks.Load(pendingBookKey(book)); pending != wantRescan {
+				t.Fatalf("pending = %v, want %v", pending, wantRescan)
+			}
+			if _, err := os.Stat(metaJSONPath(configDir, book)); err != nil {
+				t.Fatalf("旧 JSON 应保留: %v", err)
+			}
+		})
+	}
+}
+
+// TestStoreBooksMigrationRetriesAfterSaveFailure 验证写入失败不丢历史，批量重试也不会重复书签。
+func TestStoreBooksMigrationRetriesAfterSaveFailure(t *testing.T) {
+	configDir := useTempConfigDir(t)
+	ramStore := &StoreInRam{}
+	oldBook := newStoreGroupTestBook(t.TempDir(), "old-id")
+	oldBook.BookComplete = true
+	oldBook.BookMarks = model.BookMarks{{Type: model.AutoMark, BookID: oldBook.BookID, PageIndex: 3, UpdatedAt: time.Unix(1700000000, 0)}}
+	if err := SaveMetaJson(oldBook); err != nil {
+		t.Fatal(err)
+	}
+	key := pendingBookKey(oldBook)
+	ramStore.PendingBooks.Store(key, oldBook)
+	newBook := oldBook.CloneForView()
+	newBook.BookID = "new-id"
+	fileName := metaJSONPath(configDir, newBook)
+	// 用同名目录制造落盘失败，随后移除障碍并重试。
+	if err := os.Mkdir(fileName, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := ramStore.StoreBooks([]*model.Book{newBook}); err == nil {
+		t.Fatal("expected save failure")
+	}
+	if _, pending := ramStore.PendingBooks.Load(key); !pending {
+		t.Fatal("保存失败不应清除待迁移数据")
+	}
+	if _, err := os.Stat(metaJSONPath(configDir, oldBook)); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(fileName); err != nil {
+		t.Fatal(err)
+	}
+	// 失败后继续阅读更新内存进度，重试保存不能再次用旧历史覆盖它。
+	newBook.BookMarks[0].PageIndex = 4
+	if err := ramStore.SaveAllBooksMetaJson(); err != nil {
+		t.Fatal(err)
+	}
+	if len(newBook.BookMarks) != 1 || newBook.GetLastReadPage() != 4 || newBook.BookMarks[0].BookID != newBook.BookID || newBook.BookMarks[0].BookStoreID != newBook.GetStoreID() || !newBook.BookComplete {
+		t.Fatalf("恢复历史失败: %+v", newBook)
+	}
+	if _, pending := ramStore.PendingBooks.Load(key); pending {
+		t.Fatal("成功后应清除待迁移数据")
+	}
+	if _, err := os.Stat(metaJSONPath(configDir, oldBook)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("成功后应清除旧 ID 的 JSON: %v", err)
+	}
+}
+
 func newStoreGroupTestBook(storeURL, id string) *model.Book {
 	return &model.Book{BookInfo: model.BookInfo{
 		BookID:   id,

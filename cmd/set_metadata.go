@@ -41,6 +41,11 @@ func LoadMetadata() {
 		}
 		model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
 		model.ClearBookNotExist()
+		// 旧数据需要重建时立即扫描；嵌入式宿主关闭启动扫描也应自动完成版本迁移。
+		for range store.RamStore.PendingBooks.Range {
+			ScanStore()
+			break
+		}
 		model.GenerateBookGroup()
 	}
 }
