@@ -138,8 +138,20 @@ docker-compose up -d
 [用户手册](https://comigo.xyz/manual/) · [开发](https://comigo.xyz/manual/development)
 
 ```bash
-comi [flags] file_or_dir
+comi [flags] [file_or_dir ...]
 ```
+
+后台运行与停止：
+
+```bash
+# 后台启动并扫描指定书库
+comi start /path/to/manga
+
+# 停止同一配置目录中的 CLI 进程
+comi stop
+```
+
+使用自定义配置时，启动和停止都带上相同的 `--config /path/to/config.toml`。更多用法见[部署与配置手册](https://comigo.xyz/manual/deployment#cli-commands)。
 
 ### 命令行参数
 
@@ -194,32 +206,17 @@ comi .
 comi -p 8080 /path/to/manga
 
 # 使用配置文件
-comi -c /path/to/comigo.toml
+comi -c /path/to/config.toml
 ```
 
 ## 配置文件说明
 
-Comigo 支持多种配置文件位置：
-
-1. **用户主目录**  
-   - Windows: `C:\Users\用户名\.config\comigo.toml`
-   - Linux/MacOS: `/home/用户名/.config/comigo.toml`
-   - 程序启动时默认读取此位置
-
-2. **程序目录**  
-   - 将 `comigo.toml` 放在可执行文件同目录
-   - 适合作为绿色软件使用
-
-3. **当前运行目录**  
-   - 在启动命令的当前目录下查找配置文件
-
-4. **自定义位置**  
-   - 使用 `--config` 参数指定配置文件路径
+命令行版使用 `config.toml`，依次查找用户目录下的 `.config/comigo/`、程序目录、当前工作目录，使用首个找到的文件。也可用 `--config` 指定文件；桌面版和托盘版分别使用 `desktop.toml` 和 `tray.toml`。
 
 ### 配置文件示例
 
 ```toml
-# comigo.toml 配置示例
+# config.toml 配置示例
 
 # 服务设置
 Port = 1234                    # 服务端口

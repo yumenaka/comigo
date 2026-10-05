@@ -25,13 +25,22 @@ var RootCmd = &cobra.Command{
 	Long:    locale.GetString("long_description"),
 	// 书库路径和远程 URL 作为位置参数传入，独立于子命令解析。
 	Args: cobra.ArbitraryArgs,
+	// 管理命令不读取 TOML：即使配置写坏，stop 和 version 仍然可用。
+	PersistentPreRunE: func(command *cobra.Command, args []string) error {
+		switch command.Name() {
+		case "start", "stop", "reload", "version":
+			return nil
+		}
+		Args = args
+		return LoadConfigFile()
+	},
 	// Run 函数按以下顺序执行：PersistentPreRun() PreRun() Run() PostRun() PersistentPostRun()
 	// 所有函数都能拿到相同的参数，即命令名称后面添加的参数。仅当设置了 Run 函数时，才会执行 PreRun 和 PostRun 函数。
 	// 因为参数设置已完成，实际运行的命令习惯写在这里
 	Run: func(cmd *cobra.Command, args []string) {
 		Args = args
 		// 通过“可执行文件名”设置部分默认参数
-		SetByExecutableFilename()
+		SetByExecutableFilename(cmd)
 		cfg := config.GetCfg()
 		if cfg.SelfUpgrade {
 			locale.InitLanguageFromConfig(cfg.Language)
@@ -90,8 +99,6 @@ Go: ` + runtime.Version() + "\n")
 func Execute() {
 	// 初始化命令行参数。必须在config包初始化之前调用，因为config包会用到命令行参数 --config 指定的配置文件路径
 	InitFlags()
-	// 初始化配置文件
-	cobra.OnInitialize(LoadConfigFile) // "OnInitialize"传入的函数，应该会在所有命令执行之前、包括rootCmd.Run之前执行。
 	// 执行命令
 	if err := RootCmd.Execute(); err != nil {
 		logger.Infof("%s", err)

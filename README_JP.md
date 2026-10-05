@@ -153,8 +153,20 @@ docker-compose up -d
 [ユーザーマニュアル](https://comigo.xyz/manual/ja-JP/) · [開発](https://comigo.xyz/manual/ja-JP/development)
 
 ```bash
-comi [flags] file_or_dir
+comi [flags] [file_or_dir ...]
 ```
+
+バックグラウンドで起動・停止：
+
+```bash
+# バックグラウンドで起動し、このライブラリをスキャン
+comi start /path/to/manga
+
+# 同じ設定ディレクトリの CLI プロセスを停止
+comi stop
+```
+
+独自の設定ファイルを使う場合は、両方に同じ `--config /path/to/config.toml` を指定してください。詳細は[デプロイのマニュアル](https://comigo.xyz/manual/ja-JP/deployment#cli-commands)をご覧ください。
 
 ### コマンドラインオプション
 
@@ -185,22 +197,7 @@ comi -p 8080 /path/to/manga
 
 ## 設定ファイルについて
 
-Comigo は複数の設定ファイルの場所をサポートしています：
-
-1. **ユーザーホームディレクトリ**  
-   - Windows: `C:\Users\ユーザー名\.config\comigo.toml`
-   - Linux/MacOS: `/home/ユーザー名/.config/comigo.toml`
-   - プログラム起動時にデフォルトで読み込まれます
-
-2. **プログラムディレクトリ**  
-   - 実行ファイルと同じディレクトリに `comigo.toml` を配置
-   - ポータブルアプリケーションとして使用する場合に適しています
-
-3. **現在の実行ディレクトリ**  
-   - コマンド実行時のカレントディレクトリで設定ファイルを検索
-
-4. **カスタムロケーション**  
-   - `--config` パラメータで設定ファイルのパスを指定可能
+CLI は `config.toml` を使い、ユーザーの `.config/comigo/`、実行ファイルのディレクトリ、作業ディレクトリの順で最初に見つかったファイルを読み込みます。`--config` で直接指定することもできます。Desktop と Tray はそれぞれ `desktop.toml` と `tray.toml` を使います。
 
 ## フィードバックとサポート
 

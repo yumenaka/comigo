@@ -60,6 +60,10 @@ func withTailscaleContext(h http.Handler) http.Handler {
 
 // RunTailscale 启动Tailscale网络服务器，统一使用echo处理请求
 func RunTailscale(e *echo.Echo, c TailscaleConfig) error {
+	// CLI reload 和网页设置共用此入口；先释放旧实例，再按新配置创建监听。
+	if err := StopTailscale(); err != nil {
+		return err
+	}
 	// 初始化Tailscale服务器
 	if err := InitTailscale(c); err != nil {
 		return fmt.Errorf("failed to initialize Tailscale server: %w", err)
@@ -75,12 +79,14 @@ func RunTailscale(e *echo.Echo, c TailscaleConfig) error {
 	}
 	// 使用Tailscale网络监听器启动服务器
 	logger.Infof(locale.GetString("log_starting_tailscale_http_server"), c.Hostname, c.Port)
+	// 捕获本次实例，避免重载改写全局变量后，旧协程误用新监听器。
+	server, listener := tsHttpServer, netListener
 	go func() {
-		if netListener == nil {
+		if listener == nil {
 			logger.Errorf(locale.GetString("err_tailscale_netlistener_nil"))
 			return
 		}
-		if err := tsHttpServer.Serve(netListener); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			if !strings.Contains(err.Error(), "use of closed network connection") {
 				logger.Errorf(locale.GetString("err_tailscale_http_server_error"), err)
 			}

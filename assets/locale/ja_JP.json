@@ -1056,5 +1056,17 @@
   "autostart_label": "自動起動",
   "autostart_description": "ユーザーのログイン時にこの Comigo を起動します。変更しても現在の読書は中断しません。",
   "autostart_unavailable": "自動起動の状態を取得できないか、ユーザーサービスに対応していません。",
-  "autostart_failed": "自動起動の設定に失敗しました。"
+  "autostart_failed": "自動起動の設定に失敗しました。",
+  "cli_run": "Comigo をフォアグラウンドで実行",
+  "cli_start": "Comigo をバックグラウンドで起動",
+  "cli_stop": "実行中の Comigo プロセスを停止",
+  "cli_reload": "TOML から設定を再読み込み（--config で対象の設定ディレクトリを指定）",
+  "cli_upgrade": "Comigo を最新版に更新",
+  "cli_version": "バージョンを表示",
+  "cli_start_failed": "バックグラウンド起動に失敗しました。%s を確認してください：%v",
+  "cli_started": "Comigo が起動しました（PID %d）。ログ：%s",
+  "cli_already_running": "この設定ディレクトリでは Comigo が既に実行中です",
+  "cli_not_running": "実行中の Comigo が見つかりません",
+  "cli_stop_timeout": "Comigo の停止待機がタイムアウトしました",
+  "cli_reload_no_config": "再読み込みする設定ファイルがありません。--config で TOML ファイルを指定してください"
 }
