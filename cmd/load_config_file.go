@@ -11,23 +11,27 @@ import (
 )
 
 // LoadConfigFile 读取顺序：RAM 默认值 + 命令行参数 -> HomeDirectory -> ProgramDirectory -> WorkingDirectory。
-func LoadConfigFile() {
+func LoadConfigFile() error {
 	// 在非js环境下
 	if runtime.GOOS == "js" {
-		return
+		return nil
 	}
 
-	if temporaryReaderMode(RootCmd.Flags().Args(), runtimeViper.GetString("ConfigFile"), config.GetCfg().TemporaryReaderMode) {
+	if temporaryReaderMode(Args, runtimeViper.GetString("ConfigFile"), config.GetCfg().TemporaryReaderMode) {
 		config.GetCfg().TemporaryReaderMode = true
 		if err := runtimeViper.Unmarshal(config.GetCfg()); err != nil {
-			logger.Infof("%s", err)
-			os.Exit(1)
+			return err
 		}
 		config.GetCfg().TemporaryReaderMode = true
 		locale.InitLanguageFromConfig(config.GetCfg().Language)
-		return
+		return nil
 	}
 
+	reloadDefaults = config.CopyCfg()
+	// 固定 flag 的默认值，避免重载时 Viper 从已被配置改写的 flag 指针读到旧值。
+	for _, key := range runtimeViper.AllKeys() {
+		runtimeViper.SetDefault(key, runtimeViper.Get(key))
+	}
 	runtimeViper.SetConfigType("toml")
 
 	// 用户命令行指定的目录或文件
@@ -44,9 +48,7 @@ func LoadConfigFile() {
 	// 读取设定文件
 	if usedConfigFile != "" {
 		if err := runtimeViper.ReadInConfig(); err != nil {
-			if config.GetCfg().ConfigFile == "" {
-				logger.Infof("%s", err)
-			}
+			return err
 		} else {
 			usedConfigFile = runtimeViper.ConfigFileUsed()
 			logger.Infof(locale.GetString("found_config_file")+"%s", usedConfigFile)
@@ -59,18 +61,14 @@ func LoadConfigFile() {
 	}
 	// 把设定文件的内容，解析到构造体里面。
 	if err := runtimeViper.Unmarshal(config.GetCfg()); err != nil {
-		logger.Infof("%s", err)
-		os.Exit(1)
+		return err
 	}
 	if usedConfigFile != "" {
 		config.GetCfg().ConfigFile = usedConfigFile
 	}
 	// 根据配置重新初始化语言设置
 	locale.InitLanguageFromConfig(config.GetCfg().Language)
-	// //监听文件修改
-	// runtimeViper.WatchConfig()
-	// //文件修改时，执行重载设置、服务重启的函数
-	// runtimeViper.OnConfigChange(handlerConfigReload)
+	return nil
 }
 
 // temporaryReaderMode 判断是否为纯文件参数临时阅读模式。

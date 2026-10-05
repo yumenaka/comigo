@@ -152,8 +152,20 @@ For more details, see the complete [Docker documentation](docs/docker/README.md)
 [User manual](https://comigo.xyz/manual/en-US/) · [Development](https://comigo.xyz/manual/en-US/development)
 
 ```bash
-comi [flags] file_or_dir
+comi [flags] [file_or_dir ...]
 ```
+
+Run in the background and stop:
+
+```bash
+# Start in the background and scan this library
+comi start /path/to/manga
+
+# Stop the CLI process in the same configuration directory
+comi stop
+```
+
+With a custom configuration, pass the same `--config /path/to/config.toml` to both commands. See the [deployment manual](https://comigo.xyz/manual/en-US/deployment#cli-commands) for details.
 
 ### Command Line Options
 
@@ -184,23 +196,7 @@ comi -p 8080 /path/to/manga
 
 ## Configuration File
 
-Comigo supports  configuration file locations:
-
-1. **User Home Directory**  
-   - Windows: `C:\Users\username\.config\comigo.toml`
-   - Linux/MacOS: `/home/username/.config/comigo.toml`
-   - Default location read at startup
-
-2. **Program Directory**  
-   - Place `comigo.toml` in the same directory as the executable
-   - Suitable for portable usage
-
-3. **Current Working Directory**  
-   - Searches for configuration file in the current directory when running commands
-
-4. **Custom Location**  
-   - Specify configuration file path using the `--config` parameter
-
+The CLI uses `config.toml`, searching the user’s `.config/comigo/` directory, the executable directory, then the working directory, and loading the first match. Use `--config` to select a file explicitly. Desktop and Tray use `desktop.toml` and `tray.toml`, respectively.
 
 ## Feedback and Support
 

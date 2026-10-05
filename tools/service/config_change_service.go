@@ -32,6 +32,11 @@ func BuildConfigChangeAction(oldConfig config.Config, newConfig *config.Config) 
 		!slices.Equal(oldConfig.ExcludePath, newConfig.ExcludePath)
 
 	action.ReStartWebServer = oldConfig.Port != newConfig.Port ||
+		// TLS 参数改变也必须重新建立监听，不能只更新配置对象。
+		oldConfig.EnableTLS != newConfig.EnableTLS ||
+		oldConfig.AutoTLSCertificate != newConfig.AutoTLSCertificate ||
+		oldConfig.CertFile != newConfig.CertFile ||
+		oldConfig.KeyFile != newConfig.KeyFile ||
 		oldConfig.Username != newConfig.Username ||
 		oldConfig.Password != newConfig.Password ||
 		oldConfig.Host != newConfig.Host ||

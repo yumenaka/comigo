@@ -209,3 +209,14 @@ func TestApplyConfigChangeDoesNotWaitForRestart(t *testing.T) {
 		t.Fatal("配置更新不应等待重启完成")
 	}
 }
+
+// 验证 TLS 配置变化会重建监听，而非只改变界面显示的协议。
+func TestTLSConfigChangeRestartsWebServer(t *testing.T) {
+	for _, changed := range []config.Config{
+		{EnableTLS: true}, {AutoTLSCertificate: true}, {CertFile: "cert.pem"}, {KeyFile: "key.pem"},
+	} {
+		if !BuildConfigChangeAction(config.Config{}, &changed).ReStartWebServer {
+			t.Fatal("TLS change did not restart server")
+		}
+	}
+}

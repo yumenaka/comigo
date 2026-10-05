@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/spf13/cobra"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/releases"
 )
@@ -17,7 +16,6 @@ func RunDesktop(args []string, out io.Writer) (bool, error) {
 	InitFlags()
 	command, _, findErr := RootCmd.Find(args)
 	if findErr == nil && command.Name() == "service" {
-		cobra.OnInitialize(LoadConfigFile)
 		RootCmd.SetArgs(args)
 		RootCmd.SetOut(out)
 		return true, RootCmd.Execute()

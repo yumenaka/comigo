@@ -306,6 +306,11 @@ func InitialModel(lb *LogBuffer) *appModel {
 
 // Run 启动 TUI 模式；如果没有终端，则退回到普通服务模式。
 func Run() error {
+	// CLI 管理命令在任何界面和书库初始化之前执行。
+	if handled, err := cmd.RunProcessCommand(os.Args[1:], os.Stdout); handled {
+		return err
+	}
+	defer cmd.CloseProcessControl()
 	// 桌面协议命令不进入 TUI，也不初始化书库与 HTTP 服务。
 	if handled, err := cmd.RunDesktop(os.Args[1:], os.Stdout); handled {
 		return err
@@ -313,14 +318,6 @@ func Run() error {
 	// 现代终端（iTerm2、Terminal.app 等）将 East Asian Ambiguous 字符（含 Box Drawing）渲染为宽度 1，
 	// 但 go-runewidth 在 zh_CN 等 CJK locale 下默认将其视为宽度 2，导致面板宽度计算偏差。
 	runewidth.DefaultCondition.EastAsianWidth = false
-
-	for _, arg := range os.Args {
-		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" ||
-			arg == "-u" || arg == "--upgrade" {
-			cmd.Execute()
-			return nil
-		}
-	}
 
 	if shouldBypassTUI(os.Args) {
 		return runWithoutTUI()
@@ -400,6 +397,9 @@ func runWithoutTUI() error {
 // startBackend 统一 TUI 与无界面 CLI 的服务和书库启动顺序。
 func startBackend() error {
 	cmd.Execute()
+	if err := cmd.StartProcessControl(); err != nil {
+		return err
+	}
 	if err := routers.StartWebServer(); err != nil {
 		return err
 	}
@@ -411,6 +411,7 @@ func startBackend() error {
 	cmd.ScanStore()
 	cmd.SaveMetadata()
 	config.StartOrStopAutoRescan()
+	cmd.ProcessReady()
 	return nil
 }
 
@@ -441,7 +442,6 @@ func startBackendCmd() tea.Cmd {
 		if err := startBackend(); err != nil {
 			return backendErrorMsg{err: err}
 		}
-		go cmd.SetShutdownHandler()
 		return backendStartedMsg{}
 	}
 }
@@ -488,7 +488,11 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.backendError = ""
 		m.setActionMsg(locale.GetString("tui_service_started"))
 		m.refreshData()
-		return m, m.syncActiveImageCmd()
+		return m, tea.Batch(m.syncActiveImageCmd(), func() tea.Msg {
+			// stop 和系统信号共用清理流程，完成后通知 TUI 恢复终端并退出。
+			cmd.SetShutdownHandler()
+			return tea.Quit()
+		})
 	case backendErrorMsg:
 		m.backendError = msg.err.Error()
 		m.setActionMsg(locale.GetString("tui_backend_failed"))

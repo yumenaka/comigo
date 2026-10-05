@@ -263,7 +263,7 @@ func InitFlags() {
 //   - 可执行文件名为 "comigo-rescan" → 启用自动扫描
 //   - 可执行文件名为 "comigo-open-browser-zh" → 打开浏览器并设置语言为中文
 //   - 可执行文件名为 "comigo-readonly" → 启用只读模式
-func SetByExecutableFilename() {
+func SetByExecutableFilename(command *cobra.Command) {
 	// 获取可执行文件的名称,如果在类Unix系统里通过软链接调用,会拿到"软链接名"（也就是别名）
 	filename := filepath.Base(os.Args[0])
 	// 在 Windows 系统上，移除 .exe 或 .EXE 后缀（保持原始大小写）
@@ -275,11 +275,11 @@ func SetByExecutableFilename() {
 	filenameLower := strings.ToLower(filename)
 	cfg := config.GetCfg()
 	// Windows 默认打开浏览器
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" && !command.Flags().Changed("open-browser") {
 		cfg.OpenBrowser = true
 	}
 	// 打开浏览器
-	if strings.Contains(filenameLower, "open-browser") {
+	if strings.Contains(filenameLower, "open-browser") && !command.Flags().Changed("open-browser") {
 		cfg.OpenBrowser = true
 	}
 	// Debug 模式

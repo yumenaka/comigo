@@ -1056,5 +1056,17 @@
   "autostart_label": "Start automatically",
   "autostart_description": "Start this Comigo edition when you log in. Changing this does not interrupt the current session.",
   "autostart_unavailable": "Startup state is unavailable, or user services are not supported.",
-  "autostart_failed": "Unable to change automatic startup."
+  "autostart_failed": "Unable to change automatic startup.",
+  "cli_run": "Run Comigo in the foreground",
+  "cli_start": "Start Comigo in the background",
+  "cli_stop": "Stop the running Comigo process",
+  "cli_reload": "Reload the running process from TOML (--config selects its configuration directory)",
+  "cli_upgrade": "Upgrade Comigo to the latest version",
+  "cli_version": "Print the version",
+  "cli_start_failed": "Background startup failed; see %s: %v",
+  "cli_started": "Comigo started (PID %d); log: %s",
+  "cli_already_running": "Comigo is already running in this configuration directory",
+  "cli_not_running": "No running Comigo instance found",
+  "cli_stop_timeout": "Timed out waiting for Comigo to stop",
+  "cli_reload_no_config": "No configuration file to reload; use --config to specify a TOML file"
 }

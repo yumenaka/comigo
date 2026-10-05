@@ -1056,5 +1056,17 @@
   "autostart_label": "开机启动",
   "autostart_description": "登录当前用户后自动启动此版本的 Comigo。开启或关闭不会中断当前阅读。",
   "autostart_unavailable": "无法查询自启动状态，或当前环境不支持用户服务。",
-  "autostart_failed": "设置自启动失败。"
+  "autostart_failed": "设置自启动失败。",
+  "cli_run": "前台运行 Comigo",
+  "cli_start": "后台启动 Comigo",
+  "cli_stop": "停止正在运行的 Comigo 进程",
+  "cli_reload": "从 TOML 重载配置（--config 用于定位进程的配置目录）",
+  "cli_upgrade": "将 Comigo 升级到最新版本",
+  "cli_version": "打印版本",
+  "cli_start_failed": "后台启动失败，请查看 %s：%v",
+  "cli_started": "Comigo 已启动（PID %d），日志：%s",
+  "cli_already_running": "此配置目录已有 Comigo 进程正在运行",
+  "cli_not_running": "未找到正在运行的 Comigo 进程",
+  "cli_stop_timeout": "等待 Comigo 停止超时",
+  "cli_reload_no_config": "没有可重载的配置文件，请用 --config 指定 TOML 文件"
 }
