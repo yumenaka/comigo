@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comigo · 图片实验室</title>
+<style>
+  :root { color-scheme: light dark; font: 15px/1.6 system-ui, sans-serif; background: #101719; color: #e5eeee; }
+  * { box-sizing: border-box; }
+  body { max-width: 1160px; margin: 0 auto; padding: 32px 24px; }
+  h1 { margin: 4px 0; font-size: 30px; } h2 { margin: 0 0 18px; font-size: 19px; }
+  p { margin: 6px 0 18px; } .muted, small { color: #a0b4b5; }
+  .badge { color: #87dcc0; font-size: 12px; letter-spacing: 2px; }
+  main { display: grid; grid-template-columns: 330px 1fr; gap: 20px; margin-top: 26px; }
+  section { background: #192426; border: 1px solid #304345; border-radius: 14px; padding: 22px; }
+  label { display: block; margin-bottom: 14px; }
+  input, select, button, .download { font: inherit; border-radius: 7px; }
+  input:not([type=checkbox]), select { width: 100%; margin-top: 5px; padding: 9px; background: #101719; color: inherit; border: 1px solid #43585b; }
+  input[type=file] { font-size: 13px; } input[type=checkbox] { accent-color: #87dcc0; }
+  button, .download { padding: 9px 14px; border: 1px solid #496461; cursor: pointer; background: #233b38; color: #e5eeee; text-decoration: none; }
+  button.primary, .download { background: #87dcc0; color: #10251e; border-color: #87dcc0; font-weight: 650; }
+  button:disabled { opacity: .45; cursor: default; }
+  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; } .row > label { flex: 1; min-width: 90px; }
+  fieldset { padding: 0; margin: 0; border: 0; min-width: 0; } details { margin-bottom: 16px; } summary { cursor: pointer; margin-bottom: 12px; }
+  progress { width: 100%; height: 12px; accent-color: #87dcc0; margin: 16px 0 8px; }
+  .previews { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
+  figure { margin: 0; min-width: 0; } figcaption { color: #a0b4b5; font-size: 13px; margin-bottom: 8px; }
+  .canvas { display: flex; min-height: 260px; height: 40vh; align-items: center; justify-content: center; border-radius: 8px; overflow: hidden; background: repeating-conic-gradient(#253234 0 25%, #1b292b 0 50%) 0/20px 20px; }
+  img { max-width: 100%; max-height: 100%; object-fit: contain; } img:not([src]) { display: none; }
+  #error { color: #ffc1b4; white-space: pre-wrap; overflow-wrap: anywhere; }
+  [hidden] { display: none !important; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } body { padding: 20px 14px; } .canvas { min-height: 160px; height: 30vh; } }
+</style>
+<header>
+  <div class="badge">COMIGO / EXPERIMENTAL</div>
+  <h1>图片实验室</h1>
+  <p class="muted">AI 放大、普通缩放与 WebP 转换 · 独立运行，原图不变</p>
+</header>
+<main>
+  <section>
+    <h2>转换设置</h2>
+    <p id="capabilities" class="muted">正在检测本地引擎…</p>
+    <form id="form">
+      <fieldset id="settings" disabled>
+        <label>原始图片<input id="file" type="file" accept="image/png,image/jpeg,image/webp" required></label>
+        <label>算法<select id="algorithm">
+          <option value="ai">AI · Real-ESRGAN</option>
+          <option value="lanczos" selected>Lanczos · 通用缩放</option>
+          <option value="cubic">Bicubic · 平滑缩放</option>
+          <option value="nearest">Nearest · 像素风格</option>
+          <option value="none">仅转换格式</option>
+        </select></label>
+        <div id="aiSettings" hidden>
+          <label>模型<select id="model"></select></label>
+          <label>AI 放大倍率<select id="aiScale"></select></label>
+        </div>
+        <label id="scaleLabel">缩放倍率<input id="scale" type="number" min="0.1" max="4" step="0.1" value="2"><small>0.1–4；小于 1 为缩小</small></label>
+        <label>输出格式<select id="format"><option value="png">PNG</option><option value="jpeg">JPEG · 白底</option><option value="webp">WebP</option></select></label>
+        <div id="qualitySettings" hidden>
+          <label>质量<input id="quality" type="number" min="0" max="100" value="85"></label>
+          <div id="webpSettings" hidden>
+            <label><input id="lossless" type="checkbox"> 无损 WebP</label>
+            <small>无损模式下，质量值控制压缩投入，不降低像素质量。</small>
+            <label>WebP 压缩投入（0 快 → 6 慢）<input id="method" type="number" min="0" max="6" value="4"></label>
+          </div>
+        </div>
+        <details id="advanced" hidden>
+          <summary>AI 参数</summary>
+          <label>Tile 分块大小<input id="tile" type="number" min="0" max="4096" value="0"><small>0 自动；手动至少 32，显存不足时调小。</small></label>
+          <label>GPU 编号<input id="gpu" type="number" min="-1" max="31" value="-1"><small>-1 自动；多显卡时可指定 0、1…</small></label>
+          <label><input id="tta" type="checkbox"> TTA 增强（明显更慢）</label>
+        </details>
+        <button class="primary" type="submit">开始转换</button>
+      </fieldset>
+    </form>
+  </section>
+  <section>
+    <h2>预览与进度</h2>
+    <div class="row"><strong id="stage" role="status" aria-live="polite">等待图片</strong><span id="timing" class="muted"></span></div>
+    <progress id="progress" max="100" value="0" aria-label="转换进度"></progress>
+    <small>AI 百分比来自引擎分块进度；解码、普通缩放和 PNG/JPEG 编码按阶段显示。</small>
+    <p id="error" role="alert"></p>
+    <div class="previews">
+      <figure><figcaption>原始图片</figcaption><div class="canvas"><img id="original" alt="原始图片预览"></div></figure>
+      <figure><figcaption id="outputInfo">转换结果</figcaption><div class="canvas"><img id="output" alt="转换结果预览"></div></figure>
+    </div>
+    <div class="row">
+      <a id="download" class="download" download hidden>下载结果</a>
+      <button id="cancel" type="button" hidden>取消任务</button>
+      <button id="remove" type="button" hidden>删除本次任务</button>
+    </div>
+    <p class="muted"><small>任务串行运行；刷新页面可恢复当前进度。结果保存在临时目录，退出服务后清理。<br>支持静态 PNG / JPEG / WebP；请求上限 32 MiB，输入 1600 万、输出 6400 万像素。</small></p>
+  </section>
+</main>
+<script>
+  const $ = id => document.getElementById(id);
+  let caps, current = localStorage.getItem('upscale.job'), stream, originalURL;
+
+  // 请求统一检查 HTTP 错误，使页面能显示 API 的参数与引擎错误。
+  async function request(url, options) {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      const failure = new Error(error.message || `HTTP ${response.status}`);
+      failure.status = response.status;
+      throw failure;
+    }
+    return response.status === 204 || response.status === 202 && !response.headers.get('content-type') ? null : response.json();
+  }
+
+  // 随算法、模型切换允许的倍率，避免向固定 4× 模型传入 2× 参数。
+  function refreshControls() {
+    const ai = $('algorithm').value === 'ai', format = $('format').value;
+    $('aiSettings').hidden = $('advanced').hidden = !ai;
+    $('scaleLabel').hidden = ai || $('algorithm').value === 'none';
+    $('qualitySettings').hidden = format === 'png';
+    $('webpSettings').hidden = format !== 'webp';
+    $('scale').disabled = ai || $('algorithm').value === 'none';
+    for (const id of ['model', 'aiScale', 'tile', 'gpu', 'tta']) $(id).disabled = !ai;
+    $('quality').disabled = format === 'png';
+    $('lossless').disabled = $('method').disabled = format !== 'webp';
+    $('quality').min = format === 'jpeg' ? '1' : '0';
+    if (format === 'jpeg' && Number($('quality').value) === 0) $('quality').value = 1;
+    const scales = caps.models.find(m => m.name === $('model').value)?.scales || [];
+    const selected = Number($('aiScale').value);
+    $('aiScale').replaceChildren(...scales.map(scale => new Option(`${scale}×`, scale, false, scale === selected)));
+  }
+
+  // 任务完成后关闭 SSE，防止 EventSource 自动重连已完成的任务。
+  function render(job) {
+    const done = ['done', 'failed', 'canceled'].includes(job.state);
+    $('stage').textContent = `${job.stage} · ${Math.round(job.progress)}%`;
+    $('timing').textContent = `${job.elapsed_seconds.toFixed(1)} 秒（含排队）`;
+    $('progress').value = job.progress;
+    $('error').textContent = job.error || '';
+    $('settings').disabled = !done;
+    $('cancel').hidden = done;
+    $('remove').hidden = !done;
+    if (done) stream?.close();
+    if (job.state === 'done') {
+      $('output').src = job.result_url;
+      $('download').href = job.result_url;
+      $('download').download = 'result.' + job.format;
+      $('download').hidden = false;
+      $('outputInfo').textContent = `${job.width} × ${job.height} · ${(job.bytes / 1024).toFixed(1)} KiB`;
+    }
+  }
+
+  // SSE 断线由浏览器自动重连；服务重启后清除失效任务。
+  function watch(id) {
+    current = id;
+    localStorage.setItem('upscale.job', id);
+    stream?.close();
+    stream = new EventSource(`/api/jobs/${id}/events`);
+    stream.onmessage = event => render(JSON.parse(event.data));
+    stream.onerror = async () => {
+      $('stage').textContent = '连接中断，正在重连…';
+      try {
+        const response = await fetch(`/api/jobs/${id}`);
+        if (response.status === 404) {
+          stream.close(); current = null; localStorage.removeItem('upscale.job');
+          $('settings').disabled = false; $('cancel').hidden = true;
+          $('stage').textContent = '任务已清理，请重新上传';
+        }
+      } catch { /* 网络恢复后 EventSource 会重连。 */ }
+    };
+  }
+
+  $('file').onchange = () => {
+    if (originalURL) URL.revokeObjectURL(originalURL);
+    if ($('file').files[0]) $('original').src = originalURL = URL.createObjectURL($('file').files[0]);
+  };
+  for (const id of ['algorithm', 'model', 'format']) $(id).onchange = refreshControls;
+
+  // 同一页面只保留一个任务；再次转换前删除上一次已结束的结果。
+  $('form').onsubmit = async event => {
+    event.preventDefault();
+    $('settings').disabled = true; $('error').textContent = '';
+    $('output').removeAttribute('src'); $('download').hidden = $('remove').hidden = true;
+    $('outputInfo').textContent = '转换结果'; $('progress').value = 0; $('stage').textContent = '上传中…';
+    const algorithm = $('algorithm').value;
+    const options = {
+      algorithm, model: $('model').value,
+      scale: algorithm === 'none' ? 1 : Number($(algorithm === 'ai' ? 'aiScale' : 'scale').value),
+      format: $('format').value, quality: $('format').value === 'png' ? 85 : Number($('quality').value),
+      lossless: $('format').value === 'webp' && $('lossless').checked,
+      method: $('format').value === 'webp' ? Number($('method').value) : 4,
+      tile: algorithm === 'ai' ? Number($('tile').value) : 0,
+      gpu: algorithm === 'ai' ? Number($('gpu').value) : -1, tta: algorithm === 'ai' && $('tta').checked
+    };
+    const body = new FormData(); body.append('file', $('file').files[0]); body.append('options', JSON.stringify(options));
+    try {
+      if (current) { await request(`/api/jobs/${current}`, {method: 'DELETE'}); current = null; localStorage.removeItem('upscale.job'); }
+      const job = await request('/api/jobs', {method: 'POST', body});
+      render(job); watch(job.id);
+    } catch (error) { $('error').textContent = error.message; $('stage').textContent = '未开始转换'; $('settings').disabled = false; }
+  };
+  $('cancel').onclick = async () => {
+    try { await request(`/api/jobs/${current}/cancel`, {method: 'POST'}); }
+    catch (error) { $('error').textContent = error.message; }
+  };
+  $('remove').onclick = async () => {
+    try {
+      await request(`/api/jobs/${current}`, {method: 'DELETE'});
+      current = null; localStorage.removeItem('upscale.job'); $('output').removeAttribute('src');
+      $('download').hidden = $('remove').hidden = true; $('stage').textContent = '任务已删除';
+    } catch (error) { $('error').textContent = error.message; }
+  };
+
+  // 页面只启用已经安装的外部能力；普通缩放无需额外安装。
+  async function init() {
+    try {
+      caps = await request('/api/capabilities');
+      $('model').replaceChildren(...caps.models.map(m => new Option(m.name, m.name)));
+      $('algorithm').querySelector('[value=ai]').disabled = !caps.models.length;
+      $('format').querySelector('[value=webp]').disabled = !caps.webp;
+      if (caps.webp) $('format').value = 'webp';
+      $('capabilities').textContent = `${caps.models.length} 个 AI 模型 · WebP ${caps.webp ? '可用' : '未安装 cwebp'}`;
+      refreshControls(); $('settings').disabled = false;
+      if (current) { const job = await request(`/api/jobs/${current}`); render(job); if (!['done', 'failed', 'canceled'].includes(job.state)) watch(current); }
+    } catch (error) {
+      if (error.status === 404) {
+        localStorage.removeItem('upscale.job'); current = null;
+        $('stage').textContent = '上次任务已清理，请重新上传';
+      } else $('error').textContent = error.message;
+    }
+  }
+  init();
+</script>
+</html>
