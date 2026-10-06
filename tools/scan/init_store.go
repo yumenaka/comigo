@@ -530,7 +530,11 @@ func prepareBookPathForScan(storePath string, filePath string, size int64, modTi
 	if err != nil || previousBook == nil {
 		return nil, false
 	}
-	if previousBook.FileSize == size && previousBook.Modified.Equal(modTime) {
+	encodingChanged := false
+	if !previousBook.IsRemote && (previousBook.Type == model.TypeZip || previousBook.Type == model.TypeCbz || previousBook.Type == model.TypeEpub) {
+		encodingChanged = previousBook.ZipTextEncoding != cfg.GetZipFileTextEncoding()
+	}
+	if !encodingChanged && previousBook.FileSize == size && previousBook.Modified.Equal(modTime) {
 		logger.Infof(locale.GetString("log_book_data_already_exists"), previousBook.BookID, filePath)
 		return previousBook, true
 	}

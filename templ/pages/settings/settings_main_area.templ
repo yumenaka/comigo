@@ -211,7 +211,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 					<hr x-show="!collapsed" class="my-1 mx-4 h-2 border-gray-600 border-dashed dark:border-gray-200"/>
 					<!-- 可折叠内容 -->
 					<div x-show="!collapsed" x-transition>
-						@NumberConfig("MaxScanDepth", config.GetCfg().MaxScanDepth, "MaxScanDepth_Description", 0, 65535)
+						@NumberConfig("MaxScanDepth", config.GetCfg().MaxScanDepth, "MaxScanDepth_Description", -1, 65535)
 						@NumberConfig("MinImageNum", config.GetCfg().MinImageNum, "MinImageNum_Description", 0, 65535)
 						@BoolConfig("OpenBrowser", config.GetCfg().OpenBrowser, "OpenBrowser_Description")
 						@BoolConfig("EnableUpload", config.GetCfg().EnableUpload, "EnableUpload_Description")
@@ -259,7 +259,6 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 							@BoolConfig("UseCache", config.GetCfg().UseCache, "UseCache_Description")
 							@BoolConfig("ClearCacheExit", config.GetCfg().ClearCacheExit, "ClearCacheExit_Description")
 							@BoolConfig("LogToFile", config.GetCfg().LogToFile, "LogToFile_Description")
-							@BoolConfig("GenerateMetaData", config.GetCfg().GenerateMetaData, "GenerateMetaData_Description")
 							@StringConfig("ZipFileTextEncoding", config.GetCfg().ZipFileTextEncoding, "ZipFileTextEncoding_Description")
 						}
 					</div>

@@ -182,6 +182,7 @@ func buildGetPictureDataOption(req getFileRequest, book *model.Book) fileutil.Ge
 		BookIsPDF:        book.Type == model.TypePDF,
 		BookIsDir:        book.Type == model.TypeDir,
 		BookIsNonUTF8Zip: book.NonUTF8Zip,
+		ZipTextEncoding:  book.ZipTextEncoding,
 		BookPath:         book.BookPath,
 		Debug:            config.GetCfg().Debug,
 		UseCache:         config.GetCfg().UseCache,

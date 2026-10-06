@@ -10,7 +10,7 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// LoadConfigFile 读取顺序：RAM 默认值 + 命令行参数 -> HomeDirectory -> ProgramDirectory -> WorkingDirectory。
+// LoadConfigFile 配置优先级：显式参数 > 环境变量 > TOML > 默认值；文件按配置目录、程序目录、工作目录查找。
 func LoadConfigFile() error {
 	// 在非js环境下
 	if runtime.GOOS == "js" {
@@ -28,10 +28,6 @@ func LoadConfigFile() error {
 	}
 
 	reloadDefaults = config.CopyCfg()
-	// 固定 flag 的默认值，避免重载时 Viper 从已被配置改写的 flag 指针读到旧值。
-	for _, key := range runtimeViper.AllKeys() {
-		runtimeViper.SetDefault(key, runtimeViper.Get(key))
-	}
 	runtimeViper.SetConfigType("toml")
 
 	// 用户命令行指定的目录或文件

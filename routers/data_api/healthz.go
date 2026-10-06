@@ -19,7 +19,7 @@ func Healthz(c echo.Context) error {
 func GetPublicInfo(c echo.Context) error {
 	c.Response().Header().Set("Cache-Control", "no-store")
 	return c.JSON(http.StatusOK, map[string]any{
-		"Version": config.GetVersion(), "desktopProtocol": 1,
+		"Version":      config.GetVersion(),
 		"requiresAuth": config.GetCfg().RequiresAuth(),
 	})
 }

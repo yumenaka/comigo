@@ -27,7 +27,7 @@ func restartHandler(c echo.Context) error {
 		restarting.Store(false)
 		return err
 	}
-	go restartService()
+	go restartService(nil)
 	return nil
 }
 
@@ -53,7 +53,7 @@ func updateConfigHandler(c echo.Context) error {
 	action := service.BuildConfigChangeAction(old, config.GetCfg())
 	if action.ReStartWebServer {
 		restart = true
-		go restartService()
+		go restartService(&old)
 	} else if action.StartTailscale || action.ReStartTailscale {
 		go StartTailscale()
 	} else if action.StopTailscale {
@@ -63,10 +63,21 @@ func updateConfigHandler(c echo.Context) error {
 }
 
 // restartService 统一执行控制接口触发的重启并释放并发标志。
-func restartService() {
+func restartService(previous *config.Config) {
 	defer restarting.Store(false)
 	if err := RestartWebServer(); err != nil {
 		logger.Errorf(locale.GetString("err_restart_web_server_failed"), err)
+		if previous != nil {
+			*config.GetCfg() = *previous
+			if err := config.UpdateConfigFile(); err != nil {
+				logger.Errorf("%v", err)
+			}
+			if err := RestartWebServer(); err != nil {
+				logger.Errorf("%v", err)
+				return
+			}
+			StartTailscale()
+		}
 		return
 	}
 	StartTailscale()

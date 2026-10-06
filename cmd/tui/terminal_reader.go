@@ -455,6 +455,7 @@ func buildTerminalReaderPictureOption(book *modelpkg.Book, pageName string, resi
 		BookIsPDF:        book.Type == modelpkg.TypePDF,
 		BookIsDir:        book.Type == modelpkg.TypeDir,
 		BookIsNonUTF8Zip: book.NonUTF8Zip,
+		ZipTextEncoding:  book.ZipTextEncoding,
 		BookPath:         book.BookPath,
 		Debug:            config.GetCfg().Debug,
 		UseCache:         config.GetCfg().UseCache,

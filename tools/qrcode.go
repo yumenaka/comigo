@@ -29,16 +29,16 @@ func OpenLocalReaderURL(port int, customTLS bool, autoTLS bool, etcStr string) {
 }
 
 // PrintAllReaderURL 打印阅读链接与二维码，不负责打开浏览器。
-func PrintAllReaderURL(Port int, PrintAllPossibleQRCode bool, ServerHost string, DisableLAN bool, customTLS bool, autoTLS bool, etcStr string) {
+func PrintAllReaderURL(Port int, ServerHost string, DisableLAN bool, customTLS bool, autoTLS bool, etcStr string) {
 	protocol := readerURLProtocol(customTLS, autoTLS)
 	localURL := LocalReaderURL(Port, customTLS, autoTLS, etcStr)
 	logger.Info(locale.GetString("local_reading") + localURL)
 	if !DisableLAN {
-		printURLAndQRCode(Port, PrintAllPossibleQRCode, ServerHost, protocol, customTLS, autoTLS, etcStr)
+		printURLAndQRCode(Port, ServerHost, protocol, customTLS, autoTLS, etcStr)
 	}
 }
 
-func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string, protocol string, customTLS bool, autoTLS bool, etcStr string) {
+func printURLAndQRCode(port int, ServerHost string, protocol string, customTLS bool, autoTLS bool, etcStr string) {
 	// 打印指定的服务器地址
 	if ServerHost != "" {
 		if IsLoopbackHost(ServerHost) {
@@ -58,24 +58,11 @@ func printURLAndQRCode(port int, PrintAllPossibleQRCode bool, ServerHost string,
 		PrintQRCode(readURL)
 		return
 	}
-	// 打印所有可用网卡IP
-	if PrintAllPossibleQRCode {
-		IPList, err := GetIPList()
-		if err != nil {
-			logger.Infof(locale.GetString("get_ip_error")+" %v", err)
-		}
-		for _, IP := range IPList {
-			readURL := protocol + IP + ":" + strconv.Itoa(port) + etcStr
-			logger.Info(locale.GetString("reading_url_maybe") + readURL)
-			PrintQRCode(readURL)
-		}
-	} else {
-		// 只打印本机的首选出站IP
-		OutIP := GetOutboundIP().String()
-		readURL := protocol + OutIP + ":" + strconv.Itoa(port) + etcStr
-		logger.Info(locale.GetString("reading_url_maybe") + readURL)
-		PrintQRCode(readURL)
-	}
+	// 默认展示本机首选出站地址。
+	OutIP := GetOutboundIP().String()
+	readURL := protocol + OutIP + ":" + strconv.Itoa(port) + etcStr
+	logger.Info(locale.GetString("reading_url_maybe") + readURL)
+	PrintQRCode(readURL)
 }
 
 func PrintQRCode(text string) {

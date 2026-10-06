@@ -133,6 +133,21 @@ docker-compose up -d
 
 更多详细说明请查看完整的 [Docker 使用文档](docs/docker/README.md)。
 
+### 环境变量
+
+环境变量只绑定有实际配置作用的 CLI 参数，名称为 COMIGO_ 加参数名的大写形式，并把连字符改成下划线；例如 --enable-upload 对应 COMIGO_ENABLE_UPLOAD。语言使用 COMIGO_LANGUAGE。优先级为显式命令行参数 > 环境变量 > TOML > 默认值；空值按未设置处理，整数或布尔值格式错误会使启动失败。COMIGO_CONFIG_DIR 覆盖默认用户配置目录，配置发现、保存和进程状态目录保持一致；--config 显式指定文件时优先。配置路径用 --config，不提供 COMIGO_CONFIGFILE。扫描超时等没有 CLI 参数的设置使用 TOML；--no-tui、--temp、--upgrade 和 --no-default-library 仅由命令行控制，不提供对应环境变量。COMIGO_TUI_IMAGE 仍用于终端图片协议选择。
+
+| 变量 | 用途 |
+|---|---|
+| `COMIGO_PORT` | Web 端口 |
+| `COMIGO_ENABLE_UPLOAD` | 启用上传 |
+| `COMIGO_MAX_DEPTH` | 最大扫描深度 |
+| `COMIGO_MIN_IMAGE` | 最少图片数量 |
+| `COMIGO_BASE_PATH` | 反向代理基础路径 |
+| `COMIGO_LOCAL` | 仅本机访问 |
+| `COMIGO_LANGUAGE` | 语言（也适用于帮助） |
+| `COMIGO_CONFIG_DIR` | 默认用户配置目录 |
+
 ## 使用方法
 
 [用户手册](https://comigo.xyz/manual/) · [开发](https://comigo.xyz/manual/development)
@@ -146,12 +161,17 @@ comi [flags] [file_or_dir ...]
 ```bash
 # 后台启动并扫描指定书库
 comi start /path/to/manga
+comi status
 
 # 停止同一配置目录中的 CLI 进程
 comi stop
 ```
 
+`comi go` 等效于 `comi start`，`comi ls` 等效于 `comi status`；参数与行为完全相同。
+
 使用自定义配置时，启动和停止都带上相同的 `--config /path/to/config.toml`。更多用法见[部署与配置手册](https://comigo.xyz/manual/deployment#cli-commands)。
+
+允许使用不同 Web 端口运行多个实例。匹配多个实例时，用 `comi stop --port 2345` 或 `comi reload --port 2345` 选择启动端口。
 
 ### 命令行参数
 
@@ -187,8 +207,6 @@ comi stop
 | `--min-image` | 1 | 最少图片数量才认定为漫画 |
 | `--zip-encode` | gbk | 非UTF-8 ZIP文件的编码 |
 | `--log-file` | false | 输出日志到文件 |
-| `--print-all` | false | 打印所有网卡的访问地址 |
-| `--single-instance` | false | 单实例模式 |
 | `--plugin` | true | 启用插件系统 |
 | `--tailscale` | false | 启用 Tailscale 网络 |
 | `--tailscale-hostname` | comigo | Tailscale 主机名 |

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"crypto/tls"
 	"errors"
 	"fmt"
 
@@ -27,16 +26,18 @@ func readReloadConfig(file string) (config.Config, error) {
 	}
 	candidate.ConfigFile = file
 	if candidate.Port < 1 || candidate.Port > 65535 {
-		return candidate, fmt.Errorf("invalid Port: %d", candidate.Port)
+		return candidate, fmt.Errorf(locale.GetString("cli_invalid_port"), candidate.Port)
 	}
-	if (candidate.CertFile == "") != (candidate.KeyFile == "") {
-		return candidate, fmt.Errorf("CertFile and KeyFile must be set together")
+	if err := candidate.ValidateTLS(); err != nil {
+		return candidate, err
 	}
-	if candidate.CertFile != "" {
-		if _, err := tls.LoadX509KeyPair(candidate.CertFile, candidate.KeyFile); err != nil {
+	// 重载切换缓存目录时同样先创建并校验，失败不修改运行配置。
+	if candidate.CacheDir != "" && candidate.CacheDir != config.GetCfg().CacheDir {
+		if err := candidate.InitCacheDir(); err != nil {
 			return candidate, err
 		}
 	}
+
 	// 启动时的位置参数仍然有效，不能因重载配置丢失命令行指定的书库。
 	for _, path := range Args {
 		// 网页保存的 TOML 可能已包含启动路径；与启动时一样跳过已覆盖的书库。

@@ -167,7 +167,7 @@ endef
 
 define build_tray_windows
 $1: build-wasm
-	cd cmd/comigo && $(GOVERSIONINFO) $4 -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
+	cd cmd/comigo && $(GOVERSIONINFO) $4 -icon=../../icon.ico -manifest=../comi/goversioninfo.exe.manifest -internal-name=$(TRAY_NAME).exe -original-name=$(TRAY_NAME).exe ../comi/versioninfo.json
 	@rm -rf $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2 $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2.zip
 	@mkdir -p $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2
 	GOOS=windows GOARCH=$3 $(GOBUILD_WINDOWS_GUI) -o $(BINDIR)/$(TRAY_NAME)_$(VERSION)_$2/$(TRAY_NAME).exe ./cmd/comigo
@@ -229,7 +229,7 @@ desktop-MacOS_universal: wails-prepare wails-frontend
 	@rm -rf $(BINDIR)/dmg-$(DESKTOP_NAME) $(BINDIR)/$(DESKTOP_NAME).app build/bin
 
 $(eval $(call build_windows_cli,Windows_x86_64,amd64,-64))
-$(eval $(call build_windows_cli,Windows_i386,386,))
+$(eval $(call build_windows_cli,Windows_i386,386,-64=false))
 $(eval $(call build_windows_cli,Windows_arm64,arm64,-arm -64))
 $(eval $(call build_tray_tar,tray-Linux_x86_64,Linux_x86_64,linux,amd64))
 $(eval $(call build_tray_tar,tray-Linux_arm64,Linux_arm64,linux,arm64))

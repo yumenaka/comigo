@@ -1,4 +1,4 @@
-//go:generate goversioninfo -icon=../../icon.ico -manifest=goversioninfo.exe.manifest versioninfo.json
+//go:generate goversioninfo -icon=../../icon.ico -manifest=../comi/goversioninfo.exe.manifest -internal-name=comigo-tray.exe -original-name=comigo-tray.exe ../comi/versioninfo.json
 package main
 
 import (
@@ -9,7 +9,6 @@ import (
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers"
-	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/system_tray"
 )
@@ -17,62 +16,18 @@ import (
 // 运行 Comigo 服务器
 func main() {
 	config.UseTrayConfigProfile()
-	if handled, err := cmd.RunDesktop(os.Args[1:], os.Stdout); handled {
+	// 与 CLI、Wails 共用命令解析，管理命令执行后不启动托盘或扫描书库。
+	if handled, err := cmd.RunProcessCommand(os.Args[1:], os.Stdout); handled {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 		return
 	}
-	// 检查是否只是查看版本或帮助信息
-	for _, arg := range os.Args {
-		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" ||
-			arg == "-u" || arg == "--upgrade" {
-			// 初始化命令行flag与args，环境变量与配置文件
-			cmd.Execute()
-			// 打印信息后直接退出（含自升级流程内的 os.Exit）
-			return
-		}
-	}
-	// 初始化命令行flag与args，环境变量与配置文件
-	// 需要在单实例检查之前执行，以便获取 cmd.Args
+	// 初始化命令行参数与配置。
 	cmd.Execute()
-	// 如果启用了单实例模式，进行单实例检查
-	if config.GetCfg().EnableSingleInstance {
-		// 处理新参数的回调函数（当已有实例运行时，新实例会调用此函数）
-		handleNewArgs := func(args []string) error {
-			if len(args) == 0 {
-				return nil
-			}
-			logger.Infof(locale.GetString("log_received_new_args_from_instance"), args)
-			// 添加新扫描路径
-			cmd.AddStoreUrls(args)
-			// 扫描新添加的书库
-			cmd.ScanStore()
-			// 保存书籍元数据
-			cmd.SaveMetadata()
-			// 判断是否需要打开浏览器
-			config.OpenBrowserIfNeeded()
-			return nil
-		}
-		// 确保单实例模式运行
-		isFirstInstance, err := tools.EnsureSingleInstance(cmd.Args, handleNewArgs)
-		if err != nil {
-			logger.Infof(locale.GetString("log_single_instance_check_failed"), err)
-			// 如果单实例检查失败，仍然继续运行（向后兼容）
-		} else if !isFirstInstance {
-			// 已有实例运行，参数已发送，直接退出
-			logger.Infof(locale.GetString("log_args_sent_to_existing_instance"))
-			return
-		}
-		// 第一个实例，正常启动
-		// 注册退出时清理单实例资源
-		defer tools.CleanupSingleInstance()
-	}
-	var releaseSingleInstance func()
-	if config.GetCfg().EnableSingleInstance {
-		releaseSingleInstance = tools.CleanupSingleInstance
-	}
+	// 托盘菜单创建前加入启动书库，首次打开目录菜单即可看到参数中的路径。
+	cmd.AddStoreUrls(cmd.Args)
 	// 设置系统托盘并启动服务器
 	exitCode := system_tray.SetupSystray(
 		startServer,
@@ -84,7 +39,6 @@ func main() {
 		toggleTailscale,
 		setLanguage,
 		getTailscaleEnabled,
-		releaseSingleInstance,
 	)
 	if exitCode >= 0 {
 		os.Exit(exitCode)
@@ -102,8 +56,6 @@ func startServer() {
 	routers.StartTailscale()
 	// 加载用户插件，与 CLI 和桌面入口保持一致。
 	cmd.LoadUserPlugins()
-	// 分析命令行参数，生成书库URL
-	cmd.AddStoreUrls(cmd.Args)
 	// 加载书籍元数据（包括书签）
 	cmd.LoadMetadata()
 	// 扫描书库
@@ -160,10 +112,5 @@ func getTailscaleEnabled() bool {
 
 // shutdownServer 清理服务器资源
 func shutdownServer() {
-	// 清理单实例资源
-	if config.GetCfg().EnableSingleInstance {
-		tools.CleanupSingleInstance()
-	}
-
 	cmd.Shutdown()
 }

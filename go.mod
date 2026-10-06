@@ -14,6 +14,7 @@ tool (
 // gnome 需要 https://extensions.gnome.org/extension/615/appindicator-support/
 
 require (
+	fyne.io/systray v1.12.2
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f
 	github.com/a-h/templ v0.3.1020
 	github.com/atotto/clipboard v0.1.4
@@ -27,10 +28,8 @@ require (
 	github.com/cloudsoda/go-smb2 v0.0.0-20260918041005-0c5d69b69701
 	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8
 	github.com/disintegration/imaging v1.6.2
-	github.com/energye/systray v1.0.3
 	github.com/go-co-op/gocron/v2 v2.22.0
 	github.com/godbus/dbus/v5 v5.2.2
-	github.com/gofrs/flock v0.13.1
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/uuid v1.6.0

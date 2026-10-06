@@ -17,7 +17,7 @@ func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, e
 	// 打开文件，只读模式
 	file, err := os.OpenFile(filePath, os.O_RDONLY, 0o400) // Use mode 0400 for a read-only // file and 0600 for a readable+writable file.
 	if err != nil {
-		logger.Infof("%s", err)
+		return nil, err
 	}
 	defer func(file *os.File) {
 		err := file.Close()
@@ -34,11 +34,11 @@ func ScanNonUTF8Zip(filePath string, textEncoding string) (reader *zip.Reader, e
 	if ex, ok := format.(archives.Zip); ok {
 		if textEncoding != "" {
 			ex.TextEncoding = encoding.ByName(textEncoding)
-			}
-			ctx := context.Background()
-			reader, err := ex.CheckNonUTF8Zip(ctx, file, func(ctx context.Context, f archives.FileInfo) error {
-				return nil
-			})
+		}
+		ctx := context.Background()
+		reader, err := ex.CheckNonUTF8Zip(ctx, file, func(ctx context.Context, f archives.FileInfo) error {
+			return nil
+		})
 		if err != nil {
 			return nil, err
 		}

@@ -96,7 +96,7 @@ func validateStringConfigName(name string) error {
 
 func validateBoolConfigName(name string) error {
 	switch name {
-	case "DisableLAN", "OpenBrowser", "EnableUpload", "Debug", "UseCache", "ClearCacheExit", "LogToFile", "GenerateMetaData", "EnablePlugin":
+	case "DisableLAN", "OpenBrowser", "EnableUpload", "Debug", "UseCache", "ClearCacheExit", "LogToFile", "EnablePlugin":
 		return nil
 	default:
 		return errors.New("bool config is not editable: " + name)
@@ -108,7 +108,9 @@ func validateNumberConfig(name string, value int) error {
 	switch name {
 	case "TimeoutLimitForScan":
 		minValue, maxValue = 1, 3600
-	case "AutoRescanIntervalMinutes", "Port", "Timeout", "MaxScanDepth", "MinImageNum":
+	case "MaxScanDepth":
+		minValue = -1
+	case "AutoRescanIntervalMinutes", "Port", "Timeout", "MinImageNum":
 	default:
 		return errors.New("number config is not editable: " + name)
 	}
@@ -175,6 +177,9 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 
 	writeConfigAndApply(oldConfig)
 
+	if request.Name == "CacheDir" {
+		return request.Name, config.GetCfg().CacheDir, nil
+	}
 	return request.Name, *request.Value, nil
 }
 

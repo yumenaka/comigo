@@ -36,7 +36,6 @@ func newDefaultConfig() Config {
 		UseCache:              true,
 		Username:              "comigo",
 		ZipFileTextEncoding:   "",
-		EnableSingleInstance:  false,
 		Language:              "auto",
 		BuildInPluginList:     []string{"auto_flip", "auto_scroll", "clock", "comigo_xyz", "sample", "sketch_practice"},
 		UserPluginList:        []string{},

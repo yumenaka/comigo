@@ -7,8 +7,9 @@ import (
 	"runtime"
 	"sync/atomic"
 
+	"fyne.io/systray"
 	"github.com/atotto/clipboard"
-	"github.com/energye/systray"
+	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
@@ -17,23 +18,22 @@ import (
 	"github.com/yumenaka/comigo/tools/windows_registry"
 )
 
-// Sample：https://github.com/energye/systray/blob/main/example/main.go
+// 使用宿主原生托盘菜单，左右键打开同一份菜单。
 
 //go:embed icon.ico
 var iconData embed.FS
 
 var (
-	startServerFunc           func()
-	shutdownServerFunc        func()
-	getURLFunc                func() string
-	getBrowserURLFunc         func() string
-	getConfigDirFunc          func() (string, error)
-	getStoreUrlsFunc          func() []string
-	toggleTailscaleFunc       func() error
-	setLanguageFunc           func(string) error
-	getTailscaleEnabledFunc   func() bool
-	releaseSingleInstanceFunc func()
-	requestedExitCode         atomic.Int32
+	startServerFunc         func()
+	shutdownServerFunc      func()
+	getURLFunc              func() string
+	getBrowserURLFunc       func() string
+	getConfigDirFunc        func() (string, error)
+	getStoreUrlsFunc        func() []string
+	toggleTailscaleFunc     func() error
+	setLanguageFunc         func(string) error
+	getTailscaleEnabledFunc func() bool
+	requestedExitCode       atomic.Int32
 	// 菜单项引用，用于语言切换时更新
 	menuItems struct {
 		mOpenBrowser           *systray.MenuItem
@@ -69,7 +69,6 @@ const noRequestedExitCode int32 = -1
 // toggleTailscale: 切换Tailscale状态的函数
 // setLanguage: 设置语言的函数
 // getTailscaleEnabled: 获取Tailscale是否启用的函数
-// releaseSingleInstance: 升级重启前释放单实例锁（未启用单实例时传 nil）
 // 返回值：托盘流程要求入口退出时返回退出码；普通退出返回 -1，由入口自然结束。
 func SetupSystray(
 	startServer, shutdownServer func(),
@@ -80,7 +79,6 @@ func SetupSystray(
 	toggleTailscale func() error,
 	setLanguage func(string) error,
 	getTailscaleEnabled func() bool,
-	releaseSingleInstance func(),
 ) int {
 	startServerFunc = startServer
 	shutdownServerFunc = shutdownServer
@@ -91,7 +89,6 @@ func SetupSystray(
 	toggleTailscaleFunc = toggleTailscale
 	setLanguageFunc = setLanguage
 	getTailscaleEnabledFunc = getTailscaleEnabled
-	releaseSingleInstanceFunc = releaseSingleInstance
 	requestedExitCode.Store(noRequestedExitCode)
 
 	// 在主线程运行 systray
@@ -108,29 +105,28 @@ func onReady() {
 		// 如果读取失败，使用默认图标
 		systray.SetIcon(nil)
 	} else {
+		// Linux 托盘使用 Go 图片解码器，ICO 不受支持，复用内置 PNG 图标。
+		if runtime.GOOS == "linux" {
+			iconBytes = assets.GetImageData("favicon.png")
+		}
 		systray.SetIcon(iconBytes)
 	}
-	OnClickTray := func(menu systray.IMenu) {
-		// 清理所有菜单项
-		systray.ResetMenu()
-		// 重新创建所有菜单项（使用最新的语言和书库链接）
-		initMenuItems()
-		// 显示菜单
-		if menu != nil { // menu for linux nil
-			menu.ShowMenu()
-		}
-	}
-	// 设置单击托盘图标时的回调
-	systray.SetOnClick(OnClickTray)
-	// 设置右击托盘图标时的回调
-	systray.SetOnRClick(OnClickTray)
-	// 初始化菜单项
+	// 不设置图标激活回调，保留宿主的菜单模式（ItemIsMenu=true）。
 	initMenuItems()
 
 	// 在后台启动Comigo服务
 	go func() {
 		if startServerFunc != nil {
 			startServerFunc()
+		}
+	}()
+}
+
+// onMenuClick 使用库提供的点击通道；菜单移除关闭通道时自动结束监听。
+func onMenuClick(item *systray.MenuItem, action func()) {
+	go func() {
+		for range item.ClickedCh {
+			action()
 		}
 	}()
 }
@@ -142,7 +138,7 @@ func initMenuItems() {
 
 	// 创建菜单项
 	menuItems.mOpenBrowser = systray.AddMenuItem(locale.GetString("systray_open_browser"), locale.GetString("systray_open_browser_tooltip"))
-	menuItems.mOpenBrowser.Click(func() {
+	onMenuClick(menuItems.mOpenBrowser, func() {
 		if getBrowserURLFunc != nil {
 			url := getBrowserURLFunc()
 			go tools.OpenBrowserByURL(url)
@@ -152,7 +148,7 @@ func initMenuItems() {
 
 	// 复制阅读地址
 	menuItems.mCopyURL = systray.AddMenuItem(locale.GetString("systray_copy_url"), locale.GetString("systray_copy_url_tooltip"))
-	menuItems.mCopyURL.Click(func() {
+	onMenuClick(menuItems.mCopyURL, func() {
 		if getURLFunc != nil {
 			url := getURLFunc()
 			if err := clipboard.WriteAll(url); err != nil {
@@ -165,7 +161,7 @@ func initMenuItems() {
 
 	// 检测升级（经 comigo.xyz，若有新版本则替换并重启进程）
 	menuItems.mCheckUpgrade = systray.AddMenuItem(locale.GetString("systray_check_upgrade"), locale.GetString("systray_check_upgrade_tooltip"))
-	menuItems.mCheckUpgrade.Click(func() {
+	onMenuClick(menuItems.mCheckUpgrade, func() {
 		go func() {
 			upgraded, err := cmd.RunTraySelfUpgrade()
 			if err != nil {
@@ -175,7 +171,7 @@ func initMenuItems() {
 			if !upgraded {
 				return
 			}
-			if err := cmd.PrepareTrayUpgradeRestart(shutdownServerFunc, releaseSingleInstanceFunc); err != nil {
+			if err := cmd.PrepareTrayUpgradeRestart(shutdownServerFunc); err != nil {
 				logger.Infof(locale.GetString("upgrade_tray_restart_failed"), err)
 				return
 			}
@@ -193,12 +189,14 @@ func initMenuItems() {
 			tailscaleTitle = locale.GetString("systray_disable_tailscale")
 		}
 		menuItems.mTailscale = systray.AddMenuItem(tailscaleTitle, locale.GetString("systray_toggle_tailscale_tooltip"))
-		menuItems.mTailscale.Click(func() {
+		onMenuClick(menuItems.mTailscale, func() {
 			if toggleTailscaleFunc != nil {
 				if err := toggleTailscaleFunc(); err != nil {
 					logger.Infof(locale.GetString("log_failed_to_toggle_tailscale"), err)
 				}
-				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
+				// 配置改变后立即更新菜单，不依赖左键激活回调。
+				systray.ResetMenu()
+				initMenuItems()
 			}
 		})
 	}
@@ -209,33 +207,39 @@ func initMenuItems() {
 	menuItems.mLangEn = menuItems.mLanguage.AddSubMenuItem(locale.GetString("systray_language_en"), locale.GetString("systray_language_en_tooltip"))
 	menuItems.mLangJa = menuItems.mLanguage.AddSubMenuItem(locale.GetString("systray_language_ja"), locale.GetString("systray_language_ja_tooltip"))
 
-	menuItems.mLangZh.Click(func() {
+	onMenuClick(menuItems.mLangZh, func() {
 		if setLanguageFunc != nil {
 			if err := setLanguageFunc("zh-CN"); err != nil {
 				logger.Infof(locale.GetString("log_failed_to_set_language"), err)
 			} else {
 				logger.Info(locale.GetString("log_language_changed_to_chinese"))
-				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
+				// 配置改变后立即更新菜单，不依赖左键激活回调。
+				systray.ResetMenu()
+				initMenuItems()
 			}
 		}
 	})
-	menuItems.mLangEn.Click(func() {
+	onMenuClick(menuItems.mLangEn, func() {
 		if setLanguageFunc != nil {
 			if err := setLanguageFunc("en-US"); err != nil {
 				logger.Infof(locale.GetString("log_failed_to_set_language"), err)
 			} else {
 				logger.Info(locale.GetString("log_language_changed_to_english"))
-				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
+				// 配置改变后立即更新菜单，不依赖左键激活回调。
+				systray.ResetMenu()
+				initMenuItems()
 			}
 		}
 	})
-	menuItems.mLangJa.Click(func() {
+	onMenuClick(menuItems.mLangJa, func() {
 		if setLanguageFunc != nil {
 			if err := setLanguageFunc("ja-JP"); err != nil {
 				logger.Infof(locale.GetString("log_failed_to_set_language"), err)
 			} else {
 				logger.Info(locale.GetString("log_language_changed_to_japanese"))
-				// 菜单会在下次点击托盘图标时自动更新，这里不需要手动更新
+				// 配置改变后立即更新菜单，不依赖左键激活回调。
+				systray.ResetMenu()
+				initMenuItems()
 			}
 		}
 	})
@@ -248,7 +252,7 @@ func initMenuItems() {
 		configDir, err := getConfigDirFunc()
 		if err == nil && configDir != "" {
 			menuItems.mConfigDir = menuItems.mOpenDir.AddSubMenuItem(locale.GetString("systray_config_directory"), locale.GetString("systray_config_directory_tooltip"))
-			menuItems.mConfigDir.Click(func() {
+			onMenuClick(menuItems.mConfigDir, func() {
 				if getConfigDirFunc != nil {
 					configDir, err := getConfigDirFunc()
 					if err != nil {
@@ -272,7 +276,7 @@ func initMenuItems() {
 			mStore := menuItems.mOpenDir.AddSubMenuItem(storeUrl, storeUrl)
 			menuItems.mStoreFolders = append(menuItems.mStoreFolders, mStore)
 			// Go 1.22 起 range 变量按迭代独立，可直接捕获当前路径。
-			mStore.Click(func() {
+			onMenuClick(mStore, func() {
 				openDirectory(storeUrl)
 			})
 		}
@@ -288,7 +292,7 @@ func initMenuItems() {
 			folderTitle = locale.GetString("unregister_folder_context_menu")
 		}
 		menuItems.mContextFolder = menuItems.mExtra.AddSubMenuItem(folderTitle, folderTitle)
-		menuItems.mContextFolder.Click(func() {
+		onMenuClick(menuItems.mContextFolder, func() {
 			if windows_registry.HasComigoFolderContextMenu() {
 				if err := windows_registry.RemoveComigoFromFolderContextMenu(); err != nil {
 					logger.Infof(locale.GetString("log_failed_to_clear_folder_context_menu"), err)
@@ -302,12 +306,14 @@ func initMenuItems() {
 					logger.Infof("%s", locale.GetString("register_folder_context_menu"))
 				}
 			}
-			// 文本更新依赖下次点击托盘图标时重新构建菜单
+			// 注册状态改变后立即刷新，保留宿主原生的左右键菜单行为。
+			systray.ResetMenu()
+			initMenuItems()
 		})
 
 		// 子菜单：在桌面创建快捷方式
 		menuItems.mCreateDesktopShortcut = menuItems.mExtra.AddSubMenuItem(locale.GetString("create_desktop_shortcut"), locale.GetString("create_desktop_shortcut"))
-		menuItems.mCreateDesktopShortcut.Click(func() {
+		onMenuClick(menuItems.mCreateDesktopShortcut, func() {
 			if err := windows_registry.CreateDesktopShortcut(); err != nil {
 				logger.Infof(locale.GetString("log_failed_to_create_desktop_shortcut"), err)
 			} else {
@@ -321,7 +327,7 @@ func initMenuItems() {
 			fileAssocTitle = locale.GetString("unregister_file_association")
 		}
 		menuItems.mContextFileAssoc = menuItems.mExtra.AddSubMenuItem(fileAssocTitle, fileAssocTitle)
-		menuItems.mContextFileAssoc.Click(func() {
+		onMenuClick(menuItems.mContextFileAssoc, func() {
 			if windows_registry.HasComigoArchiveAssociation(nil) {
 				if err := windows_registry.UnregisterComigoAsDefaultArchiveHandler(nil); err != nil {
 					logger.Infof(locale.GetString("log_failed_to_unregister_archive_handler"), err)
@@ -335,12 +341,14 @@ func initMenuItems() {
 					logger.Infof("%s", locale.GetString("register_file_association"))
 				}
 			}
-			// 文本更新依赖下次点击托盘图标时重新构建菜单
+			// 注册状态改变后立即刷新，保留宿主原生的左右键菜单行为。
+			systray.ResetMenu()
+			initMenuItems()
 		})
 	}
 	// Comigo 项目地址子菜单（所有平台都显示）
 	menuItems.mProject = menuItems.mExtra.AddSubMenuItem(locale.GetString("systray_project"), locale.GetString("systray_project_tooltip"))
-	menuItems.mProject.Click(func() {
+	onMenuClick(menuItems.mProject, func() {
 		go tools.OpenBrowserByURL("https://github.com/yumenaka/comigo")
 		logger.Infof(locale.GetString("log_opening_comigo_project_page"))
 	})
@@ -350,7 +358,7 @@ func initMenuItems() {
 
 	// 退出
 	menuItems.mQuit = systray.AddMenuItem(locale.GetString("systray_quit"), locale.GetString("systray_quit_tooltip"))
-	menuItems.mQuit.Click(func() {
+	onMenuClick(menuItems.mQuit, func() {
 		logger.Info(locale.GetString("log_requesting_quit_from_systray"))
 		systray.Quit()
 	})

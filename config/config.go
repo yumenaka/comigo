@@ -1,6 +1,7 @@
 package config
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -47,7 +48,6 @@ type Config struct {
 	CertFile                  string         `json:"CertFile" comment:"TLS/SSL 证书文件路径 (default: ~/.config/.comigo/cert.crt)"`
 	EnableUpload              bool           `json:"EnableUpload" comment:"启用上传功能"`
 	ExcludePath               []string       `json:"ExcludePath" comment:"扫描书籍的时候，需要排除的文件或文件夹的名字"`
-	GenerateMetaData          bool           `json:"GenerateMetaData" toml:"GenerateMetaData" comment:"生成书籍元数据"`
 	StoreUrls                 []string       `json:"StoreUrls" comment:"本地书库路径列表，支持多个路径。可以是本地文件夹或网络书库地址。"` // 书库地址列表
 	LogFileName               string         `json:"LogFileName" comment:"Log文件名"`
 	LogFilePath               string         `json:"LogFilePath" comment:"Log文件的保存位置"`
@@ -57,7 +57,6 @@ type Config struct {
 	OpenBrowser               bool           `json:"OpenBrowser" comment:"是否同时打开浏览器，windows默认true，其他默认false"`
 	Password                  string         `json:"Password" comment:"登录界面需要的密码。"`
 	Port                      int            `json:"Port" comment:"Comigo 设置文件按启动壳分别使用 config.toml、desktop.toml、tray.toml，可保存在 HomeDirectory、WorkingDirectory、ProgramDirectory 下。\n网页服务端口，启用auto TLS时强制使用443端口"`
-	PrintAllPossibleQRCode    bool           `json:"PrintAllPossibleQRCode" comment:"扫描完成后，打印所有可能的阅读链接二维码"`
 	SupportFileType           []string       `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
 	SupportMediaType          []string       `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
 	SupportTemplateFile       []string       `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
@@ -72,7 +71,6 @@ type Config struct {
 	TailscalePort             int            `json:"TailscalePort" comment:"Tailscale网络的端口，默认为443"`
 	TailscaleAuthKey          string         `json:"TailscaleAuthKey" comment:"Tailscale身份验证密钥。另外，也可以将本地环境变量 TS_AUTHKEY 设置为身份验证密钥"`
 	ZipFileTextEncoding       string         `json:"ZipFileTextEncoding" comment:"非utf-8编码的ZIP文件，尝试用什么编码解析，默认GBK"`
-	EnableSingleInstance      bool           `json:"EnableSingleInstance" comment:"启用单实例模式，确保同一时间只有一个程序实例运行"`
 	Language                  string         `json:"Language" comment:"界面语言设置，可选值：auto（自动检测）、zh（中文）、en（英文）、ja（日文），默认为auto"`
 	RegisterContextMenu       bool           `json:"RegisterContextMenu" comment:"在 Windows 上注册资源管理器文件夹右键菜单：使用Comigo打开"`
 	UnregisterContextMenu     bool           `json:"UnregisterContextMenu" comment:"在 Windows 上卸载资源管理器文件夹右键菜单：使用Comigo打开"`
@@ -304,7 +302,8 @@ func (c *Config) GetTopStoreName() string {
 // SetConfigValue 更新 Config 的相应字段，如果【fieldName】不存在、或【fieldValue】类型有问题，都返回错误。
 func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
 	// 使用反射获得指向结构体的 Value
-	v := reflect.ValueOf(c).Elem()
+	candidate := *c
+	v := reflect.ValueOf(&candidate).Elem()
 
 	// 根据 fieldName 获取对应字段的 reflect.Value
 	f := v.FieldByName(fieldName)
@@ -355,6 +354,17 @@ func (c *Config) SetConfigValue(fieldName, fieldValue string) error {
 		return fmt.Errorf(locale.GetString("err_field_type_not_supported"), fieldName, f.Type().String())
 	}
 
+	switch fieldName {
+	case "CacheDir":
+		if err := candidate.InitCacheDir(); err != nil {
+			return err
+		}
+	case "EnableTLS", "AutoTLSCertificate", "CertFile", "KeyFile", "Host", "DisableLAN":
+		if err := candidate.ValidateTLS(); err != nil {
+			return err
+		}
+	}
+	*c = candidate
 	return nil
 }
 
@@ -545,6 +555,16 @@ func UpdateConfigByJson(jsonString string) error {
 	if candidate.Port < 0 || candidate.Port > 65535 {
 		return fmt.Errorf("Port must be between 0 and 65535")
 	}
+	if candidate.EnableTLS != cfg.EnableTLS || candidate.AutoTLSCertificate != cfg.AutoTLSCertificate || candidate.CertFile != cfg.CertFile || candidate.KeyFile != cfg.KeyFile || candidate.Host != cfg.Host || candidate.DisableLAN != cfg.DisableLAN {
+		if err := candidate.ValidateTLS(); err != nil {
+			return err
+		}
+	}
+	if candidate.CacheDir != cfg.CacheDir {
+		if err := candidate.InitCacheDir(); err != nil {
+			return err
+		}
+	}
 	cfg = candidate
 	return nil
 }
@@ -594,4 +614,19 @@ func setFieldValue(field reflect.Value, value interface{}) error {
 		return fmt.Errorf("unsupported config field type: %s", field.Type())
 	}
 	return nil
+}
+
+// ValidateTLS 在保存和重启前校验网络协议配置，避免错误设置使网页不可访问。
+func (c *Config) ValidateTLS() error {
+	if c.AutoTLSCertificate && (c.DisableLAN || c.Host == "" || !tools.IsValidDomain(c.Host) || c.EnableTLS) {
+		return fmt.Errorf("%s", locale.GetString("err_auto_tls_requirements"))
+	}
+	if !c.EnableTLS {
+		return nil
+	}
+	if c.CertFile == "" || c.KeyFile == "" {
+		return fmt.Errorf("%s", locale.GetString("err_tls_certificate_required"))
+	}
+	_, err := tls.LoadX509KeyPair(c.CertFile, c.KeyFile)
+	return err
 }

@@ -22,11 +22,8 @@ func RestartCurrentExecutable() error {
 	return c.Start()
 }
 
-// PrepareTrayUpgradeRestart 替换二进制成功后：可选释放单实例锁、停止服务、拉起新进程。调用方在返回 nil 后应立即 systray.Quit 与 os.Exit。
-func PrepareTrayUpgradeRestart(shutdownServer func(), releaseSingleInstance func()) error {
-	if releaseSingleInstance != nil {
-		releaseSingleInstance()
-	}
+// PrepareTrayUpgradeRestart 替换二进制成功后：停止服务、拉起新进程。调用方在返回 nil 后应立即 systray.Quit 与 os.Exit。
+func PrepareTrayUpgradeRestart(shutdownServer func()) error {
 	if shutdownServer != nil {
 		shutdownServer()
 	}

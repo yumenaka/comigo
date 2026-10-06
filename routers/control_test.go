@@ -1,6 +1,8 @@
 package routers
 
 import (
+	"fmt"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -42,5 +44,64 @@ func TestExternalAccessReadOnly(t *testing.T) {
 	e.ServeHTTP(rec, req)
 	if rec.Code != http.StatusForbidden || !config.GetCfg().DisableLAN {
 		t.Fatalf("锁定配置被修改: %d", rec.Code)
+	}
+}
+
+// REST 无效 TLS 更新必须返回错误，并保留当前协议与其他配置。
+func TestConfigUpdateRejectsInvalidTLS(t *testing.T) {
+	old := config.CopyCfg()
+	t.Cleanup(func() { *config.GetCfg() = old; restarting.Store(false) })
+	config.GetCfg().TemporaryReaderMode = true
+	config.GetCfg().ReadOnlyMode = false
+	config.GetCfg().EnableTLS = false
+	config.GetCfg().AutoTLSCertificate = false
+	config.GetCfg().Debug = false
+	config.GetCfg().CertFile, config.GetCfg().KeyFile = "", ""
+	e := echo.New()
+	e.PATCH("/configs", updateConfigHandler)
+	req := httptest.NewRequest(http.MethodPatch, "/configs", strings.NewReader(`{"EnableTLS":true,"Debug":true}`))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest || config.GetCfg().EnableTLS || config.GetCfg().Debug {
+		t.Fatalf("status=%d cfg=%+v", rec.Code, config.GetCfg())
+	}
+}
+
+// 配置导致端口绑定失败时必须恢复原监听，不能让网页控制永久断开。
+func TestConfigRestartFailureRestoresPreviousListener(t *testing.T) {
+	oldCfg, oldEngine, oldServer := config.CopyCfg(), engine, config.Server
+	t.Cleanup(func() {
+		_ = StopWebServer()
+		*config.GetCfg() = oldCfg
+		engine = oldEngine
+		config.Server = oldServer
+		restarting.Store(false)
+	})
+	cfg := config.GetCfg()
+	cfg.TemporaryReaderMode, cfg.DisableLAN = true, true
+	cfg.EnableTLS, cfg.AutoTLSCertificate, cfg.EnableTailscale, cfg.LogToFile = false, false, false, false
+	cfg.Port = 0
+	if err := StartEcho(echo.New()); err != nil {
+		t.Fatal(err)
+	}
+	previous := config.CopyCfg()
+	occupied, err := net.Listen("tcp4", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer occupied.Close()
+	cfg.Port = occupied.Addr().(*net.TCPAddr).Port
+	restartService(&previous)
+	if config.GetCfg().Port != previous.Port || config.Server == nil {
+		t.Fatal("previous listener not restored")
+	}
+	response, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/healthz", previous.Port))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("health=%d", response.StatusCode)
 	}
 }

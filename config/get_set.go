@@ -75,19 +75,19 @@ func GetConfigDir() (dir string, err error) {
 	return configDir, nil
 }
 
-func AutoSetCacheDir() {
-	// 手动设置的临时文件夹
-	if cfg.CacheDir != "" && tools.IsExist(cfg.CacheDir) && tools.CheckIsDir(cfg.CacheDir) {
-		cfg.CacheDir = filepath.Join(cfg.CacheDir)
-	} else {
-		cfg.CacheDir = filepath.Join(os.TempDir(), "comigo_cache") // 使用系统文件夹
+// AutoSetCacheDir 创建指定缓存目录，失败时明确报告而不静默切换路径。
+func AutoSetCacheDir() error { return cfg.InitCacheDir() }
+
+// InitCacheDir 校验并创建当前配置的缓存目录，错误不回退到其他目录。
+func (c *Config) InitCacheDir() error {
+	if c.CacheDir == "" {
+		c.CacheDir = filepath.Join(os.TempDir(), "comigo_cache")
 	}
-	err := os.MkdirAll(cfg.CacheDir, os.ModePerm)
-	if err != nil {
-		logger.Infof("%s", locale.GetString("temp_folder_error"))
-	} else {
-		logger.Infof("%s", locale.GetString("temp_folder_path")+cfg.CacheDir)
+	if err := os.MkdirAll(c.CacheDir, os.ModePerm); err != nil {
+		return err
 	}
+	logger.Infof("%s", locale.GetString("temp_folder_path")+c.CacheDir)
+	return nil
 }
 
 // GetJwtSigningKey JWT令牌签名key，目前是用户名+密码(如果两者都设置了的话)

@@ -121,6 +121,7 @@ func GetFileBase64Text(bookID string, fileName string) string {
 		BookIsPDF:        bookByID.Type == model.TypePDF,
 		BookIsDir:        bookByID.Type == model.TypeDir,
 		BookIsNonUTF8Zip: bookByID.NonUTF8Zip,
+		ZipTextEncoding:  bookByID.ZipTextEncoding,
 		BookPath:         bookByID.BookPath,
 		Debug:            config.GetCfg().Debug,
 		UseCache:         config.GetCfg().UseCache,

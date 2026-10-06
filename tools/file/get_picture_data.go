@@ -21,6 +21,7 @@ type GetPictureDataOption struct {
 	BookID           string // 书籍 ID，用于计算远程 PDF 的缓存路径（压缩包类型不需要缓存）
 	BookIsDir        bool
 	BookIsPDF        bool
+	ZipTextEncoding  string
 	BookIsNonUTF8Zip bool
 	BookPath         string
 	Debug            bool
@@ -75,7 +76,10 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 		// 从流中读取文件
 		textEncoding := ""
 		if option.BookIsNonUTF8Zip {
-			textEncoding = "gbk"
+			textEncoding = option.ZipTextEncoding
+			if textEncoding == "" {
+				textEncoding = "gbk"
+			}
 		}
 		// 传入 remoteURL 和 bookPath 用于缓存 FileSystem
 		imgData, err = GetSingleFileFromStream(ctx, fileName, reader, pictureName, textEncoding, option.RemoteURL, bookPath)
@@ -88,7 +92,11 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 
 		// 如果是特殊编码的ZIP文件
 		if option.BookIsNonUTF8Zip {
-			imgData, err = GetSingleFile(actualBookPath, pictureName, "gbk")
+			textEncoding := option.ZipTextEncoding
+			if textEncoding == "" {
+				textEncoding = "gbk"
+			}
+			imgData, err = GetSingleFile(actualBookPath, pictureName, textEncoding)
 			if err != nil {
 				return nil, "", err
 			}

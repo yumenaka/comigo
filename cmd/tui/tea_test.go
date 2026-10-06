@@ -12,6 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	xansi "github.com/charmbracelet/x/ansi"
 	"github.com/mattn/go-runewidth"
+	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
 	modelpkg "github.com/yumenaka/comigo/model"
 )
@@ -284,14 +285,18 @@ func TestLogContentRendersBottomStatus(t *testing.T) {
 	}
 }
 
-// 验证指定参数或环境下会跳过 TUI。
-func TestShouldBypassTUI(t *testing.T) {
+// TUI 使用 Cobra 已解析的结果，合并短参数与参数值不能误判。
+func TestParsedNoTUIFlag(t *testing.T) {
+	restoreConfig(t)
+	cmd.InitFlags()
 	tests := []struct {
 		name string
 		args []string
 		want bool
 	}{
 		{name: "long flag", args: []string{"comigo", "--no-tui"}, want: true},
+		{name: "cluster", args: []string{"comigo", "-np2345"}, want: true},
+		{name: "value", args: []string{"comigo", "--config", "-n"}, want: false},
 		{name: "short flag", args: []string{"comigo", "-n"}, want: true},
 		{name: "long true", args: []string{"comigo", "--no-tui=true"}, want: true},
 		{name: "long false", args: []string{"comigo", "--no-tui=false"}, want: false},
@@ -303,8 +308,12 @@ func TestShouldBypassTUI(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := shouldBypassTUI(tt.args); got != tt.want {
-				t.Fatalf("shouldBypassTUI(%v) = %v, want %v", tt.args, got, tt.want)
+			config.GetCfg().NoTUI = false
+			if err := cmd.RootCmd.ParseFlags(tt.args[1:]); err != nil {
+				t.Fatal(err)
+			}
+			if got := config.GetCfg().NoTUI; got != tt.want {
+				t.Fatalf("NoTUI(%v)=%v want=%v", tt.args, got, tt.want)
 			}
 		})
 	}
@@ -457,6 +466,8 @@ func TestFitImageCellsWithCellPixelsUsesNativeCellRatio(t *testing.T) {
 
 // 验证 WezTerm 的单元格几何信息优先于 iTerm2 协议推断。
 func TestProtocolCellPixelsUsesWezTermGeometryBeforeITerm2Protocol(t *testing.T) {
+	t.Setenv("GHOSTTY_RESOURCES_DIR", "")
+	t.Setenv("TERM", "xterm-256color")
 	t.Setenv("TERM_PROGRAM", "WezTerm")
 	t.Setenv("WEZTERM_PANE", "1")
 

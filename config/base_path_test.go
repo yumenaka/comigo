@@ -110,6 +110,11 @@ func TestReadingURLsTransport(t *testing.T) {
 	}
 	cfg.CertFile = "cert.pem"
 	cfg.KeyFile = "key.pem"
+	cfg.EnableTLS = false
+	if got := GetLocalBrowserURL(); got != "http://127.0.0.1:4321/books/" {
+		t.Fatalf("disabled TLS URL=%q", got)
+	}
+	cfg.EnableTLS = true
 	if got := GetLocalBrowserURL(); got != "https://127.0.0.1:4321/books/" {
 		t.Fatal(got)
 	}
@@ -119,6 +124,7 @@ func TestReadingURLsTransport(t *testing.T) {
 		t.Fatal(got)
 	}
 	cfg.AutoTLSCertificate = false
+	cfg.EnableTLS = false
 	cfg.CertFile = ""
 	cfg.KeyFile = ""
 	cfg.DisableLAN = true

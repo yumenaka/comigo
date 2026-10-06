@@ -311,15 +311,11 @@ func Run() error {
 		return err
 	}
 	defer cmd.CloseProcessControl()
-	// 桌面协议命令不进入 TUI，也不初始化书库与 HTTP 服务。
-	if handled, err := cmd.RunDesktop(os.Args[1:], os.Stdout); handled {
-		return err
-	}
 	// 现代终端（iTerm2、Terminal.app 等）将 East Asian Ambiguous 字符（含 Box Drawing）渲染为宽度 1，
 	// 但 go-runewidth 在 zh_CN 等 CJK locale 下默认将其视为宽度 2，导致面板宽度计算偏差。
 	runewidth.DefaultCondition.EastAsianWidth = false
 
-	if shouldBypassTUI(os.Args) {
+	if config.GetCfg().NoTUI {
 		return runWithoutTUI()
 	}
 
@@ -353,35 +349,6 @@ func Run() error {
 	return errors.Join(runErr, routers.StopWebServer())
 }
 
-// shouldBypassTUI 在 Cobra 正式解析前识别 --no-tui/-n。
-// TUI 会先于 cmd.Execute() 创建，因此这里必须提前判断一次启动入口。
-func shouldBypassTUI(args []string) bool {
-	bypass := false
-	for _, arg := range args[1:] {
-		if arg == "--" {
-			break
-		}
-		if arg == "--no-tui" || arg == "-n" {
-			bypass = true
-			continue
-		}
-		if strings.HasPrefix(arg, "--no-tui=") {
-			value, err := strconv.ParseBool(strings.TrimPrefix(arg, "--no-tui="))
-			if err == nil {
-				bypass = value
-			}
-			continue
-		}
-		if strings.HasPrefix(arg, "-n=") {
-			value, err := strconv.ParseBool(strings.TrimPrefix(arg, "-n="))
-			if err == nil {
-				bypass = value
-			}
-		}
-	}
-	return bypass
-}
-
 // runWithoutTUI 在非终端环境下（如管道、重定向）退回普通服务模式启动。
 func runWithoutTUI() error {
 	if err := startBackend(); err != nil {
@@ -397,10 +364,12 @@ func runWithoutTUI() error {
 // startBackend 统一 TUI 与无界面 CLI 的服务和书库启动顺序。
 func startBackend() error {
 	cmd.Execute()
-	if err := cmd.StartProcessControl(); err != nil {
+	if err := routers.StartWebServer(); err != nil {
 		return err
 	}
-	if err := routers.StartWebServer(); err != nil {
+	// 完成端口选择后登记实际启动端口，让后台管理始终定位正确实例。
+	if err := cmd.StartProcessControl(); err != nil {
+		_ = routers.StopWebServer()
 		return err
 	}
 	routers.StartTailscale()
@@ -1071,7 +1040,7 @@ func buildBaseURL() string {
 	cfg := config.GetCfg()
 	autoTLS := cfg.AutoTLSCertificate && !cfg.DisableLAN
 	protocol := "http://"
-	if (cfg.CertFile != "" && cfg.KeyFile != "") || autoTLS {
+	if cfg.EnableTLS || autoTLS {
 		protocol = "https://"
 	}
 

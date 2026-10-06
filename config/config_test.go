@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -411,5 +412,67 @@ func TestDeleteStringArrayConfigWithStoreUrls(t *testing.T) {
 
 	if len(c.StoreUrls) != 0 {
 		t.Errorf("期望有0个书库，实际有 %d 个", len(c.StoreUrls))
+	}
+}
+
+// 指定不存在的缓存目录必须创建，文件冲突必须返回错误而非切换目录。
+func TestAutoSetCacheDirCreatesRequestedDirectory(t *testing.T) {
+	old := CopyCfg()
+	t.Cleanup(func() { *GetCfg() = old })
+	dir := filepath.Join(t.TempDir(), "nested", "cache")
+	GetCfg().CacheDir = dir
+	if err := AutoSetCacheDir(); err != nil {
+		t.Fatal(err)
+	}
+	if info, err := os.Stat(dir); err != nil || !info.IsDir() || GetCfg().CacheDir != dir {
+		t.Fatalf("cache=%q info=%v err=%v", GetCfg().CacheDir, info, err)
+	}
+	file := filepath.Join(t.TempDir(), "file")
+	if err := os.WriteFile(file, []byte("fixture"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	GetCfg().CacheDir = file
+	if err := AutoSetCacheDir(); err == nil {
+		t.Fatal("file accepted as cache directory")
+	}
+}
+
+// 网页 JSON 更新与单值更新都必须在校验成功后赋值，不能先保存坏 TLS 配置。
+func TestSettingsRejectInvalidTLSAtomically(t *testing.T) {
+	old := CopyCfg()
+	t.Cleanup(func() { *GetCfg() = old })
+	GetCfg().EnableTLS, GetCfg().AutoTLSCertificate, GetCfg().Debug = false, false, false
+	GetCfg().CertFile, GetCfg().KeyFile = "", ""
+	if err := UpdateConfigByJson(`{"Debug":true,"EnableTLS":true}`); err == nil {
+		t.Fatal("invalid TLS accepted")
+	}
+	if GetCfg().Debug || GetCfg().EnableTLS {
+		t.Fatal("failed validation changed configuration")
+	}
+	GetCfg().AutoTLSCertificate = true
+	GetCfg().Host = "reader.example.com"
+	GetCfg().DisableLAN = false
+	if err := GetCfg().SetConfigValue("DisableLAN", "true"); err == nil || GetCfg().DisableLAN {
+		t.Fatal("invalid automatic TLS accepted")
+	}
+}
+
+// 设置页保存缓存目录时也要创建目录并拒绝普通文件，行为必须与 CLI 一致。
+func TestSettingsCacheDirectoryValidation(t *testing.T) {
+	old := CopyCfg()
+	t.Cleanup(func() { *GetCfg() = old })
+	dir := filepath.Join(t.TempDir(), "cache")
+	if err := GetCfg().SetConfigValue("CacheDir", dir); err != nil {
+		t.Fatal(err)
+	}
+	if info, err := os.Stat(dir); err != nil || !info.IsDir() {
+		t.Fatalf("info=%v err=%v", info, err)
+	}
+	file := filepath.Join(t.TempDir(), "file")
+	if err := os.WriteFile(file, []byte("fixture"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := UpdateConfigByJson(`{"CacheDir":` + strconv.Quote(file) + `}`); err == nil || GetCfg().CacheDir != dir {
+		t.Fatal("invalid cache directory saved")
 	}
 }

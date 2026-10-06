@@ -29,10 +29,6 @@ func InitFlags() {
 	if RootCmd.PersistentFlags().Lookup("config") != nil {
 		return
 	}
-	// 加载环境变量，改写对应值
-	runtimeViper.AutomaticEnv()
-	// 设置环境变量的前缀，将 PORT变为 COMIGO_PORT
-	runtimeViper.SetEnvPrefix("COMIGO")
 	cfg := config.GetCfg()
 	cobra.MousetrapHelpText = ""       // 屏蔽鼠标提示，支持拖拽、双击运行
 	cobra.MousetrapDisplayDuration = 5 // "这是命令行程序"的提醒表示时间
@@ -42,65 +38,65 @@ func InitFlags() {
 	runtimeViper.BindPFlag("ConfigFile", RootCmd.PersistentFlags().Lookup("config"))
 
 	RootCmd.PersistentFlags().StringVar(&cfg.Username, "username", "", locale.GetString("username"))
-	runtimeViper.BindPFlag("Username", RootCmd.PersistentFlags().Lookup("username"))
+	bindConfigFlag("Username", "username")
 
 	RootCmd.PersistentFlags().StringVar(&cfg.Password, "password", "", locale.GetString("password"))
-	runtimeViper.BindPFlag("Password", RootCmd.PersistentFlags().Lookup("password"))
+	bindConfigFlag("Password", "password")
 
 	RootCmd.PersistentFlags().IntVar(&cfg.Timeout, "timeout", 60*24*30, locale.GetString("timeout"))
-	runtimeViper.BindPFlag("Timeout", RootCmd.PersistentFlags().Lookup("timeout"))
+	bindConfigFlag("Timeout", "timeout")
 
 	// 启用自动扫描间隔，单位分钟，0为禁用自动扫描
 	RootCmd.PersistentFlags().IntVar(&cfg.AutoRescanIntervalMinutes, "auto-rescan-min", 0, locale.GetString("auto_rescan_interval_minutes"))
-	runtimeViper.BindPFlag("AutoRescanIntervalMinutes", RootCmd.PersistentFlags().Lookup("auto-rescan-min"))
+	bindConfigFlag("AutoRescanIntervalMinutes", "auto-rescan-min")
 
 	// 启用数据库，保存扫描数据
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableDatabase, "database", false, locale.GetString("enable_database"))
-	runtimeViper.BindPFlag("EnableDatabase", RootCmd.PersistentFlags().Lookup("database"))
+	bindConfigFlag("EnableDatabase", "database")
 
 	// 数据库类型。未启用数据库时该配置会被忽略。
 	RootCmd.PersistentFlags().StringVar(&cfg.DBType, "db-type", "sqlite", locale.GetString("db_type"))
-	runtimeViper.BindPFlag("DBType", RootCmd.PersistentFlags().Lookup("db-type"))
+	bindConfigFlag("DBType", "db-type")
 
 	// PostgreSQL 连接字符串。SQLite 模式不使用。
 	RootCmd.PersistentFlags().StringVar(&cfg.DBDSN, "db-dsn", "", locale.GetString("db_dsn"))
-	runtimeViper.BindPFlag("DBDSN", RootCmd.PersistentFlags().Lookup("db-dsn"))
+	bindConfigFlag("DBDSN", "db-dsn")
 
 	// 服务端口
 	RootCmd.PersistentFlags().IntVarP(&cfg.Port, "port", "p", 1234, locale.GetString("port"))
-	runtimeViper.BindPFlag("Port", RootCmd.PersistentFlags().Lookup("port"))
+	bindConfigFlag("Port", "port")
 
 	// 本地Host
 	RootCmd.PersistentFlags().StringVar(&cfg.Host, "host", "", locale.GetString("local_host"))
-	runtimeViper.BindPFlag("Host", RootCmd.PersistentFlags().Lookup("host"))
+	bindConfigFlag("Host", "host")
 
 	// 反向代理基础路径，留空时服务挂载在根路径。
 	RootCmd.PersistentFlags().StringVar(&cfg.BasePath, "base-path", "", locale.GetString("base_path_description"))
-	runtimeViper.BindPFlag("BasePath", RootCmd.PersistentFlags().Lookup("base-path"))
+	bindConfigFlag("BasePath", "base-path")
 
 	// TLS设定
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTLS, "tls", false, locale.GetString("tls_enable"))
-	runtimeViper.BindPFlag("EnableTLS", RootCmd.PersistentFlags().Lookup("tls"))
+	bindConfigFlag("EnableTLS", "tls")
 
 	// 自动获取HTTPS证书
 	RootCmd.PersistentFlags().BoolVar(&cfg.AutoTLSCertificate, "auto-tls", false, locale.GetString("auto_https_cert"))
-	runtimeViper.BindPFlag("AutoTLSCertificate", RootCmd.PersistentFlags().Lookup("auto-tls"))
+	bindConfigFlag("AutoTLSCertificate", "auto-tls")
 
 	// TLS 证书文件路径
 	RootCmd.PersistentFlags().StringVar(&cfg.CertFile, "tls-crt", "", locale.GetString("tls_crt"))
-	runtimeViper.BindPFlag("CertFile", RootCmd.PersistentFlags().Lookup("tls-crt"))
+	bindConfigFlag("CertFile", "tls-crt")
 
 	// TLS 密钥文件路径
 	RootCmd.PersistentFlags().StringVar(&cfg.KeyFile, "tls-key", "", locale.GetString("tls_key"))
-	runtimeViper.BindPFlag("KeyFile", RootCmd.PersistentFlags().Lookup("tls-key"))
+	bindConfigFlag("KeyFile", "tls-key")
 
 	// 启用文件上传功能
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableUpload, "enable-upload", true, locale.GetString("enable_file_upload"))
-	runtimeViper.BindPFlag("EnableUpload", RootCmd.PersistentFlags().Lookup("enable-upload"))
+	bindConfigFlag("EnableUpload", "enable-upload")
 
 	// 打开浏览器
 	RootCmd.PersistentFlags().BoolVarP(&cfg.OpenBrowser, "open-browser", "o", false, locale.GetString("open_browser"))
-	runtimeViper.BindPFlag("OpenBrowser", RootCmd.PersistentFlags().Lookup("open-browser"))
+	bindConfigFlag("OpenBrowser", "open-browser")
 
 	// 服务启动不自动将当前目录加入书库，不从 TOML 读取。
 	RootCmd.PersistentFlags().BoolVar(&cfg.NoDefaultLibrary, "no-default-library", false, locale.GetString("no_default_library"))
@@ -113,99 +109,99 @@ func InitFlags() {
 
 	// 不对局域网开放
 	RootCmd.PersistentFlags().BoolVar(&cfg.DisableLAN, "local", false, locale.GetString("disable_lan"))
-	runtimeViper.BindPFlag("DisableLAN", RootCmd.PersistentFlags().Lookup("local"))
+	bindConfigFlag("DisableLAN", "local")
 
 	// 文件搜索深度
 	RootCmd.PersistentFlags().IntVarP(&cfg.MaxScanDepth, "max-depth", "m", 5, locale.GetString("max_depth"))
-	runtimeViper.BindPFlag("MaxScanDepth", RootCmd.PersistentFlags().Lookup("max-depth"))
-
-	// 服务器解析书籍元数据，如果生成blurhash，需要消耗大量资源
-	RootCmd.PersistentFlags().BoolVar(&cfg.GenerateMetaData, "generate-metadata", false, locale.GetString("generate_metadata"))
-	runtimeViper.BindPFlag("GenerateMetaData", RootCmd.PersistentFlags().Lookup("generate-metadata"))
-
-	// 打印所有可用网卡ip
-	RootCmd.PersistentFlags().BoolVar(&cfg.PrintAllPossibleQRCode, "print-all", false, locale.GetString("print_all_ip"))
-	runtimeViper.BindPFlag("PrintAllPossibleQRCode", RootCmd.PersistentFlags().Lookup("print-all"))
+	bindConfigFlag("MaxScanDepth", "max-depth")
 
 	// 至少有几张图片，才认定为漫画压缩包
 	RootCmd.PersistentFlags().IntVar(&cfg.MinImageNum, "min-image", 1, locale.GetString("min_media_num"))
-	runtimeViper.BindPFlag("MinImageNum", RootCmd.PersistentFlags().Lookup("min-image"))
+	bindConfigFlag("MinImageNum", "min-image")
 
 	// 输出log文件
 	RootCmd.PersistentFlags().BoolVar(&cfg.LogToFile, "log-file", false, locale.GetString("log_to_file"))
-	runtimeViper.BindPFlag("LogToFile", RootCmd.PersistentFlags().Lookup("log-file"))
+	bindConfigFlag("LogToFile", "log-file")
 
 	// web图片缓存
 	RootCmd.PersistentFlags().BoolVar(&cfg.UseCache, "use-cache", false, locale.GetString("cache_file_enable"))
-	runtimeViper.BindPFlag("UseCache", RootCmd.PersistentFlags().Lookup("use-cache"))
+	bindConfigFlag("UseCache", "use-cache")
 
 	// 图片缓存路径
 	RootCmd.PersistentFlags().StringVar(&cfg.CacheDir, "cache-dir", "", locale.GetString("cache_file_dir"))
-	runtimeViper.BindPFlag("CacheDir", RootCmd.PersistentFlags().Lookup("cache-dir"))
+	bindConfigFlag("CacheDir", "cache-dir")
 
 	// 退出时清除缓存
 	RootCmd.PersistentFlags().BoolVar(&cfg.ClearCacheExit, "cache-clean", false, locale.GetString("cache_file_clean"))
-	runtimeViper.BindPFlag("ClearCacheExit", RootCmd.PersistentFlags().Lookup("cache-clean"))
+	bindConfigFlag("ClearCacheExit", "cache-clean")
 
 	// 手动指定zip文件编码 gbk、shiftjis……
 	RootCmd.PersistentFlags().StringVar(&cfg.ZipFileTextEncoding, "zip-encode", "gbk", locale.GetString("zip_encode"))
-	runtimeViper.BindPFlag("ZipFileTextEncoding", RootCmd.PersistentFlags().Lookup("zip-encode"))
+	bindConfigFlag("ZipFileTextEncoding", "zip-encode")
 
 	// 启用Tailscale服务
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnableTailscale, "tailscale", false, locale.GetString("enable_tailscale"))
-	runtimeViper.BindPFlag("EnableTailscale", RootCmd.PersistentFlags().Lookup("tailscale"))
+	bindConfigFlag("EnableTailscale", "tailscale")
 
 	// Tailscale服务 启用Funnel模式
 	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelTunnel, "tailscale-funnel", false, locale.GetString("funnel_tunnel_label"))
-	runtimeViper.BindPFlag("FunnelTunnel", RootCmd.PersistentFlags().Lookup("tailscale-funnel"))
+	bindConfigFlag("FunnelTunnel", "tailscale-funnel")
 
 	// FunnelLoginCheck Funnel密码保护检查
 	RootCmd.PersistentFlags().BoolVar(&cfg.FunnelLoginCheck, "funnel-password-check", true, locale.GetString("funnel_login_check"))
-	runtimeViper.BindPFlag("FunnelLoginCheck", RootCmd.PersistentFlags().Lookup("funnel-password-check"))
+	bindConfigFlag("FunnelLoginCheck", "funnel-password-check")
 
 	// Tailscale服务主机名,用于 Tailscale 网络中的标识节点
 	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleHostname, "tailscale-hostname", "comigo", locale.GetString("tailscale_hostname"))
-	runtimeViper.BindPFlag("TailscaleHostname", RootCmd.PersistentFlags().Lookup("tailscale-hostname"))
+	bindConfigFlag("TailscaleHostname", "tailscale-hostname")
 
 	// Tailscale服务端口号
 	RootCmd.PersistentFlags().IntVar(&cfg.TailscalePort, "tailscale-port", 443, locale.GetString("tailscale_port"))
-	runtimeViper.BindPFlag("TailscalePort", RootCmd.PersistentFlags().Lookup("tailscale-port"))
+	bindConfigFlag("TailscalePort", "tailscale-port")
 
 	// Tailscale AuthKey
 	RootCmd.PersistentFlags().StringVar(&cfg.TailscaleAuthKey, "tailscale-authKey", "", locale.GetString("tailscale_auth_key"))
-	runtimeViper.BindPFlag("TailscaleAuthKey", RootCmd.PersistentFlags().Lookup("tailscale-authKey"))
+	bindConfigFlag("TailscaleAuthKey", "tailscale-authKey")
 
 	// ReadOnlyMode 只读模式，禁止网页端修改配置或上传文件
 	RootCmd.PersistentFlags().BoolVar(&cfg.ReadOnlyMode, "read-only", false, locale.GetString("read_only_mode"))
-	runtimeViper.BindPFlag("ReadOnlyMode", RootCmd.PersistentFlags().Lookup("read-only"))
-
-	// EnableSingleInstance 启用单实例模式
-	RootCmd.PersistentFlags().BoolVar(&cfg.EnableSingleInstance, "single-instance", false, locale.GetString("enable_single_instance"))
-	runtimeViper.BindPFlag("EnableSingleInstance", RootCmd.PersistentFlags().Lookup("single-instance"))
+	bindConfigFlag("ReadOnlyMode", "read-only")
 
 	// Language 语言设置
 	RootCmd.PersistentFlags().StringVar(&cfg.Language, "lang", "auto", locale.GetString("lang"))
-	runtimeViper.BindPFlag("Language", RootCmd.PersistentFlags().Lookup("lang"))
+	bindConfigFlag("Language", "lang")
 
 	// Windows 右键菜单注册/卸载，仅在 Windows 下生效
 	if runtime.GOOS == "windows" {
 		RootCmd.PersistentFlags().BoolVar(&cfg.RegisterContextMenu, "register-context-menu", false, locale.GetString("register_context_menu"))
-		runtimeViper.BindPFlag("RegisterContextMenu", RootCmd.PersistentFlags().Lookup("register-context-menu"))
+		bindConfigFlag("RegisterContextMenu", "register-context-menu")
 
 		RootCmd.PersistentFlags().BoolVar(&cfg.UnregisterContextMenu, "unregister-context-menu", false, locale.GetString("unregister_context_menu"))
-		runtimeViper.BindPFlag("UnregisterContextMenu", RootCmd.PersistentFlags().Lookup("unregister-context-menu"))
+		bindConfigFlag("UnregisterContextMenu", "unregister-context-menu")
 	}
 
 	// EnablePlugin
 	RootCmd.PersistentFlags().BoolVar(&cfg.EnablePlugin, "plugin", true, locale.GetString("plugin_enable"))
-	runtimeViper.BindPFlag("EnablePlugin", RootCmd.PersistentFlags().Lookup("plugin"))
+	bindConfigFlag("EnablePlugin", "plugin")
 
 	// DEBUG
 	RootCmd.PersistentFlags().BoolVar(&cfg.Debug, "debug", false, locale.GetString("debug_mode"))
-	runtimeViper.BindPFlag("Debug", RootCmd.PersistentFlags().Lookup("debug"))
+	bindConfigFlag("Debug", "debug")
 
 	// 自升级（不绑定 viper，避免环境变量误触发）
 	RootCmd.PersistentFlags().BoolVarP(&cfg.SelfUpgrade, "upgrade", "u", false, locale.GetString("self_upgrade_flag"))
+}
+
+// bindConfigFlag 只为实际启动配置绑定环境变量；参数名中的连字符统一转为下划线。
+func bindConfigFlag(key, name string) {
+	flag := RootCmd.PersistentFlags().Lookup(name)
+	runtimeViper.BindPFlag(key, flag)
+	// 固定默认值，避免配置加载后 flag 指针的变化影响重载回退。
+	runtimeViper.SetDefault(key, flag.DefValue)
+	if name == "lang" {
+		name = "language"
+	}
+	runtimeViper.BindEnv(key, "COMIGO_"+strings.ToUpper(strings.ReplaceAll(name, "-", "_")))
 }
 
 // SetByExecutableFilename 根据可执行文件名或软链接名自动设置部分配置项的默认值。
@@ -230,8 +226,6 @@ func InitFlags() {
 //
 //   - "local" → 仅本地访问，不对局域网开放 (DisableLAN)
 //
-//   - "generate-metadata" 或 "metadata" → 生成元数据 (GenerateMetaData)
-//
 //   - "log-file" 或 "logfile" → 输出日志文件 (LogToFile)
 //
 //   - "use-cache" 或 "cache" → 启用缓存 (UseCache)
@@ -239,8 +233,6 @@ func InitFlags() {
 //   - "cache-clean" 或 "cleancache" → 退出时清除缓存 (ClearCacheExit)
 //
 //   - "read-only" 或 "readonly" → 启用只读模式 (ReadOnlyMode)
-//
-//   - "single-instance" 或 "singleinstance" → 启用单实例模式 (EnableSingleInstance)
 //
 //   - "open-browser" → 打开浏览器 (OpenBrowser)
 //
@@ -308,10 +300,6 @@ func SetByExecutableFilename(command *cobra.Command) {
 	if strings.Contains(filenameLower, "local") {
 		cfg.DisableLAN = true
 	}
-	// 生成元数据
-	if strings.Contains(filenameLower, "generate-metadata") || strings.Contains(filenameLower, "metadata") {
-		cfg.GenerateMetaData = true
-	}
 	// 输出日志文件
 	if strings.Contains(filenameLower, "log-file") || strings.Contains(filenameLower, "logfile") {
 		cfg.LogToFile = true
@@ -327,10 +315,6 @@ func SetByExecutableFilename(command *cobra.Command) {
 	// 只读模式
 	if strings.Contains(filenameLower, "read-only") || strings.Contains(filenameLower, "readonly") {
 		cfg.ReadOnlyMode = true
-	}
-	// 单实例模式
-	if strings.Contains(filenameLower, "comigo") || strings.Contains(filenameLower, "single-instance") || strings.Contains(filenameLower, "singleinstance") {
-		cfg.EnableSingleInstance = true
 	}
 	// 语言设置
 	if strings.Contains(filenameLower, "zh") || strings.Contains(filenameLower, "chinese") {

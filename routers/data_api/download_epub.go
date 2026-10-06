@@ -77,6 +77,7 @@ func DownloadEpub(c echo.Context) error {
 			BookIsDir:        book.Type == model.TypeDir,
 			BookIsPDF:        book.Type == model.TypePDF,
 			BookIsNonUTF8Zip: book.NonUTF8Zip,
+			ZipTextEncoding:  book.ZipTextEncoding,
 			BookPath:         book.BookPath,
 			// 远程书籍支持
 			IsRemote:  book.IsRemote,

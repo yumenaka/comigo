@@ -26,7 +26,7 @@ import (
 // main 是 Wails 桌面壳入口；普通 CLI 入口保留在 main.go，减少合并冲突。
 func main() {
 	config.UseDesktopConfigProfile()
-	if handled, err := cmd.RunDesktop(os.Args[1:], os.Stdout); handled {
+	if handled, err := cmd.RunProcessCommand(os.Args[1:], os.Stdout); handled {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)

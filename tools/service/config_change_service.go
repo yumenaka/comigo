@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"slices"
-	"strconv"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
@@ -29,6 +28,7 @@ func BuildConfigChangeAction(oldConfig config.Config, newConfig *config.Config) 
 		!slices.Equal(oldConfig.SupportMediaType, newConfig.SupportMediaType) ||
 		!slices.Equal(oldConfig.SupportFileType, newConfig.SupportFileType) ||
 		oldConfig.MinImageNum != newConfig.MinImageNum ||
+		oldConfig.ZipFileTextEncoding != newConfig.ZipFileTextEncoding ||
 		!slices.Equal(oldConfig.ExcludePath, newConfig.ExcludePath)
 
 	action.ReStartWebServer = oldConfig.Port != newConfig.Port ||
@@ -123,16 +123,6 @@ func logAction(action ConfigChangeAction) {
 
 func openBrowserIfNeeded(oldConfig config.Config, newConfig *config.Config) {
 	if !oldConfig.OpenBrowser && newConfig.OpenBrowser {
-		protocol := "http://"
-		if newConfig.EnableTLS {
-			protocol = "https://"
-		}
-		basePath := config.NormalizeBasePath(newConfig.BasePath)
-		if basePath == "" {
-			basePath = "/"
-		} else {
-			basePath += "/"
-		}
-		go tools.OpenBrowserByURL(protocol + "127.0.0.1:" + strconv.Itoa(newConfig.Port) + basePath)
+		go tools.OpenBrowserByURL(config.GetLocalBrowserURL())
 	}
 }

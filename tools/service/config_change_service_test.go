@@ -220,3 +220,13 @@ func TestTLSConfigChangeRestartsWebServer(t *testing.T) {
 		}
 	}
 }
+
+// ZIP 编码改变需要重新扫描，才能让网页修改影响已有书籍。
+func TestZIPEncodingChangeRescansLibrary(t *testing.T) {
+	old := config.Config{ZipFileTextEncoding: "gbk"}
+	next := old
+	next.ZipFileTextEncoding = "shiftjis"
+	if action := BuildConfigChangeAction(old, &next); !action.ReScanStores || action.ReStartWebServer {
+		t.Fatalf("action=%+v", action)
+	}
+}

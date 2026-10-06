@@ -52,21 +52,34 @@ func StartEcho(e *echo.Echo) error {
 	if err != nil {
 		return err
 	}
+	config.GetCfg().Port = listener.Addr().(*net.TCPAddr).Port
 	// 在 goroutine 中初始化 HTTP 服务器，这样它就不会阻塞关闭处理。
 	go serveHTTPServer(listener, config.Server, serveMode)
 	return nil
 }
 
 func buildHTTPServer(e *echo.Echo) (*http.Server, webServeMode, error) {
-	SetAutoTLS(e)
+	if err := SetAutoTLS(e); err != nil {
+		return nil, webServeHTTP, err
+	}
 	if config.GetCfg().AutoTLSCertificate {
 		return buildAutoTLSServer(e)
 	}
 	serveMode := webServeHTTP
-	if hasCustomTLSCertificate() {
+	if err := config.GetCfg().ValidateTLS(); err != nil {
+		return nil, webServeHTTP, err
+	}
+	var tlsConfig *tls.Config
+	if config.GetCfg().EnableTLS {
+		cert, err := tls.LoadX509KeyPair(config.GetCfg().CertFile, config.GetCfg().KeyFile)
+		if err != nil {
+			return nil, webServeHTTP, err
+		}
+		tlsConfig = &tls.Config{Certificates: []tls.Certificate{cert}}
 		serveMode = webServeCustomTLS
 	}
 	return &http.Server{
+		TLSConfig:         tlsConfig,
 		Addr:              webServerAddr(),
 		Handler:           e, // echo.Echo 实现了 http.Handler 接口
 		ReadHeaderTimeout: readHeaderTimeout,
@@ -76,10 +89,6 @@ func buildHTTPServer(e *echo.Echo) (*http.Server, webServeMode, error) {
 
 func webServerAddr() string {
 	return net.JoinHostPort(config.GetListenHost(), strconv.Itoa(config.GetCfg().Port))
-}
-
-func hasCustomTLSCertificate() bool {
-	return config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != ""
 }
 
 func buildAutoTLSServer(e *echo.Echo) (*http.Server, webServeMode, error) {
@@ -111,7 +120,8 @@ func serveHTTPServer(listener net.Listener, server *http.Server, serveMode webSe
 	switch serveMode {
 	case webServeCustomTLS:
 		logger.Infof(locale.GetString("log_custom_tls_cert"), config.GetCfg().CertFile, config.GetCfg().KeyFile)
-		logServeError(server.ServeTLS(listener, config.GetCfg().CertFile, config.GetCfg().KeyFile))
+		// 复用预载证书，同时由标准库完成 HTTP/2 与 ALPN 配置。
+		logServeError(server.ServeTLS(listener, "", ""))
 	case webServeAutoTLS:
 		tlsListener := tls.NewListener(listener, server.TLSConfig)
 		logServeError(server.Serve(tlsListener))

@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path"
 	"time"
+	"unicode/utf8"
 
 	"github.com/klauspost/compress/zip"
 	"github.com/yumenaka/archives"
@@ -23,8 +24,20 @@ func handleZipAndEpubFiles(filePath string, newBook *model.Book) error {
 		return errors.New(locale.GetString("not_a_valid_zip_file") + filePath)
 	}
 	defer fsys.Close()
+	newBook.ZipTextEncoding = cfg.GetZipFileTextEncoding()
 
-	err = walkUTF8ZipFs(fsys, "", ".", newBook)
+	nonUTF8 := false
+	for _, entry := range fsys.File {
+		if !utf8.ValidString(entry.Name) {
+			nonUTF8 = true
+			break
+		}
+	}
+	if nonUTF8 {
+		err = scanNonUTF8ZipFile(filePath, newBook)
+	} else {
+		err = walkUTF8ZipFs(fsys, "", ".", newBook)
+	}
 	if err != nil {
 		if _, ok := errors.AsType[*fs.PathError](err); ok {
 			if cfg.GetDebug() {
@@ -116,6 +129,7 @@ func handleOtherArchiveFiles(filePath string, newBook *model.Book) error {
 
 func scanNonUTF8ZipFile(filePath string, b *model.Book) error {
 	b.NonUTF8Zip = true
+	b.ZipTextEncoding = cfg.GetZipFileTextEncoding()
 	reader, err := file.ScanNonUTF8Zip(filePath, cfg.GetZipFileTextEncoding())
 	if err != nil {
 		return err

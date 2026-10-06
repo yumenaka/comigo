@@ -50,6 +50,10 @@ func PlatformConfigFilename() string {
 func configDirForLocation(location string) (string, error) {
 	switch location {
 	case HomeDirectory:
+		// 环境变量覆盖默认配置目录，查找与保存使用同一个位置。
+		if dir := os.Getenv("COMIGO_CONFIG_DIR"); dir != "" {
+			return dir, nil
+		}
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return "", err
@@ -78,10 +82,10 @@ func configFilePathForLocation(location string) (string, error) {
 
 func configSearchLocations() []configLocation {
 	locations := make([]configLocation, 0, 3)
-	if home, err := os.UserHomeDir(); err == nil {
+	if home, err := configDirForLocation(HomeDirectory); err == nil {
 		locations = append(locations, configLocation{
 			name: HomeDirectory,
-			dir:  filepath.Join(home, ".config", "comigo"),
+			dir:  home,
 		})
 	} else {
 		logger.Infof(locale.GetString("log_warning_failed_to_get_homedir"), err)
@@ -326,7 +330,7 @@ func readingURL(host string) string {
 	protocol, port := "http", cfg.Port
 	if cfg.AutoTLSCertificate {
 		protocol, port = "https", 443
-	} else if cfg.CertFile != "" && cfg.KeyFile != "" {
+	} else if cfg.EnableTLS {
 		protocol = "https"
 	}
 	return (&url.URL{Scheme: protocol, Host: net.JoinHostPort(host, strconv.Itoa(port)), Path: PrefixPath("/")}).String()

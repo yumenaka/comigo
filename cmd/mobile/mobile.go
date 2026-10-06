@@ -195,7 +195,9 @@ func configureRuntime(startCfg StartConfig) error {
 	if trimmedCacheDir := strings.TrimSpace(startCfg.CacheDir); trimmedCacheDir != "" {
 		cfg.CacheDir = trimmedCacheDir
 	}
-	config.AutoSetCacheDir()
+	if err := config.AutoSetCacheDir(); err != nil {
+		return err
+	}
 
 	cfg.StoreUrls = []string{}
 	for _, storeURL := range startCfg.StoreUrls {

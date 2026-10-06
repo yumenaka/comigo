@@ -31,7 +31,7 @@ func buildReaderLinkContext() readerLinkContext {
 	}
 
 	// 判断是否启用 TLS
-	// 如果配置文件中有证书和密钥文件，则启用 TLS
+	// 证书在服务启动前校验；链接协议遵守 TLS 开关。
 	outIP := config.GetCfg().Host
 	if config.GetCfg().Host == "" {
 		outIP = tools.GetOutboundIP().String()
@@ -39,7 +39,7 @@ func buildReaderLinkContext() readerLinkContext {
 	return readerLinkContext{
 		etcStr:    etcStr,
 		outIP:     outIP,
-		customTLS: config.GetCfg().CertFile != "" && config.GetCfg().KeyFile != "",
+		customTLS: config.GetCfg().EnableTLS,
 		autoTLS:   config.GetCfg().AutoTLSCertificate,
 	}
 }
@@ -49,7 +49,6 @@ func ShowQRCode() {
 	// 打印二维码
 	tools.PrintAllReaderURL(
 		config.GetCfg().Port,
-		config.GetCfg().PrintAllPossibleQRCode,
 		link.outIP,
 		config.GetCfg().DisableLAN,
 		link.customTLS,

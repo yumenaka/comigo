@@ -60,6 +60,8 @@ docker-compose up -d
 
 #### 环境变量
 
+环境变量只绑定有实际配置作用的 CLI 参数，名称为 COMIGO_ 加参数名的大写形式，并把连字符改成下划线；例如 --enable-upload 对应 COMIGO_ENABLE_UPLOAD。语言使用 COMIGO_LANGUAGE。优先级为显式命令行参数 > 环境变量 > TOML > 默认值；空值按未设置处理，整数或布尔值格式错误会使启动失败。COMIGO_CONFIG_DIR 覆盖默认用户配置目录，配置发现、保存和进程状态目录保持一致；--config 显式指定文件时优先。配置路径用 --config，不提供 COMIGO_CONFIGFILE。扫描超时等没有 CLI 参数的设置使用 TOML；--no-tui、--temp、--upgrade 和 --no-default-library 仅由命令行控制，不提供对应环境变量。COMIGO_TUI_IMAGE 仍用于终端图片协议选择。
+
 | 变量名 | 说明 | 默认值      |
 |--------|------|----------|
 | `COMIGO_PORT` | 服务端口 | `1234`   |
@@ -376,6 +378,8 @@ This compose example mounts:
 
 #### Environment Variables
 
+Environment variables are bound only to CLI options that configure the service. Prefix the uppercase option name with COMIGO_ and replace hyphens with underscores; for example, --enable-upload becomes COMIGO_ENABLE_UPLOAD. Language uses COMIGO_LANGUAGE. Precedence is explicit CLI options > environment > TOML > defaults. Empty values count as unset; malformed integer or boolean values fail startup. COMIGO_CONFIG_DIR overrides the default user configuration directory consistently for discovery, saving and process state. An explicit --config file takes precedence. Use --config for a specific file; COMIGO_CONFIGFILE is not supported. Settings without a CLI option, such as scan timeout, belong in TOML. --no-tui, --temp, --upgrade and --no-default-library remain CLI-only. COMIGO_TUI_IMAGE still selects the terminal image protocol.
+
 | Variable | Description | Default         |
 |----------|-------------|-----------------|
 | `COMIGO_PORT` | Service port | `1234`          |
@@ -486,6 +490,8 @@ docker-compose up -d
 ### ⚙️ 設定
 
 #### 環境変数
+
+環境変数はサービス設定を行う CLI オプションだけに対応します。オプション名を大文字にして COMIGO_ を付け、ハイフンを下線に置き換えます。例: --enable-upload は COMIGO_ENABLE_UPLOAD です。言語には COMIGO_LANGUAGE を使います。優先順位は明示した CLI オプション > 環境変数 > TOML > 既定値です。空の値は未設定とし、整数・真偽値の形式が不正な場合は起動に失敗します。COMIGO_CONFIG_DIR は既定のユーザー設定ディレクトリを変更し、設定の検索・保存・プロセス状態に共通で使用します。--config で明示したファイルが優先です。ファイル指定には --config を使い、COMIGO_CONFIGFILE は提供しません。スキャンのタイムアウトなど CLI オプションのない設定は TOML に記載します。--no-tui、--temp、--upgrade、--no-default-library は CLI 専用です。COMIGO_TUI_IMAGE は引き続き端末画像プロトコルの選択に使えます。
 
 | 変数名 | 説明 | デフォルト値  |
 |--------|------|---------|

@@ -27,17 +27,17 @@ var RootCmd = &cobra.Command{
 	Args: cobra.ArbitraryArgs,
 	// 管理命令不读取 TOML：即使配置写坏，stop 和 version 仍然可用。
 	PersistentPreRunE: func(command *cobra.Command, args []string) error {
-		switch command.Name() {
-		case "start", "stop", "reload", "version":
+		if command.Parent() != nil && command.Name() != "run" && command.Name() != "upgrade" && command.Name() != "service" {
 			return nil
 		}
+
 		Args = args
 		return LoadConfigFile()
 	},
 	// Run 函数按以下顺序执行：PersistentPreRun() PreRun() Run() PostRun() PersistentPostRun()
 	// 所有函数都能拿到相同的参数，即命令名称后面添加的参数。仅当设置了 Run 函数时，才会执行 PreRun 和 PostRun 函数。
 	// 因为参数设置已完成，实际运行的命令习惯写在这里
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		Args = args
 		// 通过“可执行文件名”设置部分默认参数
 		SetByExecutableFilename(cmd)
@@ -63,7 +63,9 @@ var RootCmd = &cobra.Command{
 		}
 
 		// 设置临时文件夹
-		config.AutoSetCacheDir()
+		if err := config.AutoSetCacheDir(); err != nil {
+			return err
+		}
 		// 在 Windows 上，根据命令行参数注册/卸载资源管理器文件夹右键菜单
 		if runtime.GOOS == "windows" {
 			// 先处理卸载，再处理注册，避免同时传入两个参数时出现冲突
@@ -82,13 +84,12 @@ var RootCmd = &cobra.Command{
 				}
 			}
 		}
+		return nil
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(serviceCommand())
-	// 帮助中公开桌面协议能力，旧版客户端探测时不会误启动服务。
-	RootCmd.AddCommand(&cobra.Command{Use: "desktop", Short: "Machine-readable desktop integration: info, check-update"})
 	// 自定义 -v/--version 输出：软件版本、系统类型、Go 版本
 	RootCmd.SetVersionTemplate(`Comigo {{.Version}}
 OS/Arch: ` + runtime.GOOS + "/" + runtime.GOARCH + `

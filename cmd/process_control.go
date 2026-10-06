@@ -15,22 +15,23 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/gofrs/flock"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 )
 
 // processState 只保存本机管理地址和随机凭据；不通过 PID 发送系统信号，避免误杀复用 PID 的进程。
 type processState struct {
-	PID     int
-	Address string
-	Token   string
+	PID        int
+	Address    string
+	Token      string
+	Port       int // 实际启动端口，重载后保持稳定，用于实例选择。
+	ConfigFile string
+	URL        string `json:",omitempty"` // 仅状态查询返回当前阅读地址。
 }
 
 // processControl 的生命周期与 CLI 相同；Web 服务换端口或重启不会中断这个独立通道。
 type processControl struct {
 	server *http.Server
-	lock   *flock.Flock
 	path   string
 	ready  atomic.Bool
 	mu     sync.Mutex // 串行处理 reload 与 stop，避免两者同时改动服务。
@@ -56,27 +57,27 @@ func processStatePath() (string, error) {
 	return filepath.Join(dir, ".comi-process.json"), nil
 }
 
-// StartProcessControl 在启动 Web 服务之前占用实例锁；异常退出后的锁由操作系统自动释放。
+// StartProcessControl 为每个进程建立独立管理通道，不限制其他实例。
 // 仅 CLI 入口调用，嵌入式、Wails 和托盘继续由各自宿主管理生命周期。
 func StartProcessControl() error {
 	statePath, err := processStatePath()
 	if err != nil {
 		return err
 	}
-	control := &processControl{path: statePath, lock: flock.New(statePath + ".lock")}
-	locked, err := control.lock.TryLock()
-	if err != nil {
-		return err
+	if cliControl != nil {
+		return fmt.Errorf("%s", locale.GetString("cli_control_initialized"))
 	}
-	if !locked {
-		return fmt.Errorf("%s", locale.GetString("cli_already_running"))
-	}
+	statePath = processInstancePath(statePath, os.Getpid())
+	control := &processControl{path: statePath}
 	listener, err := net.Listen("tcp4", "127.0.0.1:0")
 	if err != nil {
-		_ = control.lock.Unlock()
 		return err
 	}
-	state := processState{PID: os.Getpid(), Address: listener.Addr().String(), Token: rand.Text()}
+	file := config.GetCfg().ConfigFile
+	if file != "" {
+		file, _ = filepath.Abs(file)
+	}
+	state := processState{PID: os.Getpid(), Address: listener.Addr().String(), Token: rand.Text(), Port: config.GetCfg().Port, ConfigFile: file}
 	control.server = &http.Server{
 		Handler: control.handler(state.Token), ReadHeaderTimeout: 5 * time.Second,
 		IdleTimeout: 5 * time.Second,
@@ -84,13 +85,11 @@ func StartProcessControl() error {
 	// 先删除旧文件再用 0600 创建，避免继承旧文件较宽的权限。
 	if err = os.Remove(statePath); err != nil && !os.IsNotExist(err) {
 		_ = listener.Close()
-		_ = control.lock.Unlock()
 		return err
 	}
 	data, _ := json.Marshal(state)
 	if err := os.WriteFile(statePath, data, 0o600); err != nil {
 		_ = listener.Close()
-		_ = control.lock.Unlock()
 		return err
 	}
 	cliControl = control
@@ -103,12 +102,11 @@ func ProcessReady() {
 	cliControl.ready.Store(true)
 }
 
-// CloseProcessControl 清理状态后再释放锁；避免旧实例退出时删除新实例的状态文件。
+// CloseProcessControl 只删除当前进程的状态文件，不影响其他实例。
 func CloseProcessControl() {
 	if cliControl != nil {
 		_ = cliControl.server.Close()
 		_ = os.Remove(cliControl.path)
-		_ = cliControl.lock.Unlock()
 		cliControl = nil
 	}
 }
@@ -128,6 +126,10 @@ func (control *processControl) handler(token string) http.Handler {
 			return
 		}
 		switch request.URL.Path {
+		case "/status":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(processState{PID: os.Getpid(), Port: config.GetCfg().Port, URL: config.GetLocalBrowserURL()})
+			return
 		case "/ready":
 		case "/stop":
 			// 先把成功响应发到客户端，再唤醒退出流程，避免清理连接导致客户端收到 EOF。
@@ -165,10 +167,10 @@ func readProcessState(path string) (processState, error) {
 }
 
 // processRequest 禁用代理和重定向，确保管理令牌只发到本机的既定地址。
-func processRequest(state processState, action, file string) error {
+func processRequest(state processState, action, file string, result ...any) error {
 	host, _, err := net.SplitHostPort(state.Address)
 	if err != nil || host != "127.0.0.1" {
-		return fmt.Errorf("invalid local control address")
+		return fmt.Errorf("%s", locale.GetString("cli_control_invalid_address"))
 	}
 	body, _ := json.Marshal(file)
 	request, err := http.NewRequest(http.MethodPost, "http://"+state.Address+"/"+action, strings.NewReader(string(body)))
@@ -181,11 +183,17 @@ func processRequest(state processState, action, file string) error {
 	client := &http.Client{Transport: transport, Timeout: 2 * time.Minute,
 		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
 	}
+	if action == "status" || action == "ready" {
+		client.Timeout = 3 * time.Second
+	}
 	response, err := client.Do(request)
 	if err != nil {
 		return err
 	}
 	defer response.Body.Close()
+	if action == "status" && response.StatusCode == http.StatusOK && len(result) == 1 {
+		return json.NewDecoder(io.LimitReader(response.Body, 64*1024)).Decode(result[0])
+	}
 	if response.StatusCode != http.StatusNoContent {
 		message, _ := io.ReadAll(io.LimitReader(response.Body, 64*1024))
 		return fmt.Errorf("%s: %s", response.Status, strings.TrimSpace(string(message)))
@@ -199,9 +207,9 @@ func controlProcess(action string) error {
 	if err != nil {
 		return err
 	}
-	state, err := readProcessState(statePath)
+	statePath, state, err := findProcessState(statePath)
 	if err != nil {
-		return fmt.Errorf("%s: %w", locale.GetString("cli_not_running"), err)
+		return err
 	}
 	file := config.GetCfg().ConfigFile
 	if file != "" {
@@ -223,4 +231,43 @@ func controlProcess(action string) error {
 		return fmt.Errorf("%s", locale.GetString("cli_stop_timeout"))
 	}
 	return nil
+}
+
+// processInstancePath 用 PID 区分同一配置目录内的多个服务。
+func processInstancePath(base string, pid int) string {
+	return strings.TrimSuffix(base, ".json") + fmt.Sprintf("-%d.json", pid)
+}
+
+// findProcessState 只选择仍可连接的实例；存在多个目标时要求指定启动端口。
+func findProcessState(base string) (string, processState, error) {
+	paths, err := filepath.Glob(strings.TrimSuffix(base, ".json") + "-*.json")
+	if err != nil {
+		return "", processState{}, err
+	}
+	file := config.GetCfg().ConfigFile
+	if file != "" {
+		file, _ = filepath.Abs(file)
+	}
+	var chosen processState
+	chosenPath := ""
+	for _, path := range paths {
+		state, err := readProcessState(path)
+		if err != nil || (file != "" && file != state.ConfigFile) {
+			continue
+		}
+		if RootCmd.PersistentFlags().Changed("port") && state.Port != config.GetCfg().Port {
+			continue
+		}
+		if processRequest(state, "ready", "") != nil {
+			continue
+		}
+		if chosenPath != "" {
+			return "", processState{}, fmt.Errorf("%s", locale.GetString("cli_multiple_processes"))
+		}
+		chosenPath, chosen = path, state
+	}
+	if chosenPath == "" {
+		return "", processState{}, fmt.Errorf("%s", locale.GetString("cli_not_running"))
+	}
+	return chosenPath, chosen, nil
 }
