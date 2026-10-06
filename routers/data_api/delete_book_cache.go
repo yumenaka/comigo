@@ -9,7 +9,6 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/apiresp"
-	"github.com/yumenaka/comigo/store"
 	fileutil "github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -18,7 +17,7 @@ import (
 // 示例 URL： /api/books/{id}/cache
 // 相关参数：
 // id：书籍的ID，必须参数  &id=2b17a13
-// delete_metadata: 是否删除元数据JSON文件，可选参数，默认 true  &delete_metadata=true
+// delete_metadata: 是否删除书籍元数据，可选参数，默认 true  &delete_metadata=true
 // delete_cover: 是否删除封面缓存文件，可选参数，默认 true  &delete_cover=true
 // delete_image_cache: 是否删除图片缓存目录，可选参数，默认 true  &delete_image_cache=true
 func DeleteBookCache(c echo.Context) error {
@@ -55,9 +54,12 @@ func DeleteBookCache(c echo.Context) error {
 	// 元数据目录路径
 	metaPath := filepath.Join(configDir, "metadata", book.GetStoreID())
 
-	// 删除元数据 JSON 文件
+	// 通过当前存储删除元数据，数据库模式不访问 JSON。
 	if deleteMetadata {
-		err := store.DeleteBookJson(book)
+		err := model.IStore.DeleteBook(book.BookID)
+		if err == nil {
+			err = model.IStore.GenerateBookGroup()
+		}
 		if err != nil {
 			logger.Infof(locale.GetString("log_delete_book_json_error"), err)
 			deletedMap["metadata"] = false

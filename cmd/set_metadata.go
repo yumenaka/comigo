@@ -7,34 +7,31 @@ import (
 	"github.com/yumenaka/comigo/sqlc"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools/logger"
-	"github.com/yumenaka/comigo/tools/scan"
 )
 
 // LoadMetadata 加载书籍元数据
-func LoadMetadata() {
+func LoadMetadata() error {
 	// 从数据库加载书籍信息
 	if config.GetCfg().EnableDatabase {
-		// 从数据库中读取书籍信息并持久化
+		// 数据库是唯一持久化来源；打开失败直接返回，不回退到 JSON。
 		configDir, err := config.GetConfigDir()
 		if err != nil {
-			logger.Infof(locale.GetString("err_failed_to_get_config_dir"), err)
-			model.IStore = store.RamStore
-			return
+			return err
 		}
 		if err := sqlc.OpenDatabase(sqlc.DBOptions{
 			Type:      config.GetCfg().DBType,
 			DSN:       config.GetCfg().DBDSN,
 			ConfigDir: configDir,
 		}); err != nil {
-			logger.Infof(locale.GetString("log_open_database_error"), err)
-			model.IStore = store.RamStore
-			config.GetCfg().EnableDatabase = false
-		} else {
-			model.IStore = sqlc.DbStore
+			return err
 		}
+		model.IStore = sqlc.DbStore
+		model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
+		model.ClearBookNotExist()
 	}
 	// 从本地文件加载书籍信息
 	if !config.GetCfg().EnableDatabase {
+		model.IStore = store.RamStore
 		err := store.RamStore.LoadBooks()
 		if err != nil {
 			logger.Infof(locale.GetString("log_loadbooks_error"), err)
@@ -48,6 +45,7 @@ func LoadMetadata() {
 		}
 		model.GenerateBookGroup()
 	}
+	return nil
 }
 
 // SaveMetadata 保存书籍元数据
@@ -57,27 +55,6 @@ func SaveMetadata() {
 		err := store.RamStore.SaveAllBooksMetaJson()
 		if err != nil {
 			logger.Infof(locale.GetString("log_savebooks_error"), err)
-		}
-	}
-	// 启用数据库的时候，同步书籍元数据到RamStore
-	if config.GetCfg().EnableDatabase && sqlc.DbStore != nil {
-		allBooks, err := sqlc.DbStore.ListBooks()
-		if err != nil {
-			logger.Infof(locale.GetString("log_error_listing_books_from_database"), err)
-		} else {
-			// 兜底：万一数据库无效，至把书加回RamStore
-			err = store.RamStore.StoreBooks(allBooks)
-			if err != nil {
-				return
-			}
-		}
-	}
-	// 启用数据库的时候，保存书籍元数据到到数据库
-	if config.GetCfg().EnableDatabase && sqlc.DbStore != nil {
-		err := scan.SaveBooksToDatabase(config.GetCfg())
-		if err != nil {
-			logger.Infof(locale.GetString("log_failed_savebookstodatabase"), err)
-			return
 		}
 	}
 }

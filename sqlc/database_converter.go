@@ -53,13 +53,30 @@ func FromSQLCBook(sqlcBook Book) *model.Book {
 			CreatedByVersion: sqlcBook.CreatedByVersion.String,
 			IsRemote:         sqlcBook.IsRemote.Bool,
 			RemoteURL:        sqlcBook.RemoteUrl.String,
+			RemoteBookID:     sqlcBook.RemoteBookID.String,
+			RemoteStoreKey:   sqlcBook.RemoteStoreKey.String,
+			RemoteShelfKey:   sqlcBook.RemoteShelfKey.String,
+			RemoteShelfName:  sqlcBook.RemoteShelfName.String,
+			Cover: model.PageInfo{
+				Name:       sqlcBook.CoverName.String,
+				Path:       sqlcBook.CoverPath.String,
+				Size:       sqlcBook.CoverSize.Int64,
+				ModTime:    sqlcBook.CoverModTime.Time,
+				Url:        sqlcBook.CoverUrl.String,
+				PageNum:    int(sqlcBook.CoverPageNum.Int64),
+				Blurhash:   sqlcBook.CoverBlurhash.String,
+				Height:     int(sqlcBook.CoverHeight.Int64),
+				Width:      int(sqlcBook.CoverWidth.Int64),
+				ImgType:    sqlcBook.CoverImgType.String,
+				InsertHtml: sqlcBook.CoverInsertHtml.String,
+			},
 		},
 	}
 }
 
-// ToSQLCCreateBookParams 将model.Book转换为sqlc.CreateBookParams //"Valid"必须是验证条件或true
-func ToSQLCCreateBookParams(book *model.Book) CreateBookParams {
-	return CreateBookParams{
+// ToSQLCUpsertBookParams 将model.Book转换为sqlc.UpsertBookParams //"Valid"必须是验证条件或true
+func ToSQLCUpsertBookParams(book *model.Book) UpsertBookParams {
+	return UpsertBookParams{
 		Title:            book.Title,
 		BookID:           book.BookID,
 		Owner:            sql.NullString{String: "admin", Valid: true},
@@ -85,37 +102,23 @@ func ToSQLCCreateBookParams(book *model.Book) CreateBookParams {
 		CreatedByVersion: sql.NullString{String: book.CreatedByVersion, Valid: book.CreatedByVersion != ""},
 		IsRemote:         sql.NullBool{Bool: book.IsRemote, Valid: true},
 		RemoteUrl:        sql.NullString{String: book.RemoteURL, Valid: book.RemoteURL != ""},
-	}
-}
-
-// ToSQLCUpdateBookParams 将model.Book转换为sqlc.UpdateBookParams //"Valid"必须是验证条件或true
-func ToSQLCUpdateBookParams(book *model.Book) UpdateBookParams {
-	return UpdateBookParams{
-		Title:            book.Title,
-		Owner:            sql.NullString{String: "admin", Valid: true},
-		BookPath:         book.BookPath,
-		StoreUrl:         book.StoreUrl,
-		Type:             string(book.Type),
-		ChildBooksNum:    sql.NullInt64{Int64: int64(book.ChildBooksNum), Valid: true},
-		ChildBooksID:     sql.NullString{String: strings.Join(book.ChildBooksID, ", "), Valid: len(book.ChildBooksID) > 0},
-		Depth:            sql.NullInt64{Int64: int64(book.Depth), Valid: true},
-		ParentFolder:     sql.NullString{String: book.ParentFolder, Valid: book.ParentFolder != ""},
-		PageCount:        sql.NullInt64{Int64: int64(book.PageCount), Valid: true},
-		FileSize:         sql.NullInt64{Int64: book.FileSize, Valid: true},
-		Author:           sql.NullString{String: book.Author, Valid: book.Author != ""},
-		Isbn:             sql.NullString{String: book.ISBN, Valid: book.ISBN != ""},
-		Press:            sql.NullString{String: book.Press, Valid: book.Press != ""},
-		PublishedAt:      sql.NullString{String: book.PublishedAt, Valid: book.PublishedAt != ""},
-		ExtractPath:      sql.NullString{String: book.ExtractPath, Valid: book.ExtractPath != ""},
-		ExtractNum:       sql.NullInt64{Int64: int64(book.ExtractNum), Valid: true},
-		BookComplete:     sql.NullBool{Bool: book.BookComplete, Valid: true},
-		InitComplete:     sql.NullBool{Bool: book.InitComplete, Valid: true},
-		NonUtf8zip:       sql.NullBool{Bool: book.NonUTF8Zip, Valid: true},
-		ZipTextEncoding:  sql.NullString{String: book.ZipTextEncoding, Valid: book.ZipTextEncoding != ""},
-		CreatedByVersion: sql.NullString{String: book.CreatedByVersion, Valid: book.CreatedByVersion != ""},
-		IsRemote:         sql.NullBool{Bool: book.IsRemote, Valid: true},
-		RemoteUrl:        sql.NullString{String: book.RemoteURL, Valid: book.RemoteURL != ""},
-		BookID:           book.BookID,
+		ModifiedTime:     sql.NullTime{Time: book.Modified, Valid: true},
+		Deleted:          sql.NullBool{Bool: book.Deleted, Valid: true},
+		RemoteBookID:     sql.NullString{String: book.RemoteBookID, Valid: true},
+		RemoteStoreKey:   sql.NullString{String: book.RemoteStoreKey, Valid: true},
+		RemoteShelfKey:   sql.NullString{String: book.RemoteShelfKey, Valid: true},
+		RemoteShelfName:  sql.NullString{String: book.RemoteShelfName, Valid: true},
+		CoverName:        sql.NullString{String: book.Cover.Name, Valid: true},
+		CoverPath:        sql.NullString{String: book.Cover.Path, Valid: true},
+		CoverSize:        sql.NullInt64{Int64: book.Cover.Size, Valid: true},
+		CoverModTime:     sql.NullTime{Time: book.Cover.ModTime, Valid: true},
+		CoverUrl:         sql.NullString{String: book.Cover.Url, Valid: true},
+		CoverPageNum:     sql.NullInt64{Int64: int64(book.Cover.PageNum), Valid: true},
+		CoverBlurhash:    sql.NullString{String: book.Cover.Blurhash, Valid: true},
+		CoverHeight:      sql.NullInt64{Int64: int64(book.Cover.Height), Valid: true},
+		CoverWidth:       sql.NullInt64{Int64: int64(book.Cover.Width), Valid: true},
+		CoverImgType:     sql.NullString{String: book.Cover.ImgType, Valid: true},
+		CoverInsertHtml:  sql.NullString{String: book.Cover.InsertHtml, Valid: true},
 	}
 }
 

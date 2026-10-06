@@ -104,11 +104,6 @@ func StartReScan() {
 		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 		return
 	}
-	if config.GetCfg().EnableDatabase {
-		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
-			logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
-		}
-	}
 	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonLibraryRescan)
 }
 

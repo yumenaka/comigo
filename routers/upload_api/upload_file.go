@@ -176,12 +176,6 @@ func UploadFile(c echo.Context) error {
 		logger.Infof(locale.GetString("scan_error")+"path:%s  %s", storeUrl, err)
 		return c.JSON(http.StatusInternalServerError, uploadError("upload_scan_failed", err))
 	}
-	// 保存扫描结果到数据库（如果开启）
-	if config.GetCfg().EnableDatabase {
-		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
-			return c.JSON(http.StatusInternalServerError, uploadError("upload_save_database_failed", err))
-		}
-	}
 	model.GenerateBookGroup()
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": locale.GetString("file_uploaded_successfully"),

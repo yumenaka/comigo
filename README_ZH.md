@@ -202,7 +202,7 @@ comi stop
 | `--use-cache` | false | 启用本地图片缓存 |
 | `--cache-dir` | - | 缓存目录路径 |
 | `--cache-clean` | false | 退出时清除缓存 |
-| `--database` | false | 启用本地数据库存储 |
+| `--database` | false | 启用 SQLite 数据库存储（`comigo.sqlite` 位于配置目录） |
 | `--auto-rescan-min` | 0 | 自动扫描间隔（分钟，0为禁用） |
 | `--min-image` | 1 | 最少图片数量才认定为漫画 |
 | `--zip-encode` | gbk | 非UTF-8 ZIP文件的编码 |
@@ -211,6 +211,8 @@ comi stop
 | `--tailscale` | false | 启用 Tailscale 网络 |
 | `--tailscale-hostname` | comigo | Tailscale 主机名 |
 | `--tailscale-funnel` | false | 启用 Tailscale Funnel |
+
+启用 `--database` 后，扫描得到的书籍、页面、封面信息、远程索引、书签及扫描失败记录均保存在数据库中，不依赖 `metadata/*.json`。配置仍使用 TOML，原始书籍和可重新生成的图片缓存仍使用文件。数据库无法打开时启动报错，不回退到 JSON。旧版数据库结构和 JSON 数据不自动迁移；请使用新的数据库。修改数据库配置后需要重启。
 
 </details>
 

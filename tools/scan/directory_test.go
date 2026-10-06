@@ -12,6 +12,7 @@ import (
 
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/sqlc"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools/comigo_remote"
 )
@@ -256,6 +257,17 @@ func TestInitStoreRescansChangedDirectoryBook(t *testing.T) {
 
 // 验证远程 Comigo 书库扫描不会重复收录嵌套远程书籍。
 func TestInitComigoStoreSkipsNestedRemoteBooks(t *testing.T) {
+	for _, database := range []bool{false, true} {
+		name := "json"
+		if database {
+			name = "sqlite"
+		}
+		t.Run(name, func(t *testing.T) { testInitComigoStore(t, database) })
+	}
+}
+
+// 同一远端拓扑在 JSON 和 SQLite 中都应保留代理字段及本地阅读状态。
+func testInitComigoStore(t *testing.T, database bool) {
 	// 模拟远端 Comigo 里同时存在本地书、远程书和混合书组，覆盖嵌套远程书过滤。
 	remoteBooks := map[string]model.Book{
 		"local": {BookInfo: model.BookInfo{
@@ -313,6 +325,16 @@ func TestInitComigoStoreSkipsNestedRemoteBooks(t *testing.T) {
 	oldStore := model.IStore
 	oldCfg := config.CopyCfg()
 	model.IStore = &store.StoreInRam{}
+	config.GetCfg().ConfigFile = filepath.Join(t.TempDir(), "config.toml")
+	config.GetCfg().EnableDatabase = database
+	if database {
+		if err := sqlc.OpenDatabase(sqlc.DBOptions{Type: "sqlite", ConfigDir: t.TempDir()}); err != nil {
+			t.Fatal(err)
+		}
+		model.IStore = sqlc.DbStore
+		t.Cleanup(sqlc.CloseDatabase)
+	}
+
 	// 入库流程读取全局最小图片数，测试里固定成 1，避免本机配置影响断言。
 	config.GetCfg().MinImageNum = 1
 	t.Cleanup(func() {
@@ -342,6 +364,21 @@ func TestInitComigoStoreSkipsNestedRemoteBooks(t *testing.T) {
 	if len(group.ChildBooksID) != 1 || group.ChildBooksID[0] != localID {
 		t.Fatalf("书组子书 ID = %v，期望只保留 %q", group.ChildBooksID, localID)
 	}
+	book, err := model.IStore.GetBook(localID)
+	if err != nil || book.RemoteBookID != "local" || book.RemoteShelfName != "Remote Shelf" || book.RemoteShelfKey == "" || book.RemoteStoreKey == "" {
+		t.Fatalf("remote fields lost: %#v, %v", book, err)
+	}
+	if err := model.IStore.StoreBookMark(model.NewBookMark(model.UserMark, localID, book.GetStoreID(), 1, "本地书签")); err != nil {
+		t.Fatal(err)
+	}
+	if err := InitStore(server.URL, scanCfg); err != nil {
+		t.Fatal(err)
+	}
+	marks, err := model.IStore.GetBookMarks(localID)
+	if err != nil || len(*marks) != 1 {
+		t.Fatalf("remote rescan lost local bookmarks: %v, %v", marks, err)
+	}
+
 }
 
 // 验证远程书库删除失效书籍时会同时清理生成的分组。

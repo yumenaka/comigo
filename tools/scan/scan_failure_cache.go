@@ -2,6 +2,7 @@ package scan
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -20,20 +21,15 @@ const scanFailureCacheFileName = "scan_failures.json"
 
 var scanFailureCacheMu sync.Mutex
 
-// ScanFailureRecord 记录压缩文件扫描失败时的文件指纹。
-// 后续扫描仅在文件变化，或版本跨度足够大时才会再次尝试。
-type ScanFailureRecord struct {
-	StoreURL         string    `json:"store_url"`
-	FilePath         string    `json:"file_path"`
-	FileSize         int64     `json:"file_size"`
-	ModifiedUnixNano int64     `json:"modified_unix_nano"`
-	CreatedByVersion string    `json:"created_by_version"`
-	FailedAt         time.Time `json:"failed_at"`
-	Error            string    `json:"error"`
-	IsRemote         bool      `json:"is_remote"`
-}
+// ScanFailureRecord 与数据库共用扫描失败记录结构。
+type ScanFailureRecord = model.ScanFailureRecord
+type scanFailureCache = map[string]ScanFailureRecord
 
-type scanFailureCache map[string]ScanFailureRecord
+// 数据库实现负责失败记录持久化；JS 和内存模式无需依赖 SQL 驱动。
+type scanFailureStore interface {
+	LoadScanFailures() (map[string]model.ScanFailureRecord, error)
+	SaveScanFailures(map[string]model.ScanFailureRecord) error
+}
 
 func isArchiveScanFailureTarget(filePath string) bool {
 	switch model.GetBookTypeByFilename(filePath) {
@@ -64,6 +60,14 @@ func scanFailureCachePath() (string, error) {
 }
 
 func loadScanFailureCache() (scanFailureCache, error) {
+	if config.GetCfg().EnableDatabase {
+		db, ok := model.IStore.(scanFailureStore)
+		if !ok {
+			return nil, errors.New("database scan failure store is not initialized")
+		}
+		return db.LoadScanFailures()
+	}
+
 	cachePath, err := scanFailureCachePath()
 	if err != nil {
 		return nil, err
@@ -86,6 +90,14 @@ func loadScanFailureCache() (scanFailureCache, error) {
 }
 
 func saveScanFailureCache(cache scanFailureCache) error {
+	if config.GetCfg().EnableDatabase {
+		db, ok := model.IStore.(scanFailureStore)
+		if !ok {
+			return errors.New("database scan failure store is not initialized")
+		}
+		return db.SaveScanFailures(cache)
+	}
+
 	cachePath, err := scanFailureCachePath()
 	if err != nil {
 		return err

@@ -1,12 +1,12 @@
 # Project Instructions
 
-ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片目录、PDF、音频和多种阅读模式。主要栈：Go + Echo v4、templ、bun、Alpine.js、TailwindCSS；默认数据存储为内存 + JSON 持久化，SQLite/sqlc 仍是后续扩展方向。
+ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片目录、PDF、音频和多种阅读模式。主要栈：Go + Echo v4、templ、bun、Alpine.js、TailwindCSS；默认数据存储为内存 + JSON 持久化；启用数据库后，书籍、页面、书签和扫描失败记录直接持久化到 SQLite/PostgreSQL，不读写 metadata JSON。
 
 ## 目录与边界
 - `routers/` 定义 Echo 路由，`urls.go` 管理公开/私有组，私有组走 JWT；`/healthz` 供宿主等待服务就绪。
 - `cmd/` 是 CLI 与启动逻辑；`cmd/mobile/` 导出 `Start`、`Stop`、`GetServerInfo` 等 `gomobile bind` 接口，签名优先保持基础类型。
 - `model/`、`store/` 管理 Book、BookInfo、PageInfo、BookMark 和书库；`config/` 管理全局配置，嵌入式模式下配置、缓存、书库路径由宿主显式传入。
-- `tools/` 放扫描、图片处理、网络、VFS、系统工具；`sqlc/` 放 SQLite schema/query 与生成代码，暂非开发重点。
+- `tools/` 放扫描、图片处理、网络、VFS、系统工具；`sqlc/` 放数据库存储实现、SQLite/PostgreSQL schema/query 与生成代码；修改 schema/query 后执行 `sqlc generate`。
 - `assets/frontend/` 是需编译的前端入口、样式、插件、stores、utils；`assets/static/` 是不参与主包编译的页面级 JS/CSS/WASM，通过 `common.Html(..., insertScripts)` 引入。
 - `assets/dist/` 是 `bun run dev/build` 生成产物，由 `common.Html()` 自动插入；`assets/locale/` 放 `en_US.json`、`ja_JP.json`、`zh_CN.json`。
 

@@ -15,11 +15,9 @@ import (
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/sqlc"
 	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
-	"github.com/yumenaka/comigo/tools/scan"
 )
 
 // DeleteBookFileForWails 把已在页面确认的书籍源文件移到系统垃圾桶。
@@ -55,17 +53,6 @@ func saveWailsBookMetadata() {
 			logger.Infof(locale.GetString("log_savebooks_error"), err)
 		}
 		return
-	}
-	if sqlc.DbStore != nil {
-		allBooks, err := sqlc.DbStore.ListBooks()
-		if err != nil {
-			logger.Infof(locale.GetString("log_error_listing_books_from_database"), err)
-		} else if err := store.RamStore.StoreBooks(allBooks); err != nil {
-			return
-		}
-		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
-			logger.Infof(locale.GetString("log_failed_savebookstodatabase"), err)
-		}
 	}
 }
 

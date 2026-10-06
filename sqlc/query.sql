@@ -51,45 +51,59 @@ WHERE title LIKE '%' || ? || '%'
   AND deleted = FALSE
 ORDER BY modified_time DESC;
 
--- Create new book
--- name: CreateBook :one
+-- Insert or update the complete book metadata atomically.
+-- name: UpsertBook :exec
 INSERT INTO books (title, book_id, owner, book_path, store_url, type,
                    child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size,
                    author, isbn, press, published_at, extract_path, extract_num, book_complete,
-                   init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING *;
-
--- Update book information
--- name: UpdateBook :exec
-UPDATE books
-SET title             = ?,
-    owner             = ?,
-    book_path         = ?,
-    store_url         = ?,
-    type              = ?,
-    child_books_num   = ?,
-    child_books_id    = ?,
-    depth             = ?,
-    parent_folder     = ?,
-    page_count        = ?,
-    last_read_page    = ?,
-    file_size         = ?,
-    author            = ?,
-    isbn              = ?,
-    press             = ?,
-    published_at      = ?,
-    extract_path      = ?,
-    extract_num       = ?,
-    book_complete     = ?,
-    init_complete     = ?,
-    non_utf8zip       = ?,
-    zip_text_encoding = ?,
-    created_by_version = ?,
-    is_remote         = ?,
-    remote_url        = ?,
-    modified_time     = CURRENT_TIMESTAMP
-WHERE book_id = ?;
+                   init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, modified_time, deleted,
+                   remote_book_id, remote_store_key, remote_shelf_key, remote_shelf_name,
+                   cover_name, cover_path, cover_size, cover_mod_time, cover_url, cover_page_num,
+                   cover_blurhash, cover_height, cover_width, cover_img_type, cover_insert_html)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT (book_id) DO UPDATE SET
+    title = excluded.title,
+    owner = excluded.owner,
+    book_path = excluded.book_path,
+    store_url = excluded.store_url,
+    type = excluded.type,
+    child_books_num = excluded.child_books_num,
+    child_books_id = excluded.child_books_id,
+    depth = excluded.depth,
+    parent_folder = excluded.parent_folder,
+    page_count = excluded.page_count,
+    last_read_page = excluded.last_read_page,
+    file_size = excluded.file_size,
+    author = excluded.author,
+    isbn = excluded.isbn,
+    press = excluded.press,
+    published_at = excluded.published_at,
+    extract_path = excluded.extract_path,
+    extract_num = excluded.extract_num,
+    book_complete = excluded.book_complete,
+    init_complete = excluded.init_complete,
+    non_utf8zip = excluded.non_utf8zip,
+    zip_text_encoding = excluded.zip_text_encoding,
+    created_by_version = excluded.created_by_version,
+    is_remote = excluded.is_remote,
+    remote_url = excluded.remote_url,
+    modified_time = excluded.modified_time,
+    deleted = excluded.deleted,
+    remote_book_id = excluded.remote_book_id,
+    remote_store_key = excluded.remote_store_key,
+    remote_shelf_key = excluded.remote_shelf_key,
+    remote_shelf_name = excluded.remote_shelf_name,
+    cover_name = excluded.cover_name,
+    cover_path = excluded.cover_path,
+    cover_size = excluded.cover_size,
+    cover_mod_time = excluded.cover_mod_time,
+    cover_url = excluded.cover_url,
+    cover_page_num = excluded.cover_page_num,
+    cover_blurhash = excluded.cover_blurhash,
+    cover_height = excluded.cover_height,
+    cover_width = excluded.cover_width,
+    cover_img_type = excluded.cover_img_type,
+    cover_insert_html = excluded.cover_insert_html;
 
 -- Update reading progress
 -- name: UpdateLastReadPage :exec
@@ -119,7 +133,7 @@ WHERE book_id = ?;
 SELECT *
 FROM page_infos
 WHERE book_id = ?
-ORDER BY page_num;
+ORDER BY id;
 
 -- Get specific page by book ID and page number
 -- name: GetPageInfoByBookIDAndPage :one

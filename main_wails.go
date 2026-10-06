@@ -42,6 +42,11 @@ func main() {
 	}
 
 	cmd.Execute()
+	cmd.AddStoreUrls(cmd.Args)
+	if err := cmd.LoadMetadata(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	// 先确认监听成功；WebView 初始化期间的 Quit 可能尚无法退出窗口循环。
 	if err := routers.StartWebServer(); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
@@ -106,8 +111,6 @@ func wailsWindowTitle() string {
 func startComigoForWails(ctx context.Context) {
 	routers.StartTailscale()
 	cmd.LoadUserPlugins()
-	cmd.AddStoreUrls(cmd.Args)
-	cmd.LoadMetadata()
 	go finishWailsStartupScan(ctx)
 	config.StartOrStopAutoRescan()
 }

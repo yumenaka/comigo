@@ -7,11 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools"
-	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/vfs"
 )
 
@@ -35,10 +32,13 @@ func (store *Store) GenerateBookGroup() error {
 		// Comigo 远程书库直接使用远端返回的书组拓扑，避免本地按路径再生成一份重复书组。
 		return nil
 	}
+	// 重建时复用旧书组 ID 和阅读状态，数据库不必先删除旧记录。
+	previousGroups := make(map[string]*model.Book)
 	// 遍历 BookMap，清理本地生成的 BooksGroup；远端 Comigo 原本返回的书组带 RemoteBookID，不能删。
 	for _, value := range store.BookMap.Range {
 		b := value.(*model.Book)
 		if b.Type == model.TypeBooksGroup && b.RemoteBookID == "" {
+			previousGroups[b.BookPath] = b
 			store.BookMap.Delete(b.BookID)
 		}
 	}
@@ -146,14 +146,20 @@ func (store *Store) GenerateBookGroup() error {
 				}
 				modTime = pathInfo.ModTime()
 			}
-			tempBook, err := model.NewBook(parentPath, modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
-			if err != nil {
-				if config.GetCfg().Debug {
-					logger.Infof(locale.GetString("log_error_creating_new_book_group"), err)
+			newBookGroup := previousGroups[parentPath]
+			if newBookGroup != nil {
+				newBookGroup = newBookGroup.CloneForView()
+				newBookGroup.Modified = modTime
+				newBookGroup.Depth = depth - 1
+				newBookGroup.ChildBooksID = nil
+			} else {
+				var err error
+				newBookGroup, err = model.NewBook(parentPath, modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
+				if err != nil {
+					return err
 				}
-				continue
 			}
-			newBookGroup := tempBook
+
 			if len(sameParentBookList) > 0 && sameParentBookList[0].IsRemote {
 				// 远程书组由本地扫描生成，必须继承子书的远端定位信息，阅读链接才会带 remote_store。
 				firstBook := sameParentBookList[0]

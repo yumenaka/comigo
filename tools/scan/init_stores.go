@@ -1,6 +1,8 @@
 package scan
 
 import (
+	"errors"
+
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
@@ -9,20 +11,21 @@ import (
 
 // InitAllStore 扫描书库路径，取得书籍
 func InitAllStore(cfg ConfigInterface) error {
+	var scanErrors []error
 	storeUrls := cfg.GetStoreUrls()
 	for _, storeUrl := range storeUrls {
 		err := InitStore(storeUrl, cfg)
 		if err != nil {
 			logger.Infof(locale.GetString("scan_error")+" path:%s %s", storeUrl, err)
+			scanErrors = append(scanErrors, err)
 			continue
 		}
 	}
-	model.GenerateBookGroup()
-	return nil
+	return errors.Join(append(scanErrors, model.IStore.GenerateBookGroup())...)
 }
 
 // AddBooksToStore 添加一组书到书库
-func AddBooksToStore(books []*model.Book) {
+func AddBooksToStore(books []*model.Book) error {
 	for _, book := range books {
 		// 压缩包类型的书籍，页数小于最小图片数，跳过添加
 		if book.Type == model.TypeZip || book.Type == model.TypeRar ||
@@ -40,7 +43,8 @@ func AddBooksToStore(books []*model.Book) {
 		}
 		book.PageCount = len(book.PageInfos)
 		if err := model.IStore.StoreBook(book); err != nil {
-			logger.Infof(locale.GetString("log_add_book_error"), book.BookID, err)
+			return err
 		}
 	}
+	return nil
 }

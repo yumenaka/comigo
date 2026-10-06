@@ -2,24 +2,22 @@ package sqlc
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/tools"
+	"github.com/yumenaka/comigo/store"
 	"github.com/yumenaka/comigo/tools/logger"
-	"github.com/yumenaka/comigo/tools/vfs"
 )
 
 // StoreBook 向数据库中插入一本书
 func (db *StoreDatabase) StoreBook(book *model.Book) error {
+	return db.write(func(tx *StoreDatabase) error { return tx.storeBook(book) })
+}
+
+func (db *StoreDatabase) storeBook(book *model.Book) error {
 	if book == nil {
 		return fmt.Errorf("book is nil")
 	}
@@ -30,43 +28,30 @@ func (db *StoreDatabase) StoreBook(book *model.Book) error {
 		return fmt.Errorf("StoreBook: %v", err)
 	}
 	ctx := context.Background()
-	// 检查书籍是否已存在
-	_, err := db.queries.GetBookByID(ctx, book.BookID)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return fmt.Errorf("check existing book error: %v", err)
-	}
-	// 根据是否存在决定创建或更新
-	if errors.Is(err, sql.ErrNoRows) {
-		// 书籍不存在，创建新记录
-		createParams := ToSQLCCreateBookParams(book)
-		_, err = db.queries.CreateBook(ctx, createParams)
-		if err != nil {
-			return fmt.Errorf("create book error: %v", err)
-		}
-		logger.Infof(locale.GetString("log_created_new_book"), book.BookID)
-	} else {
-		// 书籍已存在，更新记录
-		updateParams := ToSQLCUpdateBookParams(book)
-		err = db.queries.UpdateBook(ctx, updateParams)
-		if err != nil {
-			return fmt.Errorf("update book error: %v", err)
-		}
-		logger.Infof(locale.GetString("log_updated_existing_book"), book.BookID, book.BookPath)
+	if err := db.queries.UpsertBook(ctx, ToSQLCUpsertBookParams(book)); err != nil {
+		return fmt.Errorf("store book: %w", err)
 	}
 	// 保存书籍的页面信息。即使列表为空也要清理旧记录，保持和 JSON 元数据一致。
-	err = db.SaveBookPageInfos(ctx, book.BookID, book.PageInfos)
+	err := db.saveBookPageInfos(ctx, book.BookID, book.PageInfos)
 	if err != nil {
 		return fmt.Errorf("book media files error: %v", err)
 	}
-	if err := db.SaveBookBookmarks(ctx, book.BookID, book.BookMarks); err != nil {
+	if err := db.saveBookBookmarks(ctx, book.BookID, book.BookMarks); err != nil {
 		return fmt.Errorf("book bookmarks error: %v", err)
 	}
 	return nil
 }
 
 func (db *StoreDatabase) StoreBookMark(mark *model.BookMark) error {
+	return db.write(func(tx *StoreDatabase) error { return tx.storeBookMark(mark) })
+}
+
+func (db *StoreDatabase) storeBookMark(mark *model.BookMark) error {
+	if mark == nil {
+		return errors.New("bookmark is nil")
+	}
 	// 获取书籍
-	b, err := db.GetBook(mark.BookID)
+	b, err := db.getBook(mark.BookID)
 	if err != nil {
 		return fmt.Errorf(locale.GetString("err_storebookmark_cannot_find"), mark.BookID)
 	}
@@ -101,7 +86,7 @@ func (db *StoreDatabase) StoreBookMark(mark *model.BookMark) error {
 		// 目前没有其他类型书签
 		return errors.New(locale.GetString("err_storebookmark_unknown_type"))
 	}
-	err = db.StoreBook(b)
+	err = db.saveBookBookmarks(context.Background(), b.BookID, b.BookMarks)
 	if err != nil {
 		return err
 	}
@@ -120,8 +105,12 @@ func (db *StoreDatabase) GetBookMarks(bookID string) (*model.BookMarks, error) {
 // DeleteBookMark 删除指定书籍的特定书签
 // 根据 bookID + markType + pageIndex 唯一确定一个书签
 func (db *StoreDatabase) DeleteBookMark(bookID string, markType model.MarkType, pageIndex int) error {
+	return db.write(func(tx *StoreDatabase) error { return tx.deleteBookMark(bookID, markType, pageIndex) })
+}
+
+func (db *StoreDatabase) deleteBookMark(bookID string, markType model.MarkType, pageIndex int) error {
 	// 获取书籍
-	b, err := db.GetBook(bookID)
+	b, err := db.getBook(bookID)
 	if err != nil {
 		return fmt.Errorf(locale.GetString("err_getbookmark_cannot_find"), bookID)
 	}
@@ -140,11 +129,11 @@ func (db *StoreDatabase) DeleteBookMark(bookID string, markType model.MarkType, 
 	}
 	b.BookMarks = newBookMarks
 	// 持久化更新
-	return db.StoreBook(b)
+	return db.saveBookBookmarks(context.Background(), b.BookID, b.BookMarks)
 }
 
-// SaveBookPageInfos  保存书籍的媒体文件信息
-func (db *StoreDatabase) SaveBookPageInfos(ctx context.Context, bookID string, pageInfos []model.PageInfo) error {
+// saveBookPageInfos  保存书籍的媒体文件信息
+func (db *StoreDatabase) saveBookPageInfos(ctx context.Context, bookID string, pageInfos []model.PageInfo) error {
 	// 先删除旧的媒体文件记录
 	err := db.queries.DeletePageInfosByBookID(ctx, bookID)
 	if err != nil {
@@ -166,8 +155,8 @@ func (db *StoreDatabase) SaveBookPageInfos(ctx context.Context, bookID string, p
 	return nil
 }
 
-// SaveBookBookmarks 保存书籍的书签信息
-func (db *StoreDatabase) SaveBookBookmarks(ctx context.Context, bookID string, bookmarks model.BookMarks) error {
+// saveBookBookmarks 保存书籍的书签信息
+func (db *StoreDatabase) saveBookBookmarks(ctx context.Context, bookID string, bookmarks model.BookMarks) error {
 	if err := db.queries.DeleteBookmarksByBookID(ctx, bookID); err != nil {
 		return fmt.Errorf("delete old bookmarks error: %v", err)
 	}
@@ -186,6 +175,15 @@ func (db *StoreDatabase) SaveBookBookmarks(ctx context.Context, bookID string, b
 // ListBooks  从数据库查询所有书籍的详细信息,避免重复扫描压缩包。忽略已删除书籍
 func (db *StoreDatabase) ListBooks() (list []*model.Book, err error) {
 	if err := db.CheckDBQueries(); err != nil {
+		return nil, err
+	}
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+	return db.listBooks()
+}
+
+func (db *StoreDatabase) listBooks() (list []*model.Book, err error) {
+	if err := db.CheckDBQueries(); err != nil {
 		return nil, fmt.Errorf("GetAllBook: %v", err)
 	}
 	ctx := context.Background()
@@ -201,15 +199,13 @@ func (db *StoreDatabase) ListBooks() (list []*model.Book, err error) {
 	for _, sqlcBook := range sqlcBooks {
 		sqlcPageInfos, err := db.queries.GetPageInfosByBookID(ctx, sqlcBook.BookID)
 		if err != nil {
-			logger.Infof(locale.GetString("log_get_media_files_for_book_error"), sqlcBook.BookID, err.Error())
-			pagesMap[sqlcBook.BookID] = []model.PageInfo{}
+			return nil, err
 		} else {
 			pagesMap[sqlcBook.BookID] = FromSQLCPageInfos(sqlcPageInfos)
 		}
 		sqlcBookmarks, err := db.queries.ListBookmarksByBookID(ctx, sqlcBook.BookID)
 		if err != nil {
-			logger.Infof(locale.GetString("log_get_bookmarks_for_book_error"), sqlcBook.BookID, err.Error())
-			bookmarksMap[sqlcBook.BookID] = nil
+			return nil, err
 		} else {
 			bookmarksMap[sqlcBook.BookID] = FromSQLCBookmarks(sqlcBookmarks)
 		}
@@ -222,6 +218,15 @@ func (db *StoreDatabase) ListBooks() (list []*model.Book, err error) {
 
 // GetBook 根据ID获取书籍信息
 func (db *StoreDatabase) GetBook(bookID string) (*model.Book, error) {
+	if err := db.CheckDBQueries(); err != nil {
+		return nil, err
+	}
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+	return db.getBook(bookID)
+}
+
+func (db *StoreDatabase) getBook(bookID string) (*model.Book, error) {
 	ctx := context.Background()
 	// 查询书籍基本信息
 	sqlcBook, err := db.queries.GetBookByID(ctx, bookID)
@@ -231,202 +236,74 @@ func (db *StoreDatabase) GetBook(bookID string) (*model.Book, error) {
 	// 补充页面信息
 	book := FromSQLCBook(sqlcBook)
 	imagesSQL, err := db.queries.GetPageInfosByBookID(ctx, sqlcBook.BookID)
-	if err == nil {
-		book.PageInfos = FromSQLCPageInfos(imagesSQL)
-		book.SortPages("default") // 对页面进行排序
+	if err != nil {
+		return nil, err
 	}
+	book.PageInfos = FromSQLCPageInfos(imagesSQL)
 	bookmarksSQL, err := db.queries.ListBookmarksByBookID(ctx, sqlcBook.BookID)
-	if err == nil {
-		book.BookMarks = FromSQLCBookmarks(bookmarksSQL)
-	} else if config.GetCfg().Debug {
-		logger.Infof(locale.GetString("log_get_bookmarks_for_book_error"), sqlcBook.BookID, err.Error())
+	if err != nil {
+		return nil, err
 	}
+	book.BookMarks = FromSQLCBookmarks(bookmarksSQL)
 	return book, nil
 }
 
-// GenerateBookGroup 分析所有子书库，并并生成书籍组
-func (db *StoreDatabase) GenerateBookGroup() (e error) {
+// GenerateBookGroup 复用内存书库的分组规则；临时 Store 仅计算拓扑，不写 JSON。
+func (db *StoreDatabase) GenerateBookGroup() error {
 	if err := db.CheckDBQueries(); err != nil {
-		return fmt.Errorf("GetAllBook: %v", err)
+		return err
 	}
-	ctx := context.Background()
-	// 遍历所有子书库
-	storeUrls, err := db.queries.ListAllBookStoreURLs(ctx)
+	db.groupsMu.Lock()
+	defer db.groupsMu.Unlock()
+	books, err := db.ListBooks()
 	if err != nil {
-		return fmt.Errorf("ListAllBookStoreURLs error: %v", err)
+		return err
 	}
-	for _, storeUrl := range storeUrls {
-		sqlcBook, err := db.queries.ListBooksByStorePath(ctx, storeUrl)
-		if err != nil {
-			return fmt.Errorf("ListBooksByStorePath error: %v", err)
+	stores := map[string]*store.Store{}
+	for _, book := range books {
+		s := stores[book.StoreUrl]
+		if s == nil {
+			s = &store.Store{StoreInfo: store.StoreInfo{BackendURL: book.StoreUrl}}
+			stores[book.StoreUrl] = s
 		}
-		storeBooks := FromSQLCBooks(sqlcBook, nil, nil)
-		// 遍历 BookMap ，删除所有 BooksGroup 类型的书籍
-		activeBooks := make([]*model.Book, 0, len(storeBooks))
-		for _, b := range storeBooks {
-			if b.Type == model.TypeBooksGroup {
-				err := db.DeleteBook(b.BookID)
-				if err != nil {
-					return err
-				}
-				continue
-			}
-			activeBooks = append(activeBooks, b)
+		s.BookMap.Store(book.BookID, book)
+	}
+	var groups []*model.Book
+	for _, s := range stores {
+		if err := s.GenerateBookGroup(); err != nil {
+			return err
 		}
-		storeBooks = activeBooks
-		addedGroupPath := make(map[string]bool)
-		// 然后再重新生成 BooksGroup
-		depthBooksMap := make(map[int][]*model.Book) // key是Depth的临时map
-		// 计算最大深度
-		maxDepth := 0
-		for _, b := range storeBooks {
-			depthBooksMap[b.Depth] = append(depthBooksMap[b.Depth], b)
-			if b.Depth > maxDepth {
-				maxDepth = b.Depth
+		for _, value := range s.BookMap.Range {
+			book := value.(*model.Book)
+			if book.Type == model.TypeBooksGroup && book.RemoteBookID == "" {
+				groups = append(groups, book)
 			}
 		}
-		// 从深往浅遍历
-		// 如果有几本书同时有同一个父文件夹，那么应该【新建】一本书(组)，并加入到depth-1层里面
-		for depth := maxDepth; depth >= 0; depth-- {
-			// 用父目录"绝对路径"做 key 的 parentMap（仅用 ParentFolder 的名字会发生同名目录误合并）
-			parentTempMap := make(map[string][]*model.Book)
-			// //遍历depth等于i的所有book
-			for _, b := range depthBooksMap[depth] {
-				// 计算父目录路径：
-				// - 文件型书籍：BookPath 是文件路径，父目录为 Dir(BookPath)
-				// - 目录型书籍/书组：BookPath 是目录路径，先去掉结尾分隔符再取父目录
-				parentPath := b.BookPath
-				if b.Type == model.TypeDir || b.Type == model.TypeBooksGroup {
-					parentPath = strings.TrimRight(parentPath, "/\\")
-				}
-				// 判断是否为远程路径
-				if b.IsRemote {
-					// 远程路径：使用字符串操作计算父目录
-					parentPath = strings.TrimRight(parentPath, "/\\")
-					lastSlash := strings.LastIndexAny(parentPath, "/\\")
-					if lastSlash >= 0 {
-						parentPath = parentPath[:lastSlash]
-					} else {
-						// 已经是根目录，使用书库根路径
-						parentPath = b.RemoteURL
-					}
-				} else {
-					// 本地路径：使用 filepath.Dir
-					parentPath = filepath.Dir(parentPath)
-				}
-				parentTempMap[parentPath] = append(parentTempMap[parentPath], b)
-			}
-			// 循环parentMap，把有相同parent的书创建为一个书组
-			for parentPath, sameParentBookList := range parentTempMap {
-				// depth-1 小于 0 说明已经到达子书库根目录以上，不生成书组
-				if (depth - 1) < 0 {
-					continue
-				}
-				if addedGroupPath[parentPath] {
-					continue
-				}
-				addedGroupPath[parentPath] = true
-				// 新建一本书,类型是书籍组
-				// 获取父目录信息（作为书组的时间信息来源）
-				var modTime time.Time
-				isRemote := tools.IsRemoteStoreURL(storeUrl)
-				if isRemote {
-					// 远程书库：使用 VFS 获取文件信息
-					vfsInstance, err := vfs.GetOrCreate(storeUrl, vfs.Options{
-						CacheEnabled: false,
-						Timeout:      10,
-					})
-					if err != nil {
-						// 无法连接远程服务器，退化为使用子项目的时间信息
-						if len(sameParentBookList) > 0 {
-							firstBook := sameParentBookList[0]
-							if firstBook.IsRemote {
-								modTime = firstBook.Modified
-							} else {
-								modTime = time.Now()
-							}
-						} else {
-							modTime = time.Now()
-						}
-					} else {
-						// 尝试获取父目录信息
-						pathInfo, err := vfsInstance.Stat(parentPath)
-						if err != nil {
-							// 父目录可能暂时不可访问，退化为使用子项目的时间信息
-							if len(sameParentBookList) > 0 {
-								firstBook := sameParentBookList[0]
-								modTime = firstBook.Modified
-							} else {
-								modTime = time.Now()
-							}
-						} else {
-							modTime = pathInfo.ModTime()
-						}
-					}
-				} else {
-					// 本地书库：使用 os.Stat
-					pathInfo, err := os.Stat(parentPath)
-					if err != nil {
-						// 父目录可能暂时不可访问，退化为使用子项目的时间信息
-						pathInfo, err = os.Stat(sameParentBookList[0].BookPath)
-						if err != nil {
-							return err
-						}
-					}
-					modTime = pathInfo.ModTime()
-				}
-				tempBook, err := model.NewBook(parentPath, modTime, 0, storeUrl, depth-1, model.TypeBooksGroup)
-				if err != nil {
-					if config.GetCfg().Debug {
-						logger.Infof(locale.GetString("log_error_creating_new_book_group"), err)
-					}
-					continue
-				}
-				newBookGroup := tempBook
-				// 书名设置为目录名（更符合"文件夹/书组"语义）
-				var parentName string
-				if isRemote {
-					// 远程路径：使用字符串操作提取目录名
-					trimmedPath := strings.TrimRight(parentPath, "/\\")
-					lastSlash := strings.LastIndexAny(trimmedPath, "/\\")
-					if lastSlash >= 0 {
-						parentName = trimmedPath[lastSlash+1:]
-					} else {
-						parentName = trimmedPath
-					}
-				} else {
-					parentName = filepath.Base(parentPath)
-				}
-				if newBookGroup.Title != parentName {
-					newBookGroup.Title = parentName
-				}
-				// 初始化ChildBook
-				// 然后把同一parent的书，都加进某个书籍组
-				for _, bookInList := range sameParentBookList {
-					newBookGroup.ChildBooksID = append(newBookGroup.ChildBooksID, bookInList.BookID)
-				}
-				newBookGroup.ChildBooksNum = len(sameParentBookList)
-				// 如果书籍组的子书籍数量等于0，那么不需要添加
-				if newBookGroup.ChildBooksNum == 0 {
-					continue
-				}
-				if (depth - 1) < 0 {
-					continue
-				}
-				depthBooksMap[depth-1] = append(depthBooksMap[depth-1], newBookGroup)
-				// 将这本书加到Store的 BookMap 表里面去
-				err = db.StoreBook(newBookGroup)
-				if err != nil {
+	}
+	// 计算或写入失败时保留旧拓扑，不向读者暴露半份书组。
+	return db.write(func(tx *StoreDatabase) error {
+		for _, book := range books {
+			if book.Type == model.TypeBooksGroup && book.RemoteBookID == "" {
+				if err := tx.deleteBook(book.BookID); err != nil {
 					return err
 				}
 			}
 		}
-	}
-	return e
+		for _, group := range groups {
+			if err := tx.storeBook(group); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 // DeleteBook 删除书籍信息
 func (db *StoreDatabase) DeleteBook(bookID string) error {
+	return db.write(func(tx *StoreDatabase) error { return tx.deleteBook(bookID) })
+}
+
+func (db *StoreDatabase) deleteBook(bookID string) error {
 	if err := db.CheckDBQueries(); err != nil {
 		return err
 	}

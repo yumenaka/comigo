@@ -6,6 +6,7 @@ package postgres
 
 import (
 	"database/sql"
+	"time"
 )
 
 type Book struct {
@@ -37,6 +38,21 @@ type Book struct {
 	CreatedByVersion sql.NullString
 	IsRemote         sql.NullBool
 	RemoteUrl        sql.NullString
+	RemoteBookID     sql.NullString
+	RemoteStoreKey   sql.NullString
+	RemoteShelfKey   sql.NullString
+	RemoteShelfName  sql.NullString
+	CoverName        sql.NullString
+	CoverPath        sql.NullString
+	CoverSize        sql.NullInt64
+	CoverModTime     sql.NullTime
+	CoverUrl         sql.NullString
+	CoverPageNum     sql.NullInt64
+	CoverBlurhash    sql.NullString
+	CoverHeight      sql.NullInt64
+	CoverWidth       sql.NullInt64
+	CoverImgType     sql.NullString
+	CoverInsertHtml  sql.NullString
 	Deleted          sql.NullBool
 }
 
@@ -65,6 +81,18 @@ type PageInfo struct {
 	Width      sql.NullInt64
 	ImgType    sql.NullString
 	InsertHtml sql.NullString
+}
+
+type ScanFailure struct {
+	Key              string
+	StoreUrl         string
+	FilePath         string
+	FileSize         int64
+	ModifiedUnixNano int64
+	CreatedByVersion string
+	FailedAt         time.Time
+	Error            string
+	IsRemote         bool
 }
 
 type User struct {

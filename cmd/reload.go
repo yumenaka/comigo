@@ -65,6 +65,10 @@ func reloadConfig(file string) error {
 	if err != nil {
 		return err
 	}
+	// 存储后端只能在启动时选择，避免配置已切到 SQLite 而请求仍写 JSON。
+	if candidate.EnableDatabase != old.EnableDatabase || candidate.DBType != old.DBType || candidate.DBDSN != old.DBDSN {
+		return fmt.Errorf("database config requires restart")
+	}
 	// 这些字段由启动流程或插件扫描计算，不属于配置文件的持久化内容。
 	candidate.TemporaryReaderMode, candidate.NoTUI = old.TemporaryReaderMode, old.NoTUI
 	candidate.CustomPlugins, candidate.UserPluginList = old.CustomPlugins, old.UserPluginList

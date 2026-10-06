@@ -55,109 +55,6 @@ func (q *Queries) CountPageInfosByBookID(ctx context.Context, bookID string) (in
 	return count, err
 }
 
-const createBook = `-- name: CreateBook :one
-INSERT INTO books (title, book_id, owner, book_path, store_url, type,
-                   child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size,
-                   author, isbn, press, published_at, extract_path, extract_num, book_complete,
-                   init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
-`
-
-type CreateBookParams struct {
-	Title            string
-	BookID           string
-	Owner            sql.NullString
-	BookPath         string
-	StoreUrl         string
-	Type             string
-	ChildBooksNum    sql.NullInt64
-	ChildBooksID     sql.NullString
-	Depth            sql.NullInt64
-	ParentFolder     sql.NullString
-	PageCount        sql.NullInt64
-	LastReadPage     sql.NullInt64
-	FileSize         sql.NullInt64
-	Author           sql.NullString
-	Isbn             sql.NullString
-	Press            sql.NullString
-	PublishedAt      sql.NullString
-	ExtractPath      sql.NullString
-	ExtractNum       sql.NullInt64
-	BookComplete     sql.NullBool
-	InitComplete     sql.NullBool
-	NonUtf8zip       sql.NullBool
-	ZipTextEncoding  sql.NullString
-	CreatedByVersion sql.NullString
-	IsRemote         sql.NullBool
-	RemoteUrl        sql.NullString
-}
-
-// Create new book
-func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, error) {
-	row := q.db.QueryRowContext(ctx, createBook,
-		arg.Title,
-		arg.BookID,
-		arg.Owner,
-		arg.BookPath,
-		arg.StoreUrl,
-		arg.Type,
-		arg.ChildBooksNum,
-		arg.ChildBooksID,
-		arg.Depth,
-		arg.ParentFolder,
-		arg.PageCount,
-		arg.LastReadPage,
-		arg.FileSize,
-		arg.Author,
-		arg.Isbn,
-		arg.Press,
-		arg.PublishedAt,
-		arg.ExtractPath,
-		arg.ExtractNum,
-		arg.BookComplete,
-		arg.InitComplete,
-		arg.NonUtf8zip,
-		arg.ZipTextEncoding,
-		arg.CreatedByVersion,
-		arg.IsRemote,
-		arg.RemoteUrl,
-	)
-	var i Book
-	err := row.Scan(
-		&i.ID,
-		&i.Title,
-		&i.BookID,
-		&i.Owner,
-		&i.BookPath,
-		&i.StoreUrl,
-		&i.Type,
-		&i.ChildBooksNum,
-		&i.ChildBooksID,
-		&i.Depth,
-		&i.ParentFolder,
-		&i.PageCount,
-		&i.LastReadPage,
-		&i.FileSize,
-		&i.Author,
-		&i.Isbn,
-		&i.Press,
-		&i.PublishedAt,
-		&i.ExtractPath,
-		&i.ModifiedTime,
-		&i.ExtractNum,
-		&i.BookComplete,
-		&i.InitComplete,
-		&i.NonUtf8zip,
-		&i.ZipTextEncoding,
-		&i.CreatedByVersion,
-		&i.IsRemote,
-		&i.RemoteUrl,
-		&i.Deleted,
-	)
-	return i, err
-}
-
 const createBookmark = `-- name: CreateBookmark :one
 INSERT INTO bookmarks (type, book_id, book_store_id, page_index, description, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -311,7 +208,7 @@ func (q *Queries) DeletePageInfosByBookID(ctx context.Context, bookID string) er
 }
 
 const getBookByBookPath = `-- name: GetBookByBookPath :one
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, remote_book_id, remote_store_key, remote_shelf_key, remote_shelf_name, cover_name, cover_path, cover_size, cover_mod_time, cover_url, cover_page_num, cover_blurhash, cover_height, cover_width, cover_img_type, cover_insert_html, deleted
 FROM books
 WHERE book_path = ?
 LIMIT 1
@@ -350,6 +247,21 @@ func (q *Queries) GetBookByBookPath(ctx context.Context, bookPath string) (Book,
 		&i.CreatedByVersion,
 		&i.IsRemote,
 		&i.RemoteUrl,
+		&i.RemoteBookID,
+		&i.RemoteStoreKey,
+		&i.RemoteShelfKey,
+		&i.RemoteShelfName,
+		&i.CoverName,
+		&i.CoverPath,
+		&i.CoverSize,
+		&i.CoverModTime,
+		&i.CoverUrl,
+		&i.CoverPageNum,
+		&i.CoverBlurhash,
+		&i.CoverHeight,
+		&i.CoverWidth,
+		&i.CoverImgType,
+		&i.CoverInsertHtml,
 		&i.Deleted,
 	)
 	return i, err
@@ -357,7 +269,7 @@ func (q *Queries) GetBookByBookPath(ctx context.Context, bookPath string) (Book,
 
 const getBookByID = `-- name: GetBookByID :one
 
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, remote_book_id, remote_store_key, remote_shelf_key, remote_shelf_name, cover_name, cover_path, cover_size, cover_mod_time, cover_url, cover_page_num, cover_blurhash, cover_height, cover_width, cover_img_type, cover_insert_html, deleted
 FROM books
 WHERE book_id = ?
 LIMIT 1
@@ -397,6 +309,21 @@ func (q *Queries) GetBookByID(ctx context.Context, bookID string) (Book, error) 
 		&i.CreatedByVersion,
 		&i.IsRemote,
 		&i.RemoteUrl,
+		&i.RemoteBookID,
+		&i.RemoteStoreKey,
+		&i.RemoteShelfKey,
+		&i.RemoteShelfName,
+		&i.CoverName,
+		&i.CoverPath,
+		&i.CoverSize,
+		&i.CoverModTime,
+		&i.CoverUrl,
+		&i.CoverPageNum,
+		&i.CoverBlurhash,
+		&i.CoverHeight,
+		&i.CoverWidth,
+		&i.CoverImgType,
+		&i.CoverInsertHtml,
 		&i.Deleted,
 	)
 	return i, err
@@ -442,7 +369,7 @@ const getPageInfosByBookID = `-- name: GetPageInfosByBookID :many
 SELECT id, book_id, name, path, size, mod_time, url, page_num, blurhash, height, width, img_type, insert_html
 FROM page_infos
 WHERE book_id = ?
-ORDER BY page_num
+ORDER BY id
 `
 
 // Media files related queries
@@ -557,7 +484,7 @@ func (q *Queries) ListBookmarksByBookID(ctx context.Context, bookID string) ([]B
 }
 
 const listBooks = `-- name: ListBooks :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, remote_book_id, remote_store_key, remote_shelf_key, remote_shelf_name, cover_name, cover_path, cover_size, cover_mod_time, cover_url, cover_page_num, cover_blurhash, cover_height, cover_width, cover_img_type, cover_insert_html, deleted
 FROM books
 WHERE deleted = FALSE
 ORDER BY modified_time DESC
@@ -602,6 +529,21 @@ func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 			&i.CreatedByVersion,
 			&i.IsRemote,
 			&i.RemoteUrl,
+			&i.RemoteBookID,
+			&i.RemoteStoreKey,
+			&i.RemoteShelfKey,
+			&i.RemoteShelfName,
+			&i.CoverName,
+			&i.CoverPath,
+			&i.CoverSize,
+			&i.CoverModTime,
+			&i.CoverUrl,
+			&i.CoverPageNum,
+			&i.CoverBlurhash,
+			&i.CoverHeight,
+			&i.CoverWidth,
+			&i.CoverImgType,
+			&i.CoverInsertHtml,
 			&i.Deleted,
 		); err != nil {
 			return nil, err
@@ -618,7 +560,7 @@ func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 }
 
 const listBooksByStorePath = `-- name: ListBooksByStorePath :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, remote_book_id, remote_store_key, remote_shelf_key, remote_shelf_name, cover_name, cover_path, cover_size, cover_mod_time, cover_url, cover_page_num, cover_blurhash, cover_height, cover_width, cover_img_type, cover_insert_html, deleted
 FROM books
 WHERE store_url = ?
   AND deleted = FALSE
@@ -664,6 +606,21 @@ func (q *Queries) ListBooksByStorePath(ctx context.Context, storeUrl string) ([]
 			&i.CreatedByVersion,
 			&i.IsRemote,
 			&i.RemoteUrl,
+			&i.RemoteBookID,
+			&i.RemoteStoreKey,
+			&i.RemoteShelfKey,
+			&i.RemoteShelfName,
+			&i.CoverName,
+			&i.CoverPath,
+			&i.CoverSize,
+			&i.CoverModTime,
+			&i.CoverUrl,
+			&i.CoverPageNum,
+			&i.CoverBlurhash,
+			&i.CoverHeight,
+			&i.CoverWidth,
+			&i.CoverImgType,
+			&i.CoverInsertHtml,
 			&i.Deleted,
 		); err != nil {
 			return nil, err
@@ -680,7 +637,7 @@ func (q *Queries) ListBooksByStorePath(ctx context.Context, storeUrl string) ([]
 }
 
 const listBooksByType = `-- name: ListBooksByType :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, remote_book_id, remote_store_key, remote_shelf_key, remote_shelf_name, cover_name, cover_path, cover_size, cover_mod_time, cover_url, cover_page_num, cover_blurhash, cover_height, cover_width, cover_img_type, cover_insert_html, deleted
 FROM books
 WHERE type = ?
   AND deleted = FALSE
@@ -726,6 +683,21 @@ func (q *Queries) ListBooksByType(ctx context.Context, type_ string) ([]Book, er
 			&i.CreatedByVersion,
 			&i.IsRemote,
 			&i.RemoteUrl,
+			&i.RemoteBookID,
+			&i.RemoteStoreKey,
+			&i.RemoteShelfKey,
+			&i.RemoteShelfName,
+			&i.CoverName,
+			&i.CoverPath,
+			&i.CoverSize,
+			&i.CoverModTime,
+			&i.CoverUrl,
+			&i.CoverPageNum,
+			&i.CoverBlurhash,
+			&i.CoverHeight,
+			&i.CoverWidth,
+			&i.CoverImgType,
+			&i.CoverInsertHtml,
 			&i.Deleted,
 		); err != nil {
 			return nil, err
@@ -755,7 +727,7 @@ func (q *Queries) MarkBookAsDeleted(ctx context.Context, bookID string) error {
 }
 
 const searchBooksByTitle = `-- name: SearchBooksByTitle :many
-SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, deleted
+SELECT id, title, book_id, owner, book_path, store_url, type, child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size, author, isbn, press, published_at, extract_path, modified_time, extract_num, book_complete, init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, remote_book_id, remote_store_key, remote_shelf_key, remote_shelf_name, cover_name, cover_path, cover_size, cover_mod_time, cover_url, cover_page_num, cover_blurhash, cover_height, cover_width, cover_img_type, cover_insert_html, deleted
 FROM books
 WHERE title LIKE '%' || ? || '%'
   AND deleted = FALSE
@@ -801,6 +773,21 @@ func (q *Queries) SearchBooksByTitle(ctx context.Context, dollar_1 sql.NullStrin
 			&i.CreatedByVersion,
 			&i.IsRemote,
 			&i.RemoteUrl,
+			&i.RemoteBookID,
+			&i.RemoteStoreKey,
+			&i.RemoteShelfKey,
+			&i.RemoteShelfName,
+			&i.CoverName,
+			&i.CoverPath,
+			&i.CoverSize,
+			&i.CoverModTime,
+			&i.CoverUrl,
+			&i.CoverPageNum,
+			&i.CoverBlurhash,
+			&i.CoverHeight,
+			&i.CoverWidth,
+			&i.CoverImgType,
+			&i.CoverInsertHtml,
 			&i.Deleted,
 		); err != nil {
 			return nil, err
@@ -814,99 +801,6 @@ func (q *Queries) SearchBooksByTitle(ctx context.Context, dollar_1 sql.NullStrin
 		return nil, err
 	}
 	return items, nil
-}
-
-const updateBook = `-- name: UpdateBook :exec
-UPDATE books
-SET title             = ?,
-    owner             = ?,
-    book_path         = ?,
-    store_url         = ?,
-    type              = ?,
-    child_books_num   = ?,
-    child_books_id    = ?,
-    depth             = ?,
-    parent_folder     = ?,
-    page_count        = ?,
-    last_read_page    = ?,
-    file_size         = ?,
-    author            = ?,
-    isbn              = ?,
-    press             = ?,
-    published_at      = ?,
-    extract_path      = ?,
-    extract_num       = ?,
-    book_complete     = ?,
-    init_complete     = ?,
-    non_utf8zip       = ?,
-    zip_text_encoding = ?,
-    created_by_version = ?,
-    is_remote         = ?,
-    remote_url        = ?,
-    modified_time     = CURRENT_TIMESTAMP
-WHERE book_id = ?
-`
-
-type UpdateBookParams struct {
-	Title            string
-	Owner            sql.NullString
-	BookPath         string
-	StoreUrl         string
-	Type             string
-	ChildBooksNum    sql.NullInt64
-	ChildBooksID     sql.NullString
-	Depth            sql.NullInt64
-	ParentFolder     sql.NullString
-	PageCount        sql.NullInt64
-	LastReadPage     sql.NullInt64
-	FileSize         sql.NullInt64
-	Author           sql.NullString
-	Isbn             sql.NullString
-	Press            sql.NullString
-	PublishedAt      sql.NullString
-	ExtractPath      sql.NullString
-	ExtractNum       sql.NullInt64
-	BookComplete     sql.NullBool
-	InitComplete     sql.NullBool
-	NonUtf8zip       sql.NullBool
-	ZipTextEncoding  sql.NullString
-	CreatedByVersion sql.NullString
-	IsRemote         sql.NullBool
-	RemoteUrl        sql.NullString
-	BookID           string
-}
-
-// Update book information
-func (q *Queries) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
-	_, err := q.db.ExecContext(ctx, updateBook,
-		arg.Title,
-		arg.Owner,
-		arg.BookPath,
-		arg.StoreUrl,
-		arg.Type,
-		arg.ChildBooksNum,
-		arg.ChildBooksID,
-		arg.Depth,
-		arg.ParentFolder,
-		arg.PageCount,
-		arg.LastReadPage,
-		arg.FileSize,
-		arg.Author,
-		arg.Isbn,
-		arg.Press,
-		arg.PublishedAt,
-		arg.ExtractPath,
-		arg.ExtractNum,
-		arg.BookComplete,
-		arg.InitComplete,
-		arg.NonUtf8zip,
-		arg.ZipTextEncoding,
-		arg.CreatedByVersion,
-		arg.IsRemote,
-		arg.RemoteUrl,
-		arg.BookID,
-	)
-	return err
 }
 
 const updateBookmark = `-- name: UpdateBookmark :exec
@@ -1001,6 +895,156 @@ func (q *Queries) UpdatePageInfo(ctx context.Context, arg UpdatePageInfoParams) 
 		arg.InsertHtml,
 		arg.BookID,
 		arg.PageNum,
+	)
+	return err
+}
+
+const upsertBook = `-- name: UpsertBook :exec
+INSERT INTO books (title, book_id, owner, book_path, store_url, type,
+                   child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size,
+                   author, isbn, press, published_at, extract_path, extract_num, book_complete,
+                   init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, modified_time, deleted,
+                   remote_book_id, remote_store_key, remote_shelf_key, remote_shelf_name,
+                   cover_name, cover_path, cover_size, cover_mod_time, cover_url, cover_page_num,
+                   cover_blurhash, cover_height, cover_width, cover_img_type, cover_insert_html)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT (book_id) DO UPDATE SET
+    title = excluded.title,
+    owner = excluded.owner,
+    book_path = excluded.book_path,
+    store_url = excluded.store_url,
+    type = excluded.type,
+    child_books_num = excluded.child_books_num,
+    child_books_id = excluded.child_books_id,
+    depth = excluded.depth,
+    parent_folder = excluded.parent_folder,
+    page_count = excluded.page_count,
+    last_read_page = excluded.last_read_page,
+    file_size = excluded.file_size,
+    author = excluded.author,
+    isbn = excluded.isbn,
+    press = excluded.press,
+    published_at = excluded.published_at,
+    extract_path = excluded.extract_path,
+    extract_num = excluded.extract_num,
+    book_complete = excluded.book_complete,
+    init_complete = excluded.init_complete,
+    non_utf8zip = excluded.non_utf8zip,
+    zip_text_encoding = excluded.zip_text_encoding,
+    created_by_version = excluded.created_by_version,
+    is_remote = excluded.is_remote,
+    remote_url = excluded.remote_url,
+    modified_time = excluded.modified_time,
+    deleted = excluded.deleted,
+    remote_book_id = excluded.remote_book_id,
+    remote_store_key = excluded.remote_store_key,
+    remote_shelf_key = excluded.remote_shelf_key,
+    remote_shelf_name = excluded.remote_shelf_name,
+    cover_name = excluded.cover_name,
+    cover_path = excluded.cover_path,
+    cover_size = excluded.cover_size,
+    cover_mod_time = excluded.cover_mod_time,
+    cover_url = excluded.cover_url,
+    cover_page_num = excluded.cover_page_num,
+    cover_blurhash = excluded.cover_blurhash,
+    cover_height = excluded.cover_height,
+    cover_width = excluded.cover_width,
+    cover_img_type = excluded.cover_img_type,
+    cover_insert_html = excluded.cover_insert_html
+`
+
+type UpsertBookParams struct {
+	Title            string
+	BookID           string
+	Owner            sql.NullString
+	BookPath         string
+	StoreUrl         string
+	Type             string
+	ChildBooksNum    sql.NullInt64
+	ChildBooksID     sql.NullString
+	Depth            sql.NullInt64
+	ParentFolder     sql.NullString
+	PageCount        sql.NullInt64
+	LastReadPage     sql.NullInt64
+	FileSize         sql.NullInt64
+	Author           sql.NullString
+	Isbn             sql.NullString
+	Press            sql.NullString
+	PublishedAt      sql.NullString
+	ExtractPath      sql.NullString
+	ExtractNum       sql.NullInt64
+	BookComplete     sql.NullBool
+	InitComplete     sql.NullBool
+	NonUtf8zip       sql.NullBool
+	ZipTextEncoding  sql.NullString
+	CreatedByVersion sql.NullString
+	IsRemote         sql.NullBool
+	RemoteUrl        sql.NullString
+	ModifiedTime     sql.NullTime
+	Deleted          sql.NullBool
+	RemoteBookID     sql.NullString
+	RemoteStoreKey   sql.NullString
+	RemoteShelfKey   sql.NullString
+	RemoteShelfName  sql.NullString
+	CoverName        sql.NullString
+	CoverPath        sql.NullString
+	CoverSize        sql.NullInt64
+	CoverModTime     sql.NullTime
+	CoverUrl         sql.NullString
+	CoverPageNum     sql.NullInt64
+	CoverBlurhash    sql.NullString
+	CoverHeight      sql.NullInt64
+	CoverWidth       sql.NullInt64
+	CoverImgType     sql.NullString
+	CoverInsertHtml  sql.NullString
+}
+
+// Insert or update the complete book metadata atomically.
+func (q *Queries) UpsertBook(ctx context.Context, arg UpsertBookParams) error {
+	_, err := q.db.ExecContext(ctx, upsertBook,
+		arg.Title,
+		arg.BookID,
+		arg.Owner,
+		arg.BookPath,
+		arg.StoreUrl,
+		arg.Type,
+		arg.ChildBooksNum,
+		arg.ChildBooksID,
+		arg.Depth,
+		arg.ParentFolder,
+		arg.PageCount,
+		arg.LastReadPage,
+		arg.FileSize,
+		arg.Author,
+		arg.Isbn,
+		arg.Press,
+		arg.PublishedAt,
+		arg.ExtractPath,
+		arg.ExtractNum,
+		arg.BookComplete,
+		arg.InitComplete,
+		arg.NonUtf8zip,
+		arg.ZipTextEncoding,
+		arg.CreatedByVersion,
+		arg.IsRemote,
+		arg.RemoteUrl,
+		arg.ModifiedTime,
+		arg.Deleted,
+		arg.RemoteBookID,
+		arg.RemoteStoreKey,
+		arg.RemoteShelfKey,
+		arg.RemoteShelfName,
+		arg.CoverName,
+		arg.CoverPath,
+		arg.CoverSize,
+		arg.CoverModTime,
+		arg.CoverUrl,
+		arg.CoverPageNum,
+		arg.CoverBlurhash,
+		arg.CoverHeight,
+		arg.CoverWidth,
+		arg.CoverImgType,
+		arg.CoverInsertHtml,
 	)
 	return err
 }

@@ -364,6 +364,11 @@ func runWithoutTUI() error {
 // startBackend 统一 TUI 与无界面 CLI 的服务和书库启动顺序。
 func startBackend() error {
 	cmd.Execute()
+	cmd.AddStoreUrls(cmd.Args)
+	cmd.SetCwdAsScanPathIfNeed()
+	if err := cmd.LoadMetadata(); err != nil {
+		return err
+	}
 	if err := routers.StartWebServer(); err != nil {
 		return err
 	}
@@ -374,9 +379,6 @@ func startBackend() error {
 	}
 	routers.StartTailscale()
 	cmd.LoadUserPlugins()
-	cmd.AddStoreUrls(cmd.Args)
-	cmd.SetCwdAsScanPathIfNeed()
-	cmd.LoadMetadata()
 	cmd.ScanStore()
 	cmd.SaveMetadata()
 	config.StartOrStopAutoRescan()

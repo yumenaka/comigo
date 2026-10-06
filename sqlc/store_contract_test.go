@@ -60,9 +60,6 @@ func TestStoreInterfaceContractPostgres(t *testing.T) {
 		if _, err := db.ExecContext(ctx, postgresDDL); err != nil {
 			t.Fatalf("create postgres schema: %v", err)
 		}
-		if err := migratePostgresDatabase(ctx, db); err != nil {
-			t.Fatalf("migrate postgres schema: %v", err)
-		}
 		if _, err := db.ExecContext(ctx, "TRUNCATE bookmarks, page_infos, books, users RESTART IDENTITY CASCADE"); err != nil {
 			t.Fatalf("clear postgres test tables: %v", err)
 		}

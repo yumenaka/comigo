@@ -19,12 +19,6 @@ func init() {
 			logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
 			return err
 		}
-		if config.GetCfg().EnableDatabase {
-			if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
-				logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
-				return err
-			}
-		}
 		// 仅在有新增书籍时提示刷新；无新书则不打扰用户（与手动全量重扫区分）
 		if model.GetAllBooksNumber() > booksBefore {
 			sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonAutoLibraryRescan)

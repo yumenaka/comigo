@@ -562,11 +562,6 @@ func doAddStoreURL(storeURL string) ([]string, string, error) {
 		logger.Infof(locale.GetString("scan_error")+" path:%s %s", storeURL, scanErr)
 	} else {
 		model.GenerateBookGroup()
-		if config.GetCfg().EnableDatabase {
-			if saveErr := scan.SaveBooksToDatabase(config.GetCfg()); saveErr != nil {
-				logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), saveErr)
-			}
-		}
 	}
 	return values, remoteComigoVersionWarning(storeURL), nil
 }
@@ -850,14 +845,6 @@ func rescanOneStore(c echo.Context, storeUrl string) error {
 	model.ClearBookNotExist()
 	model.GenerateBookGroup()
 
-	// 如果启用数据库，保存扫描结果
-	if config.GetCfg().EnableDatabase {
-		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
-			logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
-			return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
-		}
-	}
-
 	afterCount := getStoreRealBookCount(storeUrl)
 	newBooksCount, removedBooksCount := rescanBookDelta(beforeCount, afterCount)
 
@@ -893,13 +880,6 @@ func rescanAllStores(c echo.Context) error {
 	// 扫描结束后清理已经消失的书籍，才能保存并统计真实减少数量。
 	model.ClearBookNotExist()
 	model.GenerateBookGroup()
-
-	if config.GetCfg().EnableDatabase {
-		if err := scan.SaveBooksToDatabase(config.GetCfg()); err != nil {
-			logger.Infof(locale.GetString("log_failed_to_save_results_to_database"), err)
-			return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
-		}
-	}
 
 	afterCount := model.GetAllBooksNumber()
 	newBooksCount, removedBooksCount := rescanBookDelta(beforeCount, afterCount)

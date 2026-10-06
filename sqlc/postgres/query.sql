@@ -51,45 +51,59 @@ WHERE title ILIKE '%' || $1 || '%'
   AND deleted = FALSE
 ORDER BY modified_time DESC;
 
--- Create new book
--- name: CreateBook :one
+-- Insert or update the complete book metadata atomically.
+-- name: UpsertBook :exec
 INSERT INTO books (title, book_id, owner, book_path, store_url, type,
                    child_books_num, child_books_id, depth, parent_folder, page_count, last_read_page, file_size,
                    author, isbn, press, published_at, extract_path, extract_num, book_complete,
-                   init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
-RETURNING *;
-
--- Update book information
--- name: UpdateBook :exec
-UPDATE books
-SET title              = $1,
-    owner              = $2,
-    book_path          = $3,
-    store_url          = $4,
-    type               = $5,
-    child_books_num    = $6,
-    child_books_id     = $7,
-    depth              = $8,
-    parent_folder      = $9,
-    page_count         = $10,
-    last_read_page     = $11,
-    file_size          = $12,
-    author             = $13,
-    isbn               = $14,
-    press              = $15,
-    published_at       = $16,
-    extract_path       = $17,
-    extract_num        = $18,
-    book_complete      = $19,
-    init_complete      = $20,
-    non_utf8zip        = $21,
-    zip_text_encoding  = $22,
-    created_by_version = $23,
-    is_remote          = $24,
-    remote_url         = $25,
-    modified_time      = CURRENT_TIMESTAMP
-WHERE book_id = $26;
+                   init_complete, non_utf8zip, zip_text_encoding, created_by_version, is_remote, remote_url, modified_time, deleted,
+                   remote_book_id, remote_store_key, remote_shelf_key, remote_shelf_name,
+                   cover_name, cover_path, cover_size, cover_mod_time, cover_url, cover_page_num,
+                   cover_blurhash, cover_height, cover_width, cover_img_type, cover_insert_html)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43)
+ON CONFLICT (book_id) DO UPDATE SET
+    title = excluded.title,
+    owner = excluded.owner,
+    book_path = excluded.book_path,
+    store_url = excluded.store_url,
+    type = excluded.type,
+    child_books_num = excluded.child_books_num,
+    child_books_id = excluded.child_books_id,
+    depth = excluded.depth,
+    parent_folder = excluded.parent_folder,
+    page_count = excluded.page_count,
+    last_read_page = excluded.last_read_page,
+    file_size = excluded.file_size,
+    author = excluded.author,
+    isbn = excluded.isbn,
+    press = excluded.press,
+    published_at = excluded.published_at,
+    extract_path = excluded.extract_path,
+    extract_num = excluded.extract_num,
+    book_complete = excluded.book_complete,
+    init_complete = excluded.init_complete,
+    non_utf8zip = excluded.non_utf8zip,
+    zip_text_encoding = excluded.zip_text_encoding,
+    created_by_version = excluded.created_by_version,
+    is_remote = excluded.is_remote,
+    remote_url = excluded.remote_url,
+    modified_time = excluded.modified_time,
+    deleted = excluded.deleted,
+    remote_book_id = excluded.remote_book_id,
+    remote_store_key = excluded.remote_store_key,
+    remote_shelf_key = excluded.remote_shelf_key,
+    remote_shelf_name = excluded.remote_shelf_name,
+    cover_name = excluded.cover_name,
+    cover_path = excluded.cover_path,
+    cover_size = excluded.cover_size,
+    cover_mod_time = excluded.cover_mod_time,
+    cover_url = excluded.cover_url,
+    cover_page_num = excluded.cover_page_num,
+    cover_blurhash = excluded.cover_blurhash,
+    cover_height = excluded.cover_height,
+    cover_width = excluded.cover_width,
+    cover_img_type = excluded.cover_img_type,
+    cover_insert_html = excluded.cover_insert_html;
 
 -- Update reading progress
 -- name: UpdateLastReadPage :exec
@@ -119,7 +133,7 @@ WHERE book_id = $1;
 SELECT *
 FROM page_infos
 WHERE book_id = $1
-ORDER BY page_num;
+ORDER BY id;
 
 -- Get specific page by book ID and page number
 -- name: GetPageInfoByBookIDAndPage :one

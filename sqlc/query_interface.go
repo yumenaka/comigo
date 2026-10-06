@@ -6,11 +6,8 @@ import "context"
 // SQLite 的 *Queries 直接满足，PostgreSQL 通过 adapter 转换生成类型后满足。
 type bookQueries interface {
 	GetBookByID(ctx context.Context, bookID string) (Book, error)
-	CreateBook(ctx context.Context, arg CreateBookParams) (Book, error)
-	UpdateBook(ctx context.Context, arg UpdateBookParams) error
+	UpsertBook(ctx context.Context, arg UpsertBookParams) error
 	ListBooks(ctx context.Context) ([]Book, error)
-	ListAllBookStoreURLs(ctx context.Context) ([]string, error)
-	ListBooksByStorePath(ctx context.Context, storeUrl string) ([]Book, error)
 	DeleteBook(ctx context.Context, bookID string) error
 	GetPageInfosByBookID(ctx context.Context, bookID string) ([]PageInfo, error)
 	DeletePageInfosByBookID(ctx context.Context, bookID string) error

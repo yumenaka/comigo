@@ -44,6 +44,21 @@ CREATE TABLE IF NOT EXISTS books
     created_by_version TEXT,                               -- Comigo version when data was created
     is_remote          BOOLEAN  DEFAULT FALSE,             -- Whether the book is from remote storage (WebDAV, etc.)
     remote_url         TEXT,                               -- Remote storage base URL
+    remote_book_id TEXT,
+    remote_store_key TEXT,
+    remote_shelf_key TEXT,
+    remote_shelf_name TEXT,
+    cover_name TEXT,
+    cover_path TEXT,
+    cover_size BIGINT,
+    cover_mod_time TIMESTAMP,
+    cover_url TEXT,
+    cover_page_num BIGINT,
+    cover_blurhash TEXT,
+    cover_height BIGINT,
+    cover_width BIGINT,
+    cover_img_type TEXT,
+    cover_insert_html TEXT,
     deleted            BOOLEAN  DEFAULT FALSE              -- Soft delete flag
 );
 
@@ -90,3 +105,16 @@ CREATE INDEX IF NOT EXISTS idx_page_infos_book_id ON page_infos (book_id);
 CREATE INDEX IF NOT EXISTS idx_page_infos_page_num ON page_infos (book_id, page_num);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_book_id ON bookmarks (book_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_book_page ON bookmarks (book_id, page_index);
+
+-- 扫描失败指纹也由数据库持久化，不依赖 metadata JSON 文件。
+CREATE TABLE IF NOT EXISTS scan_failures (
+    key TEXT PRIMARY KEY,
+    store_url TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    file_size BIGINT NOT NULL,
+    modified_unix_nano BIGINT NOT NULL,
+    created_by_version TEXT NOT NULL,
+    failed_at TIMESTAMP NOT NULL,
+    error TEXT NOT NULL,
+    is_remote BOOLEAN NOT NULL
+);

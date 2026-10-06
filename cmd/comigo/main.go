@@ -47,6 +47,12 @@ func main() {
 
 // startServer 启动服务器
 func startServer() {
+	// 加载书籍元数据（包括书签）
+	if err := cmd.LoadMetadata(); err != nil {
+		logger.Infof("%v", err)
+		return
+	}
+
 	// 启动网页服务器（不阻塞）
 	if err := routers.StartWebServer(); err != nil {
 		logger.Infof("%v", err)
@@ -56,8 +62,6 @@ func startServer() {
 	routers.StartTailscale()
 	// 加载用户插件，与 CLI 和桌面入口保持一致。
 	cmd.LoadUserPlugins()
-	// 加载书籍元数据（包括书签）
-	cmd.LoadMetadata()
 	// 扫描书库
 	cmd.ScanStore()
 	// 保存书籍元数据（包括书签）

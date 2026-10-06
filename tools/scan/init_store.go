@@ -86,6 +86,9 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 			return false, nil
 		}
 		localBook := comigo_remote.LocalizeBookInShelf(storeURL, remoteBook, shelfKey, shelfName)
+		if previous, err := model.IStore.GetBook(localBook.BookID); err == nil {
+			mergePreviousBookState(localBook, previous)
+		}
 		if topLevel {
 			// 远端顶层列表才知道它属于哪个顶级书库；旧版详情 API 不暴露远端 StoreUrl。
 			localBook.Depth = 0
@@ -120,9 +123,10 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 	}
 
 	deleteStaleComigoRemoteBooks(storeURL, fetched)
-	AddBooksToStore(books)
-	model.GenerateBookGroup()
-	return nil
+	if err := AddBooksToStore(books); err != nil {
+		return err
+	}
+	return model.IStore.GenerateBookGroup()
 }
 
 // shouldImportRemoteComigoBook 避免导入远端服务中的远程书籍，防止 WebDAV/另一台 Comigo 等书库被二次嵌套代理。
@@ -201,8 +205,7 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 		}
 		mergePreviousBookState(book, previousBook)
 		clearArchiveScanFailure(storePathAbs, storePathAbs, false)
-		AddBooksToStore([]*model.Book{book})
-		return nil
+		return AddBooksToStore([]*model.Book{book})
 	}
 
 	// 如果书库URL是一个文件夹，使用 HandleDirectory（不支持扫描单个文件）进行扫描
@@ -264,8 +267,7 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 	if len(newBookList) > 0 {
 		logger.Infof(locale.GetString("how_many_books_update"), storePathAbs, len(newBookList))
 	}
-	AddBooksToStore(newBookList)
-	return nil
+	return AddBooksToStore(newBookList)
 }
 
 // appendLocalDirBooks 复用 HandleDirectory 已经读到的文件列表，避免本地目录扫描阶段重复 ReadDir。
@@ -391,7 +393,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 			}
 			mergePreviousBookState(book, previousBook)
 			clearArchiveScanFailure(storeURL, basePath, true)
-			AddBooksToStore([]*model.Book{book})
+			return AddBooksToStore([]*model.Book{book})
 		}
 		return nil
 	}
@@ -517,8 +519,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 	if len(newBookList) > 0 {
 		logger.Infof(locale.GetString("how_many_books_update"), storeURL, len(newBookList))
 	}
-	AddBooksToStore(newBookList)
-	return nil
+	return AddBooksToStore(newBookList)
 }
 
 // prepareBookPathForScan 在扫描前处理同路径旧书籍：
@@ -574,7 +575,7 @@ func getBookByPath(storePath string, filePath string) (*model.Book, error) {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
 	}
 	for _, b := range allBooks {
-		if b.StoreUrl == storePath && b.BookPath == filePath {
+		if b.Type != model.TypeBooksGroup && b.StoreUrl == storePath && b.BookPath == filePath {
 			return b, nil
 		}
 	}

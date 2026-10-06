@@ -20,26 +20,12 @@ func (a *postgresAdapter) GetBookByID(ctx context.Context, bookID string) (Book,
 	return Book(book), err
 }
 
-func (a *postgresAdapter) CreateBook(ctx context.Context, arg CreateBookParams) (Book, error) {
-	book, err := a.queries.CreateBook(ctx, postgres.CreateBookParams(arg))
-	return Book(book), err
-}
-
-func (a *postgresAdapter) UpdateBook(ctx context.Context, arg UpdateBookParams) error {
-	return a.queries.UpdateBook(ctx, postgres.UpdateBookParams(arg))
+func (a *postgresAdapter) UpsertBook(ctx context.Context, arg UpsertBookParams) error {
+	return a.queries.UpsertBook(ctx, postgres.UpsertBookParams(arg))
 }
 
 func (a *postgresAdapter) ListBooks(ctx context.Context) ([]Book, error) {
 	books, err := a.queries.ListBooks(ctx)
-	return fromPostgresBooks(books), err
-}
-
-func (a *postgresAdapter) ListAllBookStoreURLs(ctx context.Context) ([]string, error) {
-	return a.queries.ListAllBookStoreURLs(ctx)
-}
-
-func (a *postgresAdapter) ListBooksByStorePath(ctx context.Context, storeUrl string) ([]Book, error) {
-	books, err := a.queries.ListBooksByStorePath(ctx, storeUrl)
 	return fromPostgresBooks(books), err
 }
 

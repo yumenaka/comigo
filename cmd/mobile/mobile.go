@@ -137,12 +137,14 @@ func GetPort() int {
 }
 
 func startEmbeddedServer(startCfg StartConfig) error {
+	if err := cmd.LoadMetadata(); err != nil {
+		return err
+	}
 	if err := routers.StartWebServer(); err != nil {
 		return err
 	}
 
 	cmd.LoadUserPlugins()
-	cmd.LoadMetadata()
 	if startCfg.ScanOnStart {
 		cmd.ScanStore()
 		cmd.SaveMetadata()

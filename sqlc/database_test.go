@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"os"
 	"path/filepath"
+	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -22,9 +24,6 @@ func newTestStoreDatabase(t *testing.T) (*sql.DB, *StoreDatabase) {
 	}
 	if _, err := db.ExecContext(context.Background(), ddl); err != nil {
 		t.Fatalf("create schema: %v", err)
-	}
-	if err := migrateDatabase(context.Background(), db); err != nil {
-		t.Fatalf("migrate schema: %v", err)
 	}
 	store := NewDBStore(db)
 
@@ -109,8 +108,8 @@ func TestStoreBookRoundTripKeepsJSONMetadataFields(t *testing.T) {
 	if got.CreatedByVersion != book.CreatedByVersion {
 		t.Fatalf("created version was not restored: got %q want %q", got.CreatedByVersion, book.CreatedByVersion)
 	}
-	if len(got.PageInfos) != 2 || got.PageInfos[0].Name != "001.jpg" {
-		t.Fatalf("page infos were not restored in default order: %#v", got.PageInfos)
+	if len(got.PageInfos) != 2 || got.PageInfos[0].Name != "002.jpg" {
+		t.Fatalf("page infos were not restored in stored order: %#v", got.PageInfos)
 	}
 	if len(got.BookMarks) != 1 {
 		t.Fatalf("bookmarks were not restored: %#v", got.BookMarks)
@@ -203,8 +202,8 @@ func TestGenerateBookGroupProcessesAllStoresAndIgnoresOldGroups(t *testing.T) {
 			continue
 		}
 		groupsByStore[book.StoreUrl]++
-		if book.BookID == "old-group" {
-			t.Fatalf("old group was not removed before regenerating")
+		if book.Title == "old" {
+			t.Fatalf("old group topology was not refreshed")
 		}
 		if book.ChildBooksNum != 2 {
 			t.Fatalf("generated group included stale children: %#v", book)
@@ -232,4 +231,147 @@ func testBook(id string, path string, storeURL string, depth int) *model.Book {
 
 func mkdirAllForTest(path string) error {
 	return os.MkdirAll(path, 0o755)
+}
+
+// 验证完整字段、EPUB 顺序、失败回滚和并发书签，防止数据库与内存功能分叉。
+func TestSQLiteCompleteMetadataAndAtomicWrites(t *testing.T) {
+	db, store := newTestStoreDatabase(t)
+	now := time.Date(2026, 5, 1, 2, 3, 4, 567890123, time.UTC)
+	page := model.PageInfo{Name: "cover.png", Path: "internal/cover.png", Size: 42, ModTime: now, Url: "/cover", PageNum: 7, Blurhash: "hash", Height: 30, Width: 20, ImgType: "png", InsertHtml: "<p>chapter</p>"}
+	book := &model.Book{BookInfo: model.BookInfo{
+		BookID: "full", Title: "完整元数据", Author: "作者", Type: model.TypeEpub, BookPath: "internal/book.epub", ParentFolder: "internal", StoreUrl: "https://example.test/library",
+		IsRemote: true, RemoteURL: "https://example.test/library", RemoteBookID: "original", RemoteStoreKey: "store", RemoteShelfKey: "shelf", RemoteShelfName: "书架",
+		FileSize: 42, Modified: now, PageCount: 2, Cover: page, ISBN: "isbn", Press: "出版社", PublishedAt: "2026", ChildBooksNum: 2, ChildBooksID: []string{"one", "two"}, Depth: 3,
+		ExtractPath: "cache/book", ExtractNum: 2, NonUTF8Zip: true, ZipTextEncoding: "ShiftJIS", InitComplete: true, BookComplete: true, CreatedByVersion: "v1.0.0",
+	}, PageInfos: model.PageInfos{page, {Name: "chapter.png", PageNum: 1, ModTime: now}}, BookMarks: model.BookMarks{{Type: model.AutoMark, BookID: "full", BookStoreID: "store", PageIndex: 1, Description: "进度", CreatedAt: now, UpdatedAt: now}}}
+	check := func(want *model.Book) {
+		t.Helper()
+		got, err := store.GetBook(want.BookID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("round trip mismatch:\ngot  %#v\nwant %#v", got, want)
+		}
+		list, err := store.ListBooks()
+		if err != nil || len(list) != 1 || !reflect.DeepEqual(list[0], want) {
+			t.Fatalf("list mismatch: %#v, %v", list, err)
+		}
+	}
+	if err := store.StoreBook(book); err != nil {
+		t.Fatal(err)
+	}
+	check(book)
+	book.Title = "更新后的标题"
+	book.Modified = now.Add(-time.Hour)
+	if err := store.StoreBook(book); err != nil {
+		t.Fatal(err)
+	}
+	check(book)
+	// 在最后一步注入写入失败，确认书籍、页面和旧书签都没有被部分覆盖。
+	if _, err := db.Exec("CREATE TRIGGER reject_bookmark BEFORE INSERT ON bookmarks WHEN NEW.description = 'reject' BEGIN SELECT RAISE(ABORT, 'test failure'); END"); err != nil {
+		t.Fatal(err)
+	}
+	broken := book.CloneForView()
+	broken.Title = "不应保存"
+	broken.PageInfos = nil
+	broken.BookMarks[0].Description = "reject"
+	if err := store.StoreBook(broken); err == nil {
+		t.Fatal("expected failed transaction")
+	}
+	check(book)
+	var pageID int64
+	if err := db.QueryRow("SELECT min(id) FROM page_infos").Scan(&pageID); err != nil {
+		t.Fatal(err)
+	}
+	var wg sync.WaitGroup
+	for i := 1; i <= 16; i++ {
+		wg.Go(func() {
+			if err := store.StoreBookMark(model.NewBookMark(model.UserMark, book.BookID, "store", i, "并发书签")); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	wg.Wait()
+	var updatedPageID int64
+	if err := db.QueryRow("SELECT min(id) FROM page_infos").Scan(&updatedPageID); err != nil || updatedPageID != pageID {
+		t.Fatalf("bookmark update rewrote page data: %d, %d, %v", pageID, updatedPageID, err)
+	}
+	marks, err := store.GetBookMarks(book.BookID)
+	if err != nil || len(*marks) != 17 {
+		t.Fatalf("lost concurrent bookmarks: %v, %v", marks, err)
+	}
+	if err := store.DeleteBook(book.BookID); err != nil {
+		t.Fatal(err)
+	}
+	for _, table := range []string{"books", "page_infos", "bookmarks"} {
+		var count int
+		if err := db.QueryRow("SELECT count(*) FROM " + table).Scan(&count); err != nil || count != 0 {
+			t.Fatalf("orphaned %s: %d, %v", table, count, err)
+		}
+	}
+}
+
+// 重建书组的计算、写入任一阶段失败，都不能丢失原拓扑；成功重建保持 ID。
+func TestGenerateBookGroupRollback(t *testing.T) {
+	db, store := newTestStoreDatabase(t)
+	root := t.TempDir()
+	dir := filepath.Join(root, "series")
+	if err := os.Mkdir(dir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	book := testBook("child", filepath.Join(dir, "book.zip"), root, 1)
+	if err := store.StoreBook(book); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.GenerateBookGroup(); err != nil {
+		t.Fatal(err)
+	}
+	var group *model.Book
+	books, err := store.ListBooks()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, b := range books {
+		if b.Type == model.TypeBooksGroup {
+			group = b
+		}
+	}
+	if group == nil {
+		t.Fatal("missing group")
+	}
+	check := func() {
+		t.Helper()
+		got, err := store.GetBook(group.BookID)
+		if err != nil || !reflect.DeepEqual(got, group) {
+			t.Fatalf("group changed after failure: %#v, %v", got, err)
+		}
+	}
+	if _, err := db.Exec("CREATE TRIGGER reject_group BEFORE INSERT ON books WHEN NEW.type = '" + string(model.TypeBooksGroup) + "' BEGIN SELECT RAISE(ABORT, 'test failure'); END"); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.GenerateBookGroup(); err == nil {
+		t.Fatal("expected write failure")
+	}
+	check()
+	if _, err := db.Exec("DROP TRIGGER reject_group"); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(dir); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.GenerateBookGroup(); err == nil {
+		t.Fatal("expected filesystem failure")
+	}
+	check()
+	if err := os.Mkdir(dir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.GenerateBookGroup(); err != nil {
+		t.Fatal(err)
+	}
+	got, err := store.GetBook(group.BookID)
+	if err != nil || !reflect.DeepEqual(got.ChildBooksID, group.ChildBooksID) {
+		t.Fatalf("group ID or children changed: %#v, %v", got, err)
+	}
 }
