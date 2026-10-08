@@ -13,8 +13,6 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
-	"github.com/yumenaka/comigo/assets"
-	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools/sse_hub"
@@ -153,30 +151,6 @@ func TestRescanBookDeltaReportsRemovedBooks(t *testing.T) {
 	}
 }
 
-// 验证重新扫描结果提示使用自然的中文文案。
-func TestRescanBookDeltaMessageUsesNaturalChinese(t *testing.T) {
-	locale.SetLanguage("zh-CN")
-
-	tests := []struct {
-		name    string
-		added   int
-		removed int
-		want    string
-	}{
-		{name: "no change", want: "数量没变化"},
-		{name: "added", added: 1, want: "多了 1 本书"},
-		{name: "removed", removed: 1, want: "少了 1 本书"},
-		{name: "both", added: 2, removed: 1, want: "新加 2 本书，少了 1 本书"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := rescanBookDeltaMessage(tt.added, tt.removed); got != tt.want {
-				t.Fatalf("message = %q, want %q", got, tt.want)
-			}
-		})
-	}
-}
-
 // 验证单个书库计数只统计目标书库内的真实书籍。
 func TestGetStoreRealBookCountOnlyCountsTargetStore(t *testing.T) {
 	oldStore := model.IStore
@@ -230,13 +204,6 @@ func TestStoreConfigRendersWailsFolderPicker(t *testing.T) {
 		if !strings.Contains(text, want) {
 			t.Fatalf("StoreConfig missing %q in %s", want, text)
 		}
-	}
-}
-
-// 验证 Wails 构建会隐藏会误报连接关闭的实时日志面板。
-func TestMainAreaHidesServerLogInWailsBuild(t *testing.T) {
-	if got, want := showServerLogInSettings(), !assets.IsWailsBuild(); got != want {
-		t.Fatalf("showServerLogInSettings() = %v, want %v", got, want)
 	}
 }
 

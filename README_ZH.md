@@ -212,7 +212,7 @@ comi stop
 | `--tailscale-hostname` | comigo | Tailscale 主机名 |
 | `--tailscale-funnel` | false | 启用 Tailscale Funnel |
 
-启用 `--database` 后，扫描得到的书籍、页面、封面信息、远程索引、书签及扫描失败记录均保存在数据库中，不依赖 `metadata/*.json`。配置仍使用 TOML，原始书籍和可重新生成的图片缓存仍使用文件。数据库无法打开时启动报错，不回退到 JSON。旧版数据库结构和 JSON 数据不自动迁移；请使用新的数据库。修改数据库配置后需要重启。
+启用 `--database` 后，扫描得到的书籍、页面、封面信息、远程索引、书签及扫描失败记录均保存在数据库中，不依赖 `metadata/*.json`。配置仍使用 TOML，原始书籍和可重新生成的图片缓存仍使用文件。数据库无法打开时启动报错，不回退到 JSON。SQLite 缺少所需表或字段时，会将旧库重命名为 `comigo.sqlite.bak-时间戳` 后重建并重新扫描；旧书签和阅读进度保留在备份中，不自动导入。数据库占用、权限或文件损坏等错误不会触发重建。PostgreSQL 旧结构和 JSON 数据不自动迁移。修改数据库配置后需要重启。
 
 </details>
 

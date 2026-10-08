@@ -1,6 +1,13 @@
 package vfs
 
 import (
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"sync/atomic"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"os"
 	"path/filepath"
 	"sync"
@@ -215,46 +222,60 @@ func TestParseStoreURL(t *testing.T) {
 
 // 验证虚拟文件系统缓存的写入、读取和命中行为。
 func TestFileCache(t *testing.T) {
-	// 创建临时缓存目录
-	tempDir, err := os.MkdirTemp("", "vfs_cache_test")
-	if err != nil {
-		t.Fatalf("创建临时目录失败: %v", err)
+	cache := NewFileCache(false)
+	cache.Set("file", []byte("content"))
+	if data, ok := cache.Get("file"); !ok || string(data) != "content" {
+		t.Fatalf("缓存内容错误: %q, %v", data, ok)
 	}
-	defer os.RemoveAll(tempDir)
-
-	cache := NewFileCache(tempDir, false)
-
-	// 测试 Set 和 Get
-	testPath := "/remote/path/to/file.txt"
-	testData := []byte("cached content")
-
-	cache.Set(testPath, testData)
-
-	data, ok := cache.Get(testPath)
-	if !ok {
-		t.Error("Get() 返回 false, 期望 true")
-	}
-	if string(data) != string(testData) {
-		t.Errorf("Get() = %q, 期望 %q", string(data), string(testData))
-	}
-
-	// 测试 Size
-	if cache.Size() != 1 {
-		t.Errorf("Size() = %d, 期望 1", cache.Size())
-	}
-
-	// 测试 Delete
-	cache.Delete(testPath)
-	_, ok = cache.Get(testPath)
-	if ok {
-		t.Error("Delete 后 Get() 返回 true, 期望 false")
-	}
-
-	// 测试 Clear
-	cache.Set("/path1", []byte("data1"))
-	cache.Set("/path2", []byte("data2"))
 	cache.Clear()
-	if cache.Size() != 0 {
-		t.Errorf("Clear 后 Size() = %d, 期望 0", cache.Size())
+	if _, ok := cache.Get("file"); ok {
+		t.Fatal("清理后仍命中缓存")
+	}
+}
+
+// S3 的三种读取入口共用下载结果，缓存关闭后仍能独立下载。
+func TestS3ReadsShareCache(t *testing.T) {
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
+		if r.Method != http.MethodGet || r.URL.Path != "/bucket/books/page.jpg" {
+			t.Errorf("错误的请求: %s %s", r.Method, r.URL.Path)
+			http.NotFound(w, r)
+			return
+		}
+		_, _ = io.WriteString(w, "image-data")
+	}))
+	defer server.Close()
+	fs := &S3FS{
+		client: s3.New(s3.Options{Region: "auto", BaseEndpoint: &server.URL, Credentials: aws.AnonymousCredentials{}, UsePathStyle: true}),
+		bucket: "bucket", basePath: "books", options: DefaultOptions(), cache: NewFileCache(false),
+	}
+	data, err := fs.ReadFile("page.jpg")
+	if err != nil || string(data) != "image-data" {
+		t.Fatalf("ReadFile: %q, %v", data, err)
+	}
+	file, err := fs.Open("books/page.jpg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	data, err = io.ReadAll(file)
+	if err != nil || string(data) != "image-data" {
+		t.Fatalf("Open: %q, %v", data, err)
+	}
+	reader, err := fs.OpenReaderAtSeeker("/books/page.jpg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	buf := make([]byte, 4)
+	if _, err := reader.ReadAt(buf, 6); err != nil || string(buf) != "data" {
+		t.Fatalf("ReadAt: %q, %v", buf, err)
+	}
+	if requests.Load() != 1 {
+		t.Fatalf("缓存命中仍重复下载: %d", requests.Load())
+	}
+	fs.cache = nil
+	if _, err := fs.OpenReaderAtSeeker("page.jpg"); err != nil || requests.Load() != 2 {
+		t.Fatalf("无缓存下载失败: %d, %v", requests.Load(), err)
 	}
 }

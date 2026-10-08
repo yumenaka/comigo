@@ -467,6 +467,8 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case backendErrorMsg:
 		m.backendError = msg.err.Error()
 		m.setActionMsg(locale.GetString("tui_backend_failed"))
+		// 日志面板保留具体失败原因，避免只显示启动前的书库提示。
+		logger.Errorf("%s: %v", locale.GetString("tui_backend_failed"), msg.err)
 		m.refreshData()
 		return m, m.syncActiveImageCmd()
 	case openURLResultMsg:

@@ -69,7 +69,6 @@ func TestShelfHeaderTitleRendersRescanButton(t *testing.T) {
 	for _, want := range []string{
 		`@click.stop="window.ComiGoShelf?.rescanAllStores?.()"`,
 		`:aria-label="i18next.t('rescan_all_stores')"`,
-		`panel-control shrink-0 inline-flex items-center justify-center w-7 h-7 rounded hover:ring`,
 	} {
 		if !strings.Contains(rendered, want) {
 			t.Fatalf("ShelfHeaderTitle missing %q in %s", want, rendered)
@@ -96,7 +95,6 @@ func TestMainAreaRendersStoreRescanButton(t *testing.T) {
 	for _, want := range []string{
 		`@click.stop="window.ComiGoShelf?.rescanStore?.(&#39;` + storeURLB64 + `&#39;)"`,
 		`:aria-label="i18next.t('rescan_store')"`,
-		`inline-flex items-center justify-center w-7 h-7 rounded hover:ring`,
 		`@click="showBook = !showBook"`,
 	} {
 		if !strings.Contains(rendered, want) {

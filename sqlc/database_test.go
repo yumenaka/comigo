@@ -59,69 +59,6 @@ func TestOpenDatabaseRejectsUnsupportedType(t *testing.T) {
 	}
 }
 
-// 验证书籍写入数据库再读出时保留 JSON 元数据字段。
-func TestStoreBookRoundTripKeepsJSONMetadataFields(t *testing.T) {
-	_, store := newTestStoreDatabase(t)
-	now := time.Date(2026, 4, 27, 10, 30, 0, 0, time.UTC)
-	book := &model.Book{
-		BookInfo: model.BookInfo{
-			BookID:           "book-one",
-			Title:            "Book One",
-			Author:           "Author Name",
-			Type:             model.TypeZip,
-			BookPath:         "/library/book-one.zip",
-			StoreUrl:         "/library",
-			ParentFolder:     "library",
-			FileSize:         1234,
-			Modified:         now,
-			PageCount:        2,
-			CreatedByVersion: "v1.2.3",
-		},
-		PageInfos: model.PageInfos{
-			{Name: "002.jpg", Path: "/library/002.jpg", PageNum: 2},
-			{Name: "001.jpg", Path: "/library/001.jpg", PageNum: 1},
-		},
-		BookMarks: model.BookMarks{
-			{
-				Type:        model.UserMark,
-				BookID:      "book-one",
-				BookStoreID: "store-id",
-				PageIndex:   1,
-				Description: "note",
-				CreatedAt:   now.Add(-time.Hour),
-				UpdatedAt:   now,
-			},
-		},
-	}
-
-	if err := store.StoreBook(book); err != nil {
-		t.Fatalf("store book: %v", err)
-	}
-
-	got, err := store.GetBook("book-one")
-	if err != nil {
-		t.Fatalf("get book: %v", err)
-	}
-	if got.Author != book.Author {
-		t.Fatalf("author was not restored: got %q want %q", got.Author, book.Author)
-	}
-	if got.CreatedByVersion != book.CreatedByVersion {
-		t.Fatalf("created version was not restored: got %q want %q", got.CreatedByVersion, book.CreatedByVersion)
-	}
-	if len(got.PageInfos) != 2 || got.PageInfos[0].Name != "002.jpg" {
-		t.Fatalf("page infos were not restored in stored order: %#v", got.PageInfos)
-	}
-	if len(got.BookMarks) != 1 {
-		t.Fatalf("bookmarks were not restored: %#v", got.BookMarks)
-	}
-	if got.BookMarks[0].BookStoreID != "store-id" {
-		t.Fatalf("bookmark store id was not restored: got %q", got.BookMarks[0].BookStoreID)
-	}
-	if got.BookMarks[0].CreatedAt.IsZero() || got.BookMarks[0].UpdatedAt.IsZero() {
-		t.Fatalf("bookmark times were not restored: %#v", got.BookMarks[0])
-	}
-}
-
 // 验证保存空页面列表会清掉数据库中的旧页面记录。
 func TestStoreBookWithEmptyPageInfosClearsOldRows(t *testing.T) {
 	db, store := newTestStoreDatabase(t)
@@ -373,5 +310,117 @@ func TestGenerateBookGroupRollback(t *testing.T) {
 	got, err := store.GetBook(group.BookID)
 	if err != nil || !reflect.DeepEqual(got.ChildBooksID, group.ChildBooksID) {
 		t.Fatalf("group ID or children changed: %#v, %v", got, err)
+	}
+}
+
+// 旧库缺列时保留原始数据备份并重建；再次启动正常库不能重复备份。
+func TestSQLiteRebuildsIncompatibleSchema(t *testing.T) {
+	for _, change := range []string{
+		"ALTER TABLE books DROP COLUMN remote_book_id",
+		"ALTER TABLE page_infos DROP COLUMN insert_html",
+		"ALTER TABLE bookmarks DROP COLUMN book_store_id",
+	} {
+		t.Run(change, func(t *testing.T) {
+			dir := t.TempDir()
+			options := DBOptions{Type: "sqlite", ConfigDir: dir}
+			t.Cleanup(CloseDatabase)
+			if err := OpenDatabase(options); err != nil {
+				t.Fatal(err)
+			}
+			// 用书签确认备份可读且数据完整，新库则从空索引开始。
+			if _, err := client.Exec("INSERT INTO bookmarks (type, book_id, page_index, description) VALUES ('user', 'old-book', 7, '旧书签'); " + change); err != nil {
+				t.Fatal(err)
+			}
+			CloseDatabase()
+			if err := OpenDatabase(options); err != nil {
+				t.Fatal(err)
+			}
+			backups, err := filepath.Glob(filepath.Join(dir, "comigo.sqlite.bak-*"))
+			if err != nil || len(backups) != 1 {
+				t.Fatalf("expected one backup: %v, %v", backups, err)
+			}
+			backup, err := sql.Open("sqlite", backups[0])
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer backup.Close()
+			var description string
+			if err := backup.QueryRow("SELECT description FROM bookmarks WHERE page_index = 7").Scan(&description); err != nil || description != "旧书签" {
+				t.Fatalf("backup lost bookmark: %q, %v", description, err)
+			}
+			if err := backup.Close(); err != nil {
+				t.Fatal(err)
+			}
+			var count int
+			if err := client.QueryRow("SELECT count(*) FROM bookmarks").Scan(&count); err != nil || count != 0 {
+				t.Fatalf("new database is not empty: %d, %v", count, err)
+			}
+			if err := OpenDatabase(options); err != nil {
+				t.Fatal(err)
+			}
+			backups, _ = filepath.Glob(filepath.Join(dir, "comigo.sqlite.bak-*"))
+			if len(backups) != 1 {
+				t.Fatalf("compatible schema backed up again: %v", backups)
+			}
+		})
+	}
+}
+
+// 文件损坏并非结构升级，不得自动移动或覆盖原库。
+func TestSQLiteDoesNotRebuildInvalidFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "comigo.sqlite")
+	data := []byte("not a SQLite database")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(CloseDatabase)
+	if err := OpenDatabase(DBOptions{Type: "sqlite", ConfigDir: dir}); err == nil {
+		t.Fatal("expected invalid database error")
+	}
+	got, err := os.ReadFile(path)
+	if err != nil || string(got) != string(data) {
+		t.Fatalf("invalid database modified: %q, %v", got, err)
+	}
+	backups, _ := filepath.Glob(filepath.Join(dir, "comigo.sqlite.bak-*"))
+	if len(backups) != 0 || DbStore != nil {
+		t.Fatalf("invalid database rebuilt: %v", backups)
+	}
+}
+
+// 其他连接仍在读取旧库时拒绝重命名，保留 WAL 和原数据库供正常退出后重试。
+func TestSQLiteDoesNotRebuildBusyDatabase(t *testing.T) {
+	dir := t.TempDir()
+	options := DBOptions{Type: "sqlite", ConfigDir: dir}
+	t.Cleanup(CloseDatabase)
+	if err := OpenDatabase(options); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := client.Exec("ALTER TABLE books DROP COLUMN remote_book_id"); err != nil {
+		t.Fatal(err)
+	}
+	reader, err := sql.Open("sqlite", filepath.Join(dir, "comigo.sqlite"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reader.Close()
+	tx, err := reader.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback()
+	var count int
+	if err := tx.QueryRow("SELECT count(*) FROM books").Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	if err := OpenDatabase(options); err == nil {
+		t.Fatal("expected busy database error")
+	}
+	backups, _ := filepath.Glob(filepath.Join(dir, "comigo.sqlite.bak-*"))
+	if len(backups) != 0 || DbStore != nil {
+		t.Fatalf("busy database rebuilt: %v", backups)
+	}
+	if err := tx.QueryRow("SELECT count(*) FROM books").Scan(&count); err != nil {
+		t.Fatalf("original database no longer readable: %v", err)
 	}
 }

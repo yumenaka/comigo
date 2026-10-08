@@ -104,28 +104,10 @@ func NewFileInfo(name string, size int64, mode fs.FileMode, modTime time.Time, i
 	}
 }
 
-// dirEntry 是 DirEntry 的基础实现
-type dirEntry struct {
-	info FileInfo
-}
-
-func (de *dirEntry) Name() string               { return de.info.Name() }
-func (de *dirEntry) IsDir() bool                { return de.info.IsDir() }
-func (de *dirEntry) Type() fs.FileMode          { return de.info.Mode().Type() }
-func (de *dirEntry) Info() (fs.FileInfo, error) { return de.info, nil }
-
-// NewDirEntry 创建新的 DirEntry
-func NewDirEntry(info FileInfo) DirEntry {
-	return &dirEntry{info: info}
-}
-
 // Options 文件系统配置选项
 type Options struct {
 	// CacheEnabled 是否启用文件缓存
 	CacheEnabled bool
-
-	// CacheDir 缓存目录路径
-	CacheDir string
 
 	// Timeout 连接超时（秒）
 	Timeout int
@@ -142,7 +124,6 @@ type Options struct {
 func DefaultOptions() Options {
 	return Options{
 		CacheEnabled:     false,
-		CacheDir:         "",
 		Timeout:          30,
 		Debug:            false,
 		UseRangeRequests: true, // 默认启用 Range 请求以优化大文件读取

@@ -138,7 +138,7 @@ func NewFTPFS(urlStr string, opts ...Options) (*FTPFS, error) {
 
 	// 初始化缓存
 	if options.CacheEnabled {
-		ftpfs.cache = NewFileCache(options.CacheDir, options.Debug)
+		ftpfs.cache = NewFileCache(options.Debug)
 	}
 
 	if options.Debug {
@@ -163,34 +163,11 @@ func (f *FTPFS) resolvePath(p string) string {
 
 // Open 打开文件用于读取
 func (f *FTPFS) Open(p string) (File, error) {
-	fullPath := f.resolvePath(p)
-
-	// 检查缓存
-	if f.cache != nil {
-		if data, ok := f.cache.Get(fullPath); ok {
-			return newFTPFile(data, fullPath, f), nil
-		}
-	}
-
-	f.mu.Lock()
-	resp, err := f.conn.Retr(fullPath)
-	f.mu.Unlock()
+	data, err := f.ReadFile(p)
 	if err != nil {
-		return nil, fmt.Errorf("无法打开 FTP 文件 %s: %w", fullPath, err)
+		return nil, err
 	}
-	defer resp.Close()
-
-	data, err := io.ReadAll(resp)
-	if err != nil {
-		return nil, fmt.Errorf("无法读取 FTP 文件 %s: %w", fullPath, err)
-	}
-
-	// 保存到缓存
-	if f.cache != nil {
-		f.cache.Set(fullPath, data)
-	}
-
-	return newFTPFile(data, fullPath, f), nil
+	return newFTPFile(data, f.resolvePath(p), f), nil
 }
 
 // Stat 获取文件信息
@@ -366,34 +343,10 @@ func (f *FTPFS) IsDir(p string) (bool, error) {
 // OpenReaderAtSeeker 打开文件并返回支持 Seek 的 Reader
 // FTP 不支持随机访问（ReadAt），统一下载到内存并缓存以避免重复下载
 func (f *FTPFS) OpenReaderAtSeeker(p string) (ReaderAtSeeker, error) {
-	fullPath := f.resolvePath(p)
-
-	// 优先使用缓存
-	if f.cache != nil {
-		if data, ok := f.cache.Get(fullPath); ok {
-			return bytes.NewReader(data), nil
-		}
-	}
-
-	// 下载文件到内存
-	f.mu.Lock()
-	resp, err := f.conn.Retr(fullPath)
-	f.mu.Unlock()
+	data, err := f.ReadFile(p)
 	if err != nil {
-		return nil, fmt.Errorf("无法打开 FTP 文件 %s: %w", fullPath, err)
+		return nil, err
 	}
-	defer resp.Close()
-
-	data, err := io.ReadAll(resp)
-	if err != nil {
-		return nil, fmt.Errorf("无法读取 FTP 文件 %s: %w", fullPath, err)
-	}
-
-	// 保存到缓存，避免重复下载
-	if f.cache != nil {
-		f.cache.Set(fullPath, data)
-	}
-
 	return bytes.NewReader(data), nil
 }
 

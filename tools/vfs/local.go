@@ -50,27 +50,12 @@ func (l *LocalFS) Open(path string) (File, error) {
 
 // Stat 获取文件信息
 func (l *LocalFS) Stat(path string) (FileInfo, error) {
-	fullPath := l.resolvePath(path)
-	info, err := os.Stat(fullPath)
-	if err != nil {
-		return nil, err
-	}
-	return info, nil
+	return os.Stat(l.resolvePath(path))
 }
 
 // ReadDir 读取目录
 func (l *LocalFS) ReadDir(path string) ([]DirEntry, error) {
-	fullPath := l.resolvePath(path)
-	entries, err := os.ReadDir(fullPath)
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]DirEntry, len(entries))
-	for i, entry := range entries {
-		result[i] = entry
-	}
-	return result, nil
+	return os.ReadDir(l.resolvePath(path))
 }
 
 // ReadFile 读取文件内容

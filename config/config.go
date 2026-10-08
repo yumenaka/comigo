@@ -59,7 +59,6 @@ type Config struct {
 	Port                      int            `json:"Port" comment:"Comigo 设置文件按启动壳分别使用 config.toml、desktop.toml、tray.toml，可保存在 HomeDirectory、WorkingDirectory、ProgramDirectory 下。\n网页服务端口，启用auto TLS时强制使用443端口"`
 	SupportFileType           []string       `json:"SupportFileType" comment:"支持的书籍压缩包后缀"`
 	SupportMediaType          []string       `json:"SupportMediaType" comment:"扫描压缩包时，用于统计图片数量的图片文件后缀"`
-	SupportTemplateFile       []string       `json:"SupportTemplateFile" comment:"支持的模板文件类型，默认为html"`
 	Timeout                   int            `json:"Timeout" comment:"cookie过期的时间。单位为分钟。默认60*24*30分钟后过期。"`
 	TimeoutLimitForScan       int            `json:"TimeoutLimitForScan" comment:"扫描文件或访问远程书库时，超过几秒钟就放弃，避免卡在特殊文件或远端服务上"`
 	UseCache                  bool           `json:"UseCache" comment:"开启本地图片缓存，可以加快二次读取，但会占用硬盘空间"`
@@ -124,20 +123,8 @@ func (c *Config) GetSupportFileType() []string {
 	return c.SupportFileType
 }
 
-func (c *Config) GetSupportTemplateFile() []string {
-	return c.SupportTemplateFile
-}
-
 func (c *Config) GetZipFileTextEncoding() string {
 	return c.ZipFileTextEncoding
-}
-
-func (c *Config) GetEnableDatabase() bool {
-	return c.EnableDatabase
-}
-
-func (c *Config) GetClearDatabaseWhenExit() bool {
-	return c.ClearDatabaseWhenExit
 }
 
 // IsPathOverlapping 检查新路径是否与已有路径重合（完全相同、父子关系）
@@ -236,27 +223,6 @@ func (c *Config) AddStoreUrl(storeURL string) error {
 	// 添加到配置
 	c.StoreUrls = append(c.StoreUrls, normalizedURL)
 	return nil
-}
-
-// InitConfigStoreUrls 初始化配置文件中的书库
-// 本地路径会将相对路径转换为绝对路径
-// 远程 URL（WebDAV 等）保持原样
-func (c *Config) InitConfigStoreUrls() {
-	// 保存原始的 StoreUrls
-	originalUrls := make([]string, len(c.StoreUrls))
-	copy(originalUrls, c.StoreUrls)
-
-	// 清空 StoreUrls，然后重新添加（这样可以触发路径标准化）
-	c.StoreUrls = []string{}
-
-	for _, storeUrl := range originalUrls {
-		// 使用 AddStoreUrl 添加，会自动处理本地路径和远程 URL
-		err := c.AddStoreUrl(storeUrl)
-		if err != nil {
-			// 如果添加失败，记录错误但继续处理其他路径
-			logger.Infof(locale.GetString("log_failed_to_add_store_url"), err)
-		}
-	}
 }
 
 // HasPasswordLoginConfigured 是否已配置可用的账号密码登录。

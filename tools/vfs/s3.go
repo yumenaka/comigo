@@ -126,7 +126,7 @@ func NewS3FS(urlStr string, opts ...Options) (*S3FS, error) {
 
 	// 初始化缓存
 	if options.CacheEnabled {
-		s3fs.cache = NewFileCache(options.CacheDir, options.Debug)
+		s3fs.cache = NewFileCache(options.Debug)
 	}
 
 	if options.Debug {
@@ -166,39 +166,11 @@ func (s *S3FS) resolvePath(p string) string {
 
 // Open 打开文件用于读取
 func (s *S3FS) Open(p string) (File, error) {
-	key := s.resolvePath(p)
-
-	// 检查缓存
-	if s.cache != nil {
-		if data, ok := s.cache.Get(key); ok {
-			return newS3File(data, key, s), nil
-		}
-	}
-
-	// 从 S3 下载
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.options.Timeout)*time.Second)
-	defer cancel()
-
-	result, err := s.client.GetObject(ctx, &s3.GetObjectInput{
-		Bucket: &s.bucket,
-		Key:    &key,
-	})
+	data, err := s.ReadFile(p)
 	if err != nil {
-		return nil, fmt.Errorf("无法打开 S3 文件 %s: %w", key, err)
+		return nil, err
 	}
-	defer result.Body.Close()
-
-	data, err := io.ReadAll(result.Body)
-	if err != nil {
-		return nil, fmt.Errorf("无法读取 S3 文件 %s: %w", key, err)
-	}
-
-	// 保存到缓存
-	if s.cache != nil {
-		s.cache.Set(key, data)
-	}
-
-	return newS3File(data, key, s), nil
+	return newS3File(data, s.resolvePath(p), s), nil
 }
 
 // Stat 获取文件信息
@@ -292,7 +264,7 @@ func (s *S3FS) ReadDir(p string) ([]DirEntry, error) {
 				continue
 			}
 			info := NewFileInfo(dirName, 0, fs.ModeDir|0o755, time.Time{}, true)
-			entries = append(entries, NewDirEntry(info))
+			entries = append(entries, fs.FileInfoToDirEntry(info))
 		}
 
 		// 处理文件
@@ -317,7 +289,7 @@ func (s *S3FS) ReadDir(p string) ([]DirEntry, error) {
 				modTime = *obj.LastModified
 			}
 			info := NewFileInfo(fileName, size, 0o644, modTime, false)
-			entries = append(entries, NewDirEntry(info))
+			entries = append(entries, fs.FileInfoToDirEntry(info))
 		}
 	}
 
@@ -502,41 +474,12 @@ func (s *S3FS) IsDir(p string) (bool, error) {
 
 // OpenReaderAtSeeker 打开文件并返回支持 Seek 的 Reader
 // 下载到内存并缓存，避免重复下载 两种策略：
-// 小文件（<1MB）: 直接下载到内存+缓存
-// 大文件: 也下载到内存+缓存（S3 Range 请求虽可行，但为保持简单先用全量下载+缓存，与 SMB 一致）
+// 完整下载后在内存中随机读取，启用缓存时复用下载结果。
 func (s *S3FS) OpenReaderAtSeeker(p string) (ReaderAtSeeker, error) {
-	key := s.resolvePath(p)
-
-	// 优先使用缓存
-	if s.cache != nil {
-		if data, ok := s.cache.Get(key); ok {
-			return bytes.NewReader(data), nil
-		}
-	}
-
-	// 下载文件到内存
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.options.Timeout)*time.Second)
-	defer cancel()
-
-	result, err := s.client.GetObject(ctx, &s3.GetObjectInput{
-		Bucket: &s.bucket,
-		Key:    &key,
-	})
+	data, err := s.ReadFile(p)
 	if err != nil {
-		return nil, fmt.Errorf("无法打开 S3 文件 %s: %w", key, err)
+		return nil, err
 	}
-	defer result.Body.Close()
-
-	data, err := io.ReadAll(result.Body)
-	if err != nil {
-		return nil, fmt.Errorf("无法读取 S3 文件 %s: %w", key, err)
-	}
-
-	// 保存到缓存，避免重复下载
-	if s.cache != nil {
-		s.cache.Set(key, data)
-	}
-
 	return bytes.NewReader(data), nil
 }
 

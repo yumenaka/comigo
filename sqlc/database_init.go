@@ -13,12 +13,13 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/sqlc/postgres"
 	"github.com/yumenaka/comigo/tools/logger"
-	_ "modernc.org/sqlite"
+	"modernc.org/sqlite"
 )
 
 // 参考：
@@ -74,7 +75,7 @@ func OpenDatabase(options DBOptions) error {
 	dbType := strings.ToLower(strings.TrimSpace(options.Type))
 	switch dbType {
 	case "sqlite":
-		return openSQLiteDatabase(options.ConfigDir)
+		return openSQLiteDatabase(options.ConfigDir, true)
 	case "postgres":
 		return openPostgresDatabase(strings.TrimSpace(options.DSN))
 	default:
@@ -82,18 +83,21 @@ func OpenDatabase(options DBOptions) error {
 	}
 }
 
-func openSQLiteDatabase(configDir string) (openErr error) {
+// openSQLiteDatabase 初始化 SQLite；旧结构备份后只重试一次，避免循环重建。
+func openSQLiteDatabase(configDir string, rebuild bool) (openErr error) {
 	defer func() {
 		if openErr != nil {
 			CloseDatabase()
 		}
 	}()
 	dataSourceName := ":memory:"
+	var dbPath string
 	if configDir != "" {
 		if err := os.MkdirAll(configDir, 0o700); err != nil {
 			return err
 		}
-		dbPath, err := filepath.Abs(filepath.Join(configDir, "comigo.sqlite"))
+		var err error
+		dbPath, err = filepath.Abs(filepath.Join(configDir, "comigo.sqlite"))
 		if err != nil {
 			return err
 		}
@@ -118,14 +122,39 @@ func openSQLiteDatabase(configDir string) (openErr error) {
 		return err
 	}
 
-	// create tables - 现在使用 IF NOT EXISTS，所以即使表已存在也不会报错
-	if _, err := client.ExecContext(ctx, ddl); err != nil {
-		logger.Infof(locale.GetString("log_failed_to_create_tables"), err)
-		return err
+	// 建表或查询缺少列时说明旧结构不兼容；其他错误不能触发重建。
+	_, err = client.ExecContext(ctx, ddl)
+	if err == nil {
+		DbStore = NewDBStore(client)
+		err = validateSchema(DbStore)
 	}
-	DbStore = NewDBStore(client)
-	if err := validateSchema(DbStore); err != nil {
-		return err
+	if err != nil {
+		var sqliteErr *sqlite.Error
+		if !rebuild || dbPath == "" || !errors.As(err, &sqliteErr) || sqliteErr.Code() != 1 ||
+			(!strings.Contains(err.Error(), "no such column:") && !strings.Contains(err.Error(), "no such table:")) {
+			return err
+		}
+		// 先写回 WAL；仍有事务占用时停止，不能只移动主文件而丢失已提交数据。
+		if _, err := client.ExecContext(ctx, "PRAGMA locking_mode = EXCLUSIVE; BEGIN EXCLUSIVE; COMMIT;"); err != nil {
+			return err
+		}
+		var busy, logFrames, checkpointed int
+		if err := client.QueryRowContext(ctx, "PRAGMA wal_checkpoint(TRUNCATE)").Scan(&busy, &logFrames, &checkpointed); err != nil {
+			return err
+		}
+		if busy != 0 {
+			return fmt.Errorf("database is busy; cannot back up incompatible SQLite database")
+		}
+		if err := client.Close(); err != nil {
+			return err
+		}
+		client, DbStore = nil, nil
+		backupPath := dbPath + ".bak-" + time.Now().Format("20060102-150405.000000000")
+		if err := os.Rename(dbPath, backupPath); err != nil {
+			return err
+		}
+		logger.Infof(locale.GetString("log_sqlite_schema_rebuilt"), backupPath)
+		return openSQLiteDatabase(configDir, false)
 	}
 
 	logger.Info(locale.GetString("log_database_initialized_successfully"))
@@ -188,10 +217,17 @@ func CloseDatabase() {
 	}
 }
 
-// validateSchema 拒绝不兼容的旧结构，不静默退回 JSON，也不自动删除用户数据。
+// validateSchema 检查书籍、页面和书签结构，由对应后端决定如何处理不兼容。
 func validateSchema(db *StoreDatabase) error {
-	_, err := db.queries.GetBookByID(context.Background(), "")
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	ctx := context.Background()
+	_, bookErr := db.queries.GetBookByID(ctx, "")
+	if errors.Is(bookErr, sql.ErrNoRows) {
+		bookErr = nil
+	}
+	_, pageErr := db.queries.GetPageInfosByBookID(ctx, "")
+	_, bookmarkErr := db.queries.ListBookmarksByBookID(ctx, "")
+	err := errors.Join(bookErr, pageErr, bookmarkErr)
+	if err != nil {
 		return fmt.Errorf("incompatible database schema (use a new database): %w", err)
 	}
 	return nil

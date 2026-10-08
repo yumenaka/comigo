@@ -7,187 +7,63 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// 验证配置变化会计算出正确的服务动作。
+// 验证配置变化只触发对应的服务动作，未改动字段复用原配置。
 func TestBuildConfigChangeAction(t *testing.T) {
-	oldCfg := &config.Config{
-		Port:                      1234,
-		StoreUrls:                 []string{"/a"},
-		EnableTailscale:           false,
-		AutoRescanIntervalMinutes: 0,
-	}
-	newCfg := &config.Config{
-		Port:                      5678,
-		StoreUrls:                 []string{"/a", "/b"},
-		EnableTailscale:           true,
-		AutoRescanIntervalMinutes: 10,
-	}
-
-	action := BuildConfigChangeAction(*oldCfg, newCfg)
-	if !action.ReScanStores {
-		t.Fatalf("expected ReScanStores=true")
-	}
-	if !action.ReStartWebServer {
-		t.Fatalf("expected ReStartWebServer=true")
-	}
-	if !action.StartTailscale {
-		t.Fatalf("expected StartTailscale=true")
-	}
-	if !action.UpdateAutoRescan {
-		t.Fatalf("expected UpdateAutoRescan=true")
-	}
-}
-
-// 验证基础路径变化会触发 Web 服务重启。
-func TestBuildConfigChangeActionRestartsWebServerWhenBasePathChanges(t *testing.T) {
-	oldCfg := &config.Config{
-		BasePath: "",
-		Port:     1234,
-	}
-	newCfg := &config.Config{
-		BasePath: "/proxy",
-		Port:     1234,
-	}
-
-	action := BuildConfigChangeAction(*oldCfg, newCfg)
-	if !action.ReStartWebServer {
-		t.Fatalf("expected ReStartWebServer=true")
-	}
-}
-
-// 验证等价基础路径不会触发多余重启。
-func TestBuildConfigChangeActionIgnoresEquivalentBasePath(t *testing.T) {
-	oldCfg := &config.Config{
-		BasePath: "/proxy/",
-		Port:     1234,
-	}
-	newCfg := &config.Config{
-		BasePath: "/proxy",
-		Port:     1234,
-	}
-
-	action := BuildConfigChangeAction(*oldCfg, newCfg)
-	if action.ReStartWebServer {
-		t.Fatalf("expected ReStartWebServer=false for equivalent BasePath")
-	}
-}
-
-// 验证启用 Tailscale 时会生成启动动作。
-func TestBuildConfigChangeActionStartTailscale(t *testing.T) {
-	oldCfg := &config.Config{
-		EnableTailscale:   false,
-		TailscaleHostname: "comigo",
-		TailscalePort:     443,
-	}
-	newCfg := &config.Config{
-		EnableTailscale:   true,
-		TailscaleHostname: "comigo",
-		TailscalePort:     443,
-	}
-
-	action := BuildConfigChangeAction(*oldCfg, newCfg)
-	if !action.StartTailscale {
-		t.Fatalf("expected StartTailscale=true")
-	}
-	if action.StopTailscale {
-		t.Fatalf("expected StopTailscale=false")
-	}
-	if action.ReStartTailscale {
-		t.Fatalf("expected ReStartTailscale=false")
-	}
-}
-
-// 验证关闭 Tailscale 时会生成停止动作。
-func TestBuildConfigChangeActionStopTailscale(t *testing.T) {
-	oldCfg := &config.Config{
-		EnableTailscale:   true,
-		TailscaleHostname: "comigo",
-		TailscalePort:     443,
-	}
-	newCfg := &config.Config{
-		EnableTailscale:   false,
-		TailscaleHostname: "comigo",
-		TailscalePort:     443,
-	}
-
-	action := BuildConfigChangeAction(*oldCfg, newCfg)
-	if !action.StopTailscale {
-		t.Fatalf("expected StopTailscale=true")
-	}
-	if action.StartTailscale {
-		t.Fatalf("expected StartTailscale=false")
-	}
-	if action.ReStartTailscale {
-		t.Fatalf("expected ReStartTailscale=false")
-	}
-}
-
-// 验证 Tailscale 关键配置变化会生成重启动作。
-func TestBuildConfigChangeActionRestartTailscaleWhenConfigChanges(t *testing.T) {
-	oldCfg := &config.Config{
-		EnableTailscale:   true,
-		TailscaleAuthKey:  "tskey-old",
-		TailscaleHostname: "comigo",
-		TailscalePort:     443,
-		FunnelTunnel:      false,
-	}
-
-	testCases := []struct {
+	old := config.Config{Port: 1234, StoreUrls: []string{"/a"}, TailscaleHostname: "comigo", TailscalePort: 443}
+	for _, tc := range []struct {
 		name   string
-		newCfg *config.Config
+		change func(*config.Config)
+		want   ConfigChangeAction
 	}{
-		{
-			name: "auth key changed",
-			newCfg: &config.Config{
-				EnableTailscale:   true,
-				TailscaleAuthKey:  "tskey-new",
-				TailscaleHostname: "comigo",
-				TailscalePort:     443,
-				FunnelTunnel:      false,
-			},
-		},
-		{
-			name: "hostname changed",
-			newCfg: &config.Config{
-				EnableTailscale:   true,
-				TailscaleAuthKey:  "tskey-old",
-				TailscaleHostname: "reader",
-				TailscalePort:     443,
-				FunnelTunnel:      false,
-			},
-		},
-		{
-			name: "port changed",
-			newCfg: &config.Config{
-				EnableTailscale:   true,
-				TailscaleAuthKey:  "tskey-old",
-				TailscaleHostname: "comigo",
-				TailscalePort:     8443,
-				FunnelTunnel:      false,
-			},
-		},
-		{
-			name: "funnel changed",
-			newCfg: &config.Config{
-				EnableTailscale:   true,
-				TailscaleAuthKey:  "tskey-old",
-				TailscaleHostname: "comigo",
-				TailscalePort:     443,
-				FunnelTunnel:      true,
-			},
-		},
-	}
-
-	for _, tc := range testCases {
+		{"不变", func(c *config.Config) {}, ConfigChangeAction{}},
+		{"多个配置", func(c *config.Config) {
+			c.Port = 5678
+			c.StoreUrls = []string{"/a", "/b"}
+			c.EnableTailscale = true
+			c.AutoRescanIntervalMinutes = 10
+		}, ConfigChangeAction{ReScanStores: true, ReStartWebServer: true, StartTailscale: true, UpdateAutoRescan: true}},
+		{"基础路径", func(c *config.Config) { c.BasePath = "/proxy" }, ConfigChangeAction{ReStartWebServer: true}},
+		{"启用 Tailscale", func(c *config.Config) { c.EnableTailscale = true }, ConfigChangeAction{StartTailscale: true}},
+	} {
 		t.Run(tc.name, func(t *testing.T) {
-			action := BuildConfigChangeAction(*oldCfg, tc.newCfg)
-			if !action.ReStartTailscale {
-				t.Fatalf("expected ReStartTailscale=true")
+			next := old
+			tc.change(&next)
+			if got := BuildConfigChangeAction(old, &next); got != tc.want {
+				t.Fatalf("action=%+v, want %+v", got, tc.want)
 			}
-			if action.StartTailscale {
-				t.Fatalf("expected StartTailscale=false")
-			}
-			if action.StopTailscale {
-				t.Fatalf("expected StopTailscale=false")
+		})
+	}
+}
+
+// 等价基础路径无需重启。
+func TestBuildConfigChangeActionIgnoresEquivalentBasePath(t *testing.T) {
+	old := config.Config{BasePath: "/proxy/"}
+	next := old
+	next.BasePath = "/proxy"
+	if action := BuildConfigChangeAction(old, &next); action.ReStartWebServer {
+		t.Fatal("等价基础路径触发了重启")
+	}
+}
+
+// 已启用 Tailscale 时，关闭或修改连接参数分别触发停止或重启。
+func TestBuildConfigChangeActionUpdatesTailscale(t *testing.T) {
+	old := config.Config{EnableTailscale: true, TailscaleAuthKey: "old", TailscaleHostname: "comigo", TailscalePort: 443}
+	for _, tc := range []struct {
+		name   string
+		change func(*config.Config)
+		want   ConfigChangeAction
+	}{
+		{"关闭", func(c *config.Config) { c.EnableTailscale = false }, ConfigChangeAction{StopTailscale: true}},
+		{"密钥", func(c *config.Config) { c.TailscaleAuthKey = "new" }, ConfigChangeAction{ReStartTailscale: true}},
+		{"主机名", func(c *config.Config) { c.TailscaleHostname = "reader" }, ConfigChangeAction{ReStartTailscale: true}},
+		{"端口", func(c *config.Config) { c.TailscalePort = 8443 }, ConfigChangeAction{ReStartTailscale: true}},
+		{"Funnel", func(c *config.Config) { c.FunnelTunnel = true }, ConfigChangeAction{ReStartTailscale: true}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			next := old
+			tc.change(&next)
+			if got := BuildConfigChangeAction(old, &next); got != tc.want {
+				t.Fatalf("action=%+v, want %+v", got, tc.want)
 			}
 		})
 	}

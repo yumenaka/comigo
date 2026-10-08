@@ -151,7 +151,6 @@ func TestInitStoreSkipsPreviouslyFailedArchiveFiles(t *testing.T) {
 		excludePath:       []string{},
 		supportMediaType:  []string{".jpg", ".png", ".webp"},
 		supportFileType:   []string{".zip", ".cbz", ".rar", ".cbr", ".tar", ".epub", ".pdf"},
-		supportTemplate:   []string{".html"},
 		maxScanDepth:      -1,
 		minImageNum:       1,
 		timeoutLimitForSc: 0,

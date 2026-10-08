@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/fs"
 	"net"
 	"net/url"
 	"path/filepath"
@@ -180,7 +181,7 @@ func NewSMBFS(urlStr string, opts ...Options) (*SMBFS, error) {
 
 	// 初始化缓存
 	if options.CacheEnabled {
-		smbfs.cache = NewFileCache(options.CacheDir, options.Debug)
+		smbfs.cache = NewFileCache(options.Debug)
 	}
 
 	if options.Debug {
@@ -234,33 +235,11 @@ func (s *SMBFS) resolvePath(p string) string {
 
 // Open 打开文件用于读取
 func (s *SMBFS) Open(p string) (File, error) {
-	fullPath := s.resolvePath(p)
-
-	// 检查缓存
-	if s.cache != nil {
-		if data, ok := s.cache.Get(fullPath); ok {
-			return newSMBFile(data, fullPath, s), nil
-		}
-	}
-
-	// 从共享读取
-	file, err := s.share.Open(fullPath)
+	data, err := s.ReadFile(p)
 	if err != nil {
-		return nil, fmt.Errorf("无法打开 SMB 文件 %s: %w", fullPath, err)
+		return nil, err
 	}
-	defer file.Close()
-
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("无法读取 SMB 文件 %s: %w", fullPath, err)
-	}
-
-	// 保存到缓存（如果启用）
-	if s.cache != nil {
-		s.cache.Set(fullPath, data)
-	}
-
-	return newSMBFile(data, fullPath, s), nil
+	return newSMBFile(data, s.resolvePath(p), s), nil
 }
 
 // Stat 获取文件信息
@@ -283,7 +262,7 @@ func (s *SMBFS) ReadDir(p string) ([]DirEntry, error) {
 
 	entries := make([]DirEntry, len(files))
 	for i, f := range files {
-		entries[i] = NewDirEntry(f)
+		entries[i] = fs.FileInfoToDirEntry(f)
 	}
 	return entries, nil
 }
@@ -432,66 +411,12 @@ func (s *SMBFS) IsDir(p string) (bool, error) {
 }
 
 // OpenReaderAtSeeker 打开文件并返回支持 Seek 的 Reader
-// SMB 文件句柄支持 Seek，但不一定支持 ReadAt
-// 所有文件都会下载到内存以确保兼容性，并缓存以避免重复下载
+// 完整下载后在内存中随机读取，启用缓存时复用下载结果。
 func (s *SMBFS) OpenReaderAtSeeker(p string) (ReaderAtSeeker, error) {
-	fullPath := s.resolvePath(p)
-
-	// 检查完整文件缓存（优先使用缓存）
-	if s.cache != nil {
-		if data, ok := s.cache.Get(fullPath); ok {
-			return bytes.NewReader(data), nil
-		}
-	}
-
-	// 获取文件大小
-	info, err := s.share.Stat(fullPath)
+	data, err := s.ReadFile(p)
 	if err != nil {
-		return nil, fmt.Errorf("无法获取文件信息 %s: %w", fullPath, err)
+		return nil, err
 	}
-	fileSize := info.Size()
-
-	// 对于小文件（< 1MB），下载到内存并缓存
-	smallFileThreshold := int64(1024 * 1024) // 1MB
-	if fileSize < smallFileThreshold {
-		file, err := s.share.Open(fullPath)
-		if err != nil {
-			return nil, fmt.Errorf("无法打开 SMB 文件 %s: %w", fullPath, err)
-		}
-		defer file.Close()
-
-		data, err := io.ReadAll(file)
-		if err != nil {
-			return nil, fmt.Errorf("无法读取 SMB 文件 %s: %w", fullPath, err)
-		}
-
-		// 保存到缓存（如果启用）
-		if s.cache != nil {
-			s.cache.Set(fullPath, data)
-		}
-
-		return bytes.NewReader(data), nil
-	}
-
-	// 对于大文件，尝试使用 SMB 文件句柄（如果支持 Seek）
-	// 注意：go-smb2 的 File 可能不支持 ReadAt，所以我们需要下载到内存
-	file, err := s.share.Open(fullPath)
-	if err != nil {
-		return nil, fmt.Errorf("无法打开 SMB 文件 %s: %w", fullPath, err)
-	}
-
-	// 读取整个文件到内存（SMB 文件句柄可能不支持 ReadAt）
-	data, err := io.ReadAll(file)
-	file.Close()
-	if err != nil {
-		return nil, fmt.Errorf("无法读取 SMB 文件 %s: %w", fullPath, err)
-	}
-
-	// 保存到缓存（如果启用），避免重复下载
-	if s.cache != nil {
-		s.cache.Set(fullPath, data)
-	}
-
 	return bytes.NewReader(data), nil
 }
 

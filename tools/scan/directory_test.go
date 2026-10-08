@@ -22,24 +22,20 @@ type testCfgScan struct {
 	excludePath       []string
 	supportMediaType  []string
 	supportFileType   []string
-	supportTemplate   []string
 	maxScanDepth      int
 	minImageNum       int
 	timeoutLimitForSc int
 }
 
-func (c *testCfgScan) GetStoreUrls() []string           { return nil }
-func (c *testCfgScan) GetMaxScanDepth() int             { return c.maxScanDepth }
-func (c *testCfgScan) GetMinImageNum() int              { return c.minImageNum }
-func (c *testCfgScan) GetTimeoutLimitForScan() int      { return c.timeoutLimitForSc }
-func (c *testCfgScan) GetExcludePath() []string         { return c.excludePath }
-func (c *testCfgScan) GetSupportMediaType() []string    { return c.supportMediaType }
-func (c *testCfgScan) GetSupportFileType() []string     { return c.supportFileType }
-func (c *testCfgScan) GetSupportTemplateFile() []string { return c.supportTemplate }
-func (c *testCfgScan) GetZipFileTextEncoding() string   { return "utf-8" }
-func (c *testCfgScan) GetEnableDatabase() bool          { return false }
-func (c *testCfgScan) GetClearDatabaseWhenExit() bool   { return false }
-func (c *testCfgScan) GetDebug() bool                   { return false }
+func (c *testCfgScan) GetStoreUrls() []string         { return nil }
+func (c *testCfgScan) GetMaxScanDepth() int           { return c.maxScanDepth }
+func (c *testCfgScan) GetMinImageNum() int            { return c.minImageNum }
+func (c *testCfgScan) GetTimeoutLimitForScan() int    { return c.timeoutLimitForSc }
+func (c *testCfgScan) GetExcludePath() []string       { return c.excludePath }
+func (c *testCfgScan) GetSupportMediaType() []string  { return c.supportMediaType }
+func (c *testCfgScan) GetSupportFileType() []string   { return c.supportFileType }
+func (c *testCfgScan) GetZipFileTextEncoding() string { return "utf-8" }
+func (c *testCfgScan) GetDebug() bool                 { return false }
 
 // 验证目录扫描只收集支持的文件。
 // 这是防止初始化书库漏扫压缩包的回归用例。
@@ -65,7 +61,6 @@ func TestHandleDirectory_ShouldCollectSupportedFiles(t *testing.T) {
 		excludePath:       []string{},
 		supportMediaType:  []string{".jpg", ".png", ".webp"},
 		supportFileType:   []string{".zip", ".cbz", ".rar", ".cbr", ".tar", ".epub", ".pdf"},
-		supportTemplate:   []string{".html"},
 		maxScanDepth:      -1,
 		minImageNum:       1,
 		timeoutLimitForSc: 0,
@@ -200,7 +195,6 @@ func TestInitStoreRescansChangedDirectoryBook(t *testing.T) {
 		excludePath:       []string{},
 		supportMediaType:  []string{".jpg"},
 		supportFileType:   []string{".zip", ".cbz", ".rar", ".cbr", ".tar", ".epub", ".pdf"},
-		supportTemplate:   []string{".html"},
 		maxScanDepth:      -1,
 		minImageNum:       1,
 		timeoutLimitForSc: 0,

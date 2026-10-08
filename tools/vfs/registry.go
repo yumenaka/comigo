@@ -50,7 +50,7 @@ func registryKey(storeURL string, opts []Options) string {
 		options = opts[0]
 	}
 	identity := sha256.Sum256([]byte(storeURL))
-	return fmt.Sprintf("%x|%t|%s|%d|%t|%t", identity, options.CacheEnabled, options.CacheDir, options.Timeout, options.Debug, options.UseRangeRequests)
+	return fmt.Sprintf("%x|%t|%d|%t|%t", identity, options.CacheEnabled, options.Timeout, options.Debug, options.UseRangeRequests)
 }
 
 // New 根据 URL 创建对应的文件系统实例

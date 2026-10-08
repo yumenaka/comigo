@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/url"
 	"path"
 	"strings"
@@ -90,10 +91,9 @@ func NewWebDAVFS(urlStr string, opts ...Options) (*WebDAVFS, error) {
 	}
 
 	// 初始化缓存
-	// 只要启用缓存，就初始化 FileCache
-	// 注意：即使 CacheDir 为空，也会启用内存缓存，从而避免重复下载同一远程文件
+	// 启用内存缓存，避免重复下载同一远程文件。
 	if options.CacheEnabled {
-		wfs.cache = NewFileCache(options.CacheDir, options.Debug)
+		wfs.cache = NewFileCache(options.Debug)
 	}
 
 	if options.Debug {
@@ -169,7 +169,7 @@ func (w *WebDAVFS) ReadDir(p string) ([]DirEntry, error) {
 
 	entries := make([]DirEntry, len(files))
 	for i, f := range files {
-		entries[i] = NewDirEntry(f)
+		entries[i] = fs.FileInfoToDirEntry(f)
 	}
 	return entries, nil
 }

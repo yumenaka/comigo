@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/fs"
 	"net"
 	"net/url"
 	"path"
@@ -124,7 +125,7 @@ func NewSFTPFS(urlStr string, opts ...Options) (*SFTPFS, error) {
 
 	// 初始化缓存
 	if options.CacheEnabled {
-		sfs.cache = NewFileCache(options.CacheDir, options.Debug)
+		sfs.cache = NewFileCache(options.Debug)
 	}
 
 	if options.Debug {
@@ -151,33 +152,11 @@ func (s *SFTPFS) resolvePath(p string) string {
 // Open 打开文件用于读取
 // 如果启用了缓存，会先检查缓存，未命中则从服务器读取并缓存
 func (s *SFTPFS) Open(p string) (File, error) {
-	fullPath := s.resolvePath(p)
-
-	// 检查缓存
-	if s.cache != nil {
-		if data, ok := s.cache.Get(fullPath); ok {
-			return newSFTPFile(data, fullPath, s), nil
-		}
-	}
-
-	// 从服务器读取
-	file, err := s.sftpClient.Open(fullPath)
+	data, err := s.ReadFile(p)
 	if err != nil {
-		return nil, fmt.Errorf("无法打开 SFTP 文件 %s: %w", fullPath, err)
+		return nil, err
 	}
-	defer file.Close()
-
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("无法读取 SFTP 文件 %s: %w", fullPath, err)
-	}
-
-	// 保存到缓存（如果启用）
-	if s.cache != nil {
-		s.cache.Set(fullPath, data)
-	}
-
-	return newSFTPFile(data, fullPath, s), nil
+	return newSFTPFile(data, s.resolvePath(p), s), nil
 }
 
 // Stat 获取文件信息
@@ -200,7 +179,7 @@ func (s *SFTPFS) ReadDir(p string) ([]DirEntry, error) {
 
 	entries := make([]DirEntry, len(files))
 	for i, f := range files {
-		entries[i] = NewDirEntry(f)
+		entries[i] = fs.FileInfoToDirEntry(f)
 	}
 	return entries, nil
 }
@@ -364,21 +343,9 @@ func (s *SFTPFS) OpenReaderAtSeeker(p string) (ReaderAtSeeker, error) {
 	// 对于小文件（< 1MB），可以考虑缓存以提高性能
 	smallFileThreshold := int64(1024 * 1024) // 1MB
 	if fileSize < smallFileThreshold {
-		// 读取整个文件并缓存
-		file, err := s.sftpClient.Open(fullPath)
+		data, err := s.ReadFile(p)
 		if err != nil {
-			return nil, fmt.Errorf("无法打开 SFTP 文件 %s: %w", fullPath, err)
-		}
-		defer file.Close()
-
-		data, err := io.ReadAll(file)
-		if err != nil {
-			return nil, fmt.Errorf("无法读取 SFTP 文件 %s: %w", fullPath, err)
-		}
-
-		// 保存到缓存（如果启用）
-		if s.cache != nil {
-			s.cache.Set(fullPath, data)
+			return nil, err
 		}
 
 		return bytes.NewReader(data), nil
@@ -390,42 +357,12 @@ func (s *SFTPFS) OpenReaderAtSeeker(p string) (ReaderAtSeeker, error) {
 		return nil, fmt.Errorf("无法打开 SFTP 文件 %s: %w", fullPath, err)
 	}
 
-	// SFTP 文件句柄实现了 io.ReaderAt 和 io.Seeker
-	// 包装为 sftpReaderAtSeeker 以确保实现 ReaderAtSeeker 接口
-	return &sftpReaderAtSeeker{file: file}, nil
+	return file, nil
 }
 
 // GetBasePath 返回 SFTP 基础路径
 func (s *SFTPFS) GetBasePath() string {
 	return s.basePath
-}
-
-// sftpReaderAtSeeker 包装 SFTP 文件句柄以实现 ReaderAtSeeker 接口
-type sftpReaderAtSeeker struct {
-	file *sftp.File
-	pos  int64
-}
-
-func (r *sftpReaderAtSeeker) Read(p []byte) (n int, err error) {
-	n, err = r.file.Read(p)
-	r.pos += int64(n)
-	return n, err
-}
-
-func (r *sftpReaderAtSeeker) ReadAt(p []byte, off int64) (n int, err error) {
-	return r.file.ReadAt(p, off)
-}
-
-func (r *sftpReaderAtSeeker) Seek(offset int64, whence int) (int64, error) {
-	return r.file.Seek(offset, whence)
-}
-
-// Close 关闭 SFTP 文件句柄（实现 io.Closer，虽然不是 ReaderAtSeeker 接口的一部分，但调用方会检查）
-func (r *sftpReaderAtSeeker) Close() error {
-	if r.file != nil {
-		return r.file.Close()
-	}
-	return nil
 }
 
 // sftpFile 实现 File 接口
