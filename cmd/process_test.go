@@ -62,7 +62,7 @@ func TestTrayRejectsCLIProcessCommands(t *testing.T) {
 	}
 }
 
-// 未登记管理通道的其他配置进程也必须显示，且不能把查询进程自身算进去。
+// 未登记管理通道的其他配置进程也必须显示。
 func TestProcessStatusAcrossDirectories(t *testing.T) {
 	if os.Getenv("COMI_STATUS_TEST_CHILD") == "1" {
 		listener, err := net.Listen("tcp", "127.0.0.1:0")
@@ -163,7 +163,7 @@ func TestProcessStatusLocalization(t *testing.T) {
 func TestProcessCommands(t *testing.T) {
 	root := processTestCommand(t)
 	// 别名解析到同一个命令，参数规则和执行逻辑完全复用。
-	for alias, name := range map[string]string{"ls": "status", "go": "start"} {
+	for alias, name := range map[string]string{"ls": "status", "ps": "status", "go": "start"} {
 		command, remaining, err := root.Find([]string{alias})
 		original, _, _ := root.Find([]string{name})
 		if err != nil || command != original || len(remaining) != 0 {
@@ -309,7 +309,7 @@ func TestProcessControlLifecycle(t *testing.T) {
 
 // 查询命令必须在损坏配置下直接完成，不能落入服务初始化。
 func TestCLIQueriesReturnBeforeStartup(t *testing.T) {
-	for _, args := range [][]string{{"help"}, {"help", "run"}, {"status"}, {"completion", "bash"}, {"__complete", "run", "--"}, {"--lang=zh", "--help"}} {
+	for _, args := range [][]string{{"help"}, {"help", "run"}, {"status"}, {"ps"}, {"completion", "bash"}, {"__complete", "run", "--"}, {"--lang=zh", "--help"}} {
 		t.Run(args[0], func(t *testing.T) {
 			processTestCommand(t)
 			file := filepath.Join(t.TempDir(), "broken.toml")
@@ -328,7 +328,7 @@ func TestCLIQueriesReturnBeforeStartup(t *testing.T) {
 	}
 }
 
-// 多实例选择不能误停其他进程；只有唯一匹配或显式启动端口才能确定目标。
+// 重载多实例时，只有唯一匹配或显式启动端口才能确定目标。
 func TestSelectMultipleProcesses(t *testing.T) {
 	root := processTestCommand(t)
 	file := filepath.Join(t.TempDir(), "config.toml")
@@ -360,31 +360,72 @@ func TestSelectMultipleProcesses(t *testing.T) {
 	}
 }
 
-// 状态来自实时管理通道，重载后的端口不能沿用文件中的启动端口。
+// 查询和管理命令必须排除，但同名配置值和书库路径不能误排除。
+func TestProcessInvocation(t *testing.T) {
+	root := processTestCommand(t)
+	root.InitDefaultHelpCmd()
+	root.InitDefaultCompletionCmd()
+	for _, test := range []struct {
+		args      []string
+		file      string
+		transient bool
+	}{
+		{[]string{"status"}, "", true},
+		{[]string{"ls"}, "", true},
+		{[]string{"--config", "books.toml", "ps"}, "", true},
+		{[]string{"stop"}, "", true},
+		{[]string{"help", "run"}, "", true},
+		{[]string{"run", "--help"}, "", true},
+		{[]string{"-v"}, "", true},
+		{[]string{"--upgrade"}, "", true},
+		{[]string{"--upgrade=1"}, "", true},
+		{[]string{"run", "-c", "status", "--", "--version"}, "status", false},
+		{[]string{"--config=books with spaces.toml", "--", "status"}, "books with spaces.toml", false},
+		{[]string{"--config", "--version", "run"}, "--version", false},
+		{[]string{"--version=false", "./ps"}, "", false},
+		{nil, "", false},
+	} {
+		file, transient := processInvocation(test.args)
+		if file != test.file || transient != test.transient {
+			t.Errorf("%q: got (%q, %v), want (%q, %v)", test.args, file, transient, test.file, test.transient)
+		}
+	}
+	if root.PersistentFlags().Changed("config") || config.GetCfg().ConfigFile != "" {
+		t.Fatal("发现其他进程时改写了当前配置")
+	}
+}
+
+// 状态来自实时管理通道：排除自身及残留文件，重载后使用实际端口。
 func TestProcessStatusUsesLivePort(t *testing.T) {
 	processTestCommand(t)
 	dir := t.TempDir()
 	t.Setenv("COMIGO_CONFIG_DIR", dir)
 	config.GetCfg().Port = 23456
-	control := &processControl{}
-	control.ready.Store(true)
-	server := httptest.NewServer(control.handler("fixture"))
+	pid := os.Getpid()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(processState{PID: pid, Port: 23456})
+	}))
 	defer server.Close()
 	base, err := processStatePath()
 	if err != nil {
 		t.Fatal(err)
 	}
-	state := processState{PID: os.Getpid(), Port: 1234, Address: strings.TrimPrefix(server.URL, "http://"), Token: "fixture"}
-	data, _ := json.Marshal(state)
-	if err := os.WriteFile(processInstancePath(base, state.PID), data, 0600); err != nil {
-		t.Fatal(err)
-	}
 	var out bytes.Buffer
-	if err := showProcessStatus(&out); err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(out.String(), strconv.Itoa(os.Getpid())) || !strings.Contains(out.String(), "23456") || strings.Contains(out.String(), "fixture") {
-		t.Fatal(out.String())
+	for _, instancePID := range []int{os.Getpid(), 100000} {
+		pid = instancePID
+		state := processState{PID: pid, Port: 1234, Address: strings.TrimPrefix(server.URL, "http://"), Token: "fixture"}
+		data, _ := json.Marshal(state)
+		if err := os.WriteFile(processInstancePath(base, pid), data, 0600); err != nil {
+			t.Fatal(err)
+		}
+		out.Reset()
+		if err := showProcessStatus(&out); err != nil {
+			t.Fatal(err)
+		}
+		shown := strings.Contains(out.String(), fmt.Sprintf("PID %d", pid))
+		if shown != (pid != os.Getpid()) || (shown && !strings.Contains(out.String(), "23456")) || strings.Contains(out.String(), "fixture") {
+			t.Fatal(out.String())
+		}
 	}
 	server.Close()
 	out.Reset()

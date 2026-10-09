@@ -28,17 +28,16 @@ func addProcessCommands() {
 		Args: cobra.ArbitraryArgs, RunE: startBackground,
 	})
 	RootCmd.AddCommand(&cobra.Command{
-		Use: "status", Aliases: []string{"ls"}, Short: locale.GetString("cli_status"), Args: cobra.NoArgs,
+		Use: "status", Aliases: []string{"ls", "ps"}, Short: locale.GetString("cli_status"), Args: cobra.NoArgs,
 		RunE: func(command *cobra.Command, _ []string) error { return showProcessStatus(command.OutOrStdout()) },
 	})
-	for _, name := range []string{"stop", "reload"} {
-		RootCmd.AddCommand(&cobra.Command{
-			Use: name, Short: locale.GetString("cli_" + name), Args: cobra.NoArgs,
-			RunE: func(command *cobra.Command, _ []string) error {
-				return controlProcess(command.Name())
-			},
-		})
-	}
+	RootCmd.AddCommand(&cobra.Command{
+		Use: "stop", Short: locale.GetString("cli_stop"), Args: cobra.NoArgs, RunE: stopProcesses, SilenceUsage: true, SilenceErrors: true,
+	})
+	RootCmd.AddCommand(&cobra.Command{
+		Use: "reload", Short: locale.GetString("cli_reload"), Args: cobra.NoArgs,
+		RunE: func(_ *cobra.Command, _ []string) error { return controlProcess("reload") },
+	})
 	RootCmd.AddCommand(&cobra.Command{
 		Use: "upgrade", Short: locale.GetString("cli_upgrade"), Args: cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error { return runSelfUpgrade() },

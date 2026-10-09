@@ -41,8 +41,7 @@ var cliControl *processControl
 var processStop = make(chan struct{})
 var processStopOnce sync.Once
 
-// processStatePath 用配置目录定位实例，因此更改 TOML 中的端口后仍能 reload/stop。
-// 自定义配置的管理命令应带相同的 --config，或使用相同的 COMIGO_CONFIG_DIR。
+// processStatePath 定位当前配置的管理记录；跨目录发现由 localProcesses 补充。
 func processStatePath() (string, error) {
 	if config.GetCfg().ConfigFile == "" {
 		_, file := config.FindConfigFile()
@@ -201,13 +200,13 @@ func processRequest(state processState, action, file string, result ...any) erro
 	return nil
 }
 
-// controlProcess 对当前配置目录中的实例执行操作；stop 等待清理结束后才返回成功。
+// controlProcess 重载当前配置目录中唯一匹配的实例。
 func controlProcess(action string) error {
 	statePath, err := processStatePath()
 	if err != nil {
 		return err
 	}
-	statePath, state, err := findProcessState(statePath)
+	_, state, err := findProcessState(statePath)
 	if err != nil {
 		return err
 	}
@@ -220,15 +219,6 @@ func controlProcess(action string) error {
 	}
 	if err := processRequest(state, action, file); err != nil {
 		return err
-	}
-	if action == "stop" {
-		for deadline := time.Now().Add(15 * time.Second); time.Now().Before(deadline); time.Sleep(50 * time.Millisecond) {
-			current, err := readProcessState(statePath)
-			if os.IsNotExist(err) || (err == nil && current.Token != state.Token) {
-				return nil
-			}
-		}
-		return fmt.Errorf("%s", locale.GetString("cli_stop_timeout"))
 	}
 	return nil
 }

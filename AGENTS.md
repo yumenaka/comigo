@@ -2,6 +2,11 @@
 
 ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片目录、PDF、音频和多种阅读模式。主要栈：Go + Echo v4、templ、bun、Alpine.js、TailwindCSS；默认数据存储为内存 + JSON 持久化；启用数据库后，书籍、页面、书签和扫描失败记录直接持久化到 SQLite/PostgreSQL，不读写 metadata JSON。
 
+## 文档分工
+- `README*.md` 面向用户，只介绍项目、安装和基础功能；除基础功能外，一般不增加详细说明。
+- 开发细节、实现约束和维护规则写入项目根目录或对应模块的 `AGENTS.md`。开发备忘见 [TODO.md](TODO.md)。
+- 用户相关的详细用法、配置、限制和故障处理写入自带手册 `assets/static/manual-content/*.json`；README 只保留必要的手册链接，三语同步。
+
 ## 目录与边界
 - `routers/` 定义 Echo 路由，`urls.go` 管理公开/私有组，私有组走 JWT；`/healthz` 供宿主等待服务就绪。
 - `cmd/` 是 CLI 与启动逻辑；`cmd/mobile/` 导出 `Start`、`Stop`、`GetServerInfo` 等 `gomobile bind` 接口，签名优先保持基础类型。

@@ -53,7 +53,7 @@ PC/モバイル同期：
 
 > 💡 **GUI版の選び方**：ComiGo をバックグラウンドで常駐させ、システムトレイから管理したい場合はトレイ版がおすすめです。トレイ版はローカル Web サービスを起動し、ブラウザでリーダーを開きます。トレイメニューからブラウザを開く、閲覧URLをコピーする、設定/ライブラリフォルダを開く、言語を切り替える、更新を確認する、Tailscale リモートアクセスをオン/オフする、といった操作ができます。Windows ではフォルダ右クリックメニュー、ファイル関連付け、デスクトップショートカットの登録にも対応しています。
 >
-> 通常のアプリウィンドウとして使いたい場合はデスクトップ版を選んでください。デスクトップ版は同じ ComiGo リーダーを Wails のデスクトップシェルで表示し、システムのフォルダ選択や、確認後にローカルの元ファイルをシステムのゴミ箱へ移動する操作などに対応しています。現在のデスクトップ版にはシステムトレイメニューと内蔵 Tailscale リモートアクセスは含まれていません。
+> 通常のアプリウィンドウとして使いたい場合はデスクトップ版を選んでください。デスクトップ版は ComiGo リーダーを独立したウィンドウで表示し、システムのフォルダ選択や、確認後にローカルの元ファイルをシステムのゴミ箱へ移動する操作などに対応しています。現在のデスクトップ版にはシステムトレイメニューと内蔵 Tailscale リモートアクセスは含まれていません。
 
 > **macOS向けメモ**：macOS が「壊れているため開けません。ゴミ箱に入れる必要があります」と表示する場合、通常はファイル自体が壊れているわけではありません。アプリを Applications フォルダに移動してから実行してください：
 > ```bash
@@ -137,28 +137,11 @@ docker-compose up -d
 - `linux/arm64` - ARM64 サーバー（Raspberry Pi 4/5）
 - `linux/arm/v7` - ARMv7 デバイス（Raspberry Pi 2-4）
 
-### 環境変数
-
-環境変数はサービス設定を行う CLI オプションだけに対応します。オプション名を大文字にして COMIGO_ を付け、ハイフンを下線に置き換えます。例: --enable-upload は COMIGO_ENABLE_UPLOAD です。言語には COMIGO_LANGUAGE を使います。優先順位は明示した CLI オプション > 環境変数 > TOML > 既定値です。空の値は未設定とし、整数・真偽値の形式が不正な場合は起動に失敗します。COMIGO_CONFIG_DIR は既定のユーザー設定ディレクトリを変更し、設定の検索・保存・プロセス状態に共通で使用します。--config で明示したファイルが優先です。ファイル指定には --config を使い、COMIGO_CONFIGFILE は提供しません。スキャンのタイムアウトなど CLI オプションのない設定は TOML に記載します。--no-tui、--temp、--upgrade、--no-default-library は CLI 専用です。COMIGO_TUI_IMAGE は引き続き端末画像プロトコルの選択に使えます。
-
-| 変数名 | 説明 | デフォルト値 |
-|--------|------|-------------|
-| `COMIGO_PORT` | サービスポート | `1234` |
-| `COMIGO_USERNAME` | ログインユーザー名（オプション） | - |
-| `COMIGO_PASSWORD` | ログインパスワード（オプション） | - |
-| `COMIGO_ENABLE_UPLOAD` | ファイルアップロードを有効化 | `true` |
-| `COMIGO_MAX_DEPTH` | 最大スキャン深度 | - |
-| `COMIGO_MIN_IMAGE` | 最小画像数 | - |
-| `COMIGO_BASE_PATH` | リバースプロキシ基底パス | - |
-| `COMIGO_LOCAL` | 本機のみのアクセス | - |
-| `COMIGO_LANGUAGE` | ヘルプを含む言語 | - |
-| `COMIGO_CONFIG_DIR` | 既定のユーザー設定ディレクトリ | - |
-
 詳細については、完全な [Docker ドキュメント](docs/docker/README.md) をご覧ください。
 
 ## 使用方法
 
-[ユーザーマニュアル](https://comigo.xyz/manual/ja-JP/) · [開発](https://comigo.xyz/manual/ja-JP/development)
+[ユーザーマニュアル](https://comigo.xyz/manual/ja-JP/)
 
 ```bash
 comi [flags] [file_or_dir ...]
@@ -171,15 +154,13 @@ comi [flags] [file_or_dir ...]
 comi start /path/to/manga
 comi status
 
-# 同じ設定ディレクトリの CLI プロセスを停止
+# 本機の CLI プロセスを停止（複数の場合は選択）
 comi stop
 ```
 
-`comi go` は `comi start`、`comi ls` は `comi status` と同じです。引数と動作も同一です。
+`comi go` は `comi start`、`comi ls` / `comi ps` は `comi status` と同じです。引数と動作も同一です。
 
-独自の設定ファイルを使う場合は、両方に同じ `--config /path/to/config.toml` を指定してください。詳細は[デプロイのマニュアル](https://comigo.xyz/manual/ja-JP/deployment#cli-commands)をご覧ください。
-
-複数のインスタンスは異なる Web ポートで実行できます。複数が一致する場合は、`comi stop --port 2345` または `comi reload --port 2345` で起動時のポートを指定してください。
+詳しい使い方、環境変数、複数インスタンスの管理は[デプロイのマニュアル](https://comigo.xyz/manual/ja-JP/deployment#cli-commands)をご覧ください。
 
 ### コマンドラインオプション
 

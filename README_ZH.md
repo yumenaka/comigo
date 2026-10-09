@@ -52,7 +52,7 @@ PC/手机同步：
 
 > 💡 **版本选择**：如果希望 ComiGo 常驻后台、通过系统托盘管理，推荐托盘版。托盘版会启动本地 Web 服务，用浏览器打开阅读器；托盘菜单可打开浏览器、复制阅读地址、打开配置/书库目录、切换语言、检查更新，并可开启/关闭 Tailscale 远程访问。Windows 下还可注册文件夹右键菜单、文件关联和桌面快捷方式。
 >
-> 桌面版适合想要普通应用窗口的用户。它用 Wails 桌面壳承载同一套 ComiGo 阅读器，并提供系统目录选择、确认后将本地源文件移到系统垃圾桶等桌面专属操作。当前桌面版不包含系统托盘菜单，也不内置 Tailscale 远程访问。
+> 桌面版适合想要普通应用窗口的用户。它在独立窗口中显示 ComiGo 阅读器，并提供系统目录选择、确认后将本地源文件移到系统垃圾桶等桌面专属操作。当前桌面版不包含系统托盘菜单，也不内置 Tailscale 远程访问。
 
 > **macOS 提示**：如果系统提示应用“已损坏，无法打开，应该移到废纸篓”，通常不是下载文件真的损坏。将 App 拖入“应用程序”后执行：
 > ```bash
@@ -133,24 +133,9 @@ docker-compose up -d
 
 更多详细说明请查看完整的 [Docker 使用文档](docs/docker/README.md)。
 
-### 环境变量
-
-环境变量只绑定有实际配置作用的 CLI 参数，名称为 COMIGO_ 加参数名的大写形式，并把连字符改成下划线；例如 --enable-upload 对应 COMIGO_ENABLE_UPLOAD。语言使用 COMIGO_LANGUAGE。优先级为显式命令行参数 > 环境变量 > TOML > 默认值；空值按未设置处理，整数或布尔值格式错误会使启动失败。COMIGO_CONFIG_DIR 覆盖默认用户配置目录，配置发现、保存和进程状态目录保持一致；--config 显式指定文件时优先。配置路径用 --config，不提供 COMIGO_CONFIGFILE。扫描超时等没有 CLI 参数的设置使用 TOML；--no-tui、--temp、--upgrade 和 --no-default-library 仅由命令行控制，不提供对应环境变量。COMIGO_TUI_IMAGE 仍用于终端图片协议选择。
-
-| 变量 | 用途 |
-|---|---|
-| `COMIGO_PORT` | Web 端口 |
-| `COMIGO_ENABLE_UPLOAD` | 启用上传 |
-| `COMIGO_MAX_DEPTH` | 最大扫描深度 |
-| `COMIGO_MIN_IMAGE` | 最少图片数量 |
-| `COMIGO_BASE_PATH` | 反向代理基础路径 |
-| `COMIGO_LOCAL` | 仅本机访问 |
-| `COMIGO_LANGUAGE` | 语言（也适用于帮助） |
-| `COMIGO_CONFIG_DIR` | 默认用户配置目录 |
-
 ## 使用方法
 
-[用户手册](https://comigo.xyz/manual/) · [开发](https://comigo.xyz/manual/development)
+[用户手册](https://comigo.xyz/manual/)
 
 ```bash
 comi [flags] [file_or_dir ...]
@@ -163,15 +148,13 @@ comi [flags] [file_or_dir ...]
 comi start /path/to/manga
 comi status
 
-# 停止同一配置目录中的 CLI 进程
+# 停止本机 CLI 进程（多个目标时选择单个或全部）
 comi stop
 ```
 
-`comi go` 等效于 `comi start`，`comi ls` 等效于 `comi status`；参数与行为完全相同。
+`comi go` 等效于 `comi start`，`comi ls` / `comi ps` 等效于 `comi status`；参数与行为完全相同。
 
-使用自定义配置时，启动和停止都带上相同的 `--config /path/to/config.toml`。更多用法见[部署与配置手册](https://comigo.xyz/manual/deployment#cli-commands)。
-
-允许使用不同 Web 端口运行多个实例。匹配多个实例时，用 `comi stop --port 2345` 或 `comi reload --port 2345` 选择启动端口。
+更多用法、环境变量和多实例管理见[部署与配置手册](https://comigo.xyz/manual/deployment#cli-commands)。
 
 ### 命令行参数
 
@@ -190,32 +173,6 @@ comi stop
 | `--lang` | - | auto | CLI语言（auto/zh/en/ja） |
 | `--debug` | - | false | 启用调试模式               |
 
-<details>
-<summary>更多参数（点击展开）</summary>
-
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `--tls` | false | 启用 HTTPS |
-| `--auto-tls` | false | 自动申请 Let's Encrypt 证书 |
-| `--tls-crt` | - | TLS 证书文件路径 |
-| `--tls-key` | - | TLS 密钥文件路径 |
-| `--use-cache` | false | 启用本地图片缓存 |
-| `--cache-dir` | - | 缓存目录路径 |
-| `--cache-clean` | false | 退出时清除缓存 |
-| `--database` | false | 启用 SQLite 数据库存储（`comigo.sqlite` 位于配置目录） |
-| `--auto-rescan-min` | 0 | 自动扫描间隔（分钟，0为禁用） |
-| `--min-image` | 1 | 最少图片数量才认定为漫画 |
-| `--zip-encode` | gbk | 非UTF-8 ZIP文件的编码 |
-| `--log-file` | false | 输出日志到文件 |
-| `--plugin` | true | 启用插件系统 |
-| `--tailscale` | false | 启用 Tailscale 网络 |
-| `--tailscale-hostname` | comigo | Tailscale 主机名 |
-| `--tailscale-funnel` | false | 启用 Tailscale Funnel |
-
-启用 `--database` 后，扫描得到的书籍、页面、封面信息、远程索引、书签及扫描失败记录均保存在数据库中，不依赖 `metadata/*.json`。配置仍使用 TOML，原始书籍和可重新生成的图片缓存仍使用文件。数据库无法打开时启动报错，不回退到 JSON。SQLite 缺少所需表或字段时，会将旧库重命名为 `comigo.sqlite.bak-时间戳` 后重建并重新扫描；旧书签和阅读进度保留在备份中，不自动导入。数据库占用、权限或文件损坏等错误不会触发重建。PostgreSQL 旧结构和 JSON 数据不自动迁移。修改数据库配置后需要重启。
-
-</details>
-
 ### 使用示例
 
 ```bash
@@ -233,49 +190,12 @@ comi -c /path/to/config.toml
 
 命令行版使用 `config.toml`，依次查找用户目录下的 `.config/comigo/`、程序目录、当前工作目录，使用首个找到的文件。也可用 `--config` 指定文件；桌面版和托盘版分别使用 `desktop.toml` 和 `tray.toml`。
 
-### 配置文件示例
-
-```toml
-# config.toml 配置示例
-
-# 服务设置
-Port = 1234                    # 服务端口
-Host = ""                      # 自定义主机名（留空自动检测）
-DisableLAN = false             # 仅本地访问
-OpenBrowser = false            # 启动后打开浏览器
-Language = "auto"              # 界面语言 (auto/zh/en/ja)
-
-# 书库设置
-StoreUrls = ["/path/to/manga", "/path/to/comics"]  # 书库路径列表
-MaxScanDepth = 5               # 扫描深度
-MinImageNum = 1                # 最少图片数量
-AutoRescanIntervalMinutes = 0  # 自动扫描间隔（0为禁用）
-
-# 登录
-Username = ""                  # 本地账号密码登录的用户名；用户名和密码都非空时自动启用登录
-Password = ""                  # 密码
-Timeout = 43200                # Cookie过期时间（分钟）
-
-# 功能开关
-EnableUpload = true            # 启用上传
-ReadOnlyMode = false           # 只读模式
-EnablePlugin = true            # 启用插件
-Debug = false                  # 调试模式
-
-# 缓存设置
-UseCache = false               # 启用图片缓存
-CacheDir = ""                  # 缓存目录（留空使用系统临时目录）
-ClearCacheExit = false         # 退出时清除缓存
-```
-
 ## 反馈与支持
 
 如果您有任何建议或遇到问题，欢迎：
 - 提交 [Issue](https://github.com/yumenaka/comigo/issues)
 - 通过 [Twitter](https://x.com/yumenaka7) 联系我
 - Discord讨论群 [Discord](https://discord.gg/c5q6d3dM8r)
-## 开发与TODO
-- [开发备忘](https://github.com/yumenaka/comigo/blob/master/TODO.md)
 
 ## 特别鸣谢
 

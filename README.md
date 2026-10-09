@@ -52,7 +52,7 @@ PC/Mobile Sync:
 
 > 💡 **Which GUI package should I choose?** Choose Tray if you want ComiGo to keep running in the background and manage it from the system tray. The Tray version starts the local Web service and opens the reader in your browser; the tray menu can open the browser, copy the reading URL, open config/library folders, switch languages, check for updates, and toggle Tailscale remote access. On Windows, it can also register folder context menus, file associations, and desktop shortcuts.
 >
-> Choose Desktop if you prefer a regular app window. It wraps the same ComiGo reader in a Wails desktop shell and adds desktop-only actions such as selecting folders with the system picker and moving local source files to the system trash after confirmation. The current Desktop build does not include the tray menu or built-in Tailscale remote access.
+> Choose Desktop if you prefer a regular app window. It displays the ComiGo reader in a standalone window and adds desktop-only actions such as selecting folders with the system picker and moving local source files to the system trash after confirmation. The current Desktop build does not include the tray menu or built-in Tailscale remote access.
 
 > **macOS tip**: If macOS says the app is damaged and should be moved to Trash, the downloaded file is usually not actually broken. Run this after moving the app to Applications:
 > ```bash
@@ -136,28 +136,11 @@ docker-compose up -d
 - `linux/arm64` - ARM64 servers (Raspberry Pi 4/5)
 - `linux/arm/v7` - ARMv7 devices (Raspberry Pi 2-4)
 
-### Environment Variables
-
-Environment variables bind only to CLI options that configure the service. Prefix the uppercase option name with `COMIGO_` and replace hyphens with underscores; for example, `--enable-upload` uses `COMIGO_ENABLE_UPLOAD`. Language uses `COMIGO_LANGUAGE`. Priority is explicit CLI options > environment > TOML > defaults. Empty values are unset; malformed integers or booleans fail startup. `COMIGO_CONFIG_DIR` sets the default user configuration directory for discovery, saving, and process state; an explicit `--config` file takes priority. Use `--config` rather than `COMIGO_CONFIGFILE`. Settings without CLI options belong in TOML. `--no-tui`, `--temp`, `--upgrade`, and `--no-default-library` are CLI-only; `COMIGO_TUI_IMAGE` still selects the terminal image protocol.
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `COMIGO_PORT` | Service port | `1234` |
-| `COMIGO_USERNAME` | Login username (optional) | - |
-| `COMIGO_PASSWORD` | Login password (optional) | - |
-| `COMIGO_ENABLE_UPLOAD` | Enable file upload | `true` |
-| `COMIGO_MAX_DEPTH` | Maximum scan depth | - |
-| `COMIGO_MIN_IMAGE` | Minimum image count | - |
-| `COMIGO_BASE_PATH` | Reverse proxy base path | - |
-| `COMIGO_LOCAL` | Local access only | - |
-| `COMIGO_LANGUAGE` | Language, including help | - |
-| `COMIGO_CONFIG_DIR` | Default user configuration directory | - |
-
 For more details, see the complete [Docker documentation](docs/docker/README.md).
 
 ## Usage
 
-[User manual](https://comigo.xyz/manual/en-US/) · [Development](https://comigo.xyz/manual/en-US/development)
+[User manual](https://comigo.xyz/manual/en-US/)
 
 ```bash
 comi [flags] [file_or_dir ...]
@@ -170,15 +153,13 @@ Run in the background and stop:
 comi start /path/to/manga
 comi status
 
-# Stop the CLI process in the same configuration directory
+# Stop local CLI processes (choose one or all if multiple match)
 comi stop
 ```
 
-`comi go` is equivalent to `comi start`, and `comi ls` to `comi status`, with identical arguments and behavior.
+`comi go` is equivalent to `comi start`, and `comi ls` / `comi ps` to `comi status`, with identical arguments and behavior.
 
-With a custom configuration, pass the same `--config /path/to/config.toml` to both commands. See the [deployment manual](https://comigo.xyz/manual/en-US/deployment#cli-commands) for details.
-
-Multiple instances may use different Web ports. If several match, select the startup port with `comi stop --port 2345` or `comi reload --port 2345`.
+See the [deployment manual](https://comigo.xyz/manual/en-US/deployment#cli-commands) for detailed usage, environment variables and multiple instances.
 
 ### Command Line Options
 
