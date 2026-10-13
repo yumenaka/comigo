@@ -228,12 +228,13 @@ desktop-MacOS_universal: wails-prepare wails-frontend
 	hdiutil create -volname "$(DESKTOP_DISPLAY_NAME)" -srcfolder $(BINDIR)/dmg-$(DESKTOP_NAME) -ov -format UDZO $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_MacOS_universal.dmg > /dev/null || (rm -f $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_MacOS_universal.dmg && sleep 2 && hdiutil create -volname "$(DESKTOP_DISPLAY_NAME)" -srcfolder $(BINDIR)/dmg-$(DESKTOP_NAME) -ov -format UDZO $(BINDIR)/$(DESKTOP_NAME)_$(VERSION)_MacOS_universal.dmg > /dev/null)
 	@rm -rf $(BINDIR)/dmg-$(DESKTOP_NAME) $(BINDIR)/$(DESKTOP_NAME).app build/bin
 
-$(eval $(call build_windows_cli,Windows_x86_64,amd64,-64))
-$(eval $(call build_windows_cli,Windows_i386,386,-64=false))
+# 显式指定资源架构，避免 goversioninfo 在 ARM 宿主机上默认生成 ARM 资源。
+$(eval $(call build_windows_cli,Windows_x86_64,amd64,-arm=false -64))
+$(eval $(call build_windows_cli,Windows_i386,386,-arm=false -64=false))
 $(eval $(call build_windows_cli,Windows_arm64,arm64,-arm -64))
 $(eval $(call build_tray_tar,tray-Linux_x86_64,Linux_x86_64,linux,amd64))
 $(eval $(call build_tray_tar,tray-Linux_arm64,Linux_arm64,linux,arm64))
-$(eval $(call build_tray_windows,tray-Windows_x86_64,Windows_x86_64,amd64,-64))
+$(eval $(call build_tray_windows,tray-Windows_x86_64,Windows_x86_64,amd64,-arm=false -64))
 $(eval $(call build_tray_windows,tray-Windows_arm64,Windows_arm64,arm64,-arm -64))
 $(eval $(call build_desktop_linux,desktop-Linux_x86_64,Linux_x86_64,amd64,$(WAILS_LINUX_RUNTIME_IMAGE_AMD64),wails-linux-image-amd64))
 $(eval $(call build_desktop_linux,desktop-Linux_arm64,Linux_arm64,arm64,$(WAILS_LINUX_RUNTIME_IMAGE_ARM64),wails-linux-image-arm64))
