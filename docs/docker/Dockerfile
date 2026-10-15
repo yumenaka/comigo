@@ -14,15 +14,17 @@ FROM --platform=$BUILDPLATFORM alpine:3.23 AS frontend-builder
 
 WORKDIR /build
 
-# 安装 bun（JavaScript 运行时和包管理器）
-RUN apk add --no-cache curl unzip bash && \
+# Bun 需要 libstdc++，Parcel 使用 Node.js 运行。
+RUN apk add --no-cache curl unzip bash libstdc++ nodejs && \
     curl -fsSL https://bun.sh/install | bash && \
     ln -s /root/.bun/bin/bun /usr/local/bin/bun
 
 # 复制前端相关文件
 COPY package.json bun.lock* ./
 COPY assets/ ./assets/
-COPY tailwind.config.js ./
+# Tailwind 需要 PostCSS 配置和模板源码才能生成页面样式。
+COPY .postcssrc tailwind.config.js ./
+COPY templ/ ./templ/
 
 # 安装依赖并构建前端资源
 RUN bun install && bun run dev
