@@ -9,7 +9,7 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-var WsDebug *bool
+var WsDebug func() bool
 
 // 处理乒乓信息
 func handPingMessage(msg Message) Message {
@@ -75,5 +75,5 @@ func handSyncPageMessageToScrollMode(msg Message, clientID string) (Message, boo
 }
 
 func isWsDebug() bool {
-	return WsDebug != nil && *WsDebug
+	return WsDebug != nil && WsDebug()
 }

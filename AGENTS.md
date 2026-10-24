@@ -35,6 +35,7 @@ ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片�
 - 国际化展示文本和日志尽量使用 locale：Go/templ 用 `locale.GetString("key")`，前端用 `i18next.t("key")`。
 
 ## 架构约束
+- `config.GetCfg()` 是只读快照；仅启动参数绑定可直接修改。运行时更新经 `config.ChangeConfig` 在独立副本上完成；需持久化时先写盘成功再原子发布，失败不应用副作用。重载／回滚用 `config.ReplaceConfig`；不要缓存字段指针或修改已发布快照的切片。
 - `routers.StartWebServer()` / `StartEcho()` 在嵌入式模式下应返回错误，不能依赖 `os.Exit`、`logger.Fatalf` 结束宿主进程。
 - 嵌入式接入优先保持 Tailscale、桌面托盘、Windows 特有逻辑与启动链路解耦。
 - 远程 Comigo 书库使用 `http(s)` 主页 URL 配置；阅读与下载实时代理远端资源，本地只保存索引，不保留原始文件。

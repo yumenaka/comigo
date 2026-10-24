@@ -64,3 +64,25 @@ func TestJSONLoginIssuesBearerToken(t *testing.T) {
 		t.Fatal("REST login must not create a browser cookie")
 	}
 }
+
+// 校验密码期间发生配置更新时，旧请求不能获得用新密钥签发的有效令牌。
+func TestTokenSigningUsesValidatedSnapshot(t *testing.T) {
+	old := config.CopyCfg()
+	t.Cleanup(func() { config.ReplaceConfig(old) })
+	next := config.CopyCfg()
+	next.Username = "reader"
+	next.Password = "old-password"
+	next.Timeout = 60
+	config.ReplaceConfig(next)
+	validated := config.GetCfg()
+	next.Password = "new-password"
+	config.ReplaceConfig(next)
+	encoded, err := signedToken(newClaims(validated.Username), validated.JwtSigningKey())
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = jwt.Parse(encoded, func(*jwt.Token) (interface{}, error) { return []byte(config.GetJwtSigningKey()), nil })
+	if err == nil {
+		t.Fatal("旧密码请求获得了新密钥签发的令牌")
+	}
+}

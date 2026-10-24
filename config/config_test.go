@@ -12,23 +12,23 @@ import (
 
 // 验证保存配置会创建目标文件，并记录实际使用的配置路径。
 func TestUpdateConfigFileCreatesTargetAndTracksConfigFile(t *testing.T) {
-	oldCfg := cfg
+	oldCfg := CopyCfg()
 	t.Cleanup(func() {
-		cfg = oldCfg
+		*GetCfg() = oldCfg
 	})
 
-	cfg = newDefaultConfig()
+	*GetCfg() = newDefaultConfig()
 	targetDir := t.TempDir()
 	targetFile := filepath.Join(targetDir, "nested", "config.toml")
-	cfg.ConfigFile = targetFile
-	cfg.Debug = true
+	GetCfg().ConfigFile = targetFile
+	GetCfg().Debug = true
 
 	if err := UpdateConfigFile(); err != nil {
 		t.Fatalf("UpdateConfigFile 返回错误: %v", err)
 	}
 
-	if cfg.ConfigFile != targetFile {
-		t.Fatalf("ConfigFile 未记录实际写入路径: got %q want %q", cfg.ConfigFile, targetFile)
+	if GetCfg().ConfigFile != targetFile {
+		t.Fatalf("ConfigFile 未记录实际写入路径: got %q want %q", GetCfg().ConfigFile, targetFile)
 	}
 
 	content, err := os.ReadFile(targetFile)
@@ -42,28 +42,28 @@ func TestUpdateConfigFileCreatesTargetAndTracksConfigFile(t *testing.T) {
 
 // 验证启用插件列表会写入配置文件。
 func TestUpdateConfigFilePersistsEnabledPluginList(t *testing.T) {
-	oldCfg := cfg
+	oldCfg := CopyCfg()
 	t.Cleanup(func() {
-		cfg = oldCfg
+		*GetCfg() = oldCfg
 	})
 
-	cfg = newDefaultConfig()
-	cfg.ConfigFile = filepath.Join(t.TempDir(), "config.toml")
-	cfg.EnablePlugin = true
-	cfg.EnabledPluginList = []string{"clock"}
+	*GetCfg() = newDefaultConfig()
+	GetCfg().ConfigFile = filepath.Join(t.TempDir(), "config.toml")
+	GetCfg().EnablePlugin = true
+	GetCfg().EnabledPluginList = []string{"clock"}
 
 	if err := UpdateConfigFile(); err != nil {
 		t.Fatalf("UpdateConfigFile 返回错误: %v", err)
 	}
 
-	content, err := os.ReadFile(cfg.ConfigFile)
+	content, err := os.ReadFile(GetCfg().ConfigFile)
 	if err != nil {
 		t.Fatalf("读取生成的配置文件失败: %v", err)
 	}
 	if !strings.Contains(string(content), "EnabledPluginList") || !strings.Contains(string(content), "clock") {
 		t.Fatalf("启用插件列表未写入配置文件:\n%s", string(content))
 	}
-	info, err := os.Stat(cfg.ConfigFile)
+	info, err := os.Stat(GetCfg().ConfigFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,18 +74,18 @@ func TestUpdateConfigFilePersistsEnabledPluginList(t *testing.T) {
 
 // 验证临时阅读模式不会创建、保存或删除配置文件。
 func TestTemporaryReaderModeSkipsConfigFileWrites(t *testing.T) {
-	oldCfg := cfg
+	oldCfg := CopyCfg()
 	t.Cleanup(func() {
-		cfg = oldCfg
+		*GetCfg() = oldCfg
 	})
 
-	cfg = newDefaultConfig()
-	cfg.TemporaryReaderMode = true
+	*GetCfg() = newDefaultConfig()
+	GetCfg().TemporaryReaderMode = true
 	dir := t.TempDir()
 	t.Chdir(dir)
 
 	explicitConfig := filepath.Join(dir, "explicit.toml")
-	cfg.ConfigFile = explicitConfig
+	GetCfg().ConfigFile = explicitConfig
 	if err := UpdateConfigFile(); err != nil {
 		t.Fatalf("UpdateConfigFile 返回错误: %v", err)
 	}
@@ -114,12 +114,12 @@ func TestTemporaryReaderModeSkipsConfigFileWrites(t *testing.T) {
 
 // 验证默认保存使用当前启动壳的配置文件名。
 func TestSaveConfigUsesPlatformFilename(t *testing.T) {
-	oldCfg := cfg
+	oldCfg := CopyCfg()
 	t.Cleanup(func() {
-		cfg = oldCfg
+		*GetCfg() = oldCfg
 	})
 
-	cfg = newDefaultConfig()
+	*GetCfg() = newDefaultConfig()
 	dir := t.TempDir()
 	t.Setenv("HOME", t.TempDir())
 	t.Chdir(dir)
@@ -135,12 +135,12 @@ func TestSaveConfigUsesPlatformFilename(t *testing.T) {
 
 // 验证只读取当前启动壳的配置文件名。
 func TestFindConfigFileUsesOnlyPlatformFilename(t *testing.T) {
-	oldCfg := cfg
+	oldCfg := CopyCfg()
 	t.Cleanup(func() {
-		cfg = oldCfg
+		*GetCfg() = oldCfg
 	})
 
-	cfg = newDefaultConfig()
+	*GetCfg() = newDefaultConfig()
 	home := t.TempDir()
 	work := t.TempDir()
 	t.Setenv("HOME", home)
@@ -170,12 +170,12 @@ func TestFindConfigFileUsesOnlyPlatformFilename(t *testing.T) {
 
 // 验证已有生效配置时，配置管理器只能保存回同一个目录。
 func TestSaveConfigOnlyAllowsActiveLocation(t *testing.T) {
-	oldCfg := cfg
+	oldCfg := CopyCfg()
 	t.Cleanup(func() {
-		cfg = oldCfg
+		*GetCfg() = oldCfg
 	})
 
-	cfg = newDefaultConfig()
+	*GetCfg() = newDefaultConfig()
 	home := t.TempDir()
 	work := t.TempDir()
 	t.Setenv("HOME", home)
@@ -205,14 +205,14 @@ func TestSaveConfigOnlyAllowsActiveLocation(t *testing.T) {
 
 // 验证显式配置文件尚不存在时也会使用其所在目录作为配置目录。
 func TestGetConfigDirUsesExplicitConfigPathWhenFileDoesNotExist(t *testing.T) {
-	oldCfg := cfg
+	oldCfg := CopyCfg()
 	t.Cleanup(func() {
-		cfg = oldCfg
+		*GetCfg() = oldCfg
 	})
 
-	cfg = newDefaultConfig()
+	*GetCfg() = newDefaultConfig()
 	targetDir := filepath.Join(t.TempDir(), "nested")
-	cfg.ConfigFile = filepath.Join(targetDir, "config.toml")
+	GetCfg().ConfigFile = filepath.Join(targetDir, "config.toml")
 
 	got, err := GetConfigDir()
 	if err != nil {
@@ -228,33 +228,33 @@ func TestGetConfigDirUsesExplicitConfigPathWhenFileDoesNotExist(t *testing.T) {
 
 // 验证 JSON 配置更新会写入全局配置对象。
 func TestUpdateConfigByJsonUpdatesGlobalConfig(t *testing.T) {
-	oldCfg := cfg
+	oldCfg := CopyCfg()
 	t.Cleanup(func() {
-		cfg = oldCfg
+		*GetCfg() = oldCfg
 	})
 
-	cfg = newDefaultConfig()
-	cfg.Debug = false
-	cfg.MinImageNum = 3
+	*GetCfg() = newDefaultConfig()
+	GetCfg().Debug = false
+	GetCfg().MinImageNum = 3
 
 	if err := UpdateConfigByJson(`{"Debug":true,"MinImageNum":1}`); err != nil {
 		t.Fatalf("UpdateConfigByJson 返回错误: %v", err)
 	}
-	if !cfg.Debug {
+	if !GetCfg().Debug {
 		t.Fatal("Debug 未按 JSON 更新为 true")
 	}
-	if cfg.MinImageNum != 1 {
-		t.Fatalf("MinImageNum 未按 JSON 更新: got %d want 1", cfg.MinImageNum)
+	if GetCfg().MinImageNum != 1 {
+		t.Fatalf("MinImageNum 未按 JSON 更新: got %d want 1", GetCfg().MinImageNum)
 	}
 }
 
 // TestUpdateConfigByJsonRejectsPartialAndRuntimeUpdates 确认错误请求不会留下部分配置变更。
 func TestUpdateConfigByJsonRejectsPartialAndRuntimeUpdates(t *testing.T) {
-	oldCfg := cfg
-	t.Cleanup(func() { cfg = oldCfg })
-	cfg = newDefaultConfig()
-	cfg.Debug = false
-	originalPort := cfg.Port
+	oldCfg := CopyCfg()
+	t.Cleanup(func() { *GetCfg() = oldCfg })
+	*GetCfg() = newDefaultConfig()
+	GetCfg().Debug = false
+	originalPort := GetCfg().Port
 
 	for _, body := range []string{
 		`{"Debug":true,"Port":"invalid"}`,
@@ -268,8 +268,8 @@ func TestUpdateConfigByJsonRejectsPartialAndRuntimeUpdates(t *testing.T) {
 		if err := UpdateConfigByJson(body); err == nil {
 			t.Fatalf("invalid update should fail: %s", body)
 		}
-		if cfg.Debug || cfg.Port != originalPort || cfg.ConfigFile != "" || cfg.Password != "" {
-			t.Fatalf("invalid update changed config: %#v", cfg)
+		if GetCfg().Debug || GetCfg().Port != originalPort || GetCfg().ConfigFile != "" || GetCfg().Password != "" {
+			t.Fatalf("invalid update changed config: %#v", (*GetCfg()))
 		}
 	}
 }

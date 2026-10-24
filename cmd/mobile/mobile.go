@@ -107,7 +107,7 @@ func Stop() string {
 	}
 
 	cmd.SaveMetadata()
-	config.GetCfg().AutoRescanIntervalMinutes = 0
+	_, _ = config.ChangeConfig(false, func(next *config.Config) error { next.AutoRescanIntervalMinutes = 0; return nil })
 	config.StartOrStopAutoRescan()
 	if err := routers.StopWebServer(); err != nil {
 		return encodeError(err)

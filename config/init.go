@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"runtime"
+	"sync/atomic"
 
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -53,10 +54,15 @@ func newDefaultConfig() Config {
 	return defaultCfg
 }
 
-// cfg 为全局配置,全局单实例
-var cfg = newDefaultConfig()
+// 配置以不可变快照发布，读取无需持有跨请求的锁。
+var currentConfig = func() *atomic.Pointer[Config] {
+	value := newDefaultConfig()
+	pointer := new(atomic.Pointer[Config])
+	pointer.Store(&value)
+	return pointer
+}()
 
 // ResetConfigForRuntime 在嵌入模式重复启动时重置全局配置，避免保留上一次运行的状态。
 func ResetConfigForRuntime() {
-	cfg = newDefaultConfig()
+	ReplaceConfig(newDefaultConfig())
 }

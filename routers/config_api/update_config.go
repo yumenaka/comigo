@@ -1,6 +1,7 @@
 package config_api
 
 import (
+	"errors"
 	"io"
 
 	"github.com/labstack/echo/v4"
@@ -26,20 +27,27 @@ func UpdateConfig(c echo.Context) error {
 		return apiresp.Forbidden(c, "config_locked", "Config is locked, cannot be modified", nil)
 	}
 	// 复制当前配置以便后续比较
-	oldConfig := config.CopyCfg()
-	// 解析 JSON 数据并更新服务器配置
-	err = config.UpdateConfigByJson(jsonString)
+	var validationErr error
+	oldConfig, err := config.ChangeConfig(true, func(next *config.Config) error {
+		if next.ReadOnlyMode {
+			return echo.ErrForbidden
+		}
+		validationErr = next.UpdateByJSON(jsonString)
+		return validationErr
+	})
 	if err != nil {
 		logger.Infof("%s", err.Error())
-		return apiresp.BadRequest(c, "invalid_json", locale.GetString("log_failed_to_parse_json"), err.Error())
+		if errors.Is(err, echo.ErrForbidden) {
+			return apiresp.Forbidden(c, "config_locked", "Config is locked, cannot be modified", nil)
+		}
+		if validationErr != nil {
+			return apiresp.BadRequest(c, "invalid_json", locale.GetString("log_failed_to_parse_json"), validationErr.Error())
+		}
+		return echo.NewHTTPError(500, locale.GetString("err_update_config_failed"))
 	}
 	// 如果 Language 配置发生变化，重新初始化语言设置
 	if oldConfig.Language != config.GetCfg().Language {
 		locale.InitLanguageFromConfig(config.GetCfg().Language)
-	}
-	err = config.UpdateConfigFile()
-	if err != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), err)
 	}
 	// 根据配置变化执行副作用：打开浏览器、重扫、自动扫描调度等。
 	service.ApplyConfigChange(oldConfig, config.GetCfg(), nil)

@@ -129,12 +129,24 @@ func validateArrayConfigName(name string) error {
 	}
 }
 
-// writeConfigAndApply 写入配置后应用变更副作用；写入失败沿用旧行为，只记录日志不中断响应。
-func writeConfigAndApply(oldConfig config.Config) {
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+// changeSettings 在同一写入事务内检查只读状态，避免并发更新绕过限制。
+func changeSettings(edit func(*config.Config) error) (config.Config, error) {
+	return config.ChangeConfig(true, func(next *config.Config) error {
+		if next.ReadOnlyMode {
+			return echo.ErrForbidden
+		}
+		return edit(next)
+	})
+}
+
+// changeConfigAndApply 保存成功后才执行重扫、重启等副作用。
+func changeConfigAndApply(edit func(*config.Config) error) error {
+	old, err := changeSettings(edit)
+	if err != nil {
+		return err
 	}
-	beforeConfigUpdate(oldConfig, config.GetCfg())
+	beforeConfigUpdate(old, config.GetCfg())
+	return nil
 }
 
 // -------------------------
@@ -167,16 +179,9 @@ func updateStringConfigFromJSON(c echo.Context) (string, string, error) {
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name)
 
-	// 更新前先保存旧配置，后续用于比较并触发副作用。
-	oldConfig := config.CopyCfg()
-	// 更新配置
-	if setErr := config.GetCfg().SetConfigValue(request.Name, *request.Value); setErr != nil {
-		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
-		return "", "", setErr
+	if err := changeConfigAndApply(func(next *config.Config) error { return next.SetConfigValue(request.Name, *request.Value) }); err != nil {
+		return "", "", err
 	}
-
-	writeConfigAndApply(oldConfig)
-
 	if request.Name == "CacheDir" {
 		return request.Name, config.GetCfg().CacheDir, nil
 	}
@@ -235,16 +240,9 @@ func updateBoolConfigFromJSON(c echo.Context) (string, bool, error) {
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name)
 
-	// 更新前先保存旧配置，后续用于比较并触发副作用。
-	oldConfig := config.CopyCfg()
-	// 更新配置
-	if setErr := config.GetCfg().SetConfigValue(request.Name, newValue); setErr != nil {
-		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
-		return "", false, setErr
+	if err := changeConfigAndApply(func(next *config.Config) error { return next.SetConfigValue(request.Name, newValue) }); err != nil {
+		return "", false, err
 	}
-
-	writeConfigAndApply(oldConfig)
-
 	return request.Name, *request.Value, nil
 }
 
@@ -300,17 +298,9 @@ func updateNumberConfigFromJSON(c echo.Context) (string, int, *config.Config, er
 
 	logger.Infof(locale.GetString("log_update_config"), request.Name)
 
-	// 更新前先保存旧配置，后续用于比较并触发副作用。
-	oldConfig := config.CopyCfg()
-	// 更新配置
-	if setErr := config.GetCfg().SetConfigValue(request.Name, newValue); setErr != nil {
-		logger.Errorf(locale.GetString("err_failed_to_set_config_value"), setErr)
-		return "", 0, nil, setErr
-	}
-
-	// 端口变更需要延迟应用副作用，因此这里只写文件，不走 writeConfigAndApply。
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+	oldConfig, err := changeSettings(func(next *config.Config) error { return next.SetConfigValue(request.Name, newValue) })
+	if err != nil {
+		return "", 0, nil, err
 	}
 	return request.Name, *request.Value, &oldConfig, nil
 }
@@ -366,49 +356,46 @@ func updateLoginSettingsFromJSON(c echo.Context) error {
 	request.Username = strings.TrimSpace(request.Username)
 	request.CurrentPassword = strings.TrimSpace(request.CurrentPassword)
 
-	cfg := config.GetCfg()
-	existingPasswordLogin := cfg.HasPasswordLoginConfigured()
-	passwordLoginChanged := request.Username != cfg.Username ||
-		request.Password != "" ||
-		request.ReEnterPassword != ""
+	return changeConfigAndApply(func(cfg *config.Config) error {
+		existingPasswordLogin := cfg.HasPasswordLoginConfigured()
+		passwordLoginChanged := request.Username != cfg.Username ||
+			request.Password != "" ||
+			request.ReEnterPassword != ""
 
-	// 仅在修改账号密码登录设置时校验当前密码。
-	if existingPasswordLogin && passwordLoginChanged && cfg.Password != request.CurrentPassword {
-		return errors.New(locale.GetString("err_current_password_incorrect"))
-	}
-
-	if request.Password != request.ReEnterPassword {
-		return errors.New(locale.GetString("err_password_mismatch"))
-	}
-
-	var effectiveUsername string
-	var effectivePassword string
-	if request.Username == "" {
-		if request.Password != "" || request.ReEnterPassword != "" {
-			return errors.New(locale.GetString("prompt_set_username"))
+		// 仅在修改账号密码登录设置时校验当前密码。
+		if existingPasswordLogin && passwordLoginChanged && cfg.Password != request.CurrentPassword {
+			return errors.New(locale.GetString("err_current_password_incorrect"))
 		}
-		effectiveUsername = ""
-		effectivePassword = ""
-	} else {
-		effectiveUsername = request.Username
-		switch {
-		case request.Password != "":
-			effectivePassword = request.Password
-		case existingPasswordLogin:
-			effectivePassword = cfg.Password
-		default:
-			return errors.New(locale.GetString("prompt_set_password"))
+
+		if request.Password != request.ReEnterPassword {
+			return errors.New(locale.GetString("err_password_mismatch"))
 		}
-	}
 
-	// 更新前先保存旧配置，后续用于比较并触发副作用。
-	oldConfig := config.CopyCfg()
-	cfg.Username = effectiveUsername
-	cfg.Password = effectivePassword
+		var effectiveUsername string
+		var effectivePassword string
+		if request.Username == "" {
+			if request.Password != "" || request.ReEnterPassword != "" {
+				return errors.New(locale.GetString("prompt_set_username"))
+			}
+			effectiveUsername = ""
+			effectivePassword = ""
+		} else {
+			effectiveUsername = request.Username
+			switch {
+			case request.Password != "":
+				effectivePassword = request.Password
+			case existingPasswordLogin:
+				effectivePassword = cfg.Password
+			default:
+				return errors.New(locale.GetString("prompt_set_password"))
+			}
+		}
 
-	writeConfigAndApply(oldConfig)
+		cfg.Username = effectiveUsername
+		cfg.Password = effectivePassword
 
-	return nil
+		return nil
+	})
 }
 
 // UpdateLoginSettingsHandler 处理登录设置的 JSON API
@@ -460,15 +447,18 @@ func UpdateTailscaleConfigHandler(c echo.Context) error {
 		}
 	}
 	// 更新前先保存旧配置，后续用于比较并触发副作用。
-	oldConfig := config.CopyCfg()
-	// 更新Tailscale配置
-	config.GetCfg().EnableTailscale = request.EnableTailscale
-	config.GetCfg().TailscaleAuthKey = request.TailscaleAuthKey
-	config.GetCfg().TailscaleHostname = request.TailscaleHostname
-	config.GetCfg().TailscalePort = request.TailscalePort
-	config.GetCfg().FunnelTunnel = request.FunnelTunnel
-	config.GetCfg().FunnelLoginCheck = request.FunnelLoginCheck
-	writeConfigAndApply(oldConfig)
+	if err := changeConfigAndApply(func(next *config.Config) error {
+		// 更新Tailscale配置
+		next.EnableTailscale = request.EnableTailscale
+		next.TailscaleAuthKey = request.TailscaleAuthKey
+		next.TailscaleHostname = request.TailscaleHostname
+		next.TailscalePort = request.TailscalePort
+		next.FunnelTunnel = request.FunnelTunnel
+		next.FunnelLoginCheck = request.FunnelLoginCheck
+		return nil
+	}); err != nil {
+		return echo.NewHTTPError(500, locale.GetString("err_update_config_failed"))
+	}
 
 	// 返回成功响应
 	return c.NoContent(http.StatusOK)
@@ -535,27 +525,25 @@ func renderStoreConfigHTML(ctx context.Context) (string, error) {
 }
 
 func doAdd(configName, addValue string) ([]string, error) {
-	// 更新前先保存旧配置，后续用于比较并触发副作用。
-	oldConfig := config.CopyCfg()
-	// 更新配置
-	values, err := config.GetCfg().AddStringArrayConfig(configName, addValue)
-	if err != nil {
-		logger.Errorf(locale.GetString("err_failed_to_add_config_value"), err)
-		return nil, err
-	}
-	writeConfigAndApply(oldConfig)
-	return values, nil
+	var values []string
+	err := changeConfigAndApply(func(next *config.Config) error {
+		var err error
+		values, err = next.AddStringArrayConfig(configName, addValue)
+		return err
+	})
+	return values, err
 }
 
 // doAddStoreURL 只扫描本次新增的书库，避免新增远程书库时重扫所有既有远程服务。
 func doAddStoreURL(storeURL string) ([]string, string, error) {
-	values, err := config.GetCfg().AddStringArrayConfig("StoreUrls", storeURL)
+	var values []string
+	_, err := changeSettings(func(next *config.Config) error {
+		var err error
+		values, err = next.AddStringArrayConfig("StoreUrls", storeURL)
+		return err
+	})
 	if err != nil {
-		logger.Errorf(locale.GetString("err_failed_to_add_config_value"), err)
 		return nil, "", err
-	}
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
 	}
 
 	if scanErr := scan.InitStore(storeURL, config.GetCfg()); scanErr != nil {
@@ -568,13 +556,16 @@ func doAddStoreURL(storeURL string) ([]string, string, error) {
 
 // doDeleteStoreURL 删除书库配置但不触发通用配置重扫；当前 handler 已自行清理书籍并回传局部 UI。
 func doDeleteStoreURL(storeURL string) ([]string, error) {
-	values, err := config.GetCfg().DeleteStringArrayConfig("StoreUrls", storeURL)
+	var values []string
+	_, err := changeSettings(func(next *config.Config) error {
+		var err error
+		values, err = next.DeleteStringArrayConfig("StoreUrls", storeURL)
+		return err
+	})
 	if err != nil {
 		return nil, err
 	}
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
-	}
+
 	return values, nil
 }
 
@@ -627,26 +618,23 @@ func EnablePluginHandler(c echo.Context) error {
 
 	logger.Infof(locale.GetString("log_plugin_enabled"), pluginName)
 
-	// 互斥逻辑：auto_flip 和 sketch_practice 不能同时启用
-	if pluginName == "sketch_practice" && config.GetCfg().IsPluginEnabled("auto_flip") {
-		// 启用 sketch_practice 时，禁用 auto_flip
-		logger.Infof(locale.GetString("log_disable_mutex_plugin_auto_flip") + "\n")
-		_ = config.GetCfg().DisablePlugin("auto_flip")
-	} else if pluginName == "auto_flip" && config.GetCfg().IsPluginEnabled("sketch_practice") {
-		// 启用 auto_flip 时，禁用 sketch_practice
-		logger.Infof(locale.GetString("log_disable_mutex_plugin_sketch_practice") + "\n")
-		_ = config.GetCfg().DisablePlugin("sketch_practice")
-	}
+	_, err := changeSettings(func(next *config.Config) error {
+		// 互斥逻辑：auto_flip 和 sketch_practice 不能同时启用
+		if pluginName == "sketch_practice" && next.IsPluginEnabled("auto_flip") {
+			// 启用 sketch_practice 时，禁用 auto_flip
+			logger.Infof(locale.GetString("log_disable_mutex_plugin_auto_flip") + "\n")
+			_ = next.DisablePlugin("auto_flip")
+		} else if pluginName == "auto_flip" && next.IsPluginEnabled("sketch_practice") {
+			// 启用 auto_flip 时，禁用 sketch_practice
+			logger.Infof(locale.GetString("log_disable_mutex_plugin_sketch_practice") + "\n")
+			_ = next.DisablePlugin("sketch_practice")
+		}
 
-	// 启用插件
-	err := config.GetCfg().AddPlugin(pluginName)
+		// 启用插件
+		return next.AddPlugin(pluginName)
+	})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_update_config_failed"))
-	}
-
-	// 写入配置文件
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+		return echo.NewHTTPError(500, locale.GetString("err_update_config_failed"))
 	}
 
 	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonPluginsChanged)
@@ -667,15 +655,9 @@ func DisablePluginHandler(c echo.Context) error {
 
 	logger.Infof(locale.GetString("log_plugin_disabled"), pluginName)
 
-	// 禁用插件
-	err := config.GetCfg().DisablePlugin(pluginName)
+	_, err := changeSettings(func(next *config.Config) error { return next.DisablePlugin(pluginName) })
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_update_config_failed"))
-	}
-
-	// 写入配置文件
-	if writeErr := config.UpdateConfigFile(); writeErr != nil {
-		logger.Infof(locale.GetString("log_failed_to_update_local_config"), writeErr)
+		return echo.NewHTTPError(500, locale.GetString("err_update_config_failed"))
 	}
 
 	sse_hub.BroadcastUISuggestReload(sse_hub.UISuggestReasonPluginsChanged)
@@ -726,17 +708,14 @@ func DeleteArrayConfigHandler(c echo.Context) error {
 	})
 }
 
-func doDelete(configName string, deleteValue string) ([]string, error) {
-	// 更新前先保存旧配置，后续用于比较并触发副作用。
-	oldConfig := config.CopyCfg()
-	// 更新配置
-	values, err := config.GetCfg().DeleteStringArrayConfig(configName, deleteValue)
-	if err != nil {
-		return nil, err
-	}
-
-	writeConfigAndApply(oldConfig)
-	return values, nil
+func doDelete(configName, deleteValue string) ([]string, error) {
+	var values []string
+	err := changeConfigAndApply(func(next *config.Config) error {
+		var err error
+		values, err = next.DeleteStringArrayConfig(configName, deleteValue)
+		return err
+	})
+	return values, err
 }
 
 // renderTemplToString 将 templ 组件渲染为 HTML 字符串
@@ -971,6 +950,11 @@ func DeleteStoreHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_store_failed"))
 	}
 
+	// 读取成功且配置已保存后才删除索引，失败时保留原书库。
+	if _, err := doDeleteStoreURL(storeUrl); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_store_failed"))
+	}
+
 	deletedCount := 0
 	for _, book := range allBooks {
 		bookStoreAbs, err := filepath.Abs(book.StoreUrl)
@@ -990,11 +974,6 @@ func DeleteStoreHandler(c echo.Context) error {
 	}
 
 	logger.Infof(locale.GetString("log_deleted_books_count"), deletedCount)
-
-	// 从配置中移除该书库 URL；删除书库已在本 handler 内完成局部清理，不能再触发通用全量重扫。
-	if _, err := doDeleteStoreURL(storeUrl); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_delete_store_failed"))
-	}
 
 	// 重新生成书组
 	if err := model.IStore.GenerateBookGroup(); err != nil {

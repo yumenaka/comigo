@@ -29,7 +29,9 @@ import (
 
 // BindURLs 为前端绑定 API 路由
 func BindURLs() {
-	// Manual 固定在根路径且始终公开，不受 BasePath 与登录保护影响。
+	// 健康检查与手册固定在根路径且始终公开，不受 BasePath 与登录保护影响。
+	engine.GET("/healthz", data_api.Healthz)
+	engine.HEAD("/healthz", data_api.Healthz)
 	engine.GET("/manual", manual.Handler)
 	engine.GET("/manual/", manual.Handler)
 	engine.GET("/manual/*", manual.Handler)
@@ -239,7 +241,7 @@ func bindSettingsAPI(group *echo.Group) {
 
 // bindRealtimeAPI 注册 WebSocket/SSE 等实时通信 API。
 func bindRealtimeAPI(group *echo.Group) {
-	websocket.WsDebug = &config.GetCfg().Debug
+	websocket.WsDebug = func() bool { return config.GetCfg().Debug }
 	group.GET("/ws", websocket.WsHandler, data_api.TrackConnection)
 	// SSE 服务器发送事件
 	group.GET("/sse", sse_hub.SSEHandler, data_api.TrackConnection)

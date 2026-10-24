@@ -52,7 +52,7 @@ func StartEcho(e *echo.Echo) error {
 	if err != nil {
 		return err
 	}
-	config.GetCfg().Port = listener.Addr().(*net.TCPAddr).Port
+	config.SetPort(listener.Addr().(*net.TCPAddr).Port)
 	// 在 goroutine 中初始化 HTTP 服务器，这样它就不会阻塞关闭处理。
 	go serveHTTPServer(listener, config.Server, serveMode)
 	return nil

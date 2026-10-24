@@ -40,3 +40,24 @@ func TestUpdateConfig_ReadOnly_ReturnsContract(t *testing.T) {
 		t.Fatalf("expected code config_locked, got %v", body["code"])
 	}
 }
+
+// REST 写盘失败必须报错，不能修改正在使用的配置。
+func TestUpdateConfigSaveFailure(t *testing.T) {
+	old := config.CopyCfg()
+	t.Cleanup(func() { config.ReplaceConfig(old) })
+	next := config.CopyCfg()
+	next.ReadOnlyMode = false
+	next.TemporaryReaderMode = false
+	next.ConfigFile = t.TempDir()
+	next.Debug = false
+	config.ReplaceConfig(next)
+	e := echo.New()
+	e.PATCH("/api/configs", UpdateConfig)
+	req := httptest.NewRequest(http.MethodPatch, "/api/configs", strings.NewReader(`{"Debug":true}`))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	if rec.Code != 500 || config.GetCfg().Debug {
+		t.Fatalf("status=%d debug=%v", rec.Code, config.GetCfg().Debug)
+	}
+}

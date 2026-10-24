@@ -5,7 +5,7 @@ import "testing"
 // 验证翻页模式同步消息能转换为广播消息，并拒绝缺少书籍 ID 的输入。
 func TestHandSyncPageMessageToFlipMode(t *testing.T) {
 	debug := false
-	WsDebug = &debug
+	WsDebug = func() bool { return debug }
 
 	msg := Message{
 		Type:       "flip_mode_sync_page",
@@ -31,7 +31,7 @@ func TestHandSyncPageMessageToFlipMode(t *testing.T) {
 // 验证卷轴模式同步消息能转换为广播消息，并拒绝非法进度。
 func TestHandSyncPageMessageToScrollMode(t *testing.T) {
 	debug := false
-	WsDebug = &debug
+	WsDebug = func() bool { return debug }
 
 	msg := Message{
 		Type:       "scroll_mode_sync_page",

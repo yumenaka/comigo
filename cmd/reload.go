@@ -81,14 +81,10 @@ func reloadConfig(file string) error {
 		_ = candidate.AddPlugin("auto_scroll")
 	}
 	action := service.BuildConfigChangeAction(old, &candidate)
-	config.Mutex.Lock()
-	*config.GetCfg() = candidate
-	config.Mutex.Unlock()
+	config.ReplaceConfig(candidate)
 	if action.ReStartWebServer {
 		if err := routers.RestartWebServer(); err != nil {
-			config.Mutex.Lock()
-			*config.GetCfg() = old
-			config.Mutex.Unlock()
+			config.ReplaceConfig(old)
 			restoreErr := routers.RestartWebServer()
 			routers.StartTailscale()
 			return errors.Join(err, restoreErr)

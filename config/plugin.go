@@ -41,6 +41,11 @@ type WebPServerConfig struct {
 
 // ScanUserPlugins 扫描并加载用户自定义插件
 func ScanUserPlugins() error {
+	_, err := ChangeConfig(false, func(cfg *Config) error { return cfg.scanUserPlugins() })
+	return err
+}
+
+func (cfg *Config) scanUserPlugins() error {
 	// 检查是否启用插件
 	if !cfg.EnablePlugin {
 		if cfg.Debug {
@@ -80,7 +85,7 @@ func ScanUserPlugins() error {
 	}
 
 	for _, scope := range scopes {
-		if err := loadPluginsFromDir(scope.path, scope.name); err != nil {
+		if err := cfg.loadPluginsFromDir(scope.path, scope.name); err != nil {
 			logger.Infof(locale.GetString("log_plugin_scope_load_error"), scope.name, err)
 		}
 	}
@@ -96,7 +101,7 @@ func ScanUserPlugins() error {
 }
 
 // loadPluginsFromDir 从指定目录加载插件文件
-func loadPluginsFromDir(dirPath, scope string) error {
+func (cfg *Config) loadPluginsFromDir(dirPath, scope string) error {
 	// 检查目录是否存在
 	info, err := os.Stat(dirPath)
 	if os.IsNotExist(err) {
@@ -160,7 +165,7 @@ func loadPluginsFromDir(dirPath, scope string) error {
 // GetCustomPluginsByScope 根据范围获取自定义插件
 func GetCustomPluginsByScope(scope string) []CustomPlugin {
 	var plugins []CustomPlugin
-	for _, plugin := range cfg.CustomPlugins {
+	for _, plugin := range GetCfg().CustomPlugins {
 		if plugin.Scope == scope {
 			plugins = append(plugins, plugin)
 		}
@@ -173,7 +178,7 @@ func GetCustomPluginsByScope(scope string) []CustomPlugin {
 // scope: 范围，如 "flip" 或 "scroll"
 // 返回该书籍在指定范围下的插件列表
 func LoadBookPlugins(bookID, scope string) ([]CustomPlugin, error) {
-	if !cfg.EnablePlugin || bookID == "" {
+	if !GetCfg().EnablePlugin || bookID == "" {
 		return nil, nil
 	}
 
@@ -230,7 +235,7 @@ func LoadBookPlugins(bookID, scope string) ([]CustomPlugin, error) {
 		plugins = append(plugins, plugin)
 	}
 
-	if cfg.Debug && len(plugins) > 0 {
+	if GetCfg().Debug && len(plugins) > 0 {
 		logger.Infof(locale.GetString("log_plugin_loaded_for_book"), bookID, scope, len(plugins))
 	}
 

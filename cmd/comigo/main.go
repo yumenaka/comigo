@@ -91,17 +91,16 @@ func getStoreUrls() []string {
 
 // toggleTailscale 切换Tailscale状态
 func toggleTailscale() error {
-	cfg := config.GetCfg()
-	cfg.EnableTailscale = !cfg.EnableTailscale
-
-	if cfg.EnableTailscale {
+	_, err := config.ChangeConfig(true, func(next *config.Config) error { next.EnableTailscale = !next.EnableTailscale; return nil })
+	if err != nil {
+		return err
+	}
+	if config.GetCfg().EnableTailscale {
 		routers.StartTailscale()
 	} else {
 		routers.StopTailscale()
 	}
-
-	// 保存配置
-	return config.SaveConfig(config.DefaultConfigLocation())
+	return nil
 }
 
 // setLanguage 设置语言

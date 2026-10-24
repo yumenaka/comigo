@@ -40,9 +40,9 @@ func loginDuration() time.Duration {
 }
 
 // signedToken 将声明签名为 JWT 字符串。
-func signedToken(claims *JwtCustomClaims) (string, error) {
+func signedToken(claims *JwtCustomClaims, key string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(config.GetJwtSigningKey()))
+	return token.SignedString([]byte(key))
 }
 
 // setTokenCookie 将 JWT 写入 Cookie。
@@ -68,16 +68,17 @@ func Login(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 	username, password := request.Username, request.Password
+	cfg := config.GetCfg()
 	// 如果未配置密码登录，则不接受表单登录
-	if !config.GetCfg().HasPasswordLoginConfigured() {
+	if !cfg.HasPasswordLoginConfigured() {
 		return echo.ErrTeapot
 	}
 	// 如果密码错误，则不生成 JWT
-	if username != config.GetCfg().Username || password != config.GetCfg().Password {
+	if username != cfg.Username || password != cfg.Password {
 		logger.Infof(locale.GetString("log_login_failed"), username)
 		return echo.ErrUnauthorized
 	}
-	token, err := signedToken(newClaims(username))
+	token, err := signedToken(newClaims(username), cfg.JwtSigningKey())
 	if err != nil {
 		return err
 	}

@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comigo/assets/locale"
@@ -10,16 +11,44 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
-// GetCfg 返回当前进程的全局配置指针。
-// 调用方可以通过返回值读取或修改配置；并发写入时需要遵守 config.Mutex 的保护约定。
-func GetCfg() *Config {
-	return &cfg
+// GetCfg 返回只读配置快照；只有服务启动前的参数绑定可直接修改。
+func GetCfg() *Config { return currentConfig.Load() }
+
+// CopyCfg 连同切片复制，候选配置不能修改已发布快照的底层数组。
+func CopyCfg() Config {
+	c := *GetCfg()
+	c.BuildInPluginList = slices.Clone(c.BuildInPluginList)
+	c.UserPluginList = slices.Clone(c.UserPluginList)
+	c.EnabledPluginList = slices.Clone(c.EnabledPluginList)
+	c.CustomPlugins = slices.Clone(c.CustomPlugins)
+	c.ExcludePath = slices.Clone(c.ExcludePath)
+	c.StoreUrls = slices.Clone(c.StoreUrls)
+	c.SupportFileType = slices.Clone(c.SupportFileType)
+	c.SupportMediaType = slices.Clone(c.SupportMediaType)
+	return c
 }
 
-// CopyCfg 返回当前全局配置的值拷贝。
-// 返回值用于变更前后对比，不会随全局配置后续修改而自动更新。
-func CopyCfg() Config {
-	return cfg
+// ChangeConfig 串行更新副本，持久化失败时不发布，也不执行调用方的副作用。
+func ChangeConfig(persist bool, edit func(*Config) error) (Config, error) {
+	ConfigFileLock.Lock()
+	defer ConfigFileLock.Unlock()
+	old := CopyCfg()
+	next := CopyCfg()
+	if err := edit(&next); err != nil {
+		return old, err
+	}
+	if persist {
+		if err := writeConfig(&next); err != nil {
+			return old, err
+		}
+	}
+	currentConfig.Store(&next)
+	return old, nil
+}
+
+// ReplaceConfig 用于运行时重载与回滚；已有请求继续使用原快照。
+func ReplaceConfig(value Config) {
+	_, _ = ChangeConfig(false, func(next *Config) error { *next = value; return nil })
 }
 
 // GetConfigDir 获取配置文件所在目录
@@ -27,8 +56,8 @@ func CopyCfg() Config {
 func GetConfigDir() (dir string, err error) {
 	// 如果用户显式指定配置文件，则以该文件所在目录作为配置目录。
 	// 配置文件可能尚未创建，不能因此回退到用户主目录。
-	if cfg.ConfigFile != "" {
-		configDir := filepath.Dir(cfg.ConfigFile)
+	if GetCfg().ConfigFile != "" {
+		configDir := filepath.Dir(GetCfg().ConfigFile)
 		err = os.MkdirAll(configDir, os.ModePerm)
 		if err != nil {
 			logger.Infof(locale.GetString("log_failed_to_create_config_dir"), err)
@@ -76,7 +105,7 @@ func GetConfigDir() (dir string, err error) {
 }
 
 // AutoSetCacheDir 创建指定缓存目录，失败时明确报告而不静默切换路径。
-func AutoSetCacheDir() error { return cfg.InitCacheDir() }
+func AutoSetCacheDir() error { return GetCfg().InitCacheDir() }
 
 // InitCacheDir 校验并创建当前配置的缓存目录，错误不回退到其他目录。
 func (c *Config) InitCacheDir() error {
@@ -91,7 +120,10 @@ func (c *Config) InitCacheDir() error {
 }
 
 // GetJwtSigningKey JWT令牌签名key，目前是用户名+密码(如果两者都设置了的话)
-func GetJwtSigningKey() string {
+func GetJwtSigningKey() string { return GetCfg().JwtSigningKey() }
+
+// JwtSigningKey 绑定同一份认证快照，防止校验旧密码后用新密码签发令牌。
+func (cfg *Config) JwtSigningKey() string {
 	if cfg.HasPasswordLoginConfigured() {
 		return cfg.Username + cfg.Password
 	}
@@ -108,5 +140,5 @@ func SetPort(port int) {
 		port = 1234
 		logger.Infof(locale.GetString("log_invalid_port_number"), port)
 	}
-	cfg.Port = port
+	_, _ = ChangeConfig(false, func(c *Config) error { c.Port = port; return nil })
 }

@@ -15,6 +15,6 @@ func SetAutoTLS(_ *echo.Echo) error {
 		return err
 	}
 	// 端口绑定错误由 StartEcho 原样返回，包括无权限与端口被占用。
-	cfg.Port = 443
+	config.SetPort(443)
 	return nil
 }

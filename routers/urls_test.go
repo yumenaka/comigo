@@ -133,3 +133,21 @@ func TestControlAuthChangesWithoutRebinding(t *testing.T) {
 		t.Fatalf("旧令牌: %d", got)
 	}
 }
+
+// Docker 根健康端点不受 BasePath 和登录保护影响，HEAD 供 wget --spider 使用。
+func TestRootHealthWithBasePath(t *testing.T) {
+	restore := withRouterAuthTestConfig(t)
+	defer restore()
+	config.GetCfg().BasePath = "/comics"
+	oldEngine := engine
+	t.Cleanup(func() { engine = oldEngine })
+	engine = echo.New()
+	BindURLs()
+	for _, method := range []string{http.MethodGet, http.MethodHead} {
+		rec := httptest.NewRecorder()
+		engine.ServeHTTP(rec, httptest.NewRequest(method, "/healthz", nil))
+		if rec.Code != 200 {
+			t.Fatalf("%s healthz: %d", method, rec.Code)
+		}
+	}
+}

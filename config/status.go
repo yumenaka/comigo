@@ -29,16 +29,16 @@ func (c *Status) SetConfigStatus() error {
 	ConfigFileLock.Lock()
 	defer ConfigFileLock.Unlock()
 	*c = Status{In: "None", Current: ConfigFileInfo{Location: "None", Type: configProfile(), Format: "toml"}}
-	if runtime.GOOS == "js" || cfg.TemporaryReaderMode {
+	if runtime.GOOS == "js" || GetCfg().TemporaryReaderMode {
 		return nil
 	}
 	c.Path.WorkingDirectory = GetWorkingDirectoryConfig()
 	c.Path.HomeDirectory = GetHomeDirectoryConfig()
 	c.Path.ProgramDirectory = GetProgramDirectoryConfig()
-	if cfg.ConfigFile == "" {
+	if GetCfg().ConfigFile == "" {
 		return nil
 	}
-	current, err := filepath.Abs(cfg.ConfigFile)
+	current, err := filepath.Abs(GetCfg().ConfigFile)
 	if err != nil {
 		return err
 	}

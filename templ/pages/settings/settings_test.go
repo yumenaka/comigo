@@ -3,6 +3,7 @@ package settings
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -290,5 +291,65 @@ func TestCredentialChangeClosesEmbeddedConnections(t *testing.T) {
 		}
 	default:
 		t.Fatal("旧连接未关闭")
+	}
+}
+
+// 网页标量设置落盘失败时保留旧快照，不发出成功响应。
+func TestSettingsSaveFailureKeepsSnapshot(t *testing.T) {
+	old := config.CopyCfg()
+	t.Cleanup(func() { config.ReplaceConfig(old) })
+	next := config.CopyCfg()
+	next.ReadOnlyMode = false
+	next.TemporaryReaderMode = false
+	next.ConfigFile = t.TempDir()
+	next.Debug = false
+	config.ReplaceConfig(next)
+	e := echo.New()
+	e.PUT("/configs/:name", UpdateValueConfigHandler)
+	req := httptest.NewRequest(http.MethodPut, "/configs/Debug", strings.NewReader(`{"value":true}`))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	if rec.Code < 400 || config.GetCfg().Debug {
+		t.Fatalf("status=%d debug=%v", rec.Code, config.GetCfg().Debug)
+	}
+}
+
+// 事务自身必须拒绝只读配置，不能依赖请求进入时的检查。
+func TestChangeSettingsChecksReadOnly(t *testing.T) {
+	old := config.CopyCfg()
+	t.Cleanup(func() { config.ReplaceConfig(old) })
+	next := config.CopyCfg()
+	next.ReadOnlyMode = true
+	config.ReplaceConfig(next)
+	called := false
+	_, err := changeSettings(func(*config.Config) error { called = true; return nil })
+	if !errors.Is(err, echo.ErrForbidden) || called {
+		t.Fatalf("只读写入未被拒绝: err=%v called=%v", err, called)
+	}
+}
+
+// 列举书籍失败时不能提前移除书库配置。
+type failingListStore struct{ model.StoreInterface }
+
+func (*failingListStore) ListBooks() ([]*model.Book, error) { return nil, errors.New("list failed") }
+
+func TestDeleteStoreListFailureKeepsConfig(t *testing.T) {
+	old := config.CopyCfg()
+	oldStore := model.IStore
+	t.Cleanup(func() { config.ReplaceConfig(old); model.IStore = oldStore })
+	next := config.CopyCfg()
+	next.ReadOnlyMode = false
+	next.TemporaryReaderMode = true
+	next.StoreUrls = []string{t.TempDir()}
+	config.ReplaceConfig(next)
+	model.IStore = &failingListStore{}
+	e := echo.New()
+	e.DELETE("/stores/:id", DeleteStoreHandler)
+	id := base64.RawURLEncoding.EncodeToString([]byte(next.StoreUrls[0]))
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, httptest.NewRequest(http.MethodDelete, "/stores/"+id, nil))
+	if rec.Code != http.StatusInternalServerError || len(config.GetCfg().StoreUrls) != 1 {
+		t.Fatalf("读取失败丢失书库配置: status=%d stores=%v", rec.Code, config.GetCfg().StoreUrls)
 	}
 }

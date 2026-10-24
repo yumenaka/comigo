@@ -94,13 +94,13 @@ func TestControlAccessMatrix(t *testing.T) {
 		}
 	}
 	cfg.ReadOnlyMode = false
-	if rec := request("PUT", "/api/configs/Debug", `{"value":true}`, login.Token); rec.Code != 200 || !cfg.Debug {
+	if rec := request("PUT", "/api/configs/Debug", `{"value":true}`, login.Token); rec.Code != 200 || !config.GetCfg().Debug {
 		t.Fatalf("authorized write: %d", rec.Code)
 	}
 	if rec := request("GET", "/api/books", "", login.Token); rec.Code != 200 {
 		t.Fatalf("reading blocked: %d", rec.Code)
 	}
-	cfg.Password = "changed"
+	config.GetCfg().Password = "changed"
 	if rec := request("GET", "/api/books", "", login.Token); rec.Code != 401 {
 		t.Fatalf("old token accepted: %d", rec.Code)
 	}

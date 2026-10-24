@@ -68,7 +68,7 @@ func restartService(previous *config.Config) {
 	if err := RestartWebServer(); err != nil {
 		logger.Errorf(locale.GetString("err_restart_web_server_failed"), err)
 		if previous != nil {
-			*config.GetCfg() = *previous
+			config.ReplaceConfig(*previous)
 			if err := config.UpdateConfigFile(); err != nil {
 				logger.Errorf("%v", err)
 			}

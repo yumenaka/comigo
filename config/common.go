@@ -144,29 +144,31 @@ func writeConfigBytes(filePath string, data []byte) error {
 // UpdateConfigFile 更新当前正在使用的配置文件。
 // 如果尚未存在配置文件，则会自动在默认位置创建一份。
 func UpdateConfigFile() error {
-	if runtime.GOOS == "js" || cfg.TemporaryReaderMode {
+	_, err := ChangeConfig(true, func(*Config) error { return nil })
+	return err
+}
+
+// writeConfig 在发布前保存候选配置，临时阅读模式只更新内存。
+func writeConfig(candidate *Config) error {
+	if runtime.GOOS == "js" || candidate.TemporaryReaderMode {
 		return nil
 	}
-	ConfigFileLock.Lock()
-	defer ConfigFileLock.Unlock()
-
-	bytes, err := toml.Marshal(cfg)
-	if err != nil {
-		return err
-	}
-
-	targetPath := cfg.ConfigFile
-	if targetPath == "" {
-		targetPath, err = configFilePathForLocation(DefaultConfigLocation())
+	target := candidate.ConfigFile
+	if target == "" {
+		var err error
+		target, err = configFilePathForLocation(DefaultConfigLocation())
 		if err != nil {
 			return err
 		}
 	}
-
-	if err := writeConfigBytes(targetPath, bytes); err != nil {
+	data, err := toml.Marshal(candidate)
+	if err != nil {
 		return err
 	}
-	cfg.ConfigFile = targetPath
+	if err := writeConfigBytes(target, data); err != nil {
+		return err
+	}
+	candidate.ConfigFile = target
 	return nil
 }
 
@@ -204,7 +206,7 @@ func fileExists(filename string) bool {
 
 func SaveConfig(to string) error {
 	// 在js环境下
-	if runtime.GOOS == "js" || cfg.TemporaryReaderMode {
+	if runtime.GOOS == "js" || GetCfg().TemporaryReaderMode {
 		return nil
 	}
 	ConfigFileLock.Lock()
@@ -215,7 +217,8 @@ func SaveConfig(to string) error {
 	}
 
 	// 保存配置
-	bytes, errMarshal := toml.Marshal(cfg)
+	candidate := CopyCfg()
+	bytes, errMarshal := toml.Marshal(candidate)
 	if errMarshal != nil {
 		return errMarshal
 	}
@@ -227,7 +230,8 @@ func SaveConfig(to string) error {
 	if err := writeConfigBytes(configPath, bytes); err != nil {
 		return err
 	}
-	cfg.ConfigFile = configPath
+	candidate.ConfigFile = configPath
+	currentConfig.Store(&candidate)
 	return nil
 }
 
@@ -265,7 +269,7 @@ func getConfigInLocation(location string) string {
 
 func DeleteConfigIn(in string) error {
 	// 在非js环境下
-	if runtime.GOOS == "js" || cfg.TemporaryReaderMode {
+	if runtime.GOOS == "js" || GetCfg().TemporaryReaderMode {
 		return nil
 	}
 	ConfigFileLock.Lock()
@@ -316,21 +320,21 @@ func writeFileAtomically(filePath string, data []byte, perm os.FileMode) error {
 
 // GetQrcodeURL 使用服务实际协议与监听端口构造可分享地址。
 func GetQrcodeURL() string {
-	host := strings.Trim(strings.TrimSpace(cfg.Host), "[]")
+	host := strings.Trim(strings.TrimSpace(GetCfg().Host), "[]")
 	if host == "" || tools.IsLoopbackHost(host) || host == "0.0.0.0" || host == "::" {
 		host = tools.GetOutboundIP().String()
 	}
-	if cfg.DisableLAN && !cfg.AutoTLSCertificate {
+	if GetCfg().DisableLAN && !GetCfg().AutoTLSCertificate {
 		host = "127.0.0.1"
 	}
 	return readingURL(host)
 }
 
 func readingURL(host string) string {
-	protocol, port := "http", cfg.Port
-	if cfg.AutoTLSCertificate {
+	protocol, port := "http", GetCfg().Port
+	if GetCfg().AutoTLSCertificate {
 		protocol, port = "https", 443
-	} else if cfg.EnableTLS {
+	} else if GetCfg().EnableTLS {
 		protocol = "https"
 	}
 	return (&url.URL{Scheme: protocol, Host: net.JoinHostPort(host, strconv.Itoa(port)), Path: PrefixPath("/")}).String()
@@ -355,14 +359,14 @@ func ToQrcodePublicURL(rawURL string) string {
 // GetLocalBrowserURL 返回启动时自动打开浏览器使用的本机入口，避免本机启动流程受 Host 或 0.0.0.0 影响。
 func GetLocalBrowserURL() string {
 	// 自动证书依赖域名 SNI；用域名访问才能通过证书校验。
-	if cfg.AutoTLSCertificate {
-		return readingURL(strings.Trim(cfg.Host, "[]"))
+	if GetCfg().AutoTLSCertificate {
+		return readingURL(strings.Trim(GetCfg().Host, "[]"))
 	}
 	return readingURL("127.0.0.1")
 }
 
 func OpenBrowserIfNeeded() {
-	if cfg.OpenBrowser == true {
+	if GetCfg().OpenBrowser == true {
 		go tools.OpenBrowserByURL(GetLocalBrowserURL())
 	}
 }

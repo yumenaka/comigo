@@ -482,6 +482,12 @@ func (c *Config) DisablePlugin(pluginName string) error {
 // UpdateConfigByJson 使用 JSON 字符串反序列化将更新的配置解析为映射，遍历映射并更新配置
 // 使用反射自动处理字段赋值，减少重复代码
 func UpdateConfigByJson(jsonString string) error {
+	_, err := ChangeConfig(false, func(c *Config) error { return c.UpdateByJSON(jsonString) })
+	return err
+}
+
+// UpdateByJSON 只校验和更新候选配置，发布与落盘由 ChangeConfig 统一处理。
+func (c *Config) UpdateByJSON(jsonString string) error {
 	var updates map[string]interface{}
 	if err := json.Unmarshal([]byte(jsonString), &updates); err != nil {
 		logger.Infof(locale.GetString("log_failed_to_unmarshal_json"), err)
@@ -489,7 +495,7 @@ func UpdateConfigByJson(jsonString string) error {
 	}
 
 	// 先更新副本，全部字段校验成功后再替换，避免错误请求留下部分变更。
-	candidate := cfg
+	candidate := *c
 	v := reflect.ValueOf(&candidate).Elem()
 	configType := v.Type()
 
@@ -521,17 +527,17 @@ func UpdateConfigByJson(jsonString string) error {
 	if candidate.Port < 0 || candidate.Port > 65535 {
 		return fmt.Errorf("Port must be between 0 and 65535")
 	}
-	if candidate.EnableTLS != cfg.EnableTLS || candidate.AutoTLSCertificate != cfg.AutoTLSCertificate || candidate.CertFile != cfg.CertFile || candidate.KeyFile != cfg.KeyFile || candidate.Host != cfg.Host || candidate.DisableLAN != cfg.DisableLAN {
+	if candidate.EnableTLS != c.EnableTLS || candidate.AutoTLSCertificate != c.AutoTLSCertificate || candidate.CertFile != c.CertFile || candidate.KeyFile != c.KeyFile || candidate.Host != c.Host || candidate.DisableLAN != c.DisableLAN {
 		if err := candidate.ValidateTLS(); err != nil {
 			return err
 		}
 	}
-	if candidate.CacheDir != cfg.CacheDir {
+	if candidate.CacheDir != c.CacheDir {
 		if err := candidate.InitCacheDir(); err != nil {
 			return err
 		}
 	}
-	cfg = candidate
+	*c = candidate
 	return nil
 }
 

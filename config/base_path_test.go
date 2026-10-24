@@ -21,10 +21,10 @@ func TestNormalizeBasePath(t *testing.T) {
 
 // 验证路径加前缀和去前缀在根路径、子路径下都保持一致。
 func TestPrefixAndStripBasePath(t *testing.T) {
-	oldBasePath := cfg.BasePath
-	t.Cleanup(func() { cfg.BasePath = oldBasePath })
+	oldBasePath := GetCfg().BasePath
+	t.Cleanup(func() { GetCfg().BasePath = oldBasePath })
 
-	cfg.BasePath = "/some/path/"
+	GetCfg().BasePath = "/some/path/"
 	if got := PrefixPath("/api/get-book"); got != "/some/path/api/get-book" {
 		t.Fatalf("PrefixPath API = %q", got)
 	}
@@ -44,7 +44,7 @@ func TestPrefixAndStripBasePath(t *testing.T) {
 		t.Fatalf("StripBasePath base = %q", got)
 	}
 
-	cfg.BasePath = ""
+	GetCfg().BasePath = ""
 	if got := PrefixPath("/api/get-book"); got != "/api/get-book" {
 		t.Fatalf("PrefixPath without base = %q", got)
 	}
@@ -63,13 +63,13 @@ func TestSetConfigValueNormalizesBasePath(t *testing.T) {
 
 // 验证二维码基础地址包含反向代理基础路径。
 func TestGetQrcodeURLIncludesBasePath(t *testing.T) {
-	oldCfg := cfg
-	t.Cleanup(func() { cfg = oldCfg })
+	oldCfg := CopyCfg()
+	t.Cleanup(func() { *GetCfg() = oldCfg })
 
-	cfg = newDefaultConfig()
-	cfg.Host = "example.com"
-	cfg.Port = 1234
-	cfg.BasePath = "/proxy"
+	*GetCfg() = newDefaultConfig()
+	GetCfg().Host = "example.com"
+	GetCfg().Port = 1234
+	GetCfg().BasePath = "/proxy"
 
 	if got, want := GetQrcodeURL(), "http://example.com:1234/proxy/"; got != want {
 		t.Fatalf("GetQrcodeURL() = %q, want %q", got, want)
@@ -78,12 +78,12 @@ func TestGetQrcodeURLIncludesBasePath(t *testing.T) {
 
 // 验证二维码公开地址只替换本机回环地址，不改写任意文本。
 func TestToQrcodePublicURLRewritesLoopbackOnly(t *testing.T) {
-	oldCfg := cfg
-	t.Cleanup(func() { cfg = oldCfg })
+	oldCfg := CopyCfg()
+	t.Cleanup(func() { *GetCfg() = oldCfg })
 
-	cfg = newDefaultConfig()
-	cfg.Host = "example.com"
-	cfg.Port = 1234
+	*GetCfg() = newDefaultConfig()
+	GetCfg().Host = "example.com"
+	GetCfg().Port = 1234
 
 	got := ToQrcodePublicURL("http://127.0.0.1:1234/flip/book-id?page=2")
 	want := "http://example.com:1234/flip/book-id?page=2"
@@ -99,35 +99,35 @@ func TestToQrcodePublicURLRewritesLoopbackOnly(t *testing.T) {
 
 // 分享地址与浏览器地址必须和实际 TLS/IPv6 监听方式一致。
 func TestReadingURLsTransport(t *testing.T) {
-	oldCfg := cfg
-	t.Cleanup(func() { cfg = oldCfg })
-	cfg = newDefaultConfig()
-	cfg.Host = "2001:db8::1"
-	cfg.Port = 4321
-	cfg.BasePath = "/books"
+	oldCfg := CopyCfg()
+	t.Cleanup(func() { *GetCfg() = oldCfg })
+	*GetCfg() = newDefaultConfig()
+	GetCfg().Host = "2001:db8::1"
+	GetCfg().Port = 4321
+	GetCfg().BasePath = "/books"
 	if got := GetQrcodeURL(); got != "http://[2001:db8::1]:4321/books/" {
 		t.Fatal(got)
 	}
-	cfg.CertFile = "cert.pem"
-	cfg.KeyFile = "key.pem"
-	cfg.EnableTLS = false
+	GetCfg().CertFile = "cert.pem"
+	GetCfg().KeyFile = "key.pem"
+	GetCfg().EnableTLS = false
 	if got := GetLocalBrowserURL(); got != "http://127.0.0.1:4321/books/" {
 		t.Fatalf("disabled TLS URL=%q", got)
 	}
-	cfg.EnableTLS = true
+	GetCfg().EnableTLS = true
 	if got := GetLocalBrowserURL(); got != "https://127.0.0.1:4321/books/" {
 		t.Fatal(got)
 	}
-	cfg.AutoTLSCertificate = true
-	cfg.Host = "example.com"
+	GetCfg().AutoTLSCertificate = true
+	GetCfg().Host = "example.com"
 	if got := GetLocalBrowserURL(); got != "https://example.com:443/books/" {
 		t.Fatal(got)
 	}
-	cfg.AutoTLSCertificate = false
-	cfg.EnableTLS = false
-	cfg.CertFile = ""
-	cfg.KeyFile = ""
-	cfg.DisableLAN = true
+	GetCfg().AutoTLSCertificate = false
+	GetCfg().EnableTLS = false
+	GetCfg().CertFile = ""
+	GetCfg().KeyFile = ""
+	GetCfg().DisableLAN = true
 	if got := GetQrcodeURL(); got != "http://127.0.0.1:4321/books/" {
 		t.Fatal(got)
 	}

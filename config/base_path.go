@@ -23,7 +23,7 @@ func NormalizeBasePath(basePath string) string {
 
 // GetBasePath 返回当前运行时使用的基础路径；空字符串表示根路径。
 func GetBasePath() string {
-	return cfg.GetBasePath()
+	return GetCfg().GetBasePath()
 }
 
 // PrefixPath 为站内绝对路径加上基础路径，外部 URL 和 data/blob URL 会原样返回。
