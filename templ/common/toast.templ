@@ -2,7 +2,19 @@ package common
 
 templ Toast() {
 	<!-- Toast Container -->
-	<div id="toast-container" class="fixed z-50" style="right: 1rem; width: min(24rem, calc(100vw - 2rem)); display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; pointer-events: none;"></div>
+	<div
+		id="toast-container"
+		class="fixed z-50"
+		style="
+		right: 1rem;
+		width: min(24rem, calc(100vw - 2rem));
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.5rem;
+		pointer-events: none;
+	"
+	></div>
 	<!-- Toast JavaScript -->
 	<script>
 		// 生成随机 ID（用于唯一标识每个 Toast）

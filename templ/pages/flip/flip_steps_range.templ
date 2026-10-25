@@ -122,7 +122,7 @@ templ StepsRangeArea() {
 	<div
 		id="StepsRangeArea"
 		@click.stop=""
-		class="panel-surface w-5/6 h-12 px-4 md:px-8 overflow-visible font-semibold StepsRangeArea  rounded-xl drop-shadow-lg self-center-safe bg-base-100 text-base-content toolbar backdrop-blur-3xl"
+		class="panel-surface w-5/6 h-12 px-4 md:px-8 overflow-visible font-semibold StepsRangeArea rounded-xl drop-shadow-lg self-center-safe bg-base-100 text-base-content toolbar backdrop-blur-3xl"
 		:class="($store.flip.autoHideToolbar? 'fixed bottom-0':'flex flex-col justify-center bg-base-100/50')+($store.flip.mangaMode?' manga-mode': '')"
 	>
 		<div class="relative w-full self-center-safe" :class="$store.flip.autoHideToolbar? 'top-2.5':'mt-0'">
@@ -154,7 +154,7 @@ templ StepsRangeArea() {
 				step="1"
 			/>
 			<!-- 刻度标记容器 -->
-			<div class="absolute w-full h-2 pointer-events-none" style="bottom: 2px;">
+			<div class="absolute w-full h-2 pointer-events-none" style="bottom: 2px">
 				<template x-for="i in $store.global.allPageNum" :key="i">
 					<div
 						class="absolute"
@@ -194,7 +194,12 @@ templ StepsRangeArea() {
 						<template x-if="shouldShowLabel(i, $store.global.allPageNum, $store.flip.mangaMode)">
 							<div
 								class="text-xs text-center mb-0"
-								style="position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);"
+								style="
+		position: absolute;
+		bottom: 110%;
+		left: 50%;
+		transform: translateX(-50%);
+	"
 								x-text="i"
 							></div>
 						</template>

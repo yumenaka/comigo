@@ -14,7 +14,7 @@ templ ComigoXYZPlugin(c echo.Context) {
 			</script>
 		}
 		<!-- 版本号数据，通过 data 属性传递 -->
-		<div id="comigo-xyz-plugin-data" data-version={ config.GetVersion() } style="display: none;"></div>
+		<div id="comigo-xyz-plugin-data" data-version={ config.GetVersion() } style="display: none"></div>
 		<script>
 			// 等待页面加载完成后在书架底部插入主页功能块
 			let retryCount = 0;

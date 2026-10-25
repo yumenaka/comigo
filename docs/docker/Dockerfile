@@ -10,7 +10,7 @@
 # ============================================================================
 # 第一阶段: 前端构建
 # ============================================================================
-FROM --platform=$BUILDPLATFORM alpine:3.23 AS frontend-builder
+FROM --platform=$BUILDPLATFORM alpine:3.24 AS frontend-builder
 
 WORKDIR /build
 
@@ -32,7 +32,7 @@ RUN bun install && bun run dev
 # ============================================================================
 # 第二阶段: Go 构建
 # ============================================================================
-FROM --platform=$BUILDPLATFORM golang:alpine AS go-builder
+FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine3.24 AS go-builder
 
 # 构建参数：版本号
 ARG VERSION
@@ -62,7 +62,7 @@ RUN mkdir -p assets/static/wasm && \
     cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" assets/static/wasm/wasm_exec.js
 
 # 生成 templ 模板文件
-RUN go run github.com/a-h/templ/cmd/templ@latest generate
+RUN go tool templ generate
 
 # 编译 Go 程序
 # -trimpath: 去掉源码绝对路径
@@ -82,7 +82,7 @@ RUN if [ -z "$VERSION" ]; then \
 # ============================================================================
 # 第三阶段: 运行时镜像
 # ============================================================================
-FROM alpine:latest
+FROM alpine:3.24
 
 # 构建参数：版本号（从构建阶段传递）
 ARG VERSION

@@ -86,12 +86,19 @@ func TestConfigRestartFailureRestoresPreviousListener(t *testing.T) {
 		t.Fatal(err)
 	}
 	previous := config.CopyCfg()
+	// 先完成一次请求，确保 Serve 已接管监听，再模拟运行中的配置更新。
+	ready, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", previous.Port))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ready.Body.Close()
 	occupied, err := net.Listen("tcp4", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer occupied.Close()
-	cfg.Port = occupied.Addr().(*net.TCPAddr).Port
+	// StartEcho 已发布新的配置快照，必须通过 setter 更新当前配置。
+	config.SetPort(occupied.Addr().(*net.TCPAddr).Port)
 	restartService(&previous)
 	if config.GetCfg().Port != previous.Port || config.Server == nil {
 		t.Fatal("previous listener not restored")

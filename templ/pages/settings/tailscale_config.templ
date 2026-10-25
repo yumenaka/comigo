@@ -146,7 +146,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 				>
 					<label for={ "TailscalePort" } x-text={ getTranslations("tailscale_port") } class="wrap-break-word"></label>
 					<input
-						class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black  placeholder-gray-500 placeholder-opacity-50"
+						class="panel-control px-2.5 w-full max-w-64 rounded border-gray-400 py-2.5 shadow-sm sm:text-sm text-black placeholder-gray-500 placeholder-opacity-50"
 						id={ "TailscalePort" }
 						name={ "TailscalePort" }
 						type="number"
@@ -193,10 +193,10 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 								style=""
 							}
 							if tsStatus.FunnelCapability == "true" || tsStatus.FunnelCapability == "unknown" {
-								style="display:none;"
+								style="display: none"
 							}
 						} else {
-							style="display:none;"
+							style="display: none"
 						}
 					></div>
 					<div x-text={ getTranslations("funnel_login_check") } class="wrap-break-word"></div>
@@ -234,10 +234,10 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 								style=""
 							}
 							if tsStatus.FunnelCapability == "true" || tsStatus.FunnelCapability == "unknown" {
-								style="display:none;"
+								style="display: none"
 							}
 						} else {
-							style="display:none;"
+							style="display: none"
 						}
 					></div>
 					<div x-text={ getTranslations("funnel_tunnel_label") } class="wrap-break-word"></div>
@@ -269,10 +269,10 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 							style=""
 						}
 						if tsStatus.FunnelCapability == "true" || tsStatus.FunnelCapability == "unknown" {
-							style="display:none;"
+							style="display: none"
 						}
 					} else {
-						style="display:none;"
+						style="display: none"
 					}
 				>
 					<p x-text={ getTranslations("funnel_not_set_hint") } class="wrap-break-word">Funnel 功能未设置。需要：</p>
@@ -312,7 +312,7 @@ templ TailscaleConfig(tsStatus *tailscale_plugin.TailscaleStatus) {
 						id="tailscale-submit-btn"
 						type="button"
 						disabled?={ config.GetCfg().ReadOnlyMode }
-						class="panel-control min-w-28 px-2 h-10 mx-2 my-0 text-center font-semibold transition border border-black text-black rounded bg-blue-200  hover:bg-indigo-300 disabled:opacity-70 disabled:cursor-not-allowed"
+						class="panel-control min-w-28 px-2 h-10 mx-2 my-0 text-center font-semibold transition border border-black text-black rounded bg-blue-200 hover:bg-indigo-300 disabled:opacity-70 disabled:cursor-not-allowed"
 						x-text={ getTranslations("submit") }
 					>Submit</button>
 					<script>
@@ -446,7 +446,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 		<div class="overflow-x-auto">
 			<table class="table table-auto w-full min-w-full">
 				<tbody>
-					<tr id="ts-auth-row" class="border-separate border-b border-gray-500" style="display:none">
+					<tr id="ts-auth-row" class="border-separate border-b border-gray-500" style="display: none">
 						<td class="min-w-24 font-semibold align-top" x-text={ getTranslations("verify_link") }>验证链接</td>
 						<td class="align-top wrap-break-word">
 							<a id="ts-auth-link" class="text-indigo-600 no-underline hover:underline wrap-break-word" href={ tsStatus.AuthURL } target="_blank">{ tsStatus.AuthURL }</a>
@@ -475,7 +475,7 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 							}
 						</td>
 					</tr>
-					<tr id="ts-funnel-capability-row" class="border-separate border-b border-gray-400" style="display:none">
+					<tr id="ts-funnel-capability-row" class="border-separate border-b border-gray-400" style="display: none">
 						<td x-text={ getTranslations("funnel_status") } class="min-w-24 font-semibold">Funnel状态</td>
 						if tsStatus.FunnelCapability == "true" {
 							<td id="ts-funnel-capability" x-text={ getTranslations("funnel_setup_done") } class="wrap-break-word"></td>
@@ -503,13 +503,13 @@ templ TailscaleStatusPanel(tsStatus *tailscale_plugin.TailscaleStatus) {
 						<td x-text={ getTranslations("service_version") } class="min-w-24 font-semibold">服务版本</td>
 						<td id="ts-version" class="wrap-break-word">{ tsStatus.Version }</td>
 					</tr>
-					<tr id="ts-fqdn-row" class="border-separate border-b border-gray-400" style="display:none">
+					<tr id="ts-fqdn-row" class="border-separate border-b border-gray-400" style="display: none">
 						<td x-text={ getTranslations("read_link") } class="min-w-24 font-semibold">阅读链接</td>
 						<td class="wrap-break-word">
 							<a id="ts-fqdn-link" class="text-indigo-600 no-underline hover:underline wrap-break-word" href={ tsStatus.FQDN } target="_blank">{ tsStatus.FQDN }</a>
 						</td>
 					</tr>
-					<tr id="ts-qrcode-row" class="border-separate border-b border-gray-400" style="display:none">
+					<tr id="ts-qrcode-row" class="border-separate border-b border-gray-400" style="display: none">
 						<td colspan="2" class="text-center align-top">
 							<div
 								id="ts-qrcode-container"

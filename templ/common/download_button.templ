@@ -29,7 +29,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 			<a
 				href={ templ.SafeURL(RawBookURL(book)) }
 				download={ book.BookInfo.Title }
-				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
 				:title="i18next.t('download_raw_archive')"
 				x-text="i18next.t('download_raw_archive')"
 			>
@@ -41,7 +41,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 			<a
 				href={ templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/download-zip?id=%v", book.BookID))) }
 				download={ book.BookInfo.Title + ".zip" }
-				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
 				:title="i18next.t('download_as_zip')"
 				x-text="i18next.t('download_as_zip')"
 			>
@@ -53,7 +53,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 			<a
 				href={ templ.SafeURL(downloadEpubURL(book)) }
 				download={ getEpubFileName(book.BookInfo.Title) }
-				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
 				:title="i18next.t('download_as_epub')"
 				x-text="i18next.t('download_as_epub')"
 			>
@@ -65,7 +65,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 			<a
 				href={ templ.SafeURL(portableBookURL(c, book)) }
 				download={ book.BookInfo.Title + ".html" }
-				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-1 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out  hover:bg-indigo-300"
+				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-1 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
 				:title="i18next.t('download_portable_web_file')"
 				x-text="i18next.t('download_portable_web_file')"
 			>

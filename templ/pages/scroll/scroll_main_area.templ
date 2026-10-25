@@ -74,7 +74,7 @@ templ MainArea(c echo.Context, book *model.Book, loadMode string, pagedIndex int
 		for key, image := range book.PageInfos {
 			if shouldRenderScrollPage(loadMode, pagedIndex, pageLimit, key, c != nil && c.QueryParam("static") != "") {
 				<div
-					class="flex flex-col justify-start w-full max-w-full  m-0 rounded item-center"
+					class="flex flex-col justify-start w-full max-w-full m-0 rounded item-center"
 					:style="{ marginBottom: $store.scroll.marginBottomOnScrollMode + 'px' }"
 				>
 					if strings.Contains(image.Url, ".html")&& !strings.Contains(image.Url, "hidden.") {
@@ -112,7 +112,7 @@ templ MainArea(c echo.Context, book *model.Book, loadMode string, pagedIndex int
 						}
 					}
 					<template x-if="$store.scroll.showPageNum">
-						<div class="w-full mt-0 mb-1 text-sm font-semibold text-center page_hint ">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
+						<div class="w-full mt-0 mb-1 text-sm font-semibold text-center page_hint">{ fmt.Sprintf("%d / %d", key+1,book.BookInfo.PageCount) }</div>
 					</template>
 				</div>
 			}

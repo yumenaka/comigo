@@ -48,7 +48,7 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScripts []string) 
 			x-data="{}"
 			x-bind:data-theme="$store.global.getEffectiveTheme()"
 			x-bind:style="'--custom-base-100:' + $store.global.customBase100 + ';--custom-base-300:' + $store.global.customBase300 + ';--custom-base-content:' + $store.global.customBaseContent + ';'"
-			class="text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between  h-full min-h-screen w-full max-w-full p-0 m-0 font-sans"
+			class="text-gray-500 hover:text-gray-700 selected:text-blue-500 flex flex-col items-center justify-between h-full min-h-screen w-full max-w-full p-0 m-0 font-sans"
 			:class="$store.global.getMainAreaBgClass()"
 		>
 			@MessageModal()

@@ -185,7 +185,7 @@ templ MainArea(c echo.Context) {
 						@input="initPageNum = $event.target.value; window.ComiGoReader?.inputFlipPage($event); updateProgress();"
 						@change="initPageNum = $event.target.value; window.ComiGoReader?.inputFlipPage($event); updateProgress();"
 					/>
-					<div class="absolute w-full h-2 pointer-events-none" style="bottom: 2px;">
+					<div class="absolute w-full h-2 pointer-events-none" style="bottom: 2px">
 						<template x-for="i in $store.global.allPageNum" :key="i">
 							<div
 								class="absolute"
@@ -223,7 +223,12 @@ templ MainArea(c echo.Context) {
 								<template x-if="shouldShowLabel(i, $store.global.allPageNum)">
 									<div
 										class="text-xs text-center mb-0"
-										style="position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);"
+										style="
+		position: absolute;
+		bottom: 110%;
+		left: 50%;
+		transform: translateX(-50%);
+	"
 										x-text="i"
 									></div>
 								</template>
