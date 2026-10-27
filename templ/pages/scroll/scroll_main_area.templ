@@ -87,6 +87,7 @@ templ MainArea(c echo.Context, book *model.Book, loadMode string, pagedIndex int
 					}
 					if !strings.Contains(image.Url, "hidden.")&& !strings.Contains(image.Url, ".html") {
 						if c != nil && c.QueryParam("static") == "" {
+							// :src 是本模板生成的 Alpine 表达式，不是 URL；避免三元表达式被 URL 检查替换。
 							<img
 								data-scroll-page-num={ fmt.Sprintf("%d", key+1) }
 								x-data={ ImageXData(image.Url) }
@@ -94,7 +95,7 @@ templ MainArea(c echo.Context, book *model.Book, loadMode string, pagedIndex int
 								draggable="false"
 								:data-scroll-lazy={ fmt.Sprintf("$store.scroll.loadMode === 'lazy' && %d >= $store.scroll.pageLimit ? 'true' : null", key) }
 								:data-scroll-src={ ImageSrc(image.Url) }
-								:src={ fmt.Sprintf("$store.scroll.loadMode === 'lazy' && %d >= $store.scroll.pageLimit ? null : %s", key, ImageSrc(image.Url)) }
+								:src={ templ.SafeURL(fmt.Sprintf("$store.scroll.loadMode === 'lazy' && %d >= $store.scroll.pageLimit ? null : %s", key, ImageSrc(image.Url))) }
 								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;loaded = true;"
 								@error="loaded = false"
 								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
