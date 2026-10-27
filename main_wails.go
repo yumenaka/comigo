@@ -95,5 +95,9 @@ func serveWailsAsset(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	// WebView 可能携带请求体却没有 Content-Length；按服务端语义标为未知长度，避免 Echo 跳过 Bind。
+	if r.Body != nil && r.Body != http.NoBody && r.ContentLength == 0 && r.Header.Get("Content-Length") == "" {
+		r.ContentLength = -1
+	}
 	config.Server.Handler.ServeHTTP(w, r)
 }

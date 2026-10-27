@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -68,6 +69,10 @@ func websocketOriginAllowed(r *http.Request) bool {
 		return false
 	}
 	if parsed.Scheme == "wails" {
+		return true
+	}
+	// Windows/Android 的 Wails3 使用虚拟 HTTP(S) 主机；仅桌面壳构建允许这些精确来源。
+	if assets.IsWailsBuild() && (origin == "http://wails.localhost" || origin == "https://wails.localhost") {
 		return true
 	}
 	if parsed.Host == "" {

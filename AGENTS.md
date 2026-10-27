@@ -56,6 +56,7 @@ ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片�
 - Wails 入口使用 `wails && !js && !bindings` build tag；绑定生成如需恢复，继续避免临时二进制启动 Web 服务、扫描书库或启动 Tailscale。
 - Wails 构建使用 `tools/tailscale_plugin/ts_fake.go` 空实现，当前不支持内置 Tailscale；设置页不要在 Wails 环境暴露远程访问/Tailscale 配置。
 - Wails3 页面资源由内嵌 Echo 服务提供；仅原生 WebView 插入 `/wails/runtime.js`，普通浏览器不加载 Wails 运行时。
+- Wails assetserver 转交 Echo 的请求若有 Body 但缺少 Content-Length，须在 `serveWailsAsset` 标记为未知长度（-1）；否则 Echo `Bind` 会按空请求体处理 JSON/表单。
 - 独立 tray 使用 `tools/system_tray/` 的 `fyne.io/systray`，以 `!wails` 标签隔离，不得引入 Wails/GTK/WebKit 依赖；desktop 使用 `tools/wails_systray/` 的 Wails3 托盘与面板，仅在 `wails` 标签下编译。面板仅由 Wails 资产处理器提供，通过 Go 绑定调用本进程，不在公共 Echo 上注册控制接口。
 - Linux 独立 tray 以 `CGO_ENABLED=0` 交叉编译；仅 desktop 依赖 CGO、GTK4、WebKitGTK 6.0，发布镜像见 `docs/docker/Dockerfile.wails-linux`。托盘需要 StatusNotifier/AppIndicator 宿主；无宿主时 desktop 正常关闭退出，tray 明确报错退出。
 - macOS 最低版本为 13；两个入口复用 `docs/macos-app.mk` 打包，自签后生成 DMG。构建图标源为已跟踪的 `assets/appicon.png`。

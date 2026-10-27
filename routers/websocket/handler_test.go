@@ -10,6 +10,7 @@ import (
 
 	gorilla "github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets"
 )
 
 func TestShouldLogWebSocketReadError(t *testing.T) {
@@ -34,6 +35,9 @@ func TestWebSocketOriginAllowed(t *testing.T) {
 		{origin: "https://reader.example.com", forwardedHost: "reader.example.com, proxy.internal", want: true},
 		{origin: "https://example.com", want: false},
 		{origin: "wails://wails", want: true},
+		{origin: "http://wails.localhost", want: assets.IsWailsBuild()},
+		{origin: "https://wails.localhost", want: assets.IsWailsBuild()},
+		{origin: "https://wails.localhost.example.com", want: false},
 		{origin: "not a url", want: false},
 	}
 	for _, tc := range cases {

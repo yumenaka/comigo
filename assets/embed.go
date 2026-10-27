@@ -49,14 +49,19 @@ func GetBasePathScript(wailsWebView bool) string {
 	wailsWebViewJSON, _ := json.Marshal(wailsWebView)
 	debugMode, _ := json.Marshal(config.GetCfg().Debug)
 	wailsRuntimeScript := ""
+	wailsWebSocketURL := ""
 	if wailsWebView {
+		// WebView 的虚拟主机没有服务端口；使用内嵌服务实际监听地址，并保留 TLS 和 BasePath。
+		wailsWebSocketURL = strings.Replace(config.GetLocalBrowserURL(), "http", "ws", 1) + "api/ws"
 		// Wails3 runtime 负责通知窗口 ready；普通 Web 构建不插入这个脚本。
 		wailsRuntimeScript = "<script type=\"module\" src=\"/wails/runtime.js\"></script>\n"
 	}
+	wailsWebSocketURLJSON, _ := json.Marshal(wailsWebSocketURL)
 	return `<script>
 window.ComiGoBasePath = ` + string(basePath) + `;
 window.ComiGoWails = ` + string(wailsBuild) + `;
 window.ComiGoWailsWebView = ` + string(wailsWebViewJSON) + `;
+window.ComiGoWailsWebSocketURL = ` + string(wailsWebSocketURLJSON) + `;
 window.ComiGoDebug = ` + string(debugMode) + `;
 window.ComiGoPath = function(path) {
   const base = window.ComiGoBasePath || '';
@@ -100,7 +105,7 @@ window.ComiGoElectronAction = function(action) {
   return true;
 };
 window.ComiGoIsWails = function() {
-  return window.ComiGoWailsWebView || window.location.protocol === 'wails:' || !!window.WailsInvoke || !!window.go?.main?.App;
+  return window.ComiGoWailsWebView || window.location.protocol === 'wails:';
 };
 if (window.ComiGoIsWails()) {
   // Wails dev/debug 默认会放开右键菜单，这里只在桌面壳内统一禁用。

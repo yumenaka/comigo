@@ -111,7 +111,8 @@
             const config = getConfig()
             const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://'
             const wsPath = window.ComiGoPath ? window.ComiGoPath('/api/ws') : '/api/ws'
-            const wsUrl = wsProtocol + window.location.host + wsPath
+            // 仅原生 WebView 使用服务端提供的地址；普通 Web 保留当前域名、代理端口和协议。
+            const wsUrl = window.ComiGoWailsWebSocketURL || wsProtocol + window.location.host + wsPath
 
             try {
                 socket = new WebSocket(wsUrl)
