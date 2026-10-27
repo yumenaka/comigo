@@ -398,3 +398,13 @@ func parseStoreURLPort(port string, defaultPort int) int {
 	}
 	return defaultPort
 }
+
+// LibraryLabel 隐藏远程书库地址中的认证信息，实际操作仍使用原始配置。
+func LibraryLabel(path string) string {
+	u, err := url.Parse(path)
+	if err != nil || u.Host == "" {
+		return path
+	}
+	u.User, u.RawQuery, u.Fragment = nil, "", ""
+	return u.String()
+}

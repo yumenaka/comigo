@@ -1,4 +1,4 @@
-//go:build !js
+//go:build !wails && !js
 
 package system_tray
 
@@ -80,6 +80,10 @@ func SetupSystray(
 	setLanguage func(string) error,
 	getTailscaleEnabled func() bool,
 ) int {
+	if !traySupported() {
+		logger.Info(locale.GetString("tray_unavailable"))
+		return 1
+	}
 	startServerFunc = startServer
 	shutdownServerFunc = shutdownServer
 	getURLFunc = getURL
@@ -273,7 +277,8 @@ func initMenuItems() {
 			if storeUrl == "" {
 				continue
 			}
-			mStore := menuItems.mOpenDir.AddSubMenuItem(storeUrl, storeUrl)
+			label := tools.LibraryLabel(storeUrl)
+			mStore := menuItems.mOpenDir.AddSubMenuItem(label, label)
 			menuItems.mStoreFolders = append(menuItems.mStoreFolders, mStore)
 			// Go 1.22 起 range 变量按迭代独立，可直接捕获当前路径。
 			onMenuClick(mStore, func() {

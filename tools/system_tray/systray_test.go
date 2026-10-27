@@ -1,4 +1,4 @@
-//go:build !js
+//go:build !wails && !js
 
 package system_tray
 

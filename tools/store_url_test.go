@@ -96,3 +96,16 @@ func TestIsSubPathAllowsDotPrefixedNames(t *testing.T) {
 		t.Fatal("..foo 是普通子目录名，不应被当成父目录跳转")
 	}
 }
+
+// 两套托盘展示远程书库时都必须移除认证信息，本地路径保持原样。
+func TestLibraryLabel(t *testing.T) {
+	for input, want := range map[string]string{
+		"https://user:secret@example.com/books?token=secret#private": "https://example.com/books",
+		"smb://user:secret@server/share":                             "smb://server/share",
+		"/books/local":                                               "/books/local",
+	} {
+		if got := LibraryLabel(input); got != want {
+			t.Fatalf("LibraryLabel(%q) = %q, want %q", input, got, want)
+		}
+	}
+}

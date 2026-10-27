@@ -9,6 +9,7 @@ import (
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/templ/common"
+	"github.com/yumenaka/comigo/templ/pages/epub"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
 	"github.com/yumenaka/comigo/tools/comigo_remote"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -49,6 +50,9 @@ func FlipModeHandler(c echo.Context) error {
 	}
 	if book == nil {
 		return renderFlipNotFound(c)
+	}
+	if book.Type == model.TypeEpub {
+		return epub.Redirect(c)
 	}
 	// HTML 单文件书籍直接返回源文件，避免翻页模板包裹后破坏原页面结构和脚本。
 	if book.Type == model.TypeHTML {

@@ -17,7 +17,7 @@ ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片�
 
 ## 构建与生成产物
 - `templ/**/*_templ.go` 和 `assets/dist/*` 是生成产物；不要手动编辑生成产物实现业务逻辑。
-- `assets/wailsjs/*` 是 Wails 生成产物；修改 Wails 绑定或升级 Wails 后允许同步，但不要手写业务逻辑。
+- Wails 绑定生成产物只允许由 Wails 生成器同步；当前前端走 HTTP 子路由，不依赖旧 `assets/wailsjs`。
 - 修改 `*.templ` 后执行 `templ fmt ./templ && templ generate`；修改 `assets/frontend/*` 或 `assets/locale/*` 后执行 `bun run dev` 或等价构建命令。
 - `templ/pages/manual/` 是内置手册页面，正文翻译独立放在 `assets/static/manual-content/*.json`；不需要单独构建，示例图片只使用 HTTPS 外链。
 - 提交/review 前分开检查源码和生成产物；生成产物必须能被本轮源码变化解释，不能混入无关 churn。
@@ -41,13 +41,27 @@ ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片�
 - 远程 Comigo 书库使用 `http(s)` 主页 URL 配置；阅读与下载实时代理远端资源，本地只保存索引，不保留原始文件。
 - 前端 Alpine.js store 持久化键名格式为 `模块.配置项`，如 `flip.autoHideToolbar`。
 
-## Wails v2
+## EPUB 阅读
+- `templ/pages/epub/`、`assets/static/js/epub_reader.js` 与对应 CSS 是独立阅读器，不复用 ZIP 漫画的 WASM、页码或翻页状态。
+- `/epub` 只在浏览器读取本地文件；`/epub/:id` 复用认证后的原文件接口，支持远程书库。纯文字 EPUB 不受最少图片数过滤。
+- `assets/static/lib/epub/` 固定分发 epub.js 0.3.93 和 JSZip 3.10.2 的官方构建与许可证，不能改为运行时 CDN。升级时同步文件与版本记录。
+- 书籍章节在禁用脚本的 iframe 中展示；注入 CSP 必须发生在渲染前，只允许包内 blob/data 资源，不能允许书籍联网或执行脚本。
+- EPUB 的 CFI 阅读位置、字号和配色仅保存在当前浏览器的 `epub.*` 键，不写入漫画页码书签。
+
+## Wails v3
+- Wails3 代码、编译与开发配置统一在 `dev` 维护，不再使用独立 `wails3` 分支。
 - Wails 修改不要影响非 Wails 环境；优先用 build tag、Wails-only API 或前端运行时判断隔离。
-- Wails 开发启动用 `bun run wails:dev`；裸 `wails dev` 会执行 embed 目录静态分析，当前会因 `tailscale.com/tsnet` 类型加载问题失败，等价错误为 `package "tailscale.com/tsnet" without types`。
-- Wails 命令必须带 `-skipembedcreate`；项目没有依赖 Wails 自动创建 embed 目录。
-- Wails 入口使用 `wails && !js && !bindings` build tag；绑定生成阶段使用 `main_wails_bindings.go` 的空入口，避免临时 `wailsbindings` 二进制启动 Web 服务、扫描书库或启动 Tailscale。
+- Wails 开发启动用 `bun run wails:dev`；Makefile 会按 `go.mod` 中的 Wails3 版本安装并优先使用 `GOBIN/wails3`。
+- Wails 本机构建用 `bun run wails:build`；Wails3 dev 配置在 `wails3.yml`，构建入口在 `Taskfile.yml`。
+- Wails 入口使用 `wails && !js && !bindings` build tag；绑定生成如需恢复，继续避免临时二进制启动 Web 服务、扫描书库或启动 Tailscale。
 - Wails 构建使用 `tools/tailscale_plugin/ts_fake.go` 空实现，当前不支持内置 Tailscale；设置页不要在 Wails 环境暴露远程访问/Tailscale 配置。
-- `wails.json` 中保留 `build:tags: wails`，前端构建走 `bun run build` / `bun run dev`，监听目录使用 `routers`。
+- Wails3 页面资源由内嵌 Echo 服务提供；仅原生 WebView 插入 `/wails/runtime.js`，普通浏览器不加载 Wails 运行时。
+- 独立 tray 使用 `tools/system_tray/` 的 `fyne.io/systray`，以 `!wails` 标签隔离，不得引入 Wails/GTK/WebKit 依赖；desktop 使用 `tools/wails_systray/` 的 Wails3 托盘与面板，仅在 `wails` 标签下编译。面板仅由 Wails 资产处理器提供，通过 Go 绑定调用本进程，不在公共 Echo 上注册控制接口。
+- Linux 独立 tray 以 `CGO_ENABLED=0` 交叉编译；仅 desktop 依赖 CGO、GTK4、WebKitGTK 6.0，发布镜像见 `docs/docker/Dockerfile.wails-linux`。托盘需要 StatusNotifier/AppIndicator 宿主；无宿主时 desktop 正常关闭退出，tray 明确报错退出。
+- macOS 最低版本为 13；两个入口复用 `docs/macos-app.mk` 打包，自签后生成 DMG。构建图标源为已跟踪的 `assets/appicon.png`。
+- Wails3 开发版当前特性：桌面端保留托盘、外部链接、全屏和删除源文件；Android arm64 APK 可构建运行，主页支持整页下拉刷新、书卡长按删除、文件图标与桌面一致。
+- Android Wails 暂不支持目录选择器；上传与设置页写操作当前等待 Wails3 正式能力补齐，不再用 fetch 拦截、HTML 重放或原生写文件桥做临时兼容。
+- Android APK 构建用 `make wails-android-apk`；Go shared library 必须带 `production,wails,android` tags，少 `wails` 会编进 CLI 入口并导致首屏 `wails.localhost` 连接失败。
 
 ## 常用命令
 - 模板生成：`templ fmt ./templ && templ generate`
@@ -55,7 +69,7 @@ ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片�
 - 本地运行：`templ fmt ./templ && templ generate && go run main.go`
 - Wails 开发：`bun run wails:dev`
 - 热重载：`air -c .air.toml`；频繁改动导致失败时可杀掉 air 后重试，或改用 `go run main.go`。
-- 测试：`GOCACHE="${TMPDIR%/}/cvgo-go-build-cache" go test ./...`
+- 测试：`GOCACHE="${TMPDIR%/}/cvgo-go-build-cache" go test ./...`；desktop 另执行 `go test -tags wails ./...`。
 - 移动端构建由主仓库脚本触发：`scripts/build_android_go.sh`、`scripts/build_ios_go.sh`、`scripts/build_macos_go.sh`，实际对 `cvgo/cmd/mobile` 执行 `gomobile bind`。
 
 ## 插件与 TUI

@@ -1,0 +1,81 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Comigo</title>
+<style>
+/* 固定窗口由纵向布局分配剩余空间，仅正文在内容超长时滚动。 */
+:root{color-scheme:light dark;--bg:#f4f6f9;--card:#fff;--ink:#202a37;--muted:#6c7788;--line:#dce2eb;--accent:#4265d5}*{box-sizing:border-box}html,body{height:100%;overflow:hidden}body{display:flex;flex-direction:column;margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,sans-serif}header{padding:16px 20px 8px;display:flex;align-items:center;justify-content:space-between}h1{font-size:19px;margin:0}header small{color:var(--muted)}header,nav,#notice{flex-shrink:0}.header-actions{display:flex;align-items:center;gap:12px}#close{display:grid;place-items:center;width:32px;height:32px;padding:0}nav{display:flex;margin:0 16px 12px;padding:4px;border-radius:12px;background:var(--line);gap:3px}button,select{font:inherit;color:inherit;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:7px 10px;cursor:pointer}button:disabled{opacity:.45;cursor:default}button:focus-visible,select:focus-visible{outline:2px solid var(--accent)}nav button{flex:1;border:0;background:transparent;padding:7px 3px}nav button[aria-selected=true]{background:var(--card);color:var(--accent);box-shadow:0 1px 4px #0001}main{padding:0 16px 16px;flex:1;min-height:0;overflow:auto}section[hidden]{display:none}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}section>.card:last-child{margin-bottom:0}h2{font-size:13px;color:var(--muted);margin:0 0 10px;font-weight:600}.qr{display:block;width:190px;height:190px;margin:auto;background:white;border-radius:8px}.address{overflow-wrap:anywhere;color:var(--accent);margin:12px 0}.actions{display:flex;gap:8px;flex-wrap:wrap}.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.row{display:flex;justify-content:space-between;gap:12px;padding:5px 0}.row span:first-child{color:var(--muted)}.row span:last-child{overflow-wrap:anywhere;text-align:right}.rate-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.rate-grid strong{font-size:22px;color:var(--accent);font-variant-numeric:tabular-nums}.note{font-size:12px;color:var(--muted);margin:8px 0 0}.status{color:#28936b}.full{width:100%;margin:8px 0}#notice{font-size:12px;color:var(--muted);padding:0 20px;min-height:18px;margin:0}label{display:flex;gap:9px;align-items:center}input[type=checkbox]{accent-color:var(--accent)}#libraries{display:grid;gap:6px}#libraries button{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+@media(prefers-color-scheme:dark){:root{--bg:#171b24;--card:#222836;--ink:#e4e9f2;--muted:#9ca9bc;--line:#343e50;--accent:#8da9ff}.primary{color:#17213a}}
+</style></head><body>
+<header><h1>Comigo</h1><div class="header-actions"><small id="version"></small><button id="close" type="button" aria-label="关闭面板" title="关闭面板"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div></header>
+<nav role="tablist"><button role="tab" data-page="home" data-t="nav_home" aria-selected="true">概览</button><button role="tab" data-page="status" data-t="nav_status">状态</button><button role="tab" data-page="service" data-t="nav_service">服务</button><button role="tab" data-page="settings" data-t="nav_config">设置</button></nav>
+<p id="notice" role="status" aria-live="polite"></p><main>
+<section id="home"><div class="card"><h2 data-t="qr">二维码</h2><img id="qr" class="qr" alt="QR"><select id="addresses" class="full" aria-label="阅读地址"></select><div class="actions"><button class="primary" data-action="reader" data-t="show_reader">打开阅读器</button><button data-action="browser" data-t="open">打开浏览器</button><button data-action="copy" data-t="copy">复制阅读地址</button></div></div><div class="card"><div class="row"><span data-t="server_status">服务状态</span><span class="status" data-t="running">运行中</span></div><div class="row"><span data-t="books">书籍</span><span data-value="books"></span></div></div></section>
+<section id="status" hidden><div class="rate-grid"><div class="card"><h2>↑ <span data-t="sent">发送</span></h2><strong id="sentRate"></strong></div><div class="card"><h2>↓ <span data-t="received">接收</span></h2><strong id="receivedRate"></strong></div></div><div class="card"><h2 data-t="total">本次运行总流量</h2><div class="row"><span data-t="sent">发送</span><span id="sentTotal"></span></div><div class="row"><span data-t="received">接收</span><span id="receivedTotal"></span></div><p class="note" data-t="traffic_note"></p></div><div class="card"><div class="row"><span data-t="books">书籍</span><span data-value="books"></span></div><div class="row"><span data-t="online_users">在线用户</span><span data-value="users"></span></div><div class="row"><span data-t="connections">连接数</span><span data-value="connections"></span></div></div></section>
+<section id="service" hidden><div class="card"><label><input id="sharing" type="checkbox"><span data-t="external_access">局域网共享</span></label><p class="note" data-t="external_note"></p><div class="row"><span data-t="listen_address">绑定地址</span><span data-value="listenAddress"></span></div></div><div class="card actions"><button data-action="rescan" data-t="rescan">重新扫描书库</button><button id="refresh" data-t="refresh">刷新</button></div><div class="card actions"><button data-action="github" data-t="github">GitHub 项目</button><button data-action="website" data-t="website">官网</button></div></section>
+<section id="settings" hidden><div class="card"><label><span data-t="language">语言</span><select id="language"><option value="auto" data-t="auto">自动</option><option value="zh-CN">简体中文</option><option value="en-US">English</option><option value="ja-JP">日本語</option></select></label></div><div class="card"><h2 data-t="config_file">配置文件</h2><p id="configPath" class="address"></p><p id="configMissing" class="note" data-t="config_missing" hidden></p><div class="actions"><button data-action="settings" data-t="manage_config">管理配置</button><button data-action="config" data-t="config_directory">打开配置目录</button></div></div><div class="card"><h2 data-t="libraries">书库</h2><div id="libraries"></div></div></section>
+</main>
+<script type="module">
+import {Call,Window} from '/wails/runtime.js';
+const $=id=>document.getElementById(id);
+const call=(name,...args)=>Call.ByName('github.com/yumenaka/comigo/tools/wails_systray.PanelService.'+name,...args);
+let state, selected='', busy=false, loading=false;
+// 轮询只更新变化的文字，避免重建可访问节点或打断正在操作的下拉菜单。
+function setText(el,value){const text=String(value);if(el.textContent!==text)el.textContent=text}
+// 只使用文本节点展示配置与状态，不把书库路径作为 HTML 执行。
+function render(next){
+ state=next;selected=next.readingURL;
+ document.documentElement.lang=next.language==='auto'?navigator.language:next.language;
+ for(const el of document.querySelectorAll('[data-t]'))setText(el,next.labels[el.dataset.t]);
+ for(const el of document.querySelectorAll('[data-value]'))setText(el,next[el.dataset.value]);
+ setText($('version'),next.version);
+ $('close').setAttribute('aria-label',next.labels.close);
+ $('close').title=next.labels.close;
+ if($('qr').src!==next.qr)$('qr').src=next.qr;
+ $('qr').alt=next.labels.qr;
+ $('addresses').setAttribute('aria-label',next.labels.reading);
+ if(JSON.stringify(Array.from($('addresses').options,o=>o.value))!==JSON.stringify(next.urls))$('addresses').replaceChildren(...next.urls.map(u=>new Option(u,u)));
+ if($('addresses').value!==selected)$('addresses').value=selected;
+ $('sharing').checked=next.externalAccess;
+ $('sharing').disabled=busy||next.readOnly;
+ if($('language').value!==next.language)$('language').value=next.language;
+ $('language').disabled=busy||next.readOnly;
+ document.querySelector('[data-action=rescan]').disabled=busy||next.readOnly;
+ setText($('configPath'),next.config.path||next.labels.config_memory);
+ $('configMissing').hidden=!next.config.path||next.config.exists;
+ const libraries=$('libraries');
+ if(JSON.stringify(Array.from(libraries.children,e=>e.textContent))!==JSON.stringify(next.stores)){
+  libraries.replaceChildren(...next.stores.map((path,index)=>{const b=document.createElement('button');b.textContent=path;b.title=path;b.onclick=()=>act('store',index);return b}));
+ }
+ setText($('sentRate'),bytes(next.traffic.sendBytesPerSecond)+'/s');
+ setText($('receivedRate'),bytes(next.traffic.receiveBytesPerSecond)+'/s');
+ setText($('sentTotal'),bytes(next.traffic.sentBytes));
+ setText($('receivedTotal'),bytes(next.traffic.receivedBytes));
+}
+// 统一格式化本次进程流量，速度来自 Go 的滚动窗口。
+function bytes(n){const units=['B','KiB','MiB','GiB'];let i=0;while(n>=1024&&i<3){n/=1024;i++}return n.toFixed(i?1:0)+' '+units[i]}
+async function refresh(){if(loading||busy)return;loading=true;try{render(await call('Snapshot',selected))}catch(e){$('notice').textContent=String(e)}finally{loading=false}}
+// 同时只执行一个修改；失败时重新读取实际状态，避免开关停留在假状态。
+async function perform(name,...args){if(busy)return;busy=true;let done=false;try{await call(name,...args);done=true}catch(e){$('notice').textContent=String(e)}finally{busy=false;await refresh();if(done)$('notice').textContent=state.labels.done}}
+function act(action,index=0){return perform('Action',action,action==='copy'?state.urls.indexOf(selected):index)}
+for(const b of document.querySelectorAll('[data-page]'))b.onclick=()=>{for(const button of document.querySelectorAll('[data-page]'))button.setAttribute('aria-selected',String(button===b));for(const section of document.querySelectorAll('main>section'))section.hidden=section.id!==b.dataset.page;refresh()};
+for(const b of document.querySelectorAll('[data-action]'))b.onclick=()=>act(b.dataset.action);
+$('sharing').onchange=()=>perform('SetSharing',$('sharing').checked);
+$('language').onchange=()=>perform('SetLanguage',$('language').value);
+$('addresses').onchange=()=>{selected=$('addresses').value;refresh()};
+$('refresh').onclick=refresh;
+// 关闭按钮仅隐藏当前托盘面板，阅读器和后台服务继续运行。
+$('close').onclick=()=>Window.Hide();
+// 按概览实际内容收紧窗口；翻译换行时重新测量，其他标签页沿用此高度。
+let panelHeight=0;
+function fitOverview(){
+ if($('home').hidden)return;
+ const main=document.querySelector('main');
+ const height=Math.ceil(main.offsetTop+$('home').getBoundingClientRect().height+parseFloat(getComputedStyle(main).paddingBottom));
+ if(height!==panelHeight){panelHeight=height;Window.SetSize(420,height)}
+}
+const panelLayout=new ResizeObserver(fitOverview);
+for(const el of [document.querySelector('header'),document.querySelector('nav'),$('notice'),$('home')])panelLayout.observe(el);
+// 隐藏面板不轮询，重新显示时立即读取状态。
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+setInterval(()=>{if(!document.hidden)refresh()},2000);
+refresh();
+</script></body></html>

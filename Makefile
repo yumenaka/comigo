@@ -80,21 +80,75 @@ endif
 export VERSION
 
 ## ============================================================================
-## Wails 桌面版
+## Wails
 ## ============================================================================
 
-.PHONY: wails-prepare wails-dev wails-build
+WAILS3_VERSION ?= $(shell awk '/github.com\/wailsapp\/wails\/v3/ {print $$2; exit}' go.mod)
+# 在跨平台规则取消导出 GOBIN 前固定路径，确保安装与执行使用同一目录。
+ifndef WAILS3_GOBIN
+WAILS3_GOBIN := $(shell go env GOBIN)
+endif
+ifeq ($(WAILS3_GOBIN),)
+WAILS3_GOBIN := $(shell go env GOPATH)/bin
+endif
+WAILS3 := $(WAILS3_GOBIN)/wails3
+WAILS3_STAMP := $(WAILS3).version
+WAILS3_ENV := PATH="$(WAILS3_GOBIN):$(PATH)"
 
-wails-prepare:
+.PHONY: wails3-tool wails-prepare wails-dev wails-build wails-android-icons wails-android-apk
+
+wails3-tool:
+	@if [ ! -x "$(WAILS3)" ] || [ "$$(cat "$(WAILS3_STAMP)" 2>/dev/null)" != "$(WAILS3_VERSION)" ]; then \
+		echo "==> install Wails3 CLI $(WAILS3_VERSION)"; \
+		GOBIN="$(WAILS3_GOBIN)" go install github.com/wailsapp/wails/v3/cmd/wails3@$(WAILS3_VERSION) && \
+		printf '%s\n' "$(WAILS3_VERSION)" > "$(WAILS3_STAMP)"; \
+	fi
+
+wails-prepare: wails3-tool
 	@mkdir -p build/windows bin
-	@cp assets/icon.png build/appicon.png
+	@cp assets/appicon.png build/appicon.png
 	@rm -f build/windows/icon.ico
 
 wails-dev: wails-prepare
-	@wails dev -m -nosyncgomod -skipembedcreate
+	@$(WAILS3_ENV) "$(WAILS3)" dev -config ./wails3.yml
 
-# Wails release 输出统一交给跨平台发布矩阵命名，避免和 tray 产物冲突。
-wails-build: desktop-current
+wails-build: wails-prepare
+	@$(WAILS3_ENV) "$(WAILS3)" build -tags wails
+
+# Android 工程由 Wails 生成，生成后把启动图标同步成 Comigo 图标。
+wails-android-icons:
+	@test -d build/android/app/src/main/res || { echo "missing build/android; run wails3 android project first"; exit 1; }
+	@echo "==> sync Android launcher icons from assets/appicon.png"
+	@for item in "mipmap-mdpi:48" "mipmap-hdpi:72" "mipmap-xhdpi:96" "mipmap-xxhdpi:144" "mipmap-xxxhdpi:192"; do \
+		dir="build/android/app/src/main/res/$${item%%:*}"; \
+		size="$${item##*:}"; \
+		mkdir -p "$$dir"; \
+		sips -z "$$size" "$$size" assets/appicon.png --out "$$dir/ic_launcher.png" >/dev/null; \
+		cp "$$dir/ic_launcher.png" "$$dir/ic_launcher_round.png"; \
+	done
+
+# Android APK 走 Wails 入口；少了 wails tag 会编进 CLI main，WebView 首屏会连接 wails.localhost 失败。
+wails-android-apk: wails3-tool
+	@test -f build/android/overlay.json || { echo "missing build/android/overlay.json; run wails3 android project first"; exit 1; }
+	@bun run build
+	@SDK_ROOT="$${ANDROID_HOME:-$${ANDROID_SDK_ROOT:-$$HOME/Library/Android/sdk}}"; \
+	NDK_ROOT="$${ANDROID_NDK_HOME:-$$(ls -d "$$SDK_ROOT"/ndk/* 2>/dev/null | sort -V | tail -1)}"; \
+	if [ -z "$$NDK_ROOT" ] || [ ! -d "$$NDK_ROOT" ]; then echo "Android NDK not found"; exit 1; fi; \
+	case "$$(uname -s)" in Darwin) HOST_TAG="darwin-x86_64" ;; Linux) HOST_TAG="linux-x86_64" ;; *) echo "Unsupported host OS"; exit 1 ;; esac; \
+	TOOLCHAIN="$$NDK_ROOT/toolchains/llvm/prebuilt/$$HOST_TAG"; \
+	export CC="$$TOOLCHAIN/bin/aarch64-linux-android21-clang"; \
+	export CXX="$$TOOLCHAIN/bin/aarch64-linux-android21-clang++"; \
+	export CGO_ENABLED=1 GOOS=android GOARCH=arm64; \
+	mkdir -p build/android/app/src/main/jniLibs/arm64-v8a; \
+	go build -buildmode=c-shared -overlay build/android/overlay.json -tags production,wails,android -trimpath -buildvcs=false -ldflags="-w -s" -o build/android/app/src/main/jniLibs/arm64-v8a/libwails.so
+	@$(MAKE) wails-android-icons
+	@cd build/android && chmod +x ./gradlew && \
+	if command -v /usr/libexec/java_home >/dev/null 2>&1; then JAVA_HOME_21="$$(/usr/libexec/java_home -v 21 2>/dev/null || true)"; if [ -n "$$JAVA_HOME_21" ]; then export JAVA_HOME="$$JAVA_HOME_21"; fi; fi; \
+	./gradlew assembleRelease
+	@mkdir -p bin
+	@cp build/android/app/build/outputs/apk/release/app-release.apk bin/Comigo.apk
+	@echo "Release APK created: bin/Comigo.apk"
+	@bun run dev
 
 ## ============================================================================
 ## 引入子 Makefile

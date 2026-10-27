@@ -37,7 +37,7 @@
 ```bash
 omarchy plugin validate comigo-omarchy
 go test ./cmd ./routers/... ./templ/pages/settings ./tools/autostart
-go test -tags 'wails webkit2_41' ./tools/wails_systray
+go test -tags wails ./tools/wails_systray
 ```
 
 修改 templ 后生成模板，修改前端或 locale 后构建资源。运行联调使用临时配置、书库及端口，结束时清理测试进程和测试服务。验证真实密码登录、错误密码、令牌隔离、只读 API 无副作用、公开元数据、CLI／桌面／托盘运行及自启。

@@ -98,6 +98,7 @@ templ MainArea(c echo.Context) {
 					</a>
 				</div>
 			}
+			<a href={ templ.SafeURL(config.PrefixPath("/epub")) } class="mt-4 underline" x-text="i18next.t('epub_reader')">EPUB 阅读</a>
 			<div id="ReaderStatus" class="w-full mt-4 text-sm text-center opacity-80"></div>
 		</section>
 		<!-- 阅读区。reader.js 会根据 readMode 在卷轴容器和翻页容器之间切换。 -->

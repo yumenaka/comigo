@@ -9,7 +9,7 @@ func UseTrayConfigProfile() {
 	runtimeConfigProfile = "tray"
 }
 
-// UseDesktopConfigProfile 标记当前进程正在 Wails v2 桌面环境内运行。
+// UseDesktopConfigProfile 标记当前进程正在 Wails 桌面环境内运行。
 func UseDesktopConfigProfile() {
 	runtimeConfigProfile = "desktop"
 }

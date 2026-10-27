@@ -3,6 +3,9 @@
 MAC_APP_NAME ?= Comigo
 MAC_DISPLAY_NAME ?= $(MAC_APP_NAME)
 BUNDLE_ID ?= xyz.comigo
+MAC_PACKAGE ?= ./cmd/comigo
+MAC_TAGS ?= production
+MAC_AGENT ?= true
 
 # 最终 .app 输出目录
 BIN_DIR     := bin
@@ -16,14 +19,13 @@ DMG_FILE    := $(BIN_DIR)/$(MAC_APP_NAME)_$(VERSION).dmg
 ASSETS_DIR  := assets
 INFO_PLIST  := $(ASSETS_DIR)/Info.plist
 INFO_PLIST_TMP := $(BUILD_DIR)/Info.plist
-ICON_PNG    := $(ASSETS_DIR)/icon.png
+ICON_PNG    := $(ASSETS_DIR)/appicon.png
 ICON_ICNSET := $(BUILD_DIR)/AppIcon.iconset
 APP_ICON    := $(ASSETS_DIR)/AppIcon.icns
 # 网站和 Windows 图标
 FAVICON_ICO := $(ASSETS_DIR)/images/favicon.ico
 FAVICON_PNG := $(ASSETS_DIR)/images/favicon.png
 WINDOWS_ICO := icon.ico
-SYSTRAY_ICO := tools/system_tray/icon.ico
 
 # 从 config/version.go 提取版本号（不去掉 v 前缀）
 # 注意：如果主 Makefile 已经定义了 VERSION，这里不会覆盖
@@ -35,7 +37,7 @@ ifndef VERSION
   endif
 endif
 
-.PHONY: macos-app macos-dmg dmg clean-app app universal icon version favicon windows-icon systray-icon all-icons FORCE
+.PHONY: macos-app macos-dmg dmg clean-app app universal icon version favicon windows-icon all-icons FORCE
 FORCE:
 
 # macOS app 打包的默认目标
@@ -105,25 +107,14 @@ $(WINDOWS_ICO): FORCE $(ICON_PNG)
 	@sips -s format ico -z 256 256 $(ICON_PNG) --out $(WINDOWS_ICO) > /dev/null 2>&1
 	@echo "==> 已生成 $(WINDOWS_ICO)"
 
-# 生成系统托盘图标 tools/system_tray/icon.ico（强制重新生成）
-$(SYSTRAY_ICO): FORCE $(ICON_PNG)
-	@echo "==> 生成系统托盘图标 $(SYSTRAY_ICO) (256x256)..."
-	@rm -f $(SYSTRAY_ICO)
-	@mkdir -p tools/system_tray
-	@sips -s format ico -z 256 256 $(ICON_PNG) --out $(SYSTRAY_ICO) > /dev/null 2>&1
-	@echo "==> 已生成 $(SYSTRAY_ICO)"
-
-# 生成所有图标（包括网站、Windows 和系统托盘图标）
-all-icons: $(APP_ICON) $(FAVICON_ICO) $(FAVICON_PNG) $(WINDOWS_ICO) $(SYSTRAY_ICO)
+# 托盘复用网站 PNG，不再维护另一份图标。
+all-icons: $(APP_ICON) $(FAVICON_ICO) $(FAVICON_PNG) $(WINDOWS_ICO)
 
 # 仅生成网站 favicon
 favicon: $(FAVICON_ICO) $(FAVICON_PNG)
 
 # 仅生成 Windows 图标
 windows-icon: $(WINDOWS_ICO)
-
-# 仅生成系统托盘图标
-systray-icon: $(SYSTRAY_ICO)
 
 # 从 config/version.go 提取版本号并更新 Info.plist
 $(INFO_PLIST_TMP): $(INFO_PLIST) $(VERSION_GO)
@@ -136,6 +127,8 @@ $(INFO_PLIST_TMP): $(INFO_PLIST) $(VERSION_GO)
 	@plutil -replace CFBundleName -string "$(MAC_DISPLAY_NAME)" $(INFO_PLIST_TMP)
 	@plutil -replace CFBundleDisplayName -string "$(MAC_DISPLAY_NAME)" $(INFO_PLIST_TMP)
 	@plutil -replace CFBundleIdentifier -string "$(BUNDLE_ID)" $(INFO_PLIST_TMP)
+	@plutil -replace LSUIElement -bool $(MAC_AGENT) $(INFO_PLIST_TMP)
+	@plutil -replace LSMinimumSystemVersion -string "13.0" $(INFO_PLIST_TMP)
 	@plutil -replace CFBundleExecutable -string "$(MAC_APP_NAME)" $(INFO_PLIST_TMP)
 	@plutil -replace CFBundleVersion -string "$(MAC_VERSION)" $(INFO_PLIST_TMP)
 	@plutil -replace CFBundleShortVersionString -string "$(MAC_VERSION)" $(INFO_PLIST_TMP)
@@ -147,13 +140,13 @@ version: $(INFO_PLIST_TMP)
 $(BUILD_DIR)/$(MAC_APP_NAME)_amd64: $(VERSION_GO)
 	@echo "==> 构建 amd64 版本..."
 	@mkdir -p $(BUILD_DIR)
-	@GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=$(VERSION)'" -o $@ ./cmd/comigo
+	@GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 MACOSX_DEPLOYMENT_TARGET=13.0 go build -tags $(MAC_TAGS) -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=$(VERSION)'" -o $@ $(MAC_PACKAGE)
 
 # 构建 arm64 版本（使用 CGO 和版本号）
 $(BUILD_DIR)/$(MAC_APP_NAME)_arm64: $(VERSION_GO)
 	@echo "==> 构建 arm64 版本..."
 	@mkdir -p $(BUILD_DIR)
-	@GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=$(VERSION)'" -o $@ ./cmd/comigo
+	@GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 MACOSX_DEPLOYMENT_TARGET=13.0 go build -tags $(MAC_TAGS) -trimpath -ldflags "-s -w -X 'github.com/yumenaka/comigo/config.version=$(VERSION)'" -o $@ $(MAC_PACKAGE)
 
 # 用 lipo 合成 universal binary
 $(BUILD_DIR)/$(MAC_APP_NAME): $(BUILD_DIR)/$(MAC_APP_NAME)_amd64 $(BUILD_DIR)/$(MAC_APP_NAME)_arm64
@@ -179,6 +172,8 @@ app: $(BUILD_DIR)/$(MAC_APP_NAME) $(INFO_PLIST_TMP) $(APP_ICON)
 	@echo "==> 拷贝 App 图标"
 	@cp "$(APP_ICON)" "$(APP_DIR)/Contents/Resources/AppIcon.icns"
 
+	@codesign --force --deep --sign - "$(APP_DIR)"
+	@codesign --verify --deep --strict "$(APP_DIR)"
 	@echo "==> 已生成 $(APP_DIR)"
 	@echo "==> 版本号: $(VERSION)"
 	@echo "==> 清理中间文件..."

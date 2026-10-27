@@ -320,6 +320,14 @@ func generateReadURL(book model.BookInfo, lastReadPage int) string {
 		}
 		return fmt.Sprintf("%q", shelfURL)
 	}
+	// EPUB 使用独立的文本排版页面，不受漫画阅读模式影响。
+	if book.Type == model.TypeEpub {
+		epubURL := config.PrefixPath("/epub/" + book.BookID)
+		if book.RemoteStoreKey != "" {
+			epubURL += "?remote_store=" + url.QueryEscape(book.RemoteStoreKey)
+		}
+		return fmt.Sprintf("%q", epubURL)
+	}
 	// 如果是视频、音频，跳转到播放器页面
 	if book.Type == model.TypeVideo || book.Type == model.TypeAudio {
 		playerURL := config.PrefixPath("/player/" + book.BookID)

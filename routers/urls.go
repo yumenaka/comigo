@@ -15,6 +15,7 @@ import (
 	"github.com/yumenaka/comigo/routers/reverse_proxy"
 	"github.com/yumenaka/comigo/routers/upload_api"
 	"github.com/yumenaka/comigo/routers/websocket"
+	"github.com/yumenaka/comigo/templ/pages/epub"
 	"github.com/yumenaka/comigo/templ/pages/flip"
 	"github.com/yumenaka/comigo/templ/pages/login_page"
 	"github.com/yumenaka/comigo/templ/pages/manual"
@@ -128,6 +129,9 @@ func bindProtectedView(group *echo.Group) {
 	group.GET("/upload", upload_page.PageHandler)
 	// 本地压缩包阅读页面（文件不上传服务器）
 	group.GET("/reader", reader.PageHandler)
+	// EPUB 排版独立于漫画阅读，本地文件仅在浏览器打开。
+	group.GET("/epub", epub.PageHandler)
+	group.GET("/epub/:id", epub.PageHandler)
 	// 设置页面
 	group.GET("/settings", settings.PageHandler)
 	// OPDS 1.2 目录

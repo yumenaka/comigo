@@ -1,29 +1,24 @@
 //go:build wails && !js && !bindings
 
-//go:generate go install -v github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-//go:generate goversioninfo -icon=build/windows/icon.ico -manifest=goversioninfo.exe.manifest
+//go:generate go tool goversioninfo -icon=build/windows/icon.ico -manifest=goversioninfo.exe.manifest
 
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
+	"sync"
 
-	"github.com/wailsapp/wails/v2"
-	"github.com/wailsapp/wails/v2/pkg/options"
-	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
 	"github.com/yumenaka/comigo/cmd"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/routers"
 	"github.com/yumenaka/comigo/tools/wails_systray"
 )
 
-// main 是 Wails 桌面壳入口；普通 CLI 入口保留在 main.go，减少合并冲突。
+// main 保持 desktop 配置与管理命令行为，窗口和托盘共用 Wails 原生事件循环。
 func main() {
 	config.UseDesktopConfigProfile()
 	if handled, err := cmd.RunProcessCommand(os.Args[1:], os.Stdout); handled {
@@ -33,97 +28,69 @@ func main() {
 		}
 		return
 	}
-	for _, arg := range os.Args {
+	for _, arg := range os.Args[1:] {
 		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" {
-			// 仅打印版本或帮助信息时，不启动 WebView。
 			cmd.Execute()
 			return
 		}
 	}
-
 	cmd.Execute()
+	if err := ensureWailsAndroidImportStore(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	cmd.AddStoreUrls(cmd.Args)
 	if err := cmd.LoadMetadata(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	// 先确认监听成功；WebView 初始化期间的 Quit 可能尚无法退出窗口循环。
 	if err := routers.StartWebServer(); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	defer routers.StopWebServer()
-	tray := wails_systray.Start()
-	defer tray.Stop()
-	// systemd 退出信号必须真正退出，不能被托盘的关闭窗口隐藏逻辑截住。
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
-	defer signal.Stop(signals)
-
-	app := NewApp()
-	err := wails.Run(&options.App{
-		Title:  wailsWindowTitle(),
-		Width:  1024,
-		Height: 768,
-		AssetServer: &assetserver.Options{
-			Handler: http.HandlerFunc(serveWailsAsset),
-		},
-		BackgroundColour:         &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		EnableDefaultContextMenu: false,
-		OnStartup: func(ctx context.Context) {
-			app.startup(ctx)
-			routers.SetWailsContext(ctx)
-			tray.SetContext(ctx)
-			go func() {
-				select {
-				case <-signals:
-					tray.Quit()
-				case <-ctx.Done():
-				}
-			}()
-			startComigoForWails(ctx)
-		},
-		OnShutdown: func(context.Context) {
-			if err := routers.StopWebServer(); err != nil {
-				_, _ = fmt.Fprintln(os.Stderr, err)
-			}
-			tray.Stop()
-		},
-		OnBeforeClose: func(ctx context.Context) bool {
-			return tray.HandleBeforeClose(ctx)
-		},
-		Bind: []interface{}{
-			app,
-		},
+	defer cmd.Shutdown()
+	// 资源始终走内嵌 Echo，不能被开发服务器环境变量替换。
+	_ = os.Unsetenv("FRONTEND_DEVSERVER_URL")
+	panel := &wails_systray.PanelService{}
+	app := application.New(application.Options{
+		Name: "Comigo", Description: "Comigo desktop reader",
+		Services:   []application.Service{application.NewService(NewApp()), application.NewService(panel)},
+		Assets:     application.AssetOptions{Handler: http.HandlerFunc(serveWailsAsset), DisableLogging: true},
+		OnShutdown: cmd.Shutdown,
 	})
-	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
+	window := app.Window.NewWithOptions(application.WebviewWindowOptions{
+		Name: "main", Title: wailsWindowTitle(), Width: 1024, Height: 768, URL: config.PrefixPath("/"),
+		BackgroundColour: application.NewRGB(27, 38, 54), DefaultContextMenuDisabled: true,
+	})
+	routers.SetWailsRuntime(app, window)
+	tray := wails_systray.New(app, window)
+	wails_systray.AttachPanel(tray, panel)
+	var scanOnce sync.Once
+	window.OnWindowEvent(events.Common.WindowRuntimeReady, func(*application.WindowEvent) { scanOnce.Do(func() { go finishWailsStartupScan(window) }) })
+	cmd.LoadUserPlugins()
+	config.StartOrStopAutoRescan()
+	if err := app.Run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
-// wailsWindowTitle 生成桌面窗口标题，保留完整版本便于用户确认当前构建。
-func wailsWindowTitle() string {
-	return "Comigo " + config.GetVersion()
-}
+// wailsWindowTitle 保留版本号，便于确认当前运行的构建。
+func wailsWindowTitle() string { return "Comigo " + config.GetVersion() }
 
-// startComigoForWails 在桌面上下文就绪后加载书库；监听已在创建窗口前确认。
-func startComigoForWails(ctx context.Context) {
-	routers.StartTailscale()
-	cmd.LoadUserPlugins()
-	go finishWailsStartupScan(ctx)
-	config.StartOrStopAutoRescan()
-}
-
-// finishWailsStartupScan 后台刷新书库，避免 Wails 首页等扫描完成才出现。
-func finishWailsStartupScan(ctx context.Context) {
+// finishWailsStartupScan 后台扫描，主窗口无需等待整个书库读完。
+func finishWailsStartupScan(window application.Window) {
 	cmd.ScanStore()
 	cmd.SaveMetadata()
-	wailsruntime.WindowReload(ctx)
+	window.Reload()
 }
 
-// serveWailsAsset 在 Web 服务就绪后把 Wails 的资源请求转给 Echo。
+// serveWailsAsset 由 Wails 注入运行时，业务页面交给现有 Echo 路由。
 func serveWailsAsset(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/panel.html" {
+		wails_systray.ServePanel(w, r)
+		return
+	}
 	if config.Server == nil || config.Server.Handler == nil {
 		http.NotFound(w, r)
 		return

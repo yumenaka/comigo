@@ -40,6 +40,9 @@ main
 *.DS_Store
 *comigo.yaml
 *comigo
+!/cmd/comigo/
+/cmd/comigo/*
+!/cmd/comigo/*.go
 *comigo.exe
 *comigo.db
 *.local

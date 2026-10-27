@@ -1,12 +1,12 @@
 # 使用: air -c .air.wails.toml
-# 这个配置只负责拉起 Wails CLI；不要用 go build -tags wails 直接启动桌面壳。
+# Wails3 自带热重载；日常开发优先用 bun run wails:dev。
 
 root = "."
 tmp_dir = "test/.temp-wails"
 
 [build]
 cmd = "make wails-prepare"
-full_bin = "wails dev -m -nosyncgomod -skipembedcreate"
+full_bin = "make wails-dev"
 post_cmd = []
 delay = 3000
 exclude_dir = [
@@ -19,13 +19,12 @@ exclude_dir = [
     "build",
     "testdata",
     "assets/dist",
-    "assets/wailsjs",
 ]
 exclude_regex = ["_test\\.go", "_templ\\.go", "tar.gz", "zip", "tgz", "exe", "app"]
 exclude_unchanged = false
 follow_symlink = false
 include_ext = ["go", "templ", "json"]
-include_file = ["Makefile", "package.json", "wails.json"]
+include_file = ["Makefile", "package.json", "wails3.yml", "Taskfile.yml"]
 kill_delay = "2s"
 log = "air.log"
 poll = false

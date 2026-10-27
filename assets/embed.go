@@ -48,6 +48,11 @@ func GetBasePathScript(wailsWebView bool) string {
 	wailsBuild, _ := json.Marshal(isWailsBuild())
 	wailsWebViewJSON, _ := json.Marshal(wailsWebView)
 	debugMode, _ := json.Marshal(config.GetCfg().Debug)
+	wailsRuntimeScript := ""
+	if wailsWebView {
+		// Wails3 runtime 负责通知窗口 ready；普通 Web 构建不插入这个脚本。
+		wailsRuntimeScript = "<script type=\"module\" src=\"/wails/runtime.js\"></script>\n"
+	}
 	return `<script>
 window.ComiGoBasePath = ` + string(basePath) + `;
 window.ComiGoWails = ` + string(wailsBuild) + `;
@@ -153,7 +158,7 @@ window.ComiGoToggleFullscreen = async function() {
   }
 };
 </script>
-`
+` + wailsRuntimeScript
 }
 
 // GetJavaScript 在页面中插入需要的js代码

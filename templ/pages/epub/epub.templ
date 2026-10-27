@@ -1,0 +1,44 @@
+package epub
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets"
+	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
+)
+
+// Page 使用独立控件和排版容器，不依赖漫画阅读的全局页码与翻页状态。
+templ Page(c echo.Context, source string) {
+	if c.QueryParam("static") != "" {
+		@templ.Raw("<style>" + assets.GetFileStr("static/css/epub_reader.css") + "</style>")
+	} else {
+		<link rel="stylesheet" href={ templ.SafeURL(config.PrefixPath("/assets/static/css/epub_reader.css")) }/>
+	}
+	<main id="EpubReader" data-source={ source }>
+		<header class="epub-toolbar">
+			<a href={ templ.SafeURL(config.PrefixPath("/")) } x-text="i18next.t('epub_shelf')">书架</a>
+			<h1 id="EpubTitle">{ locale.GetString("epub_reader") }</h1>
+			<label class="epub-open">
+				<span x-text="i18next.t('epub_open')">打开 EPUB</span>
+				<input id="EpubFile" type="file" accept=".epub,application/epub+zip"/>
+			</label>
+		</header>
+		<section id="EpubWelcome">
+			<h2 x-text="i18next.t('epub_reader')">EPUB 阅读</h2>
+			<p x-text="i18next.t('epub_local_hint')">选择或拖入 EPUB，文件仅在浏览器中读取，不会上传。</p>
+			<a href={ templ.SafeURL(config.PrefixPath("/reader")) } x-text="i18next.t('epub_comic_reader')">打开漫画阅读器</a>
+		</section>
+		<p id="EpubStatus" role="status" aria-live="polite"></p>
+		<section id="EpubControls" class="epub-toolbar" hidden>
+			<label><span x-text="i18next.t('epub_contents')">目录</span><select id="EpubTOC" :aria-label="i18next.t('epub_contents')"></select></label>
+			<label><span x-text="i18next.t('epub_font_size')">字号</span><select id="EpubFont" :aria-label="i18next.t('epub_font_size')"><option value="90">90%</option><option value="100">100%</option><option value="120">120%</option><option value="140">140%</option><option value="170">170%</option><option value="200">200%</option></select></label>
+			<label><span x-text="i18next.t('epub_theme')">配色</span><select id="EpubTheme" :aria-label="i18next.t('epub_theme')"><option value="light" x-text="i18next.t('epub_light')">明亮</option><option value="sepia" x-text="i18next.t('epub_sepia')">护眼</option><option value="dark" x-text="i18next.t('epub_dark')">夜间</option></select></label>
+		</section>
+		<div id="EpubViewport" hidden></div>
+		<footer id="EpubNavigation" class="epub-toolbar" hidden>
+			<button id="EpubPrevious" type="button" x-text="i18next.t('epub_previous')">上一页</button>
+			<output id="EpubPosition" aria-live="polite"></output>
+			<button id="EpubNext" type="button" x-text="i18next.t('epub_next')">下一页</button>
+		</footer>
+	</main>
+}

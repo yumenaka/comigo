@@ -27,10 +27,10 @@ func InitAllStore(cfg ConfigInterface) error {
 // AddBooksToStore 添加一组书到书库
 func AddBooksToStore(books []*model.Book) error {
 	for _, book := range books {
-		// 压缩包类型的书籍，页数小于最小图片数，跳过添加
+		// 漫画压缩包按图片数过滤；EPUB 可以是没有任何图片的纯文字书。
 		if book.Type == model.TypeZip || book.Type == model.TypeRar ||
 			book.Type == model.TypeCbz || book.Type == model.TypeCbr ||
-			book.Type == model.TypeTar || book.Type == model.TypeEpub {
+			book.Type == model.TypeTar {
 			if len(book.PageInfos) < config.GetCfg().MinImageNum {
 				continue
 			}

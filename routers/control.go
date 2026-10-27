@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"errors"
 	"net/http"
 	"sync/atomic"
 
@@ -63,7 +64,7 @@ func updateConfigHandler(c echo.Context) error {
 }
 
 // restartService 统一执行控制接口触发的重启并释放并发标志。
-func restartService(previous *config.Config) {
+func restartService(previous *config.Config) error {
 	defer restarting.Store(false)
 	if err := RestartWebServer(); err != nil {
 		logger.Errorf(locale.GetString("err_restart_web_server_failed"), err)
@@ -74,11 +75,31 @@ func restartService(previous *config.Config) {
 			}
 			if err := RestartWebServer(); err != nil {
 				logger.Errorf("%v", err)
-				return
+				return err
 			}
 			StartTailscale()
 		}
-		return
+		return err
 	}
 	StartTailscale()
+	return nil
+}
+
+// SetLANSharing 让原生面板直接复用配置事务和监听重启，不通过 HTTP 控制自己。
+func SetLANSharing(enabled bool) error {
+	if !restarting.CompareAndSwap(false, true) {
+		return errors.New(locale.GetString("err_update_config_failed"))
+	}
+	old, err := config.ChangeConfig(true, func(next *config.Config) error {
+		if next.ReadOnlyMode {
+			return errors.New(locale.GetString("err_config_locked"))
+		}
+		next.DisableLAN = !enabled
+		return nil
+	})
+	if err != nil {
+		restarting.Store(false)
+		return err
+	}
+	return restartService(&old)
 }

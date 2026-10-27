@@ -1,3 +1,5 @@
+//go:build !wails && !js
+
 //go:generate goversioninfo -icon=../../icon.ico -manifest=../comi/goversioninfo.exe.manifest -internal-name=comigo-tray.exe -original-name=comigo-tray.exe ../comi/versioninfo.json
 package main
 
@@ -105,7 +107,18 @@ func toggleTailscale() error {
 
 // setLanguage 设置语言
 func setLanguage(lang string) error {
-	return locale.SetLanguage(lang)
+	_, err := config.ChangeConfig(true, func(next *config.Config) error {
+		if next.ReadOnlyMode {
+			return fmt.Errorf("%s", locale.GetString("err_config_locked"))
+		}
+		next.Language = lang
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	locale.InitLanguageFromConfig(lang)
+	return nil
 }
 
 // getTailscaleEnabled 获取Tailscale是否启用

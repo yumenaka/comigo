@@ -77,3 +77,9 @@ func GetConnections(c echo.Context) error {
 	connections, users, devices := connectionSnapshot()
 	return c.JSON(http.StatusOK, echo.Map{"connections": connections, "onlineUsers": users, "onlineDevices": devices})
 }
+
+// ConnectionCounts 为原生面板提供统计，不暴露设备和用户详情。
+func ConnectionCounts() (connections, users, devices int) {
+	list, users, devices := connectionSnapshot()
+	return len(list), users, devices
+}

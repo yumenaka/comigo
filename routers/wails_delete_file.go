@@ -22,7 +22,7 @@ import (
 
 // DeleteBookFileForWails 把已在页面确认的书籍源文件移到系统垃圾桶。
 func DeleteBookFileForWails(bookID string) (bool, error) {
-	if wailsContext == nil || bookID == "" {
+	if wailsApp == nil || wailsWindow == nil || bookID == "" {
 		return false, errors.New(locale.GetString("wails_delete_file_not_allowed"))
 	}
 	book, err := model.IStore.GetBook(bookID)
@@ -45,6 +45,14 @@ func DeleteBookFileForWails(bookID string) (bool, error) {
 	// 删除后立刻保存，避免重启后从元数据里复活。
 	saveWailsBookMetadata()
 	return true, nil
+}
+
+// DeleteBookFileSuccessMessageForWails 返回与平台删除方式一致的成功提示。
+func DeleteBookFileSuccessMessageForWails() string {
+	if runtime.GOOS == "android" {
+		return locale.GetString("wails_delete_file_success_android")
+	}
+	return locale.GetString("wails_delete_file_success")
 }
 
 func saveWailsBookMetadata() {
@@ -120,6 +128,11 @@ func movePathToSystemTrash(target string, isDir bool) error {
 		if path, err := exec.LookPath("trash-put"); err == nil {
 			return runTrashCommand(path, target)
 		}
+	case "android":
+		if isDir {
+			return os.RemoveAll(target)
+		}
+		return os.Remove(target)
 	}
 	return errors.New(locale.GetString("wails_delete_file_unsupported"))
 }

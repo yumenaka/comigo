@@ -12,8 +12,8 @@ import (
 	"github.com/yumenaka/comigo/config"
 )
 
-// 验证配置账号密码后实时接口也必须经过登录认证。
-func TestRealtimeAPIRequiresAuthWhenPasswordConfigured(t *testing.T) {
+// 配置密码后，实时 API 返回未认证，EPUB 阅读页跳转登录。
+func TestReaderAndRealtimeRequireAuthWhenPasswordConfigured(t *testing.T) {
 	restore := withRouterAuthTestConfig(t)
 	defer restore()
 
@@ -24,15 +24,19 @@ func TestRealtimeAPIRequiresAuthWhenPasswordConfigured(t *testing.T) {
 	engine = echo.New()
 	BindURLs()
 
-	for _, path := range []string{"/api/ws", "/api/sse"} {
+	for _, tc := range []struct {
+		path   string
+		status int
+	}{{"/api/ws", http.StatusUnauthorized}, {"/api/sse", http.StatusUnauthorized}, {"/epub", http.StatusFound}, {"/epub/book", http.StatusFound}} {
+		path := tc.path
 		t.Run(path, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, path, nil)
 			rec := httptest.NewRecorder()
 
 			engine.ServeHTTP(rec, req)
 
-			if rec.Code != http.StatusUnauthorized {
-				t.Fatalf("%s status = %d, want %d", path, rec.Code, http.StatusUnauthorized)
+			if rec.Code != tc.status {
+				t.Fatalf("%s status = %d, want %d", path, rec.Code, tc.status)
 			}
 		})
 	}

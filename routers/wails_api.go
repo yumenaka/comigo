@@ -3,16 +3,17 @@
 package routers
 
 import (
-	"context"
 	"net/http"
 	"net/url"
+	"runtime"
 
 	"github.com/labstack/echo/v4"
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/yumenaka/comigo/assets/locale"
 )
 
-var wailsContext context.Context
+var wailsApp *application.App
+var wailsWindow application.Window
 
 type wailsOpenURLRequest struct {
 	URL string `json:"url"`
@@ -22,25 +23,22 @@ type wailsDeleteBookFileRequest struct {
 	BookID string `json:"bookId"`
 }
 
-// SetWailsContext 保存桌面壳上下文，供普通 HTTP 页面触发窗口操作。
-func SetWailsContext(ctx context.Context) {
-	wailsContext = ctx
+// SetWailsRuntime 保存桌面壳对象，供普通 HTTP 页面触发窗口操作。
+func SetWailsRuntime(app *application.App, window application.Window) {
+	wailsApp = app
+	wailsWindow = window
 }
 
 func bindWailsAPI(group *echo.Group) {
 	group.POST("/wails/toggle-fullscreen", func(c echo.Context) error {
-		if wailsContext == nil {
+		if wailsWindow == nil {
 			return c.NoContent(http.StatusServiceUnavailable)
 		}
-		if wailsruntime.WindowIsFullscreen(wailsContext) {
-			wailsruntime.WindowUnfullscreen(wailsContext)
-		} else {
-			wailsruntime.WindowFullscreen(wailsContext)
-		}
+		wailsWindow.ToggleFullscreen()
 		return c.NoContent(http.StatusNoContent)
 	})
 	group.POST("/wails/open-url", func(c echo.Context) error {
-		if wailsContext == nil {
+		if wailsApp == nil {
 			return c.NoContent(http.StatusServiceUnavailable)
 		}
 		var req wailsOpenURLRequest
@@ -52,19 +50,27 @@ func bindWailsAPI(group *echo.Group) {
 			return c.NoContent(http.StatusBadRequest)
 		}
 		// Wails WebView 里 target=_blank 不一定会交给系统浏览器，需由宿主显式打开外部 URL。
-		wailsruntime.BrowserOpenURL(wailsContext, req.URL)
+		if err := wailsApp.Browser.OpenURL(req.URL); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 		return c.NoContent(http.StatusNoContent)
 	})
 	group.POST("/wails/select-directory", func(c echo.Context) error {
-		if wailsContext == nil {
+		if wailsApp == nil || wailsWindow == nil {
 			return c.NoContent(http.StatusServiceUnavailable)
 		}
+		if runtime.GOOS == "android" {
+			return echo.NewHTTPError(http.StatusBadRequest, locale.GetString("wails_android_directory_picker_unsupported"))
+		}
 		// 只在 Wails 桌面壳里调用系统目录选择器，普通 Web 环境不暴露本机路径能力。
-		path, err := wailsruntime.OpenDirectoryDialog(wailsContext, wailsruntime.OpenDialogOptions{
-			Title:                locale.GetString("select_store_folder"),
-			CanCreateDirectories: true,
-			ResolvesAliases:      true,
-		})
+		path, err := wailsApp.Dialog.OpenFile().
+			SetTitle(locale.GetString("select_store_folder")).
+			CanChooseFiles(false).
+			CanChooseDirectories(true).
+			CanCreateDirectories(true).
+			ResolvesAliases(true).
+			AttachToWindow(wailsWindow).
+			PromptForSingleSelection()
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -82,6 +88,9 @@ func bindWailsAPI(group *echo.Group) {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
-		return c.JSON(http.StatusOK, map[string]bool{"deleted": deleted})
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"deleted": deleted,
+			"message": DeleteBookFileSuccessMessageForWails(),
+		})
 	})
 }

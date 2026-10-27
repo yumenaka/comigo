@@ -2,8 +2,9 @@
 go = { version = "latest", install_env = { GOROOT = "" } }
 bun = "latest"
 "conda:make" = { version = "latest", os = ["macos", "linux", "windows/x64"] }
-"go:github.com/a-h/templ/cmd/templ" = "latest"
-"go:github.com/wailsapp/wails/v2/cmd/wails" = "latest"
+# 与 go.mod 同步，避免生成器和模板运行库版本不一致。
+"go:github.com/a-h/templ/cmd/templ" = "0.3.1100"
+"go:github.com/wailsapp/wails/v3/cmd/wails3" = "3.0.0"
 "go:github.com/air-verse/air" = "latest"
 "go:github.com/sqlc-dev/sqlc/cmd/sqlc" = "latest"
 "go:github.com/josephspurrier/goversioninfo/cmd/goversioninfo" = "latest"
@@ -28,9 +29,9 @@ alias = "fe"
 run = "bun run dev"
 
 [tasks.dev]
-description = "使用 Air 启动热重载开发服务"
+description = "使用 Wails v3 启动桌面开发环境"
 alias = "d"
-run = "air -c .air.toml"
+run = "bun run wails:dev"
 
 [tasks.run]
 description = "生成模板并直接启动 Web 服务"
@@ -48,12 +49,12 @@ alias = "db"
 run = "sqlc generate"
 
 [tasks.wails-dev]
-description = "启动 Wails v2 开发环境"
+description = "启动 Wails v3 开发环境"
 alias = "wd"
 run = "bun run wails:dev"
 
 [tasks.wails-build]
-description = "构建当前平台的 Wails v2 应用"
+description = "构建当前平台的 Wails v3 应用"
 alias = "wb"
 run = "bun run wails:build"
 

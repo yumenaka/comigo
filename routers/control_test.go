@@ -112,3 +112,64 @@ func TestConfigRestartFailureRestoresPreviousListener(t *testing.T) {
 		t.Fatalf("health=%d", response.StatusCode)
 	}
 }
+
+// 原生绑定与 HTTP 控制接口共用配置锁和重启锁，拒绝时不写入共享状态。
+func TestNativeSharingGuards(t *testing.T) {
+	old := config.CopyCfg()
+	t.Cleanup(func() { config.ReplaceConfig(old); restarting.Store(false) })
+	next := config.CopyCfg()
+	next.TemporaryReaderMode, next.ReadOnlyMode, next.DisableLAN = true, true, true
+	config.ReplaceConfig(next)
+	if err := SetLANSharing(true); err == nil || !config.GetCfg().DisableLAN || restarting.Load() {
+		t.Fatal("只读配置被修改或重启锁未释放")
+	}
+	next.ReadOnlyMode = false
+	config.ReplaceConfig(next)
+	restarting.Store(true)
+	if err := SetLANSharing(true); err == nil || !config.GetCfg().DisableLAN {
+		t.Fatal("已有重启时仍修改局域网共享")
+	}
+}
+
+// 原生面板关闭局域网共享后必须完成监听重启，并继续在原端口提供服务。
+func TestNativeSharingRebindsLoopback(t *testing.T) {
+	oldCfg, oldEngine, oldServer := config.CopyCfg(), engine, config.Server
+	t.Cleanup(func() {
+		_ = StopWebServer()
+		config.ReplaceConfig(oldCfg)
+		engine, config.Server = oldEngine, oldServer
+		restarting.Store(false)
+	})
+	next := config.CopyCfg()
+	next.TemporaryReaderMode, next.DisableLAN = true, true
+	next.EnableTLS, next.AutoTLSCertificate, next.EnableTailscale, next.LogToFile, next.ReadOnlyMode = false, false, false, false, false
+	next.Port = 0
+	config.ReplaceConfig(next)
+	if err := StartEcho(echo.New()); err != nil {
+		t.Fatal(err)
+	}
+	port := config.GetCfg().Port
+	ready, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", port))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ready.Body.Close()
+	// 仅改变配置快照，不实际向局域网开放测试服务器。
+	next = config.CopyCfg()
+	next.DisableLAN = false
+	config.ReplaceConfig(next)
+	if err := SetLANSharing(false); err != nil {
+		t.Fatal(err)
+	}
+	if !config.GetCfg().DisableLAN || config.GetCfg().Port != port || restarting.Load() {
+		t.Fatal("共享状态或监听端口未正确更新")
+	}
+	response, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/healthz", port))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("health=%d", response.StatusCode)
+	}
+}
