@@ -4,7 +4,7 @@ bun = "latest"
 "conda:make" = { version = "latest", os = ["macos", "linux", "windows/x64"] }
 # 与 go.mod 同步，避免生成器和模板运行库版本不一致。
 "go:github.com/a-h/templ/cmd/templ" = "0.3.1100"
-"go:github.com/wailsapp/wails/v3/cmd/wails3" = "3.0.0"
+"go:github.com/wailsapp/wails/v3/cmd/wails3" = "3.1.0"
 "go:github.com/air-verse/air" = "latest"
 "go:github.com/sqlc-dev/sqlc/cmd/sqlc" = "latest"
 "go:github.com/josephspurrier/goversioninfo/cmd/goversioninfo" = "latest"

@@ -16,6 +16,8 @@ import (
 // TestEchoLogHandlerEscapesRequestFields 防止外部请求字段进入设置页日志 HTML。
 func TestEchoLogHandlerEscapesRequestFields(t *testing.T) {
 	e := echo.New()
+	// Echo 默认忽略转发头；仅在测试中注入原始字段，继续覆盖日志层的转义。
+	e.IPExtractor = func(r *http.Request) string { return r.Header.Get(echo.HeaderXForwardedFor) }
 	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 	req.Header.Set(echo.HeaderXForwardedFor, `<img src=x onerror="alert(1)">`)
 	rec := httptest.NewRecorder()
