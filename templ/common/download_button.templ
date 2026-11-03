@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/labstack/echo/v4"
@@ -39,7 +38,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 		<!-- 【下载为ZIP】按钮，仅对 图片类书籍（TypeDir） 类型显示 -->
 		if book != nil && book.Type == model.TypeDir {
 			<a
-				href={ templ.SafeURL(config.PrefixPath(fmt.Sprintf("/api/download-zip?id=%v", book.BookID))) }
+				href={ templ.SafeURL(downloadBookURL(book, "/api/download-zip")) }
 				download={ book.BookInfo.Title + ".zip" }
 				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
 				:title="i18next.t('download_as_zip')"
@@ -51,7 +50,7 @@ templ DownloadButton(c echo.Context, book *model.Book) {
 		<!-- 【下载为EPUB】按钮，对图片类书籍（TypeDir）显示 -->
 		if book != nil && canDownloadAsEpub(book.Type) {
 			<a
-				href={ templ.SafeURL(downloadEpubURL(book)) }
+				href={ templ.SafeURL(downloadBookURL(book, "/api/download-epub")) }
 				download={ getEpubFileName(book.BookInfo.Title) }
 				class="panel-control z-10 flex justify-center items-center h-10 px-3 mx-1 mt-2 mb-1 text-sm border rounded text-black font-semibold focus:outline-none focus:ring bg-blue-200 transition delay-150 duration-300 ease-in-out hover:bg-indigo-300"
 				:title="i18next.t('download_as_epub')"
@@ -96,14 +95,14 @@ func getEpubFileName(title string) string {
 	return title + ".epub"
 }
 
-// downloadEpubURL 生成 EPUB 下载链接，远程书籍必须保留 remote_store 才能走远端代理。
-func downloadEpubURL(book *model.Book) string {
+// downloadBookURL 生成下载链接，远程书籍必须保留 remote_store 才能走远端代理。
+func downloadBookURL(book *model.Book, apiPath string) string {
 	query := url.Values{}
 	query.Set("id", book.BookID)
 	if book.RemoteStoreKey != "" {
 		query.Set("remote_store", book.RemoteStoreKey)
 	}
-	return config.PrefixPath("/api/download-epub?" + query.Encode())
+	return config.PrefixPath(apiPath + "?" + query.Encode())
 }
 
 // portableBookURL 生成便携网页下载链接，远程书籍静态化时也要保留 remote_store。

@@ -155,7 +155,7 @@ func TestAppendLocalDirBooksSkipsOverMaxDepthNode(t *testing.T) {
 				Path: filepath.Join(nested, "001.jpg"),
 			}},
 		}},
-	}, tmp)
+	}, tmp, nil)
 
 	for _, book := range books {
 		if book.BookPath == nested {
@@ -292,15 +292,20 @@ func testInitComigoStore(t *testing.T, database bool) {
 			ChildBooksID: []string{"local", "nested-remote"},
 		}},
 	}
+	failedPath := ""
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == failedPath {
+			http.Error(w, "temporary failure", http.StatusServiceUnavailable)
+			return
+		}
 		switch r.URL.Path {
 		case "/api/top-shelf":
 			_ = json.NewEncoder(w).Encode([]model.StoreBookInfo{{
 				DisplayName: "Remote Shelf",
 				BookInfos: model.BookInfos{
+					remoteBooks["group"].BookInfo,
 					remoteBooks["local"].BookInfo,
 					remoteBooks["nested-remote"].BookInfo,
-					remoteBooks["group"].BookInfo,
 				},
 			}})
 		case "/api/books/local", "/api/books/nested-remote", "/api/books/group":
@@ -371,6 +376,22 @@ func testInitComigoStore(t *testing.T, database bool) {
 	marks, err := model.IStore.GetBookMarks(localID)
 	if err != nil || len(*marks) != 1 {
 		t.Fatalf("remote rescan lost local bookmarks: %v, %v", marks, err)
+	}
+
+	// 顶层、书组和子书失败均不得清理旧索引，也不能覆盖旧拓扑与书签。
+	for _, failed := range []string{"/api/top-shelf", "/api/books/group", "/api/books/local"} {
+		failedPath = failed
+		if err := InitStore(server.URL, scanCfg); err == nil {
+			t.Fatalf("%s failure must be reported", failed)
+		}
+		marks, err := model.IStore.GetBookMarks(localID)
+		if err != nil || len(*marks) != 1 {
+			t.Fatalf("%s lost bookmarks: %v, %v", failed, marks, err)
+		}
+		group, err := model.IStore.GetBook(groupID)
+		if err != nil || len(group.ChildBooksID) != 1 || group.ChildBooksID[0] != localID {
+			t.Fatalf("%s changed old group: %v, %v", failed, group, err)
+		}
 	}
 
 }
@@ -467,4 +488,58 @@ func mustFindBookByPath(t *testing.T, bookPath string) *model.Book {
 	}
 	t.Fatalf("cannot find TypeDir book at %s in %+v", absBookPath, books)
 	return nil
+}
+
+// 重扫未变化的多本书只读取一次全库，不随文件数重复加载数据库页面与书签。
+func TestUnchangedRescanListsBooksOnce(t *testing.T) {
+	for _, backend := range []string{"json", "sqlite"} {
+		t.Run(backend, func(t *testing.T) {
+			oldCfg, oldStore := config.CopyCfg(), model.IStore
+			defer func() { config.ReplaceConfig(oldCfg); model.IStore = oldStore }()
+			config.GetCfg().ConfigFile = filepath.Join(t.TempDir(), "config.toml")
+			config.GetCfg().MinImageNum = 1
+			var backing model.StoreInterface = &store.StoreInRam{}
+			config.GetCfg().EnableDatabase = backend == "sqlite"
+			if backend == "sqlite" {
+				if err := sqlc.OpenDatabase(sqlc.DBOptions{Type: "sqlite", ConfigDir: t.TempDir()}); err != nil {
+					t.Fatal(err)
+				}
+				defer sqlc.CloseDatabase()
+				backing = sqlc.DbStore
+			}
+			counted := &countingScanStore{StoreInterface: backing}
+			model.IStore = counted
+			root := t.TempDir()
+			for _, name := range []string{".", "a", "b", "c"} {
+				dir := filepath.Join(root, name)
+				if err := os.MkdirAll(dir, 0700); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(dir, "001.jpg"), []byte("fixture"), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			cfg := &testCfgScan{supportMediaType: []string{".jpg"}, minImageNum: 1, maxScanDepth: -1}
+			if err := InitStore(root, cfg); err != nil {
+				t.Fatal(err)
+			}
+			counted.calls = 0
+			if err := InitStore(root, cfg); err != nil {
+				t.Fatal(err)
+			}
+			if counted.calls != 1 {
+				t.Fatalf("ListBooks calls = %d, want 1", counted.calls)
+			}
+		})
+	}
+}
+
+type countingScanStore struct {
+	model.StoreInterface
+	calls int
+}
+
+func (s *countingScanStore) ListBooks() ([]*model.Book, error) {
+	s.calls++
+	return s.StoreInterface.ListBooks()
 }

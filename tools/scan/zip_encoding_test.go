@@ -67,7 +67,7 @@ func TestZIPEncodingInvalidatesExistingMetadata(t *testing.T) {
 		if err := model.IStore.StoreBook(book); err != nil {
 			t.Fatal(err)
 		}
-		_, skip := prepareBookPathForScan(dir, path, 12, modified)
+		_, skip := prepareBookPathForScan(book, 12, modified)
 		if skip != (encoding == "shiftjis") {
 			t.Fatalf("encoding=%q skip=%v", encoding, skip)
 		}

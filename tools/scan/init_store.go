@@ -28,13 +28,28 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 		return initComigoStore(storePath, cfg)
 	}
 
-	// 判断是否为远程 URL
-	isRemote := tools.IsRemoteStoreURL(storePath)
-
-	if isRemote {
-		return initRemoteStore(storePath, cfg)
+	// 每轮只读取一次旧书籍，逐文件重扫直接按路径查找，避免数据库反复加载全库。
+	books, err := model.IStore.ListBooks()
+	if err != nil {
+		return err
 	}
-	return initLocalStore(storePath, cfg)
+	storeKey := storePath
+	if !tools.IsRemoteStoreURL(storePath) {
+		storeKey, err = filepath.Abs(storePath)
+		if err != nil {
+			return err
+		}
+	}
+	booksByPath := make(map[string]*model.Book)
+	for _, book := range books {
+		if book.StoreUrl == storeKey && book.Type != model.TypeBooksGroup {
+			booksByPath[book.BookPath] = book
+		}
+	}
+	if tools.IsRemoteStoreURL(storePath) {
+		return initRemoteStore(storePath, cfg, booksByPath)
+	}
+	return initLocalStore(storePath, cfg, booksByPath)
 }
 
 // initComigoStore 扫描另一个 Comigo 服务，只保存远端元数据和代理定位信息。
@@ -101,8 +116,7 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 		for _, childRemoteID := range remoteBook.ChildBooksID {
 			imported, err := fetchBook(childRemoteID, shelfKey, shelfName, false)
 			if err != nil {
-				logger.Infof(locale.GetString("log_get_book_error"), err)
-				continue
+				return false, err
 			}
 			if imported {
 				childBookIDs = append(childBookIDs, comigo_remote.LocalBookID(storeURL, childRemoteID))
@@ -117,15 +131,16 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 		shelfName := shelf.DisplayName
 		for _, bookInfo := range shelf.BookInfos {
 			if _, err := fetchBook(bookInfo.BookID, shelfKey, shelfName, true); err != nil {
-				logger.Infof(locale.GetString("log_get_book_error"), err)
+				return err
 			}
 		}
 	}
 
-	deleteStaleComigoRemoteBooks(storeURL, fetched)
+	// 完整获取并保存成功后才清理旧索引；临时网络失败不能被当作远端删除。
 	if err := AddBooksToStore(books); err != nil {
 		return err
 	}
+	deleteStaleComigoRemoteBooks(storeURL, fetched)
 	return model.IStore.GenerateBookGroup()
 }
 
@@ -162,7 +177,7 @@ func deleteStaleComigoRemoteBooks(storeURL string, current map[string]bool) {
 }
 
 // initLocalStore 扫描本地路径
-func initLocalStore(storePath string, cfg ConfigInterface) error {
+func initLocalStore(storePath string, cfg ConfigInterface, booksByPath map[string]*model.Book) error {
 	if !tools.PathExists(storePath) {
 		return errors.New(locale.GetString("path_not_exist"))
 	}
@@ -193,7 +208,7 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 		if shouldSkipFailedArchiveFile(storePathAbs, storePathAbs, fileInfo.Size(), fileInfo.ModTime(), false) {
 			return nil
 		}
-		previousBook, skip := prepareBookPathForScan(storePathAbs, storePathAbs, fileInfo.Size(), fileInfo.ModTime())
+		previousBook, skip := prepareBookPathForScan(booksByPath[storePathAbs], fileInfo.Size(), fileInfo.ModTime())
 		if skip {
 			return nil
 		}
@@ -216,7 +231,7 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 
 	var newBookList []*model.Book
 
-	appendLocalDirBooks(&newBookList, rootDirectoryNode, storePathAbs)
+	appendLocalDirBooks(&newBookList, rootDirectoryNode, storePathAbs, booksByPath)
 
 	// 处理文件
 	for _, file := range foundFiles {
@@ -247,7 +262,7 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 		if shouldSkipFailedArchiveFile(storePathAbs, file.Path, file.Size, file.ModTime, false) {
 			continue
 		}
-		previousBook, skip := prepareBookPathForScan(storePathAbs, file.Path, file.Size, file.ModTime)
+		previousBook, skip := prepareBookPathForScan(booksByPath[file.Path], file.Size, file.ModTime)
 		if skip {
 			continue
 		}
@@ -271,15 +286,15 @@ func initLocalStore(storePath string, cfg ConfigInterface) error {
 }
 
 // appendLocalDirBooks 复用 HandleDirectory 已经读到的文件列表，避免本地目录扫描阶段重复 ReadDir。
-func appendLocalDirBooks(newBookList *[]*model.Book, node DirNode, storePathAbs string) {
-	appendLocalDirBook(newBookList, node, storePathAbs)
+func appendLocalDirBooks(newBookList *[]*model.Book, node DirNode, storePathAbs string, booksByPath map[string]*model.Book) {
+	appendLocalDirBook(newBookList, node, storePathAbs, booksByPath)
 	for _, subNode := range node.SubDirs {
-		appendLocalDirBooks(newBookList, subNode, storePathAbs)
+		appendLocalDirBooks(newBookList, subNode, storePathAbs, booksByPath)
 	}
 }
 
 // appendLocalDirBook 处理单个本地目录节点，并保留旧书签迁移与失败回滚逻辑。
-func appendLocalDirBook(newBookList *[]*model.Book, node DirNode, storePathAbs string) {
+func appendLocalDirBook(newBookList *[]*model.Book, node DirNode, storePathAbs string, booksByPath map[string]*model.Book) {
 	depth, err := localScanDepth(storePathAbs, node.Path)
 	if err != nil {
 		logger.Infof(locale.GetString("log_failed_to_get_relative_path"), err)
@@ -294,7 +309,7 @@ func appendLocalDirBook(newBookList *[]*model.Book, node DirNode, storePathAbs s
 		logger.Infof(locale.GetString("log_failed_to_get_file_info_scan"), node.Path, statErr)
 		return
 	}
-	previousBook, skip := prepareBookPathForScan(storePathAbs, node.Path, dirInfo.Size(), dirInfo.ModTime())
+	previousBook, skip := prepareBookPathForScan(booksByPath[node.Path], dirInfo.Size(), dirInfo.ModTime())
 	if skip {
 		return
 	}
@@ -318,7 +333,7 @@ func localScanDepth(storePathAbs string, path string) (int, error) {
 }
 
 // initRemoteStore 扫描远程书库（WebDAV 等）
-func initRemoteStore(storeURL string, cfg ConfigInterface) error {
+func initRemoteStore(storeURL string, cfg ConfigInterface, booksByPath map[string]*model.Book) error {
 	logger.Infof(locale.GetString("log_scan_remote_store_start"), storeURL)
 
 	// 创建 VFS 实例
@@ -381,7 +396,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 			if shouldSkipFailedArchiveFile(storeURL, basePath, fileInfo.Size(), fileInfo.ModTime(), true) {
 				return nil
 			}
-			previousBook, skip := prepareBookPathForScan(storeURL, basePath, fileInfo.Size(), fileInfo.ModTime())
+			previousBook, skip := prepareBookPathForScan(booksByPath[basePath], fileInfo.Size(), fileInfo.ModTime())
 			if skip {
 				return nil
 			}
@@ -410,7 +425,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 		if statErr != nil {
 			return statErr
 		}
-		previousBook, skip := prepareBookPathForScan(storeURL, basePath, dirInfo.Size(), dirInfo.ModTime())
+		previousBook, skip := prepareBookPathForScan(booksByPath[basePath], dirInfo.Size(), dirInfo.ModTime())
 		if !skip {
 			book, err := scanRemoteDirGetBook(fs, basePath, storeURL, 0)
 			if err != nil {
@@ -455,7 +470,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 			logger.Infof(locale.GetString("log_failed_to_get_file_info_scan"), dir, statErr)
 			continue
 		}
-		previousBook, skip := prepareBookPathForScan(storeURL, dir, dirInfo.Size(), dirInfo.ModTime())
+		previousBook, skip := prepareBookPathForScan(booksByPath[dir], dirInfo.Size(), dirInfo.ModTime())
 		if skip {
 			continue
 		}
@@ -498,7 +513,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 		if shouldSkipFailedArchiveFile(storeURL, file.Path, file.Size, file.ModTime, true) {
 			continue
 		}
-		previousBook, skip := prepareBookPathForScan(storeURL, file.Path, file.Size, file.ModTime)
+		previousBook, skip := prepareBookPathForScan(booksByPath[file.Path], file.Size, file.ModTime)
 		if skip {
 			continue
 		}
@@ -526,9 +541,8 @@ func initRemoteStore(storeURL string, cfg ConfigInterface) error {
 // - 指纹未变化时跳过扫描，沿用旧 metadata；
 // - 指纹变化时先移除旧条目，避免 NewBook 的同路径判重阻止重扫。
 // 返回 previousBook 用于扫描失败回滚或扫描成功后迁移用户状态。
-func prepareBookPathForScan(storePath string, filePath string, size int64, modTime time.Time) (previousBook *model.Book, skip bool) {
-	previousBook, err := getBookByPath(storePath, filePath)
-	if err != nil || previousBook == nil {
+func prepareBookPathForScan(previousBook *model.Book, size int64, modTime time.Time) (*model.Book, bool) {
+	if previousBook == nil {
 		return nil, false
 	}
 	encodingChanged := false
@@ -536,7 +550,7 @@ func prepareBookPathForScan(storePath string, filePath string, size int64, modTi
 		encodingChanged = previousBook.ZipTextEncoding != cfg.GetZipFileTextEncoding()
 	}
 	if !encodingChanged && previousBook.FileSize == size && previousBook.Modified.Equal(modTime) {
-		logger.Infof(locale.GetString("log_book_data_already_exists"), previousBook.BookID, filePath)
+		logger.Infof(locale.GetString("log_book_data_already_exists"), previousBook.BookID, previousBook.BookPath)
 		return previousBook, true
 	}
 	if err := model.IStore.DeleteBook(previousBook.BookID); err != nil {
@@ -566,18 +580,4 @@ func restorePreviousBookAfterScanFailure(previousBook *model.Book) {
 	if err := model.IStore.StoreBook(previousBook); err != nil {
 		logger.Infof(locale.GetString("log_error_adding_book"), previousBook.BookID, err)
 	}
-}
-
-// getBookByPath 获取指定路径的书籍
-func getBookByPath(storePath string, filePath string) (*model.Book, error) {
-	allBooks, err := model.IStore.ListBooks()
-	if err != nil {
-		logger.Infof(locale.GetString("log_error_listing_books"), err)
-	}
-	for _, b := range allBooks {
-		if b.Type != model.TypeBooksGroup && b.StoreUrl == storePath && b.BookPath == filePath {
-			return b, nil
-		}
-	}
-	return nil, fmt.Errorf("err_getbook_cannot_find_by_path")
 }

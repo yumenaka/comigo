@@ -13,6 +13,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/vfs"
 )
 
 // DownloadZip 将 TypeDir 类型的书籍打包为 zip 文件下载
@@ -20,6 +21,18 @@ import (
 // 相关参数：
 // id：书籍的ID，必须参数  &id=2b17a13
 func DownloadZip(c echo.Context) error {
+	// 远端 Comigo 直接流式转发，不读取本地路径或缓存整个压缩包。
+	if book, client, _, ok, err := remoteComigoBookFromRequest(c, c.QueryParam("id")); ok {
+		if err != nil {
+			return writeRemoteComigoError(c, err)
+		}
+		resp, err := client.GetResponse("/api/download-zip", remoteComigoQuery(c, book.RemoteBookID), nil)
+		if err != nil {
+			return writeRemoteComigoError(c, err)
+		}
+		defer resp.Body.Close()
+		return streamRemoteDownload(c, resp)
+	}
 	book, handled, err := requireBookByQueryID(c)
 	if handled || err != nil {
 		return err
@@ -30,9 +43,19 @@ func DownloadZip(c echo.Context) error {
 		return apiresp.BadRequest(c, "unsupported_book_type", fmt.Sprintf("Only TypeDir books can be downloaded as zip, current type: %s", book.Type), map[string]string{"type": string(book.Type)})
 	}
 
-	// 检查目录是否存在
-	if _, err := os.Stat(book.BookPath); os.IsNotExist(err) {
+	// 本地目录与远程 VFS 共用打包逻辑，远程文件不能经过 os.Stat/os.Open。
+	storeURL := book.BookPath
+	if book.IsRemote {
+		storeURL = book.RemoteURL
+	}
+	fs, err := vfs.GetOrCreate(storeURL, vfs.Options{Timeout: 30})
+	if err != nil {
+		return err
+	}
+	if _, err := fs.Stat(book.BookPath); os.IsNotExist(err) {
 		return apiresp.Error(c, http.StatusNotFound, "book_directory_not_found", "Book directory not found", map[string]string{"id": book.BookID})
+	} else if err != nil {
+		return err
 	}
 
 	// 设置响应头
@@ -55,11 +78,11 @@ func DownloadZip(c echo.Context) error {
 		filePath := page.Path
 		if filePath == "" {
 			// 如果 Path 为空，尝试使用 BookPath + Name 构建路径
-			filePath = filepath.Join(book.BookPath, page.Name)
+			filePath = fs.JoinPath(book.BookPath, page.Name)
 		}
 
 		// 检查文件是否存在
-		fileInfo, err := os.Stat(filePath)
+		fileInfo, err := fs.Stat(filePath)
 		if err != nil {
 			logger.Infof(locale.GetString("log_file_not_found_skipping"), filePath)
 			continue
@@ -71,7 +94,7 @@ func DownloadZip(c echo.Context) error {
 		}
 
 		// 打开源文件
-		srcFile, err := os.Open(filePath)
+		srcFile, err := fs.Open(filePath)
 		if err != nil {
 			logger.Infof(locale.GetString("log_error_opening_file"), filePath, err)
 			continue
