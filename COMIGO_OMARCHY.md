@@ -46,6 +46,6 @@ go test -tags wails ./tools/wails_systray
 
 ## Omarchy 开发基线与发布规则
 
-插件始终以开发当时 Omarchy 官方最新开发分支（当前为 `quattro`）的规范为基线；每轮开发先在线核对最新提交、Shell reference 与插件开发／发布指南，并同步所需接口变更，不以本机安装版本或旧资料替代最新开发规范。插件版本号独立维护，兼容性跟随最新 Omarchy 开发版，不添加旧接口兼容层。本轮同时通过已安装 v4.0.6 的验证。
+插件始终以开发当时 Omarchy 官方最新开发分支（当前为 `quattro`）的规范为基线；每轮开发先在线核对最新提交、Shell reference 与插件开发／发布指南，并同步所需接口变更，不以本机安装版本或旧资料替代最新开发规范。插件版本号与 Comigo 版本保持一致（manifest 不带 v 前缀），不单独递增；兼容性跟随最新 Omarchy 开发版，不添加旧接口兼容层。本轮同时通过已安装 v4.0.6 的验证。
 
 QML 通过 `import qs.Commons as Commons` 与 `Commons.Color` 引用宿主调色板，避免 Qt 6.12 类型冲突。发布前再次检查 https://plugins.omarchy.org/publish.html 与官方 Shell reference；仓库根目录保留 manifest、三语 README、LICENSE 与第三方许可说明。服务型插件依赖内置受信任状态栏；第三方替代状态栏可能不提供 serviceFor，这属于宿主能力边界，不绕过宿主获取其他插件或认证服务。
