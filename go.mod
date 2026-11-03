@@ -24,7 +24,7 @@ require (
 	github.com/blacktop/go-termimg v0.1.26
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/x/ansi v0.11.9
-	github.com/cloudsoda/go-smb2 v0.0.0-20261029174947-95daac2ef783
+	github.com/cloudsoda/go-smb2 v0.0.0-20261103071945-eb7a6cfa5657
 	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-co-op/gocron/v2 v2.23.0
@@ -65,7 +65,7 @@ require (
 	golang.org/x/term v0.47.0
 	golang.org/x/text v0.43.0
 	modernc.org/sqlite v1.61.1
-	tailscale.com v1.104.4
+	tailscale.com v1.104.5
 	wait4x.dev/v3 v3.7.3
 )
 
@@ -106,7 +106,7 @@ require (
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.15 // indirect
-	github.com/charmbracelet/x/mosaic v0.0.0-20261101002738-e877ff7c6c4c // indirect
+	github.com/charmbracelet/x/mosaic v0.0.0-20261101151554-27ecf3e4d454 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/cli/browser v1.3.0 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
@@ -264,7 +264,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	// gVisor 默认分支不能直接用 Go Modules 构建，随 Tailscale 升级其指定版本。
 	gvisor.dev/gvisor v0.0.0-20260915211658-a6f909f08a72 // indirect
-	modernc.org/libc v1.79.1 // indirect
+	modernc.org/libc v1.80.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.12.1 // indirect
 )

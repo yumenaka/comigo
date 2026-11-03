@@ -156,6 +156,8 @@ github.com/charmbracelet/x/cellbuf v0.0.15 h1:ur3pZy0o6z/R7EylET877CBxaiE1Sp1GMx
 github.com/charmbracelet/x/cellbuf v0.0.15/go.mod h1:J1YVbR7MUuEGIFPCaaZ96KDl5NoS0DAWkskup+mOY+Q=
 github.com/charmbracelet/x/mosaic v0.0.0-20261101002738-e877ff7c6c4c h1:WW+FHHsKO8C/olP6JvBwuHvrExTYDV8HTZca5MtUr28=
 github.com/charmbracelet/x/mosaic v0.0.0-20261101002738-e877ff7c6c4c/go.mod h1:vlV/MyqoZMen/tW97GwMMOeUPQpW/+AF1CVJuYKZQrw=
+github.com/charmbracelet/x/mosaic v0.0.0-20261101151554-27ecf3e4d454 h1:JZWBgf0AaBQjd2vUOzG+BRu5K+Cmie2msv7F6EEuwAQ=
+github.com/charmbracelet/x/mosaic v0.0.0-20261101151554-27ecf3e4d454/go.mod h1:vlV/MyqoZMen/tW97GwMMOeUPQpW/+AF1CVJuYKZQrw=
 github.com/charmbracelet/x/term v0.2.2 h1:xVRT/S2ZcKdhhOuSP4t5cLi5o+JxklsoEObBSgfgZRk=
 github.com/charmbracelet/x/term v0.2.2/go.mod h1:kF8CY5RddLWrsgVwpw4kAa6TESp6EB5y3uxGLeCqzAI=
 github.com/cilium/ebpf v0.22.0 h1:v2ktp0roffpMOj2MMf3idtCQZOsAoC4BJbAJN+ke2bY=
@@ -170,6 +172,8 @@ github.com/clipperhouse/uax29/v2 v2.7.0 h1:+gs4oBZ2gPfVrKPthwbMzWZDaAFPGYK72F0NJ
 github.com/clipperhouse/uax29/v2 v2.7.0/go.mod h1:EFJ2TJMRUaplDxHKj1qAEhCtQPW2tJSwu5BF98AuoVM=
 github.com/cloudsoda/go-smb2 v0.0.0-20261029174947-95daac2ef783 h1:nMiJfdX9TxRrf1RJpyTTvfR56jsuRMm0P2smJcuIqBQ=
 github.com/cloudsoda/go-smb2 v0.0.0-20261029174947-95daac2ef783/go.mod h1:1pQXB0vAlzRlqcY7LYKOOZMw0wKfJPFxTLsJRF2Gswo=
+github.com/cloudsoda/go-smb2 v0.0.0-20261103071945-eb7a6cfa5657 h1:+rl/J5fKkDoeZIQoK7WLa+MpobIVaR4e8D2XYbWiZa0=
+github.com/cloudsoda/go-smb2 v0.0.0-20261103071945-eb7a6cfa5657/go.mod h1:1pQXB0vAlzRlqcY7LYKOOZMw0wKfJPFxTLsJRF2Gswo=
 github.com/cloudsoda/sddl v0.0.0-20250224235906-926454e91efc h1:0xCWmFKBmarCqqqLeM7jFBSw/Or81UEElFqO8MY+GDs=
 github.com/cloudsoda/sddl v0.0.0-20250224235906-926454e91efc/go.mod h1:uvR42Hb/t52HQd7x5/ZLzZEK8oihrFpgnodIJ1vte2E=
 github.com/coder/websocket v1.8.15 h1:6B2JPeOGlpff2Uz6vOEH1Vzpi0iUz20A+lPVhPHtNUA=
@@ -326,6 +330,7 @@ github.com/hashicorp/go-uuid v1.0.2/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/b
 github.com/hashicorp/go-uuid v1.0.3/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
 github.com/hashicorp/go-uuid v1.0.4 h1:ZrN80XjMzpRYk+2FxMDy2A2zz0d5QjJ7GMFSkZLj12A=
 github.com/hashicorp/go-uuid v1.0.4/go.mod h1:x2Ds7vSkQ2n/yQj8Synnxmt0zt1l26uCAjxIhChisLU=
+github.com/hashicorp/golang-lru v1.0.2 h1:dV3g9Z/unq5DpblPpw+Oqcv4dU/1omnb4Ok8iPY6p1c=
 github.com/hashicorp/golang-lru/v2 v2.0.7 h1:a+bsQ5rvGLjzHuww6tVxozPZFVghXaHOwFs4luLUK2k=
 github.com/hashicorp/golang-lru/v2 v2.0.7/go.mod h1:QeFd9opnmA6QUJc5vARoKUSoFhyfM2/ZepoAG6RGpeM=
 github.com/hdevalence/ed25519consensus v0.2.0 h1:37ICyZqdyj0lAZ8P4D1d1id3HqbbG1N3iBb1Tb4rdcU=
@@ -852,8 +857,10 @@ howett.net/plist v1.0.2-0.20250314012144-ee69052608d9 h1:eeH1AIcPvSc0Z25ThsYF+Xo
 howett.net/plist v1.0.2-0.20250314012144-ee69052608d9/go.mod h1:fyFX5Hj5tP1Mpk8obqA9MZgXT416Q5711SDT7dQLTLk=
 modernc.org/cc/v4 v4.30.3 h1:aDq8gIX1X7+VFgO/JYYji6pLWL2H4tv3g8WatT3KCys=
 modernc.org/cc/v4 v4.30.3/go.mod h1:OnovgIhbbMXMu1aISnJ0wvVD1KnW+cAUJkIrAWh+kVI=
+modernc.org/cc/v4 v4.30.5 h1:s086/M3aHHBJVrk95Dq+ciWXLOwcH6EruIoTb8XWTAY=
 modernc.org/ccgo/v4 v4.37.0 h1:BAuJCUtIHIxFIYaFhqXIw5YaoMBlNCUlFovejHfMip4=
 modernc.org/ccgo/v4 v4.37.0/go.mod h1:/8627VhwWtAbqUXmPORxFQU5SgLrAx2jl9seLw9GBhY=
+modernc.org/ccgo/v4 v4.38.0 h1:bvjlNLdV3ysX2TcKFPmGnzYtPi69647Q3HffqSs9XQE=
 modernc.org/fileutil v1.4.0 h1:j6ZzNTftVS054gi281TyLjHPp6CPHr2KCxEXjEbD6SM=
 modernc.org/fileutil v1.4.0/go.mod h1:EqdKFDxiByqxLk8ozOxObDSfcVOv/54xDs/DUHdvCUU=
 modernc.org/gc/v2 v2.6.5 h1:nyqdV8q46KvTpZlsw66kWqwXRHdjIlJOhG6kxiV/9xI=
@@ -864,6 +871,8 @@ modernc.org/goabi0 v0.2.0 h1:HvEowk7LxcPd0eq6mVOAEMai46V+i7Jrj13t4AzuNks=
 modernc.org/goabi0 v0.2.0/go.mod h1:CEFRnnJhKvWT1c1JTI3Avm+tgOWbkOu5oPA8eH8LnMI=
 modernc.org/libc v1.79.1 h1:GgKnSYDT0WctfCKddw03DPUiSAiL2LZIF/fGxqqLkN0=
 modernc.org/libc v1.79.1/go.mod h1:uT3kR61NsbeKJSLqq83GJwSnZMVLlSjyAz4DfTaBy1M=
+modernc.org/libc v1.80.0 h1:EHPhhOouLWob4DZRY7VIcaIoyzT4MKGEz25jRecd8KE=
+modernc.org/libc v1.80.0/go.mod h1:KaEO/N1pWq08YxZ+wfdA4+d/WeE7TvRRnoLaFI46YMc=
 modernc.org/mathutil v1.7.1 h1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU=
 modernc.org/mathutil v1.7.1/go.mod h1:4p5IwJITfppl0G4sUEDtCr4DthTaT47/N3aT6MhfgJg=
 modernc.org/memory v1.12.1 h1:nFMiWrpStgZczNl6XI9GnIk/rWhYIyHGUaR04pGbp9g=
@@ -884,5 +893,7 @@ software.sslmate.com/src/go-pkcs12 v0.7.3 h1:JBQD3FDqYjTeyDAeZQklj2ar88ykBLtALlo
 software.sslmate.com/src/go-pkcs12 v0.7.3/go.mod h1:Qiz0EyvDRJjjxGyUQa2cCNZn/wMyzrRJ/qcDXOQazLI=
 tailscale.com v1.104.4 h1:3UXjZjDdD3o3FTYcdFARD1ZLyHOHdhQYqdYOjvbHSpk=
 tailscale.com v1.104.4/go.mod h1:Hq4zB8UpaxMW1fvqO30CLVQo3A7Ith0t9MnvEyiuoSA=
+tailscale.com v1.104.5 h1:TLemRww20+bcQ0FEVTTZ7yMtVDZ4pOpSCL86Oo9g3mA=
+tailscale.com v1.104.5/go.mod h1:Hq4zB8UpaxMW1fvqO30CLVQo3A7Ith0t9MnvEyiuoSA=
 wait4x.dev/v3 v3.7.3 h1:gt3pAYk2BniWRqUVnHY/IKRxzkMCxbNZKagoz4JK97o=
 wait4x.dev/v3 v3.7.3/go.mod h1:1AxAf9za06kBrMu4u2kbFJW8eGZYhQrmNsg4RY6u/ms=
