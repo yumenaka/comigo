@@ -101,12 +101,13 @@ templ MainArea(c echo.Context, book *model.Book, loadMode string, pagedIndex int
 								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
 							/>
 						} else {
+							// 便携网页内联书籍图片，显式保留生成的 data URL，避免 templ 过滤。
 							<img
 								data-scroll-page-num={ fmt.Sprintf("%d", key+1) }
 								x-data={ ImageXData(image.Url) }
 								class="w-full manga_image min-h-16 text-center select-none"
 								draggable="false"
-								src={ common.GetFileBase64Text(book.BookInfo.BookID, image.Name) }
+								src={ templ.SafeURL(common.GetFileBase64Text(book.BookInfo.BookID, image.Name)) }
 								@load="isDoublePage=$event.target.naturalWidth > $event.target.naturalHeight;"
 								:style="{ width: $store.global.isLandscape?($store.scroll.widthUseFixedValue? (isDoublePage ? $store.scroll.doublePageWidth_PX +'px': $store.scroll.singlePageWidth_PX +'px'): (isDoublePage ? $store.scroll.doublePageWidth_Percent + '%':$store.scroll.singlePageWidth_Percent + '%')): $store.scroll.portraitWidthPercent+'%', maxWidth: '100%'}"
 							/>

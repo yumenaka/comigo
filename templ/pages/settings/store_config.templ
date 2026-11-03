@@ -170,7 +170,10 @@ templ StoreConfigJavaScript() {
 			async function selectStoreFolder(configName) {
 				if (!window.ComiGoWails) return;
 				if (/Android/i.test(navigator.userAgent)) {
-					showToast(i18next.t("wails_android_directory_picker_unsupported"), "warning");
+					showToast(
+						i18next.t("wails_android_directory_picker_unsupported"),
+						"warning",
+					);
 					return;
 				}
 				const addInput = document.getElementById(configName + "AddInput");
@@ -187,10 +190,7 @@ templ StoreConfigJavaScript() {
 					if (response.status === 204) return;
 					if (!response.ok) {
 						const data = await response.json().catch(() => ({}));
-						showToast(
-							data.message || i18next.t("err_network_error"),
-							"error",
-						);
+						showToast(data.message || i18next.t("err_network_error"), "error");
 						return;
 					}
 					const data = await response.json();

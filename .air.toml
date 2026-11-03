@@ -26,7 +26,8 @@ post_cmd = []
 # dav://user:pass@host:port/path   (caddy2 with webdav plugin)            大量缓存文件，需要优化
 # s3://accessKey:secretKey@endpoint/bucket/prefix (minio, aws s3)         未测试
 # args_bin = ["https://test:test@localhost/dav/","sftp://test:test@192.168.1.1/path/to/books","smb://guest@192.168.1.1:445/some/path","--tailscale","--debug"]
-args_bin = ["./test","--debug"]
+# Air 子进程不持有前台终端，禁用 TUI，避免 macOS 作业控制将其暂停。
+args_bin = ["./test","--debug","--no-tui"]
 #二进制文件 Binary file yields from 'cmd', will be deprecated soon, recommend using entrypoint.
 # bin = "./test/.temp/comi"
 entrypoint = ["./test/.temp/comi"]
