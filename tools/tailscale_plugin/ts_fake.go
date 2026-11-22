@@ -65,3 +65,8 @@ func GetTailscaleStatus(ctx context.Context) (*TailscaleStatus, error) {
 		FunnelCapability: "unknown",
 	}, nil
 }
+
+// TailscaleAuthMiddleware 在 Wails 构建中不查询 Tailscale 身份。
+func TailscaleAuthMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc { return next }
+}

@@ -1,6 +1,11 @@
 package logger
 
 import (
+	"io"
+	"os"
+	"path/filepath"
+	"sync"
+
 	"bytes"
 	"errors"
 	"fmt"
@@ -99,5 +104,112 @@ func TestEchoLogHandlerPolling(t *testing.T) {
 				t.Fatalf("日志状态码不符: %s", output.String())
 			}
 		})
+	}
+}
+
+// TestFileLoggingSingleOutput 验证首次创建、重配置、轮转、关闭和失败回退均不重复或丢失镜像日志。
+func TestFileLoggingSingleOutput(t *testing.T) {
+	oldOutput, oldMirror, oldSuppressed := baseOutput, mirrorOutput, IsStdoutSuppressed()
+	t.Cleanup(func() {
+		EchoLogHandler(false, "", "", false)
+		SetOutput(oldOutput)
+		SetMirrorOutput(oldMirror)
+		SetSuppressStdout(oldSuppressed)
+	})
+	var output, mirror bytes.Buffer
+	SetOutput(&output)
+	SetMirrorOutput(&mirror)
+	SetSuppressStdout(false)
+	dir := t.TempDir()
+	EchoLogHandler(true, dir, "app.log", true)
+	Info("first-message")
+	if !strings.Contains(output.String(), "logger_test.go:") {
+		t.Fatal("Debug 日志缺少调用位置")
+	}
+	EchoLogHandler(true, dir, "app.log", false)
+	Info("second-message")
+	data, err := os.ReadFile(filepath.Join(dir, "app.log"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, text := range []string{"first-message", "second-message"} {
+		if bytes.Count(data, []byte(text)) != 1 || strings.Count(mirror.String(), text) != 1 {
+			t.Fatalf("日志重复或丢失: %s / %s", data, mirror.String())
+		}
+	}
+	// 终端管道关闭后，后续镜像和文件仍各收到一次日志。
+	reader, writer := io.Pipe()
+	_ = reader.Close()
+	SetOutput(writer)
+	Info("closed-console")
+	_ = writer.Close()
+	data, err = os.ReadFile(filepath.Join(dir, "app.log"))
+	if err != nil || bytes.Count(data, []byte("closed-console")) != 1 || strings.Count(mirror.String(), "closed-console") != 1 {
+		t.Fatal("终端失败时丢失了文件或镜像日志")
+	}
+	SetOutput(&output)
+	SetSuppressStdout(true)
+	output.Reset()
+	mirror.Reset()
+	if err := fileOutput.Rotate(); err != nil {
+		t.Fatal(err)
+	}
+	Info("rotated-message")
+	data, err = os.ReadFile(filepath.Join(dir, "app.log"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if output.Len() != 0 || !strings.Contains(mirror.String(), "rotated-message") || bytes.Count(data, []byte("rotated-message")) != 1 {
+		t.Fatalf("抑制/轮转失效: stdout=%s mirror=%s file=%s", output.String(), mirror.String(), data)
+	}
+	EchoLogHandler(false, "", "", false)
+	Info("file-disabled")
+	data, err = os.ReadFile(filepath.Join(dir, "app.log"))
+	if err != nil || bytes.Contains(data, []byte("file-disabled")) {
+		t.Fatalf("禁用后仍写文件: %s %v", data, err)
+	}
+	// 用普通文件作为父目录，稳定触发创建失败。
+	badPath := filepath.Join(dir, "not-a-directory")
+	if err := os.WriteFile(badPath, []byte("x"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	EchoLogHandler(true, badPath, "app.log", false)
+	Info("fallback-message")
+	if fileOutput != nil || !strings.Contains(mirror.String(), "fallback-message") {
+		t.Fatal("文件失败后镜像输出不可用")
+	}
+}
+
+// TestFileLoggingConcurrentReconfigure 重配置期间的每条日志仍只写入一次，旧文件关闭不能打断写入。
+func TestFileLoggingConcurrentReconfigure(t *testing.T) {
+	oldOutput, oldMirror := baseOutput, mirrorOutput
+	t.Cleanup(func() { EchoLogHandler(false, "", "", false); SetOutput(oldOutput); SetMirrorOutput(oldMirror) })
+	SetOutput(io.Discard)
+	SetMirrorOutput(nil)
+	dir := t.TempDir()
+	EchoLogHandler(true, dir, "app.log", false)
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 100; i++ {
+			Infof("record-%03d-end", i)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		for range 10 {
+			EchoLogHandler(true, dir, "app.log", false)
+		}
+	}()
+	wg.Wait()
+	data, err := os.ReadFile(filepath.Join(dir, "app.log"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 100; i++ {
+		if bytes.Count(data, []byte(fmt.Sprintf("record-%03d-end", i))) != 1 {
+			t.Fatalf("重配置丢失或重复第 %d 条日志", i)
+		}
 	}
 }

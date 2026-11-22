@@ -1,6 +1,7 @@
 package file
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/url"
@@ -9,6 +10,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/natefinch/atomic"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools/logger"
 )
@@ -65,7 +67,7 @@ func SaveCoverToLocal(metaDataDir string, bookID string, resizeHeight int, data 
 	// 写入文件
 	filename := coverCacheFilename(bookID, resizeHeight)
 	filePath := filepath.Join(metaDataDir, filename)
-	err = os.WriteFile(filePath, data, 0o644)
+	err = atomic.WriteFile(filePath, bytes.NewReader(data))
 	if err != nil {
 		return fmt.Errorf(locale.GetString("log_failed_to_write_file_to_cache"), err)
 	}

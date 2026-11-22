@@ -34,6 +34,7 @@ func SetShutdownHandler() {
 
 // Shutdown 统一清理缓存并关闭 Web、Tailscale、SSE 与 WebSocket 服务。
 func Shutdown() {
+	stopTailscaleQRCode()
 	// CLI 的停止与重载共用锁；停止开始后不再接受排队的重载请求。
 	if control := cliControl; control != nil {
 		control.mu.Lock()

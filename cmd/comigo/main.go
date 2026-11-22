@@ -27,7 +27,10 @@ func main() {
 		return
 	}
 	// 初始化命令行参数与配置。
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	// 托盘菜单创建前加入启动书库，首次打开目录菜单即可看到参数中的路径。
 	cmd.AddStoreUrls(cmd.Args)
 	// 设置系统托盘并启动服务器

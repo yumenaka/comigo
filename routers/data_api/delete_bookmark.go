@@ -18,7 +18,7 @@ import (
 func DeleteBookmark(c echo.Context) error {
 	request, err := parseDeleteBookmarkRequest(c)
 	if err != nil {
-		return err
+		return writeValidationError(c, err)
 	}
 	if localBook, client, _, ok, err := remoteComigoBookFromRequest(c, request.BookID); ok {
 		if err != nil {

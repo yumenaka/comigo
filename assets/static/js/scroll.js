@@ -892,10 +892,8 @@ let ScrollMainArea = document.getElementById('ScrollMainArea')
 if (ScrollMainArea) {
     // 鼠标移动的时候触发移动事件
     ScrollMainArea.addEventListener('mousemove', onMouseMove)
-    // 点击的时候触发点击事件
+    // 点击和轻触统一由 click 处理，touchstart 没有鼠标坐标。
     ScrollMainArea.addEventListener('click', onMouseClick)
-    // 触摸的时候也触发点击事件
-    ScrollMainArea.addEventListener('touchstart', onMouseClick)
 }
 
 // 键盘快捷键

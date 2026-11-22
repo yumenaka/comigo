@@ -3,6 +3,7 @@ package vfs
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -217,16 +218,16 @@ func (f *FTPFS) ReadFile(p string) ([]byte, error) {
 		}
 	}
 
+	// FTP 控制连接直到 Close 读取传输结束响应后才能供下一次请求使用。
 	f.mu.Lock()
+	defer f.mu.Unlock()
 	resp, err := f.conn.Retr(fullPath)
-	f.mu.Unlock()
 	if err != nil {
 		return nil, fmt.Errorf("无法打开 FTP 文件 %s: %w", fullPath, err)
 	}
-	defer resp.Close()
-
-	data, err := io.ReadAll(resp)
-	if err != nil {
+	data, readErr := io.ReadAll(resp)
+	closeErr := resp.Close()
+	if err := errors.Join(readErr, closeErr); err != nil {
 		return nil, fmt.Errorf("无法读取 FTP 文件 %s: %w", fullPath, err)
 	}
 
@@ -245,6 +246,9 @@ func (f *FTPFS) BaseURL() string {
 
 // Close 关闭连接
 func (f *FTPFS) Close() error {
+	// QUIT 也使用控制连接，必须等当前传输读完结束响应。
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	// 清理缓存
 	if f.cache != nil {
 		f.cache.Clear()

@@ -16,6 +16,7 @@ import (
 	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/templ/pages/error_page"
 	"github.com/yumenaka/comigo/tools/logger"
+	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 	"github.com/yumenaka/comigo/tools/traffic"
 )
 
@@ -81,6 +82,8 @@ func SetMiddleware() {
 	// Recovery 中间件。返回 500 错误，避免程序直接崩溃，同时记录错误日志。
 	engine.Use(middleware.Recover())
 	engine.Use(middleware.RequestID())
+	// 每个 Echo 实例仅挂载一次，Tailscale 重载不再修改运行中的路由链。
+	engine.Use(tailscale_plugin.TailscaleAuthMiddleware())
 
 	// 设置 Echo 的日志输出
 	SetEchoLogger(engine)

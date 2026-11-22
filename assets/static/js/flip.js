@@ -1017,10 +1017,8 @@ function initFlipMainAreaListeners() {
     
     // 鼠标移动时触发移动事件
     DOM.flipMainArea.addEventListener('mousemove', onMouseMove)
-    // 点击的时候触发点击事件
+    // 点击和轻触统一由 click 处理，touchstart 没有鼠标坐标。
     DOM.flipMainArea.addEventListener('click', onMouseClick)
-    // 触摸开始时触发点击事件
-    DOM.flipMainArea.addEventListener('touchstart', onMouseClick)
     // 离开的时候触发离开事件
     DOM.flipMainArea.addEventListener('mouseleave', onMouseLeave)
     

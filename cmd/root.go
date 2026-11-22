@@ -1,11 +1,8 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/yumenaka/comigo/assets/locale"
@@ -44,11 +41,7 @@ var RootCmd = &cobra.Command{
 		cfg := config.GetCfg()
 		if cfg.SelfUpgrade {
 			locale.InitLanguageFromConfig(cfg.Language)
-			if err := runSelfUpgrade(); err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				os.Exit(1)
-			}
-			os.Exit(0)
+			return runSelfUpgrade()
 		}
 		// 默认启用几个内置插件
 		if cfg.EnablePlugin {
@@ -97,13 +90,8 @@ Go: ` + runtime.Version() + "\n")
 }
 
 // Execute 将所有子命令添加到根命令并适当设置标志。 由 main.main() 调用。 rootCmd 只需要执行一次。
-func Execute() {
-	// 初始化命令行参数。必须在config包初始化之前调用，因为config包会用到命令行参数 --config 指定的配置文件路径
+func Execute() error {
+	// 初始化命令行参数；错误交给入口处理，允许 TUI 恢复终端。
 	InitFlags()
-	// 执行命令
-	if err := RootCmd.Execute(); err != nil {
-		logger.Infof("%s", err)
-		time.Sleep(3 * time.Second)
-		os.Exit(1)
-	}
+	return RootCmd.Execute()
 }

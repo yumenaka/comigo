@@ -7,14 +7,13 @@ import (
 	fslib "io/fs"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"time"
 
 	"github.com/yumenaka/archives"
 	"github.com/yumenaka/comigo/assets/locale"
-	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/tools/file"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/vfs"
 )
@@ -212,22 +211,7 @@ func handleRemoteOtherArchiveFile(vfsInstance vfs.FileSystem, filePath string, n
 // downloadToCache 下载远程文件到本地缓存目录（仅用于 PDF 等需要随机访问的文件）
 // 返回本地缓存文件路径
 func downloadToCache(fs vfs.FileSystem, remotePath string, bookID string) (string, error) {
-	// 获取缓存目录
-	cacheDir := config.GetCfg().CacheDir
-	if cacheDir == "" {
-		cacheDir = os.TempDir()
-	}
-
-	// 创建书籍专用缓存目录
-	bookCacheDir := filepath.Join(cacheDir, "remote_books", bookID)
-	if err := os.MkdirAll(bookCacheDir, 0o755); err != nil {
-		return "", fmt.Errorf("创建缓存目录失败: %w", err)
-	}
-
-	// 获取文件名
-	fileName := path.Base(remotePath)
-	localPath := filepath.Join(bookCacheDir, fileName)
-
+	localPath := file.RemoteBookCachePath(bookID, remotePath)
 	// 检查缓存是否已存在
 	if info, err := os.Stat(localPath); err == nil {
 		// 获取远程文件信息
@@ -243,15 +227,5 @@ func downloadToCache(fs vfs.FileSystem, remotePath string, bookID string) (strin
 
 	// 下载文件
 	logger.Infof(locale.GetString("log_remote_file_download_to_cache"), remotePath, localPath)
-	data, err := fs.ReadFile(remotePath)
-	if err != nil {
-		return "", fmt.Errorf("读取远程文件失败: %w", err)
-	}
-
-	// 保存到本地
-	if err := os.WriteFile(localPath, data, 0o644); err != nil {
-		return "", fmt.Errorf("保存缓存文件失败: %w", err)
-	}
-
-	return localPath, nil
+	return file.DownloadRemoteBook(fs, remotePath, localPath)
 }

@@ -83,16 +83,19 @@ func GetImageDataBlurHashImage(loadedImage []byte, components int) []byte {
 	imageData, err := imaging.Decode(buf)
 	if err != nil {
 		logger.Infof("%s", err)
+		return loadedImage
 	}
 	str, err := blurhash.Encode(components, components, imageData)
 	if err != nil {
 		logger.Infof("%s", err)
+		return loadedImage
 	}
 	// Generate an imageData for a given BlurHash
 	// Punch specifies the contrasts and defaults to 1
 	img, err := blurhash.Decode(str, imageData.Bounds().Dx(), imageData.Bounds().Dy(), 1)
 	if err != nil {
 		logger.Infof("%s", err)
+		return loadedImage
 	}
 	buf2 := &bytes.Buffer{}
 	// 将图片编码成jpeg

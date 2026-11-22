@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
@@ -33,59 +34,69 @@ import (
 // Windows： %AppData% （like： C:\Users\[ユーザー名]\AppData）
 
 var (
-	tsServer     *tsnet.Server
-	netListener  net.Listener
-	localClient  *local.Client
-	tsHttpServer *http.Server
-	nowStatus    *TailscaleStatus
+	lifecycleMu   sync.RWMutex
+	cancelStartup context.CancelFunc
+	tsServer      *tsnet.Server
+	netListener   net.Listener
+	localClient   *local.Client
+	tsHttpServer  *http.Server
+	nowStatus     = &TailscaleStatus{}
 )
 
-func init() {
-	nowStatus = &TailscaleStatus{
-		Online: false,
-	}
-}
-
-// ctxKeyIsTailscale 用于标记来自 Tailscale 监听器的请求
-const ctxKeyIsTailscale = "is_tailscale_request"
-
-// withTailscaleContext 为经过 Tailscale 监听器的请求注入上下文标记
-// 这样中间件可以识别这些请求，让中间件仅在检测到该标记时执行 WhoIs 查询（普通请求触发 Tailscale WhoIs 查询会导致2秒左右的延迟）
-func withTailscaleContext(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), ctxKeyIsTailscale, true)
-		h.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
+// tailscaleClientKey 让请求始终使用接收该连接的实例查询身份。
+type tailscaleClientKey struct{}
 
 // RunTailscale 启动Tailscale网络服务器，统一使用echo处理请求
 func RunTailscale(e *echo.Echo, c TailscaleConfig) error {
+	lifecycleMu.Lock()
 	// CLI reload 和网页设置共用此入口；先释放旧实例，再按新配置创建监听。
-	if err := StopTailscale(); err != nil {
+	if err := stopTailscale(); err != nil {
+		lifecycleMu.Unlock()
 		return err
 	}
-	// 初始化Tailscale服务器
-	if err := InitTailscale(c); err != nil {
-		return fmt.Errorf("failed to initialize Tailscale server: %w", err)
+	if c.FunnelMode && c.Port != 443 && c.Port != 8443 && c.Port != 10000 {
+		lifecycleMu.Unlock()
+		return errors.New(locale.GetString("err_funnel_mode_ports_only"))
 	}
-
-	// 添加Tailscale身份验证信息中间件
-	e.Use(TailscaleAuthMiddleware())
-
-	// 创建HTTP服务器，使用echo.Echo作为处理器
+	instance := &tsnet.Server{Hostname: c.Hostname, Port: c.Port, Dir: c.ConfigDir, AuthKey: c.AuthKey, UserLogf: tailscaleUserLogf}
+	tsServer = instance
+	client, err := instance.LocalClient() // 启动完成后才允许 Stop 关闭 tsnet。
+	if err != nil {
+		err = errors.Join(err, stopTailscale())
+		lifecycleMu.Unlock()
+		return err
+	}
+	localClient = client
+	// 等待 Funnel 登录时允许状态查询、停止和重启；只发布仍属于本次启动的监听。
+	ctx, cancel := context.WithCancel(context.Background())
+	cancelStartup = cancel
+	lifecycleMu.Unlock()
+	ln, err := listenTailscale(ctx, instance, client, c)
+	cancel()
+	lifecycleMu.Lock()
+	defer lifecycleMu.Unlock()
+	if tsServer != instance {
+		if ln != nil {
+			err = errors.Join(err, ln.Close())
+		}
+		return errors.Join(context.Canceled, err)
+	}
+	cancelStartup = nil
+	if err != nil {
+		return errors.Join(fmt.Errorf("failed to initialize Tailscale listener: %w", err), stopTailscale())
+	}
+	netListener = ln
 	tsHttpServer = &http.Server{
-		Addr:    c.Hostname + ":" + fmt.Sprint(c.Port),
-		Handler: withTailscaleContext(e), // echo.Echo (多包一层)
+		Handler: e,
+		BaseContext: func(net.Listener) context.Context {
+			return context.WithValue(context.Background(), tailscaleClientKey{}, client)
+		},
 	}
 	// 使用Tailscale网络监听器启动服务器
 	logger.Infof(locale.GetString("log_starting_tailscale_http_server"), c.Hostname, c.Port)
 	// 捕获本次实例，避免重载改写全局变量后，旧协程误用新监听器。
 	server, listener := tsHttpServer, netListener
 	go func() {
-		if listener == nil {
-			logger.Errorf(locale.GetString("err_tailscale_netlistener_nil"))
-			return
-		}
 		if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			if !strings.Contains(err.Error(), "use of closed network connection") {
 				logger.Errorf(locale.GetString("err_tailscale_http_server_error"), err)
@@ -97,32 +108,41 @@ func RunTailscale(e *echo.Echo, c TailscaleConfig) error {
 
 // StopTailscale 停止Tailscale服务器
 func StopTailscale() error {
+	lifecycleMu.Lock()
+	defer lifecycleMu.Unlock()
+	return stopTailscale()
+}
+
+// stopTailscale 在持有生命周期锁时释放全部资源，单项关闭失败不跳过其余清理。
+func stopTailscale() error {
+	if cancelStartup != nil {
+		cancelStartup()
+		cancelStartup = nil
+	}
 	if tsServer == nil && tsHttpServer == nil && netListener == nil && localClient == nil {
 		return nil
 	}
-	logger.Info(locale.GetString("log_tailscale_server_stopped_successfully"))
-	// 关闭网络监听器
+	var errs []error
+	if tsHttpServer != nil {
+		errs = append(errs, tsHttpServer.Close())
+		tsHttpServer = nil
+	}
 	if netListener != nil {
-		if err := netListener.Close(); err != nil {
-			logger.Errorf(locale.GetString("err_error_closing_network_listener"), err)
-			return err
+		if err := netListener.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
+			errs = append(errs, err)
 		}
 		netListener = nil
 	}
-	// 可选：关闭 HTTP 服务器（忽略错误），并置空引用
-	// if tsHttpServer != nil { _ = tsHttpServer.Close() }
-	tsHttpServer = nil
-	// 关闭 Tailscale 服务器
 	if tsServer != nil {
-		if err := tsServer.Close(); err != nil {
-			logger.Errorf(locale.GetString("err_error_closing_tailscale_server"), err)
-			return err
-		}
+		errs = append(errs, tsServer.Close())
 		tsServer = nil
 	}
-	// 清理本地客户端，避免后续调用误判为可用
 	localClient = nil
-	return nil
+	err := errors.Join(errs...)
+	if err == nil {
+		logger.Info(locale.GetString("log_tailscale_server_stopped_successfully"))
+	}
+	return err
 }
 
 // firstLabel 提取主机名的第一个标签

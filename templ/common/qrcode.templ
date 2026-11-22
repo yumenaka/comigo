@@ -24,7 +24,7 @@ templ QRCode() {
 				class="block text-center"
 				target="_blank"
 				rel="noopener noreferrer"
-				@click="if (window.ComiGoWails && window.ComiGoOpenExternalURL) { $event.preventDefault(); window.ComiGoOpenExternalURL($store.global.qrcodeTargetURL); }"
+				@click="if (window.ComiGoIsWails() && window.ComiGoOpenExternalURL) { $event.preventDefault(); window.ComiGoOpenExternalURL($store.global.qrcodeTargetURL); }"
 			>
 				<div class="panel-surface inline-block max-w-full p-1 px-2 mt-1 text-center text-base-content bg-base-100 rounded text-sm text-shadow-2xs font-semibold break-all" x-text="$store.global.qrcodeTargetURL"></div>
 			</a>

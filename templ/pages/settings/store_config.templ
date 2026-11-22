@@ -168,7 +168,7 @@ templ StoreConfigJavaScript() {
 
 			// selectStoreFolder 只在 Wails 桌面壳中调用系统目录选择器，普通浏览器不显示入口。
 			async function selectStoreFolder(configName) {
-				if (!window.ComiGoWails) return;
+				if (!window.ComiGoIsWails()) return;
 				if (/Android/i.test(navigator.userAgent)) {
 					showToast(
 						i18next.t("wails_android_directory_picker_unsupported"),

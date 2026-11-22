@@ -149,16 +149,16 @@ func startEmbeddedServer(startCfg StartConfig) error {
 		cmd.ScanStore()
 		cmd.SaveMetadata()
 	}
-	config.StartOrStopAutoRescan()
 
 	timeout := time.Duration(startCfg.WaitReadyTimeoutSeconds) * time.Second
 	if timeout <= 0 {
 		timeout = 20 * time.Second
 	}
 	if err := waitForReady(timeout); err != nil {
-		_ = routers.StopWebServer()
-		return err
+		return errors.Join(err, routers.StopWebServer())
 	}
+	// 就绪后才启动调度，失败启动不会遗留后台扫描任务。
+	config.StartOrStopAutoRescan()
 	return nil
 }
 

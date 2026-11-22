@@ -132,7 +132,7 @@ window.ComiGoShareURL = function(currentURL, publicBaseURL) {
 // Wails WebView 内的新窗口链接由宿主打开，普通浏览器保留 window.open 行为。
 window.ComiGoOpenExternalURL = async function(targetURL) {
   if (!targetURL) return;
-  if (window.ComiGoWails) {
+  if (window.ComiGoIsWails()) {
     try {
       const response = await fetch(window.ComiGoPath('/api/wails/open-url'), {
         method: 'POST',
@@ -147,7 +147,7 @@ window.ComiGoOpenExternalURL = async function(targetURL) {
 };
 window.ComiGoToggleFullscreen = async function() {
   if (window.ComiGoElectronAction('toggle-fullscreen')) return;
-  if (window.ComiGoWails) {
+  if (window.ComiGoIsWails()) {
     try {
       const response = await fetch(window.ComiGoPath('/api/wails/toggle-fullscreen'), {
         method: 'POST',

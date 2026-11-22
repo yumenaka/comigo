@@ -2,7 +2,6 @@ package routers
 
 import (
 	"math/rand"
-	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/config"
@@ -21,12 +20,7 @@ func SetHttpPort() {
 		if err != nil {
 			logger.Infof(locale.GetString("log_failed_to_get_free_port"), err)
 			// 如果无法获取空闲端口，则随机选择一个端口
-			rand.New(rand.NewSource(time.Now().UnixNano()))
-			if config.GetCfg().Port+2000 > 65535 {
-				config.SetPort(rand.Intn(1024) + config.GetCfg().Port)
-			} else {
-				config.SetPort(rand.Intn(20000) + 30000)
-			}
+			config.SetPort(rand.Intn(20000) + 30000)
 		} else {
 			config.SetPort(port)
 		}

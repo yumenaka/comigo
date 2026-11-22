@@ -28,13 +28,10 @@ func main() {
 		}
 		return
 	}
-	for _, arg := range os.Args[1:] {
-		if arg == "-v" || arg == "--version" || arg == "-h" || arg == "--help" {
-			cmd.Execute()
-			return
-		}
+	if err := cmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
-	cmd.Execute()
 	if err := ensureWailsAndroidImportStore(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

@@ -8,9 +8,8 @@ import (
 
 // SetLogger 设置日志中间件
 func SetEchoLogger(e *echo.Echo) {
-	// 设置log中间件
-	logger.ReportCaller = config.GetCfg().Debug
+	cfg := config.GetCfg()
 	// TUI 会通过 logger.SetMirrorOutput 接收同一份 Echo 访问日志。
-	echoLogHandler := logger.EchoLogHandler(config.GetCfg().LogToFile, config.GetCfg().LogFilePath, config.GetCfg().LogFileName, config.GetCfg().Debug)
+	echoLogHandler := logger.EchoLogHandler(cfg.LogToFile, cfg.LogFilePath, cfg.LogFileName, cfg.Debug)
 	e.Use(echoLogHandler)
 }

@@ -235,3 +235,16 @@ func TestSortImagesReverseOrder(t *testing.T) {
 		t.Fatalf("filesize_reverse order = %#v", pages)
 	}
 }
+
+// TestGroupCoverSkipsMissingChild 首个子书失效后仍使用后续子书的有效封面。
+func TestGroupCoverSkipsMissingChild(t *testing.T) {
+	group := &Book{BookInfo: BookInfo{BookID: "group", Type: TypeBooksGroup, ChildBooksID: []string{"missing", "valid"}}}
+	withBookCleanupTestStore(t, &bookCleanupTestStore{books: map[string]*Book{"group": group, "valid": {BookInfo: BookInfo{BookID: "valid", Type: TypePDF}}}})
+	if cover := group.GetCover(); cover.Name != "1.jpg" {
+		t.Fatalf("有效子书封面被失效条目遮住: %+v", cover)
+	}
+	group.ChildBooksID = []string{"missing"}
+	if cover := group.GetCover(); cover.Name != "unknown.png" {
+		t.Fatalf("无有效子书时应保留占位图: %+v", cover)
+	}
+}

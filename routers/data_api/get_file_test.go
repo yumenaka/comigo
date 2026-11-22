@@ -1,11 +1,14 @@
 package data_api
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/yumenaka/comigo/assets"
 	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/store"
@@ -178,5 +181,31 @@ func TestServeCachedPictureSkipsCacheWhenNoCacheQuerySet(t *testing.T) {
 	}
 	if rec.Code != http.StatusOK {
 		t.Fatalf("跳过缓存时不应提前写响应，got status %d", rec.Code)
+	}
+}
+
+// TestGetCoverCachedPNG 验证命中本地缓存时，HTTP 响应仍保留封面实际编码。
+func TestGetCoverCachedPNG(t *testing.T) {
+	old := config.CopyCfg()
+	cfg := old
+	cfg.ConfigFile = filepath.Join(t.TempDir(), "config.toml")
+	config.ReplaceConfig(cfg)
+	t.Cleanup(func() { config.ReplaceConfig(old) })
+	book := &model.Book{BookInfo: model.BookInfo{BookID: "book", Type: model.TypePDF}}
+	oldStore := model.IStore
+	model.IStore = &zipDownloadStore{book: book}
+	t.Cleanup(func() { model.IStore = oldStore })
+	data := assets.GetImageData("unknown.png")
+	dir := filepath.Join(filepath.Dir(cfg.ConfigFile), "metadata", book.GetStoreID())
+	if err := fileutil.SaveCoverToLocal(dir, book.BookID, 352, data); err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodGet, "/api/get-cover?id=book", nil)
+	rec := httptest.NewRecorder()
+	if err := GetCover(echo.New().NewContext(req, rec)); err != nil {
+		t.Fatal(err)
+	}
+	if rec.Code != http.StatusOK || rec.Header().Get("Content-Type") != "image/png" || !bytes.Equal(rec.Body.Bytes(), data) {
+		t.Fatalf("缓存封面响应错误: HTTP %d, %s", rec.Code, rec.Header().Get("Content-Type"))
 	}
 }

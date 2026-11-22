@@ -11,10 +11,11 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
+// StoreBookmark 校验请求后保存书签。
 func StoreBookmark(c echo.Context) error {
 	request, err := parseStoreBookmarkRequest(c)
 	if err != nil {
-		return err
+		return writeValidationError(c, err)
 	}
 	if localBook, client, _, ok, err := remoteComigoBookFromRequest(c, request.BookID); ok {
 		if err != nil {
@@ -36,13 +37,13 @@ func StoreBookmark(c echo.Context) error {
 		}
 		return apiresp.Success(c, "ok", locale.GetString("bookmark_updated_successfully"), nil)
 	}
-	book, err := requireBookmarkBook(c, request.BookID)
+	book, err := requireBookmarkBook(request.BookID)
 	if err != nil {
 		logger.Infof("%s", err)
-		return err
+		return writeValidationError(c, err)
 	}
-	if err := validateBookmarkPageIndex(c, request, book); err != nil {
-		return err
+	if err := validateBookmarkPageIndex(request, book); err != nil {
+		return writeValidationError(c, err)
 	}
 	// 创建或更新书签
 	bookMark := model.NewBookMark(request.MarkType, book.BookID, book.GetStoreID(), request.PageIndex, request.Description)
@@ -61,14 +62,16 @@ func GetAllBookmarks(c echo.Context) error {
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
+		return apiresp.Error(c, http.StatusInternalServerError, "list_books_failed", locale.GetString("err_internal_server"), nil)
 	}
 	// 收集所有书签
 	allMarks := []model.BookinfoWithBookMark{}
 	for _, book := range allBooks {
 		for _, mark := range book.BookMarks {
-			book.BookInfo.Cover = book.GetCover()
+			info := book.BookInfo
+			info.Cover = book.GetCover()
 			bookinfoWithMark := model.BookinfoWithBookMark{
-				BookInfo: book.BookInfo,
+				BookInfo: info,
 				BookMark: mark,
 			}
 			allMarks = append(allMarks, bookinfoWithMark)

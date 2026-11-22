@@ -137,8 +137,8 @@ func (cfg *Config) JwtSigningKey() string {
 
 func SetPort(port int) {
 	if port < 0 || port > 65535 {
-		port = 1234
 		logger.Infof(locale.GetString("log_invalid_port_number"), port)
+		port = 1234
 	}
 	_, _ = ChangeConfig(false, func(c *Config) error { c.Port = port; return nil })
 }

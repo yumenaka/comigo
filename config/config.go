@@ -180,7 +180,7 @@ func (c *Config) AddStoreUrl(storeURL string) error {
 		// 远程 URL 处理（WebDAV, SMB, SFTP 等），扫描时再验证连接。
 		info, err := tools.ParseStoreURL(storeURL)
 		if err != nil {
-			return fmt.Errorf(locale.GetString("err_invalid_store_path")+": %w", err)
+			return fmt.Errorf(locale.GetString("err_invalid_store_path")+": %w", tools.NormalizeStoreURLKey(storeURL), err)
 		}
 
 		if info.ServerHost == "" {

@@ -97,7 +97,7 @@ window.ComiGoShelf.rescanAllStores = () =>
   rescanShelfStore("/api/stores/refresh", null, "重新扫描全部书库失败:");
 
 (() => {
-  const isAndroidWails = window.ComiGoWails && /Android/i.test(navigator.userAgent);
+  const isAndroidWails = window.ComiGoIsWails() && /Android/i.test(navigator.userAgent);
   if (!isAndroidWails) return;
   const path = window.ComiGoRelativePath?.(window.location.pathname) || window.location.pathname;
   if (path !== "/" && path !== "/index.html") return;

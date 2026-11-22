@@ -110,7 +110,7 @@ func GetContentTypeByFileName(fileName string) (contentType string) {
 	case ext == ".heif":
 		contentType = "image/heif"
 	case ext == ".ico":
-		contentType = "image/image/vnd.microsoft.icon"
+		contentType = "image/vnd.microsoft.icon"
 	case ext == ".zip":
 		contentType = "application/zip"
 	case ext == ".rar":

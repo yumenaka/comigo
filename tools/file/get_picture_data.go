@@ -1,16 +1,20 @@
 package file
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/natefinch/atomic"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/vfs"
@@ -123,7 +127,10 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 		actualPdfPath := bookPath
 		if option.IsRemote && option.RemoteURL != "" && option.BookID != "" {
 			// PDF 需要下载到缓存（因为 PDF 处理库需要随机访问）
-			actualPdfPath = getRemotePdfCachePath(option.BookID, bookPath, option.RemoteURL)
+			actualPdfPath, err = getRemotePdfCachePath(option.BookID, bookPath, option.RemoteURL)
+			if err != nil {
+				return nil, "", err
+			}
 		}
 
 		imgData, err = GetImageFromPDF(actualPdfPath, page, option.Debug)
@@ -177,17 +184,14 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 	// 图片Resize, 按照固定的width height缩放
 	if option.ResizeWidth > 0 && option.ResizeHeight > 0 {
 		imgData = tools.ImageResize(imgData, option.ResizeWidth, option.ResizeHeight)
-		contentType = tools.GetContentTypeByFileName(".jpg")
 	}
 	// 图片Resize, 按照 width 等比例缩放
 	if option.ResizeHeight == 0 && option.ResizeWidth > 0 {
 		imgData = tools.ImageResizeByWidth(imgData, option.ResizeWidth)
-		contentType = tools.GetContentTypeByFileName(".jpg")
 	}
 	// 图片Resize, 按照 height 等比例缩放
 	if option.ResizeHeight > 0 && option.ResizeWidth == 0 {
 		imgData = tools.ImageResizeByHeight(imgData, option.ResizeHeight)
-		contentType = tools.GetContentTypeByFileName(".jpg")
 	}
 	// 图片Resize, 按照 maxWidth 限制大小
 	if option.ResizeMaxWidth > 0 {
@@ -197,7 +201,6 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 		} else {
 			imgData = tempData
 		}
-		contentType = tools.GetContentTypeByFileName(".jpg")
 	}
 	// 图片Resize, 按照 MaxHeight 限制大小
 	if option.ResizeMaxHeight > 0 {
@@ -207,17 +210,14 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 		} else {
 			imgData = tempData
 		}
-		contentType = tools.GetContentTypeByFileName(".jpg")
 	}
 	// 自动切白边
 	if option.AutoCrop > 0 && option.AutoCrop <= 100 {
 		imgData = tools.ImageAutoCrop(imgData, float32(option.AutoCrop))
-		contentType = tools.GetContentTypeByFileName(".jpg")
 	}
 	// 转换为黑白图片
 	if option.Gray {
 		imgData = tools.ImageGray(imgData)
-		contentType = tools.GetContentTypeByFileName(".jpg")
 	}
 	// //获取对应图片的blurhash字符串(!)
 	if option.BlurHash >= 1 && option.BlurHash <= 2 {
@@ -228,37 +228,53 @@ func GetPictureData(option GetPictureDataOption) (imgData []byte, contentType st
 	// 返回blurhash图片 虽然blurhash components 理论上最大可以设到9，但速度太慢，限定为1或2
 	if option.BlurHashImage >= 1 && option.BlurHashImage <= 2 {
 		imgData = tools.GetImageDataBlurHashImage(imgData, option.BlurHashImage)
+	}
+	// 变换失败会保留原始数据；只有实际输出 JPEG 时才改 MIME。
+	if http.DetectContentType(imgData) == "image/jpeg" {
 		contentType = tools.GetContentTypeByFileName(".jpg")
 	}
+
 	return imgData, contentType, nil
 }
 
 // getRemotePdfCachePath 获取远程 PDF 的本地缓存路径
 // PDF 处理库（pdfcpu）需要文件路径进行随机访问，无法流式读取，所以需要下载到本地
 // 注意：PDF 文件在扫描时应该已经下载到缓存，这里作为后备机制按需下载
-func getRemotePdfCachePath(bookID string, remotePath string, remoteURL string) string {
-	cacheDir := os.Getenv("COMIGO_CACHE_DIR")
-	if cacheDir == "" {
-		cacheDir = os.TempDir()
+func getRemotePdfCachePath(bookID, remotePath, remoteURL string) (string, error) {
+	target := RemoteBookCachePath(bookID, remotePath)
+	if _, err := os.Stat(target); err == nil {
+		return target, nil
+	} else if !os.IsNotExist(err) {
+		return "", err
 	}
-	fileName := filepath.Base(remotePath)
-	cachePath := filepath.Join(cacheDir, "remote_books", bookID, fileName)
-
-	// 如果缓存不存在，按需下载（PDF 在扫描时应该已经下载，这里作为后备）
-	if _, err := os.Stat(cachePath); os.IsNotExist(err) {
-		logger.Infof(locale.GetString("log_remote_pdf_download_on_demand"), remotePath)
-		fs, err := vfs.GetOrCreate(remoteURL, vfs.Options{
-			CacheEnabled: false,
-			Timeout:      30,
-		})
-		if err == nil {
-			data, readErr := fs.ReadFile(remotePath)
-			if readErr == nil {
-				_ = os.MkdirAll(filepath.Dir(cachePath), 0o755)
-				_ = os.WriteFile(cachePath, data, 0o644)
-			}
-		}
+	logger.Infof(locale.GetString("log_remote_pdf_download_on_demand"), remotePath)
+	fs, err := vfs.GetOrCreate(remoteURL, vfs.Options{CacheEnabled: false, Timeout: 30})
+	if err != nil {
+		return "", err
 	}
+	return DownloadRemoteBook(fs, remotePath, target)
+}
 
-	return cachePath
+// RemoteBookCachePath 让扫描和读取使用配置中的同一份远端文件缓存。
+func RemoteBookCachePath(bookID, remotePath string) string {
+	dir := config.GetCfg().CacheDir
+	if dir == "" {
+		dir = os.TempDir()
+	}
+	return filepath.Join(dir, "remote_books", bookID, filepath.Base(remotePath))
+}
+
+// DownloadRemoteBook 下载完整后再替换缓存，失败时保留旧文件并返回原因。
+func DownloadRemoteBook(fs vfs.FileSystem, remotePath, target string) (string, error) {
+	data, err := fs.ReadFile(remotePath)
+	if err != nil {
+		return "", fmt.Errorf("读取远程文件失败: %w", err)
+	}
+	if err = os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+		return "", err
+	}
+	if err = atomic.WriteFile(target, bytes.NewReader(data)); err != nil {
+		return "", err
+	}
+	return target, nil
 }

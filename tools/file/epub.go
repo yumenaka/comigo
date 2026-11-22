@@ -9,8 +9,8 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/yumenaka/archives"
 	"github.com/yumenaka/comigo/assets/locale"
@@ -52,18 +52,18 @@ func getDataFromEpub(epubPath string, needFile string) (data []byte, err error) 
 			if f.Name() != needFile {
 				return nil
 			}
-				found = true
+			found = true
 			// 取得特定压缩文件
 			file, err := f.Open()
 			if err != nil {
 				return err
 			}
-			content, err := io.ReadAll(file)
-			if err != nil {
+			content, readErr := io.ReadAll(file)
+			closeErr := file.Close()
+			if err := errors.Join(readErr, closeErr); err != nil {
 				return err
 			}
 			data = content
-			file.Close()
 			return nil
 		})
 		if err != nil {
@@ -213,32 +213,15 @@ func absUrl(currUrl, baseUrl string) string {
 	if err != nil {
 		return ""
 	}
-	u := ""
-	var path string
-	if strings.Index(urlInfo.Path, "/") == 0 {
-		path = urlInfo.Path
-	} else {
-		path = filepath.Dir(baseInfo.Path) + "/" + urlInfo.Path
+	// EPUB 条目统一使用斜杠；绝对路径不能退到根外，相对路径保留上级引用。
+	if path.IsAbs(urlInfo.Path) {
+		return path.Clean(urlInfo.Path)
 	}
-	rst := make([]string, 0)
-	pathArr := strings.Split(path, "/")
-
-	// 如果path是已/开头，那在rst加入一个空元素
-	if pathArr[0] == "" {
-		rst = append(rst, "")
+	resolved := path.Join(path.Dir(baseInfo.Path), urlInfo.Path)
+	if resolved == "." {
+		return ""
 	}
-	for _, p := range pathArr {
-		if p == ".." {
-			if rst[len(rst)-1] == ".." {
-				rst = append(rst, "..")
-			} else {
-				rst = rst[:len(rst)-1]
-			}
-		} else if p != "" && p != "." {
-			rst = append(rst, p)
-		}
-	}
-	return u + strings.Join(rst, "/")
+	return resolved
 }
 
 // GetImageListFromEpubFile 根据Epub信息，获取有序的imgSrc列表
@@ -280,10 +263,10 @@ func GetImageListFromEpubFile(epubPath string) (imageList []string, err error) {
 			continue
 		}
 		reader := bytes.NewReader(data)
-			tempSrc := findAttrValue(reader, "src")
-			src := absUrl(tempSrc, htmlList[i])
-			imageList = append(imageList, src)
-		}
+		tempSrc := findAttrValue(reader, "src")
+		src := absUrl(tempSrc, htmlList[i])
+		imageList = append(imageList, src)
+	}
 	return imageList, err
 }
 

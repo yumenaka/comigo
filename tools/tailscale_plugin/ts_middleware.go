@@ -6,31 +6,20 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"tailscale.com/client/local"
 )
 
 // TailscaleAuthMiddleware 创建Tailscale身份验证中间件
 func TailscaleAuthMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// 中间件仅在检测到Tailscale标记时执行 WhoIs 查询（普通请求触发 Tailscale WhoIs 查询会导致2秒左右的延迟）
-			if v, ok := c.Request().Context().Value(ctxKeyIsTailscale).(bool); !ok || !v {
+			client, _ := c.Request().Context().Value(tailscaleClientKey{}).(*local.Client)
+			if client == nil {
 				return next(c)
 			}
-			// 避免重复查询
-			if c.Get("tailscale_user") != nil && c.Get("tailscale_node") != "" {
-				if nowStatus.CheckClientInfoExists(
-					c.Get("tailscale_user").(string),
-					c.Get("tailscale_node").(string),
-					c.Get("tailscale_remote_addr").(string),
-				) {
-					// 已经存在此user, 说明访问者信息已经保存过了, 直接返回
-					return next(c)
-				}
-			}
-			// 检测到Tailscale标记, 获取请求者的Tailscale身份信息
-			who, err := localClient.WhoIs(c.Request().Context(), c.Request().RemoteAddr)
+			who, err := client.WhoIs(c.Request().Context(), c.Request().RemoteAddr)
 			// 如果可以获取访问者的身份信息
-			if err == nil {
+			if err == nil && who.Node != nil && who.UserProfile != nil {
 				// 将最后访问者的Tailscale信息存储到上下文(避免重复查询)
 				c.Set("tailscale_user", who.UserProfile.LoginName)
 				c.Set("tailscale_node", firstLabel(who.Node.ComputedName))

@@ -218,7 +218,8 @@ func (b *BookInfo) GetCover() PageInfo {
 		for _, childID := range bookGroup.ChildBooksID {
 			book, err := IStore.GetBook(childID)
 			if err != nil {
-				return PageInfo{Name: "unknown.png", Url: "/images/unknown.png"}
+				// 失效子书不能遮住后续可用的封面。
+				continue
 			}
 			// 递归调用
 			return book.GetCover()

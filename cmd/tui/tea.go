@@ -363,7 +363,9 @@ func runWithoutTUI() error {
 
 // startBackend 统一 TUI 与无界面 CLI 的服务和书库启动顺序。
 func startBackend() error {
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		return err
+	}
 	cmd.AddStoreUrls(cmd.Args)
 	cmd.SetCwdAsScanPathIfNeed()
 	if err := cmd.LoadMetadata(); err != nil {

@@ -3,6 +3,7 @@ package cover
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -55,11 +56,17 @@ func GetBookCover(req Request) (Result, error) {
 
 	bookCover := book.GetCover()
 	cacheCtx := getCacheContext(book)
-	if data, ok := getCached(cacheCtx, req); ok {
-		return Result{Data: data, ContentType: "image/jpeg"}, nil
+	data, ok := getCached(cacheCtx, req)
+	if !ok {
+		data, ok = getMP3Cover(book, cacheCtx, req)
 	}
-	if data, ok := getMP3Cover(book, cacheCtx, req); ok {
-		return Result{Data: data, ContentType: "image/jpeg"}, nil
+	if ok {
+		// 缩放失败会保留原始图片，缓存文件的 .jpg 后缀不能决定响应类型。
+		mime := http.DetectContentType(data)
+		if !strings.HasPrefix(mime, "image/") {
+			mime = tools.GetContentTypeByFileName(bookCover.Name)
+		}
+		return Result{Data: data, ContentType: mime}, nil
 	}
 
 	needFile := bookCover.Name

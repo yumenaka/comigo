@@ -11,11 +11,11 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 	"github.com/yumenaka/comigo/tools/sse_hub"
 )
@@ -37,17 +37,16 @@ var (
 // 全局 logger
 var (
 	logger         *logrus.Logger
-	ReportCaller   bool
 	baseOutput     io.Writer
 	mirrorOutput   io.Writer
 	suppressStdout bool
+	outputMu       sync.Mutex
+	fileOutput     *rotatelogs.RotateLogs
 )
 
 func init() {
 	logger = logrus.New()
 	baseOutput = os.Stderr
-	// 开启收集调用信息
-	logger.SetReportCaller(ReportCaller)
 
 	// 设置自定义 formatter
 	logger.SetFormatter(&EchoLogFormatter{
@@ -58,17 +57,26 @@ func init() {
 	// 将 logger 的输出函数赋值给外部调用
 	// 每个包的包级变量初始化是在 init 函数执行前完成的。所以不可以用 var Info = logger.Info 这种写法，会因为 logger 未初始化，导致空指针异常
 	SetOutput = func(output io.Writer) {
+		outputMu.Lock()
+		defer outputMu.Unlock()
 		baseOutput = output
 		applyOutput()
 	}
 	SetMirrorOutput = func(output io.Writer) {
+		outputMu.Lock()
+		defer outputMu.Unlock()
 		mirrorOutput = output
 		applyOutput()
 	}
 	SetSuppressStdout = func(disable bool) {
+		outputMu.Lock()
+		defer outputMu.Unlock()
 		suppressStdout = disable
+		applyOutput()
 	}
 	IsStdoutSuppressed = func() bool {
+		outputMu.Lock()
+		defer outputMu.Unlock()
 		return suppressStdout
 	}
 	Info = logger.Info
@@ -80,18 +88,48 @@ func init() {
 	applyOutput()
 }
 
-// applyOutput 把主输出和镜像输出统一到 logger 上。
-func applyOutput() {
-	switch {
-	case baseOutput != nil && mirrorOutput != nil:
-		logger.SetOutput(io.MultiWriter(baseOutput, mirrorOutput))
-	case baseOutput != nil:
-		logger.SetOutput(baseOutput)
-	case mirrorOutput != nil:
-		logger.SetOutput(mirrorOutput)
-	default:
-		logger.SetOutput(os.Stderr)
+// logOutputs 将同一条日志交给每个目的地，终端或镜像写入失败仍可写文件。
+type logOutputs []io.Writer
+
+func (outputs logOutputs) Write(data []byte) (int, error) {
+	var writeErr error
+	for _, output := range outputs {
+		n, err := output.Write(data)
+		if err == nil && n != len(data) {
+			err = io.ErrShortWrite
+		}
+		if err != nil {
+			writeErr = errors.Join(writeErr, err)
+		}
 	}
+	if writeErr != nil {
+		return 0, writeErr
+	}
+	return len(data), nil
+}
+
+// applyOutput 配置终端、TUI 镜像和轮转文件，切换文件模式不改写原终端设置。
+func applyOutput() {
+	var outputs logOutputs
+	if !suppressStdout {
+		console := baseOutput
+		if console == os.Stderr && fileOutput != nil {
+			console = os.Stdout
+		}
+		if console == nil && mirrorOutput == nil {
+			console = os.Stderr
+		}
+		if console != nil {
+			outputs = append(outputs, console)
+		}
+	}
+	if mirrorOutput != nil {
+		outputs = append(outputs, mirrorOutput)
+	}
+	if fileOutput != nil {
+		outputs = append(outputs, fileOutput)
+	}
+	logger.SetOutput(outputs)
 }
 
 // EchoLogFormatter 可以根据自己需求自由命名
@@ -114,7 +152,7 @@ func (f *EchoLogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	// 默认的调用信息
 	var callerInfo string
-	if ReportCaller && entry.HasCaller() {
+	if entry.HasCaller() {
 		// 例如：/path/to/pkg/file.go
 		file := entry.Caller.File
 		// 行号
@@ -129,20 +167,14 @@ func (f *EchoLogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		shortFuncName := trimFuncName(funcName)
 
 		// 组合 caller 信息
-		callerInfo = fmt.Sprintf("%s:%d %s()", fileName, line, shortFuncName)
+		callerInfo = fmt.Sprintf("%s:%d %s() ", fileName, line, shortFuncName)
 	} else {
 		callerInfo = ""
 	}
 
 	// 拼装日志内容
-	var logLine string
-	if ReportCaller {
-		logLine = fmt.Sprintf("[%s][%s]%s\n",
-			strings.ToUpper(entry.Level.String()), timestamp, entry.Message)
-	} else {
-		logLine = fmt.Sprintf("[%s][%s]%s%s\n",
-			strings.ToUpper(entry.Level.String()), timestamp, callerInfo, entry.Message)
-	}
+	logLine := fmt.Sprintf("[%s][%s]%s%s\n",
+		strings.ToUpper(entry.Level.String()), timestamp, callerInfo, entry.Message)
 	b.WriteString(logLine)
 	return b.Bytes(), nil
 }
@@ -158,6 +190,7 @@ func trimFuncName(funcName string) string {
 	return parts[len(parts)-1]
 }
 
+// EchoLogHandler 配置日志输出并记录 HTTP 请求。
 func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debug bool) echo.MiddlewareFunc {
 	logger.SetLevel(logrus.DebugLevel)
 	logger.SetReportCaller(Debug)
@@ -165,45 +198,34 @@ func EchoLogHandler(LogToFile bool, LogFilePath string, LogFileName string, Debu
 		FullTimestamp:   false,
 		TimestampFormat: "2006-01-02 15:04:05",
 	})
-	// 设置输出
+	// 先验证新轮转文件可写，再替换旧输出；失败时仍保留终端和 TUI 镜像。
+	var logWriter *rotatelogs.RotateLogs
+	var fileErr error
 	if LogToFile {
-		// 日志文件路径
 		filename := path.Join(LogFilePath, LogFileName)
-		file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-		if err != nil {
-			logger.Info("logger err:", err)
-		}
-		// 设置多种输出类型(默认值“os.Stderr”)
-		if suppressStdout {
-			SetOutput(file)
-		} else {
-			SetOutput(io.MultiWriter(os.Stdout, file))
-		}
-		// 设置rotatelogs
-		logWriter, err := rotatelogs.New(
-			// 分割后的文件名
-			filename+"%Y%m%d.log",
-			// 指向最新日志文件的软链接
+		logWriter, fileErr = rotatelogs.New(filename+"%Y%m%d.log",
 			rotatelogs.WithLinkName(filename),
-			// 最长保存时间
 			rotatelogs.WithMaxAge(7*24*time.Hour),
-			// 切割间隔时间
-			rotatelogs.WithRotationTime(24*time.Hour),
-		)
-		if err != nil {
-			logger.Info("logger err:", err)
+			rotatelogs.WithRotationTime(24*time.Hour))
+		if fileErr == nil {
+			_, fileErr = logWriter.Write(nil)
+			if fileErr != nil {
+				_ = logWriter.Close()
+				logWriter = nil
+			}
 		}
-		writeMap := lfshook.WriterMap{
-			logrus.InfoLevel:  logWriter,
-			logrus.FatalLevel: logWriter,
-			logrus.DebugLevel: logWriter,
-			logrus.WarnLevel:  logWriter,
-			logrus.ErrorLevel: logWriter,
-			logrus.PanicLevel: logWriter,
-		}
-		logger.AddHook(lfshook.NewHook(writeMap, &logrus.TextFormatter{
-			TimestampFormat: "2006-01-02 03:04:05",
-		}))
+	}
+	outputMu.Lock()
+	oldFile := fileOutput
+	fileOutput = logWriter
+	applyOutput()
+	// logrus.SetOutput 已等待旧输出的写入完成，此时可安全关闭旧文件。
+	if oldFile != nil {
+		_ = oldFile.Close()
+	}
+	outputMu.Unlock()
+	if fileErr != nil {
+		logger.Info("logger err:", fileErr)
 	}
 	// 自定义log处理函数
 	return func(next echo.HandlerFunc) echo.HandlerFunc {

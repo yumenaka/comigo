@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/model"
+	"github.com/yumenaka/comigo/routers/apiresp"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -56,6 +57,7 @@ func GetReadingHistory(c echo.Context) error {
 	allBooks, err := model.IStore.ListBooks()
 	if err != nil {
 		logger.Infof(locale.GetString("log_error_listing_books"), err)
+		return apiresp.Error(c, http.StatusInternalServerError, "list_books_failed", locale.GetString("err_internal_server"), nil)
 	}
 
 	// 收集阅读历史（过滤 page_index > 0 的书签）
@@ -67,9 +69,10 @@ func GetReadingHistory(c echo.Context) error {
 		for _, mark := range book.BookMarks {
 			// 只收集有阅读记录的书签（page_index > 0）
 			if mark.PageIndex > 0 {
-				book.BookInfo.Cover = book.GetCover()
+				info := book.BookInfo
+				info.Cover = book.GetCover()
 				bookinfoWithMark := model.BookinfoWithBookMark{
-					BookInfo: book.BookInfo,
+					BookInfo: info,
 					BookMark: mark,
 				}
 				readingHistory = append(readingHistory, bookinfoWithMark)

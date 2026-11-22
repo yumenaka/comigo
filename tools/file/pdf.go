@@ -20,19 +20,19 @@ import (
 // sample code: https://github.com/pdfcpu/pdfcpu/blob/master/pkg/api/extract.go
 
 // CountPagesOfPDF 确定PDF的页数
-func CountPagesOfPDF(pdfFileName string) (int, error) {
-	// 设置一个defer语句来捕获并处理潜在的panic。defer语句会确保在函数返回之前执行其中的代码，而recover函数用于捕获并恢复panic，防止panic向上传播并导致整个程序崩溃
-	// recover 函数旨在捕获恐慌，但必须在延迟函数中调用它才能正常工作。https://victoriametrics.com/blog/defer-in-go/
+func CountPagesOfPDF(pdfFileName string) (count int, err error) {
+	// 底层解析 panic 也必须作为失败返回，不能伪装成零页成功。
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Infof(locale.GetString("log_countpages_pdf_invalid_error"), pdfFileName, r)
-			// 这里可以根据需要进行错误处理，比如返回特定的错误值给调用者
+			count = -1
+			err = fmt.Errorf(locale.GetString("err_countpages_pdf_invalid"), pdfFileName, fmt.Sprint(r))
 		}
 	}()
 	// use default configuration for pdfcpu ("nil")
 	// pdfcpu 的文件接口需要上下文；本地同步读取使用后台上下文。
 	ctx := context.Background()
-	err := api.ValidateFile(ctx, pdfFileName, nil, nil)
+	err = api.ValidateFile(ctx, pdfFileName, nil, nil)
 	if err != nil {
 		return -1, fmt.Errorf(locale.GetString("err_countpages_pdf_invalid"), pdfFileName, err.Error())
 	}
@@ -45,7 +45,7 @@ func GetImageFromPDF(pdfFileName string, pageNum int, Debug bool) ([]byte, error
 	// 打开PDF文件
 	file, err := os.Open(pdfFileName)
 	if err != nil {
-		logger.Info(err)
+		return nil, err
 	}
 	defer file.Close()
 	// use default configuration for pdfcpu
@@ -54,7 +54,7 @@ func GetImageFromPDF(pdfFileName string, pageNum int, Debug bool) ([]byte, error
 	buffer := &bytes.Buffer{}
 	err = api.ExtractImages(context.Background(), file, []string{strconv.Itoa(pageNum)}, digestImage(buffer), pdfSetting)
 	if err != nil {
-		logger.Info(err)
+		return nil, err
 	}
 	// 参考：https://github.com/pdfcpu/pdfcpu/issues/45
 	// https://github.com/pdfcpu/pdfcpu/issues/351

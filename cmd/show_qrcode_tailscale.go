@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
@@ -12,68 +13,82 @@ import (
 	"github.com/yumenaka/comigo/tools/tailscale_plugin"
 )
 
-var authUrlPrinted bool = false
-var readUrlPrinted bool = false
-var counter int = 0
+var tailscaleQRMu sync.Mutex
+var tailscaleQRCancel context.CancelFunc
 
-// ShowQRCodeTailscale 打印 Tailscale 访问地址的二维码
+// stopTailscaleQRCode 取消上一轮轮询，避免重载后遗留定时任务。
+func stopTailscaleQRCode() {
+	tailscaleQRMu.Lock()
+	defer tailscaleQRMu.Unlock()
+	if tailscaleQRCancel != nil {
+		tailscaleQRCancel()
+		tailscaleQRCancel = nil
+	}
+}
+
+// ShowQRCodeTailscale 每次调用替换上一轮轮询，计数和打印状态只属于本次调用。
 func ShowQRCodeTailscale(ctx context.Context) {
-	// 前提： 启用 Tailscale 服务
-	if config.GetCfg().EnableTailscale == false {
+	tailscaleQRMu.Lock()
+	defer tailscaleQRMu.Unlock()
+	if tailscaleQRCancel != nil {
+		tailscaleQRCancel()
+	}
+	if !config.GetCfg().EnableTailscale {
+		tailscaleQRCancel = nil
 		return
 	}
-	if counter > 100 {
-		logger.Info(locale.GetString("log_tailscale_status_check_exceeded"))
-		return
-	}
-	// 1 秒后打印 Url（不会阻塞 main 线程）
-	time.AfterFunc(1*time.Second, func() {
-		// 获取 Tailscale 状态
+	ctx, tailscaleQRCancel = context.WithCancel(ctx)
+	go pollTailscaleQRCode(ctx)
+}
+
+// pollTailscaleQRCode 使用单条可取消的轮询链，获取阅读地址后结束。
+func pollTailscaleQRCode(ctx context.Context) {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+	authURLPrinted := false
+	for counter := 0; counter < 101; counter++ {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+		}
+		cfg := config.GetCfg()
+		if !cfg.EnableTailscale {
+			return
+		}
 		st, err := tailscale_plugin.GetTailscaleStatus(ctx)
+		if ctx.Err() != nil {
+			return
+		}
 		if err != nil {
-			if config.GetCfg().Debug {
+			if cfg.Debug {
 				logger.Infof(locale.GetString("log_tailscale_status_not_available"), err)
 			}
 			return
 		}
-		// 计数器+1
-		counter++
-		// 打印 Tailscale 访问链接（只打印一次）
-		if st.Online == true {
-			if st.FQDN != "" {
-				if readUrlPrinted == false {
-					proto := "http://"
-					if config.GetCfg().TailscalePort == 443 || config.GetCfg().FunnelTunnel {
-						proto = "https://"
-					}
-					readURL := proto + st.FQDN
-					if config.GetCfg().TailscalePort != 80 && config.GetCfg().TailscalePort != 443 {
-						readURL = readURL + ":" + strconv.Itoa(config.GetCfg().TailscalePort)
-					}
-					readURL += config.PrefixPath("/")
-					logger.Info(locale.GetString("tailscale_reading_url") + readURL)
-					tools.PrintQRCode(readURL)
-					readUrlPrinted = true
-				}
-			} else {
+		if st.Online {
+			if st.FQDN == "" {
 				logger.Info(locale.GetString("log_tailscale_not_yet_fqdn"))
-				ShowQRCodeTailscale(ctx)
-				return
+				continue
 			}
-		}
-		// 打印 Tailscale 授权验证链接（只打印一次）
-		if st.Online == false {
-			if st.AuthURL != "" {
-				if authUrlPrinted == false {
-					logger.Info(locale.GetString("tailscale_auth_url_is") + st.AuthURL)
-					tools.PrintQRCode(st.AuthURL)
-					authUrlPrinted = true
-					ShowQRCodeTailscale(ctx)
-				}
+			proto := "http://"
+			if cfg.TailscalePort == 443 || cfg.FunnelTunnel {
+				proto = "https://"
 			}
-			// 继续检查状态，直到上线
-			ShowQRCodeTailscale(ctx)
+			readURL := proto + st.FQDN
+			if cfg.TailscalePort != 80 && cfg.TailscalePort != 443 {
+				readURL += ":" + strconv.Itoa(cfg.TailscalePort)
+			}
+			readURL += config.PrefixPath("/")
+			logger.Info(locale.GetString("tailscale_reading_url") + readURL)
+			tools.PrintQRCode(readURL)
 			return
 		}
-	})
+		if st.AuthURL != "" && !authURLPrinted {
+			logger.Info(locale.GetString("tailscale_auth_url_is") + st.AuthURL)
+			tools.PrintQRCode(st.AuthURL)
+			authURLPrinted = true
+		}
+	}
+	logger.Info(locale.GetString("log_tailscale_status_check_exceeded"))
 }

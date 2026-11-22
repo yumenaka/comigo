@@ -476,3 +476,11 @@ func TestSettingsCacheDirectoryValidation(t *testing.T) {
 		t.Fatal("invalid cache directory saved")
 	}
 }
+
+// TestInvalidStoreURLMasksCredentials 解析失败的书库地址可显示主机，但不能把密码或查询参数写入错误。
+func TestInvalidStoreURLMasksCredentials(t *testing.T) {
+	err := new(Config).AddStoreUrl("smb://reader:private-password@example.invalid/?token=secret-token")
+	if err == nil || !strings.Contains(err.Error(), "example.invalid") || strings.Contains(err.Error(), "private-password") || strings.Contains(err.Error(), "secret-token") {
+		t.Fatalf("错误地址未脱敏: %v", err)
+	}
+}

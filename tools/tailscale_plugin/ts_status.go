@@ -6,6 +6,7 @@ import (
 	"context"
 	"net/netip"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -78,47 +79,41 @@ func (t *TailscaleStatus) CheckClientInfoExists(loginUserName, nodeComputedName 
 
 // GetTailscaleStatus 获取Tailscale服务状态 https://github.com/tailscale/golink/blob/b54cbbbb609ce8425193e7171a35af023cb5066d/golink.go#L787
 func GetTailscaleStatus(ctx context.Context) (*TailscaleStatus, error) {
-	if localClient == nil {
-		// Tailscale 未启用或尚未初始化时，返回离线状态而不是错误，避免上层页面 500
-		nowStatus.AuthURL = ""
-		nowStatus.BackendState = "Stopped"
-		nowStatus.TailscaleIPs = nil
-		nowStatus.Version = ""
-		nowStatus.OS = runtime.GOOS
-		nowStatus.FQDN = ""
-		nowStatus.Online = false
-		nowStatus.FunnelCapability = "unknown"
-		return nowStatus, nil
+	// 每次返回独立快照，序列化和轮询不会改写同一对象。
+	status := &TailscaleStatus{BackendState: "Stopped", OS: runtime.GOOS, FunnelCapability: "unknown"}
+	nowStatus.mu.Lock()
+	status.Clients = slices.Clone(nowStatus.Clients)
+	nowStatus.mu.Unlock()
+	lifecycleMu.RLock()
+	client := localClient
+	lifecycleMu.RUnlock()
+	if client == nil {
+		return status, nil
 	}
 	// *ipnstate.Status
-	st, err := localClient.Status(ctx)
+	st, err := client.Status(ctx)
 	if err != nil {
 		return nil, err
 	}
 	// 刷新状态
-	nowStatus.AuthURL = st.AuthURL
-	nowStatus.BackendState = st.BackendState
-	nowStatus.TailscaleIPs = st.TailscaleIPs
-	nowStatus.Version = st.Version
+	status.AuthURL = st.AuthURL
+	status.BackendState = st.BackendState
+	status.TailscaleIPs = st.TailscaleIPs
+	status.Version = st.Version
 	if st.Self != nil {
 		fullyQualifiedDomainName := st.Self.DNSName
 		if strings.HasSuffix(fullyQualifiedDomainName, ".") {
 			fullyQualifiedDomainName = fullyQualifiedDomainName[:len(fullyQualifiedDomainName)-1]
 		}
-		nowStatus.OS = st.Self.OS
-		nowStatus.FQDN = fullyQualifiedDomainName
-		nowStatus.Online = st.Self.Online
-		nowStatus.FunnelCapability = "false"
+		status.OS = st.Self.OS
+		status.FQDN = fullyQualifiedDomainName
+		status.Online = st.Self.Online
+		status.FunnelCapability = "false"
 		// 检查是否支持 Funnel 功能
 		if st.Self.CapMap != nil && st.Self.CapMap.Contains(tailcfg.NodeAttrFunnel) {
 			// 检查 st.Self.CapMap[tailcfg.NodeAttrFunnel] 是否存在
-			nowStatus.FunnelCapability = "true"
+			status.FunnelCapability = "true"
 		}
 	}
-	if st.Self == nil {
-		nowStatus.OS = runtime.GOOS
-		nowStatus.FQDN = ""
-		nowStatus.Online = false
-	}
-	return nowStatus, nil
+	return status, nil
 }
