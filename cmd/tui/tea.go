@@ -177,7 +177,7 @@ type appModel struct {
 	autoFollowLogs bool     // 是否自动跟随最新日志
 
 	backendReady bool       // 后台服务是否已启动完成
-	backendError string     // 后台启动错误信息（空表示无错误）
+	backendError error      // 后台启动错误；退出时继续向 CLI 入口传递。
 	actionMsg    string     // 最近一次操作的状态提示
 	modal        modalState // 全局提示弹窗，优先接管键盘和鼠标事件
 
@@ -340,13 +340,15 @@ func Run() error {
 		logger.SetOutput(os.Stderr)
 	}()
 
+	model := InitialModel(logBuffer)
 	program := tea.NewProgram(
-		InitialModel(logBuffer),
+		model,
 		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	)
 	_, runErr := program.Run()
-	return errors.Join(runErr, routers.StopWebServer())
+	// 恢复终端后仍保留启动失败，不能因用户关闭错误界面而报告成功。
+	return errors.Join(runErr, model.backendError, routers.StopWebServer())
 }
 
 // runWithoutTUI 在非终端环境下（如管道、重定向）退回普通服务模式启动。
@@ -458,7 +460,7 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Batch(tickCmd(), m.handleReaderAutoFlip(time.Time(msg)), m.syncActiveImageCmd())
 	case backendStartedMsg:
 		m.backendReady = true
-		m.backendError = ""
+		m.backendError = nil
 		m.setActionMsg(locale.GetString("tui_service_started"))
 		m.refreshData()
 		return m, tea.Batch(m.syncActiveImageCmd(), func() tea.Msg {
@@ -467,7 +469,7 @@ func (m *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return tea.Quit()
 		})
 	case backendErrorMsg:
-		m.backendError = msg.err.Error()
+		m.backendError = msg.err
 		m.setActionMsg(locale.GetString("tui_backend_failed"))
 		// 日志面板保留具体失败原因，避免只显示启动前的书库提示。
 		logger.Errorf("%s: %v", locale.GetString("tui_backend_failed"), msg.err)
@@ -788,7 +790,7 @@ func shelfItemIdentity(item shelfItem) string {
 // refreshStatus 更新当前界面底部需要展示的服务状态。
 func (m *appModel) refreshStatus() {
 	statusText := locale.GetString("tui_status_starting")
-	if m.backendError != "" {
+	if m.backendError != nil {
 		statusText = locale.GetString("tui_status_failed")
 	} else if m.backendReady {
 		statusText = locale.GetString("tui_status_running")
