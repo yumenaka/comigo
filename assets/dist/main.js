@@ -7644,8 +7644,8 @@ Alpine.store('global', {
     autoResize: Alpine.$persist(false).as('global.autoResize'),
     // 压缩图片限宽
     autoResizeWidth: Alpine.$persist(800).as('global.autoResizeWidth'),
-    // 插件只影响首次初始化的默认值；已有本地设置始终优先。
-    theme: Alpine.$persist(window.ComiGoDefaultTheme || 'retro').as('global.theme'),
+    // 所有页面使用相同默认主题；已有本地设置始终优先。
+    theme: Alpine.$persist('retro').as('global.theme'),
     // 随机模板实际解析出的主题，选择态依然保留为 random。
     randomResolvedTheme: Alpine.$persist('').as('global.randomResolvedTheme'),
     // custom 主题：组件颜色

@@ -32,12 +32,6 @@ templ Html(c echo.Context, bodyContent templ.Component, insertScripts []string) 
 				<link rel="shortcut icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.ico")) } type="image/x-icon"/>
 				<link rel="icon" href={ templ.SafeURL(config.PrefixPath("/images/favicon.png")) } sizes="any"/>
 			}
-			// Comigo.xyz 插件只提供首次初始化默认主题，不覆盖用户已保存的选择。
-			if config.GetCfg().EnablePlugin && config.GetCfg().IsPluginEnabled("comigo_xyz") {
-				<script>
-					window.ComiGoDefaultTheme = "random";
-				</script>
-			}
 			// 内联脚本会在 main.js 前执行，路径工具必须先于页面内容注入。
 			@templ.Raw(assets.GetBasePathScript(assets.IsWailsWebViewRequest(c.Request())))
 			@templ.Raw(assets.GetCSS(c.QueryParam("static") != ""))
