@@ -79,6 +79,7 @@ templ MainArea(tsStatus *tailscale_plugin.TailscaleStatus) {
 						@NumberConfig("TimeoutLimitForScan", config.GetCfg().TimeoutLimitForScan, "TimeoutLimitForScan_Description", 1, 3600)
 						@NumberConfig("AutoRescanIntervalMinutes", config.GetCfg().AutoRescanIntervalMinutes, "auto_rescan_interval_minutes_desc", 0, 65535)
 						@StringConfig("CacheDir", config.GetCfg().CacheDir, "CacheDir_Description")
+						@CleanupPanel()
 					</div>
 				</div>
 				if config.GetCfg().EnableUpload && !config.GetCfg().ReadOnlyMode {

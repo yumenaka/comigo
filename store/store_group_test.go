@@ -14,7 +14,7 @@ import (
 	"github.com/yumenaka/comigo/model"
 )
 
-// 提供生成书籍组测试所需的最小书库实现，避免 model.NewBook 去重检查访问空书库。
+// 提供生成书籍组测试所需的最小书库快照。
 type fakeModelStore struct{}
 
 func (s *fakeModelStore) StoreBook(b *model.Book) error            { return nil }
@@ -116,7 +116,7 @@ func TestLoadBooksMinimumVersion(t *testing.T) {
 				t.Fatal(err)
 			}
 			_, err := ramStore.GetBook(book.BookID)
-			wantRescan := version == "" || version == "invalid" || version == "v1.2.99" || version == "v1.3.0-rc.1"
+			wantRescan := !config.SupportsBookVersion(version)
 			if (err != nil) != wantRescan {
 				t.Fatalf("version %q: load error = %v, want rescan = %v", version, err, wantRescan)
 			}
@@ -184,6 +184,51 @@ func newStoreGroupTestBook(storeURL, id string) *model.Book {
 		StoreUrl: storeURL,
 		Type:     model.TypeZip,
 	}}
+}
+
+// TestPendingBookIDReservation 待恢复索引占用的 ID 必须扩位，直接写入也不能覆盖其 JSON。
+func TestPendingBookIDReservation(t *testing.T) {
+	configDir := useTempConfigDir(t)
+	ram := &StoreInRam{}
+	incoming := newStoreGroupTestBook(t.TempDir(), "incoming")
+	ids, err := model.NewBookIDIndex(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ids.Assign(&incoming.BookInfo); err != nil {
+		t.Fatal(err)
+	}
+	old := incoming.CloneForView()
+	old.BookPath = filepath.Join(old.StoreUrl, "old.cbz")
+	old.CreatedByVersion = "v1.3.0"
+	if err := SaveMetaJson(old); err != nil {
+		t.Fatal(err)
+	}
+	ram.PendingBooks.Store(pendingBookKey(old), old)
+	before, err := os.ReadFile(metaJSONPath(configDir, old))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ram.StoreBook(incoming); err == nil {
+		t.Fatal("conflicting write accepted")
+	}
+	after, err := os.ReadFile(metaJSONPath(configDir, old))
+	if err != nil || string(before) != string(after) {
+		t.Fatalf("pending JSON overwritten: %v", err)
+	}
+	ids, err = model.NewStoreBookIDIndex(ram, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ids.Assign(&incoming.BookInfo); err != nil {
+		t.Fatal(err)
+	}
+	if len(incoming.BookID) != 8 || incoming.BookID[:7] != old.BookID {
+		t.Fatalf("pending ID not reserved: %q", incoming.BookID)
+	}
+	if err := ram.StoreBook(incoming); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // 验证内存书库写入书籍时不会额外落盘元数据。
@@ -363,7 +408,7 @@ func TestGenerateBookGroup_ShouldCreateFolderGroupsForIntermediateDirs(t *testin
 	s.BookMap.Store(b1.BookID, b1)
 	s.BookMap.Store(b2.BookID, b2)
 
-	if err := s.GenerateBookGroup(); err != nil {
+	if err := s.GenerateBookGroup(groupTestBookIDs(t)); err != nil {
 		t.Fatalf("GenerateBookGroup error: %v", err)
 	}
 
@@ -469,7 +514,7 @@ func TestGeneratedRemoteBookGroupInheritsRemoteFields(t *testing.T) {
 	store := &Store{StoreInfo: StoreInfo{BackendURL: remoteStore}}
 	store.BookMap.Store(childA.BookID, childA)
 	store.BookMap.Store(childB.BookID, childB)
-	if err := store.GenerateBookGroup(); err != nil {
+	if err := store.GenerateBookGroup(groupTestBookIDs(t)); err != nil {
 		t.Fatalf("GenerateBookGroup error: %v", err)
 	}
 
@@ -513,7 +558,7 @@ func TestGenerateBookGroupKeepsRemoteComigoOriginalGroup(t *testing.T) {
 	store := &Store{StoreInfo: StoreInfo{BackendURL: remoteStore}}
 	store.BookMap.Store(remoteGroup.BookID, remoteGroup)
 	store.BookMap.Store(child.BookID, child)
-	if err := store.GenerateBookGroup(); err != nil {
+	if err := store.GenerateBookGroup(groupTestBookIDs(t)); err != nil {
 		t.Fatalf("GenerateBookGroup error: %v", err)
 	}
 	if _, ok := store.BookMap.Load(remoteGroup.BookID); !ok {
@@ -595,4 +640,18 @@ func assertBookIDs(t *testing.T, got model.BookInfos, want ...string) {
 			t.Fatalf("缺少同目录书籍 %q, got=%v", id, gotIDs)
 		}
 	}
+}
+
+// groupTestBookIDs 为临时书组测试提供全库的 ID 占用表。
+func groupTestBookIDs(t *testing.T) *model.BookIDIndex {
+	t.Helper()
+	books, err := model.IStore.ListBooks()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ids, err := model.NewBookIDIndex(books)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return ids
 }

@@ -1,13 +1,10 @@
 package model
 
 import (
-	"fmt"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comigo/assets/locale"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
@@ -80,75 +77,6 @@ func (b *BookInfo) GetAllChildBooksNum() int {
 		}
 	}
 	return total
-}
-
-// initBookID 根据路径和书籍属性初始化稳定 BookID。
-// 行为保持原则：
-// - 已存在同路径、同类型书籍时，仍返回“书籍数据已存在”的错误。
-// - 完整 ID 的生成字段和短 ID 扩展顺序不变，保证重扫时 ID 前缀稳定。
-// - 只把重复读取 Store 的部分换成一次快照，不改变外部可见的成功/失败结果。
-func (b *BookInfo) initBookID(bookPath string) (*BookInfo, error) {
-	// 只读取一次当前书库快照。旧实现会先为了重复路径检测读一次，
-	// 后续每尝试一个短 ID 又重新 ListBooks；大书库下这个成本会被放大。
-	allBooks, err := IStore.ListBooks()
-	if err != nil {
-		logger.Infof(locale.GetString("log_error_listing_books"), err)
-	}
-
-	// existingIDs 用于后面的短 ID 冲突判断。这里只保存 ID，不保存整本书，
-	// 避免后续每扩展一位 shortID 都重新遍历 allBooks。
-	existingIDs := make(map[string]struct{}, len(allBooks))
-
-	// 保持旧逻辑的比较边界：重复书籍检测使用传入 bookPath 的 filepath.Abs 结果，
-	// 而不是 b.BookPath。这样不会改变远程路径、相对路径失败等边界场景的现有结果。
-	absBookPath, absErr := filepath.Abs(bookPath)
-	if absErr != nil {
-		logger.Infof(locale.GetString("log_error_getting_absolute_path"), absErr)
-	}
-
-	for _, existingBook := range allBooks {
-		existingIDs[existingBook.BookID] = struct{}{}
-
-		// 与旧实现一致：遍历到第一个同路径、同类型书籍时立刻返回，
-		// 错误信息中也继续使用这个已存在书籍的 BookID。
-		if absErr == nil && existingBook.BookPath == absBookPath && existingBook.Type == b.Type {
-			return nil, fmt.Errorf(locale.GetString("log_book_data_already_exists"), existingBook.BookID, bookPath)
-		}
-	}
-
-	// 生成完整 BookID 的字符串。字段顺序保持旧规则不变：
-	// BookPath + FileSize + Type + ParentFolder + StoreUrl。
-	idSource := b.BookPath + strconv.Itoa(int(b.FileSize)) + string(b.Type) + b.ParentFolder + b.StoreUrl
-	// 两次 MD5 加密，然后转为 base62 编码。
-	// 为什么选择 Base62?
-	// 1. 人类可读，可以目视或简单的 regexp 进行验证。
-	// 2. 仅包含字母数字符号，不包含特殊字符。
-	// 3. 可以通过在任何文本编辑器和浏览器地址栏中双击鼠标来完全选择。
-	// 4. 紧凑，生成的字符串比 Base32 短。
-	fullID := base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(idSource))))
-
-	// 生成短 BookID，并沿用旧策略避免冲突：
-	// 从 7 位开始尝试；如果该前缀已被占用，就逐位扩展，直到没有冲突或已经扩展到 fullID 全长。
-	minLength := 7
-	if len(fullID) <= minLength {
-		logger.Infof(locale.GetString("log_cannot_shorten_id"), fullID)
-		b.BookID = fullID
-		return b, nil
-	}
-	shortID := fullID[:minLength]
-	add := 0
-	for {
-		if _, conflict := existingIDs[shortID]; !conflict {
-			break
-		}
-		add++
-		if minLength+add > len(fullID) {
-			break
-		}
-		shortID = fullID[:minLength+add]
-	}
-	b.BookID = shortID
-	return b, nil
 }
 
 // setFilePath 初始化 Book 时，设置 BookPath

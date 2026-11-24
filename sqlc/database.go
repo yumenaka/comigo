@@ -2,6 +2,7 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -28,11 +29,21 @@ func (db *StoreDatabase) storeBook(book *model.Book) error {
 		return fmt.Errorf("StoreBook: %v", err)
 	}
 	ctx := context.Background()
+	// 在同一写事务中核对身份，不能把短 ID 碰撞当作书籍更新。
+	existing, err := db.queries.GetBookByID(ctx, book.BookID)
+	if err == nil {
+		previous := FromSQLCBook(existing)
+		if err := model.CheckBookID(&previous.BookInfo, &book.BookInfo); err != nil {
+			return err
+		}
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
 	if err := db.queries.UpsertBook(ctx, ToSQLCUpsertBookParams(book)); err != nil {
 		return fmt.Errorf("store book: %w", err)
 	}
 	// 保存书籍的页面信息。即使列表为空也要清理旧记录，保持和 JSON 元数据一致。
-	err := db.saveBookPageInfos(ctx, book.BookID, book.PageInfos)
+	err = db.saveBookPageInfos(ctx, book.BookID, book.PageInfos)
 	if err != nil {
 		return fmt.Errorf("book media files error: %v", err)
 	}
@@ -259,6 +270,10 @@ func (db *StoreDatabase) GenerateBookGroup() error {
 	if err != nil {
 		return err
 	}
+	ids, err := model.NewStoreBookIDIndex(db, books)
+	if err != nil {
+		return err
+	}
 	stores := map[string]*store.Store{}
 	for _, book := range books {
 		s := stores[book.StoreUrl]
@@ -270,7 +285,7 @@ func (db *StoreDatabase) GenerateBookGroup() error {
 	}
 	var groups []*model.Book
 	for _, s := range stores {
-		if err := s.GenerateBookGroup(); err != nil {
+		if err := s.GenerateBookGroup(ids); err != nil {
 			return err
 		}
 		for _, value := range s.BookMap.Range {
@@ -322,4 +337,25 @@ func (db *StoreDatabase) deleteBook(bookID string) error {
 		return fmt.Errorf("DeleteBook bookmarks error: %v", err)
 	}
 	return nil
+}
+
+// ReserveBookIDs 软删除行仍受唯一约束保护，仅查询占位所需的身份字段。
+func (db *StoreDatabase) ReserveBookIDs(ids *model.BookIDIndex) error {
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+	rows, err := db.connection.Query("SELECT book_id, store_url, book_path, type, COALESCE(remote_store_key, ''), COALESCE(remote_book_id, '') FROM books WHERE deleted = TRUE")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var b model.BookInfo
+		if err := rows.Scan(&b.BookID, &b.StoreUrl, &b.BookPath, &b.Type, &b.RemoteStoreKey, &b.RemoteBookID); err != nil {
+			return err
+		}
+		if err := ids.Reserve(&b); err != nil {
+			return err
+		}
+	}
+	return rows.Err()
 }

@@ -12,12 +12,12 @@ import (
 )
 
 // bookFromLocalDirNode 将已递归扫描出的目录节点转成书籍，避免同一个目录再次 os.ReadDir。
-func bookFromLocalDirNode(node DirNode, storePath string, depth int) (*model.Book, error) {
+func bookFromLocalDirNode(node DirNode, storePath string, depth int, ids *model.BookIDIndex) (*model.Book, error) {
 	dirInfo, err := os.Stat(node.Path)
 	if err != nil {
 		return nil, err
 	}
-	newBook, err := model.NewBook(node.Path, dirInfo.ModTime(), dirInfo.Size(), storePath, depth, model.TypeDir)
+	newBook, err := ids.NewBook(node.Path, dirInfo.ModTime(), dirInfo.Size(), storePath, depth, model.TypeDir)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func bookFromLocalDirNode(node DirNode, storePath string, depth int) (*model.Boo
 }
 
 // scanRemoteDirGetBook 扫描远程目录，并返回对应书籍
-func scanRemoteDirGetBook(fs vfs.FileSystem, dirPath string, storeURL string, depth int) (*model.Book, error) {
+func scanRemoteDirGetBook(fs vfs.FileSystem, dirPath string, storeURL string, depth int, ids *model.BookIDIndex) (*model.Book, error) {
 	// 获取目录信息
 	dirInfo, err := fs.Stat(dirPath)
 	if err != nil {
@@ -41,7 +41,7 @@ func scanRemoteDirGetBook(fs vfs.FileSystem, dirPath string, storeURL string, de
 	}
 
 	// 创建新书籍，使用远程路径
-	newBook, err := model.NewBook(dirPath, dirInfo.ModTime(), dirInfo.Size(), storeURL, depth, model.TypeDir)
+	newBook, err := ids.NewBook(dirPath, dirInfo.ModTime(), dirInfo.Size(), storeURL, depth, model.TypeDir)
 	if err != nil {
 		return nil, err
 	}

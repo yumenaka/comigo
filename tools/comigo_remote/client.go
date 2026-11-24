@@ -14,10 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jxskiss/base62"
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
-	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
 )
 
@@ -89,19 +88,6 @@ func MatchStoreByKey(storeURLs []string, key string) (string, error) {
 	return "", fmt.Errorf("remote store not found: %s", key)
 }
 
-// LocalBookID 根据远端书库和远端 BookID 生成本机 BookID，避免跨书库冲突。
-func LocalBookID(storeURL string, remoteBookID string) string {
-	key, err := StoreKey(storeURL)
-	if err != nil {
-		key = storeURL
-	}
-	fullID := base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(key + "\x00" + remoteBookID))))
-	if len(fullID) > 12 {
-		return fullID[:12]
-	}
-	return fullID
-}
-
 // NewClient 创建远端 Comigo 客户端。URL 中的 userinfo 用于远端登录。
 func NewClient(storeURL string, timeoutSeconds int) (*Client, error) {
 	parsedURL, err := url.Parse(storeURL)
@@ -138,8 +124,31 @@ func NewClient(storeURL string, timeoutSeconds int) (*Client, error) {
 	return client, nil
 }
 
+// UnsupportedVersionError 明确拒绝低于数据格式支持下限或没有有效版本的远端。
+type UnsupportedVersionError struct{ Version string }
+
+// Error 返回可直接展示给用户的版本要求，不暴露远端登录凭据。
+func (e *UnsupportedVersionError) Error() string {
+	return fmt.Sprintf(locale.GetString("err_remote_comigo_unsupported_version"), e.Version, config.GetMinSupportedVersion())
+}
+
+// CheckVersion 使用与本地数据相同的最低支持版本，不探测或兼容旧版接口。
+func (c *Client) CheckVersion() error {
+	version, err := c.GetServerVersion()
+	if err != nil {
+		return err
+	}
+	if !config.SupportsBookVersion(version) {
+		return &UnsupportedVersionError{Version: version}
+	}
+	return nil
+}
+
 // GetTopShelf 获取远端顶层书架。
 func (c *Client) GetTopShelf(sortBy string) ([]model.StoreBookInfo, error) {
+	if err := c.CheckVersion(); err != nil {
+		return nil, err
+	}
 	query := url.Values{}
 	if sortBy != "" {
 		query.Set("sort_by", sortBy)
@@ -355,37 +364,25 @@ func (c *Client) apiURL(apiPath string, query url.Values) string {
 	return u.String()
 }
 
-// LocalizeBook 把远端书籍元数据转换成本机书库中的远程书籍元数据。
-func LocalizeBook(storeURL string, remoteBook *model.Book) *model.Book {
-	return LocalizeBookInShelf(storeURL, remoteBook, "", "")
-}
-
-// LocalizeBookInShelf 把远端书籍放进指定的远端顶级书库分组。
-func LocalizeBookInShelf(storeURL string, remoteBook *model.Book, shelfKey string, shelfName string) *model.Book {
-	if remoteBook == nil {
-		return nil
-	}
+// LocalizeBook 将远端内容转换为本机资源地址，保留已分配的 ID 和子书引用。
+func LocalizeBook(storeURL string, remoteBook, indexedBook *model.Book) *model.Book {
 	localBook := *remoteBook
-	remoteBookID := remoteBook.BookID
-	key, err := StoreKey(storeURL)
-	if err != nil {
-		key = ""
-	}
-	localBook.BookID = LocalBookID(storeURL, remoteBookID)
+	localBook.BookID = indexedBook.BookID
 	localBook.StoreUrl = storeURL
 	localBook.RemoteURL = storeURL
-	localBook.RemoteBookID = remoteBookID
-	localBook.RemoteStoreKey = key
-	localBook.RemoteShelfKey = shelfKey
-	localBook.RemoteShelfName = shelfName
+	localBook.RemoteBookID = indexedBook.RemoteBookID
+	localBook.RemoteStoreKey = indexedBook.RemoteStoreKey
+	localBook.RemoteShelfKey = indexedBook.RemoteShelfKey
+	localBook.RemoteShelfName = indexedBook.RemoteShelfName
+	localBook.CreatedByVersion = config.GetVersion()
 	localBook.IsRemote = true
 	localBook.BookMarks = nil
-	localBook.ChildBooksID = localizeChildIDs(storeURL, remoteBook.ChildBooksID)
-	localBook.Cover.Url = LocalCoverURL(localBook.BookID, key, remoteBook.Cover.Url)
+	localBook.ChildBooksID = append([]string(nil), indexedBook.ChildBooksID...)
+	localBook.Cover.Url = LocalCoverURL(localBook.BookID, localBook.RemoteStoreKey, remoteBook.Cover.Url)
 	localBook.PageInfos = make(model.PageInfos, len(remoteBook.PageInfos))
 	for i := range remoteBook.PageInfos {
 		localBook.PageInfos[i] = remoteBook.PageInfos[i]
-		localBook.PageInfos[i].Url = LocalFileURL(localBook.BookID, key, remoteBook.PageInfos[i])
+		localBook.PageInfos[i].Url = LocalFileURL(localBook.BookID, localBook.RemoteStoreKey, remoteBook.PageInfos[i])
 	}
 	return &localBook
 }
@@ -414,16 +411,8 @@ func ResolveBook(storeURLs []string, remoteStoreKey string, localBookID string, 
 	if err != nil {
 		return nil, true, err
 	}
-	refreshedBook := LocalizeBookInShelf(storeURL, remoteBook, localBook.RemoteShelfKey, localBook.RemoteShelfName)
+	refreshedBook := LocalizeBook(storeURL, remoteBook, localBook)
 	return refreshedBook, true, nil
-}
-
-func localizeChildIDs(storeURL string, remoteIDs []string) []string {
-	localIDs := make([]string, 0, len(remoteIDs))
-	for _, id := range remoteIDs {
-		localIDs = append(localIDs, LocalBookID(storeURL, id))
-	}
-	return localIDs
 }
 
 // LocalCoverURL 生成本机封面代理 URL。

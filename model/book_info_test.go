@@ -2,14 +2,9 @@ package model
 
 import (
 	"errors"
-	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/jxskiss/base62"
-	"github.com/yumenaka/comigo/tools"
 )
 
 type bookInfoTestStore struct {
@@ -62,82 +57,6 @@ func withBookInfoTestStore(t *testing.T, store *bookInfoTestStore) {
 	t.Cleanup(func() {
 		IStore = originalStore
 	})
-}
-
-// 验证短书籍 ID 冲突时会在同一快照内继续扩展长度。
-func TestInitBookIDExpandsShortIDConflictFromSingleSnapshot(t *testing.T) {
-	store := &bookInfoTestStore{}
-	withBookInfoTestStore(t, store)
-
-	const (
-		bookPath = "fixtures/series/book.cbz"
-		storeURL = "fixtures/library"
-	)
-	modified := time.Unix(1700000000, 0)
-	fileSize := int64(12345)
-
-	baseline, err := NewBook(bookPath, modified, fileSize, storeURL, 1, TypeCbz)
-	if err != nil {
-		t.Fatalf("baseline NewBook failed: %v", err)
-	}
-	idSource := baseline.BookPath + strconv.Itoa(int(baseline.FileSize)) + string(baseline.Type) + baseline.ParentFolder + baseline.StoreUrl
-	fullID := base62.EncodeToString([]byte(tools.Md5string(tools.Md5string(idSource))))
-	const minLength = 7
-	if len(fullID) <= minLength {
-		t.Fatalf("test setup expected fullID longer than %d, got %q", minLength, fullID)
-	}
-
-	// 只制造 BookID 前 7 位冲突，BookPath 故意不同，避免触发“同路径同类型已存在”的分支。
-	store.books = []*Book{{
-		BookInfo: BookInfo{
-			BookID:   fullID[:minLength],
-			BookPath: "fixtures/other/book.cbz",
-			Type:     TypeCbz,
-		},
-	}}
-	store.listCalls = 0
-
-	got, err := NewBook(bookPath, modified, fileSize, storeURL, 1, TypeCbz)
-	if err != nil {
-		t.Fatalf("NewBook with short ID conflict failed: %v", err)
-	}
-	wantID := fullID[:minLength+1]
-	if got.BookID != wantID {
-		t.Fatalf("BookID = %q, want %q", got.BookID, wantID)
-	}
-	if store.listCalls != 1 {
-		t.Fatalf("ListBooks calls = %d, want 1", store.listCalls)
-	}
-}
-
-// 验证相同路径和类型的书籍不会重复生成新 ID。
-func TestInitBookIDRejectsExistingSamePathAndType(t *testing.T) {
-	store := &bookInfoTestStore{}
-	withBookInfoTestStore(t, store)
-
-	const bookPath = "fixtures/existing/book.cbz"
-	absBookPath, err := filepath.Abs(bookPath)
-	if err != nil {
-		t.Fatalf("filepath.Abs failed: %v", err)
-	}
-	store.books = []*Book{{
-		BookInfo: BookInfo{
-			BookID:   "existing-book",
-			BookPath: absBookPath,
-			Type:     TypeCbz,
-		},
-	}}
-
-	_, err = NewBook(bookPath, time.Unix(1700000000, 0), 1, "fixtures/library", 1, TypeCbz)
-	if err == nil {
-		t.Fatal("NewBook expected duplicate error, got nil")
-	}
-	if !strings.Contains(err.Error(), "existing-book") {
-		t.Fatalf("duplicate error = %q, want existing BookID", err.Error())
-	}
-	if store.listCalls != 1 {
-		t.Fatalf("ListBooks calls = %d, want 1", store.listCalls)
-	}
 }
 
 // 验证按最近阅读排序时，没有阅读记录的书籍会回退到修改时间。

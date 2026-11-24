@@ -237,25 +237,34 @@ func TestGenericConfigEndpointsOnlyAllowRenderedFields(t *testing.T) {
 	}
 }
 
-// 验证远端 Comigo 版本更旧时会显示兼容性提示。
-func TestRemoteComigoVersionWarningWhenRemoteOlder(t *testing.T) {
-	server := newServerInfoTestServer(t, `{"Version":"v0.1.0","ServerName":"Comigo v0.1.0"}`)
-
-	warning := remoteComigoVersionWarning(server.URL)
-	if warning == "" {
-		t.Fatal("expected warning for older remote Comigo version")
+// 版本低于支持下限时明确拒绝添加，错误同时给出远端版本和要求的版本。
+func TestRemoteComigoVersionRejectsUnsupported(t *testing.T) {
+	server := newServerInfoTestServer(t, `{"Version":"v1.3.9"}`)
+	err := checkRemoteComigoVersion(server.URL)
+	if err == nil || !strings.Contains(err.Error(), "v1.3.9") || !strings.Contains(err.Error(), config.GetMinSupportedVersion()) {
+		t.Fatalf("unsupported version error: %v", err)
 	}
-	if !strings.Contains(warning, "v0.1.0") || !strings.Contains(warning, config.GetVersion()) {
-		t.Fatalf("warning = %q, want both remote and local version", warning)
+	// 拒绝必须发生在配置持久化之前。
+	before := config.CopyCfg()
+	if _, _, err := doAddStoreURL(server.URL); err == nil {
+		t.Fatal("unsupported remote accepted")
+	}
+	if strings.Join(config.GetCfg().StoreUrls, "\x00") != strings.Join(before.StoreUrls, "\x00") {
+		t.Fatal("unsupported remote changed libraries")
+	}
+	response := storeOperationError(err, "err_add_config_failed").(*echo.HTTPError)
+	if response.Code != http.StatusBadRequest || response.Message != err.Error() {
+		t.Fatalf("version message hidden: %v", response)
 	}
 }
 
-// 验证远端 Comigo 版本更新时不显示兼容性提示。
-func TestRemoteComigoVersionWarningAllowsNewerRemote(t *testing.T) {
-	server := newServerInfoTestServer(t, `{"Version":"v99.0.0","ServerName":"Comigo v99.0.0"}`)
-
-	if warning := remoteComigoVersionWarning(server.URL); warning != "" {
-		t.Fatalf("warning = %q, want empty for newer remote Comigo", warning)
+// 支持下限及更新版本均可接入，不要求远端与本机版本完全相同。
+func TestRemoteComigoVersionAllowsSupported(t *testing.T) {
+	for _, version := range []string{config.GetMinSupportedVersion(), "v99.0.0"} {
+		server := newServerInfoTestServer(t, `{"Version":"`+version+`"}`)
+		if err := checkRemoteComigoVersion(server.URL); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 

@@ -10,7 +10,7 @@ import (
 )
 
 // scanFileGetBook 扫描本地文件，并返回对应书籍
-func scanFileGetBook(filePath string, storePath string, depth int) (*model.Book, error) {
+func scanFileGetBook(filePath string, storePath string, depth int, ids *model.BookIDIndex) (*model.Book, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		logger.Infof(locale.GetString("log_failed_to_open_file"), filePath, err)
@@ -23,7 +23,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*model.Book,
 		return nil, err
 	}
 	// 创建新书籍
-	newBook, err := model.NewBook(filePath, fileInfo.ModTime(), fileInfo.Size(), storePath, depth, model.GetBookTypeByFilename(filePath))
+	newBook, err := ids.NewBook(filePath, fileInfo.ModTime(), fileInfo.Size(), storePath, depth, model.GetBookTypeByFilename(filePath))
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func scanFileGetBook(filePath string, storePath string, depth int) (*model.Book,
 // scanRemoteFileGetBook 扫描远程文件，并返回对应书籍
 // 压缩包类型（ZIP/RAR/EPUB等）直接从 WebDAV 流式读取，不下载到本地
 // PDF 文件需要下载到本地缓存（因为 PDF 处理库需要随机访问）
-func scanRemoteFileGetBook(fs vfs.FileSystem, filePath string, storeURL string, depth int) (*model.Book, error) {
+func scanRemoteFileGetBook(fs vfs.FileSystem, filePath string, storeURL string, depth int, ids *model.BookIDIndex) (*model.Book, error) {
 	// 获取文件信息
 	fileInfo, err := fs.Stat(filePath)
 	if err != nil {
@@ -65,7 +65,7 @@ func scanRemoteFileGetBook(fs vfs.FileSystem, filePath string, storeURL string, 
 	}
 
 	// 创建新书籍
-	newBook, err := model.NewBook(filePath, fileInfo.ModTime(), fileInfo.Size(), storeURL, depth, model.GetBookTypeByFilename(filePath))
+	newBook, err := ids.NewBook(filePath, fileInfo.ModTime(), fileInfo.Size(), storeURL, depth, model.GetBookTypeByFilename(filePath))
 	if err != nil {
 		return nil, err
 	}

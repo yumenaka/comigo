@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/yumenaka/comigo/assets/locale"
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/comigo_remote"
@@ -24,14 +25,17 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 
 	InitConfig(cfg)
 
-	if tools.DetectStoreURL(storePath).Type == tools.StoreBackendComigo {
-		return initComigoStore(storePath, cfg)
-	}
-
 	// 每轮只读取一次旧书籍，逐文件重扫直接按路径查找，避免数据库反复加载全库。
 	books, err := model.IStore.ListBooks()
 	if err != nil {
 		return err
+	}
+	ids, err := model.NewStoreBookIDIndex(model.IStore, books)
+	if err != nil {
+		return err
+	}
+	if tools.DetectStoreURL(storePath).Type == tools.StoreBackendComigo {
+		return initComigoStore(storePath, cfg, ids)
 	}
 	storeKey := storePath
 	if !tools.IsRemoteStoreURL(storePath) {
@@ -47,13 +51,13 @@ func InitStore(storePath string, cfg ConfigInterface) error {
 		}
 	}
 	if tools.IsRemoteStoreURL(storePath) {
-		return initRemoteStore(storePath, cfg, booksByPath)
+		return initRemoteStore(storePath, cfg, booksByPath, ids)
 	}
-	return initLocalStore(storePath, cfg, booksByPath)
+	return initLocalStore(storePath, cfg, booksByPath, ids)
 }
 
 // initComigoStore 扫描另一个 Comigo 服务，只保存远端元数据和代理定位信息。
-func initComigoStore(storeURL string, cfg ConfigInterface) error {
+func initComigoStore(storeURL string, cfg ConfigInterface, ids *model.BookIDIndex) error {
 	logger.Infof(locale.GetString("log_scan_remote_store_start"), storeURL)
 	client, err := comigo_remote.NewClient(storeURL, cfg.GetTimeoutLimitForScan())
 	if err != nil {
@@ -64,7 +68,13 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 		return err
 	}
 
+	storeKey, err := comigo_remote.StoreKey(storeURL)
+	if err != nil {
+		return err
+	}
 	fetched := map[string]bool{}
+	// 按远端原始 ID 去重，本机短 ID 碰撞不代表同一本书。
+	remoteIDs := map[string]string{}
 	var books []*model.Book
 	scanStart := time.Now()
 	lastProgressLog := scanStart.Add(-2 * time.Second)
@@ -83,11 +93,10 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 	// fetchBook 返回该远端书是否实际导入；父书组据此过滤 ChildBooksID，避免留下指向被跳过书籍的子项。
 	var fetchBook func(remoteBookID string, shelfKey string, shelfName string, topLevel bool) (bool, error)
 	fetchBook = func(remoteBookID string, shelfKey string, shelfName string, topLevel bool) (bool, error) {
-		localBookID := comigo_remote.LocalBookID(storeURL, remoteBookID)
-		if fetched[localBookID] {
+		if _, exists := remoteIDs[remoteBookID]; exists {
 			return true, nil
 		}
-		if skipped[localBookID] {
+		if skipped[remoteBookID] {
 			return false, nil
 		}
 		remoteBook, err := client.GetBook(remoteBookID, "default")
@@ -96,14 +105,25 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 		}
 		// 远端 Comigo 中的远程书籍只属于远端服务本身，本机不再套一层远程代理。
 		if !shouldImportRemoteComigoBook(remoteBook) {
-			skipped[localBookID] = true
+			skipped[remoteBookID] = true
 			logProgress(remoteBook.Title)
 			return false, nil
 		}
-		localBook := comigo_remote.LocalizeBookInShelf(storeURL, remoteBook, shelfKey, shelfName)
+		indexedBook := &model.Book{BookInfo: model.BookInfo{
+			RemoteBookID: remoteBookID, RemoteStoreKey: storeKey,
+			RemoteShelfKey: shelfKey, RemoteShelfName: shelfName,
+		}}
+		if err := ids.Assign(&indexedBook.BookInfo); err != nil {
+			return false, err
+		}
+		localBook := comigo_remote.LocalizeBook(storeURL, remoteBook, indexedBook)
 		if previous, err := model.IStore.GetBook(localBook.BookID); err == nil {
+			if err := model.CheckBookID(&previous.BookInfo, &localBook.BookInfo); err != nil {
+				return false, err
+			}
 			mergePreviousBookState(localBook, previous)
 		}
+		remoteIDs[remoteBookID] = localBook.BookID
 		if topLevel {
 			// 远端顶层列表才知道它属于哪个顶级书库；旧版详情 API 不暴露远端 StoreUrl。
 			localBook.Depth = 0
@@ -119,7 +139,7 @@ func initComigoStore(storeURL string, cfg ConfigInterface) error {
 				return false, err
 			}
 			if imported {
-				childBookIDs = append(childBookIDs, comigo_remote.LocalBookID(storeURL, childRemoteID))
+				childBookIDs = append(childBookIDs, remoteIDs[childRemoteID])
 			}
 		}
 		localBook.ChildBooksID = childBookIDs
@@ -177,7 +197,7 @@ func deleteStaleComigoRemoteBooks(storeURL string, current map[string]bool) {
 }
 
 // initLocalStore 扫描本地路径
-func initLocalStore(storePath string, cfg ConfigInterface, booksByPath map[string]*model.Book) error {
+func initLocalStore(storePath string, cfg ConfigInterface, booksByPath map[string]*model.Book, ids *model.BookIDIndex) error {
 	if !tools.PathExists(storePath) {
 		return errors.New(locale.GetString("path_not_exist"))
 	}
@@ -212,7 +232,7 @@ func initLocalStore(storePath string, cfg ConfigInterface, booksByPath map[strin
 		if skip {
 			return nil
 		}
-		book, err := scanFileGetBook(storePathAbs, storePathAbs, 0)
+		book, err := scanFileGetBook(storePathAbs, storePathAbs, 0, ids)
 		if err != nil {
 			restorePreviousBookAfterScanFailure(previousBook)
 			recordArchiveScanFailure(storePathAbs, storePathAbs, fileInfo.Size(), fileInfo.ModTime(), false, err)
@@ -231,7 +251,7 @@ func initLocalStore(storePath string, cfg ConfigInterface, booksByPath map[strin
 
 	var newBookList []*model.Book
 
-	appendLocalDirBooks(&newBookList, rootDirectoryNode, storePathAbs, booksByPath)
+	appendLocalDirBooks(&newBookList, rootDirectoryNode, storePathAbs, booksByPath, ids)
 
 	// 处理文件
 	for _, file := range foundFiles {
@@ -267,7 +287,7 @@ func initLocalStore(storePath string, cfg ConfigInterface, booksByPath map[strin
 			continue
 		}
 		// 扫描文件
-		book, err := scanFileGetBook(file.Path, storePathAbs, depth)
+		book, err := scanFileGetBook(file.Path, storePathAbs, depth, ids)
 		if err != nil {
 			restorePreviousBookAfterScanFailure(previousBook)
 			recordArchiveScanFailure(storePathAbs, file.Path, file.Size, file.ModTime, false, err)
@@ -286,15 +306,15 @@ func initLocalStore(storePath string, cfg ConfigInterface, booksByPath map[strin
 }
 
 // appendLocalDirBooks 复用 HandleDirectory 已经读到的文件列表，避免本地目录扫描阶段重复 ReadDir。
-func appendLocalDirBooks(newBookList *[]*model.Book, node DirNode, storePathAbs string, booksByPath map[string]*model.Book) {
-	appendLocalDirBook(newBookList, node, storePathAbs, booksByPath)
+func appendLocalDirBooks(newBookList *[]*model.Book, node DirNode, storePathAbs string, booksByPath map[string]*model.Book, ids *model.BookIDIndex) {
+	appendLocalDirBook(newBookList, node, storePathAbs, booksByPath, ids)
 	for _, subNode := range node.SubDirs {
-		appendLocalDirBooks(newBookList, subNode, storePathAbs, booksByPath)
+		appendLocalDirBooks(newBookList, subNode, storePathAbs, booksByPath, ids)
 	}
 }
 
 // appendLocalDirBook 处理单个本地目录节点，并保留旧书签迁移与失败回滚逻辑。
-func appendLocalDirBook(newBookList *[]*model.Book, node DirNode, storePathAbs string, booksByPath map[string]*model.Book) {
+func appendLocalDirBook(newBookList *[]*model.Book, node DirNode, storePathAbs string, booksByPath map[string]*model.Book, ids *model.BookIDIndex) {
 	depth, err := localScanDepth(storePathAbs, node.Path)
 	if err != nil {
 		logger.Infof(locale.GetString("log_failed_to_get_relative_path"), err)
@@ -313,7 +333,7 @@ func appendLocalDirBook(newBookList *[]*model.Book, node DirNode, storePathAbs s
 	if skip {
 		return
 	}
-	book, err := bookFromLocalDirNode(node, storePathAbs, depth)
+	book, err := bookFromLocalDirNode(node, storePathAbs, depth, ids)
 	if err != nil {
 		restorePreviousBookAfterScanFailure(previousBook)
 		logger.Infof(locale.GetString("log_skip_to_scan_directory"), node.Path, err)
@@ -333,7 +353,7 @@ func localScanDepth(storePathAbs string, path string) (int, error) {
 }
 
 // initRemoteStore 扫描远程书库（WebDAV 等）
-func initRemoteStore(storeURL string, cfg ConfigInterface, booksByPath map[string]*model.Book) error {
+func initRemoteStore(storeURL string, cfg ConfigInterface, booksByPath map[string]*model.Book, ids *model.BookIDIndex) error {
 	logger.Infof(locale.GetString("log_scan_remote_store_start"), storeURL)
 
 	// 创建 VFS 实例
@@ -400,7 +420,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface, booksByPath map[strin
 			if skip {
 				return nil
 			}
-			book, err := scanRemoteFileGetBook(fs, basePath, storeURL, 0)
+			book, err := scanRemoteFileGetBook(fs, basePath, storeURL, 0, ids)
 			if err != nil {
 				restorePreviousBookAfterScanFailure(previousBook)
 				recordArchiveScanFailure(storeURL, basePath, fileInfo.Size(), fileInfo.ModTime(), true, err)
@@ -427,7 +447,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface, booksByPath map[strin
 		}
 		previousBook, skip := prepareBookPathForScan(booksByPath[basePath], dirInfo.Size(), dirInfo.ModTime())
 		if !skip {
-			book, err := scanRemoteDirGetBook(fs, basePath, storeURL, 0)
+			book, err := scanRemoteDirGetBook(fs, basePath, storeURL, 0, ids)
 			if err != nil {
 				restorePreviousBookAfterScanFailure(previousBook)
 				logger.Infof(locale.GetString("log_skip_to_scan_root_directory"), basePath, err)
@@ -476,7 +496,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface, booksByPath map[strin
 		}
 
 		// 扫描目录
-		book, err := scanRemoteDirGetBook(fs, dir, storeURL, depth)
+		book, err := scanRemoteDirGetBook(fs, dir, storeURL, depth, ids)
 		if err != nil {
 			restorePreviousBookAfterScanFailure(previousBook)
 			logger.Infof(locale.GetString("log_skip_to_scan_directory"), dir, err)
@@ -519,7 +539,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface, booksByPath map[strin
 		}
 
 		// 扫描文件
-		book, err := scanRemoteFileGetBook(fs, file.Path, storeURL, depth)
+		book, err := scanRemoteFileGetBook(fs, file.Path, storeURL, depth, ids)
 		if err != nil {
 			restorePreviousBookAfterScanFailure(previousBook)
 			recordArchiveScanFailure(storeURL, file.Path, file.Size, file.ModTime, true, err)
@@ -539,7 +559,7 @@ func initRemoteStore(storeURL string, cfg ConfigInterface, booksByPath map[strin
 
 // prepareBookPathForScan 在扫描前处理同路径旧书籍：
 // - 指纹未变化时跳过扫描，沿用旧 metadata；
-// - 指纹变化时先移除旧条目，避免 NewBook 的同路径判重阻止重扫。
+// - 指纹或索引版本变化时先移除旧条目，避免旧 ID 留在书架中。
 // 返回 previousBook 用于扫描失败回滚或扫描成功后迁移用户状态。
 func prepareBookPathForScan(previousBook *model.Book, size int64, modTime time.Time) (*model.Book, bool) {
 	if previousBook == nil {
@@ -549,7 +569,7 @@ func prepareBookPathForScan(previousBook *model.Book, size int64, modTime time.T
 	if !previousBook.IsRemote && (previousBook.Type == model.TypeZip || previousBook.Type == model.TypeCbz || previousBook.Type == model.TypeEpub) {
 		encodingChanged = previousBook.ZipTextEncoding != cfg.GetZipFileTextEncoding()
 	}
-	if !encodingChanged && previousBook.FileSize == size && previousBook.Modified.Equal(modTime) {
+	if config.SupportsBookVersion(previousBook.CreatedByVersion) && !encodingChanged && previousBook.FileSize == size && previousBook.Modified.Equal(modTime) {
 		logger.Infof(locale.GetString("log_book_data_already_exists"), previousBook.BookID, previousBook.BookPath)
 		return previousBook, true
 	}

@@ -44,6 +44,44 @@ func TestStoreInterfaceContractSQLite(t *testing.T) {
 	})
 }
 
+// TestSoftDeletedBookIDReservation 书架隐藏的软删除记录仍占用 ID，新书需扩位后才能入库。
+func TestSoftDeletedBookIDReservation(t *testing.T) {
+	_, db := newTestStoreDatabase(t)
+	incoming := &model.Book{BookInfo: model.BookInfo{StoreUrl: t.TempDir(), BookPath: "incoming.cbz", Type: model.TypeCbz, CreatedByVersion: config.GetVersion()}}
+	ids, err := model.NewBookIDIndex(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ids.Assign(&incoming.BookInfo); err != nil {
+		t.Fatal(err)
+	}
+	old := incoming.CloneForView()
+	old.BookPath, old.Deleted = "deleted.cbz", true
+	if err := db.StoreBook(old); err != nil {
+		t.Fatal(err)
+	}
+	books, err := db.ListBooks()
+	if err != nil || len(books) != 0 {
+		t.Fatalf("deleted book visible: %v %v", books, err)
+	}
+	ids, err = model.NewStoreBookIDIndex(db, books)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ids.Assign(&incoming.BookInfo); err != nil {
+		t.Fatal(err)
+	}
+	if len(incoming.BookID) != 8 || incoming.BookID[:7] != old.BookID {
+		t.Fatalf("deleted ID not reserved: %q", incoming.BookID)
+	}
+	if err := db.StoreBook(incoming); err != nil {
+		t.Fatal(err)
+	}
+	if stored, err := db.GetBook(old.BookID); err != nil || stored.BookPath != old.BookPath {
+		t.Fatalf("deleted record overwritten: %v", err)
+	}
+}
+
 // 验证 PostgreSQL 书库实现满足统一书库接口契约。
 func TestStoreInterfaceContractPostgres(t *testing.T) {
 	dsn := os.Getenv("COMIGO_TEST_PG_DSN")
@@ -136,6 +174,22 @@ func runStoreInterfaceContract(t *testing.T, newStore func(t *testing.T) model.S
 	}
 	if len(got.BookMarks) != 1 || got.BookMarks[0].BookStoreID != "store-id" {
 		t.Fatalf("bookmarks were not restored: %#v", got.BookMarks)
+	}
+
+	// 不同书籍即使携带同一个 ID，也不能覆盖原页面和书签；跨书库同样检查。
+	for _, otherStore := range []string{storeURL, filepath.Join(root, "another-library")} {
+		conflict := book.CloneForView()
+		conflict.StoreUrl = otherStore
+		conflict.BookPath = filepath.Join(otherStore, "another.zip")
+		conflict.PageInfos = nil
+		conflict.BookMarks = nil
+		if err := store.StoreBook(conflict); err == nil {
+			t.Fatal("conflicting book ID was accepted")
+		}
+		preserved, err := store.GetBook(book.BookID)
+		if err != nil || preserved.BookPath != book.BookPath || len(preserved.PageInfos) != 2 || len(preserved.BookMarks) != 1 {
+			t.Fatalf("collision damaged existing book: %+v, %v", preserved, err)
+		}
 	}
 
 	book.PageInfos = nil

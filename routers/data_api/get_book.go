@@ -34,7 +34,7 @@ func GetBook(c echo.Context) error {
 			logger.Infof("%s", err)
 			return writeRemoteComigoError(c, err)
 		}
-		return apiresp.Success(c, "ok", "book retrieved", comigo_remote.LocalizeBookInShelf(storeURL, remoteBook, localBook.RemoteShelfKey, localBook.RemoteShelfName))
+		return apiresp.Success(c, "ok", "book retrieved", comigo_remote.LocalizeBook(storeURL, remoteBook, localBook))
 	}
 	model.ClearBookWhenStoreUrlNotExist(config.GetCfg().StoreUrls)
 	model.ClearBookNotExist()

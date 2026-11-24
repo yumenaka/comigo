@@ -63,7 +63,7 @@ func TestZIPEncodingInvalidatesExistingMetadata(t *testing.T) {
 	path := filepath.Join(dir, "book.zip")
 	modified := time.Now()
 	for _, encoding := range []string{"", "gbk", "shiftjis"} {
-		book := &model.Book{BookInfo: model.BookInfo{BookID: "fixture", Type: model.TypeZip, StoreUrl: dir, BookPath: path, FileSize: 12, Modified: modified, ZipTextEncoding: encoding}}
+		book := &model.Book{BookInfo: model.BookInfo{BookID: "fixture", Type: model.TypeZip, StoreUrl: dir, BookPath: path, FileSize: 12, Modified: modified, ZipTextEncoding: encoding, CreatedByVersion: config.GetVersion()}}
 		if err := model.IStore.StoreBook(book); err != nil {
 			t.Fatal(err)
 		}

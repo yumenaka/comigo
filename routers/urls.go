@@ -234,6 +234,8 @@ func bindSettingsAPI(group *echo.Group) {
 	// 书库管理
 	group.POST("/stores/:id/refresh", settings.RescanStoreHandler)
 	group.POST("/stores/refresh", settings.RescanAllStoresHandler)
+	group.GET("/stores/cleanup", settings.CleanupDataHandler)
+	group.POST("/stores/cleanup", settings.CleanupDataHandler)
 	group.DELETE("/stores/:id", settings.DeleteStoreHandler)
 	// 插件管理
 	group.PUT("/plugins/:name", settings.EnablePluginHandler)

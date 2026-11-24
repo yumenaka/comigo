@@ -255,7 +255,9 @@ templ StoreConfigJavaScript() {
 
 					// 检查响应状态
 					if (!response.ok) {
-						showToast(i18next.t("err_add_config_failed"), "error");
+						// 保留后端的版本要求等具体原因，非 JSON 错误页沿用通用提示。
+						const data = await response.json().catch(() => ({}));
+						showToast(data.message || i18next.t("err_add_config_failed"), "error");
 						return;
 					}
 
@@ -300,7 +302,9 @@ templ StoreConfigJavaScript() {
 					);
 
 					if (!response.ok) {
-						showToast(i18next.t("err_rescan_store_failed"), "error");
+						// 保留后端的版本要求等具体原因，非 JSON 错误页沿用通用提示。
+						const data = await response.json().catch(() => ({}));
+						showToast(data.message || i18next.t("err_rescan_store_failed"), "error");
 						return;
 					}
 
@@ -334,7 +338,9 @@ templ StoreConfigJavaScript() {
 
 					// 检查响应状态
 					if (!response.ok) {
-						showToast(i18next.t("err_rescan_store_failed"), "error");
+						// 保留后端的版本要求等具体原因，非 JSON 错误页沿用通用提示。
+						const data = await response.json().catch(() => ({}));
+						showToast(data.message || i18next.t("err_rescan_store_failed"), "error");
 						return;
 					}
 

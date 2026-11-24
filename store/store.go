@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/yumenaka/comigo/config"
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/vfs"
@@ -27,7 +28,7 @@ type Store struct {
 }
 
 // GenerateBookGroup 分析书库中已有书籍的路径，生成书籍组信息
-func (store *Store) GenerateBookGroup() error {
+func (store *Store) GenerateBookGroup(ids *model.BookIDIndex) error {
 	if tools.DetectStoreURL(store.BackendURL).Type == tools.StoreBackendComigo {
 		// Comigo 远程书库直接使用远端返回的书组拓扑，避免本地按路径再生成一份重复书组。
 		return nil
@@ -147,14 +148,14 @@ func (store *Store) GenerateBookGroup() error {
 				modTime = pathInfo.ModTime()
 			}
 			newBookGroup := previousGroups[parentPath]
-			if newBookGroup != nil {
+			if newBookGroup != nil && config.SupportsBookVersion(newBookGroup.CreatedByVersion) {
 				newBookGroup = newBookGroup.CloneForView()
 				newBookGroup.Modified = modTime
 				newBookGroup.Depth = depth - 1
 				newBookGroup.ChildBooksID = nil
 			} else {
 				var err error
-				newBookGroup, err = model.NewBook(parentPath, modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
+				newBookGroup, err = ids.NewBook(parentPath, modTime, 0, store.BackendURL, depth-1, model.TypeBooksGroup)
 				if err != nil {
 					return err
 				}

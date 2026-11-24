@@ -225,3 +225,11 @@ body[data-theme="cyberpunk"] select option {
 :is(button, a.panel-control, [role="button"], [data-drawer-target], [data-drawer-show], [data-drawer-hide], [data-modal-target], [data-modal-toggle], [onclick]):hover:not(:disabled) {
   filter: var(--button-hover-filter);
 }
+
+/* 清理确认框交由原生 dialog 管理焦点，并限制背景滚动。 */
+#cleanup-dialog:modal { overscroll-behavior: contain; }
+#cleanup-dialog::backdrop {
+  background: rgb(0 0 0 / 45%);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}

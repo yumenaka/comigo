@@ -113,7 +113,7 @@ func TestBookFromLocalDirNodeUsesScannedFiles(t *testing.T) {
 		supportMediaType: []string{".jpg"},
 		supportFileType:  []string{".zip"},
 	})
-	book, err := bookFromLocalDirNode(node, tmp, 0)
+	book, err := bookFromLocalDirNode(node, tmp, 0, testBookIDs(t))
 	if err != nil {
 		t.Fatalf("bookFromLocalDirNode error: %v", err)
 	}
@@ -155,7 +155,7 @@ func TestAppendLocalDirBooksSkipsOverMaxDepthNode(t *testing.T) {
 				Path: filepath.Join(nested, "001.jpg"),
 			}},
 		}},
-	}, tmp, nil)
+	}, tmp, nil, testBookIDs(t))
 
 	for _, book := range books {
 		if book.BookPath == nested {
@@ -299,6 +299,8 @@ func testInitComigoStore(t *testing.T, database bool) {
 			return
 		}
 		switch r.URL.Path {
+		case "/api/server":
+			_ = json.NewEncoder(w).Encode(map[string]string{"Version": config.GetVersion()})
 		case "/api/top-shelf":
 			_ = json.NewEncoder(w).Encode([]model.StoreBookInfo{{
 				DisplayName: "Remote Shelf",
@@ -341,12 +343,23 @@ func testInitComigoStore(t *testing.T, database bool) {
 		*config.GetCfg() = oldCfg
 	})
 
+	// 预占远端子书的七位前缀，验证扫描、书组引用和实时读取都保留加长后的 ID。
+	shortID := localComigoBookID(t, server.URL, "local")
+	blocker := &model.Book{BookInfo: model.BookInfo{
+		BookID: shortID, StoreUrl: t.TempDir(), BookPath: "occupied.cbz", Type: model.TypeCbz,
+	}}
+	if err := model.IStore.StoreBook(blocker); err != nil {
+		t.Fatal(err)
+	}
 	scanCfg := &testCfgScan{timeoutLimitForSc: 5}
 	if err := InitStore(server.URL, scanCfg); err != nil {
 		t.Fatalf("InitStore remote Comigo: %v", err)
 	}
 
 	localID := localComigoBookID(t, server.URL, "local")
+	if len(localID) != 8 || localID[:7] != shortID {
+		t.Fatalf("remote collision not expanded: %q -> %q", shortID, localID)
+	}
 	groupID := localComigoBookID(t, server.URL, "group")
 	nestedRemoteID := localComigoBookID(t, server.URL, "nested-remote")
 	if _, err := model.IStore.GetBook(localID); err != nil {
@@ -366,6 +379,10 @@ func testInitComigoStore(t *testing.T, database bool) {
 	book, err := model.IStore.GetBook(localID)
 	if err != nil || book.RemoteBookID != "local" || book.RemoteShelfName != "Remote Shelf" || book.RemoteShelfKey == "" || book.RemoteStoreKey == "" {
 		t.Fatalf("remote fields lost: %#v, %v", book, err)
+	}
+	refreshed, handled, err := comigo_remote.ResolveBook([]string{server.URL}, book.RemoteStoreKey, localID, "default", 5)
+	if err != nil || !handled || refreshed.BookID != localID || !strings.Contains(refreshed.PageInfos[0].Url, "id="+localID) {
+		t.Fatalf("remote refresh changed assigned ID: %+v, %v", refreshed, err)
 	}
 	if err := model.IStore.StoreBookMark(model.NewBookMark(model.UserMark, localID, book.GetStoreID(), 1, "本地书签")); err != nil {
 		t.Fatal(err)
@@ -468,7 +485,15 @@ func TestDeleteStaleComigoRemoteBooksRemovesGeneratedGroups(t *testing.T) {
 
 func localComigoBookID(t *testing.T, storeURL string, remoteBookID string) string {
 	t.Helper()
-	return comigo_remote.LocalBookID(storeURL, remoteBookID)
+	key, err := comigo_remote.StoreKey(storeURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	book := model.BookInfo{RemoteStoreKey: key, RemoteBookID: remoteBookID}
+	if err := testBookIDs(t).Assign(&book); err != nil {
+		t.Fatal(err)
+	}
+	return book.BookID
 }
 
 func mustFindBookByPath(t *testing.T, bookPath string) *model.Book {
@@ -542,4 +567,18 @@ type countingScanStore struct {
 func (s *countingScanStore) ListBooks() ([]*model.Book, error) {
 	s.calls++
 	return s.StoreInterface.ListBooks()
+}
+
+// testBookIDs 为扫描测试创建当前书库的 ID 占用表。
+func testBookIDs(t *testing.T) *model.BookIDIndex {
+	t.Helper()
+	books, err := model.IStore.ListBooks()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ids, err := model.NewBookIDIndex(books)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return ids
 }

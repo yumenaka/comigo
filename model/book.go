@@ -52,7 +52,7 @@ func (b *Book) GuessCover() (cover PageInfo) {
 }
 
 // NewBook 初始化 Book，设置文件路径、书名、BookID 等
-func NewBook(bookPath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
+func (ids *BookIDIndex) NewBook(bookPath string, modified time.Time, fileSize int64, storePath string, depth int, bookType SupportFileType) (*Book, error) {
 	// 初始化书籍
 	book := &Book{
 		BookInfo: BookInfo{
@@ -66,7 +66,8 @@ func NewBook(bookPath string, modified time.Time, fileSize int64, storePath stri
 		},
 	}
 	// 设置文件路径、书名、BookID
-	_, err := book.setFilePath(bookPath).setParentFolder(bookPath).setTitle(bookPath).setAuthor().initBookID(bookPath)
+	book.setFilePath(bookPath).setParentFolder(bookPath).setTitle(bookPath).setAuthor()
+	err := ids.Assign(&book.BookInfo)
 	return book, err
 }
 

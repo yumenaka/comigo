@@ -1,0 +1,124 @@
+package settings
+
+// CleanupPanel 先展示预计清理范围，用户确认后才执行删除。
+templ CleanupPanel() {
+	<div class="px-4 py-3 font-normal" x-data="cleanupPanel()">
+		<button type="button" class="px-4 py-2 border rounded cursor-pointer disabled:opacity-50" @click="preview()" :disabled="busy" x-text="i18next.t(busy ? 'cleanup_busy' : 'cleanup_title')"></button>
+		<p class="mt-2 text-sm opacity-80" x-text="i18next.t('cleanup_description')"></p>
+		<p class="mt-2 text-sm" role="status" x-text="status"></p>
+		<dialog x-ref="dialog" id="cleanup-dialog" aria-labelledby="cleanup-title" class="m-auto w-full max-w-xl max-h-[85vh] overflow-auto p-6 border rounded-xl shadow-xl bg-base-100 text-base-content" @cancel="if (busy) $event.preventDefault()">
+			<h1 id="cleanup-title" class="text-xl font-semibold" x-text="i18next.t('cleanup_title')"></h1>
+			<p class="my-3 text-sm" x-text="i18next.t('cleanup_scope')"></p>
+			<dl class="grid grid-cols-2 gap-2 text-sm">
+				<dt x-text="i18next.t('cleanup_files')"></dt>
+				<dd x-text="result.files"></dd>
+				<dt x-text="i18next.t('cleanup_bytes')"></dt>
+				<dd x-text="formatSize(result.bytes)"></dd>
+				<dt x-text="i18next.t('cleanup_books')"></dt>
+				<dd x-text="result.books"></dd>
+				<dt x-text="i18next.t('cleanup_pages')"></dt>
+				<dd x-text="result.pages"></dd>
+				<dt x-text="i18next.t('cleanup_bookmarks')"></dt>
+				<dd x-text="result.bookmarks"></dd>
+				<dt x-text="i18next.t('cleanup_failures')"></dt>
+				<dd x-text="result.failures"></dd>
+			</dl>
+			<p class="my-3 text-sm" x-show="result.skipped" x-text="i18next.t('cleanup_skipped', {count: result.skipped})"></p>
+			<details class="my-3 text-sm" x-show="result.samples.length" open>
+				<summary class="cursor-pointer py-2" x-text="i18next.t('cleanup_samples')"></summary>
+				<ul class="max-h-48 overflow-auto list-disc pl-5 break-all font-mono">
+					<template x-for="(sample, index) in result.samples" :key="index"><li x-text="sample"></li></template>
+				</ul>
+			</details>
+			<p class="my-3 text-sm" x-show="!hasItems()" x-text="i18next.t('cleanup_empty')"></p>
+			<p class="my-3 text-sm" role="status" x-text="error"></p>
+			<div class="flex justify-end gap-3 mt-5">
+				<button type="button" autofocus class="px-4 py-2 border rounded cursor-pointer disabled:opacity-50" :disabled="busy" @click="$refs.dialog.close()" x-text="i18next.t('cancel')"></button>
+				<button type="button" class="px-4 py-2 border rounded cursor-pointer disabled:opacity-50" :disabled="busy || !hasItems() || !result.token" @click="clean()" x-text="i18next.t(busy ? 'cleanup_busy' : 'cleanup_confirm')"></button>
+			</div>
+		</dialog>
+	</div>
+	<script>
+		// 清理面板只提交预览指纹，不能由浏览器指定服务器上的删除路径。
+		function cleanupPanel() {
+			return {
+				busy: false,
+				status: "",
+				error: "",
+				result: { samples: [] },
+				hasItems() {
+					return (
+						this.result.files ||
+						this.result.books ||
+						this.result.pages ||
+						this.result.bookmarks ||
+						this.result.failures
+					);
+				},
+				formatSize(bytes = 0) {
+					const units = ["B", "KiB", "MiB", "GiB", "TiB"];
+					let unit = 0;
+					while (bytes >= 1024 && unit < units.length - 1) {
+						bytes /= 1024;
+						unit++;
+					}
+					return `${bytes.toFixed(unit ? 1 : 0)} ${units[unit]}`;
+				},
+				async request(token) {
+					const response = await fetch(
+						window.ComiGoPath("/api/stores/cleanup"),
+						token
+							? {
+									method: "POST",
+									headers: { "Content-Type": "application/json" },
+									body: JSON.stringify({ token }),
+								}
+							: { cache: "no-store" },
+					);
+					// 代理或认证返回 HTML 时也显示清理失败，不把解析异常直接展示给用户。
+					const data = await response.json().catch((cause) => {
+						throw new Error(i18next.t("cleanup_failed"), { cause });
+					});
+					if (!response.ok)
+						throw new Error(data.message || i18next.t("cleanup_failed"));
+					return data;
+				},
+				async preview() {
+					this.busy = true;
+					this.status = "";
+					this.error = "";
+					try {
+						this.result = await this.request();
+						this.busy = false;
+						await this.$nextTick();
+						this.$refs.dialog.showModal();
+					} catch (error) {
+						this.status = error.message;
+					} finally {
+						this.busy = false;
+					}
+				},
+				async clean() {
+					this.busy = true;
+					this.error = "";
+					try {
+						const result = await this.request(this.result.token);
+						this.$refs.dialog.close();
+						this.status = i18next.t("cleanup_done", {
+							files: result.files,
+							bytes: this.formatSize(result.bytes),
+							books: result.books,
+							records: result.pages + result.bookmarks + result.failures,
+						});
+					} catch (error) {
+						this.error = error.message;
+					} finally {
+						// 无论成功或部分失败，旧计划都不能再次提交。
+						this.result.token = "";
+						this.busy = false;
+					}
+				},
+			};
+		}
+	</script>
+}

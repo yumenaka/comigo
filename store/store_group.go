@@ -16,14 +16,14 @@ import (
 	"github.com/yumenaka/comigo/model"
 	"github.com/yumenaka/comigo/tools"
 	"github.com/yumenaka/comigo/tools/logger"
-	"golang.org/x/mod/semver"
 )
 
 // StoreInRam 内存书库，扫描后生成。可以有多个子书库。
 type StoreInRam struct {
 	StoreInfo
-	ChildStores  sync.Map // key为路径 存储 *Store
-	PendingBooks sync.Map // 待重扫的旧书籍，按书库和路径匹配，保留书签及已读状态
+	ChildStores  sync.Map   // key为路径 存储 *Store
+	PendingBooks sync.Map   // 待重扫的旧书籍，按书库和路径匹配，保留书签及已读状态
+	booksMu      sync.Mutex // 串行检查和写入，避免不同书库抢占同一个 ID。
 	bookmarksMu  sync.RWMutex
 }
 
@@ -54,10 +54,20 @@ func (ramStore *StoreInRam) AddStore(storeURL string) error {
 
 // GenerateBookGroup 分析所有子书库，并并生成书籍组
 func (ramStore *StoreInRam) GenerateBookGroup() (e error) {
+	ramStore.booksMu.Lock()
+	defer ramStore.booksMu.Unlock()
+	books, err := ramStore.ListBooks()
+	if err != nil {
+		return err
+	}
+	ids, err := model.NewStoreBookIDIndex(ramStore, books)
+	if err != nil {
+		return err
+	}
 	// 遍历所有子书库
 	for _, value := range ramStore.ChildStores.Range {
 		s := value.(*Store)
-		err := s.GenerateBookGroup()
+		err := s.GenerateBookGroup(ids)
 		if err != nil {
 			e = err
 		}
@@ -342,7 +352,7 @@ func (ramStore *StoreInRam) LoadBooks() error {
 			}
 			// 仅低于数据格式支持下限（或没有有效版本）时重扫，普通升级直接沿用 JSON。
 			minimumVersion := config.GetMinSupportedVersion()
-			if !semver.IsValid(book.CreatedByVersion) || semver.Compare(book.CreatedByVersion, minimumVersion) < 0 {
+			if !config.SupportsBookVersion(book.CreatedByVersion) {
 				logger.Infof(locale.GetString("log_book_version_mismatch_skip"), book.BookID, book.CreatedByVersion, minimumVersion)
 				ramStore.PendingBooks.Store(pendingBookKey(&book), &book)
 				continue
@@ -423,12 +433,6 @@ func (ramStore *StoreInRam) storeBookInMemory(b *model.Book) error {
 	if b.BookID == "" {
 		return errors.New(locale.GetString("err_add_book_empty_bookid"))
 	}
-	// Load 返回存储在映射中的键值，如果不存在值，则返回 nil。ok 结果指示是否在映射中找到了值。
-	if _, ok := ramStore.ChildStores.Load(b.StoreUrl); !ok {
-		if err := ramStore.AddStore(b.StoreUrl); err != nil {
-			logger.Infof(locale.GetString("log_error_adding_subfolder"), err)
-		}
-	}
 	return ramStore.StoreBookToSubStore(b.StoreUrl, b)
 }
 
@@ -443,24 +447,30 @@ func saveBookMeta(b *model.Book) error {
 
 // StoreBookToSubStore 将某一本书，放到BookMap里面去
 func (ramStore *StoreInRam) StoreBookToSubStore(storeURL string, b *model.Book) error {
-	if f, ok := ramStore.ChildStores.Load(storeURL); !ok {
-		// 创建一个新子书库，并添加一本书
-		newSubStore := Store{
-			StoreInfo: StoreInfo{
-				BackendURL:  storeURL,
-				Name:        filepath.Base(storeURL), // 使用路径的最后一部分作为名称
-				Description: "Comigo StoreInfo for " + storeURL,
-			},
+	ramStore.booksMu.Lock()
+	defer ramStore.booksMu.Unlock()
+	if existing, err := ramStore.GetBook(b.BookID); err == nil {
+		if err := model.CheckBookID(&existing.BookInfo, &b.BookInfo); err != nil {
+			return err
 		}
-		newSubStore.BookMap.Store(b.BookID, b)
-		ramStore.ChildStores.Store(storeURL, &newSubStore)
-		return fmt.Errorf(locale.GetString("err_add_bookstore_key_not_found"), storeURL)
-	} else {
-		// 给已有子书库添加一本书
-		temp := f.(*Store)
-		temp.BookMap.Store(b.BookID, b)
-		return nil
 	}
+	// 入库也核对待恢复记录，避免绕过分配器时覆盖同名 JSON。
+	var conflict error
+	ramStore.PendingBooks.Range(func(_, value any) bool {
+		conflict = model.CheckBookID(&value.(*model.Book).BookInfo, &b.BookInfo)
+		return conflict == nil
+	})
+	if conflict != nil {
+		return conflict
+	}
+	if _, exists := ramStore.ChildStores.Load(storeURL); !exists {
+		if err := ramStore.AddStore(storeURL); err != nil {
+			return err
+		}
+	}
+	value, _ := ramStore.ChildStores.Load(storeURL)
+	value.(*Store).BookMap.Store(b.BookID, b)
+	return nil
 }
 
 // StoreBooks 添加多本书
@@ -855,4 +865,13 @@ func bookParentPath(book model.BookInfo) string {
 		return book.StoreUrl
 	}
 	return filepath.Dir(bookPath)
+}
+
+// ReserveBookIDs 待恢复 JSON 仍占用文件名，不能被其他书籍覆盖。
+func (ramStore *StoreInRam) ReserveBookIDs(ids *model.BookIDIndex) (err error) {
+	ramStore.PendingBooks.Range(func(_, value any) bool {
+		err = ids.Reserve(&value.(*model.Book).BookInfo)
+		return err == nil
+	})
+	return err
 }

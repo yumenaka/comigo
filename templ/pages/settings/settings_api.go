@@ -22,7 +22,6 @@ import (
 	"github.com/yumenaka/comigo/tools/logger"
 	"github.com/yumenaka/comigo/tools/scan"
 	"github.com/yumenaka/comigo/tools/sse_hub"
-	"golang.org/x/mod/semver"
 )
 
 func reloadHintForStringConfig(name string) (saveSuccessHint bool, reason string) {
@@ -496,7 +495,7 @@ func AddArrayConfigHandler(c echo.Context) error {
 		values, err = doAdd(decodedConfigName, decodedAddValue)
 	}
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_add_config_failed"))
+		return storeOperationError(err, "err_add_config_failed")
 	}
 
 	saveSuccessHint := false
@@ -536,6 +535,9 @@ func doAdd(configName, addValue string) ([]string, error) {
 
 // doAddStoreURL 只扫描本次新增的书库，避免新增远程书库时重扫所有既有远程服务。
 func doAddStoreURL(storeURL string) ([]string, string, error) {
+	if err := checkRemoteComigoVersion(storeURL); err != nil {
+		return nil, "", err
+	}
 	var values []string
 	_, err := changeSettings(func(next *config.Config) error {
 		var err error
@@ -551,7 +553,7 @@ func doAddStoreURL(storeURL string) ([]string, string, error) {
 	} else {
 		model.GenerateBookGroup()
 	}
-	return values, remoteComigoVersionWarning(storeURL), nil
+	return values, "", nil
 }
 
 // doDeleteStoreURL 删除书库配置但不触发通用配置重扫；当前 handler 已自行清理书籍并回传局部 UI。
@@ -569,43 +571,25 @@ func doDeleteStoreURL(storeURL string) ([]string, error) {
 	return values, nil
 }
 
-// remoteComigoVersionWarning 检查远端 Comigo 版本；只返回提醒，不阻止添加书库。
-func remoteComigoVersionWarning(storeURL string) string {
+// checkRemoteComigoVersion 添加书库前验证支持下限，失败时不保存配置或扫描旧版数据。
+func checkRemoteComigoVersion(storeURL string) error {
 	if tools.DetectStoreURL(storeURL).Type != tools.StoreBackendComigo {
-		return ""
+		return nil
 	}
 	client, err := comigo_remote.NewClient(storeURL, config.GetCfg().TimeoutLimitForScan)
 	if err != nil {
-		logger.Infof(locale.GetString("log_remote_comigo_version_check_failed"), err)
-		return ""
+		return err
 	}
-	remoteVersion, err := client.GetServerVersion()
-	if err != nil {
-		logger.Infof(locale.GetString("log_remote_comigo_version_check_failed"), err)
-		return ""
-	}
-	remoteTag, localTag := canonicalSemverTag(remoteVersion), canonicalSemverTag(config.GetVersion())
-	if remoteTag == "" || localTag == "" {
-		return ""
-	}
-	if semver.Compare(remoteTag, localTag) >= 0 {
-		return ""
-	}
-	return fmt.Sprintf(locale.GetString("remote_comigo_version_older_warning"), remoteVersion, config.GetVersion())
+	return client.CheckVersion()
 }
 
-func canonicalSemverTag(version string) string {
-	version = strings.TrimSpace(version)
-	if version == "" {
-		return ""
+// storeOperationError 保留不支持的远端版本提示，其余错误沿用对应操作的通用提示。
+func storeOperationError(err error, messageKey string) error {
+	var versionErr *comigo_remote.UnsupportedVersionError
+	if errors.As(err, &versionErr) {
+		return echo.NewHTTPError(http.StatusBadRequest, versionErr.Error())
 	}
-	if !strings.HasPrefix(version, "v") {
-		version = "v" + version
-	}
-	if !semver.IsValid(version) {
-		return ""
-	}
-	return version
+	return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString(messageKey)).SetInternal(err)
 }
 
 // EnablePluginHandler 处理启用插件的 JSON API
@@ -817,7 +801,7 @@ func rescanOneStore(c echo.Context, storeUrl string) error {
 	// 调用扫描功能
 	if err := scan.InitStore(storeUrl, config.GetCfg()); err != nil {
 		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
-		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
+		return storeOperationError(err, "err_rescan_store_failed")
 	}
 
 	// 扫描只会发现现存书籍，缺失的旧记录需要在保存和统计前主动清理。
@@ -853,7 +837,7 @@ func rescanAllStores(c echo.Context) error {
 
 	if err := scan.InitAllStore(config.GetCfg()); err != nil {
 		logger.Infof(locale.GetString("log_failed_to_scan_store_path"), err)
-		return echo.NewHTTPError(http.StatusInternalServerError, locale.GetString("err_rescan_store_failed"))
+		return storeOperationError(err, "err_rescan_store_failed")
 	}
 
 	// 扫描结束后清理已经消失的书籍，才能保存并统计真实减少数量。

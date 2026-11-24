@@ -38,8 +38,11 @@ ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片�
 - `config.GetCfg()` 是只读快照；仅启动参数绑定可直接修改。运行时更新经 `config.ChangeConfig` 在独立副本上完成；需持久化时先写盘成功再原子发布，失败不应用副作用。重载／回滚用 `config.ReplaceConfig`；不要缓存字段指针或修改已发布快照的切片。
 - `routers.StartWebServer()` / `StartEcho()` 在嵌入式模式下应返回错误，不能依赖 `os.Exit`、`logger.Fatalf` 结束宿主进程。
 - 嵌入式接入优先保持 Tailscale、桌面托盘、Windows 特有逻辑与启动链路解耦。
-- 远程 Comigo 书库使用 `http(s)` 主页 URL 配置；阅读与下载实时代理远端资源，本地只保存索引，不保留原始文件。
+- 远程 Comigo 书库使用 `http(s)` 主页 URL 配置；添加与扫描时按 `minSupportedVersion` 拒绝旧版服务并提示升级，不兼容旧版远端数据；阅读与下载实时代理远端资源，本地只保存索引，不保留原始文件。
 - 前端 Alpine.js store 持久化键名格式为 `模块.配置项`，如 `flip.autoHideToolbar`。
+- 书籍 ID 使用 SHA-256 原始摘要的 Base62 编码，默认 7 位、冲突逐位加长；本地摘要字段包含路径、文件大小、类型、父目录名和书库地址，以 NUL 分隔。远程 Comigo 使用公开书库标识与远端 ID，不包含登录凭据。
+- 扫描和书组重建共用本轮 `model.BookIDIndex`，新 ID 在生成资源 URL 前立即登记，软删除行与 `PendingBooks` 也须占位但不作为摘要复用来源；远程详情沿用已分配的 ID 和子书引用。存储层禁止不同书籍共用 ID，不能依靠 upsert 覆盖冲突。
+- 无效数据清理与扫描串行，先预览再确认，执行时重算并核对计划；只清理生成数据，不删除源文件。保留离线书库和仍可恢复的旧索引，数据库模式下仅清理功能可检查遗留 metadata JSON。SQLite 手动清理完成后执行分批 incremental_vacuum 和 WAL 截断，回收失败只记日志；不自动转换旧数据库模式。
 
 ## EPUB 阅读
 - `templ/pages/epub/`、`assets/static/js/epub_reader.js` 与对应 CSS 是独立阅读器，不复用 ZIP 漫画的 WASM、页码或翻页状态。

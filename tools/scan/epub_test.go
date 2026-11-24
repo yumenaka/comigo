@@ -48,7 +48,7 @@ func TestTextEPUBIsStoredWithoutImages(t *testing.T) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-	book, err := scanFileGetBook(filename, dir, 0)
+	book, err := scanFileGetBook(filename, dir, 0, testBookIDs(t))
 	if err != nil {
 		t.Fatal(err)
 	}
