@@ -23,7 +23,7 @@ RUN apk add --no-cache curl unzip bash libstdc++ nodejs && \
 COPY package.json bun.lock* ./
 COPY assets/ ./assets/
 # Tailwind 需要 PostCSS 配置和模板源码才能生成页面样式。
-COPY .postcssrc tailwind.config.js ./
+COPY .postcssrc ./
 COPY templ/ ./templ/
 
 # 安装依赖并构建前端资源

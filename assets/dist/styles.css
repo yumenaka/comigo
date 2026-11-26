@@ -1653,24 +1653,16 @@
     height: calc(var(--spacing) * 44);
   }
 
-  .h-64 {
-    height: calc(var(--spacing) * 64);
-  }
-
   .h-\[400px\] {
     height: 400px;
-  }
-
-  .h-\[calc\(100\%-1rem\)\] {
-    height: calc(100% - 1rem);
   }
 
   .h-\[calc\(100dvh-4rem\)\] {
     height: calc(100dvh - 4rem);
   }
 
-  .h-\[calc\(100vh-7rem\)\] {
-    height: calc(100vh - 7rem);
+  .h-\[calc\(100dvh-7rem\)\] {
+    height: calc(100dvh - 7rem);
   }
 
   .h-auto {
@@ -1683,10 +1675,6 @@
 
   .h-full {
     height: 100%;
-  }
-
-  .h-screen {
-    height: 100vh;
   }
 
   .max-h-48 {
@@ -1705,16 +1693,16 @@
     max-height: 85vh;
   }
 
+  .max-h-\[calc\(100dvh-2rem\)\] {
+    max-height: calc(100dvh - 2rem);
+  }
+
+  .max-h-dvh {
+    max-height: 100dvh;
+  }
+
   .max-h-fit {
     max-height: fit-content;
-  }
-
-  .max-h-full {
-    max-height: 100%;
-  }
-
-  .max-h-screen {
-    max-height: 100vh;
   }
 
   .min-h-9 {
@@ -1733,12 +1721,12 @@
     min-height: calc(var(--spacing) * 16);
   }
 
-  .min-h-32 {
-    min-height: calc(var(--spacing) * 32);
-  }
-
   .min-h-72 {
     min-height: calc(var(--spacing) * 72);
+  }
+
+  .min-h-\[60dvh\] {
+    min-height: 60dvh;
   }
 
   .min-h-\[60vh\] {
@@ -1849,12 +1837,20 @@
     width: calc(var(--spacing) * 64);
   }
 
+  .w-72 {
+    width: calc(var(--spacing) * 72);
+  }
+
   .w-\[0\.5px\] {
     width: .5px;
   }
 
   .w-\[1\.5px\] {
     width: 1.5px;
+  }
+
+  .w-\[calc\(100\%-2rem\)\] {
+    width: calc(100% - 2rem);
   }
 
   .w-auto {
@@ -1897,6 +1893,10 @@
     max-width: calc(var(--spacing) * 64);
   }
 
+  .max-w-\[calc\(100\%-2rem\)\] {
+    max-width: calc(100% - 2rem);
+  }
+
   .max-w-fit {
     max-width: fit-content;
   }
@@ -1935,10 +1935,6 @@
 
   .min-w-64 {
     min-width: calc(var(--spacing) * 64);
-  }
-
-  .min-w-80 {
-    min-width: calc(var(--spacing) * 80);
   }
 
   .min-w-\[20rem\] {
@@ -2212,12 +2208,6 @@
     margin-inline-end: calc(-1px * calc(1 - var(--tw-space-x-reverse)));
   }
 
-  :where(.space-x-2 > :not(:last-child)) {
-    --tw-space-x-reverse: 0;
-    margin-inline-start: calc(calc(var(--spacing) * 2) * var(--tw-space-x-reverse));
-    margin-inline-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-x-reverse)));
-  }
-
   .gap-y-1 {
     row-gap: var(--spacing);
   }
@@ -2468,16 +2458,6 @@
     }
   }
 
-  .bg-black\/50 {
-    background-color: #00000080;
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-black\/50 {
-      background-color: color-mix(in oklab, var(--color-black) 50%, transparent);
-    }
-  }
-
   .bg-black\/70 {
     background-color: #000000b3;
   }
@@ -2498,10 +2478,6 @@
 
   .bg-blue-300 {
     background-color: var(--color-blue-300);
-  }
-
-  .bg-blue-400 {
-    background-color: var(--color-blue-400);
   }
 
   .bg-blue-500 {
@@ -2696,10 +2672,6 @@
     background-position: 50%;
   }
 
-  .bg-top {
-    background-position: top;
-  }
-
   .fill-current {
     fill: currentColor;
   }
@@ -2710,6 +2682,10 @@
 
   .object-cover {
     object-fit: cover;
+  }
+
+  .object-top {
+    object-position: top;
   }
 
   .p-0 {
@@ -3023,6 +2999,10 @@
 
   .text-blue-500 {
     color: var(--color-blue-500);
+  }
+
+  .text-blue-600 {
+    color: var(--color-blue-600);
   }
 
   .text-blue-700 {
@@ -3464,6 +3444,10 @@
       background-color: var(--color-gray-300);
     }
 
+    .hover\:bg-gray-600:hover {
+      background-color: var(--color-gray-600);
+    }
+
     .hover\:bg-gray-700:hover {
       background-color: var(--color-gray-700);
     }
@@ -3494,6 +3478,10 @@
 
     .hover\:bg-red-400:hover {
       background-color: var(--color-red-400);
+    }
+
+    .hover\:bg-red-500:hover {
+      background-color: var(--color-red-500);
     }
 
     .hover\:bg-white\/30:hover {
@@ -3620,18 +3608,6 @@
     outline-offset: 2px;
   }
 
-  .active\:bg-blue-500:active {
-    background-color: var(--color-blue-500);
-  }
-
-  .active\:bg-gray-600:active {
-    background-color: var(--color-gray-600);
-  }
-
-  .active\:bg-red-500:active {
-    background-color: var(--color-red-500);
-  }
-
   .active\:bg-sky-500:active {
     background-color: var(--color-sky-500);
   }
@@ -3729,10 +3705,6 @@
   }
 
   @media (width >= 48rem) {
-    .md\:inset-0 {
-      inset: 0;
-    }
-
     .md\:m-3 {
       margin: calc(var(--spacing) * 3);
     }
@@ -4035,7 +4007,7 @@ body[data-theme="cyberpunk"] footer.footer.panel-surface a {
   color: #fff !important;
 }
 
-body[data-theme="cyberpunk"] :is(#ScrollMainArea, #FlipMainArea, #ReaderRoot, #ReaderShell, #ReaderFlipArea, #ReaderPDFArea), body[data-theme="cyberpunk"]:has(#ScrollMainArea), body[data-theme="cyberpunk"]:has(#FlipMainArea), body[data-theme="cyberpunk"]:has(#ReaderRoot) {
+body[data-theme="cyberpunk"]:has(#ScrollMainArea), body[data-theme="cyberpunk"]:has(#FlipMainArea), body[data-theme="cyberpunk"]:has(#ReaderRoot), body[data-theme="cyberpunk"] :is(#ScrollMainArea, #FlipMainArea, #ReaderRoot, #ReaderShell, #ReaderFlipArea, #ReaderPDFArea) {
   --cyber-spot-a: 4deg;
   --cyber-spot-b: -18deg;
   --cyber-spot-c: -42deg;
@@ -4414,13 +4386,7 @@ body::-webkit-scrollbar {
   display: none;
 }
 
-body {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  overflow: auto;
-}
-
-.scroll-hidden {
+body, .scroll-hidden {
   scrollbar-width: none;
   overflow: auto;
 }
@@ -4598,11 +4564,11 @@ body[data-theme="cyberpunk"] select, body[data-theme="cyberpunk"] select:hover, 
   filter: var(--button-hover-filter);
 }
 
-#cleanup-dialog:modal {
+dialog:modal {
   overscroll-behavior: contain;
 }
 
-#cleanup-dialog::backdrop {
+dialog::backdrop {
   overscroll-behavior: contain;
   background: #00000073;
   overflow: hidden;

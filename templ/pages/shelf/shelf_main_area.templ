@@ -40,6 +40,7 @@ templ ShelfSearchBar(c echo.Context) {
 // 为了避免特殊编码，showBook的persist key使用了Base64编码
 templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookInfo, childBookInfos []model.BookInfo) {
 	{{ bookmarkResolver := NewBookmarkResolver(storeBookInfos, childBookInfos) }}
+	{{ coverIndex := 0 }}
 	<!-- 不包括Header与Footer的【书架主体部分】 -->
 	if nowBookNum != 0 && getShelfParentID(c) == "" {
 		<div
@@ -88,7 +89,8 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 						</span>
 					</div>
 					for _, book := range storeBooks.BookInfos {
-						@BookCard(c, book, bookmarkResolver.Get(book))
+						@BookCard(c, book, bookmarkResolver.Get(book), coverIndex)
+						{{ coverIndex++ }}
 					}
 				</div>
 			}
@@ -102,7 +104,8 @@ templ MainArea(c echo.Context, nowBookNum int, storeBookInfos []model.StoreBookI
 		>
 			<div id="book-shelf" class="flex flex-row flex-wrap content-start justify-center flex-1 w-full h-full overflow-y-auto text-base-content">
 				for _, book := range childBookInfos {
-					@BookCard(c, book, bookmarkResolver.Get(book))
+					@BookCard(c, book, bookmarkResolver.Get(book), coverIndex)
+					{{ coverIndex++ }}
 				}
 			</div>
 		</div>

@@ -3,11 +3,11 @@ package common
 import "github.com/yumenaka/comigo/config"
 
 templ QRCode() {
-	<!-- QRCode -->
-	<div x-data="{ serverHost: 'localhost' }" id="qrcode-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+	<!-- 原生模态框提供键盘焦点与关闭按钮，遮罩点击由 closedby 渐进增强。 -->
+	<dialog x-data="{}" id="qrcode-modal" closedby="any" :aria-label="i18next.t('qrcode')" class="panel-surface m-auto w-72 max-w-[calc(100%-2rem)] max-h-[calc(100dvh-2rem)] overflow-auto p-3 rounded-lg bg-base-100 text-base-content">
 		<!-- QRCode Modal Content -->
 		<div
-			class="relative w-64 h-64 p-1 m-1"
+			class="relative w-full"
 			data-qrcode-base={ config.GetQrcodeURL() }
 			@comigo-modal-shown.window="if ($event.target.id === 'qrcode-modal') $store.global.refreshQRCode($el.dataset.qrcodeBase)"
 		>
@@ -15,7 +15,7 @@ templ QRCode() {
 				id="qrcode-img"
 				draggable="false"
 				:src="$store.global.qrcodeImageSrc"
-				class="w-64 h-64 rounded shadow-lg border border-gray-300"
+				class="w-full aspect-square rounded shadow-lg border border-gray-300"
 				alt="QR Code"
 			/>
 			<a
@@ -32,5 +32,8 @@ templ QRCode() {
 				<p x-text="i18next.t('qrcode_lan_sharing_disabled_hint')" class="panel-surface max-w-full p-1 px-2 mt-1 text-center text-warning bg-base-100 rounded text-sm font-semibold">请启用局域网共享，否则扫码后无法访问</p>
 			}
 		</div>
-	</div>
+		<form method="dialog" class="mt-3 text-center">
+			<button autofocus class="panel-control px-4 py-2 rounded border" x-text="i18next.t('close')"></button>
+		</form>
+	</dialog>
 }

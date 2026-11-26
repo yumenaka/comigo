@@ -167,158 +167,42 @@ function initDrawers() {
         })
 
     document.addEventListener('keydown', (event) => {
-        if (event.key !== 'Escape') return
+        if (event.key !== 'Escape' || document.querySelector('dialog:modal')) return
         drawers.forEach((drawer) => {
             if (drawer.isVisible()) drawer.hide()
         })
     })
 }
 
-// modal 本身是 flex 容器，placement 决定内容在视口中的对齐位置。
-function getModalPlacementClasses(placement) {
-    switch (placement) {
-        case 'top-left':
-            return ['justify-start', 'items-start']
-        case 'top-center':
-            return ['justify-center', 'items-start']
-        case 'top-right':
-            return ['justify-end', 'items-start']
-        case 'center-left':
-            return ['justify-start', 'items-center']
-        case 'center-right':
-            return ['justify-end', 'items-center']
-        case 'bottom-left':
-            return ['justify-start', 'items-end']
-        case 'bottom-center':
-            return ['justify-center', 'items-end']
-        case 'bottom-right':
-            return ['justify-end', 'items-end']
-        case 'center':
-        default:
-            return ['justify-center', 'items-center']
-    }
-}
-
-// 控制单个模态框；dynamic 遮罩允许点击空白处关闭，所有模态框都支持 ESC。
-function createModalController(modal, options) {
-    let visible = false
-    let backdrop = null
-
-    addClasses(modal, getModalPlacementClasses(options.placement))
-
-    function removeBackdrop() {
-        backdrop?.remove()
-        backdrop = null
-    }
-
-    function createBackdrop() {
-        if (backdrop) return
-        backdrop = document.createElement('div')
-        addClasses(backdrop, [...backdropClassNames, 'z-40'])
-        document.body.append(backdrop)
-    }
-
-    function handleOutsideClick(event) {
-        if (
-            options.backdrop === 'dynamic' &&
-            (event.target === modal || event.target === backdrop)
-        ) {
-            hide()
-        }
-    }
-
-    function handleKeydown(event) {
-        if (event.key === 'Escape') {
-            hide()
-        }
-    }
-
-    // Modal 保留原先的 dynamic backdrop 与 ESC 关闭能力，便携 reader 页也会复用该路径。
-    function show() {
-        if (visible) return
-        modal.classList.remove('hidden')
-        modal.classList.add('flex')
-        modal.setAttribute('aria-modal', 'true')
-        modal.setAttribute('role', 'dialog')
-        modal.removeAttribute('aria-hidden')
-        createBackdrop()
-        document.body.classList.add('overflow-hidden')
-        modal.addEventListener('click', handleOutsideClick, true)
-        document.body.addEventListener('keydown', handleKeydown, true)
-        visible = true
-        // 模态框真正显示后再刷新其按需内容，关闭动作不会触发后台请求。
-        modal.dispatchEvent(
-            new CustomEvent('comigo-modal-shown', { bubbles: true }),
-        )
-    }
-
-    function hide() {
-        if (!visible && modal.classList.contains('hidden')) return
-        modal.classList.add('hidden')
-        modal.classList.remove('flex')
-        modal.setAttribute('aria-hidden', 'true')
-        modal.removeAttribute('aria-modal')
-        modal.removeAttribute('role')
-        removeBackdrop()
-        document.body.classList.remove('overflow-hidden')
-        modal.removeEventListener('click', handleOutsideClick, true)
-        document.body.removeEventListener('keydown', handleKeydown, true)
-        visible = false
-    }
-
-    function toggle() {
-        if (visible) {
-            hide()
-        } else {
-            show()
-        }
-    }
-
-    return {
-        hide,
-        show,
-        toggle,
-        isVisible: () => visible,
-    }
-}
-
-// data-modal-target 负责注册模态框，toggle/show/hide 只调用已注册的控制器。
+// 二维码沿用模板触发器；焦点、Esc 和遮罩层由原生 dialog 管理。
 function initModals() {
-    const modals = new Map()
-
-    document.querySelectorAll('[data-modal-target]').forEach((trigger) => {
-        const modalId = trigger.getAttribute('data-modal-target')
-        const modal = document.getElementById(modalId)
-        if (!modal || modals.has(modalId)) return
-
-        modals.set(
-            modalId,
-            createModalController(modal, {
-                backdrop:
-                    modal.getAttribute('data-modal-backdrop') || 'dynamic',
-                placement:
-                    modal.getAttribute('data-modal-placement') || 'center',
-            }),
-        )
-    })
-
     document.querySelectorAll('[data-modal-toggle]').forEach((trigger) => {
+        const dialog = document.getElementById(trigger.dataset.modalToggle)
         trigger.addEventListener('click', () => {
-            modals.get(trigger.getAttribute('data-modal-toggle'))?.toggle()
+            if (dialog.open) {
+                dialog.close()
+                return
+            }
+            dialog.showModal()
+            dialog.dispatchEvent(new CustomEvent('comigo-modal-shown', { bubbles: true }))
         })
     })
 
-    document.querySelectorAll('[data-modal-show]').forEach((trigger) => {
-        trigger.addEventListener('click', () => {
-            modals.get(trigger.getAttribute('data-modal-show'))?.show()
+    // Safari 等缺少 closedby 时，只在按下与抬起都位于边界外时关闭，避免误关文字选择。
+    if (!('closedBy' in HTMLDialogElement.prototype)) {
+        document.querySelectorAll('dialog[closedby="any"]').forEach((dialog) => {
+            const outside = (event) => {
+                const rect = dialog.getBoundingClientRect()
+                return event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom
+            }
+            let pressedOutside = false
+            dialog.addEventListener('pointerdown', (event) => { pressedOutside = outside(event) })
+            dialog.addEventListener('pointerup', (event) => {
+                if (pressedOutside && outside(event)) dialog.close()
+                pressedOutside = false
+            })
         })
-    })
-
-    document.querySelectorAll('[data-modal-hide]').forEach((trigger) => {
-        trigger.addEventListener('click', () => {
-            modals.get(trigger.getAttribute('data-modal-hide'))?.hide()
-        })
-    })
+    }
 }
 
 // 当前排序菜单固定显示在触发器下方并水平居中，同时限制在视口宽度内。

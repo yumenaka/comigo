@@ -2,11 +2,12 @@
  * 复用一个全局 SSE 连接接收后端事件：处理界面刷新通知，并把日志转交给设置页日志面板。
  * 后端的 ui_suggest_reload 与 log 事件来自 tools/sse_hub；日志面板通过 __comigoLogAppend 接入同一连接。
  */
-// 登录页与公开手册不使用书库事件，也不应发起需要 JWT 的连接。
+// 便携文件没有后端；登录页与公开手册也不应发起需要 JWT 的书库事件连接。
 function shouldEnableComigoSSE() {
     if (typeof window === 'undefined' || typeof EventSource === 'undefined') {
         return false
     }
+    if (window.location.protocol === 'file:') return false
     const pathname = window.ComiGoRelativePath
         ? window.ComiGoRelativePath(window.location.pathname)
         : window.location.pathname

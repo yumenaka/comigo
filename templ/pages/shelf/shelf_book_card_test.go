@@ -26,7 +26,7 @@ func TestBookCardRendersWailsContextMenuHook(t *testing.T) {
 		PageCount: 1,
 	}
 
-	if err := BookCard(nil, book, marks).Render(context.Background(), &html); err != nil {
+	if err := BookCard(nil, book, marks, 0).Render(context.Background(), &html); err != nil {
 		t.Fatalf("render BookCard: %v", err)
 	}
 	if !strings.Contains(html.String(), "data-wails-book-card") {
@@ -50,7 +50,7 @@ func TestBookCardRendersUnsupportedDeleteSourceType(t *testing.T) {
 		Type:     model.TypeDir,
 	}
 
-	if err := BookCard(nil, book, model.BookMarks{}).Render(context.Background(), &html); err != nil {
+	if err := BookCard(nil, book, model.BookMarks{}, 0).Render(context.Background(), &html); err != nil {
 		t.Fatalf("render BookCard: %v", err)
 	}
 	if !strings.Contains(html.String(), `data-wails-can-delete-source="false"`) {
@@ -130,5 +130,28 @@ func TestGetShelfSortByOnlyPrefersQueryForWailsWebView(t *testing.T) {
 	}
 	if got := getShelfSortBy(c); got != want {
 		t.Fatalf("getShelfSortBy() = %q, want %q", got, want)
+	}
+}
+
+// 首屏封面不延迟，屏外封面使用浏览器懒加载，远程书库标识仍随请求传递。
+func TestBookCardCoverLoading(t *testing.T) {
+	book := model.BookInfo{BookID: "cover", Title: "Book", Type: model.TypeZip, RemoteStoreKey: "remote"}
+	for _, index := range []int{0, 11, 12} {
+		var html bytes.Buffer
+		if err := BookCard(nil, book, nil, index).Render(context.Background(), &html); err != nil {
+			t.Fatal(err)
+		}
+		output := html.String()
+		if strings.Contains(output, `loading="lazy"`) != (index >= 12) {
+			t.Fatalf("cover %d has wrong lazy loading policy", index)
+		}
+		if strings.Contains(output, `fetchpriority="high"`) != (index == 0) {
+			t.Fatalf("cover %d has wrong priority", index)
+		}
+		for _, want := range []string{`<img`, `width="128"`, `height="176"`, `remote_store=remote`} {
+			if !strings.Contains(output, want) {
+				t.Fatalf("cover missing %s", want)
+			}
+		}
 	}
 }

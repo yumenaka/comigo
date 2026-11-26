@@ -15,6 +15,11 @@ ComiGo 是漫画/图片阅读器，提供 Web 界面，支持压缩包、图片�
 - `assets/frontend/` 是需编译的前端入口、样式、插件、stores、utils；`assets/static/` 是不参与主包编译的页面级 JS/CSS/WASM，通过 `common.Html(..., insertScripts)` 引入。
 - `assets/dist/` 是 `bun run dev/build` 生成产物，由 `common.Html()` 自动插入；`assets/locale/` 放 `en_US.json`、`ja_JP.json`、`zh_CN.json`。
 
+## 浏览器兼容性
+- Web 前端最低支持 Chrome/Edge 111、Firefox 128、Safari/iOS 16.4，与 Tailwind 4 的要求对齐；目标同时维护在 `package.json`。
+- Wails 的系统 WebView 需满足同等 Web API/CSS 能力，不能仅由宿主操作系统最低版本推断兼容性。
+- `assets/static/` 与 templ 内联脚本不经过 Parcel 转译；新 API 必须直接满足最低版本，增强功能才可通过能力检测降级。
+
 ## 构建与生成产物
 - `templ/**/*_templ.go` 和 `assets/dist/*` 是生成产物；不要手动编辑生成产物实现业务逻辑。
 - Wails 绑定生成产物只允许由 Wails 生成器同步；当前前端走 HTTP 子路由，不依赖旧 `assets/wailsjs`。

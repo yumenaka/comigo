@@ -119,7 +119,7 @@ templ MainArea(c echo.Context) {
 			<!-- 翻页阅读：左/中/右三页结构用于触摸拖动时显示相邻页并完成滑出动画。 -->
 			<div
 				id="ReaderFlipArea"
-				class="hidden flex-col items-start justify-start flex-1 w-full h-[calc(100vh-7rem)] min-h-[60vh] m-0 p-0 text-base-content"
+				class="hidden flex-col items-start justify-start flex-1 w-full h-[calc(100dvh-7rem)] min-h-[60dvh] m-0 p-0 text-base-content"
 			>
 				<div id="reader-flip-slider-container" class="slider_container w-full h-full flex justify-center item-start overflow-hidden flex-row m-0 p-0">
 					<div id="reader-flip-slider" class="flex transition-transform duration-300 ease-out w-full h-full justify-center item-start">
@@ -129,20 +129,20 @@ templ MainArea(c echo.Context) {
 								id="ReaderFlipSingleImage"
 								x-show="!$store.flip.doublePageMode"
 								draggable="false"
-								:class="$store.global.isPortrait? 'object-contain w-auto max-w-full h-screen':'object-contain h-screen w-auto max-w-full'"
+								:class="$store.global.isPortrait? 'object-contain w-auto max-w-full h-dvh':'object-contain h-dvh w-auto max-w-full'"
 							/>
-							<div x-show="$store.flip.doublePageMode" class="slider_container flex flex-row w-full h-screen m-0 p-0 justify-center-safe item-start">
+							<div x-show="$store.flip.doublePageMode" class="slider_container flex flex-row w-full h-dvh m-0 p-0 justify-center-safe item-start">
 								<img
 									id="ReaderFlipDoubleImageLeft"
 									draggable="false"
 									x-show="!$store.flip.mangaMode || ($store.global.nowPageNum > 1 && $store.global.nowPageNum < $store.global.allPageNum)"
-									class="select-none object-contain m-0 max-w-1/2 w-auto h-auto max-h-screen grow-0"
+									class="select-none object-contain m-0 max-w-1/2 w-auto h-auto max-h-dvh grow-0"
 								/>
 								<img
 									id="ReaderFlipDoubleImageRight"
 									draggable="false"
 									x-show="$store.flip.mangaMode || ($store.global.nowPageNum > 1 && $store.global.nowPageNum < $store.global.allPageNum)"
-									class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
+									class="select-none object-contain m-0 max-w-1/2 w-auto max-h-dvh grow-0"
 								/>
 							</div>
 						</div>

@@ -119,7 +119,7 @@ function setReaderHeaderTitle(fileName, book) {
     const titleText = pageCount > 0 ? `${displayName} (${pageCount})` : displayName
     title.title = `${titleText} ${readerText('reader_choose_another_file', '点击重选')}`
     title.className = 'inline-flex items-center justify-center gap-1 max-w-full min-w-0 text-lg font-semibold text-center cursor-pointer'
-    title.innerHTML = ''
+    title.replaceChildren()
 
     const name = document.createElement('span')
     name.className = 'truncate'
@@ -362,11 +362,11 @@ function cleanupReaderView() {
     }
     const mainArea = document.getElementById('ScrollMainArea')
     if (mainArea) {
-        mainArea.innerHTML = ''
+        mainArea.replaceChildren()
     }
     const pdfArea = document.getElementById('ReaderPDFArea')
     if (pdfArea) {
-        pdfArea.innerHTML = ''
+        pdfArea.replaceChildren()
         pdfArea.classList.add('hidden')
         pdfArea.classList.remove('flex')
     }
@@ -444,7 +444,7 @@ function renderReaderPDF(book) {
     frame.className = 'w-full h-full min-h-0 flex-1 border-0 bg-base-100'
     frame.title = readerState.fileName || readerText('reader_title', 'Local Reader')
     frame.src = readerState.pdfObjectURL
-    pdfArea.innerHTML = ''
+    pdfArea.replaceChildren()
     pdfArea.appendChild(frame)
     pdfArea.classList.remove('hidden')
     pdfArea.classList.add('flex')
@@ -487,7 +487,7 @@ function renderReaderScrollBook(book) {
     }
     restoreReaderHeaderToolbar()
 
-    mainArea.innerHTML = ''
+    mainArea.replaceChildren()
     const fragment = document.createDocumentFragment()
     book.PageInfos.forEach((page, index) => {
         fragment.appendChild(createReaderPageNode(page, index, book.PageInfos.length))
@@ -794,22 +794,22 @@ async function updateReaderFlipImages() {
     }
 
     const singlePageClass = isPortrait
-        ? 'object-contain w-auto max-w-full h-screen'
-        : 'h-screen w-auto max-w-full object-contain'
-    const doublePageClass = 'object-contain w-auto max-h-screen m-0 select-none max-w-1/2 grow-0'
-    const singleImgClass = 'object-contain h-screen max-w-full max-h-screen m-0'
+        ? 'object-contain w-auto max-w-full h-dvh'
+        : 'h-dvh w-auto max-w-full object-contain'
+    const doublePageClass = 'object-contain w-auto max-h-dvh m-0 select-none max-w-1/2 grow-0'
+    const singleImgClass = 'object-contain h-dvh max-w-full max-h-dvh m-0'
     const adjacentLoads = []
 
     // 中间页是当前可见页；左右页只用于拖动/滑出动画，必须提前准备好 src。
     if (!doublePageMode) {
         await setImageElementSrc(elements.singleImage, nowPageNum - 1)
-        elements.leftSlide.innerHTML = ''
+        elements.leftSlide.replaceChildren()
         if (nowPageNum > 1) {
             const prev = createReaderFlipImage(singlePageClass)
             elements.leftSlide.appendChild(prev)
             adjacentLoads.push(setImageElementSrc(prev, nowPageNum - 2))
         }
-        elements.rightSlide.innerHTML = ''
+        elements.rightSlide.replaceChildren()
         if (nowPageNum < allPageNum) {
             const next = createReaderFlipImage(singlePageClass)
             elements.rightSlide.appendChild(next)
@@ -823,8 +823,8 @@ async function updateReaderFlipImages() {
         const rightIndex = mangaMode ? nowPageNum - 1 : (hasSecondPage ? nowPageNum : -1)
         await setImageElementSrc(elements.doubleLeft, leftIndex)
         await setImageElementSrc(elements.doubleRight, rightIndex)
-        elements.leftSlide.innerHTML = ''
-        elements.rightSlide.innerHTML = ''
+        elements.leftSlide.replaceChildren()
+        elements.rightSlide.replaceChildren()
 
         const appendReaderDoubleScreen = (container, pageNum) => {
             if (pageNum < 1 || pageNum > allPageNum) return
@@ -1242,14 +1242,14 @@ function applyReaderFlipLayout() {
         footer.style.setProperty('display', 'none', 'important')
     }
     if (root) {
-        root.style.minHeight = '100vh'
+        root.style.minHeight = '100dvh'
     }
     if (shell) {
-        shell.style.minHeight = '100vh'
+        shell.style.minHeight = '100dvh'
     }
     if (flipArea) {
-        flipArea.style.height = Alpine.store('flip').autoHideToolbar ? '100vh' : 'calc(100vh - 3rem)'
-        flipArea.style.minHeight = Alpine.store('flip').autoHideToolbar ? '100vh' : 'calc(100vh - 3rem)'
+        flipArea.style.height = Alpine.store('flip').autoHideToolbar ? '100dvh' : 'calc(100dvh - 3rem)'
+        flipArea.style.minHeight = Alpine.store('flip').autoHideToolbar ? '100dvh' : 'calc(100dvh - 3rem)'
     }
     if (!header) return
     if (Alpine.store('flip').autoHideToolbar) {
@@ -1392,16 +1392,9 @@ function initReaderGestures() {
     mainArea.addEventListener('touchstart', onReaderClick, { passive: true })
 }
 
-// 平滑滚动到页面顶部，移植自 scroll.js 的返回顶部行为。
-function scrollReaderToTop(scrollDuration) {
-    const scrollStep = -window.scrollY / (scrollDuration / 15)
-    const scrollInterval = setInterval(() => {
-        if (window.scrollY !== 0) {
-            window.scrollBy(0, scrollStep)
-        } else {
-            clearInterval(scrollInterval)
-        }
-    }, 15)
+// 返回顶部交由浏览器平滑滚动；减少动态效果时直接定位。
+function scrollReaderToTop() {
+    window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
 }
 
 function getReaderBackTopButton() {
@@ -1445,7 +1438,7 @@ function initReaderInput() {
 function initReaderBackTop() {
     const btn = getReaderBackTopButton()
     if (!btn) return
-    btn.addEventListener('click', () => scrollReaderToTop(500))
+    btn.addEventListener('click', () => scrollReaderToTop())
     window.addEventListener('scroll', () => {
         const scrollTop = document.documentElement.scrollTop || document.body.scrollTop
         readerState.scrollDownFlag = scrollTop > readerState.scrollTopSave

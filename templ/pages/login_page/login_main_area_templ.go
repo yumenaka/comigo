@@ -28,7 +28,7 @@ func LoginMainArea() templ.Component {
 		}
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full min-h-screen flex items-center justify-center bg-gray-200 py-12 px-4 sm:px-6 lg:px-8\"><div class=\"max-w-md w-full space-y-8 bg-white p-6 rounded-lg shadow-md\"><div class=\"text-center\"><h2 class=\"mt-6 text-3xl font-extrabold text-gray-900\" x-text=\"i18next.t('login_title')\"></h2><p class=\"mt-2 text-sm text-gray-600\" x-text=\"i18next.t('login_subtitle')\"></p></div><div x-data=\"{\n\t\t\t\t\terror: '',\n\t\t\t\t\tloading: false,\n\t\t\t\t\tinit() {\n\t\t\t\t\t\tconst errorCode = new URLSearchParams(window.location.search).get('error');\n\t\t\t\t\t\tif (errorCode) {\n\t\t\t\t\t\t\tthis.error = i18next.t(errorCode);\n\t\t\t\t\t\t}\n\t\t\t\t\t},\n\t\t\t\t}\" class=\"mt-8\"><div x-show=\"error\" x-transition class=\"bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4\" role=\"alert\"><div class=\"block sm:inline\" x-html=\"error\"></div><span class=\"absolute top-0 bottom-0 right-0 px-4 py-3\" @click=\"error = ''\"><svg class=\"fill-current h-6 w-6 text-red-500\" role=\"button\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\"><title>关闭</title><path d=\"M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z\"></path></svg></span></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"w-full min-h-screen flex items-center justify-center bg-gray-200 py-12 px-4 sm:px-6 lg:px-8\"><div class=\"max-w-md w-full space-y-8 bg-white p-6 rounded-lg shadow-md\"><div class=\"text-center\"><h2 class=\"mt-6 text-3xl font-extrabold text-gray-900\" x-text=\"i18next.t('login_title')\"></h2><p class=\"mt-2 text-sm text-gray-600\" x-text=\"i18next.t('login_subtitle')\"></p></div><div x-data=\"{\n\t\t\t\t\terror: '',\n\t\t\t\t\tloading: false,\n\t\t\t\t\tinit() {\n\t\t\t\t\t\tconst errorCode = new URLSearchParams(window.location.search).get('error');\n\t\t\t\t\t\tif (errorCode) {\n\t\t\t\t\t\t\t// URL 只接受已知错误码，不能把未知翻译键作为 HTML 展示。\n\t\t\t\t\t\t\tthis.error = i18next.t(['login_failed', 'err_login_required', 'login_error_teapot'].includes(errorCode) ? errorCode : 'login_failed');\n\t\t\t\t\t\t}\n\t\t\t\t\t},\n\t\t\t\t}\" class=\"mt-8\"><div x-show=\"error\" x-transition class=\"bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4\" role=\"alert\"><div class=\"block sm:inline\" x-text=\"error\"></div><span class=\"absolute top-0 bottom-0 right-0 px-4 py-3\" @click=\"error = ''\"><svg class=\"fill-current h-6 w-6 text-red-500\" role=\"button\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\"><title>关闭</title><path d=\"M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z\"></path></svg></span></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -39,12 +39,25 @@ func LoginMainArea() templ.Component {
 			}
 		}
 		if !config.GetCfg().HasPasswordLoginConfigured() {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"rounded-md border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-sky-900\" x-html=\"i18next.t('login_error_teapot')\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"rounded-md border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-sky-900\"><span x-text=\"i18next.t('login_error_teapot')\"></span> <a href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templruntime.NewAttributeExpression(templ.SafeURL(config.PrefixPath("/"))).ResolveURL(ctx)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templ/pages/login_page/login_main_area.templ`, Line: 93, Col: 53}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"font-semibold text-blue-600 underline\" x-text=\"i18next.t('login_homepage')\"></a></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div class=\"mt-6\"><div class=\"relative\"><div class=\"absolute inset-0 flex items-center\"><div class=\"w-full border-t border-gray-300\"></div></div><div class=\"relative flex justify-center text-sm\"><span class=\"px-2 bg-white text-gray-500\" x-text=\"i18next.t('other_information')\"></span></div></div><div class=\"mt-6 text-center text-sm\"><p class=\"text-gray-600\" x-text=\"i18next.t('login_forgot_password_hint')\"></p></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div class=\"mt-6\"><div class=\"relative\"><div class=\"absolute inset-0 flex items-center\"><div class=\"w-full border-t border-gray-300\"></div></div><div class=\"relative flex justify-center text-sm\"><span class=\"px-2 bg-white text-gray-500\" x-text=\"i18next.t('other_information')\"></span></div></div><div class=\"mt-6 text-center text-sm\"><p class=\"text-gray-600\" x-text=\"i18next.t('login_forgot_password_hint')\"></p></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

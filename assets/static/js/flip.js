@@ -354,15 +354,15 @@ function updateSliderImages(nowPageNum) {
     
     // CSS 类名
     const singlePageClass = isPortrait 
-        ? 'object-contain w-auto max-w-full h-screen' 
-        : 'h-screen w-auto max-w-full object-contain'
-    const doublePageClass = 'object-contain w-auto max-h-screen m-0 select-none max-w-1/2 grow-0'
-    const singleImgClass = 'object-contain h-screen max-w-full max-h-screen m-0'
+        ? 'object-contain w-auto max-w-full h-dvh'
+        : 'h-dvh w-auto max-w-full object-contain'
+    const doublePageClass = 'object-contain w-auto max-h-dvh m-0 select-none max-w-1/2 grow-0'
+    const singleImgClass = 'object-contain h-dvh max-w-full max-h-dvh m-0'
     
     // ========== 单页模式 ==========
     if (!doublePageMode) {
         // 前一张图片
-        DOM.leftSlide.innerHTML = ''
+        DOM.leftSlide.replaceChildren()
         if (nowPageNum > 1) {
             const prevImg = createImageElement(GetImageSrc(nowPageNum - 2), singlePageClass)
             DOM.leftSlide.appendChild(prevImg)
@@ -374,7 +374,7 @@ function updateSliderImages(nowPageNum) {
         }
         
         // 后一张图片
-        DOM.rightSlide.innerHTML = ''
+        DOM.rightSlide.replaceChildren()
         if (nowPageNum < allPageNum) {
             const nextImg = createImageElement(GetImageSrc(nowPageNum), singlePageClass)
             DOM.rightSlide.appendChild(nextImg)
@@ -414,13 +414,13 @@ function updateSliderImages(nowPageNum) {
         }
 
         // 前一屏图片
-        DOM.leftSlide.innerHTML = ''
+        DOM.leftSlide.replaceChildren()
         if (previousStep !== 0) {
             appendDoubleScreen(DOM.leftSlide, nowPageNum + previousStep)
         }
         
         // 后一屏图片
-        DOM.rightSlide.innerHTML = ''
+        DOM.rightSlide.replaceChildren()
         if (nextStep !== 0) {
             appendDoubleScreen(DOM.rightSlide, nowPageNum + nextStep)
         }

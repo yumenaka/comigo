@@ -785,14 +785,9 @@ function initScrollModeSync() {
     }
 }
 
-//滚动到顶部
-function scrollToTop(scrollDuration) {
-    let scrollStep = -window.scrollY / (scrollDuration / 15),
-        scrollInterval = setInterval(function () {
-            if (window.scrollY !== 0) {
-                window.scrollBy(0, scrollStep)
-            } else clearInterval(scrollInterval)
-        }, 15)
+// 返回顶部交由浏览器平滑滚动；减少动态效果时直接定位。
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
 }
 
 // 带缓存地获取"返回顶部"按钮 DOM 元素
@@ -808,7 +803,7 @@ function getBackTopButton() {
 const backTopBtn = getBackTopButton()
 if (backTopBtn) {
     backTopBtn.addEventListener('click', function () {
-        scrollToTop(500)
+        scrollToTop()
     })
 }
 

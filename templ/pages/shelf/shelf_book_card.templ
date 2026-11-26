@@ -31,11 +31,8 @@ func canDeleteSourceInWails(book model.BookInfo) bool {
 		book.RemoteStoreKey == ""
 }
 
-css GetCoverBackgroundCSS(book model.BookInfo) {
-	background-image: { "url(" + getCoverURL(book, shelfCoverResizeHeight) + ")" };
-}
-
-templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
+// BookCard 保留固定尺寸，原生图片懒加载避免屏外封面抢占首屏请求。
+templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks, coverIndex int) {
 	<!-- 把链接的 target 属性设置为 "_blank"，该链接会在新窗口中打开。 -->
 	<!-- transition-transform duration-200 hover:scale-105  -->
 	<!-- 使用 transform 和 scale 实现“元素放大且不影响原有布局”的效果。核心思路是通过 CSS Transform 做放大动画，而不改变其占据的文档流空间。 -->
@@ -54,8 +51,22 @@ templ BookCard(c echo.Context, book model.BookInfo, bookMarks model.BookMarks) {
 			target="_blank"
 		}
 		:rel="$store.shelf.openInNewTab ? 'noopener noreferrer' : null"
-		class={ GetCoverBackgroundCSS(book), "relative w-32 transition-transform duration-200 hover:scale-105 m-2 md:m-3 bg-top bg-cover h-44 rounded drop-shadow-lg ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden" }
+		class="relative w-32 transition-transform duration-200 hover:scale-105 m-2 md:m-3 h-44 rounded drop-shadow-lg ring-2 ring-gray-400 hover:ring-4 hover:ring-blue-500 overflow-hidden"
 	>
+		<img
+			src={ getCoverURL(book, shelfCoverResizeHeight) }
+			alt=""
+			width="128"
+			height="176"
+			draggable="false"
+			class="absolute inset-0 w-full h-full object-cover object-top pointer-events-none"
+			if coverIndex >= 12 {
+				loading="lazy"
+			}
+			if coverIndex == 0 {
+				fetchpriority="high"
+			}
+		/>
 		if book.IsRemote {
 			<svg class="absolute top-9 left-1 z-20 w-7 h-7 text-sky-400 drop-shadow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
 				<path d="M6.5 20a5.5 5.5 0 0 1-.46-10.98A7.5 7.5 0 0 1 20.7 11.6A4.5 4.5 0 0 1 19.5 20h-13Z"></path>

@@ -35,23 +35,23 @@ templ MainArea(book *model.Book) {
 						id="Single-NowImage"
 						x-show="!$store.flip.doublePageMode"
 						draggable="false"
-						:class="$store.global.isPortrait? 'object-contain w-auto  max-w-full h-screen':'object-contain h-screen w-auto max-w-full'"
+						:class="$store.global.isPortrait? 'object-contain w-auto  max-w-full h-dvh':'object-contain h-dvh w-auto max-w-full'"
 					/>
 					<!-- 双页模式+日漫模式-->
-					<div x-show="$store.flip.doublePageMode" class="slider_container flex flex-row w-full h-screen m-0 p-0 justify-center-safe item-start">
+					<div x-show="$store.flip.doublePageMode" class="slider_container flex flex-row w-full h-dvh m-0 p-0 justify-center-safe item-start">
 						<!-- 双页模式-当前屏幕-左页 -->
 						<img
 							id="Double-NowImage-Left"
 							draggable="false"
 							x-show="!$store.flip.mangaMode || ($store.global.nowPageNum > 1 && $store.global.nowPageNum < $store.global.allPageNum)"
-							class="select-none object-contain m-0 max-w-1/2 w-auto h-auto max-h-screen grow-0"
+							class="select-none object-contain m-0 max-w-1/2 w-auto h-auto max-h-dvh grow-0"
 						/>
 						<!-- 双页模式-当前屏幕-右页 -->
 						<img
 							id="Double-NowImage-Right"
 							draggable="false"
 							x-show="$store.flip.mangaMode || ($store.global.nowPageNum > 1 && $store.global.nowPageNum < $store.global.allPageNum)"
-							class="select-none object-contain m-0 max-w-1/2 w-auto max-h-screen grow-0"
+							class="select-none object-contain m-0 max-w-1/2 w-auto max-h-dvh grow-0"
 						/>
 					</div>
 				</div>

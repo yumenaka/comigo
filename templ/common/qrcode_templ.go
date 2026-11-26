@@ -28,7 +28,7 @@ func QRCode() templ.Component {
 		}
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- QRCode --><div x-data=\"{ serverHost: 'localhost' }\" id=\"qrcode-modal\" tabindex=\"-1\" class=\"hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full\"><!-- QRCode Modal Content --><div class=\"relative w-64 h-64 p-1 m-1\" data-qrcode-base=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- 原生模态框提供键盘焦点与关闭按钮，遮罩点击由 closedby 渐进增强。 --><dialog x-data=\"{}\" id=\"qrcode-modal\" closedby=\"any\" :aria-label=\"i18next.t('qrcode')\" class=\"panel-surface m-auto w-72 max-w-[calc(100%-2rem)] max-h-[calc(100dvh-2rem)] overflow-auto p-3 rounded-lg bg-base-100 text-base-content\"><!-- QRCode Modal Content --><div class=\"relative w-full\" data-qrcode-base=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -41,7 +41,7 @@ func QRCode() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" @comigo-modal-shown.window=\"if ($event.target.id === 'qrcode-modal') $store.global.refreshQRCode($el.dataset.qrcodeBase)\"><img id=\"qrcode-img\" draggable=\"false\" :src=\"$store.global.qrcodeImageSrc\" class=\"w-64 h-64 rounded shadow-lg border border-gray-300\" alt=\"QR Code\"> <a x-ref=\"content\" :href=\"$store.global.qrcodeTargetURL\" class=\"block text-center\" target=\"_blank\" rel=\"noopener noreferrer\" @click=\"if (window.ComiGoIsWails() && window.ComiGoOpenExternalURL) { $event.preventDefault(); window.ComiGoOpenExternalURL($store.global.qrcodeTargetURL); }\"><div class=\"panel-surface inline-block max-w-full p-1 px-2 mt-1 text-center text-base-content bg-base-100 rounded text-sm text-shadow-2xs font-semibold break-all\" x-text=\"$store.global.qrcodeTargetURL\"></div></a> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" @comigo-modal-shown.window=\"if ($event.target.id === 'qrcode-modal') $store.global.refreshQRCode($el.dataset.qrcodeBase)\"><img id=\"qrcode-img\" draggable=\"false\" :src=\"$store.global.qrcodeImageSrc\" class=\"w-full aspect-square rounded shadow-lg border border-gray-300\" alt=\"QR Code\"> <a x-ref=\"content\" :href=\"$store.global.qrcodeTargetURL\" class=\"block text-center\" target=\"_blank\" rel=\"noopener noreferrer\" @click=\"if (window.ComiGoIsWails() && window.ComiGoOpenExternalURL) { $event.preventDefault(); window.ComiGoOpenExternalURL($store.global.qrcodeTargetURL); }\"><div class=\"panel-surface inline-block max-w-full p-1 px-2 mt-1 text-center text-base-content bg-base-100 rounded text-sm text-shadow-2xs font-semibold break-all\" x-text=\"$store.global.qrcodeTargetURL\"></div></a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -51,7 +51,7 @@ func QRCode() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><form method=\"dialog\" class=\"mt-3 text-center\"><button autofocus class=\"panel-control px-4 py-2 rounded border\" x-text=\"i18next.t('close')\"></button></form></dialog>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
